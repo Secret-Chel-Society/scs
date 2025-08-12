@@ -16,7 +16,7 @@ export default function FixDiscordConnectionsMigration() {
     try {
       setRunning(true)
 
-      const adminKey = localStorage.getItem("mghl-admin-key")
+      const adminKey = localStorage.getItem("scs-admin-key")
       if (!adminKey) {
         toast({
           title: "Admin key required",

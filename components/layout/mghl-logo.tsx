@@ -14,7 +14,7 @@ export function MGHLLogo({ onClick }: MGHLLogoProps) {
       <div className="flex items-center">
         <Image
           src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
-          alt="MGHL Logo"
+          alt="SCS Logo"
           width={120}
           height={40}
           className="h-10 w-auto object-contain"

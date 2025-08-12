@@ -18,7 +18,7 @@ export default function FixBiddingAssignments() {
     setResults(null)
 
     try {
-      const adminKey = localStorage.getItem("mghl-admin-key")
+      const adminKey = localStorage.getItem("scs-admin-key")
       if (!adminKey) {
         throw new Error("Admin key not found. Please set it in the admin panel first.")
       }

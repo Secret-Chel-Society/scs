@@ -24,8 +24,8 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
 
   // Default fallback content
   const defaultContent = {
-    url: "/placeholder.svg?height=600&width=1200&text=MGHL",
-    title: "Welcome to MGHL",
+    url: "/placeholder.svg?height=600&width=1200&text=SCS",
+    title: "Welcome to SCS",
     subtitle: "The premier NHL 25 competitive gaming league",
   }
 

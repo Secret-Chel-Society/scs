@@ -387,8 +387,8 @@ export default function Navigation() {
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
               <Image
-                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
-                alt="MGHL Logo"
+                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
+                alt="SCS Logo"
                 width={120}
                 height={40}
                 className="h-10 w-auto object-contain"
@@ -617,8 +617,8 @@ export default function Navigation() {
           <div className="container flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center" onClick={closeMenu}>
               <Image
-                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
-                alt="MGHL Logo"
+                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
+                alt="SCS Logo"
                 width={120}
                 height={40}
                 className="h-10 w-auto object-contain"

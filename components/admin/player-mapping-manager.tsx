@@ -155,7 +155,7 @@ export default function PlayerMappingManager() {
       <Card>
         <CardHeader>
           <CardTitle>EA Player Mappings</CardTitle>
-          <CardDescription>Manage mappings between EA player IDs and MGHL player IDs</CardDescription>
+          <CardDescription>Manage mappings between EA player IDs and SCS player IDs</CardDescription>
           <div className="flex items-center gap-4 mt-4">
             <Button variant="outline" size="sm" onClick={fetchMappings} disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
@@ -202,7 +202,7 @@ export default function PlayerMappingManager() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">MGHL Player ID (UUID)</label>
+              <label className="text-sm font-medium mb-1 block">SCS Player ID (UUID)</label>
               <Input
                 placeholder="e.g., 657dbb12-0db5-4a8b-94da-7dea7eba7409"
                 value={playerId}
@@ -234,7 +234,7 @@ export default function PlayerMappingManager() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>EA Player ID</TableHead>
-                    <TableHead>MGHL Player ID</TableHead>
+                    <TableHead>SCS Player ID</TableHead>
                     <TableHead>Player Name</TableHead>
                     <TableHead>Created At</TableHead>
                   </TableRow>
@@ -286,7 +286,7 @@ export default function PlayerMappingManager() {
                   {hasLispDogeMapping && (
                     <div className="mt-2 text-xs">
                       <p>EA Player ID: 1005699228134</p>
-                      <p>MGHL Player ID: 657dbb12-0db5-4a8b-94da-7dea7eba7409</p>
+                      <p>SCS Player ID: 657dbb12-0db5-4a8b-94da-7dea7eba7409</p>
                     </div>
                   )}
                 </div>

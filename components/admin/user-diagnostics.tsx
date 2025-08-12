@@ -33,7 +33,7 @@ export default function UserDiagnostics() {
 
   // Load saved admin key if available
   useEffect(() => {
-    const savedKey = localStorage.getItem("mghl-admin-key")
+    const savedKey = localStorage.getItem("scs-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
     }
@@ -63,7 +63,7 @@ export default function UserDiagnostics() {
       setLookupResults(null)
 
       // Save admin key for future use
-      localStorage.setItem("mghl-admin-key", adminKey)
+      localStorage.setItem("scs-admin-key", adminKey)
 
       console.log("Looking up user:", email)
       const response = await fetch("/api/admin/lookup-user", {
