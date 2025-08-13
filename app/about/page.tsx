@@ -62,6 +62,11 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
+                name: "Zacharia Johnson",
+                role: "Web Tech",
+                image: "/placeholder.svg?height=200&width=200",
+              },
+              {
                 name: "John Smith",
                 role: "League Commissioner",
                 image: "/placeholder.svg?height=200&width=200",
