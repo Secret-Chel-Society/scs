@@ -38,7 +38,7 @@ export default function Footer() {
               The premier competitive NHL 26 league for elite console players across North America, powered by Midnight Studios.
             </p>
             <Link
-              href="https://discord.gg/scs"
+              href="https://discord.gg/secretchelsociety"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-primary hover:underline"
