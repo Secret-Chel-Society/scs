@@ -122,12 +122,12 @@ export default function Home() {
     {
       url: "/placeholder.svg?height=600&width=1200",
       title: "Season 1 Registration Open",
-      subtitle: "Join the most competitive NHL 25 league and earn rewards through our token system",
+      subtitle: "Join the most competitive NHL 26 league and earn rewards through our token system",
     },
     {
       url: "/placeholder.svg?height=600&width=1200",
       title: "Live Match Streaming",
-      subtitle: "Watch professional NHL 25 matches with real-time statistics and commentary",
+      subtitle: "Watch professional NHL 26 matches with real-time statistics and commentary",
     },
   ])
 
@@ -151,7 +151,7 @@ export default function Home() {
               url:
                 img.url && typeof img.url === "string" && img.url.trim() !== ""
                   ? img.url
-                  : `/placeholder.svg?height=600&width=1200&query=${encodeURIComponent(img.title || "NHL 25 hockey league")}`,
+                  : `/placeholder.svg?height=600&width=1200&query=${encodeURIComponent(img.title || "NHL 26 hockey league")}`,
             }))
             setHeroImages(validatedImages)
           }
@@ -415,17 +415,17 @@ export default function Home() {
               <CardContent className="p-8">
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
                   <GamepadIcon className="h-6 w-6 text-primary" />
-                  Premier NHL 25 League
+                  Premier NHL 26 League
                 </h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 25
+                  The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 26
                   gaming league available today. We provide a complete hockey simulation experience with structured
                   seasons, playoffs, and championship tournaments that mirror real NHL operations.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  Our league features multiple divisions, comprehensive team management systems, player trades, free
-                  agency periods, and a complete statistical tracking system that records every aspect of gameplay
-                  performance.
+                  We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
+                  Players can engage in a full range of league activities, 
+                  from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
                 </p>
               </CardContent>
             </Card>
@@ -444,13 +444,14 @@ export default function Home() {
                   Professional Community
                 </h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  Join hundreds of dedicated NHL 25 players in a mature, competitive environment. Our community includes
-                  experienced gamers, team managers, and hockey enthusiasts who are passionate about strategic gameplay
-                  and fair competition.
+                  Connect with hundreds of dedicated NHL 26 players in a top-tier competitive environment. 
+                  Our community consists of seasoned gamers and 
+                  hockey enthusiasts who are passionate about strategic play and sportsmanship.
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
-                  We maintain high standards for sportsmanship and competitive integrity, with dedicated moderators and
-                  comprehensive rules that ensure every match is played fairly and professionally.
+                  Competitive integrity is at the heart of our community. 
+                  Our dedicated team of moderators enforces a robust rule set, 
+                  fostering an environment where every match is played with sportsmanship and professionalism.
                 </p>
               </CardContent>
             </Card>
@@ -496,9 +497,8 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  Our proprietary API system automatically tracks and analyzes every aspect of NHL 25 gameplay,
-                  including goals, assists, saves, shots, face-off wins, and advanced metrics like Corsi and Fenwick
-                  ratings.
+                 Our proprietary API system provides detailed statistical tracking and analysis for every aspect of NHL 26 gameplay. 
+                 It automatically records all key metrics, from goals and assists to advanced analytics like Corsi and Fenwick ratings.
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-center gap-2">
@@ -616,7 +616,7 @@ export default function Home() {
             </motion.div>
             <div>
               <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Upcoming NHL 25 Matches
+                Upcoming NHL 26 Matches
               </h2>
               <p className="text-muted-foreground mt-1">Live-streamed competitive games with real-time statistics</p>
               <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent rounded-full mt-2" />
@@ -646,7 +646,7 @@ export default function Home() {
                     <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   </motion.div>
                   <p className="text-muted-foreground">
-                    No upcoming matches scheduled. Check back soon for the next round of competitive NHL 25 games!
+                    No upcoming matches scheduled. Check back soon for the next round of competitive NHL 26 games!
                   </p>
                 </CardContent>
               </Card>
@@ -766,10 +766,10 @@ export default function Home() {
               </motion.div>
 
               <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Join the Premier NHL 25 League
+                Join the Premier NHL 26 League
               </h2>
               <p className="text-xl mb-4 max-w-3xl mx-auto text-muted-foreground">
-                Experience the most competitive NHL 25 gaming environment with professional-grade statistics tracking,
+                Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking,
                 free token rewards, and authentic hockey league management.
               </p>
               <p className="text-lg mb-8 max-w-2xl mx-auto text-muted-foreground">
@@ -798,7 +798,7 @@ export default function Home() {
                     className="border-primary/30 hover:bg-primary/10 backdrop-blur-sm bg-transparent"
                   >
                     <Link
-                      href="https://discord.gg/scs"
+                      href="https://discord.gg/secretchelsociety"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2"

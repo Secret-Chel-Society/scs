@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const hash = url.hash
 
     // Create our custom reset URL
-    const customResetUrl = `https://majorgaminghockeyleague.com/reset-password${hash}`
+    const customResetUrl = `https://www.secretchelsociety.com/reset-password${hash}`
     console.log("Custom reset URL:", customResetUrl)
 
     // Send a custom email with the reset link
@@ -48,13 +48,13 @@ export async function POST(request: Request) {
 
       // Send the email
       await transporter.sendMail({
-        from: process.env.SMTP_FROM || '"MGHL Support" <noreply@majorgaminghockeyleague.com>',
+        from: process.env.SMTP_FROM || '"SCS Support" <noreply@secretchelsociety.com>',
         to: email,
-        subject: "Reset your MGHL password",
+        subject: "Reset your SCS password",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">Reset Your Password</h2>
-            <p>You requested to reset your password for your Major Gaming Hockey League account.</p>
+            <p>You requested to reset your password for your Secret Chel Society account.</p>
             <p>Click the button below to reset your password:</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${customResetUrl}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       // If we can't send a custom email, use Supabase's built-in email
       // but with our custom redirect URL
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://majorgaminghockeyleague.com/reset-password",
+        redirectTo: "https://www.secretchelsociety.com/reset-password",
       })
 
       if (resetError) {

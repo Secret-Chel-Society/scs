@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       `https://proclubs.ea.com/api/nhl/clubs/search?platform=common-gen5&clubName=${clubName}`,
       {
         headers: {
-          "User-Agent": "MGHL-Website/1.0",
+          "User-Agent": "SCS-Website/1.0",
         },
       },
     )

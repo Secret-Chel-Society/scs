@@ -70,7 +70,7 @@ export default function ContactPage() {
             <CardDescription>Meet the team behind SCS</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Site CEO */}
+            {/* Site Tech */}
             <div className="flex items-start gap-4">
               <img
                 src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/Screenshot%202025-07-01%20180349.png"
@@ -78,8 +78,8 @@ export default function ContactPage() {
                 className="w-16 h-16 rounded-full object-cover"
               />
               <div>
-                <h3 className="font-semibold">LispDoge</h3>
-                <p className="text-sm text-primary font-medium">Site CEO</p>
+                <h3 className="font-semibold">DARKWOLF9235</h3>
+                <p className="text-sm text-primary font-medium">Website Tech</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Oversees the technical development and overall vision of the SCS platform. Responsible for website
                   functionality, user experience, and strategic planning.
