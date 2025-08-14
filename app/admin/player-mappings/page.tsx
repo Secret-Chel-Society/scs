@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export const metadata = {
   title: "Player Mappings | MGHL Admin",
-  description: "Manage EA Player to MGHL Player Mappings",
+  description: "Manage EA Player to SCS Player Mappings",
 }
 
 export default function PlayerMappingsPage() {

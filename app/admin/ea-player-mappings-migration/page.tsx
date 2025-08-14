@@ -6,7 +6,7 @@ export default function EaPlayerMappingsMigrationPage() {
     <div className="container mx-auto py-6 space-y-6">
       <PageHeader
         heading="EA Player Mappings Migration"
-        subheading="Create a table to map EA player personas to MGHL player IDs"
+        subheading="Create a table to map EA player personas to SCS player IDs"
       />
       <EaPlayerMappingsMigration />
     </div>

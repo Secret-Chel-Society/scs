@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">1. Introduction</h2>
           <p>
-            Major Gaming Hockey League ("MGHL," "we," "us," or "our") is committed to protecting your privacy. This
+            Secret Chel Society ("SCS," "we," "us," or "our") is committed to protecting your privacy. This
             Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our
             website and use our services.
           </p>
@@ -208,12 +208,12 @@ export default function PrivacyPage() {
             <p>
               <strong>Discord:</strong>{" "}
               <a
-                href="https://discord.gg/mghl"
+                href="https://discord.gg/scs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                MGHL Discord Server
+                SCS Discord Server
               </a>
             </p>
           </div>

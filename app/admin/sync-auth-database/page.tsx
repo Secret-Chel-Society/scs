@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import AuthDatabaseSync from "@/components/admin/auth-database-sync"
 
 export const metadata: Metadata = {
-  title: "Auth to Database Sync - MGHL Admin",
+  title: "Auth to Database Sync - SCS Admin",
   description: "Sync users from Supabase Auth to database tables",
 }
 

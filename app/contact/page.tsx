@@ -7,7 +7,7 @@ export default function ContactPage() {
     <div className="container mx-auto px-4 py-8">
       <PageHeader
         title="Contact Us"
-        description="Get in touch with the MGHL team for support, questions, or feedback."
+        description="Get in touch with the SCS team for support, questions, or feedback."
       />
 
       <div className="grid gap-8 md:grid-cols-2">
@@ -39,13 +39,13 @@ export default function ContactPage() {
               </p>
               <p className="font-medium">
                 <a
-                  href="https://discord.gg/mghl"
+                  href="https://discord.gg/scs"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline flex items-center gap-2"
                 >
                   <MessageSquare className="h-4 w-4" />
-                  Join MGHL Discord
+                  Join SCS Discord
                 </a>
               </p>
             </div>
@@ -67,10 +67,10 @@ export default function ContactPage() {
               <Users className="h-5 w-5" />
               Leadership Team
             </CardTitle>
-            <CardDescription>Meet the team behind MGHL</CardDescription>
+            <CardDescription>Meet the team behind SCS</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Site CEO */}
+            {/* Site Tech */}
             <div className="flex items-start gap-4">
               <img
                 src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/Screenshot%202025-07-01%20180349.png"
@@ -78,10 +78,10 @@ export default function ContactPage() {
                 className="w-16 h-16 rounded-full object-cover"
               />
               <div>
-                <h3 className="font-semibold">LispDoge</h3>
-                <p className="text-sm text-primary font-medium">Site CEO</p>
+                <h3 className="font-semibold">DARKWOLF9235</h3>
+                <p className="text-sm text-primary font-medium">Website Tech</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Oversees the technical development and overall vision of the MGHL platform. Responsible for website
+                  Oversees the technical development and overall vision of the SCS platform. Responsible for website
                   functionality, user experience, and strategic planning.
                 </p>
               </div>
@@ -98,13 +98,13 @@ export default function ContactPage() {
                 <h3 className="font-semibold">Inked_Reaper91</h3>
                 <p className="text-sm text-primary font-medium">League President</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Leads the competitive operations of MGHL, including season planning, team management, and ensuring
+                  Leads the competitive operations of SCS, including season planning, team management, and ensuring
                   fair play across all divisions.
                 </p>
               </div>
             </div>
 
-            {/* MGHL Commissioner */}
+            {/* SCS Commissioner */}
             <div className="flex items-start gap-4">
               <img
                 src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/default-avatar-profile-icon-grey-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-no-photo-default-images-for-unfilled-user-profile-free-vector.jpg"
@@ -113,10 +113,10 @@ export default function ContactPage() {
               />
               <div>
                 <h3 className="font-semibold">OldManGotchu</h3>
-                <p className="text-sm text-primary font-medium">MGHL Commissioner</p>
+                <p className="text-sm text-primary font-medium">SCS Commissioner</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   Handles league governance, rule enforcement, disciplinary actions, and maintains the integrity of
-                  competitive play within MGHL.
+                  competitive play within SCS.
                 </p>
               </div>
             </div>

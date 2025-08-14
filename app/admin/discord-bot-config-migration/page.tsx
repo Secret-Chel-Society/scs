@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import DiscordBotConfigMigration from "@/components/admin/discord-bot-config-migration"
 
 export const metadata: Metadata = {
-  title: "Discord Bot Config Migration - MGHL Admin",
+  title: "Discord Bot Config Migration - SCS Admin",
   description: "Run Discord bot configuration table migration",
 }
 

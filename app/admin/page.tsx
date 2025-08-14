@@ -235,10 +235,10 @@ export default function AdminDashboardPage() {
       href: "/admin/user-account-manager",
     },
     {
-      title: "MGHL Bot",
+      title: "SCS Bot",
       description: "Manage Discord bot integration, roles, and Twitch streaming",
       icon: <Bot className="h-6 w-6" />,
-      href: "/admin/mghl-bot",
+      href: "/admin/scs-bot",
     },
     {
       title: "Setup Bot Config",

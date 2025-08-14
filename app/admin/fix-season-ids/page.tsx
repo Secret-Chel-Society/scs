@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import FixNullSeasonIdsMigration from "@/components/admin/fix-null-season-ids-migration"
 
 export const metadata: Metadata = {
-  title: "Fix Null Season IDs | MGHL Admin",
+  title: "Fix Null Season IDs | SCS Admin",
   description: "Fix registrations with null season IDs",
 }
 

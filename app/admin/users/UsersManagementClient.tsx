@@ -319,7 +319,7 @@ export default function UsersManagementClient() {
 
   // Load saved admin key if available
   useEffect(() => {
-    const savedKey = localStorage.getItem("mghl-admin-key")
+    const savedKey = localStorage.getItem("scs-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
     }
@@ -425,7 +425,7 @@ export default function UsersManagementClient() {
 
     if (autoRefresh && !refreshing) {
       // Make sure we have an admin key before proceeding
-      const savedKey = localStorage.getItem("mghl-admin-key") || adminKey
+      const savedKey = localStorage.getItem("scs-admin-key") || adminKey
       if (!savedKey) {
         // If no admin key is available, disable auto-refresh
         setAutoRefresh(false)
@@ -709,7 +709,7 @@ export default function UsersManagementClient() {
 
   // Function to check if we have an admin key and prompt for one if needed
   function withAdminKey(action: () => Promise<void>) {
-    const savedKey = localStorage.getItem("mghl-admin-key")
+    const savedKey = localStorage.getItem("scs-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
       return action()
@@ -732,7 +732,7 @@ export default function UsersManagementClient() {
 
       // Save key if requested
       if (saveAdminKey && adminKey) {
-        localStorage.setItem("mghl-admin-key", adminKey)
+        localStorage.setItem("scs-admin-key", adminKey)
       }
 
       // Close dialog
@@ -760,7 +760,7 @@ export default function UsersManagementClient() {
         setRefreshResults(null)
 
         // Get admin key from state or localStorage
-        const keyToUse = adminKey || localStorage.getItem("mghl-admin-key") || ""
+        const keyToUse = adminKey || localStorage.getItem("scs-admin-key") || ""
 
         if (!keyToUse) {
           throw new Error("Admin key is required to refresh users")
@@ -785,7 +785,7 @@ export default function UsersManagementClient() {
 
           // If unauthorized, clear the stored key as it might be invalid
           if (response.status === 401) {
-            localStorage.removeItem("mghl-admin-key")
+            localStorage.removeItem("scs-admin-key")
             setAdminKey("")
 
             // Prompt for a new key
@@ -825,7 +825,7 @@ export default function UsersManagementClient() {
       setRefreshing(true)
 
       // Get admin key from localStorage or component state
-      const keyToUse = localStorage.getItem("mghl-admin-key") || adminKey
+      const keyToUse = localStorage.getItem("scs-admin-key") || adminKey
 
       if (!keyToUse) {
         // If no key is available, disable auto-refresh
@@ -852,7 +852,7 @@ export default function UsersManagementClient() {
 
         // If unauthorized, disable auto-refresh
         if (response.status === 401) {
-          localStorage.removeItem("mghl-admin-key")
+          localStorage.removeItem("scs-admin-key")
           setAdminKey("")
           setAutoRefresh(false)
           throw new Error("Invalid admin key. Auto-refresh disabled.")
@@ -887,7 +887,7 @@ export default function UsersManagementClient() {
         setSubmitting(true)
 
         // Get admin key from state or localStorage
-        const keyToUse = adminKey || localStorage.getItem("mghl-admin-key") || ""
+        const keyToUse = adminKey || localStorage.getItem("scs-admin-key") || ""
 
         if (!keyToUse) {
           throw new Error("Admin key is required to fix secondary positions")
@@ -936,7 +936,7 @@ export default function UsersManagementClient() {
         setSubmitting(true)
 
         // Get admin key from state or localStorage
-        const keyToUse = adminKey || localStorage.getItem("mghl-admin-key") || ""
+        const keyToUse = adminKey || localStorage.getItem("scs-admin-key") || ""
 
         if (!keyToUse) {
           throw new Error("Admin key is required to fix role constraint")
@@ -1036,7 +1036,7 @@ export default function UsersManagementClient() {
       const link = document.createElement("a")
       const url = URL.createObjectURL(blob)
       link.setAttribute("href", url)
-      link.setAttribute("download", `mghl-users-${new Date().toISOString().split("T")[0]}.csv`)
+      link.setAttribute("download", `scs-users-${new Date().toISOString().split("T")[0]}.csv`)
       link.style.visibility = "hidden"
       document.body.appendChild(link)
       link.click()
@@ -1819,7 +1819,7 @@ export default function UsersManagementClient() {
           variant={autoRefresh ? "default" : "outline"}
           onClick={() => {
             // Check if we have an admin key before enabling auto-refresh
-            const savedKey = localStorage.getItem("mghl-admin-key") || adminKey
+            const savedKey = localStorage.getItem("scs-admin-key") || adminKey
             if (!savedKey && !autoRefresh) {
               // If trying to enable auto-refresh but no key exists, show admin key dialog
               pendingActionRef.current = () => {
@@ -1988,7 +1988,7 @@ export default function UsersManagementClient() {
                   className="bg-blue-100 border-blue-300 hover:bg-blue-200 text-blue-800"
                   asChild
                 >
-                  <Link href="/admin/mghl-bot">Set Up Discord Integration</Link>
+                  <Link href="/admin/scs-bot">Set Up Discord Integration</Link>
                 </Button>
               </div>
             </div>

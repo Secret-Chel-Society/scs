@@ -116,7 +116,7 @@ export default function AdminAwardsPage() {
   const [selectedTeamSeason, setSelectedTeamSeason] = useState<string>("1")
   const [selectedPlayerSeason, setSelectedPlayerSeason] = useState<string>("1")
 
-  const teamAwardTypes = ["President Trophy", "MGHL Cup"]
+  const teamAwardTypes = ["President Trophy", "SCS Cup"]
   const playerAwardTypes = [
     "MVP",
     "Rookie of the Year",
@@ -659,7 +659,7 @@ export default function AdminAwardsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Team Awards</CardTitle>
-                  <CardDescription>Manage team awards like President Trophy and MGHL Cup</CardDescription>
+                  <CardDescription>Manage team awards like President Trophy and SCS Cup</CardDescription>
                 </div>
                 <Dialog open={isTeamDialogOpen} onOpenChange={setIsTeamDialogOpen}>
                   <DialogTrigger asChild>
@@ -899,7 +899,7 @@ export default function AdminAwardsPage() {
                       <TableRow key={award.id}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            {award.award_type === "MGHL Cup" ? (
+                            {award.award_type === "SCS Cup" ? (
                               <Trophy className="h-5 w-5 text-yellow-500" />
                             ) : (
                               <Medal className="h-5 w-5 text-blue-500" />

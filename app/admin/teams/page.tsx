@@ -1183,7 +1183,7 @@ export default function AdminTeamsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Search EA Teams</DialogTitle>
-            <DialogDescription>Search for teams in EA Sports NHL to link with your MGHL team.</DialogDescription>
+            <DialogDescription>Search for teams in EA Sports NHL to link with your SCS team.</DialogDescription>
           </DialogHeader>
 
           <div className="flex items-center space-x-2 py-4">

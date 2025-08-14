@@ -5,7 +5,7 @@ export default function DisclaimerPage() {
     <div className="container mx-auto px-4 py-8">
       <PageHeader
         title="Disclaimer"
-        description="Important legal information and terms regarding the use of MGHL services"
+        description="Important legal information and terms regarding the use of SCS services"
       />
 
       <div className="prose prose-gray dark:prose-invert max-w-none">
@@ -16,7 +16,7 @@ export default function DisclaimerPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">1. General Disclaimer</h2>
           <p>
-            The information contained on the Major Gaming Hockey League (MGHL) website is for general information
+            The information contained on the Secret Chel Society (SCS) website is for general information
             purposes only. While we endeavor to keep the information up to date and correct, we make no representations
             or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability,
             or availability of the website or the information, products, services, or related graphics contained on the
@@ -27,7 +27,7 @@ export default function DisclaimerPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">2. EA Sports Non-Affiliation</h2>
           <p>
-            <strong>IMPORTANT:</strong> Major Gaming Hockey League (MGHL) is an independent gaming community and is NOT
+            <strong>IMPORTANT:</strong> Secret Chel Society (SCS) is an independent gaming community and is NOT
             affiliated with, endorsed by, or connected to EA Sports, Electronic Arts Inc., or the National Hockey League
             (NHL).
           </p>
@@ -45,7 +45,7 @@ export default function DisclaimerPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">3. Limitation of Liability</h2>
           <p>
-            In no event will MGHL, its administrators, moderators, or affiliates be liable for any loss or damage
+            In no event will SCS, its administrators, moderators, or affiliates be liable for any loss or damage
             including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever
             arising from:
           </p>
@@ -64,12 +64,12 @@ export default function DisclaimerPage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">4. User Responsibility</h2>
-          <p>By participating in MGHL activities, users acknowledge and agree that:</p>
+          <p>By participating in SCS activities, users acknowledge and agree that:</p>
           <ul className="list-disc pl-6 mb-4">
             <li>They participate at their own risk and responsibility</li>
             <li>They must comply with all applicable laws and regulations</li>
             <li>They are responsible for their own gaming equipment and internet connection</li>
-            <li>They must follow MGHL rules and code of conduct</li>
+            <li>They must follow SCS rules and code of conduct</li>
             <li>They are responsible for maintaining the confidentiality of their account information</li>
             <li>They must respect other players and maintain good sportsmanship</li>
           </ul>
@@ -79,7 +79,7 @@ export default function DisclaimerPage() {
           <h2 className="text-2xl font-bold mb-4">5. Game-Related Disclaimers</h2>
 
           <h3 className="text-xl font-semibold mb-3">5.1 Game Performance</h3>
-          <p>MGHL cannot guarantee:</p>
+          <p>SCS cannot guarantee:</p>
           <ul className="list-disc pl-6 mb-4">
             <li>Stable game connections during matches</li>
             <li>Absence of game bugs or glitches</li>
@@ -106,7 +106,7 @@ export default function DisclaimerPage() {
           </p>
 
           <h3 className="text-xl font-semibold mb-3">6.1 User-Generated Content</h3>
-          <p>MGHL is not responsible for:</p>
+          <p>SCS is not responsible for:</p>
           <ul className="list-disc pl-6 mb-4">
             <li>Content posted by users in forums, chat, or other interactive areas</li>
             <li>Accuracy of user-submitted information</li>
@@ -118,7 +118,7 @@ export default function DisclaimerPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">7. External Links Disclaimer</h2>
           <p>
-            Our website may contain links to external websites that are not provided or maintained by MGHL. We do not
+            Our website may contain links to external websites that are not provided or maintained by SCS. We do not
             guarantee the accuracy, relevance, timeliness, or completeness of any information on these external
             websites. The inclusion of any links does not necessarily imply a recommendation or endorse the views
             expressed within them.
@@ -127,7 +127,7 @@ export default function DisclaimerPage() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">8. Competitive Integrity</h2>
-          <p>While MGHL strives to maintain fair and competitive gameplay:</p>
+          <p>While SCS strives to maintain fair and competitive gameplay:</p>
           <ul className="list-disc pl-6 mb-4">
             <li>We cannot guarantee the absence of cheating or unsportsmanlike conduct</li>
             <li>Disciplinary decisions are made at the discretion of league administrators</li>
@@ -160,7 +160,7 @@ export default function DisclaimerPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">10. Modification of Services</h2>
           <p>
-            MGHL reserves the right to modify, suspend, or discontinue any aspect of our services at any time without
+            SCS reserves the right to modify, suspend, or discontinue any aspect of our services at any time without
             prior notice. This includes but is not limited to:
           </p>
           <ul className="list-disc pl-6 mb-4">
@@ -202,12 +202,12 @@ export default function DisclaimerPage() {
             <p>
               <strong>Discord:</strong>{" "}
               <a
-                href="https://discord.gg/mghl"
+                href="https://discord.gg/scs"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
-                MGHL Discord Server
+                SCS Discord Server
               </a>
             </p>
           </div>
@@ -216,7 +216,7 @@ export default function DisclaimerPage() {
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">14. Acknowledgment</h2>
           <p>
-            By using the MGHL website and services, you acknowledge that you have read, understood, and agree to be
+            By using the SCS website and services, you acknowledge that you have read, understood, and agree to be
             bound by this disclaimer. If you do not agree with any part of this disclaimer, please discontinue use of
             our services immediately.
           </p>

@@ -18,8 +18,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Major Gaming Hockey League (MGHL)",
-  description: "Official website for the NHL 25 Major Gaming Hockey League",
+  title: "Secret Chel Society (SCS)",
+  description: "Official website for the NHL 26 Secret Chel Society",
   viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
   icons: {

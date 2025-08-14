@@ -173,7 +173,7 @@ export function EaPlayerMappingsManager() {
             </div>
             <div className="flex-1">
               <label htmlFor="player" className="block text-sm font-medium mb-1">
-                MGHL Player
+                SCS Player
               </label>
               <select
                 id="player"
@@ -201,7 +201,7 @@ export function EaPlayerMappingsManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead>EA Persona</TableHead>
-                  <TableHead>MGHL Player</TableHead>
+                  <TableHead>SCS Player</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>

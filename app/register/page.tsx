@@ -263,7 +263,7 @@ export default function RegisterPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Create an Account</CardTitle>
-            <CardDescription>Join the MGHL community today</CardDescription>
+            <CardDescription>Join the SCS community today</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
@@ -303,7 +303,7 @@ export default function RegisterPage() {
               <div className="space-y-2 border rounded-md p-4 bg-slate-50 dark:bg-slate-900">
                 <h3 className="font-medium text-sm">Step 1: Connect Discord</h3>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Discord connection is required for MGHL communication
+                  Discord connection is required for SCS communication
                 </p>
                 {discordConnected ? (
                   <div className="space-y-2">

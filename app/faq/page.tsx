@@ -3,8 +3,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PageHeader } from "@/components/ui/page-header"
 
 export const metadata: Metadata = {
-  title: "FAQ - Major Gaming Hockey League",
-  description: "Frequently asked questions about the Major Gaming Hockey League (MGHL)",
+  title: "FAQ - Secret Chel Society",
+  description: "Frequently asked questions about the Secret Chel Society (SCS)",
 }
 
 export default function FAQPage() {
@@ -12,20 +12,20 @@ export default function FAQPage() {
     <div className="container py-8 max-w-4xl mx-auto">
       <PageHeader
         heading="Frequently Asked Questions"
-        subheading="Find answers to common questions about the Major Gaming Hockey League"
+        subheading="Find answers to common questions about the Secret Chel Society"
       />
 
       <div className="mt-8">
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="item-1">
-            <AccordionTrigger className="text-left">How do I join the MGHL?</AccordionTrigger>
+            <AccordionTrigger className="text-left">How do I join the SCS?</AccordionTrigger>
             <AccordionContent>
               <p className="mb-2">
-                To join the MGHL, you need to register on our website during the registration period. Follow these
+                To join the SCS, you need to register on our website during the registration period. Follow these
                 steps:
               </p>
               <ol className="list-decimal pl-5 space-y-1">
-                <li>Create an account on the MGHL website</li>
+                <li>Create an account on the SCS website</li>
                 <li>Complete your player profile with your gamer tag and contact information</li>
                 <li>Register for the current or upcoming season during the registration window</li>
                 <li>
@@ -39,7 +39,7 @@ export default function FAQPage() {
             <AccordionTrigger className="text-left">What are the league rules?</AccordionTrigger>
             <AccordionContent>
               <p className="mb-2">
-                The MGHL has a comprehensive set of rules covering gameplay, conduct, team management, and more. You can
+                The SCS has a comprehensive set of rules covering gameplay, conduct, team management, and more. You can
                 find the complete rulebook on our{" "}
                 <a href="/rules" className="text-primary hover:underline">
                   Rules page
@@ -84,7 +84,7 @@ export default function FAQPage() {
           <AccordionItem value="item-4">
             <AccordionTrigger className="text-left">What positions can I play?</AccordionTrigger>
             <AccordionContent>
-              <p className="mb-2">In the MGHL, you can play as a:</p>
+              <p className="mb-2">In the SCS, you can play as a:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Forward (Left Wing, Center, Right Wing)</li>
                 <li>Defenseman (Left Defense, Right Defense)</li>
@@ -101,7 +101,7 @@ export default function FAQPage() {
           <AccordionItem value="item-5">
             <AccordionTrigger className="text-left">How are matches scheduled?</AccordionTrigger>
             <AccordionContent>
-              <p className="mb-2">Match scheduling in the MGHL follows these general guidelines:</p>
+              <p className="mb-2">Match scheduling in the SCS follows these general guidelines:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>The league administrators create the season schedule with matchups</li>
                 <li>Games are typically scheduled for 8:00,8:35,9:10PM EST Wednesday,Thursday, and Friday</li>
@@ -121,7 +121,7 @@ export default function FAQPage() {
           <AccordionItem value="item-6">
             <AccordionTrigger className="text-left">How do team management roles work?</AccordionTrigger>
             <AccordionContent>
-              <p className="mb-2">Why Manage in MGHL?:</p>
+              <p className="mb-2">Why Manage in SCS?:</p>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Management get to pick a GM and AGM at a cheaper salary than them going into bidding.</li>
                 <li>

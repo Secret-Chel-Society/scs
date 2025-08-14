@@ -16,7 +16,7 @@ export function FixConsoleValues() {
       setIsRunning(true)
       setResults(null)
 
-      const adminKey = localStorage.getItem("mghl-admin-key") || prompt("Enter admin key:")
+      const adminKey = localStorage.getItem("scs-admin-key") || prompt("Enter admin key:")
       if (!adminKey) {
         toast({
           title: "Admin key required",

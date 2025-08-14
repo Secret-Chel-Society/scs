@@ -5,14 +5,14 @@ export default function RulesPage() {
     <div className="container mx-auto px-4 py-8">
       <PageHeader
         title="League Rules"
-        description="Official rules and regulations for the Major Gaming Hockey League"
+        description="Official rules and regulations for the Secret Chel Society"
       />
 
       <div className="mt-8 max-w-4xl mx-auto prose dark:prose-invert">
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">
             Please read the Rules and Regulations stated here. You should visit this frequently to review the Rules and
-            Regulations, MGHL has the right to add, remove, modify, or otherwise change any part of these Rules and
+            Regulations, SCS has the right to add, remove, modify, or otherwise change any part of these Rules and
             Regulations in whole or in part at any time. Changes will be effective when notice of such change is posted.
           </h2>
 
@@ -82,7 +82,7 @@ export default function RulesPage() {
             the Owner or GM are unavailable.
           </p>
           <p>
-            5.1.4 If management and/or players in MGHL are caught in violation of the rules, attempting to circumvent,
+            5.1.4 If management and/or players in SCS are caught in violation of the rules, attempting to circumvent,
             or any action deemed detrimental to the league operation, league removal, bans, fines or additional action
             can be taken by the league and not limited to the defined punishments in the rulebook. Punishable offenses
             are below but not limited to: Failure to update stats Illegal rosters Failure to have the roster comply with

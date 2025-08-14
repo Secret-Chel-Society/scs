@@ -76,7 +76,7 @@ export default function TeamsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Teams</h1>
-            <p className="text-muted-foreground">All teams competing in the Major Gaming Hockey League</p>
+            <p className="text-muted-foreground">All teams competing in the Secret Chel Society</p>
           </div>
 
           <Input
@@ -127,17 +127,17 @@ export default function TeamsPage() {
                                 key={award.id}
                                 variant="outline"
                                 className={`flex items-center gap-1 ${
-                                  award.award_type === "MGHL Cup"
+                                  award.award_type === "SCS Cup"
                                     ? "border-yellow-500 text-yellow-500"
                                     : "border-blue-500 text-blue-500"
                                 }`}
                               >
-                                {award.award_type === "MGHL Cup" ? (
+                                {award.award_type === "SCS Cup" ? (
                                   <Trophy className="h-3 w-3" />
                                 ) : (
                                   <Award className="h-3 w-3" />
                                 )}
-                                {award.award_type === "MGHL Cup" ? "Cup" : "Trophy"} {award.year}
+                                {award.award_type === "SCS Cup" ? "Cup" : "Trophy"} {award.year}
                               </Badge>
                             ))}
                             {team.awards.length > 3 && <Badge variant="outline">+{team.awards.length - 3} more</Badge>}

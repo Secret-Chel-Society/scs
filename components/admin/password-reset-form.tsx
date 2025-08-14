@@ -22,7 +22,7 @@ export default function PasswordResetForm() {
 
   // Load saved admin key if available
   useState(() => {
-    const savedKey = localStorage.getItem("mghl-admin-key")
+    const savedKey = localStorage.getItem("scs-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
     }
@@ -82,7 +82,7 @@ export default function PasswordResetForm() {
       setResult(null)
 
       // Save admin key for future use
-      localStorage.setItem("mghl-admin-key", adminKey)
+      localStorage.setItem("scs-admin-key", adminKey)
 
       const response = await fetch("/api/admin/reset-user-password", {
         method: "POST",

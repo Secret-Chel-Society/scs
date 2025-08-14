@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import PasswordResetForm from "@/components/admin/password-reset-form"
 
 export const metadata: Metadata = {
-  title: "Reset User Password | MGHL Admin",
+  title: "Reset User Password | SCS Admin",
   description: "Reset a user's password by email address",
 }
 

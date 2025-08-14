@@ -58,7 +58,7 @@ const pastStreams = [
     date: "2023-12-05",
     time: "9:00 PM EST",
     platform: "twitch",
-    url: "https://twitch.tv/mghl",
+    url: "https://twitch.tv/scs",
     views: 723,
     featured: false,
     live: false,
@@ -70,7 +70,7 @@ const pastStreams = [
     date: "2023-11-28",
     time: "6:00 PM EST",
     platform: "youtube",
-    url: "https://youtube.com/mghl",
+    url: "https://youtube.com/scs",
     views: 1432,
     featured: false,
     live: false,
@@ -82,7 +82,7 @@ const pastStreams = [
     date: "2023-11-20",
     time: "7:30 PM EST",
     platform: "twitch",
-    url: "https://twitch.tv/mghl",
+    url: "https://twitch.tv/scs",
     views: 967,
     featured: false,
     live: false,
@@ -94,7 +94,7 @@ const pastStreams = [
     date: "2023-11-15",
     time: "8:00 PM EST",
     platform: "youtube",
-    url: "https://youtube.com/mghl",
+    url: "https://youtube.com/scs",
     views: 1876,
     featured: false,
     live: false,
@@ -324,7 +324,7 @@ export default function LiveStreamPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <PageHeader heading="LiveStream" text="Watch live streams from MGHL players and teams" />
+      <PageHeader heading="LiveStream" text="Watch live streams from SCS players and teams" />
 
       {/* Featured Stream Section */}
       {data?.featuredStream && (
@@ -383,7 +383,7 @@ export default function LiveStreamPage() {
             <CardContent>
               <Twitch className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-xl font-semibold mb-2">No Live Streams</h3>
-              <p className="text-muted-foreground mb-4">No MGHL players are currently streaming. Check back later!</p>
+              <p className="text-muted-foreground mb-4">No SCS players are currently streaming. Check back later!</p>
               <div className="flex justify-center gap-4">
                 <Button variant="outline" onClick={fetchLiveStreamData}>
                   Refresh
@@ -439,7 +439,7 @@ export default function LiveStreamPage() {
         <div className="rounded-lg border bg-card p-6 shadow">
           <h2 className="mb-4 text-2xl font-bold">Connect Your Stream</h2>
           <p className="mb-4">
-            Are you an MGHL player? Connect your Twitch account to appear on this page when you go live!
+            Are you an SCS player? Connect your Twitch account to appear on this page when you go live!
           </p>
           <div className="flex flex-wrap gap-4">
             <Button asChild variant="outline">

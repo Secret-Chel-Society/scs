@@ -104,7 +104,7 @@ export default function LoginPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Login</CardTitle>
-            <CardDescription>Sign in to your MGHL account</CardDescription>
+            <CardDescription>Sign in to your SCS account</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">

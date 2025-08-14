@@ -648,7 +648,7 @@ export default function StatisticsPage() {
           const mappings: Record<string, string> = {}
           const nameToIdMap: Record<string, string> = {}
 
-          // Create a mapping from EA Player ID to MGHL Player ID
+          // Create a mapping from EA Player ID to SCS Player ID
           data.forEach((mapping) => {
             if (mapping.ea_player_id && mapping.player_id) {
               mappings[mapping.ea_player_id.toString()] = mapping.player_id
