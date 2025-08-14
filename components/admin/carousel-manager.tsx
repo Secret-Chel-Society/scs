@@ -729,7 +729,7 @@ export function CarouselManager() {
                         id="image-title"
                         value={imageForm.title}
                         onChange={(e) => setImageForm({ ...imageForm, title: e.target.value })}
-                        placeholder="e.g. Welcome to SCS"
+                        placeholder="e.g. Welcome to MGHL"
                       />
                     </div>
 

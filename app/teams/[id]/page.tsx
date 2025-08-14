@@ -657,7 +657,7 @@ export default function TeamDetailPage() {
               <div className="flex flex-wrap gap-3">
                 {awards.map((award) => {
                   const isPresident = award.award_type === "President Trophy"
-                  const isCup = award.award_type === "SCS Cup"
+                  const isCup = award.award_type === "MGHL Cup"
 
                   return (
                     <div

@@ -26,7 +26,7 @@ import {
   UserX,
 } from "lucide-react"
 
-export default function SCSBotPanel() {
+export default function MGHLBotPanel() {
   const { supabase } = useSupabase()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -621,7 +621,7 @@ export default function SCSBotPanel() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
         <Bot className="h-8 w-8" />
-        <h1 className="text-3xl font-bold">SCS Bot Management</h1>
+        <h1 className="text-3xl font-bold">MGHL Bot Management</h1>
         {botStatus && botStatus.connected && (
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             <CheckCircle className="mr-1 h-3 w-3" />
@@ -776,7 +776,7 @@ export default function SCSBotPanel() {
                     <Users className="h-5 w-5" />
                     Discord Connections ({discordConnections.length})
                   </CardTitle>
-                  <CardDescription>Users who have connected their Discord accounts to SCS Bot</CardDescription>
+                  <CardDescription>Users who have connected their Discord accounts to MGHL Bot</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={loadData}>
@@ -794,7 +794,7 @@ export default function SCSBotPanel() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>SCS User</TableHead>
+                    <TableHead>MGHL User</TableHead>
                     <TableHead>Discord User</TableHead>
                     <TableHead>Position</TableHead>
                     <TableHead>Console</TableHead>
@@ -914,7 +914,7 @@ export default function SCSBotPanel() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>SCS User</TableHead>
+                    <TableHead>MGHL User</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Position</TableHead>
                     <TableHead>Console</TableHead>
@@ -1075,7 +1075,7 @@ export default function SCSBotPanel() {
             <Card>
               <CardHeader>
                 <CardTitle>Bot Status</CardTitle>
-                <CardDescription>Current status of the SCS Discord bot.</CardDescription>
+                <CardDescription>Current status of the MGHL Discord bot.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1106,7 +1106,7 @@ export default function SCSBotPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Team Role Mapping</CardTitle>
-              <CardDescription>Map Discord roles to SCS teams.</CardDescription>
+              <CardDescription>Map Discord roles to MGHL teams.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -1185,7 +1185,7 @@ export default function SCSBotPanel() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>SCS User</TableHead>
+                    <TableHead>MGHL User</TableHead>
                     <TableHead>Twitch Username</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Last Checked</TableHead>

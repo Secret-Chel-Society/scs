@@ -67,7 +67,7 @@ export default function AdminEmailVerificationPage() {
 
   // Load admin key from localStorage if available
   useEffect(() => {
-    const savedKey = localStorage.getItem("scs-admin-key")
+    const savedKey = localStorage.getItem("mghl-admin-key")
     if (savedKey) {
       setAdminKeyValue(savedKey)
       setVerifyValue("adminKey", savedKey)
@@ -115,7 +115,7 @@ export default function AdminEmailVerificationPage() {
   // Add this function after the onVerifySubmit function
   const saveAdminKey = (key: string) => {
     if (typeof window !== "undefined" && key) {
-      localStorage.setItem("scs-admin-key", key)
+      localStorage.setItem("mghl-admin-key", key)
     }
   }
 

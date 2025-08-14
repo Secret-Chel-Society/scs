@@ -240,7 +240,7 @@ export default function AwardsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">League Awards</h1>
-            <p className="text-muted-foreground">Celebrating excellence in the Secret Chel Society</p>
+            <p className="text-muted-foreground">Celebrating excellence in the Major Gaming Hockey League</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
@@ -299,7 +299,7 @@ export default function AwardsPage() {
                   Object.entries(teamAwardsByType).map(([awardType, awards]) => (
                     <div key={awardType} className="space-y-6">
                       <h2 className="text-2xl font-bold flex items-center gap-2">
-                        {awardType === "SCS Cup" ? (
+                        {awardType === "MGHL Cup" ? (
                           <Trophy className="h-6 w-6 text-yellow-500" />
                         ) : (
                           <Award className="h-6 w-6 text-blue-500" />
@@ -317,7 +317,7 @@ export default function AwardsPage() {
                             <Link href={`/teams/${award.team_id}`}>
                               <Card
                                 className={`overflow-hidden h-full hover:border-primary transition-colors ${
-                                  awardType === "SCS Cup" ? "border-yellow-200 dark:border-yellow-900" : ""
+                                  awardType === "MGHL Cup" ? "border-yellow-200 dark:border-yellow-900" : ""
                                 }`}
                               >
                                 <CardContent className="p-6">

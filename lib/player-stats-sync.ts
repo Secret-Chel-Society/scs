@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 /**
  * Syncs player statistics from EA match data to the player_statistics table
- * @param matchId The SCS match ID
+ * @param matchId The MGHL match ID
  * @param eaMatchId The EA match ID
  * @param eaMatchData The EA match data
  */

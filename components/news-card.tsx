@@ -68,7 +68,7 @@ export default function NewsCard({ news }: NewsCardProps) {
           <div className="relative z-10 p-6 h-full flex flex-col justify-between text-white">
             {/* Category Badge */}
             <div className="self-start">
-              <span className="bg-green-500 text-black px-3 py-1 text-xs font-bold uppercase tracking-wider">SCS</span>
+              <span className="bg-green-500 text-black px-3 py-1 text-xs font-bold uppercase tracking-wider">MGHL</span>
             </div>
 
             {/* Title and Date */}

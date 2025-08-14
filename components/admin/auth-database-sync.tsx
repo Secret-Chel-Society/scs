@@ -20,7 +20,7 @@ export default function AuthDatabaseSync() {
 
   // Load saved admin key if available
   useState(() => {
-    const savedKey = localStorage.getItem("scs-admin-key")
+    const savedKey = localStorage.getItem("mghl-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
     }
@@ -52,7 +52,7 @@ export default function AuthDatabaseSync() {
       setResult(null)
 
       // Save admin key for future use
-      localStorage.setItem("scs-admin-key", adminKey)
+      localStorage.setItem("mghl-admin-key", adminKey)
 
       const response = await fetch("/api/admin/sync-auth-to-database", {
         method: "POST",

@@ -220,7 +220,7 @@ export default function ForumPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">SCS Forum</h1>
+          <h1 className="text-4xl font-bold mb-2">MGHL Forum</h1>
           <p className="text-muted-foreground">Discuss hockey, strategies, and connect with the community</p>
         </div>
         <Button onClick={handleCreatePost}>

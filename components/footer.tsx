@@ -33,12 +33,12 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">Secret Chel Society</h3>
+            <h3 className="font-bold text-lg mb-4">Major Gaming Hockey League</h3>
             <p className="text-muted-foreground mb-4">
-              The premier competitive NHL 26 league for elite console players across North America, powered by Midnight Studios.
+              The premier competitive NHL 25 league for elite console players across North America.
             </p>
             <Link
-              href="https://discord.gg/secretchelsociety"
+              href="https://discord.gg/mghl"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-primary hover:underline"
@@ -145,9 +145,8 @@ export default function Footer() {
 
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
           <p>
-            &copy; {currentYear} Secret Chel Society. All rights reserved.
-             In official partnership with Midnight Studios.
-            This site is an independent entity and is not affiliated with or endorsed by EA Sports.
+            &copy; {currentYear} Major Gaming Hockey League. All rights reserved. This site is an independent entity and
+            is not affiliated with or endorsed by EA Sports.
           </p>
         </div>
       </div>

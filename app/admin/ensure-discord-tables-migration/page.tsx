@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import EnsureDiscordTablesMigration from "@/components/admin/ensure-discord-tables-migration"
 
 export const metadata: Metadata = {
-  title: "Ensure Discord Tables Migration - SCS Admin",
+  title: "Ensure Discord Tables Migration - MGHL Admin",
   description: "Create and configure Discord integration tables",
 }
 

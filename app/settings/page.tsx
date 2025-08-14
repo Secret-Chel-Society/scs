@@ -658,7 +658,7 @@ export default function SettingsPage() {
                   <div>
                     <CardTitle>Discord Integration</CardTitle>
                     <CardDescription>
-                      Connect your Discord account to automatically receive the "Registered" role in the SCS Discord
+                      Connect your Discord account to automatically receive the "Registered" role in the MGHL Discord
                       server
                     </CardDescription>
                   </div>
@@ -734,7 +734,7 @@ export default function SettingsPage() {
                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg">
                       <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Why Connect Discord?</h4>
                       <ul className="text-sm text-blue-600 dark:text-blue-400 space-y-1">
-                        <li>• Automatically receive the "Registered" role in SCS Discord</li>
+                        <li>• Automatically receive the "Registered" role in MGHL Discord</li>
                         <li>• Get team-specific roles when you join a team</li>
                         <li>• Access to team management channels if you're a GM/AGM</li>
                         <li>• Stay updated with league announcements</li>
@@ -816,7 +816,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="emailNotifications">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Receive email notifications from SCS</p>
+                    <p className="text-sm text-muted-foreground">Receive email notifications from MGHL</p>
                   </div>
                   <Switch
                     id="emailNotifications"

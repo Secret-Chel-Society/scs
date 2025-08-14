@@ -463,7 +463,7 @@ export default function SeasonRegistrationPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{activeSeason.name} Registration</CardTitle>
-            <CardDescription>Register to participate for Season 1 of the Secret Chel Society</CardDescription>
+            <CardDescription>Register to participate for Season 1 of the Major Gaming Hockey League</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-6 p-4 bg-muted/30 rounded-lg">
@@ -569,7 +569,7 @@ export default function SeasonRegistrationPage() {
             <div className="text-sm">
               Questions? Contact us on{" "}
               <a
-                href="https://discord.gg/scs"
+                href="https://discord.gg/mghl"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"

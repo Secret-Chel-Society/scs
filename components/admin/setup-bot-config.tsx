@@ -49,7 +49,7 @@ export default function SetupBotConfig() {
           <Settings className="h-5 w-5" />
           Setup Bot Configuration
         </CardTitle>
-        <CardDescription>Initialize the Discord bot configuration with the correct settings for SCS.</CardDescription>
+        <CardDescription>Initialize the Discord bot configuration with the correct settings for MGHL.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isSetup ? (

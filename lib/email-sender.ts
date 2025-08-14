@@ -124,11 +124,11 @@ export function generateVerificationEmail(email: string, token: string, siteUrl:
 
   return {
     to: email,
-    subject: "Verify your email address for SCS",
+    subject: "Verify your email address for MGHL",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Verify Your Email Address</h2>
-        <p>Thank you for registering with SCS. Please click the button below to verify your email address:</p>
+        <p>Thank you for registering with MGHL. Please click the button below to verify your email address:</p>
         <div style="text-align: center; margin: 30px 0;">
           <a href="${verificationUrl}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">
             Verify Email Address
@@ -139,7 +139,7 @@ export function generateVerificationEmail(email: string, token: string, siteUrl:
         <p>This link will expire in 24 hours.</p>
         <p>If you did not create an account, you can safely ignore this email.</p>
         <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;" />
-        <p style="color: #666; font-size: 14px;">SCS - Multiplayer Gaming Hockey League</p>
+        <p style="color: #666; font-size: 14px;">MGHL - Multiplayer Gaming Hockey League</p>
       </div>
     `,
   }
@@ -169,11 +169,11 @@ export async function sendVerificationEmail(
       // Generate the verification email with direct token
       const emailOptions = {
         to: email,
-        subject: "Verify your email address for SCS",
+        subject: "Verify your email address for MGHL",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">Verify Your Email Address</h2>
-            <p>Thank you for registering with SCS. Please click the button below to verify your email address:</p>
+            <p>Thank you for registering with MGHL. Please click the button below to verify your email address:</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${siteUrl}/direct-verify?token=${directToken}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: bold;">
                 Verify Email Address
@@ -184,7 +184,7 @@ export async function sendVerificationEmail(
             <p>This link will expire in 24 hours.</p>
             <p>If you did not create an account, you can safely ignore this email.</p>
             <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;" />
-            <p style="color: #666; font-size: 14px;">SCS - Multiplayer Gaming Hockey League</p>
+            <p style="color: #666; font-size: 14px;">MGHL - Multiplayer Gaming Hockey League</p>
           </div>
         `,
       }

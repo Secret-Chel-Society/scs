@@ -181,7 +181,7 @@ export function BiddingRecap() {
   const downloadCSV = () => {
     if (!data) return
 
-    let csvContent = "SCS Bidding Recap\n\n"
+    let csvContent = "MGHL Bidding Recap\n\n"
 
     // Summary
     csvContent += "SUMMARY\n"
@@ -215,7 +215,7 @@ export function BiddingRecap() {
     const link = document.createElement("a")
     const url = URL.createObjectURL(blob)
     link.setAttribute("href", url)
-    link.setAttribute("download", `SCS_Bidding_Recap_${new Date().toISOString().split("T")[0]}.csv`)
+    link.setAttribute("download", `MGHL_Bidding_Recap_${new Date().toISOString().split("T")[0]}.csv`)
     link.style.visibility = "hidden"
     document.body.appendChild(link)
     link.click()

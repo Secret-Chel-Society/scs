@@ -72,7 +72,7 @@ export default function NewsArticle({ article, isPreview = false }: NewsArticleP
               />
               <AvatarFallback>{getAuthorInitials()}</AvatarFallback>
             </Avatar>
-            <span>{author?.gamer_tag_id || author?.email || "SCS Staff"}</span>
+            <span>{author?.gamer_tag_id || author?.email || "MGHL Staff"}</span>
             <span>•</span>
             <span>{formattedDate}</span>
           </div>

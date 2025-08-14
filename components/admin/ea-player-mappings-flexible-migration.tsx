@@ -66,7 +66,7 @@ export function EaPlayerMappingsFlexibleMigration() {
       <CardHeader>
         <CardTitle>EA Player Mappings Flexible Migration</CardTitle>
         <CardDescription>
-          Create a table to map EA player names to SCS player profiles with custom column names
+          Create a table to map EA player names to MGHL player profiles with custom column names
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,7 +96,7 @@ export function EaPlayerMappingsFlexibleMigration() {
 
           <p className="text-sm">
             This migration will create a new table called <code>{tableName}</code> with a column{" "}
-            <code>{columnName}</code> to map EA player names to SCS player profiles.
+            <code>{columnName}</code> to map EA player names to MGHL player profiles.
           </p>
 
           <Button onClick={runMigration} disabled={isRunning || isComplete}>

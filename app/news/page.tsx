@@ -71,8 +71,8 @@ export default function NewsPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">SCS News</h1>
-              <p className="text-gray-400">Stay up to date with the latest SCS news and announcements</p>
+              <h1 className="text-4xl font-bold text-white mb-2">MGHL News</h1>
+              <p className="text-gray-400">Stay up to date with the latest MGHL news and announcements</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -132,7 +132,7 @@ export default function NewsPage() {
                       <div className="absolute inset-0 p-6 flex flex-col justify-end">
                         <div className="mb-2">
                           <span className="inline-block px-2 py-1 bg-green-500 text-black text-xs font-bold uppercase tracking-wider rounded">
-                            SCS
+                            MGHL
                           </span>
                         </div>
                         <h3 className="text-white font-bold text-lg leading-tight mb-2 line-clamp-3">{item.title}</h3>

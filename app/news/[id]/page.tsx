@@ -225,7 +225,7 @@ export default function NewsDetailPage() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Badge variant="default" className="bg-green-500 text-black">
-                    SCS
+                    MGHL
                   </Badge>
                   {article.featured && <Badge variant="default">Featured</Badge>}
                   {!article.published && <Badge variant="outline">Draft</Badge>}
@@ -241,7 +241,7 @@ export default function NewsDetailPage() {
                     <AvatarFallback>{getAuthorInitials()}</AvatarFallback>
                   </Avatar>
                   <span className="text-white">
-                    {article.author?.gamer_tag_id || article.author?.email || "SCS Staff"}
+                    {article.author?.gamer_tag_id || article.author?.email || "MGHL Staff"}
                   </span>
                   <span>•</span>
                   <span>{formatDistanceToNow(new Date(article.created_at), { addSuffix: true })}</span>
