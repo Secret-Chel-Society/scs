@@ -7,7 +7,10 @@ const SITE_URL =
   (process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")) ||
   (isDevelopment ? "http://localhost:3000" : "https://www.secretchelsociety.com")
 
-const DISCORD_REDIRECT_URI = `${SITE_URL}/api/auth/discord/callback`
+// Prefer explicit env var, fallback to SITE_URL version
+const DISCORD_REDIRECT_URI =
+  process.env.DISCORD_REDIRECT_URI?.trim() ||
+  `${SITE_URL}/api/auth/discord/callback`
 
 export async function GET(request: Request) {
   try {
