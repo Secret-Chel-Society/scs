@@ -87,8 +87,8 @@ div[style*="position: fixed"][style*="bottom"][style*="right"] {
 [class*="v0-"],
 [id*="v0-"],
 [data-testid*="v0"],
-[aria-label*="Built with v0"],
-[title*="Built with v0"] {
+[aria-label*="Built by lispdoge"],
+[title*="Built by lispdoge"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
