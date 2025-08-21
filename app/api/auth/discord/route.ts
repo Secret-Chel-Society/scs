@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 const isDevelopment = process.env.NODE_ENV === "development"
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1395925587205296178"
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1407947416094900245"
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
 const DISCORD_REDIRECT_URI = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/discord/callback`
 
