@@ -18,13 +18,16 @@ export async function GET(request: Request) {
     const userId = searchParams.get("user_id")
     const state = searchParams.get("state")
 
+    // Ensure no spaces/newlines sneak into redirect URI
+    const safeRedirectUri = DISCORD_REDIRECT_URI.replace(/^\s+|\s+$/g, "")
+
     console.log("Discord OAuth request:", {
       userId,
       state,
       hasClientId: !!DISCORD_CLIENT_ID,
       hasClientSecret: !!DISCORD_CLIENT_SECRET,
-      redirectUri: DISCORD_REDIRECT_URI,
-      siteUrl: SITE_URL, // Log the site URL for debugging
+      redirectUri: safeRedirectUri,
+      siteUrl: SITE_URL,
     })
 
     // Check if Discord is properly configured
@@ -42,7 +45,6 @@ export async function GET(request: Request) {
         DISCORD_CLIENT_SECRET: !!process.env.DISCORD_CLIENT_SECRET,
       })
 
-      // Return a more helpful error in development
       if (isDevelopment) {
         return NextResponse.json(
           {
@@ -65,7 +67,7 @@ export async function GET(request: Request) {
     // Build the Discord OAuth URL
     const discordAuthUrl = new URL("https://discord.com/api/oauth2/authorize")
     discordAuthUrl.searchParams.set("client_id", DISCORD_CLIENT_ID)
-    discordAuthUrl.searchParams.set("redirect_uri", DISCORD_REDIRECT_URI)
+    discordAuthUrl.searchParams.set("redirect_uri", safeRedirectUri)
     discordAuthUrl.searchParams.set("response_type", "code")
     discordAuthUrl.searchParams.set("scope", "identify")
 
@@ -88,4 +90,3 @@ export async function GET(request: Request) {
     )
   }
 }
-
