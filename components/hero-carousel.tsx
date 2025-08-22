@@ -22,27 +22,23 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
   const [loadError, setLoadError] = useState<Record<number, boolean>>({})
   const [validImages, setValidImages] = useState<HeroImage[]>([])
 
-  // Default fallback content
+  // ✅ Default fallback content uses your new PNG logo
   const defaultContent = {
-    url: "/placeholder.svg?height=600&width=1200&text=SCS",
-    title: "Welcome to SCS",
-    subtitle: "The premier NHL 25 competitive gaming league",
+    url: "/2D183079-0CA8-4A08-84F6-A6645094ADD7.png", // place this PNG in /public
+    title: "Welcome to Secret CHEL Society",
+    subtitle: "The premier NHL 26 competitive gaming league",
   }
 
-  // Filter out images with invalid URLs and add default if no valid images
   useEffect(() => {
     const filtered = images.filter((_, index) => !loadError[index])
     setValidImages(filtered.length > 0 ? filtered : [defaultContent])
   }, [images, loadError])
 
-  // Auto-advance the carousel
   useEffect(() => {
-    if (validImages.length <= 1) return // Don't set interval if only one image
-
+    if (validImages.length <= 1) return
     const interval = setInterval(() => {
       setCurrent((prev) => (prev === validImages.length - 1 ? 0 : prev + 1))
     }, 5000)
-
     return () => clearInterval(interval)
   }, [validImages.length])
 
@@ -55,22 +51,16 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
     [validImages.length],
   )
 
-  // Handle image load error
   const handleImageError = (index: number) => {
     console.warn(`Failed to load image at index ${index}:`, validImages[index]?.url)
     setLoadError((prev) => ({ ...prev, [index]: true }))
-
-    // If the current image failed to load, move to the next one
-    if (index === current && validImages.length > 1) {
-      next()
-    }
+    if (index === current && validImages.length > 1) next()
   }
 
-  // Get the current image with fallback
   const currentImage = validImages[current] || defaultContent
 
   return (
-    <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden">
+    <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-black flex flex-col items-center justify-center">
       {/* Carousel Images */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -79,31 +69,22 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.7 }}
-          className="absolute inset-0"
+          className="absolute inset-0 flex items-center justify-center"
         >
           <Image
             src={currentImage.url || "/placeholder.svg"}
             alt={currentImage.title || "Carousel image"}
-            fill
-            className="object-cover"
+            width={500}
+            height={500}
+            className="object-contain"
             priority
-            sizes="100vw"
             onError={() => handleImageError(current)}
-            onLoad={() => {
-              // Remove error state if image loads successfully
-              setLoadError((prev) => {
-                const newState = { ...prev }
-                delete newState[current]
-                return newState
-              })
-            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
         </motion.div>
       </AnimatePresence>
 
       {/* Content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+      <div className="absolute bottom-16 inset-x-0 flex flex-col items-center text-center p-4">
         <motion.div
           key={`content-${current}`}
           initial={{ opacity: 0, y: 20 }}
@@ -117,7 +98,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-md">{currentImage.subtitle}</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" className="font-semibold">
-              <Link href="/register/season">Season 1 Signup</Link>
+              <Link href="/register/season">Season 2 Signup</Link>
             </Button>
             <Button
               variant="outline"
@@ -131,7 +112,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
         </motion.div>
       </div>
 
-      {/* Navigation Arrows - Only show if more than one image */}
+      {/* Nav arrows if >1 image */}
       {validImages.length > 1 && (
         <>
           <Button
@@ -139,7 +120,6 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
             size="icon"
             className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/30 backdrop-blur-sm text-white hover:bg-background/50 rounded-full h-10 w-10"
             onClick={prev}
-            aria-label="Previous slide"
           >
             <ChevronLeft className="h-6 w-6" />
           </Button>
@@ -148,25 +128,9 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
             size="icon"
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/30 backdrop-blur-sm text-white hover:bg-background/50 rounded-full h-10 w-10"
             onClick={next}
-            aria-label="Next slide"
           >
             <ChevronRight className="h-6 w-6" />
           </Button>
-
-          {/* Indicators */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-            {validImages.map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 rounded-full transition-all ${
-                  index === current ? "w-8 bg-primary" : "w-2 bg-white/50"
-                }`}
-                onClick={() => setCurrent(index)}
-                aria-label={`Go to slide ${index + 1}`}
-                aria-current={index === current ? "true" : "false"}
-              />
-            ))}
-          </div>
         </>
       )}
     </div>
