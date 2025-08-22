@@ -115,17 +115,17 @@ export default function Home() {
   })
   const [heroImages, setHeroImages] = useState([
     {
-      url: "/placeholder.svg?height=600&width=1200",
-      title: "Welcome to SCS",
+      url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png?height=600&width=1200",
+      title: "Welcome to Secret Chel Society",
       subtitle: "The premier NHL 26 competitive gaming league with advanced stat tracking",
     },
     {
-      url: "/placeholder.svg?height=600&width=1200",
+      url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png?height=600&width=1200",
       title: "Season 1 Registration Open",
       subtitle: "Join the most competitive NHL 26 league and earn rewards through our token system",
     },
     {
-      url: "/placeholder.svg?height=600&width=1200",
+      url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png?height=600&width=1200",
       title: "Live Match Streaming",
       subtitle: "Watch professional NHL 26 matches with real-time statistics and commentary",
     },
@@ -151,7 +151,7 @@ export default function Home() {
               url:
                 img.url && typeof img.url === "string" && img.url.trim() !== ""
                   ? img.url
-                  : `/placeholder.svg?height=600&width=1200&query=${encodeURIComponent(img.title || "NHL 26 hockey league")}`,
+                  : `/https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png?height=600&width=1200&query=${encodeURIComponent(img.title || "NHL 26 hockey league")}`,
             }))
             setHeroImages(validatedImages)
           }
