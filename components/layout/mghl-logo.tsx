@@ -15,8 +15,8 @@ export function MGHLLogo({ onClick }: MGHLLogoProps) {
         <Image
           src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
           alt="SCS Logo"
-          width={120}
-          height={40}
+          width={240}
+          height={80}
           className="h-10 w-auto object-contain"
           priority
         />
