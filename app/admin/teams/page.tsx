@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge"
 import { getCurrentSeasonId } from "@/lib/team-utils"
 
 interface Season {
-  id: number
+  number: number
   name: string
   is_active: boolean
 }
@@ -76,7 +76,7 @@ export default function AdminTeamsPage() {
   const [teamForm, setTeamForm] = useState({
     name: "",
     logo_url: "",
-    season_id: 1,
+    season_number: 2,
     ea_club_id: "",
     is_active: true,
   })
@@ -162,8 +162,8 @@ export default function AdminTeamsPage() {
           if (seasonsError) {
             console.error("Error loading seasons:", seasonsError)
             // Use default season if can't load from database
-            setSeasons([{ id: 1, name: "Season 1", is_active: true }])
-            setSelectedSeason(1)
+            setSeasons([{ number: 2, name: "Season 1", is_active: true }])
+            setSelectedSeason(2)
           } else if (seasonsData) {
             const seasonsArray = seasonsData.value || []
             setSeasons(seasonsArray)
@@ -175,14 +175,14 @@ export default function AdminTeamsPage() {
             } catch (error) {
               console.error("Error getting current season:", error)
               // Use first season from the list or default to 1
-              setSelectedSeason(seasonsArray.length > 0 ? seasonsArray[0].id : 1)
+              setSelectedSeason(seasonsArray.length > 0 ? seasonsArray[0].number : 2)
             }
           }
         } catch (error) {
           console.error("Error loading seasons:", error)
           // Fallback to default season
-          setSeasons([{ id: 1, name: "Season 1", is_active: true }])
-          setSelectedSeason(1)
+          setSeasons([{ number: 2, name: "Season 1", is_active: true }])
+          setSelectedSeason(2)
         }
 
         // Load teams - will be done by effect that watches selectedSeason
@@ -425,7 +425,7 @@ export default function AdminTeamsPage() {
       const season = seasonId || selectedSeason || 1
 
       // Use standard Supabase query instead of exec_sql
-      const { data, error } = await supabase.from("teams").select("*").eq("season_id", season).order("name")
+      const { data, error } = await supabase.from("teams").select("*").eq("season_number", season).order("name")
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -498,7 +498,7 @@ export default function AdminTeamsPage() {
     setTeamForm({
       name: "",
       logo_url: "",
-      season_id: selectedSeason || 1,
+      season_number: selectedSeason || 1,
       ea_club_id: "",
       is_active: true,
     })
@@ -510,7 +510,7 @@ export default function AdminTeamsPage() {
     setTeamForm({
       name: team.name,
       logo_url: team.logo_url || "",
-      season_id: team.season_id,
+      season_number: team.season_number,
       ea_club_id: team.ea_club_id || "",
       is_active: team.is_active !== false, // Default to true if undefined
     })
@@ -532,7 +532,7 @@ export default function AdminTeamsPage() {
       const teamData: any = {
         name: teamForm.name,
         logo_url: teamForm.logo_url || null,
-        season_id: teamForm.season_id,
+        season_number: teamForm.season_number,
       }
 
       // Only include ea_club_id if the column exists
@@ -564,7 +564,7 @@ export default function AdminTeamsPage() {
         })
       } else if (editingTeam) {
         // Update existing team using standard Supabase update
-        const { error } = await supabase.from("teams").update(teamData).eq("id", editingTeam.id)
+        const { error } = await supabase.from("teams").update(teamData).eq("number", editingTeam.number)
 
         if (error) throw error
 
@@ -874,7 +874,7 @@ export default function AdminTeamsPage() {
             </SelectTrigger>
             <SelectContent>
               {seasons.map((season: Season) => (
-                <SelectItem key={season.id} value={season.id.toString()}>
+                <SelectItem key={season.number} value={season.number.toString()}>
                   {season.name} {season.is_active ? "(Active)" : ""}
                 </SelectItem>
               ))}
@@ -949,7 +949,7 @@ export default function AdminTeamsPage() {
                 ) : (
                   filteredTeams.map((team) => {
                     const seasonName =
-                      seasons.find((s: Season) => s.id === team.season_id)?.name || `Season ${team.season_id}`
+                      seasons.find((s: Season) => s.number === team.season_number)?.name || `Season ${team.season_number}`
 
                     // Use database values directly for more accurate display
                     const wins = team.wins || 0
@@ -1109,15 +1109,15 @@ export default function AdminTeamsPage() {
             <div className="space-y-2">
               <Label htmlFor="season">Season</Label>
               <Select
-                value={teamForm.season_id.toString()}
-                onValueChange={(value) => setTeamForm({ ...teamForm, season_id: Number(value) })}
+                value={teamForm.season_number.toString()}
+                onValueChange={(value) => setTeamForm({ ...teamForm, season_number: Number(value) })}
               >
-                <SelectTrigger id="season">
+                <SelectTrigger number="season">
                   <SelectValue placeholder="Select Season" />
                 </SelectTrigger>
                 <SelectContent>
                   {seasons.map((season: Season) => (
-                    <SelectItem key={season.id} value={season.id.toString()}>
+                    <SelectItem key={season.number} value={season.number.toString()}>
                       {season.name} {season.is_active ? "(Active)" : ""}
                     </SelectItem>
                   ))}
