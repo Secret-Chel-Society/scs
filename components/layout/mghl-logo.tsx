@@ -13,7 +13,7 @@ export function MGHLLogo({ onClick }: MGHLLogoProps) {
     <Link href="/" onClick={onClick}>
       <div className="flex items-center">
         <Image
-          src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png"
+          src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png"
           alt="SCS Logo"
           width={120}
           height={40}
