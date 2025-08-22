@@ -151,7 +151,7 @@ export default function Home() {
               url:
                 img.url && typeof img.url === "string" && img.url.trim() !== ""
                   ? img.url
-                  : `/https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png?height=600&width=1200&query=${encodeURIComponent(img.title || "NHL 26 hockey league")}`,
+                  : `/https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png?height=600&width=1200&query=${encodeURIComponent(img.title || "NHL 26 hockey league")}`,
             }))
             setHeroImages(validatedImages)
           }
