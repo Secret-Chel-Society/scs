@@ -72,7 +72,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           className="absolute inset-0 flex items-center justify-center"
         >
           <Image
-            src={currentImage.url || "/placeholder.svg"}
+            src={currentImage.url || "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png"}
             alt={currentImage.title || "Carousel image"}
             width={500}
             height={500}
@@ -98,7 +98,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-md">{currentImage.subtitle}</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" className="font-semibold">
-              <Link href="/register/season">Season 2 Signup</Link>
+              <Link href="/register/season">Season 1 Signup</Link>
             </Button>
             <Button
               variant="outline"
