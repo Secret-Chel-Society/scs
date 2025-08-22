@@ -24,7 +24,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
 
   // ✅ Default fallback content uses your new PNG logo
   const defaultContent = {
-    url: "/2D183079-0CA8-4A08-84F6-A6645094ADD7.png", // place this PNG in /public
+    url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png", // place this PNG in /public
     title: "Welcome to Secret CHEL Society",
     subtitle: "The premier NHL 26 competitive gaming league",
   }
