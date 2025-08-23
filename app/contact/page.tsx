@@ -73,7 +73,7 @@ export default function ContactPage() {
             {/* Site Tech */}
             <div className="flex items-start gap-4">
               <img
-                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/upscalemedia-transformed.jpeg"
+                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/Untitled%20design%20(42).png"
                 alt="DarkWolf"
                 className="w-16 h-16 rounded-full object-cover"
               />
