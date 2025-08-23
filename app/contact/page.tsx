@@ -26,8 +26,8 @@ export default function ContactPage() {
               <p className="text-muted-foreground">For general questions, support, or feedback about the league.</p>
               <p className="font-medium">
                 Email:{" "}
-                <a href="mailto:lispdoge@gmail.com" className="text-primary hover:underline">
-                  lispdoge@gmail.com
+                <a href="mailto:midnightstudiosintl@outlook.com" className="text-primary hover:underline">
+                  midnightstudiosintl@outlook.com
                 </a>
               </p>
             </div>
@@ -73,7 +73,7 @@ export default function ContactPage() {
             {/* Site Tech */}
             <div className="flex items-start gap-4">
               <img
-                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/HD.png"
+                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/upscalemedia-transformed.jpeg"
                 alt="DarkWolf"
                 className="w-16 h-16 rounded-full object-cover"
               />
