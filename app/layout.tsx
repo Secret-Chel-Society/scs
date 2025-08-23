@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import Navigation from "@/components/navigation"
+// Changed the import to the new side navigation component
+import SideNavigation from "@/components/side-navigation" 
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
@@ -11,7 +12,6 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
-// Optimize font loading
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -38,8 +38,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3668249624265877"
@@ -49,12 +47,18 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navigation />
-              <Suspense>
-                <main className="flex-1">{children}</main>
-              </Suspense>
-              <Footer />
+            {/* The main wrapper for the sidebar layout */}
+            <div className="flex min-h-screen w-full flex-col bg-muted/40">
+              <SideNavigation />
+              <div className="flex flex-col sm:gap-4 sm:py-4 md:pl-64"> {/* Adjust md:pl-64 to your sidebar width */}
+                <Suspense>
+                  {/* The main content area now includes the children and the footer */}
+                  <main className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8">
+                    {children}
+                  </main>
+                </Suspense>
+                <Footer />
+              </div>
             </div>
             <Toaster />
             <BannedUserModal />
