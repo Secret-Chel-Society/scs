@@ -145,8 +145,8 @@ export default function PrivacyPage() {
           </ul>
           <p>
             To exercise these rights, please contact us at{" "}
-            <a href="mailto:lispdoge@gmail.com" className="text-primary hover:underline">
-              lispdoge@gmail.com
+            <a href="mailto:midnightstudiosintl@outlook.com" className="text-primary hover:underline">
+              midnightstudiosintl@outlook.com
             </a>
             .
           </p>
@@ -201,8 +201,8 @@ export default function PrivacyPage() {
           <div className="bg-muted p-4 rounded-lg mt-4">
             <p>
               <strong>Email:</strong>{" "}
-              <a href="mailto:lispdoge@gmail.com" className="text-primary hover:underline">
-                lispdoge@gmail.com
+              <a href="mailto:midnightstudiosintl@outlook.com" className="text-primary hover:underline">
+                midnightstudiosintl@outlook.com
               </a>
             </p>
             <p>
