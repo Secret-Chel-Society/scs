@@ -195,7 +195,7 @@ export default function DisclaimerPage() {
           <div className="bg-muted p-4 rounded-lg mt-4">
             <p>
               <strong>Email:</strong>{" "}
-              <a href="mailto:lispdoge@gmail.com" className="text-primary hover:underline">
+              <a href="mailto:midnightstudiosintl@outlook.com" className="text-primary hover:underline">
                 lispdoge@gmail.com
               </a>
             </p>
