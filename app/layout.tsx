@@ -4,7 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 // Changed the import to the new side navigation component
-import SideNavigation from "@/components/side-navigation" 
+import SideNavigation from "@/components/navigation" 
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
