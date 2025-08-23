@@ -107,7 +107,7 @@ export default function ContactPage() {
             {/* SCS Commissioner */}
             <div className="flex items-start gap-4">
               <img
-                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/default-avatar-profile-icon-grey-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-no-photo-default-images-for-unfilled-user-profile-free-vector.jpg"
+                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/FB_IMG_1755920678962.webp"
                 alt="OldManGotchu"
                 className="w-16 h-16 rounded-full object-cover"
               />
