@@ -11,6 +11,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
+// Optimize font loading
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -48,19 +49,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen flex-row">
-              {/* Sidebar Navigation */}
+            <div className="flex min-h-screen flex-col">
               <Navigation />
-
-              {/* Main Content Area */}
-              <div className="flex flex-col flex-1 ml-64">
-                <Suspense>
-                  <main className="flex-1">{children}</main>
-                </Suspense>
-                <Footer />
-              </div>
+              <Suspense>
+                <main className="flex-1">{children}</main>
+              </Suspense>
+              <Footer />
             </div>
-
             <Toaster />
             <BannedUserModal />
             <Analytics />
