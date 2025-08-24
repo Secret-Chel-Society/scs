@@ -44,11 +44,16 @@ import { avatarSync } from "@/lib/avatar-sync"
 import { cn } from "@/lib/utils"
 
 interface SidebarNavigationProps {
-  isOpen: boolean
-  onToggle: () => void
+  isOpen?: boolean
+  onToggle?: () => void
 }
 
-export function SidebarNavigation({ isOpen, onToggle }: SidebarNavigationProps) {
+export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOnToggle }: SidebarNavigationProps = {}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const onToggle = externalOnToggle || (() => setInternalIsOpen(!internalIsOpen))
   const [userProfile, setUserProfile] = useState<any>(null)
   const [playerRole, setPlayerRole] = useState<string | null>(null)
   const [userRoles, setUserRoles] = useState<string[]>([])
