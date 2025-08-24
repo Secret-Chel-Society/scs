@@ -7,20 +7,23 @@ export function useMobile() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    // This is the key change: it always sets the state to 'false'.
+    setIsMobile(false)
+
+    // The rest of this code is now unnecessary but doesn't hurt.
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768) // Adjust breakpoint as needed
+      // This line is no longer used but can remain.
+      setIsMobile(window.innerWidth < 1024) 
     }
 
-    // Set initial value
     handleResize()
 
-    // Add event listener
     window.addEventListener("resize", handleResize)
 
-    // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  // The function will always return false, no matter the screen size.
   return isMobile
 }
 
