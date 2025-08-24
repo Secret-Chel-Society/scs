@@ -8,7 +8,7 @@ export function useMobile() {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768) // Adjust breakpoint as needed
+      setIsMobile(window.innerWidth < 1024) // Use lg breakpoint (1024px) to match navigation
     }
 
     // Set initial value
