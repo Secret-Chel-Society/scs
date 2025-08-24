@@ -1,40 +1,18 @@
-import type * as React from "react";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
+import type * as React from "react"
 
-export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  title: React.ReactNode;
-  description?: React.ReactNode;
-  links?: { label: string; href: string }[];
+import { cn } from "@/lib/utils"
+
+export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  title: React.ReactNode
+  description?: React.ReactNode
 }
 
-export function Sidebar({ className, title, description, links = [], ...props }: SidebarProps) {
+export function PageHeader({ className, title, description, ...props }: PageHeaderProps) {
   return (
-    <aside
-      className={cn(
-        "h-screen w-64 bg-gray-900 text-white p-6 space-y-6 fixed top-0 left-0",
-        className
-      )}
-      {...props}
-    >
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        {description && <p className="text-muted-foreground text-sm">{description}</p>}
-      </div>
-
-      {links.length > 0 && (
-        <nav className="flex flex-col space-y-2">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="hover:text-gray-300 transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-      )}
-    </aside>
-  );
+    <div className={cn("space-y-2", className)} {...props}>
+      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      {description && <p className="text-muted-foreground">{description}</p>}
+    </div>
+  )
 }
+
