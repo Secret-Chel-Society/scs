@@ -1,21 +1,21 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import Navigation from "@/components/navigation"
-import Footer from "@/components/footer"
-import { Toaster } from "@/components/ui/toaster"
-import SupabaseProvider from "@/lib/supabase/client"
-import { Analytics } from "@vercel/analytics/next"
-import { Suspense } from "react"
-import { BannedUserModal } from "@/components/auth/banned-user-modal"
+import type React from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
 
-// Optimize font loading
+import { ThemeProvider } from "@/components/theme-provider";
+import Footer from "@/components/footer";
+import { Toaster } from "@/components/ui/toaster";
+import SupabaseProvider from "@/lib/supabase/client";
+import { Analytics } from "@vercel/analytics/next";
+import { Suspense } from "react";
+import { BannedUserModal } from "@/components/auth/banned-user-modal";
+import { Sidebar } from "@/components/ui/page-header"; // ← Sidebar now lives here
+
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-})
+});
 
 export const metadata: Metadata = {
   title: "Secret Chel Society (SCS)",
@@ -27,12 +27,12 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -49,12 +49,24 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navigation />
-              <Suspense>
-                <main className="flex-1">{children}</main>
-              </Suspense>
-              <Footer />
+            <div className="flex min-h-screen">
+              {/* Sidebar replaces Navigation */}
+              <Sidebar
+                title="SCS Portal"
+                description="Secret Chel Society"
+                links={[
+                  { label: "Home", href: "/" },
+                  { label: "Members", href: "/members" },
+                  { label: "Projects", href: "/projects" },
+                  { label: "Settings", href: "/settings" },
+                ]}
+              />
+              <div className="flex flex-col flex-1 ml-64">
+                <Suspense>
+                  <main className="flex-1 p-6">{children}</main>
+                </Suspense>
+                <Footer />
+              </div>
             </div>
             <Toaster />
             <BannedUserModal />
@@ -63,5 +75,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
