@@ -4,17 +4,17 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
-import { 
-  Menu, 
-  X, 
-  Home, 
-  Users, 
-  Trophy, 
-  BarChart3, 
-  Calendar, 
-  Award, 
-  DollarSign, 
-  Newspaper, 
+import {
+  Menu,
+  X,
+  Home,
+  Users,
+  Trophy,
+  BarChart3,
+  Calendar,
+  Award,
+  DollarSign,
+  Newspaper,
   MessageSquare,
   UserPlus,
   Settings,
@@ -201,8 +201,8 @@ export default function Navigation() {
 
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={closeMobileMenu}
         />
       )}
@@ -213,7 +213,7 @@ export default function Navigation() {
         "lg:translate-x-0 lg:static lg:z-auto",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full w-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
             <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
@@ -237,8 +237,8 @@ export default function Navigation() {
               {navigation.map((item) => {
                 const Icon = item.icon
                 // Special handling for home page to prevent it from always being active
-                const isActive = item.href === "/" 
-                  ? pathname === "/" 
+                const isActive = item.href === "/"
+                  ? pathname === "/"
                   : pathname === item.href || pathname.startsWith(item.href + "/")
                 const hasSubmenu = item.submenu && item.submenu.length > 0
                 const isExpanded = expandedMenus[item.name]
@@ -251,8 +251,8 @@ export default function Navigation() {
                         onClick={closeMobileMenu}
                         className={cn(
                           "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-1",
-                          isActive 
-                            ? "bg-primary text-primary-foreground" 
+                          isActive
+                            ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         )}
                       >
