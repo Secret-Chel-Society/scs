@@ -209,8 +209,8 @@ export default function Navigation() {
         <div className="flex items-center justify-center p-4 border-b">
           <Link href="/" onClick={() => setIsMobileOpen(false)}>
             <Image
-              src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
-              alt="MGHL Logo"
+              src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
+              alt="SCS Logo"
               width={120}
               height={40}
               className="h-8 w-auto object-contain"
