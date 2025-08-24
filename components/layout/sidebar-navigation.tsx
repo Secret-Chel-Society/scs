@@ -383,8 +383,8 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
           <div className="flex items-center justify-between p-4 border-b">
             <Link href="/" className="flex items-center" onClick={onToggle}>
               <Image
-                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
-                alt="MGHL Logo"
+                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
+                alt="SCS Logo"
                 width={120}
                 height={40}
                 className="h-8 w-auto object-contain"
