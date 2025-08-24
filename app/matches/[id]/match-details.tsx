@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -19,6 +20,7 @@ import { EaMatchImportModal } from "@/components/matches/ea-match-import-modal"
 import { SyncMatchStatsButton } from "@/components/matches/sync-match-stats-button"
 import { SyncPlayerStatsButton } from "@/components/matches/sync-player-stats-button"
 import { UploadMatchButton } from "@/components/matches/upload-match-button"
+import { ThreeStarsDisplay } from "@/components/matches/three-stars-display"
 
 interface MatchDetailsProps {
   matchId: string
@@ -486,66 +488,7 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
         </TabsContent>
 
         <TabsContent value="stars" className="mt-0">
-          <Card className="bg-gradient-to-br from-yellow-50/50 to-orange-50/50 border-yellow-200/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-600" />
-                3 Stars of the Match
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-4">
-                  {/* First Star */}
-                  <div className="flex flex-col items-center text-center">
-                    <div className="relative w-28 h-28 mb-4 rounded-full overflow-hidden border-4 border-yellow-400 shadow-lg">
-                      <Image src="/placeholder-user.jpg" alt="First Star" fill className="object-cover" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-2xl">⭐</div>
-                      <h3 className="text-xl font-bold text-yellow-700">First Star</h3>
-                      <p className="text-sm text-muted-foreground font-medium">Player Name</p>
-                      <p className="text-xs text-muted-foreground">2G, 1A, +2</p>
-                    </div>
-                  </div>
-
-                  {/* Second Star */}
-                  <div className="flex flex-col items-center text-center">
-                    <div className="relative w-24 h-24 mb-4 rounded-full overflow-hidden border-4 border-gray-400 shadow-lg">
-                      <Image src="/placeholder-user.jpg" alt="Second Star" fill className="object-cover" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-xl">⭐</div>
-                      <h3 className="text-lg font-bold text-gray-600">Second Star</h3>
-                      <p className="text-sm text-muted-foreground font-medium">Player Name</p>
-                      <p className="text-xs text-muted-foreground">1G, 2A, +1</p>
-                    </div>
-                  </div>
-
-                  {/* Third Star */}
-                  <div className="flex flex-col items-center text-center">
-                    <div className="relative w-20 h-20 mb-4 rounded-full overflow-hidden border-4 border-amber-600 shadow-lg">
-                      <Image src="/placeholder-user.jpg" alt="Third Star" fill className="object-cover" />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-lg">⭐</div>
-                      <h3 className="text-base font-bold text-amber-700">Third Star</h3>
-                      <p className="text-sm text-muted-foreground font-medium">Player Name</p>
-                      <p className="text-xs text-muted-foreground">1G, 1A, +1</p>
-                    </div>
-                  </div>
-                </div>
-
-                {canManageMatch && (
-                  <div className="flex justify-center pt-4 border-t border-border/50">
-                    <Button variant="outline" className="hover:bg-yellow-50">
-                      Edit Stars of the Match
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <ThreeStarsDisplay matchId={matchId} canEdit={canManageMatch} />
         </TabsContent>
 
         <TabsContent value="highlights" className="mt-0">
