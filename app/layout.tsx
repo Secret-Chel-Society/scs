@@ -52,7 +52,9 @@ export default function RootLayout({
             <div className="flex min-h-screen flex-col">
               <Navigation />
               <Suspense>
-                <main className="flex-1">{children}</main>
+                <main className="flex-1">
+                  {children}
+                </main>
               </Suspense>
               <Footer />
             </div>
