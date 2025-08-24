@@ -1,4 +1,3 @@
-i
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -8,7 +7,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import { SupabaseProvider } from "@/lib/supabase/client"
-// import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
+import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
@@ -66,7 +65,7 @@ export default function RootLayout({
             </div>
             <Toaster />
             <BannedUserModal />
-            {/* <Analytics /> */}
+            <Analytics />
           </SupabaseProvider>
         </ThemeProvider>
       </body>
