@@ -5,3 +5,4 @@ import SidebarNavigation from './sidebar-navigation'
 
 export default function Header() {
   return <SidebarNavigation />
+}
