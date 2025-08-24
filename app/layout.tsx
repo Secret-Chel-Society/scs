@@ -1,4 +1,4 @@
-import type React from "react"
+iimport type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -7,7 +7,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
-import { Analytics } from "@vercel/analytics/next"
+// import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
@@ -49,18 +49,21 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen flex-col">
+            <div className="flex min-h-screen">
               <Navigation />
-              <Suspense>
-                <main className="flex-1">
-                  {children}
-                </main>
-              </Suspense>
-              <Footer />
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col lg:ml-64">
+                <Suspense>
+                  <main className="flex-1 p-6">
+                    {children}
+                  </main>
+                </Suspense>
+                <Footer />
+              </div>
             </div>
             <Toaster />
             <BannedUserModal />
-            <Analytics />
+            {/* <Analytics /> */}
           </SupabaseProvider>
         </ThemeProvider>
       </body>
