@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -225,7 +224,10 @@ export default function Navigation() {
           <ul className="space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href || pathname.startsWith(item.href)
+              // Special handling for home page to prevent it from always being active
+              const isActive = item.href === "/" 
+                ? pathname === "/" 
+                : pathname === item.href || pathname.startsWith(item.href + "/")
               const hasSubmenu = item.submenu && item.submenu.length > 0
               const isExpanded = expandedMenus[item.name]
 
