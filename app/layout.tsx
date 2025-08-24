@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -10,8 +11,8 @@ import { SupabaseProvider } from "@/lib/supabase/client"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: SCS - Secret Chel Society",
-  description: "The official website for the Secret Chel Society",
+  title: "MGHL - Minor Guild Hockey League",
+  description: "The official website for the Minor Guild Hockey League",
 }
 
 export default function RootLayout({
