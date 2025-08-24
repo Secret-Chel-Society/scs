@@ -18,8 +18,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Major Gaming Hockey League (MGHL)",
-  description: "Official website for the NHL 25 Major Gaming Hockey League",
+  title: "Secret Chel Society",
+  description: "Official website for the NHL 26 Secret Chel Society",
   viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
   icons: {
@@ -42,7 +42,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.ico" />
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3668249624265877"
+          src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
           crossOrigin="anonymous"
         />
       </head>
