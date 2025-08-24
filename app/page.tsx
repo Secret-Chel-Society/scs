@@ -312,7 +312,7 @@ export default function Home() {
 
       {/* Enhanced Stats Section with Hockey Theme */}
       <motion.section
-        className="relative -mt-0 z-10 mx-4"
+        className="relative mt-5 z-10 mx-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
