@@ -30,12 +30,12 @@ export default function RootLayout({
         >
           <SupabaseProvider>
             <div className="min-h-screen lg:flex">
-              {/* Header with mobile menu and sidebar */}
+              {/* Unified Sidebar for both mobile and desktop */}
               <Header />
 
-              {/* Main Content - flex-1 to take remaining space */}
-              <div className="flex-1 flex flex-col min-w-0">
-                <main className="flex-1">
+              {/* Main Content */}
+              <div className="flex-1 lg:ml-64 pt-14 lg:pt-0">
+                <main className="min-h-screen">
                   {children}
                 </main>
                 <Footer />
