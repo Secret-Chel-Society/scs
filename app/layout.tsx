@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
-import SupabaseProvider from "@/lib/supabase/client"
-// import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
+import { SupabaseProvider } from "@/lib/supabase/client"
+import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
@@ -18,15 +18,19 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Secret Chel Society",
-  description: "Official website for the NHL 26 Secret Chel Society",
-  viewport: "width=device-width, initial-scale=1",
+  title: "Major Gaming Hockey League (MGHL)",
+  description: "Official website for the NHL 25 Major Gaming Hockey League",
   generator: "v0.dev",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -42,28 +46,30 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.ico" />
         <script
           async
-          src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3668249624265877"
           crossOrigin="anonymous"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} min-h-screen`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen overflow-hidden">
               <Navigation />
               {/* Main content area */}
-              <div className="flex-1 flex flex-col lg:ml-64">
-                <Suspense>
-                  <main className="flex-1 p-6">
-                    {children}
-                  </main>
-                </Suspense>
-                <Footer />
+              <div className="flex-1 flex flex-col lg:ml-64 min-h-screen">
+                <div className="flex-1 flex flex-col">
+                  <Suspense>
+                    <main className="flex-1 p-6">
+                      {children}
+                    </main>
+                  </Suspense>
+                  <Footer />
+                </div>
               </div>
             </div>
             <Toaster />
             <BannedUserModal />
-            {/* <Analytics /> */}
+            <Analytics />
           </SupabaseProvider>
         </ThemeProvider>
       </body>
