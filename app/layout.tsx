@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -30,12 +29,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SupabaseProvider>
-            <div className="flex min-h-screen">
-              {/* Sidebar Navigation */}
+            <div className="min-h-screen lg:flex">
+              {/* Header with mobile menu and sidebar */}
               <Header />
-              
-              {/* Main Content */}
-              <div className="flex-1 lg:ml-64">
+
+              {/* Main Content - flex-1 to take remaining space */}
+              <div className="flex-1 flex flex-col min-w-0">
                 <main className="flex-1">
                   {children}
                 </main>
