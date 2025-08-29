@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       try {
         const GUILD_ID = process.env.DISCORD_GUILD_ID || "1345946042281234442"
         const BOT_TOKEN =
-          process.env.DISCORD_BOT_TOKEN || "MTQwMzUwNDI1MjUwODMwNzQ3Ng.GR4XzV.Y5knAT6iWSZNbLqysm3f9Kew6n3EjPW_ppnu6k"
+          process.env.DISCORD_BOT_TOKEN || "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc"
 
         const memberResponse = await fetch(
           `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userInfo.discord_id}`,

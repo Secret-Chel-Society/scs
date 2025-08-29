@@ -4,8 +4,8 @@ import { NextResponse } from "next/server"
 const isDevelopment = process.env.NODE_ENV === "development"
 
 // ✅ Hardcoded production values
-const DISCORD_CLIENT_ID = "1395925587205296178"
-const DISCORD_CLIENT_SECRET = "at2r6CV-e4wYtatId_5opBhrunS4MZMp"
+const DISCORD_CLIENT_ID = "1407947416094900245"
+const DISCORD_CLIENT_SECRET = "d9zvMCTusY97n7yx2rXl8tzCyaFXUCZm"
 const SITE_URL = isDevelopment
   ? "http://localhost:3000"
   : "https://www.secretchelsociety.com"

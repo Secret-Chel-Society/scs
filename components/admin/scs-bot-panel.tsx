@@ -87,7 +87,7 @@ export default function SCSBotPanel() {
           // Set default configuration if none exists
           setBotConfig({
             guild_id: "1345946042281234442",
-            bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
+            bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
             registered_role_id: "1376351990354804848",
           })
         } else if (configs && configs.length > 0) {
@@ -105,7 +105,7 @@ export default function SCSBotPanel() {
           // Set default configuration if none exists
           setBotConfig({
             guild_id: "1345946042281234442",
-            bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
+            bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
             registered_role_id: "1376351990354804848",
           })
         }
@@ -113,7 +113,7 @@ export default function SCSBotPanel() {
         console.warn("Could not load bot config:", configError)
         setBotConfig({
           guild_id: "1345946042281234442",
-          bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
+          bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
           registered_role_id: "1376351990354804848",
         })
       }
