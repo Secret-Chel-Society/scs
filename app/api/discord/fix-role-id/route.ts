@@ -11,7 +11,7 @@ export async function POST() {
     // Update the bot configuration with the correct registered role ID
     const { error } = await supabase.from("discord_bot_config").upsert({
       guild_id: "1345946042281234442",
-      bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
+      bot_token: "MTQwMzUwNDI1MjUwODMwNzQ3Ng.Gp-ck1.0Bj3yHkPzGdGeETQxMlOuMGYaIud4gHH8TcjiU,
       registered_role_id: "1376351990354804848",
     })
 
