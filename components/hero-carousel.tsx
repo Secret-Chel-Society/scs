@@ -84,19 +84,19 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="absolute bottom-16 inset-x-0 flex flex-col items-center text-center p-4">
+      <div className="absolute inset-x-0 flex flex-col items-center text-center p-4">
         <motion.div
           key={`content-${current}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="max-w-3xl"
+          className="max-w-3xl flex flex-col h-full justify-center"
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 text-white drop-shadow-md">
             {currentImage.title}
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 text-white/90 drop-shadow-md px-4">{currentImage.subtitle}</p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-auto">
             <Button asChild size="lg" className="font-semibold">
               <Link href="/register/season">Season 1 Signup</Link>
             </Button>
