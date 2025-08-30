@@ -89,9 +89,9 @@ CREATE INDEX IF NOT EXISTS idx_twitch_users_discord_user_id ON twitch_users(disc
 CREATE INDEX IF NOT EXISTS idx_live_streams_user_id ON live_streams(user_id);
 CREATE INDEX IF NOT EXISTS idx_live_streams_is_active ON live_streams(is_active);
 
--- Insert default bot configuration
+-- Insert default bot configuration (will be overridden by environment variables)
 INSERT INTO discord_bot_config (guild_id, bot_token, registered_role_id)
-VALUES ('1345946042281234442', 'MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc', '1376312623728951339')
+VALUES ('1345946042281234442', 'placeholder_token', '1376312623728951339')
 ON CONFLICT DO NOTHING;
     `
 
