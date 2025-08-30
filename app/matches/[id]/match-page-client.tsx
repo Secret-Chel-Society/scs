@@ -24,7 +24,7 @@ export default function MatchDetailPage() {
         setLoading(true)
         setError(null)
 
-        // Fetch match with team details
+        // Fetch match with team details (without season relationship since it's causing issues)
         const { data: matchData, error: matchError } = await supabase
           .from("matches")
           .select(`
@@ -40,11 +40,6 @@ export default function MatchDetailPage() {
               name,
               logo_url,
               ea_club_id
-            ),
-            season:seasons(
-              id,
-              name,
-              season_number
             )
           `)
           .eq("id", matchId)
@@ -54,16 +49,35 @@ export default function MatchDetailPage() {
           throw new Error(`Failed to fetch match: ${matchError.message}`)
         }
 
+        // If we have a season_number, try to get season info separately
+        if (matchData.season_number) {
+          const { data: seasonData } = await supabase
+            .from("seasons")
+            .select("id, name, season_number")
+            .eq("season_number", matchData.season_number)
+            .single()
+
+          if (seasonData) {
+            matchData.season = seasonData
+          }
+        }
+
         setMatch(matchData)
 
         // Check if user is admin
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        if (user) {
-          const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single()
 
-          setIsAdmin(userData?.role === "admin")
+        if (user) {
+          // Check user roles table
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.id)
+            .in("role", ["Admin", "GM", "AGM", "Owner"])
+
+          setIsAdmin(roleData && roleData.length > 0)
         }
       } catch (err: any) {
         console.error("Error fetching match:", err)
