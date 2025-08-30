@@ -317,7 +317,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="container mx-auto">
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
           <Card className="backdrop-blur-md bg-background/90 border-primary/20 shadow-2xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
             <CardContent className="relative p-4 lg:p-8">
@@ -386,7 +386,7 @@ export default function Home() {
 
       {/* New: About SCS Section */}
       <motion.section
-        className="container mx-auto px-4 py-8 lg:py-16"
+        className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -461,7 +461,7 @@ export default function Home() {
 
       {/* New: Advanced Features Section */}
       <motion.section
-        className="container mx-auto px-4 py-8 lg:py-16"
+        className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -597,7 +597,7 @@ export default function Home() {
       </motion.section>
 
       {/* Main Content with Enhanced Animations */}
-              <div className="container mx-auto px-4 py-8 lg:py-16 space-y-16 lg:space-y-32">
+              <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16 space-y-12 lg:space-y-32">
         {/* Enhanced Upcoming Games Section */}
         <motion.section
           className="relative z-40"

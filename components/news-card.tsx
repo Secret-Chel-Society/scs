@@ -49,7 +49,7 @@ export default function NewsCard({ news }: NewsCardProps) {
   return (
     <>
       <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
-        <Card className="relative overflow-hidden h-80 cursor-pointer group" onClick={() => setIsOpen(true)}>
+        <Card className="relative overflow-hidden h-64 sm:h-80 cursor-pointer group" onClick={() => setIsOpen(true)}>
           {/* Background Image */}
           <div className="absolute inset-0">
             <Image
@@ -65,7 +65,7 @@ export default function NewsCard({ news }: NewsCardProps) {
           </div>
 
           {/* Content Overlay */}
-          <div className="relative z-10 p-6 h-full flex flex-col justify-between text-white">
+          <div className="relative z-10 p-4 sm:p-6 h-full flex flex-col justify-between text-white">
             {/* Category Badge */}
             <div className="self-start">
               <span className="bg-green-500 text-black px-3 py-1 text-xs font-bold uppercase tracking-wider">SCS</span>
@@ -73,7 +73,7 @@ export default function NewsCard({ news }: NewsCardProps) {
 
             {/* Title and Date */}
             <div className="space-y-2">
-              <h3 className="text-xl font-bold leading-tight line-clamp-3 group-hover:text-green-400 transition-colors">
+              <h3 className="text-lg sm:text-xl font-bold leading-tight line-clamp-3 group-hover:text-green-400 transition-colors">
                 {news.title}
               </h3>
               <p className="text-sm text-gray-300 uppercase tracking-wide">

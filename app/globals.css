@@ -99,6 +99,15 @@
 .container {
   @apply mx-auto max-w-7xl;
   width: 100%;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 /* Hide v0 attribution popup */
