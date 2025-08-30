@@ -310,9 +310,33 @@ export default function Home() {
         />
       </div>
 
+      {/* Action Buttons Section */}
+      <motion.section
+        className="relative mt-8 z-10 mx-4"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button asChild size="lg" className="font-semibold text-base sm:text-lg px-8 py-3">
+              <Link href="/register/season">Season 1 Signup</Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground hover:bg-background/50 font-semibold text-base sm:text-lg px-8 py-3"
+            >
+              <Link href="/matches">View Matches</Link>
+            </Button>
+          </div>
+        </div>
+      </motion.section>
+
       {/* Enhanced Stats Section with Hockey Theme */}
       <motion.section
-        className="relative mt-5 z-10 mx-4"
+        className="relative mt-8 z-10 mx-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}

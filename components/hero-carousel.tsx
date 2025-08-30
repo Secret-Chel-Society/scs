@@ -96,19 +96,6 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
             {currentImage.title}
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 text-white/90 drop-shadow-md px-4">{currentImage.subtitle}</p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-auto">
-            <Button asChild size="lg" className="font-semibold">
-              <Link href="/register/season">Season 1 Signup</Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="bg-background/30 backdrop-blur-sm border-white/20 text-white hover:bg-background/50"
-            >
-              <Link href="/matches">View Matches</Link>
-            </Button>
-          </div>
         </motion.div>
       </div>
 
