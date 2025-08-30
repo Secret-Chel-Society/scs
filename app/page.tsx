@@ -320,12 +320,12 @@ export default function Home() {
         <div className="container mx-auto">
           <Card className="backdrop-blur-md bg-background/90 border-primary/20 shadow-2xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
-            <CardContent className="relative p-8">
+            <CardContent className="relative p-4 lg:p-8">
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-foreground mb-2">SCS League Statistics</h2>
                 <p className="text-muted-foreground">Real-time data from our advanced tracking system</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
                 {[
                   {
                     icon: Users,
@@ -386,7 +386,7 @@ export default function Home() {
 
       {/* New: About SCS Section */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4 py-8 lg:py-16"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -404,7 +404,7 @@ export default function Home() {
           <div className="h-1 w-32 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mb-6" />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-4 lg:gap-8 mb-8 lg:mb-12">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -412,7 +412,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20">
-              <CardContent className="p-8">
+              <CardContent className="p-4 lg:p-8">
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
                   <GamepadIcon className="h-6 w-6 text-primary" />
                   Premier NHL 26 League
@@ -438,7 +438,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20">
-              <CardContent className="p-8">
+              <CardContent className="p-4 lg:p-8">
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
                   <Users className="h-6 w-6 text-primary" />
                   Professional Community
@@ -461,7 +461,7 @@ export default function Home() {
 
       {/* New: Advanced Features Section */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4 py-8 lg:py-16"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -479,7 +479,7 @@ export default function Home() {
           <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-transparent rounded-full mx-auto mb-6" />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-4 lg:gap-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -597,7 +597,7 @@ export default function Home() {
       </motion.section>
 
       {/* Main Content with Enhanced Animations */}
-      <div className="container mx-auto px-4 py-16 space-y-32">
+              <div className="container mx-auto px-4 py-8 lg:py-16 space-y-16 lg:space-y-32">
         {/* Enhanced Upcoming Games Section */}
         <motion.section
           className="relative z-40"
@@ -637,8 +637,8 @@ export default function Home() {
             ) : upcomingGames.length > 0 ? (
               <UpcomingGames games={upcomingGames} />
             ) : (
-              <Card className="text-center p-8 border-dashed border-2 border-muted-foreground/20">
-                <CardContent className="pt-6">
+              <Card className="text-center p-4 lg:p-8 border-dashed border-2 border-muted-foreground/20">
+                <CardContent className="pt-4 lg:pt-6">
                   <motion.div
                     animate={{ y: [-5, 5, -5] }}
                     transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
@@ -885,8 +885,8 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <Card className="text-center p-8 border-dashed border-2 border-muted-foreground/20">
-              <CardContent className="pt-6">
+            <Card className="text-center p-4 lg:p-8 border-dashed border-2 border-muted-foreground/20">
+              <CardContent className="pt-4 lg:pt-6">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}

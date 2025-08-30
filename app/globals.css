@@ -60,18 +60,37 @@
   /* Mobile optimizations */
   @media (max-width: 768px) {
     html {
-      font-size: 14px;
+      font-size: 13px;
     }
     
     /* Ensure proper touch targets */
     button, a {
-      min-height: 44px;
-      min-width: 44px;
+      min-height: 40px;
+      min-width: 40px;
     }
     
     /* Improve text readability on mobile */
     p, span, div {
-      line-height: 1.5;
+      line-height: 1.4;
+    }
+    
+    /* Reduce spacing on mobile */
+    .container {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+  
+  /* Extra small mobile optimizations */
+  @media (max-width: 480px) {
+    html {
+      font-size: 12px;
+    }
+    
+    /* Even smaller touch targets for very small screens */
+    button, a {
+      min-height: 36px;
+      min-width: 36px;
     }
   }
 }
