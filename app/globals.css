@@ -56,6 +56,24 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    html {
+      font-size: 14px;
+    }
+    
+    /* Ensure proper touch targets */
+    button, a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Improve text readability on mobile */
+    p, span, div {
+      line-height: 1.5;
+    }
+  }
 }
 
 /* Custom container class to ensure proper centering */

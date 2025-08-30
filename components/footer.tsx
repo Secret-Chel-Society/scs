@@ -30,8 +30,8 @@ export default function Footer() {
 
   return (
     <footer className="border-t">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-3 lg:px-4 py-6 lg:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           <div>
             <h3 className="font-bold text-lg mb-4">Secret Chel Society</h3>
             <p className="text-muted-foreground mb-4">
@@ -143,7 +143,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
+        <div className="border-t mt-6 lg:mt-8 pt-6 lg:pt-8 text-center text-muted-foreground">
           <p>
             &copy; {currentYear} Secret Chel Society. All rights reserved.
              In official partnership with Midnight Studios.

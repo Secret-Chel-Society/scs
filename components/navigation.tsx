@@ -191,7 +191,7 @@ export default function Navigation() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden"
+        className="fixed top-3 left-3 z-50 lg:hidden h-10 w-10"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -207,19 +207,20 @@ export default function Navigation() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col transition-transform duration-300 ease-in-out shadow-lg",
+        "fixed left-0 top-0 z-50 h-screen bg-background border-r flex flex-col transition-transform duration-300 ease-in-out shadow-lg",
+        "w-72 lg:w-64", // Wider on mobile, narrower on desktop
         "lg:translate-x-0 lg:shadow-none",
         isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-3 lg:p-4 border-b">
           <Link href="/" onClick={() => setIsMobileOpen(false)}>
             <Image
               src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
               alt="SCS Logo"
               width={120}
               height={40}
-              className="h-8 w-auto object-contain"
+              className="h-6 lg:h-8 w-auto object-contain"
               priority
             />
           </Link>
@@ -227,7 +228,7 @@ export default function Navigation() {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden h-8 w-8"
             onClick={() => setIsMobileOpen(false)}
           >
             <X className="h-4 w-4" />
@@ -235,7 +236,7 @@ export default function Navigation() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4">
+        <nav className="flex-1 overflow-y-auto p-3 lg:p-4">
           <ul className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon
@@ -252,7 +253,7 @@ export default function Navigation() {
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
+                        "flex items-center gap-2 lg:gap-3 px-2 lg:px-3 py-2 lg:py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
                         isActive 
                           ? "bg-primary text-primary-foreground shadow-sm" 
                           : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -265,7 +266,7 @@ export default function Navigation() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 flex-shrink-0"
+                        className="h-7 w-7 lg:h-8 lg:w-8 flex-shrink-0"
                         onClick={() => toggleSubmenu(item.name)}
                       >
                         {isExpanded ? (
@@ -278,14 +279,14 @@ export default function Navigation() {
                   </div>
 
                   {hasSubmenu && isExpanded && (
-                    <ul className="mt-1 ml-6 space-y-1">
+                    <ul className="mt-1 ml-4 lg:ml-6 space-y-1">
                       {item.submenu.map((subItem) => (
                         <li key={subItem.name}>
                           <Link
                             href={subItem.href}
                             onClick={() => setIsMobileOpen(false)}
                             className={cn(
-                              "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                              "block px-2 lg:px-3 py-1.5 lg:py-2 rounded-md text-sm transition-all duration-200",
                               pathname === subItem.href
                                 ? "bg-primary/10 text-primary font-medium"
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -307,7 +308,7 @@ export default function Navigation() {
                   href="/register/season"
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-2 lg:gap-3 px-2 lg:px-3 py-2 lg:py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     pathname === "/register/season"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -322,7 +323,7 @@ export default function Navigation() {
         </nav>
 
         {/* User Section */}
-        <div className="border-t p-4 space-y-4">
+        <div className="border-t p-3 lg:p-4 space-y-3 lg:space-y-4">
           {session ? (
             <>
               {/* Team Info */}
@@ -330,9 +331,9 @@ export default function Navigation() {
                 <Link 
                   href={`/teams/${teamInfo.id}`} 
                   onClick={() => setIsMobileOpen(false)}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
+                  <div className="flex h-6 w-6 lg:h-8 lg:w-8 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
                     {teamInfo.logo_url ? (
                       <Image
                         src={teamInfo.logo_url}
@@ -364,8 +365,8 @@ export default function Navigation() {
               )}
 
               {/* User Info */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Avatar className="h-10 w-10 flex-shrink-0">
+              <div className="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg bg-muted/30">
+                <Avatar className="h-8 w-8 lg:h-10 lg:w-10 flex-shrink-0">
                   <AvatarImage
                     src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
                     alt={userProfile?.gamer_tag_id || "User"}
@@ -389,7 +390,7 @@ export default function Navigation() {
                 <ModeToggle />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 lg:h-9 lg:w-9">
                       <Settings className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -427,11 +428,11 @@ export default function Navigation() {
               </div>
             </>
           ) : (
-            <div className="space-y-3">
-              <Button variant="outline" asChild className="w-full">
+            <div className="space-y-2 lg:space-y-3">
+              <Button variant="outline" asChild className="w-full h-9 lg:h-10">
                 <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
               </Button>
-              <Button asChild className="w-full">
+              <Button asChild className="w-full h-9 lg:h-10">
                 <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
               </Button>
               <div className="flex justify-center">
