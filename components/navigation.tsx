@@ -191,7 +191,7 @@ export default function Navigation() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-3 left-3 z-50 lg:hidden h-10 w-10"
+        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -205,39 +205,259 @@ export default function Navigation() {
         />
       )}
 
-      {/* Sidebar */}
-      <aside className={cn(
-        "fixed left-0 top-0 z-50 h-screen bg-background border-r flex flex-col transition-transform duration-300 ease-in-out shadow-lg",
-        "w-64 sm:w-72 lg:w-64", // Even narrower on very small screens
-        "lg:translate-x-0 lg:shadow-none",
-        isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      {/* Mobile Navigation Drawer */}
+      <div className={cn(
+        "fixed inset-0 z-50 lg:hidden",
+        isMobileOpen ? "block" : "hidden"
       )}>
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-sm">
+          {/* Mobile Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <Link href="/" onClick={() => setIsMobileOpen(false)}>
+              <Image
+                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
+                alt="SCS Logo"
+                width={120}
+                height={40}
+                className="h-6 w-auto object-contain"
+                priority
+              />
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsMobileOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-2">
+              {navigation.map((item) => {
+                const Icon = item.icon
+                const isActive = item.href === "/" 
+                  ? pathname === "/" 
+                  : pathname === item.href || pathname.startsWith(item.href + "/")
+                const hasSubmenu = item.submenu && item.submenu.length > 0
+                const isExpanded = expandedMenus[item.name]
+
+                return (
+                  <div key={item.name}>
+                    <div className="flex items-center">
+                      <Link
+                        href={item.href}
+                        onClick={() => setIsMobileOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
+                          isActive 
+                            ? "bg-primary text-primary-foreground" 
+                            : "text-foreground hover:bg-muted"
+                        )}
+                      >
+                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        <span>{item.name}</span>
+                      </Link>
+                      {hasSubmenu && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10"
+                          onClick={() => toggleSubmenu(item.name)}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+
+                    {hasSubmenu && isExpanded && (
+                      <div className="mt-1 ml-8 space-y-1">
+                        {item.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            href={subItem.href}
+                            onClick={() => setIsMobileOpen(false)}
+                            className={cn(
+                              "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                              pathname === subItem.href
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            )}
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+
+              {session && (
+                <Link
+                  href="/register/season"
+                  onClick={() => setIsMobileOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                    pathname === "/register/season"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  <UserPlus className="h-5 w-5" />
+                  <span>Season Registration</span>
+                </Link>
+              )}
+            </div>
+
+            {/* Mobile User Section */}
+            <div className="mt-8 pt-6 border-t">
+              {session ? (
+                <div className="space-y-4">
+                  {/* Team Info */}
+                  {teamInfo && (
+                    <Link 
+                      href={`/teams/${teamInfo.id}`} 
+                      onClick={() => setIsMobileOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
+                        {teamInfo.logo_url ? (
+                          <Image
+                            src={teamInfo.logo_url}
+                            alt={teamInfo.name}
+                            width={40}
+                            height={40}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-bold">{teamInfo.name.substring(0, 2)}</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{teamInfo.name}</p>
+                        <p className="text-sm text-muted-foreground">Your Team</p>
+                      </div>
+                    </Link>
+                  )}
+
+                  {/* Role Badges */}
+                  {getUniqueRoleBadges().length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {getUniqueRoleBadges().map((role) => (
+                        <Badge key={role} className={`${getRoleBadgeColor(role)} text-white`}>
+                          {role}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* User Info */}
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <Avatar className="h-12 w-12 flex-shrink-0">
+                      <AvatarImage
+                        src={userProfile?.avatar_url || "/placeholder.svg?height=48&width=48"}
+                        alt={userProfile?.gamer_tag_id || "User"}
+                      />
+                      <AvatarFallback>
+                        {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {userProfile?.gamer_tag_id || "User"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {session?.user?.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-3">
+                    <ModeToggle />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-10 w-10">
+                          <Settings className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/players/${playerId || session.user.id}`}>
+                              <User className="mr-2 h-4 w-4" />
+                              View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          {isTeamManager && (
+                            <DropdownMenuItem asChild>
+                              <Link href="/management">Management</Link>
+                            </DropdownMenuItem>
+                          )}
+                          {isAdmin && (
+                            <DropdownMenuItem asChild>
+                              <Link href="/admin">Admin Dashboard</Link>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem asChild>
+                            <Link href="/settings">Settings</Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleSignOut}>
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Log out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Button variant="outline" asChild className="w-full h-12">
+                    <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
+                  </Button>
+                  <Button asChild className="w-full h-12">
+                    <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
+                  </Button>
+                  <div className="flex justify-center">
+                    <ModeToggle />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-2 lg:p-4 border-b">
-          <Link href="/" onClick={() => setIsMobileOpen(false)}>
+        <div className="flex items-center justify-center p-4 border-b">
+          <Link href="/">
             <Image
               src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
               alt="SCS Logo"
               width={120}
               height={40}
-              className="h-5 lg:h-8 w-auto object-contain"
+              className="h-8 w-auto object-contain"
               priority
             />
           </Link>
-          {/* Close button for mobile */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden h-8 w-8"
-            onClick={() => setIsMobileOpen(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-2 lg:p-4">
-          <ul className="space-y-0.5 lg:space-y-1">
+        <nav className="flex-1 overflow-y-auto p-4">
+          <ul className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon
               const isActive = item.href === "/" 
@@ -251,9 +471,8 @@ export default function Navigation() {
                   <div className="flex items-center">
                     <Link
                       href={item.href}
-                      onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-2 px-2 lg:px-3 py-1.5 lg:py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
                         isActive 
                           ? "bg-primary text-primary-foreground shadow-sm" 
                           : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -266,7 +485,7 @@ export default function Navigation() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 lg:h-8 lg:w-8 flex-shrink-0"
+                        className="h-8 w-8 flex-shrink-0"
                         onClick={() => toggleSubmenu(item.name)}
                       >
                         {isExpanded ? (
@@ -279,14 +498,13 @@ export default function Navigation() {
                   </div>
 
                   {hasSubmenu && isExpanded && (
-                    <ul className="mt-0.5 lg:mt-1 ml-3 lg:ml-6 space-y-0.5 lg:space-y-1">
+                    <ul className="mt-1 ml-6 space-y-1">
                       {item.submenu.map((subItem) => (
                         <li key={subItem.name}>
                           <Link
                             href={subItem.href}
-                            onClick={() => setIsMobileOpen(false)}
                             className={cn(
-                              "block px-2 lg:px-3 py-1 lg:py-2 rounded-md text-sm transition-all duration-200",
+                              "block px-3 py-2 rounded-md text-sm transition-all duration-200",
                               pathname === subItem.href
                                 ? "bg-primary/10 text-primary font-medium"
                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -306,9 +524,8 @@ export default function Navigation() {
               <li>
                 <Link
                   href="/register/season"
-                  onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-2 px-2 lg:px-3 py-1.5 lg:py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     pathname === "/register/season"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -323,17 +540,16 @@ export default function Navigation() {
         </nav>
 
         {/* User Section */}
-        <div className="border-t p-2 lg:p-4 space-y-2 lg:space-y-4">
+        <div className="border-t p-4 space-y-4">
           {session ? (
             <>
               {/* Team Info */}
               {teamInfo && (
                 <Link 
                   href={`/teams/${teamInfo.id}`} 
-                  onClick={() => setIsMobileOpen(false)}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <div className="flex h-5 w-5 lg:h-8 lg:w-8 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
+                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
                     {teamInfo.logo_url ? (
                       <Image
                         src={teamInfo.logo_url}
@@ -365,8 +581,8 @@ export default function Navigation() {
               )}
 
               {/* User Info */}
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
-                <Avatar className="h-7 w-7 lg:h-10 lg:w-10 flex-shrink-0">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                <Avatar className="h-10 w-10 flex-shrink-0">
                   <AvatarImage
                     src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
                     alt={userProfile?.gamer_tag_id || "User"}
@@ -390,7 +606,7 @@ export default function Navigation() {
                 <ModeToggle />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 lg:h-9 lg:w-9">
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
                       <Settings className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -428,12 +644,12 @@ export default function Navigation() {
               </div>
             </>
           ) : (
-            <div className="space-y-2">
-              <Button variant="outline" asChild className="w-full h-8 lg:h-10">
-                <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
+            <div className="space-y-3">
+              <Button variant="outline" asChild className="w-full h-10">
+                <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild className="w-full h-8 lg:h-10">
-                <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
+              <Button asChild className="w-full h-10">
+                <Link href="/register">Sign up</Link>
               </Button>
               <div className="flex justify-center">
                 <ModeToggle />
