@@ -49,10 +49,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen w-full overflow-x-hidden">
               <Navigation />
               {/* Main content area */}
-              <div className="flex-1 flex flex-col lg:ml-64">
+              <div className="flex-1 flex flex-col lg:ml-64 w-full min-w-0">
                 <Suspense>
                   <main className="flex-1 p-2 lg:p-6">
                     {children}

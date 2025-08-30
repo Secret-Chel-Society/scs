@@ -55,6 +55,11 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+  
+  html {
+    overflow-x: hidden;
   }
   
   /* Mobile optimizations */
@@ -79,6 +84,24 @@
       padding-left: 0.5rem;
       padding-right: 0.5rem;
     }
+    
+    /* Force mobile fitting */
+    body, html {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Ensure all elements fit within viewport */
+    * {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* Prevent horizontal scrolling */
+    .flex, .grid {
+      min-width: 0;
+    }
   }
   
   /* Extra small mobile optimizations */
@@ -91,6 +114,21 @@
     button, a {
       min-height: 36px;
       min-width: 36px;
+    }
+    
+    /* Ultra-aggressive mobile fitting */
+    body, html {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Ensure all content fits */
+    .container, .w-full {
+      width: 100% !important;
+      max-width: 100vw !important;
+      padding-left: 0.25rem !important;
+      padding-right: 0.25rem !important;
     }
   }
 }
