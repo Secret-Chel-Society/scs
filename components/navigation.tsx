@@ -20,7 +20,8 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  User
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -54,6 +55,11 @@ export default function Navigation() {
   const router = useRouter()
   const { supabase, session, isLoading } = useSupabase()
   const { toast } = useToast()
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileOpen(false)
+  }, [pathname])
 
   // Fetch user data
   useEffect(() => {
@@ -201,12 +207,12 @@ export default function Navigation() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col transition-transform duration-300 ease-in-out",
-        "lg:translate-x-0",
+        "fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col transition-transform duration-300 ease-in-out shadow-lg",
+        "lg:translate-x-0 lg:shadow-none",
         isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-center p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b">
           <Link href="/" onClick={() => setIsMobileOpen(false)}>
             <Image
               src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
@@ -217,14 +223,22 @@ export default function Navigation() {
               priority
             />
           </Link>
+          {/* Close button for mobile */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setIsMobileOpen(false)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon
-              // Special handling for home page to prevent it from always being active
               const isActive = item.href === "/" 
                 ? pathname === "/" 
                 : pathname === item.href || pathname.startsWith(item.href + "/")
@@ -238,20 +252,20 @@ export default function Navigation() {
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-1",
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
                         isActive 
-                          ? "bg-primary text-primary-foreground" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                          ? "bg-primary text-primary-foreground shadow-sm" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                       )}
                     >
-                      <Icon className="h-4 w-4" />
-                      {item.name}
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{item.name}</span>
                     </Link>
                     {hasSubmenu && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 flex-shrink-0"
                         onClick={() => toggleSubmenu(item.name)}
                       >
                         {isExpanded ? (
@@ -271,10 +285,10 @@ export default function Navigation() {
                             href={subItem.href}
                             onClick={() => setIsMobileOpen(false)}
                             className={cn(
-                              "block px-3 py-2 rounded-md text-sm transition-colors",
+                              "block px-3 py-2 rounded-md text-sm transition-all duration-200",
                               pathname === subItem.href
-                                ? "bg-primary text-primary-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                             )}
                           >
                             {subItem.name}
@@ -293,14 +307,14 @@ export default function Navigation() {
                   href="/register/season"
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     pathname === "/register/season"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   )}
                 >
                   <UserPlus className="h-4 w-4" />
-                  Season Registration
+                  <span className="truncate">Season Registration</span>
                 </Link>
               </li>
             )}
@@ -308,43 +322,52 @@ export default function Navigation() {
         </nav>
 
         {/* User Section */}
-        <div className="border-t p-4">
+        <div className="border-t p-4 space-y-4">
           {session ? (
-            <div className="space-y-3">
+            <>
               {/* Team Info */}
               {teamInfo && (
-                <Link href={`/teams/${teamInfo.id}`} className="flex items-center gap-2 p-2 rounded-md hover:bg-muted">
-                  <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border bg-background">
+                <Link 
+                  href={`/teams/${teamInfo.id}`} 
+                  onClick={() => setIsMobileOpen(false)}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
                     {teamInfo.logo_url ? (
                       <Image
                         src={teamInfo.logo_url}
                         alt={teamInfo.name}
-                        width={24}
-                        height={24}
+                        width={32}
+                        height={32}
                         className="h-full w-full object-cover"
                       />
                     ) : (
                       <span className="text-xs font-bold">{teamInfo.name.substring(0, 2)}</span>
                     )}
                   </div>
-                  <span className="text-sm font-medium truncate">{teamInfo.name}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{teamInfo.name}</p>
+                    <p className="text-xs text-muted-foreground">Your Team</p>
+                  </div>
                 </Link>
               )}
 
               {/* Role Badges */}
-              <div className="flex flex-wrap gap-1">
-                {getUniqueRoleBadges().map((role) => (
-                  <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs`}>
-                    {role}
-                  </Badge>
-                ))}
-              </div>
+              {getUniqueRoleBadges().length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {getUniqueRoleBadges().map((role) => (
+                    <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs`}>
+                      {role}
+                    </Badge>
+                  ))}
+                </div>
+              )}
 
               {/* User Info */}
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                <Avatar className="h-10 w-10 flex-shrink-0">
                   <AvatarImage
-                    src={userProfile?.avatar_url || "/placeholder.svg?height=32&width=32"}
+                    src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
                     alt={userProfile?.gamer_tag_id || "User"}
                   />
                   <AvatarFallback>
@@ -355,57 +378,56 @@ export default function Navigation() {
                   <p className="text-sm font-medium leading-none truncate">
                     {userProfile?.gamer_tag_id || "User"}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground truncate">
+                  <p className="text-xs leading-none text-muted-foreground truncate mt-1">
                     {session?.user?.email}
                   </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ModeToggle />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/players/${playerId || session.user.id}`}>
-                            View Profile
-                          </Link>
-                        </DropdownMenuItem>
-                        {isTeamManager && (
-                          <DropdownMenuItem asChild>
-                            <Link href="/management">Management</Link>
-                          </DropdownMenuItem>
-                        )}
-                        {isAdmin && (
-                          <DropdownMenuItem asChild>
-                            <Link href="/admin">Admin Dashboard</Link>
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem asChild>
-                          <Link href="/settings">Settings</Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleSignOut}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log out
+              <div className="flex items-center gap-2">
+                <ModeToggle />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/players/${playerId || session.user.id}`}>
+                          <User className="mr-2 h-4 w-4" />
+                          View Profile
+                        </Link>
                       </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                      {isTeamManager && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/management">Management</Link>
+                        </DropdownMenuItem>
+                      )}
+                      {isAdmin && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin">Admin Dashboard</Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem asChild>
+                        <Link href="/settings">Settings</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            </div>
+            </>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Button variant="outline" asChild className="w-full">
                 <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
               </Button>
