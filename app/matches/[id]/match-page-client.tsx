@@ -1,30 +1,28 @@
-"use client";
+"use client"
 
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSupabase } from "@/lib/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { ComprehensiveMatchView } from "@/components/matches/comprehensive-match-view";
+import { useParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useSupabase } from "@/lib/supabase/client"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
+import { ComprehensiveMatchView } from "@/components/matches/comprehensive-match-view"
 
 export default function MatchDetailPage() {
-  const params = useParams<{ id: string }>();
-  const matchId = params?.id;
-  const { supabase } = useSupabase();
+  const params = useParams()
+  const matchId = Array.isArray(params.id) ? params.id[0] : params.id
+  const { supabase } = useSupabase()
 
-  const [match, setMatch] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [match, setMatch] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
-    if (!matchId) return;
-
     const fetchMatch = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        setLoading(true)
+        setError(null)
 
         const { data: matchData, error: matchError } = await supabase
           .from("matches")
@@ -34,42 +32,41 @@ export default function MatchDetailPage() {
             away_team:teams!away_team_id(id,name,logo_url,ea_club_id)
           `)
           .eq("id", matchId)
-          .single();
+          .single()
 
-        if (matchError) throw new Error(`Failed to fetch match: ${matchError.message}`);
+        if (matchError) throw new Error(`Failed to fetch match: ${matchError.message}`)
 
         if (matchData.season_number) {
           const { data: seasonData } = await supabase
             .from("seasons")
             .select("id,name,season_number")
             .eq("season_number", matchData.season_number)
-            .single();
+            .single()
 
-          if (seasonData) matchData.season = seasonData;
+          if (seasonData) matchData.season = seasonData
         }
 
-        setMatch(matchData);
+        setMatch(matchData)
 
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           const { data: roleData } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", user.id)
-            .in("role", ["Admin", "GM", "AGM", "Owner"]);
-
-          setIsAdmin(!!roleData?.length);
+            .in("role", ["Admin", "GM", "AGM", "Owner"])
+          setIsAdmin(roleData && roleData.length > 0)
         }
       } catch (err: any) {
-        console.error("Error fetching match:", err);
-        setError(err.message || "Failed to load match");
+        console.error("Error fetching match:", err)
+        setError(err.message || "Failed to load match")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchMatch();
-  }, [matchId, supabase]);
+    if (matchId) fetchMatch()
+  }, [matchId, supabase])
 
   if (loading) {
     return (
@@ -79,7 +76,7 @@ export default function MatchDetailPage() {
           <Skeleton className="h-[400px] w-full" />
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !match) {
@@ -90,12 +87,12 @@ export default function MatchDetailPage() {
           <AlertDescription>{error || "Match not found"}</AlertDescription>
         </Alert>
       </div>
-    );
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       <ComprehensiveMatchView match={match} isAdmin={isAdmin} />
     </div>
-  );
+  )
 }
