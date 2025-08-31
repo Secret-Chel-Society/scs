@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import TeamStandings from "@/components/team-standings"
+import { PlayoffBracket } from "@/components/standings/playoff-bracket"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
 
@@ -222,10 +223,11 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   return (
     <Tabs defaultValue="overall" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="overall">Overall Standings</TabsTrigger>
         <TabsTrigger value="conference">Conference</TabsTrigger>
         <TabsTrigger value="playoffs">Playoff Picture</TabsTrigger>
+        <TabsTrigger value="bracket">Playoff Bracket</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overall" className="space-y-6">
@@ -262,6 +264,10 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
       <TabsContent value="playoffs" className="space-y-6">
         <PlayoffPicture standings={standings} />
+      </TabsContent>
+
+      <TabsContent value="bracket" className="space-y-6">
+        <PlayoffBracket seasonId={seasonId} />
       </TabsContent>
     </Tabs>
   )

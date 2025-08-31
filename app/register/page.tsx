@@ -24,8 +24,6 @@ const formSchema = z.object({
     .string()
     .min(2, { message: "Gamer tag must be at least 2 characters" })
     .max(50, { message: "Gamer tag must be less than 50 characters" }),
-  primaryPosition: z.string().min(1, { message: "Please select a primary position" }),
-  secondaryPosition: z.string().optional(),
   console: z.string().refine((value) => ["PS5", "Xbox"].includes(value), {
     message: "Please select a valid console",
   }),
@@ -127,8 +125,6 @@ export default function RegisterPage() {
       email: "",
       password: "",
       gamerTag: "",
-      primaryPosition: "",
-      secondaryPosition: "",
       console: "",
     },
   })
@@ -171,9 +167,6 @@ export default function RegisterPage() {
           password: data.password,
           metadata: {
             gamer_tag_id: data.gamerTag,
-            primary_position: data.primaryPosition,
-            secondary_position: data.secondaryPosition || null,
-            console: data.console,
             is_active: true,
             discord_id: discordUserId,
             discord_username: discordUsername,
@@ -372,42 +365,6 @@ export default function RegisterPage() {
                 <p className="text-sm text-muted-foreground mb-1">Your Xbox or PSN name (2-50 characters)</p>
                 <Input id="gamerTag" placeholder="Your in-game name" {...register("gamerTag")} />
                 {errors.gamerTag && <p className="text-sm text-red-500">{errors.gamerTag.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="primaryPosition">Primary Position</Label>
-                <select
-                  id="primaryPosition"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  {...register("primaryPosition")}
-                >
-                  <option value="">Select position</option>
-                  <option value="Center">Center (C)</option>
-                  <option value="Left Wing">Left Wing (LW)</option>
-                  <option value="Right Wing">Right Wing (RW)</option>
-                  <option value="Left Defense">Left Defense (LD)</option>
-                  <option value="Right Defense">Right Defense (RD)</option>
-                  <option value="Goalie">Goalie (G)</option>
-                </select>
-                {errors.primaryPosition && <p className="text-sm text-red-500">{errors.primaryPosition.message}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="secondaryPosition">Secondary Position (Optional)</Label>
-                <select
-                  id="secondaryPosition"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  {...register("secondaryPosition")}
-                >
-                  <option value="">None</option>
-                  <option value="Center">Center (C)</option>
-                  <option value="Left Wing">Left Wing (LW)</option>
-                  <option value="Right Wing">Right Wing (RW)</option>
-                  <option value="Left Defense">Left Defense (LD)</option>
-                  <option value="Right Defense">Right Defense (RD)</option>
-                  <option value="Goalie">Goalie (G)</option>
-                </select>
-                {errors.secondaryPosition && <p className="text-sm text-red-500">{errors.secondaryPosition.message}</p>}
               </div>
 
               <div className="space-y-2">

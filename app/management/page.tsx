@@ -10,6 +10,7 @@ import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-d
 import { SalaryProgress } from "@/components/management/salary-progress"
 import { RosterProgress } from "@/components/management/roster-progress"
 import { TeamAvailabilityTab } from "@/components/management/team-availability-tab"
+import { WaiverHistory } from "@/components/waiver-history"
 import Image from "next/image"
 import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
@@ -199,6 +200,7 @@ const tabs = [
   { id: "bids", label: "Bids", icon: Gavel },
   { id: "lineups", label: "Lineups", icon: Users },
   { id: "availability", label: "Availability", icon: Calendar },
+  { id: "waivers", label: "Waivers", icon: History },
 ]
 
 const ManagementPage = () => {
@@ -2140,6 +2142,7 @@ const ManagementPage = () => {
                       <TabsList className="mb-4">
                         <TabsTrigger value="available">Available Players</TabsTrigger>
                         <TabsTrigger value="waive">Waive Player</TabsTrigger>
+                        <TabsTrigger value="history">History</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="available">
@@ -2353,6 +2356,10 @@ const ManagementPage = () => {
                             </div>
                           )}
                         </div>
+                      </TabsContent>
+
+                      <TabsContent value="history">
+                        <WaiverHistory />
                       </TabsContent>
                     </Tabs>
                   </CardContent>

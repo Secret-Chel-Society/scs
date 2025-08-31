@@ -53,11 +53,13 @@ export default function RootLayout({
               <Navigation />
               {/* Main content area */}
               <div className="flex-1 flex flex-col lg:ml-64 w-full min-w-0">
-                <Suspense>
-                  <main className="flex-1 p-2 lg:p-6">
-                    {children}
-                  </main>
-                </Suspense>
+                <div className="pt-16 lg:pt-16">
+                  <Suspense>
+                    <main className="flex-1 p-2 lg:p-6">
+                      {children}
+                    </main>
+                  </Suspense>
+                </div>
                 <Footer />
               </div>
             </div>

@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MatchDetails } from "@/components/matches/match-details"
+import { ComprehensiveMatchView } from "@/components/matches/comprehensive-match-view"
 import { AlertCircle, Upload, Edit, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
@@ -280,63 +281,8 @@ export default function MatchDetailPage() {
       </div>
 
       <div className="space-y-3 sm:space-y-6">
-        {/* Match Details */}
-        <MatchDetails match={match} onMatchUpdated={fetchMatchData} isAdmin={canManageMatch} />
-
-        {/* Tabs for mobile-friendly navigation */}
-        <Tabs defaultValue="lineups" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-3 sm:mb-4">
-            <TabsTrigger value="lineups" className="text-xs sm:text-sm">
-              Lineups
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs sm:text-sm">
-              Statistics
-            </TabsTrigger>
-            <TabsTrigger value="highlights" className="text-xs sm:text-sm">
-              Highlights
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="lineups" className="mt-0">
-            <MatchLineups matchId={matchId} homeTeam={match?.home_team} awayTeam={match?.away_team} />
-          </TabsContent>
-
-          <TabsContent value="stats" className="mt-0">
-            {match?.ea_match_id ? (
-              <EaMatchStatistics
-                matchId={matchId}
-                eaMatchId={match.ea_match_id}
-                homeTeamEaClubId={match?.home_team?.ea_club_id}
-                awayTeamEaClubId={match?.away_team?.ea_club_id}
-                homeTeamName={match?.home_team?.name}
-                awayTeamName={match?.away_team?.name}
-                homeScore={match?.home_score}
-                awayScore={match?.away_score}
-                isAdmin={canManageMatch}
-              />
-            ) : (
-              <Card>
-                <CardContent className="p-4 sm:p-6">
-                  <div className="text-center text-muted-foreground">
-                    <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                    <p>No EA statistics available for this match.</p>
-                    {canManageMatch && (
-                      <div className="mt-4">
-                        <Button onClick={() => setOpenModal(true)} variant="outline">
-                          Import EA Match Data
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="highlights" className="mt-0">
-            <MatchHighlightsWrapper matchId={matchId} />
-          </TabsContent>
-        </Tabs>
+        {/* Comprehensive Match View */}
+        <ComprehensiveMatchView matchId={matchId} />
       </div>
 
       {/* EA Match Import Modal */}
