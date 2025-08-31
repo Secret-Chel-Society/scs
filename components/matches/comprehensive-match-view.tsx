@@ -569,10 +569,11 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
               <CardTitle className="text-lg">Player Statistics</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-4 h-full">
+              {/* Summary Player Stats */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <h4 className="font-bold text-red-100 mb-2">{match.home_team.name}</h4>
-                  <div className="space-y-1 max-h-48 overflow-y-auto text-xs">
+                  <div className="space-y-1 max-h-24 overflow-y-auto text-xs">
                     {getPaginatedPlayers(homePlayerStats).map((player) => (
                       <div key={player.id} className="p-1 bg-red-600 rounded">
                         <div className="font-medium">{player.gamer_tag_id}</div>
@@ -585,7 +586,7 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                 </div>
                 <div>
                   <h4 className="font-bold text-red-100 mb-2">{match.away_team.name}</h4>
-                  <div className="space-y-1 max-h-48 overflow-y-auto text-xs">
+                  <div className="space-y-1 max-h-24 overflow-y-auto text-xs">
                     {getPaginatedPlayers(awayPlayerStats).map((player) => (
                       <div key={player.id} className="p-1 bg-red-600 rounded">
                         <div className="font-medium">{player.gamer_tag_id}</div>
@@ -598,41 +599,11 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                 </div>
               </div>
               
-              {/* Player Stats Slider */}
-              <div className="mt-4 flex items-center justify-between">
-                <button
-                  onClick={() => setPlayerStatsPage(Math.max(0, playerStatsPage - 1))}
-                  disabled={playerStatsPage === 0}
-                  className="p-1 bg-red-600 rounded disabled:opacity-50"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <span className="text-sm">
-                  Page {playerStatsPage + 1} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setPlayerStatsPage(Math.min(totalPages - 1, playerStatsPage + 1))}
-                  disabled={playerStatsPage >= totalPages - 1}
-                  className="p-1 bg-red-600 rounded disabled:opacity-50"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Detailed Player Stats Table - Full Width Bottom */}
-        <div className="col-span-12">
-          <Card className="bg-gradient-to-b from-gray-600 to-gray-700 text-white border-0 shadow-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Detailed Player Statistics</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
+              {/* Detailed Player Stats Table */}
               <div className="overflow-x-auto">
                 <Table className="text-xs">
                   <TableHeader>
-                    <TableRow className="border-gray-500">
+                    <TableRow className="border-red-600">
                       <TableHead className="text-white">Player</TableHead>
                       <TableHead className="text-white text-center">Pos</TableHead>
                       <TableHead className="text-white text-center">G</TableHead>
@@ -658,7 +629,7 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                   </TableHeader>
                   <TableBody>
                     {getPaginatedPlayers([...homePlayerStats, ...awayPlayerStats]).map((player) => (
-                      <TableRow key={player.id} className="border-gray-500">
+                      <TableRow key={player.id} className="border-red-600">
                         <TableCell className="font-medium text-white">{player.gamer_tag_id}</TableCell>
                         <TableCell className="text-center text-white">{player.position}</TableCell>
                         <TableCell className="text-center text-white">{player.goals}</TableCell>
@@ -688,12 +659,12 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                 </Table>
               </div>
               
-              {/* Detailed Stats Slider */}
+              {/* Player Stats Slider */}
               <div className="mt-4 flex items-center justify-between">
                 <button
                   onClick={() => setPlayerStatsPage(Math.max(0, playerStatsPage - 1))}
                   disabled={playerStatsPage === 0}
-                  className="p-2 bg-gray-600 rounded disabled:opacity-50"
+                  className="p-1 bg-red-600 rounded disabled:opacity-50"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -703,7 +674,7 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                 <button
                   onClick={() => setPlayerStatsPage(Math.min(totalPages - 1, playerStatsPage + 1))}
                   disabled={playerStatsPage >= totalPages - 1}
-                  className="p-2 bg-gray-600 rounded disabled:opacity-50"
+                  className="p-1 bg-red-600 rounded disabled:opacity-50"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
