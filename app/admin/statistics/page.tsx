@@ -1103,7 +1103,7 @@ export default function AdminStatisticsPage() {
             <p className="text-white/70">Current season statistics and management</p>
           </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Select
               value={selectedSeason?.toString() || ""}
               onValueChange={(value) => setSelectedSeason(Number.parseInt(value))}
