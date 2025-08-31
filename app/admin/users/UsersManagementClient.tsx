@@ -41,6 +41,28 @@ import {
   Search,
   X,
   Download,
+  Crown,
+  Shield,
+  Gamepad2,
+  Calendar,
+  Mail,
+  Phone,
+  MapPin,
+  Star,
+  Zap,
+  Target,
+  TrendingUp,
+  CheckCircle,
+  Clock,
+  Filter,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
+  UserPlus,
+  Settings,
+  Database,
+  Bot,
 } from "lucide-react"
 
 // Define valid player roles - these must match the database constraint
@@ -75,12 +97,12 @@ const positionAbbreviations = {
 }
 
 const positionColors = {
-  LW: "text-green-600 font-medium",
-  C: "text-red-600 font-medium",
-  RW: "text-blue-600 font-medium",
-  LD: "text-cyan-600 font-medium",
-  RD: "text-yellow-600 font-medium",
-  G: "text-purple-600 font-medium",
+  LW: "bg-green-500/20 text-green-300 border-green-500/30",
+  C: "bg-red-500/20 text-red-300 border-red-500/30",
+  RW: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  LD: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+  RD: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+  G: "bg-purple-500/20 text-purple-300 border-purple-500/30",
 }
 
 const consoles = [
@@ -152,34 +174,36 @@ function PositionUpdateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
         <DialogHeader>
-          <DialogTitle>Update Positions</DialogTitle>
-          <DialogDescription>{user && `Update positions for ${user.gamer_tag_id || user.email}`}</DialogDescription>
+          <DialogTitle className="text-white">Update Positions</DialogTitle>
+          <DialogDescription className="text-white/70">
+            {user && `Update positions for ${user.gamer_tag_id || user.email}`}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="primary-position" className="text-sm font-medium">
+              <label htmlFor="primary-position" className="text-sm font-medium text-white">
                 Primary Position
               </label>
               <Select value={primaryPosition} onValueChange={setPrimaryPosition} disabled={submitting}>
-                <SelectTrigger id="primary-position">
+                <SelectTrigger id="primary-position" className="bg-slate-800/50 border-white/20 text-white">
                   <SelectValue placeholder="Select primary position" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-800 border-white/20">
                   {positions.map((position) => (
-                    <SelectItem key={position.value} value={position.value}>
+                    <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
                       {position.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">The player's main position</p>
+              <p className="text-sm text-white/60">The player's main position</p>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="secondary-position" className="text-sm font-medium">
+              <label htmlFor="secondary-position" className="text-sm font-medium text-white">
                 Secondary Position (Optional)
               </label>
               <Select
@@ -187,24 +211,28 @@ function PositionUpdateDialog({
                 onValueChange={(value) => setSecondaryPosition(value === "none" ? null : value)}
                 disabled={submitting}
               >
-                <SelectTrigger id="secondary-position">
+                <SelectTrigger id="secondary-position" className="bg-slate-800/50 border-white/20 text-white">
                   <SelectValue placeholder="Select secondary position" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                <SelectContent className="bg-slate-800 border-white/20">
+                  <SelectItem value="none" className="text-white hover:bg-slate-700">None</SelectItem>
                   {positions.map((position) => (
-                    <SelectItem key={position.value} value={position.value}>
+                    <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
                       {position.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">The player's alternate position (optional)</p>
+              <p className="text-sm text-white/60">The player's alternate position (optional)</p>
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={submitting || !primaryPosition}>
+            <Button 
+              type="submit" 
+              disabled={submitting || !primaryPosition}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+            >
               {submitting ? "Updating..." : "Update Positions"}
             </Button>
           </DialogFooter>
@@ -1895,82 +1923,208 @@ export default function UsersManagementClient() {
   )
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {renderButtonsSection()}
-
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by gamer tag..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        {searchQuery && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Found {filteredUsers.length} {filteredUsers.length === 1 ? "user" : "users"} matching "{searchQuery}"
-            {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
-          </p>
-        )}
-      </div>
-
-      {autoRefresh && lastRefreshTime && (
-        <div className="mb-4 text-sm text-muted-foreground">
-          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-          Auto-refresh active. Last refresh: {lastRefreshTime.toLocaleTimeString()}. Next refresh in{" "}
-          {nextRefreshCountdown} seconds.
-        </div>
-      )}
-
-      {showMigrationAlert && (
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6">
-          <div className="flex items-start">
-            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 mr-3" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
+              <Users className="h-8 w-8 text-blue-400" />
+            </div>
             <div>
-              <h3 className="font-medium text-amber-800">Database Update Required</h3>
-              <p className="text-amber-700 mt-1 text-sm">
-                The user activation feature requires a database update. Please run the SQL below in the Supabase SQL
-                Editor.
-              </p>
-              <div className="mt-3 space-y-2">
-                <div className="text-sm text-amber-700 mt-2">
-                  <p className="font-medium">SQL Migration:</p>
-                  <pre className="bg-amber-100 p-2 rounded mt-1 overflow-x-auto text-xs">
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
-                    <br />
-                    UPDATE users SET is_active = TRUE WHERE is_active IS NULL;
-                  </pre>
-                </div>
-                <div className="flex items-center mt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-amber-100 border-amber-300 hover:bg-amber-200 text-amber-800"
-                    onClick={checkColumnAfterMigration}
-                    disabled={submitting}
-                  >
-                    <RefreshCw className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
-                    {submitting ? "Checking..." : "I've run the migration, check again"}
-                  </Button>
-                </div>
-              </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                User Management
+              </h1>
+              <p className="text-white/70 mt-1">Manage user accounts, roles, and permissions</p>
             </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 pb-8">
+        {/* Action Buttons */}
+        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <Button 
+                  onClick={() => setNewUserDialogOpen(true)}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add User
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={refreshUsers} 
+                  disabled={refreshing}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+                  {refreshing ? "Refreshing..." : "Refresh"}
+                </Button>
+                <Button
+                  variant={autoRefresh ? "default" : "outline"}
+                  onClick={() => {
+                    const savedKey = localStorage.getItem("scs-admin-key") || adminKey
+                    if (!savedKey && !autoRefresh) {
+                      pendingActionRef.current = () => {
+                        setAutoRefresh(true)
+                        setLastRefreshTime(new Date())
+                        setNextRefreshCountdown(30)
+                        return Promise.resolve()
+                      }
+                      setAdminKeyDialogOpen(true)
+                    } else {
+                      setAutoRefresh(!autoRefresh)
+                      if (!autoRefresh) {
+                        setLastRefreshTime(new Date())
+                        setNextRefreshCountdown(30)
+                      }
+                    }
+                  }}
+                  className={autoRefresh ? "bg-green-600 hover:bg-green-700" : "border-white/20 text-white hover:bg-white/10"}
+                >
+                  {autoRefresh ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Auto-Refresh ({nextRefreshCountdown}s)
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Auto-Refresh
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={fixSecondaryPositions}
+                  disabled={submitting}
+                  className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
+                  Fix Positions
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={fixRoleConstraint}
+                  disabled={submitting}
+                  className="border-purple-500/30 text-purple-300 hover:bg-purple-500/10"
+                >
+                  <Key className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
+                  Fix Roles
+                </Button>
+                <Button
+                  variant="outline"
+                  asChild
+                  className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                >
+                  <Link href="/admin/user-diagnostics">
+                    <Stethoscope className="mr-2 h-4 w-4" />
+                    Diagnostics
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={exportUsersToCSV}
+                  disabled={submitting || filteredUsers.length === 0}
+                  className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export CSV
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Search Bar */}
+        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 mb-6">
+          <CardContent className="p-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
+              <Input
+                placeholder="Search by gamer tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-10 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-white/50 hover:text-white"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="mt-3 text-sm text-white/70">
+                Found {filteredUsers.length} {filteredUsers.length === 1 ? "user" : "users"} matching "{searchQuery}"
+                {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Auto-refresh Status */}
+        {autoRefresh && lastRefreshTime && (
+          <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-500/30 mb-6">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-green-300">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                <span className="text-sm">
+                  Auto-refresh active. Last refresh: {lastRefreshTime.toLocaleTimeString()}. Next refresh in{" "}
+                  {nextRefreshCountdown} seconds.
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Migration Alert */}
+        {showMigrationAlert && (
+          <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-sm border border-amber-500/30 mb-6">
+            <CardContent className="p-6">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-amber-300 mb-2">Database Update Required</h3>
+                  <p className="text-amber-200/80 text-sm mb-4">
+                    The user activation feature requires a database update. Please run the SQL below in the Supabase SQL Editor.
+                  </p>
+                  <div className="bg-amber-500/20 p-3 rounded-lg border border-amber-500/30">
+                    <p className="font-medium text-amber-300 text-sm mb-2">SQL Migration:</p>
+                    <pre className="text-amber-200 text-xs overflow-x-auto">
+                      ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+                      <br />
+                      UPDATE users SET is_active = TRUE WHERE is_active IS NULL;
+                    </pre>
+                  </div>
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                      onClick={checkColumnAfterMigration}
+                      disabled={submitting}
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
+                      {submitting ? "Checking..." : "I've run the migration, check again"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+                 )}
 
       {showDiscordAlert && (
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
