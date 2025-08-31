@@ -33,9 +33,27 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Stethoscope,
   UserCog,
   Key,
+  Stethoscope,
+  UserX,
+  Ban,
+  FileText,
+  Camera,
+  Palette,
+  Bell,
+  ChartBar,
+  Award,
+  Mail,
+  Lock,
+  Cog,
+  MessageCircle,
+  Table,
+  GitBranch,
+  UserCheck,
+  Gamepad2,
+  Wrench,
+  Bug,
 } from "lucide-react"
 import AdminDiagnostics from "@/components/admin/admin-diagnostics"
 
@@ -137,7 +155,7 @@ export default function AdminDashboardPage() {
           title: "Banned Users Management",
           description: "View and manage banned users, ban/unban functionality",
           href: "/admin/banned-users",
-          icon: <AlertTriangle className="h-4 w-4" />,
+          icon: <Ban className="h-4 w-4" />,
         },
         {
           title: "User Diagnostics",
@@ -177,7 +195,7 @@ export default function AdminDashboardPage() {
           title: "Team Availability",
           description: "View player availability and games played by week",
           href: "/admin/team-avail",
-          icon: <Calendar className="h-4 w-4" />,
+          icon: <UserCheck className="h-4 w-4" />,
         },
         {
           title: "Featured Games",
@@ -211,7 +229,7 @@ export default function AdminDashboardPage() {
           title: "Player Mappings",
           description: "Manage EA player to user mappings",
           href: "/admin/player-mappings",
-          icon: <Users className="h-4 w-4" />,
+          icon: <Gamepad2 className="h-4 w-4" />,
         },
       ]
     },
@@ -249,25 +267,25 @@ export default function AdminDashboardPage() {
           title: "News Management",
           description: "Manage news articles and announcements",
           href: "/admin/news",
-          icon: <Newspaper className="h-4 w-4" />,
+          icon: <FileText className="h-4 w-4" />,
         },
         {
           title: "Photo Gallery",
           description: "Manage photos and media",
           href: "/admin/photos",
-          icon: <ImageIcon className="h-4 w-4" />,
+          icon: <Camera className="h-4 w-4" />,
         },
         {
           title: "Team Logos",
           description: "Manage team logos and branding",
           href: "/admin/team-logos",
-          icon: <ImageIcon className="h-4 w-4" />,
+          icon: <Palette className="h-4 w-4" />,
         },
         {
           title: "Daily Recap",
           description: "Generate nightly recap for all teams",
           href: "/admin/daily-recap",
-          icon: <Newspaper className="h-4 w-4" />,
+          icon: <Bell className="h-4 w-4" />,
         },
       ]
     },
@@ -283,7 +301,7 @@ export default function AdminDashboardPage() {
           title: "Statistics Management",
           description: "Manage player and team statistics",
           href: "/admin/statistics",
-          icon: <BarChart3 className="h-4 w-4" />,
+          icon: <ChartBar className="h-4 w-4" />,
         },
         {
           title: "EA Stats",
@@ -301,7 +319,7 @@ export default function AdminDashboardPage() {
           title: "Awards Management",
           description: "Manage season awards and achievements",
           href: "/admin/awards",
-          icon: <Trophy className="h-4 w-4" />,
+          icon: <Award className="h-4 w-4" />,
         },
       ]
     },
@@ -317,7 +335,7 @@ export default function AdminDashboardPage() {
           title: "Email Verification",
           description: "Manage email verification",
           href: "/admin/email-verification",
-          icon: <ShieldCheck className="h-4 w-4" />,
+          icon: <Mail className="h-4 w-4" />,
         },
         {
           title: "Password Reset",
@@ -329,7 +347,7 @@ export default function AdminDashboardPage() {
           title: "Reset User Password",
           description: "Reset a user's password by email address",
           href: "/admin/reset-user-password",
-          icon: <Key className="h-4 w-4" />,
+          icon: <Lock className="h-4 w-4" />,
         },
         {
           title: "RBAC Debug",
@@ -351,7 +369,7 @@ export default function AdminDashboardPage() {
           title: "System Settings",
           description: "Configure system settings",
           href: "/admin/settings",
-          icon: <Settings className="h-4 w-4" />,
+          icon: <Cog className="h-4 w-4" />,
         },
         {
           title: "SCS Bot",
@@ -369,13 +387,13 @@ export default function AdminDashboardPage() {
           title: "Forum Management",
           description: "Manage forum categories and posts",
           href: "/admin/forum",
-          icon: <MessageSquare className="h-4 w-4" />,
+          icon: <MessageCircle className="h-4 w-4" />,
         },
         {
           title: "Database Structure",
           description: "Explore database tables and structure",
           href: "/admin/database-structure",
-          icon: <Database className="h-4 w-4" />,
+          icon: <Table className="h-4 w-4" />,
         },
       ]
     },
@@ -391,7 +409,7 @@ export default function AdminDashboardPage() {
           title: "Auth to Database Sync",
           description: "Sync users from Supabase Auth to database",
           href: "/admin/sync-auth-database",
-          icon: <RefreshCw className="h-4 w-4" />,
+          icon: <GitBranch className="h-4 w-4" />,
         },
         {
           title: "Sync Missing Users",
@@ -403,13 +421,13 @@ export default function AdminDashboardPage() {
           title: "Orphaned Auth Users",
           description: "Find and fix orphaned auth users",
           href: "/admin/orphaned-auth-users",
-          icon: <Users className="h-4 w-4" />,
+          icon: <UserX className="h-4 w-4" />,
         },
         {
           title: "Fix User Constraints",
           description: "Fix console and gamer tag constraints",
           href: "/admin/fix-user-constraints",
-          icon: <ShieldCheck className="h-4 w-4" />,
+          icon: <Wrench className="h-4 w-4" />,
         },
         {
           title: "Fix Console Values",
@@ -427,7 +445,7 @@ export default function AdminDashboardPage() {
           title: "Discord Debug",
           description: "Debug Discord bot integration",
           href: "/admin/discord-debug",
-          icon: <Bot className="h-4 w-4" />,
+          icon: <Bug className="h-4 w-4" />,
         },
       ]
     },
@@ -460,12 +478,14 @@ export default function AdminDashboardPage() {
           {adminCategories.map((category, index) => (
             <Card 
               key={index} 
-              className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-300 group"
+              className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-300 group hover:scale-105"
             >
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 bg-gradient-to-r ${category.bgColor} rounded-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <div className={`text-white ${category.icon.props.className}`} />
+                  <div className={`p-3 bg-gradient-to-r ${category.bgColor} rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    <div className="text-white">
+                      {category.icon}
+                    </div>
                   </div>
                   <CardTitle className="text-xl text-white">{category.title}</CardTitle>
                 </div>
@@ -474,9 +494,11 @@ export default function AdminDashboardPage() {
               <CardContent className="space-y-3">
                 {category.links.map((link, linkIndex) => (
                   <Link key={linkIndex} href={link.href} className="block">
-                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors duration-200 group/link">
-                      <div className={`p-1.5 bg-gradient-to-r ${category.bgColor} rounded-md group-hover/link:scale-110 transition-transform duration-200`}>
-                        <div className="text-white">{link.icon}</div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-all duration-200 group/link hover:scale-105">
+                      <div className={`p-2 bg-gradient-to-r ${category.bgColor} rounded-lg group-hover/link:scale-110 transition-transform duration-200 shadow-md`}>
+                        <div className="text-white">
+                          {link.icon}
+                        </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="font-medium text-white group-hover/link:text-blue-300 transition-colors">
