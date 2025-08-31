@@ -1,178 +1,279 @@
 import type { Metadata } from "next"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { PageHeader } from "@/components/ui/page-header"
+import { Card, CardContent } from "@/components/ui/card"
+import { HelpCircle, Users, Trophy, Calendar, Settings, MessageSquare, Shield, Award } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "FAQ - Secret Chel Society",
   description: "Frequently asked questions about the Secret Chel Society (SCS)",
 }
 
+function FAQStats() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+        <div className="text-3xl font-bold text-blue-200 mb-2">8</div>
+        <div className="text-blue-300 flex items-center justify-center gap-2">
+          <HelpCircle className="h-5 w-5" />
+          Common Questions
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
+        <div className="text-3xl font-bold text-green-200 mb-2">24/7</div>
+        <div className="text-green-300 flex items-center justify-center gap-2">
+          <Shield className="h-5 w-5" />
+          Support Available
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <div className="text-3xl font-bold text-purple-200 mb-2">Discord</div>
+        <div className="text-purple-300 flex items-center justify-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          Live Help
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "400ms" }}>
+        <div className="text-3xl font-bold text-yellow-200 mb-2">Quick</div>
+        <div className="text-yellow-300 flex items-center justify-center gap-2">
+          <Award className="h-5 w-5" />
+          Answers
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function FAQPage() {
   return (
-    <div className="container py-8 max-w-4xl mx-auto">
-      <PageHeader
-        heading="Frequently Asked Questions"
-        subheading="Find answers to common questions about the Secret Chel Society"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-      <div className="mt-8">
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="item-1">
-            <AccordionTrigger className="text-left">How do I join the SCS?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">
-                To join the SCS, you need to register on our website during the registration period. Follow these
-                steps:
-              </p>
-              <ol className="list-decimal pl-5 space-y-1">
-                <li>Create an account on the SCS website</li>
-                <li>Complete your player profile with your gamer tag and contact information</li>
-                <li>Register for the current or upcoming season during the registration window</li>
-                <li>
-                  You'll either be drafted by a team or can participate in free agency depending on the league schedule
-                </li>
-              </ol>
-            </AccordionContent>
-          </AccordionItem>
+      <div className="relative container py-8 max-w-4xl mx-auto px-4">
+        <div className="relative z-10">
+          {/* Header Section */}
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-emerald-200 to-teal-200 bg-clip-text text-transparent">
+              FAQ
+            </h1>
+            <p className="text-xl text-emerald-200 mb-8">
+              Find answers to common questions about the Secret Chel Society
+            </p>
+          </div>
 
-          <AccordionItem value="item-2">
-            <AccordionTrigger className="text-left">What are the league rules?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">
-                The SCS has a comprehensive set of rules covering gameplay, conduct, team management, and more. You can
-                find the complete rulebook on our{" "}
-                <a href="/rules" className="text-primary hover:underline">
-                  Rules page
-                </a>
-                .
-              </p>
-              <p>Some key rules include:</p>
-              <ul className="list-disc pl-5 space-y-1 mt-2">
-                <li>Code Of Conduct</li>
-                <li>Player Expectations</li>
-                <li>Match Expectations</li>
-                <li>Match scheduling and reporting procedures</li>
-                <li>Disciplinary actions for rule violations</li>
-              </ul>
-            </AccordionContent>
-          </AccordionItem>
+          {/* FAQ Statistics */}
+          <FAQStats />
 
-          <AccordionItem value="item-3">
-            <AccordionTrigger className="text-left">How does free agency work?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">
-                Free agency is the process where players without a team can be signed by team managers. The process
-                works as follows:
-              </p>
-              <ol className="list-decimal pl-5 space-y-1">
-                <li>Players register as free agents during the registration period</li>
-                <li>Teams can view available free agents on the Free Agency page</li>
-                <li>Teams place bids on players they want to sign</li>
-                <li>Once 12 hours pass without another bid the team with the winning bid, wins the player</li>
-                <li>Once a bidding period is finished, the player is added to the team's roster</li>
-              </ol>
-              <p className="mt-2">
-                You can view current free agents on the{" "}
-                <a href="/free-agency" className="text-primary hover:underline">
-                  Free Agency page
-                </a>
-                .
-              </p>
-            </AccordionContent>
-          </AccordionItem>
+          {/* Main FAQ Content */}
+          <div className="animate-slide-up" style={{ animationDelay: "500ms" }}>
+            <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+              <CardContent className="p-6">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Users className="h-5 w-5 text-emerald-400" />
+                        How do I join the SCS?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">
+                        To join the SCS, you need to register on our website during the registration period. Follow these
+                        steps:
+                      </p>
+                      <ol className="list-decimal pl-5 space-y-1">
+                        <li>Create an account on the SCS website</li>
+                        <li>Complete your player profile with your gamer tag and contact information</li>
+                        <li>Register for the current or upcoming season during the registration window</li>
+                        <li>
+                          You'll either be drafted by a team or can participate in free agency depending on the league schedule
+                        </li>
+                      </ol>
+                    </AccordionContent>
+                  </AccordionItem>
 
-          <AccordionItem value="item-4">
-            <AccordionTrigger className="text-left">What positions can I play?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">In the SCS, you can play as a:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Forward (Left Wing, Center, Right Wing)</li>
-                <li>Defenseman (Left Defense, Right Defense)</li>
-                <li>Goaltender</li>
-                <li>If you sign up as ex. LW,LD you can play both Forward and Defense positions.</li>
-              </ul>
-              <p className="mt-2">
-                When registering, you'll be asked to specify your Primary and Secondary positions. Teams may recruit you
-                based on their needs and your position preferences.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
+                  <AccordionItem value="item-2" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Shield className="h-5 w-5 text-emerald-400" />
+                        What are the league rules?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">
+                        The SCS has a comprehensive set of rules covering gameplay, conduct, team management, and more. You can
+                        find the complete rulebook on our{" "}
+                        <a href="/rules" className="text-emerald-300 hover:text-emerald-200 hover:underline">
+                          Rules page
+                        </a>
+                        .
+                      </p>
+                      <p>Some key rules include:</p>
+                      <ul className="list-disc pl-5 space-y-1 mt-2">
+                        <li>Code Of Conduct</li>
+                        <li>Player Expectations</li>
+                        <li>Match Expectations</li>
+                        <li>Match scheduling and reporting procedures</li>
+                        <li>Disciplinary actions for rule violations</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
 
-          <AccordionItem value="item-5">
-            <AccordionTrigger className="text-left">How are matches scheduled?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">Match scheduling in the SCS follows these general guidelines:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>The league administrators create the season schedule with matchups</li>
-                <li>Games are typically scheduled for 8:00,8:35,9:10PM EST Wednesday,Thursday, and Friday</li>
-                <li>Team managers coordinate with their players to ensure availability</li>
-                <li>Match results must be reported by team managers after completion</li>
-              </ul>
-              <p className="mt-2">
-                You can view the current schedule on the{" "}
-                <a href="/matches" className="text-primary hover:underline">
-                  Matches page
-                </a>
-                .
-              </p>
-            </AccordionContent>
-          </AccordionItem>
+                  <AccordionItem value="item-3" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Trophy className="h-5 w-5 text-emerald-400" />
+                        How does free agency work?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">
+                        Free agency is the process where players without a team can be signed by team managers. The process
+                        works as follows:
+                      </p>
+                      <ol className="list-decimal pl-5 space-y-1">
+                        <li>Players register as free agents during the registration period</li>
+                        <li>Teams can view available free agents on the Free Agency page</li>
+                        <li>Teams place bids on players they want to sign</li>
+                        <li>Once 12 hours pass without another bid the team with the winning bid, wins the player</li>
+                        <li>Once a bidding period is finished, the player is added to the team's roster</li>
+                      </ol>
+                      <p className="mt-2">
+                        You can view current free agents on the{" "}
+                        <a href="/free-agency" className="text-emerald-300 hover:text-emerald-200 hover:underline">
+                          Free Agency page
+                        </a>
+                        .
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
 
-          <AccordionItem value="item-6">
-            <AccordionTrigger className="text-left">How do team management roles work?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">Why Manage in SCS?:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Management get to pick a GM and AGM at a cheaper salary than them going into bidding.</li>
-                <li>
-                  <strong>Owner:</strong> Free Contract
-                </li>
-                <li>
-                  <strong>General Manager (GM):</strong> Free Contract
-                </li>
-                <li>
-                  <strong>Assistant General Manager (AGM):</strong> $1,500,000.00 Contract
-                </li>
-              </ul>
-              <p className="mt-2">
-                These roles have different permissions on the website for managing team operations. Team management can
-                access additional features through the Team Management dashboard.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
+                  <AccordionItem value="item-4" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Users className="h-5 w-5 text-emerald-400" />
+                        What positions can I play?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">In the SCS, you can play as a:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Forward (Left Wing, Center, Right Wing)</li>
+                        <li>Defenseman (Left Defense, Right Defense)</li>
+                        <li>Goaltender</li>
+                        <li>If you sign up as ex. LW,LD you can play both Forward and Defense positions.</li>
+                      </ul>
+                      <p className="mt-2">
+                        When registering, you'll be asked to specify your Primary and Secondary positions. Teams may recruit you
+                        based on their needs and your position preferences.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
 
-          <AccordionItem value="item-7">
-            <AccordionTrigger className="text-left">How are player statistics tracked?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">Player statistics are tracked through our system:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Team managers report game results and individual player statistics</li>
-                <li>Stats are verified by league administrators</li>
-                <li>Player profiles are updated with the latest statistics</li>
-                <li>Season and career statistics are maintained in our database</li>
-              </ul>
-              <p className="mt-2">
-                You can view player and team statistics on the{" "}
-                <a href="/stats" className="text-primary hover:underline">
-                  Stats page
-                </a>
-                .
-              </p>
-            </AccordionContent>
-          </AccordionItem>
+                  <AccordionItem value="item-5" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-5 w-5 text-emerald-400" />
+                        How are matches scheduled?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">Match scheduling in the SCS follows these general guidelines:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>The league administrators create the season schedule with matchups</li>
+                        <li>Games are typically scheduled for 8:00,8:35,9:10PM EST Wednesday,Thursday, and Friday</li>
+                        <li>Team managers coordinate with their players to ensure availability</li>
+                        <li>Match results must be reported by team managers after completion</li>
+                      </ul>
+                      <p className="mt-2">
+                        You can view the current schedule on the{" "}
+                        <a href="/matches" className="text-emerald-300 hover:text-emerald-200 hover:underline">
+                          Matches page
+                        </a>
+                        .
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
 
-          <AccordionItem value="item-8">
-            <AccordionTrigger className="text-left">How do I contact league administration?</AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2">You can contact league administration through several channels:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Send a direct message to an admin through the website messaging system</li>
-                <li>Join our Discord server and message an admin (link available in your profile)</li>
-              </ul>
-              <p className="mt-2">For urgent matters, Discord is usually the fastest way to reach an administrator.</p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                  <AccordionItem value="item-6" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Settings className="h-5 w-5 text-emerald-400" />
+                        How do team management roles work?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">Why Manage in SCS?:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Management get to pick a GM and AGM at a cheaper salary than them going into bidding.</li>
+                        <li>
+                          <strong>Owner:</strong> Free Contract
+                        </li>
+                        <li>
+                          <strong>General Manager (GM):</strong> Free Contract
+                        </li>
+                        <li>
+                          <strong>Assistant General Manager (AGM):</strong> $1,500,000.00 Contract
+                        </li>
+                      </ul>
+                      <p className="mt-2">
+                        These roles have different permissions on the website for managing team operations. Team management can
+                        access additional features through the Team Management dashboard.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-7" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Award className="h-5 w-5 text-emerald-400" />
+                        How are player statistics tracked?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">Player statistics are tracked through our system:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Team managers report game results and individual player statistics</li>
+                        <li>Stats are verified by league administrators</li>
+                        <li>Player profiles are updated with the latest statistics</li>
+                        <li>Season and career statistics are maintained in our database</li>
+                      </ul>
+                      <p className="mt-2">
+                        You can view player and team statistics on the{" "}
+                        <a href="/stats" className="text-emerald-300 hover:text-emerald-200 hover:underline">
+                          Stats page
+                        </a>
+                        .
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-8" className="border-white/20">
+                    <AccordionTrigger className="text-left text-white hover:text-emerald-300 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <MessageSquare className="h-5 w-5 text-emerald-400" />
+                        How do I contact league administration?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-white/80">
+                      <p className="mb-2">You can contact league administration through several channels:</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Send a direct message to an admin through the website messaging system</li>
+                        <li>Join our Discord server and message an admin (link available in your profile)</li>
+                      </ul>
+                      <p className="mt-2">For urgent matters, Discord is usually the fastest way to reach an administrator.</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

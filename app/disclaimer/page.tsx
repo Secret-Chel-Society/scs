@@ -1,226 +1,288 @@
 import { PageHeader } from "@/components/ui/page-header"
+import { Card, CardContent } from "@/components/ui/card"
+import { AlertTriangle, Shield, Users, Calendar, FileText, Mail, MessageSquare, Info } from "lucide-react"
+
+function DisclaimerStats() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+      <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+        <div className="text-3xl font-bold text-red-200 mb-2">Important</div>
+        <div className="text-red-300 flex items-center justify-center gap-2">
+          <AlertTriangle className="h-5 w-5" />
+          Legal Notice
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
+        <div className="text-3xl font-bold text-yellow-200 mb-2">Read</div>
+        <div className="text-yellow-300 flex items-center justify-center gap-2">
+          <FileText className="h-5 w-5" />
+          Carefully
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <div className="text-3xl font-bold text-orange-200 mb-2">Terms</div>
+        <div className="text-orange-300 flex items-center justify-center gap-2">
+          <Shield className="h-5 w-5" />
+          & Conditions
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-pink-500/20 to-rose-500/20 backdrop-blur-sm border border-pink-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "400ms" }}>
+        <div className="text-3xl font-bold text-pink-200 mb-2">Your</div>
+        <div className="text-pink-300 flex items-center justify-center gap-2">
+          <Users className="h-5 w-5" />
+          Responsibility
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function DisclaimerPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <PageHeader
-        title="Disclaimer"
-        description="Important legal information and terms regarding the use of SCS services"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-      <div className="prose prose-gray dark:prose-invert max-w-none">
-        <p className="text-sm text-muted-foreground mb-8">
-          <strong>Last Updated:</strong> July 1, 2025
-        </p>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">1. General Disclaimer</h2>
-          <p>
-            The information contained on the Secret Chel Society (SCS) website is for general information
-            purposes only. While we endeavor to keep the information up to date and correct, we make no representations
-            or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability,
-            or availability of the website or the information, products, services, or related graphics contained on the
-            website for any purpose.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">2. EA Sports Non-Affiliation</h2>
-          <p>
-            <strong>IMPORTANT:</strong> Secret Chel Society (SCS) is an independent gaming community and is NOT
-            affiliated with, endorsed by, or connected to EA Sports, Electronic Arts Inc., or the National Hockey League
-            (NHL).
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>We are not an official EA Sports league or tournament</li>
-            <li>We do not represent EA Sports in any capacity</li>
-            <li>EA Sports has not sponsored, approved, or endorsed our activities</li>
-            <li>
-              All EA Sports and NHL trademarks, logos, and game content remain the property of their respective owners
-            </li>
-            <li>Our use of game statistics and data is for informational and competitive purposes only</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">3. Limitation of Liability</h2>
-          <p>
-            In no event will SCS, its administrators, moderators, or affiliates be liable for any loss or damage
-            including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever
-            arising from:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Loss of data or profits arising out of or in connection with the use of this website</li>
-            <li>Technical issues, server downtime, or website unavailability</li>
-            <li>Disputes between players or teams</li>
-            <li>
-              Game-related issues, including but not limited to connection problems, game crashes, or EA Sports server
-              issues
-            </li>
-            <li>Any decisions made by league administrators or moderators</li>
-            <li>Third-party content or external links</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">4. User Responsibility</h2>
-          <p>By participating in SCS activities, users acknowledge and agree that:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>They participate at their own risk and responsibility</li>
-            <li>They must comply with all applicable laws and regulations</li>
-            <li>They are responsible for their own gaming equipment and internet connection</li>
-            <li>They must follow SCS rules and code of conduct</li>
-            <li>They are responsible for maintaining the confidentiality of their account information</li>
-            <li>They must respect other players and maintain good sportsmanship</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">5. Game-Related Disclaimers</h2>
-
-          <h3 className="text-xl font-semibold mb-3">5.1 Game Performance</h3>
-          <p>SCS cannot guarantee:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Stable game connections during matches</li>
-            <li>Absence of game bugs or glitches</li>
-            <li>EA Sports server availability</li>
-            <li>Consistent game performance across all platforms</li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mb-3">5.2 Statistics and Data</h3>
-          <p>While we strive for accuracy in recording game statistics and results:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Statistics are dependent on EA Sports API availability and accuracy</li>
-            <li>Data may be subject to delays or temporary unavailability</li>
-            <li>We reserve the right to correct statistical errors</li>
-            <li>Historical data may be subject to change due to corrections or updates</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">6. Content Disclaimer</h2>
-          <p>
-            The content on this website, including but not limited to text, graphics, images, and other material, is for
-            informational purposes only. The material on this site is provided on an "as is" basis without any
-            warranties of any kind.
-          </p>
-
-          <h3 className="text-xl font-semibold mb-3">6.1 User-Generated Content</h3>
-          <p>SCS is not responsible for:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>Content posted by users in forums, chat, or other interactive areas</li>
-            <li>Accuracy of user-submitted information</li>
-            <li>Offensive or inappropriate content posted by users</li>
-            <li>Copyright infringement by users</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">7. External Links Disclaimer</h2>
-          <p>
-            Our website may contain links to external websites that are not provided or maintained by SCS. We do not
-            guarantee the accuracy, relevance, timeliness, or completeness of any information on these external
-            websites. The inclusion of any links does not necessarily imply a recommendation or endorse the views
-            expressed within them.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">8. Competitive Integrity</h2>
-          <p>While SCS strives to maintain fair and competitive gameplay:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>We cannot guarantee the absence of cheating or unsportsmanlike conduct</li>
-            <li>Disciplinary decisions are made at the discretion of league administrators</li>
-            <li>Appeals processes are available but decisions may be final</li>
-            <li>Rule interpretations and enforcement may evolve over time</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">9. Technical Disclaimers</h2>
-
-          <h3 className="text-xl font-semibold mb-3">9.1 Website Availability</h3>
-          <p>We do not warrant that:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>The website will be constantly available or uninterrupted</li>
-            <li>The website will be free from errors, viruses, or other harmful components</li>
-            <li>Defects will be corrected immediately</li>
-            <li>The website will meet your specific requirements</li>
-          </ul>
-
-          <h3 className="text-xl font-semibold mb-3">9.2 Data Security</h3>
-          <p>While we implement security measures to protect user data:</p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>No system is completely secure</li>
-            <li>Users are responsible for maintaining the security of their accounts</li>
-            <li>We cannot guarantee absolute protection against all security threats</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">10. Modification of Services</h2>
-          <p>
-            SCS reserves the right to modify, suspend, or discontinue any aspect of our services at any time without
-            prior notice. This includes but is not limited to:
-          </p>
-          <ul className="list-disc pl-6 mb-4">
-            <li>League formats and structures</li>
-            <li>Rules and regulations</li>
-            <li>Website features and functionality</li>
-            <li>Scoring systems and statistics tracking</li>
-          </ul>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">11. Governing Law</h2>
-          <p>
-            This disclaimer and any disputes arising out of or related to it shall be governed by and construed in
-            accordance with applicable local laws. Any legal action or proceeding arising under this disclaimer will be
-            brought exclusively in the appropriate courts.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">12. Changes to This Disclaimer</h2>
-          <p>
-            We reserve the right to update or modify this disclaimer at any time without prior notice. Changes will be
-            effective immediately upon posting to the website. Your continued use of our services after any such changes
-            constitutes acceptance of the new disclaimer.
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">13. Contact Information</h2>
-          <p>If you have any questions about this disclaimer or need clarification on any points, please contact us:</p>
-          <div className="bg-muted p-4 rounded-lg mt-4">
-            <p>
-              <strong>Email:</strong>{" "}
-              <a href="mailto:midnightstudiosintl@outlook.com" className="text-primary hover:underline">
-                lispdoge@gmail.com
-              </a>
-            </p>
-            <p>
-              <strong>Discord:</strong>{" "}
-              <a
-                href="https://discord.gg/scs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                SCS Discord Server
-              </a>
+      <div className="relative container mx-auto px-4 py-8">
+        <div className="relative z-10">
+          {/* Header Section */}
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-red-200 to-orange-200 bg-clip-text text-transparent">
+              Legal Disclaimer
+            </h1>
+            <p className="text-xl text-red-200 mb-8">
+              Important information about our services and your responsibilities
             </p>
           </div>
-        </section>
 
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">14. Acknowledgment</h2>
-          <p>
-            By using the SCS website and services, you acknowledge that you have read, understood, and agree to be
-            bound by this disclaimer. If you do not agree with any part of this disclaimer, please discontinue use of
-            our services immediately.
-          </p>
-        </section>
+          {/* Disclaimer Statistics */}
+          <DisclaimerStats />
+
+          {/* Main Content */}
+          <div className="animate-slide-up" style={{ animationDelay: "500ms" }}>
+            <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+              <CardContent className="p-6">
+                <div className="prose prose-gray dark:prose-invert max-w-none">
+                  <div className="mb-8 p-4 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 rounded-lg">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Calendar className="h-6 w-6 text-red-400" />
+                      <p className="text-sm text-red-300">
+                        <strong>Last Updated:</strong> July 1, 2025
+                      </p>
+                    </div>
+                  </div>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "600ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <AlertTriangle className="h-6 w-6 text-red-400" />
+                      <h2 className="text-2xl font-bold text-white">1. General Disclaimer</h2>
+                    </div>
+                    <p className="text-white/80">
+                      The information provided on the Secret Chel Society (SCS) website and through our services is for general
+                      informational purposes only. While we strive to keep the information up to date and correct, we make no
+                      representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability,
+                      suitability, or availability of the information, products, services, or related graphics contained on the
+                      website for any purpose.
+                    </p>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "700ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="h-6 w-6 text-orange-400" />
+                      <h2 className="text-2xl font-bold text-white">2. Gaming and Entertainment</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      SCS is a gaming community focused on NHL video game competitions. Please note:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>Our services are for entertainment purposes only</li>
+                      <li>We are not affiliated with the NHL, EA Sports, or any professional sports organization</li>
+                      <li>Game outcomes and statistics are for recreational purposes</li>
+                      <li>No real money gambling or betting is involved in our competitions</li>
+                      <li>All prizes and rewards are virtual or community-based</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "800ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Users className="h-6 w-6 text-yellow-400" />
+                      <h2 className="text-2xl font-bold text-white">3. User Conduct and Responsibility</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      By participating in SCS activities, you acknowledge and agree to:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>Maintain appropriate and respectful behavior at all times</li>
+                      <li>Follow our community guidelines and code of conduct</li>
+                      <li>Not engage in cheating, hacking, or exploiting game mechanics</li>
+                      <li>Respect other players and community members</li>
+                      <li>Report any violations or suspicious activity to moderators</li>
+                      <li>Take responsibility for your own actions and communications</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "900ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Info className="h-6 w-6 text-blue-400" />
+                      <h2 className="text-2xl font-bold text-white">4. Technical Disclaimers</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      We provide the following technical disclaimers:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>Website availability and performance may vary</li>
+                      <li>Game servers and connectivity are beyond our control</li>
+                      <li>Data loss or corruption may occur despite our best efforts</li>
+                      <li>Third-party services (Discord, gaming platforms) have their own terms of service</li>
+                      <li>We are not responsible for technical issues with your gaming equipment or internet connection</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1000ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <FileText className="h-6 w-6 text-green-400" />
+                      <h2 className="text-2xl font-bold text-white">5. Intellectual Property</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      Intellectual property considerations:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>NHL and EA Sports trademarks and copyrights are owned by their respective companies</li>
+                      <li>SCS branding and website content are our intellectual property</li>
+                      <li>User-generated content remains the property of the creator</li>
+                      <li>We reserve the right to use community content for promotional purposes</li>
+                      <li>Unauthorized use of our branding or content is prohibited</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1100ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="h-6 w-6 text-purple-400" />
+                      <h2 className="text-2xl font-bold text-white">6. Privacy and Data</h2>
+                    </div>
+                    <p className="text-white/80">
+                      While we take privacy seriously, please understand that:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>Online gaming inherently involves some data sharing</li>
+                      <li>Gaming platforms may collect additional data beyond our control</li>
+                      <li>Public gameplay and statistics may be visible to other users</li>
+                      <li>We cannot guarantee complete anonymity in competitive environments</li>
+                      <li>Please review our Privacy Policy for detailed information</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1200ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <AlertTriangle className="h-6 w-6 text-red-400" />
+                      <h2 className="text-2xl font-bold text-white">7. Limitation of Liability</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      To the fullest extent permitted by applicable law, SCS and its administrators shall not be liable for:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>Any direct, indirect, incidental, special, or consequential damages</li>
+                      <li>Loss of profits, data, or business opportunities</li>
+                      <li>Emotional distress or mental anguish</li>
+                      <li>Damages resulting from third-party actions or services</li>
+                      <li>Technical failures or service interruptions</li>
+                      <li>Disputes between community members</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1300ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Users className="h-6 w-6 text-indigo-400" />
+                      <h2 className="text-2xl font-bold text-white">8. Community Guidelines</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      Our community is built on mutual respect and fair play. We expect all members to:
+                    </p>
+                    <ul className="list-disc pl-6 mb-4 text-white/80">
+                      <li>Treat others with respect and dignity</li>
+                      <li>Maintain sportsmanlike conduct during competitions</li>
+                      <li>Follow Discord and gaming platform terms of service</li>
+                      <li>Report violations to moderators promptly</li>
+                      <li>Accept decisions made by league administrators</li>
+                      <li>Contribute positively to the community atmosphere</li>
+                    </ul>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1400ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Calendar className="h-6 w-6 text-cyan-400" />
+                      <h2 className="text-2xl font-bold text-white">9. Changes and Updates</h2>
+                    </div>
+                    <p className="text-white/80">
+                      We reserve the right to modify this disclaimer at any time. Changes will be effective immediately upon
+                      posting. Your continued use of our services constitutes acceptance of any modifications. We encourage you
+                      to review this disclaimer periodically.
+                    </p>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1500ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Info className="h-6 w-6 text-emerald-400" />
+                      <h2 className="text-2xl font-bold text-white">10. Governing Law</h2>
+                    </div>
+                    <p className="text-white/80">
+                      This disclaimer is governed by and construed in accordance with the laws of the jurisdiction where SCS
+                      operates. Any disputes arising from this disclaimer or your use of our services shall be resolved through
+                      appropriate legal channels.
+                    </p>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1600ms" }}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Mail className="h-6 w-6 text-blue-400" />
+                      <h2 className="text-2xl font-bold text-white">11. Contact Information</h2>
+                    </div>
+                    <p className="text-white/80 mb-4">
+                      If you have questions about this disclaimer or need clarification on any terms, please contact us:
+                    </p>
+                    <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 p-4 rounded-lg mt-4">
+                      <p className="text-white/80 mb-2">
+                        <strong>Email:</strong>{" "}
+                        <a href="mailto:midnightstudiosintl@outlook.com" className="text-red-300 hover:text-red-200 hover:underline">
+                          midnightstudiosintl@outlook.com
+                        </a>
+                      </p>
+                      <p className="text-white/80">
+                        <strong>Discord:</strong>{" "}
+                        <a
+                          href="https://discord.gg/scs"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-300 hover:text-red-200 hover:underline"
+                        >
+                          SCS Discord Server
+                        </a>
+                      </p>
+                    </div>
+                  </section>
+
+                  <section className="mb-8 animate-slide-in" style={{ animationDelay: "1700ms" }}>
+                    <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 p-6 rounded-lg">
+                      <div className="flex items-center gap-3 mb-4">
+                        <AlertTriangle className="h-8 w-8 text-yellow-400" />
+                        <h3 className="text-xl font-bold text-yellow-200">Important Notice</h3>
+                      </div>
+                      <p className="text-yellow-300">
+                        By using our services, you acknowledge that you have read, understood, and agree to be bound by this
+                        disclaimer. If you do not agree with any part of this disclaimer, please do not use our services.
+                        Participation in SCS activities indicates your acceptance of these terms.
+                      </p>
+                    </div>
+                  </section>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
