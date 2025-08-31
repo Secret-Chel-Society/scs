@@ -38,6 +38,12 @@ const nextConfig = {
     }
     return config;
   },
+  experimental: {
+    // Disable the export * restriction for client boundaries
+    clientComponents: {
+      allowExportAll: true,
+    },
+  },
 };
 
 export default nextConfig;

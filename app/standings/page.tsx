@@ -7,7 +7,6 @@ import TeamStandings from "@/components/team-standings"
 import { PlayoffBracket } from "@/components/standings/playoff-bracket"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { motion } from "framer-motion"
 import { Trophy, Target, TrendingUp, Star, Award, Medal, Crown, Zap } from "lucide-react"
 import Image from "next/image"
 
@@ -51,11 +50,7 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
   return (
     <div className="space-y-8">
       {/* Playoff Teams */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
+      <div className="animate-fade-in">
         <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-200">
@@ -69,12 +64,10 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
           <CardContent>
             <div className="grid gap-3">
               {playoffTeams.map((team, index) => (
-                <motion.div
+                <div
                   key={team.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-400/20 hover:border-green-400/40 transition-all duration-300"
+                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-400/20 hover:border-green-400/40 transition-all duration-300 animate-slide-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative">
@@ -111,20 +104,16 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                       {team.wins}-{team.losses}-{team.otl}
                     </span>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Bubble Teams */}
       {bubbleTeams.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
+        <div className="animate-fade-in" style={{ animationDelay: "400ms" }}>
           <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-200">
@@ -138,12 +127,10 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
             <CardContent>
               <div className="grid gap-3">
                 {bubbleTeams.map((team, index) => (
-                  <motion.div
+                  <div
                     key={team.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                    className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 backdrop-blur-sm border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300"
+                    className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 backdrop-blur-sm border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 animate-slide-in"
+                    style={{ animationDelay: `${500 + index * 100}ms` }}
                   >
                     <div className="flex items-center gap-4">
                       <Badge
@@ -163,12 +150,12 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                         {playoffTeams[7] ? `${playoffTeams[7].points - team.points} back` : ""}
                       </span>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
     </div>
   )
@@ -181,29 +168,24 @@ function StandingsStats({ standings }: { standings: TeamStanding[] }) {
   const avgPoints = totalTeams > 0 ? Math.round(totalPoints / totalTeams) : 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
-    >
-      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
         <div className="text-3xl font-bold text-blue-200 mb-2">{totalTeams}</div>
         <div className="text-blue-300">Total Teams</div>
       </div>
-      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center">
+      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
         <div className="text-3xl font-bold text-green-200 mb-2">{totalGames}</div>
         <div className="text-green-300">Games Played</div>
       </div>
-      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center">
+      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
         <div className="text-3xl font-bold text-purple-200 mb-2">{totalPoints}</div>
         <div className="text-purple-300">Total Points</div>
       </div>
-      <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center">
+      <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "400ms" }}>
         <div className="text-3xl font-bold text-yellow-200 mb-2">{avgPoints}</div>
         <div className="text-yellow-300">Avg Points</div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -222,34 +204,19 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
       </div>
 
       <div className="relative container mx-auto px-4 py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.5 }}
-          className="relative z-10"
-        >
+        <div className="relative z-10">
           {/* Header Section */}
-          <motion.div 
-            className="text-center mb-12"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div className="text-center mb-12 animate-fade-in">
             <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
               League Standings
             </h1>
             <p className="text-xl text-purple-200 mb-8">
               Current season rankings and playoff picture
             </p>
-          </motion.div>
+          </div>
 
           {/* Season Selector */}
-          <motion.div 
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
+          <div className="mb-8 animate-slide-up" style={{ animationDelay: "300ms" }}>
             <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
               <CardContent className="p-6">
                 <div className="flex flex-wrap gap-2 justify-center">
@@ -269,17 +236,13 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Standings Statistics */}
           <StandingsStats standings={standings} />
 
           {/* Main Content Tabs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
+          <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
             <Tabs defaultValue="standings" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-sm border border-white/20">
                 <TabsTrigger 
@@ -333,8 +296,8 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                 </Card>
               </TabsContent>
             </Tabs>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   )
