@@ -402,17 +402,14 @@ export default function Home() {
                   >
                     <Link href={stat.link}>
                       <motion.div
-                        className={`bg-gradient-to-r ${stat.bgGradient} border ${stat.borderColor} rounded-2xl p-4 mb-4 backdrop-blur-sm cursor-pointer`}
+                        className={`bg-gradient-to-r ${stat.bgGradient} border ${stat.borderColor} rounded-full p-4 mb-4 backdrop-blur-sm cursor-pointer w-20 h-20 mx-auto flex items-center justify-center`}
                         whileHover={{ rotate: 360, scale: 1.1 }}
-                        animate={{ rotate: [0, 360] }}
                         transition={{ 
-                          duration: 8, 
-                          repeat: Number.POSITIVE_INFINITY, 
-                          ease: "linear",
-                          hover: { duration: 0.5 }
+                          duration: 0.5,
+                          ease: "easeInOut"
                         }}
                       >
-                        <stat.icon className={`h-10 w-10 mx-auto bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} />
+                        <stat.icon className={`h-8 w-8 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} />
                       </motion.div>
                     </Link>
                     <div className={`text-4xl font-bold mb-2 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>

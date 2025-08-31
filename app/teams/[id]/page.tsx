@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { ArrowLeft, Calendar, Trophy, Award, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowLeft, Calendar, Trophy, Award, RefreshCw, ChevronLeft, ChevronRight, Users, Target, Zap, TrendingUp, Star, Crown, Medal } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { Button } from "@/components/ui/button"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
@@ -533,34 +533,38 @@ export default function TeamDetailPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 mb-8">
-          <ArrowLeft className="h-5 w-5" />
-          <Link href="/teams" className="text-muted-foreground hover:text-foreground">
-            Back to Teams
-          </Link>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-8">
+            <ArrowLeft className="h-5 w-5 text-purple-300" />
+            <Link href="/teams" className="text-purple-300 hover:text-purple-200">
+              Back to Teams
+            </Link>
+          </div>
+          <Skeleton className="h-64 w-full rounded-2xl bg-white/10 mb-8" />
+          <Skeleton className="h-96 w-full rounded-2xl bg-white/10" />
         </div>
-        <Skeleton className="h-64 w-full rounded-lg mb-8" />
-        <Skeleton className="h-96 w-full rounded-lg" />
       </div>
     )
   }
 
   if (!team) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 mb-8">
-          <ArrowLeft className="h-5 w-5" />
-          <Link href="/teams" className="text-muted-foreground hover:text-foreground">
-            Back to Teams
-          </Link>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-8">
+            <ArrowLeft className="h-5 w-5 text-purple-300" />
+            <Link href="/teams" className="text-purple-300 hover:text-purple-200">
+              Back to Teams
+            </Link>
+          </div>
+          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+            <CardContent className="p-12 text-center">
+              <h1 className="text-2xl font-bold mb-4 text-white">Team Not Found</h1>
+              <p className="text-purple-300">The team you are looking for does not exist or has been removed.</p>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardContent className="p-12 text-center">
-            <h1 className="text-2xl font-bold mb-4">Team Not Found</h1>
-            <p className="text-muted-foreground">The team you are looking for does not exist or has been removed.</p>
-          </CardContent>
-        </Card>
       </div>
     )
   }
@@ -578,535 +582,541 @@ export default function TeamDetailPage() {
     .sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime())
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            <ArrowLeft className="h-5 w-5" />
-            <Link href="/teams" className="text-muted-foreground hover:text-foreground">
-              Back to Teams
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative container mx-auto px-4 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.5 }}
+          className="relative z-10"
+        >
+          {/* Navigation */}
+          <div className="flex items-center justify-between mb-8">
+            <motion.div 
+              className="flex items-center gap-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ArrowLeft className="h-5 w-5 text-purple-300" />
+              <Link href="/teams" className="text-purple-300 hover:text-purple-200 transition-colors">
+                Back to Teams
+              </Link>
+            </motion.div>
+
+            {session?.user && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={refreshTeamStats} 
+                  disabled={refreshing}
+                  className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20 hover:border-purple-400/50"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+                  Refresh Stats
+                </Button>
+              </motion.div>
+            )}
           </div>
 
-          {session?.user && (
-            <Button variant="outline" size="sm" onClick={refreshTeamStats} disabled={refreshing}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
-              Refresh Stats
-            </Button>
-          )}
-        </div>
+          {/* Team Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="mb-8 overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+              <div className="bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-pink-500/20 p-8">
+                <div className="flex flex-col lg:flex-row items-center gap-8">
+                  {/* Team Logo */}
+                  <motion.div 
+                    className="relative h-40 w-40"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    {team.logo_url ? (
+                      <Image 
+                        src={team.logo_url || "/placeholder.svg"} 
+                        alt={team.name} 
+                        fill 
+                        className="object-contain drop-shadow-2xl" 
+                      />
+                    ) : (
+                      <TeamLogo teamName={team.name} size="xl" />
+                    )}
+                  </motion.div>
 
-        {/* Team Header */}
-        <Card className="mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary/20 to-primary/5 p-6">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="relative h-32 w-32">
-                {team.logo_url ? (
-                  <Image src={team.logo_url || "/placeholder.svg"} alt={team.name} fill className="object-contain" />
-                ) : (
-                  <TeamLogo teamName={team.name} size="xl" />
-                )}
-              </div>
-
-              <div className="text-center md:text-left">
-                <h1 className="text-3xl font-bold mb-2">{team.name}</h1>
-                <div className="text-lg text-muted-foreground mb-4">
-                  Record: {team.wins}-{team.losses}-{team.otl}
-                </div>
-
-                <div className="flex flex-wrap justify-center md:justify-start gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{team.points}</div>
-                    <div className="text-sm text-muted-foreground">Points</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{team.games_played}</div>
-                    <div className="text-sm text-muted-foreground">Games Played</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{team.goals_for}</div>
-                    <div className="text-sm text-muted-foreground">Goals For</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{team.goals_against}</div>
-                    <div className="text-sm text-muted-foreground">Goals Against</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">
-                      {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Goal Diff</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Team Awards */}
-        {awards && awards.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-yellow-500" />
-                Team Awards
-              </CardTitle>
-              <CardDescription>Achievements and honors earned by {team.name}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-3">
-                {awards.map((award) => {
-                  const isPresident = award.award_type === "President Trophy"
-                  const isCup = award.award_type === "SCS Cup"
-
-                  return (
-                    <div
-                      key={award.id}
-                      className={`flex items-center gap-3 p-3 rounded-lg ${
-                        isPresident
-                          ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
-                          : isCup
-                            ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
-                            : "bg-muted/50"
-                      }`}
+                  {/* Team Info */}
+                  <div className="text-center lg:text-left flex-1">
+                    <motion.h1 
+                      className="text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
                     >
-                      <div
-                        className={`p-2 rounded-full ${
-                          isPresident
-                            ? "bg-blue-100 dark:bg-blue-800"
-                            : isCup
-                              ? "bg-yellow-100 dark:bg-yellow-800"
-                              : "bg-muted"
-                        }`}
-                      >
-                        {isPresident ? (
-                          <Award className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                        ) : isCup ? (
-                          <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-                        ) : (
-                          <Award className="h-6 w-6" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-medium">{award.award_type}</div>
-                        <div className="text-sm text-muted-foreground">
-                          Season {award.season_number} ({award.year})
+                      {team.name}
+                    </motion.h1>
+                    
+                    <motion.div 
+                      className="text-xl text-purple-300 mb-6 font-medium"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.8 }}
+                    >
+                      Record: {team.wins}-{team.losses}-{team.otl}
+                    </motion.div>
+
+                    {/* Team Stats Grid */}
+                    <motion.div 
+                      className="grid grid-cols-2 md:grid-cols-5 gap-4"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.0 }}
+                    >
+                      <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-sm border border-blue-400/30 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-200 flex items-center justify-center gap-2">
+                          <TrendingUp className="h-5 w-5" />
+                          {team.points}
                         </div>
-                        {award.description && <div className="text-sm mt-1">{award.description}</div>}
+                        <div className="text-sm text-blue-300">Points</div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Tabs defaultValue="roster" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="roster">Roster</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="stats">Team Stats</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="roster">
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Roster</CardTitle>
-                <CardDescription>Players currently on {team.name}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {roster.length > 0 ? (
-                  <div className="rounded-md border overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Player</TableHead>
-                          <TableHead className="text-center">Position</TableHead>
-                          <TableHead className="text-center">Role</TableHead>
-                          <TableHead className="text-center">Gamer Tag</TableHead>
-                          <TableHead className="text-center">Console</TableHead>
-                          <TableHead className="text-center">Salary</TableHead>
-                          <TableHead className="text-center">Points</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedRoster.map((player) => (
-                          <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
-                            <TableCell>
-                              <Link href={`/players/${player.id}`} className="hover:text-primary transition-colors">
-                                {player.user.gamer_tag_id}
-                              </Link>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {getPositionAbbreviation(player.user.primary_position || "Unknown")}
-                              {player.user.secondary_position &&
-                                `/${getPositionAbbreviation(player.user.secondary_position)}`}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              {player.role === "Owner" ? (
-                                <span className="inline-flex items-center">
-                                  {player.role} <Trophy className="h-4 w-4 ml-1 text-yellow-500" />
-                                </span>
-                              ) : (
-                                player.role
-                              )}
-                            </TableCell>
-                            <TableCell className="text-center">{player.user.gamer_tag_id}</TableCell>
-                            <TableCell className="text-center">{player.user.console || "Unknown"}</TableCell>
-                            <TableCell className="text-center">${(player.salary / 1000000).toFixed(2)}M</TableCell>
-                            <TableCell className="text-center font-bold">
-                              {player.user.primary_position === "G" || player.user.primary_position === "Goalie"
-                                ? "N/A" // For goalies, we'd show different stats
-                                : player.stats?.points || 0}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                      <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 backdrop-blur-sm border border-green-400/30 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-green-200 flex items-center justify-center gap-2">
+                          <Target className="h-5 w-5" />
+                          {team.games_played}
+                        </div>
+                        <div className="text-sm text-green-300">Games</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-sm border border-yellow-400/30 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-yellow-200 flex items-center justify-center gap-2">
+                          <Zap className="h-5 w-5" />
+                          {team.goals_for}
+                        </div>
+                        <div className="text-sm text-yellow-300">Goals For</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-red-500/20 to-red-600/20 backdrop-blur-sm border border-red-400/30 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-red-200 flex items-center justify-center gap-2">
+                          <Target className="h-5 w-5" />
+                          {team.goals_against}
+                        </div>
+                        <div className="text-sm text-red-300">Goals Against</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-200 flex items-center justify-center gap-2">
+                          <Star className="h-5 w-5" />
+                          {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
+                        </div>
+                        <div className="text-sm text-purple-300">Goal Diff</div>
+                      </div>
+                    </motion.div>
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">No players currently on this team.</div>
-                )}
-              </CardContent>
+                </div>
+              </div>
             </Card>
-          </TabsContent>
+          </motion.div>
 
-          <TabsContent value="schedule">
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Schedule</CardTitle>
-                <CardDescription>Games for {team.name} organized by week</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Week Navigation */}
-                {totalWeeks > 1 && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+          {/* Team Awards */}
+          {awards && awards.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2 }}
+              className="mb-8"
+            >
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-white">
+                    <div className="p-2 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-full">
+                      <Trophy className="h-6 w-6 text-yellow-400" />
+                    </div>
+                    Team Awards
+                  </CardTitle>
+                  <CardDescription className="text-purple-300">
+                    Achievements and honors earned by {team.name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {awards.map((award, index) => {
+                      const isPresident = award.award_type === "President Trophy"
+                      const isCup = award.award_type === "SCS Cup"
+
+                      return (
+                        <motion.div
+                          key={award.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 1.4 + index * 0.1 }}
+                          className={`p-4 rounded-xl backdrop-blur-sm border ${
+                            isPresident
+                              ? "bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-blue-400/30"
+                              : isCup
+                                ? "bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-yellow-400/30"
+                                : "bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-400/30"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`p-3 rounded-full ${
+                                isPresident
+                                  ? "bg-gradient-to-br from-blue-500/30 to-indigo-500/30"
+                                  : isCup
+                                    ? "bg-gradient-to-br from-yellow-500/30 to-amber-500/30"
+                                    : "bg-gradient-to-br from-purple-500/30 to-pink-500/30"
+                              }`}
+                            >
+                              {isPresident ? (
+                                <Crown className="h-6 w-6 text-blue-300" />
+                              ) : isCup ? (
+                                <Trophy className="h-6 w-6 text-yellow-300" />
+                              ) : (
+                                <Medal className="h-6 w-6 text-purple-300" />
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-medium text-white">{award.award_type}</div>
+                              <div className="text-sm text-purple-300">
+                                Season {award.season_number} ({award.year})
+                              </div>
+                              {award.description && (
+                                <div className="text-sm mt-1 text-purple-200">{award.description}</div>
+                              )}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Management Button */}
+          {canManageTeam && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.6 }}
+              className="mb-8"
+            >
+              <Link href={`/teams/${teamId}/manage`}>
+                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-6 text-lg">
+                  <Users className="h-5 w-5 mr-2" />
+                  Manage Team
+                </Button>
+              </Link>
+            </motion.div>
+          )}
+
+          {/* Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.8 }}
+          >
+            <Tabs defaultValue="roster" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-sm border border-white/20">
+                <TabsTrigger 
+                  value="roster" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-white"
+                >
+                  Roster
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="schedule" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:text-white"
+                >
+                  Schedule
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="matches" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:text-white"
+                >
+                  Matches
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="roster" className="mt-6">
+                <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                  <CardHeader>
+                    <CardTitle className="text-white">Team Roster</CardTitle>
+                    <CardDescription className="text-purple-300">
+                      {roster.length} players on the roster
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="border-white/20 hover:bg-white/5">
+                            <TableHead className="text-purple-300">Player</TableHead>
+                            <TableHead className="text-purple-300">Position</TableHead>
+                            <TableHead className="text-purple-300">Role</TableHead>
+                            <TableHead className="text-purple-300">Salary</TableHead>
+                            <TableHead className="text-purple-300">Goals</TableHead>
+                            <TableHead className="text-purple-300">Assists</TableHead>
+                            <TableHead className="text-purple-300">Points</TableHead>
+                            {roster.some((player) => player.user.primary_position === "G" || player.user.primary_position === "Goalie") && (
+                              <>
+                                <TableHead className="text-purple-300">Saves</TableHead>
+                                <TableHead className="text-purple-300">Save %</TableHead>
+                              </>
+                            )}
+                            <TableHead className="text-purple-300">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {sortedRoster.map((player) => (
+                            <TableRow key={player.id} className="border-white/20 hover:bg-white/5">
+                              <TableCell className="font-medium text-white">
+                                {player.user.gamer_tag_id}
+                              </TableCell>
+                              <TableCell className="text-purple-300">
+                                {getPositionAbbreviation(player.user.primary_position)}
+                                {player.user.secondary_position && ` / ${getPositionAbbreviation(player.user.secondary_position)}`}
+                              </TableCell>
+                              <TableCell className="text-purple-300">{player.role}</TableCell>
+                              <TableCell className="text-purple-300">
+                                ${(player.salary / 1000000).toFixed(1)}M
+                              </TableCell>
+                              <TableCell className="text-purple-300">{player.stats?.goals || 0}</TableCell>
+                              <TableCell className="text-purple-300">{player.stats?.assists || 0}</TableCell>
+                              <TableCell className="text-purple-300 font-semibold">{player.stats?.points || 0}</TableCell>
+                              {(player.user.primary_position === "G" || player.user.primary_position === "Goalie") && (
+                                <>
+                                  <TableCell className="text-purple-300">{player.stats?.saves || 0}</TableCell>
+                                  <TableCell className="text-purple-300">
+                                    {player.stats?.save_percentage ? `${player.stats.save_percentage.toFixed(1)}%` : "N/A"}
+                                  </TableCell>
+                                </>
+                              )}
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <GameAvailabilityButton
+                                    teamId={teamId}
+                                    userId={player.user_id}
+                                    gamerTag={player.user.gamer_tag_id}
+                                  />
+                                  <InjuryReserveButton
+                                    teamId={teamId}
+                                    userId={player.user_id}
+                                    gamerTag={player.user.gamer_tag_id}
+                                  />
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="schedule" className="mt-6">
+                <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                  <CardHeader>
+                    <CardTitle className="text-white">Team Schedule</CardTitle>
+                    <CardDescription className="text-purple-300">
+                      Weekly match schedule and availability
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Week Navigation */}
+                    <div className="flex items-center justify-between mb-6">
                       <Button
                         variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentWeek(currentWeek - 1)}
+                        onClick={() => setCurrentWeek(Math.max(1, currentWeek - 1))}
                         disabled={currentWeek === 1}
+                        className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20"
                       >
                         <ChevronLeft className="h-4 w-4" />
-                        Previous Week
                       </Button>
-
                       <div className="text-center">
-                        <div className="font-semibold">
-                          Week {currentWeek} of {totalWeeks}
-                        </div>
-                        <div className="text-sm text-muted-foreground">{getWeekDateRange(currentWeek)}</div>
+                        <div className="text-lg font-semibold text-white">Week {currentWeek}</div>
+                        <div className="text-sm text-purple-300">{getWeekDateRange(currentWeek)}</div>
                       </div>
-
                       <Button
                         variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentWeek(currentWeek + 1)}
+                        onClick={() => setCurrentWeek(Math.min(totalWeeks, currentWeek + 1))}
                         disabled={currentWeek === totalWeeks}
+                        className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20"
                       >
-                        Next Week
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
 
-                    {/* Week selector for quick navigation */}
-                    <Select
-                      value={currentWeek.toString()}
-                      onValueChange={(value) => setCurrentWeek(Number.parseInt(value))}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
-                          <SelectItem key={week} value={week.toString()}>
-                            Week {week}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* IR Request Button - Show once per week */}
-                {isUserOnTeam && weekMatches.length > 0 && (
-                  <div className="flex justify-between items-center p-4 bg-muted/30 rounded-lg">
-                    <div>
-                      <h3 className="font-medium">Week {currentWeek} Injury Reserve</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Request IR for the entire week ({getWeekDateRange(currentWeek)})
-                      </p>
-                    </div>
-                    <InjuryReserveButton
-                      teamId={team.id}
-                      isUserOnTeam={isUserOnTeam}
-                      matches={weekMatches}
-                      currentSeasonId={currentSeasonId || 1}
-                    />
-                  </div>
-                )}
-
-                {/* Matches for current week */}
-                {weekMatches.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No games scheduled for Week {currentWeek}</p>
-                  </div>
-                ) : (
-                  <div className="rounded-md border overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Matchup</TableHead>
-                          <TableHead className="text-center">Status</TableHead>
-                          {isUserOnTeam && <TableHead className="text-center">Availability</TableHead>}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {weekMatches.map((match) => {
-                          const matchDate = new Date(match.match_date)
-                          const formattedDate = matchDate.toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          })
-                          const formattedTime = matchDate.toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-
-                          return (
-                            <TableRow key={match.id} className="hover:bg-muted/50 transition-colors">
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                                  <div>
-                                    <div>{formattedDate}</div>
-                                    <div className="text-sm text-muted-foreground">{formattedTime}</div>
-                                  </div>
+                    {/* Week Matches */}
+                    <div className="space-y-4">
+                      {weekMatches.length === 0 ? (
+                        <div className="text-center py-8 text-purple-300">
+                          No matches scheduled for this week.
+                        </div>
+                      ) : (
+                        weekMatches.map((match) => (
+                          <div
+                            key={match.id}
+                            className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="text-center">
+                                  <div className="font-semibold text-white">{match.home_team.name}</div>
+                                  <div className="text-2xl font-bold text-purple-300">{match.home_score}</div>
                                 </div>
-                              </TableCell>
-                              <TableCell>
-                                <Link href={`/matches/${match.id}`} className="hover:text-primary transition-colors">
-                                  {match.home_team.name} vs {match.away_team.name}
-                                  {(match.status === "Completed" || match.status === "completed") && (
-                                    <div className="text-sm text-muted-foreground">
-                                      {match.home_score} - {match.away_score}
-                                    </div>
-                                  )}
-                                </Link>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span
-                                  className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                    match.status === "Completed" || match.status === "completed"
-                                      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
-                                      : match.status === "In Progress"
-                                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                                        : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
-                                  }`}
-                                >
-                                  {match.status}
-                                </span>
-                              </TableCell>
-                              {isUserOnTeam && currentUserPlayer && (
-                                <TableCell className="text-center">
-                                  <GameAvailabilityButton
-                                    matchId={match.id}
-                                    playerId={currentUserPlayer.id}
-                                    userId={session?.user?.id || ""}
-                                    teamId={team.id}
-                                  />
-                                </TableCell>
-                              )}
-                            </TableRow>
-                          )
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="stats">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Team Statistics</CardTitle>
-                  <CardDescription>Overall performance metrics</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{team.games_played}</div>
-                        <div className="text-sm text-muted-foreground">Games Played</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{team.points}</div>
-                        <div className="text-sm text-muted-foreground">Total Points</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">
-                          {team.games_played > 0 ? ((team.wins / team.games_played) * 100).toFixed(1) : "0.0"}%
-                        </div>
-                        <div className="text-sm text-muted-foreground">Win Percentage</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">
-                          {team.games_played > 0 ? (team.goals_for / team.games_played).toFixed(2) : "0.00"}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Goals Per Game</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">
-                          {team.games_played > 0 ? (team.goals_against / team.games_played).toFixed(2) : "0.00"}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Goals Against Per Game</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">
-                          {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Goal Differential</div>
-                      </div>
+                                <div className="text-purple-300 font-medium">vs</div>
+                                <div className="text-center">
+                                  <div className="font-semibold text-white">{match.away_team.name}</div>
+                                  <div className="text-2xl font-bold text-purple-300">{match.away_score}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm text-purple-300">
+                                  {new Date(match.match_date).toLocaleDateString()}
+                                </div>
+                                <div className="text-xs text-purple-400 capitalize">{match.status}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Performers</CardTitle>
-                  <CardDescription>Leading players on the team</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {roster.length > 0 ? (
+              <TabsContent value="matches" className="mt-6">
+                <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                  <CardHeader>
+                    <CardTitle className="text-white">All Matches</CardTitle>
+                    <CardDescription className="text-purple-300">
+                      Complete match history and upcoming games
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="space-y-6">
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Points Leaders</h3>
-                        <div className="space-y-2">
-                          {sortedRoster
-                            .filter(
-                              (player) =>
-                                player.user.primary_position !== "G" && player.user.primary_position !== "Goalie",
-                            )
-                            .slice(0, 3)
-                            .map((player, index) => (
+                      {/* Upcoming Matches */}
+                      {upcomingMatches.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-4">Upcoming Matches</h3>
+                          <div className="space-y-3">
+                            {upcomingMatches.map((match) => (
                               <div
-                                key={player.id}
-                                className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
+                                key={match.id}
+                                className="p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-400/20"
                               >
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
-                                    {index + 1}
-                                  </div>
-                                  <Link
-                                    href={`/players/${player.id}`}
-                                    className="font-medium hover:text-primary transition-colors"
-                                  >
-                                    {player.user.gamer_tag_id} (
-                                    {getPositionAbbreviation(player.user.primary_position || "Unknown")}
-                                    {player.user.secondary_position &&
-                                      `/${getPositionAbbreviation(player.user.secondary_position)}`}
-                                    )
-                                  </Link>
-                                </div>
-                                <div className="font-bold">{player.stats?.points || 0} PTS</div>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Goal Scorers</h3>
-                        <div className="space-y-2">
-                          {[...sortedRoster]
-                            .filter(
-                              (player) =>
-                                player.user.primary_position !== "G" && player.user.primary_position !== "Goalie",
-                            )
-                            .sort((a, b) => (b.stats?.goals || 0) - (a.stats?.goals || 0))
-                            .slice(0, 3)
-                            .map((player, index) => (
-                              <div
-                                key={player.id}
-                                className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
-                                    {index + 1}
-                                  </div>
-                                  <Link
-                                    href={`/players/${player.id}`}
-                                    className="font-medium hover:text-primary transition-colors"
-                                  >
-                                    {player.user.gamer_tag_id}
-                                  </Link>
-                                </div>
-                                <div className="font-bold">{player.stats?.goals || 0} G</div>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-2">Goaltending</h3>
-                        <div className="space-y-2">
-                          {sortedRoster
-                            .filter(
-                              (player) =>
-                                player.user.primary_position === "G" || player.user.primary_position === "Goalie",
-                            )
-                            .map((player) => (
-                              <div
-                                key={player.id}
-                                className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
-                              >
-                                <Link
-                                  href={`/players/${player.id}`}
-                                  className="font-medium hover:text-primary transition-colors"
-                                >
-                                  {player.user.gamer_tag_id}
-                                </Link>
-                                <div className="font-bold">
-                                  {player.stats?.save_percentage !== undefined && player.stats.save_percentage > 0 ? (
-                                    <div className="text-right">
-                                      <div>{player.stats.save_percentage.toFixed(1)}% SV%</div>
-                                      <div className="text-xs text-muted-foreground">
-                                        {player.stats.saves}/
-                                        {player.stats.shots_against || player.stats.saves + player.stats.goals_against}{" "}
-                                        ({player.stats.goals_against} GA)
-                                      </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="text-center">
+                                      <div className="font-semibold text-white">{match.home_team.name}</div>
+                                      <div className="text-lg font-bold text-green-300">-</div>
                                     </div>
-                                  ) : (
-                                    <div className="text-muted-foreground">No stats</div>
-                                  )}
+                                    <div className="text-green-300 font-medium">vs</div>
+                                    <div className="text-center">
+                                      <div className="font-semibold text-white">{match.away_team.name}</div>
+                                      <div className="text-lg font-bold text-green-300">-</div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-sm text-green-300">
+                                      {new Date(match.match_date).toLocaleDateString()}
+                                    </div>
+                                    <div className="text-xs text-green-400">Scheduled</div>
+                                  </div>
                                 </div>
                               </div>
                             ))}
-                          {sortedRoster.filter(
-                            (player) =>
-                              player.user.primary_position === "G" || player.user.primary_position === "Goalie",
-                          ).length === 0 && (
-                            <div className="text-center py-2 text-muted-foreground">No goalies on roster</div>
-                          )}
+                          </div>
                         </div>
-                      </div>
+                      )}
+
+                      {/* Completed Matches */}
+                      {completedMatches.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-4">Completed Matches</h3>
+                          <div className="space-y-3">
+                            {completedMatches.map((match) => (
+                              <div
+                                key={match.id}
+                                className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 backdrop-blur-sm border border-blue-400/20"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="text-center">
+                                      <div className="font-semibold text-white">{match.home_team.name}</div>
+                                      <div className="text-lg font-bold text-blue-300">{match.home_score}</div>
+                                    </div>
+                                    <div className="text-blue-300 font-medium">vs</div>
+                                    <div className="text-center">
+                                      <div className="font-semibold text-white">{match.away_team.name}</div>
+                                      <div className="text-lg font-bold text-blue-300">{match.away_score}</div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-sm text-blue-300">
+                                      {new Date(match.match_date).toLocaleDateString()}
+                                    </div>
+                                    <div className="text-xs text-blue-400">Completed</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {upcomingMatches.length === 0 && completedMatches.length === 0 && (
+                        <div className="text-center py-8 text-purple-300">
+                          No matches found for this team.
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">No player statistics available.</div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </motion.div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }
