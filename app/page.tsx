@@ -280,7 +280,14 @@ export default function Home() {
   }, [supabase, toast])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
       <BannedUserModal />
       <FloatingParticles />
 
@@ -342,12 +349,12 @@ export default function Home() {
         transition={{ duration: 0.8 }}
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <Card className="backdrop-blur-md bg-background/90 border-primary/20 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
+          <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-pink-500/10" />
             <CardContent className="relative p-4 lg:p-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">SCS League Statistics</h2>
-                <p className="text-muted-foreground">Real-time data from our advanced tracking system</p>
+                <h2 className="text-2xl font-bold text-white mb-2">SCS League Statistics</h2>
+                <p className="text-purple-200">Real-time data from our advanced tracking system</p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
                 {[
@@ -416,7 +423,7 @@ export default function Home() {
                       <AnimatedCounter end={stat.value} />
                     </div>
                     <div className="text-lg font-semibold mb-2 text-white">{stat.label}</div>
-                    <div className="text-sm text-slate-300">{stat.desc}</div>
+                    <div className="text-sm text-purple-200">{stat.desc}</div>
                   </motion.div>
                 ))}
               </div>
@@ -435,14 +442,14 @@ export default function Home() {
       >
         <div className="text-center mb-12">
           <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-primary to-primary/60 rounded-xl">
+            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
               <Crown className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
               About SCS
             </h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mb-6" />
+          <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-transparent rounded-full mx-auto mb-6" />
         </div>
 
         <div className="grid md:grid-cols-2 gap-4 lg:gap-8 mb-8 lg:mb-12">
@@ -452,18 +459,18 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20">
+            <Card className="h-full border-white/20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm">
               <CardContent className="p-4 lg:p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                  <GamepadIcon className="h-6 w-6 text-primary" />
+                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-white">
+                  <GamepadIcon className="h-6 w-6 text-purple-400" />
                   Premier NHL 26 League
                 </h3>
-                <p className="text-muted-foreground leading-relaxed mb-4">
+                <p className="text-purple-200 leading-relaxed mb-4">
                   The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 26
                   gaming league available today. We provide a complete hockey simulation experience with structured
                   seasons, playoffs, and championship tournaments that mirror real NHL operations.
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-purple-200 leading-relaxed">
                   We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
                   Players can engage in a full range of league activities, 
                   from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
@@ -478,18 +485,18 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20">
+            <Card className="h-full border-white/20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm">
               <CardContent className="p-4 lg:p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                  <Users className="h-6 w-6 text-primary" />
+                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-white">
+                  <Users className="h-6 w-6 text-purple-400" />
                   Professional Community
                 </h3>
-                <p className="text-muted-foreground leading-relaxed mb-4">
+                <p className="text-purple-200 leading-relaxed mb-4">
                   Connect with hundreds of dedicated NHL 26 players in a top-tier competitive environment. 
                   Our community consists of seasoned gamers and 
                   hockey enthusiasts who are passionate about strategic play and sportsmanship.
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-purple-200 leading-relaxed">
                   Competitive integrity is at the heart of our community. 
                   Our dedicated team of moderators enforces a robust rule set, 
                   fostering an environment where every match is played with sportsmanship and professionalism.
@@ -942,6 +949,32 @@ export default function Home() {
           )}
         </motion.section>
       </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }
