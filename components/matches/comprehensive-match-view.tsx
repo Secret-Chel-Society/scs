@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Trophy, Users, BarChart3, Star, Clock, Target, Zap } from "lucide-react"
@@ -388,341 +387,323 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="periods" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="periods">Period Stats</TabsTrigger>
-          <TabsTrigger value="team-stats">Team Stats</TabsTrigger>
-          <TabsTrigger value="lineups">Lineups</TabsTrigger>
-          <TabsTrigger value="player-stats">Player Stats</TabsTrigger>
-        </TabsList>
+      {/* Period Stats Panel */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Period Scoring
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Period</TableHead>
+                <TableHead className="text-center">{match.home_team.name}</TableHead>
+                <TableHead className="text-center">{match.away_team.name}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">1st Period</TableCell>
+                <TableCell className="text-center">
+                  {match.period_scores?.home?.[0] || 0}
+                </TableCell>
+                <TableCell className="text-center">
+                  {match.period_scores?.away?.[0] || 0}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">2nd Period</TableCell>
+                <TableCell className="text-center">
+                  {match.period_scores?.home?.[1] || 0}
+                </TableCell>
+                <TableCell className="text-center">
+                  {match.period_scores?.away?.[1] || 0}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">3rd Period</TableCell>
+                <TableCell className="text-center">
+                  {match.period_scores?.home?.[2] || 0}
+                </TableCell>
+                <TableCell className="text-center">
+                  {match.period_scores?.away?.[2] || 0}
+                </TableCell>
+              </TableRow>
+              {wentToOvertime && (
+                <TableRow>
+                  <TableCell className="font-medium">Overtime</TableCell>
+                  <TableCell className="text-center">
+                    {match.period_scores?.home?.[3] || 0}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {match.period_scores?.away?.[3] || 0}
+                  </TableCell>
+                </TableRow>
+              )}
+              <TableRow className="font-bold">
+                <TableCell>Total</TableCell>
+                <TableCell className="text-center">{match.home_score}</TableCell>
+                <TableCell className="text-center">{match.away_score}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-        {/* Period Stats */}
-        <TabsContent value="periods" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Period Scoring
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+      {/* Team Stats Panel */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Team Statistics
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Stat</TableHead>
+                <TableHead className="text-center">{match.home_team.name}</TableHead>
+                <TableHead className="text-center">{match.away_team.name}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">Goals</TableCell>
+                <TableCell className="text-center">{homeStats?.goals || 0}</TableCell>
+                <TableCell className="text-center">{awayStats?.goals || 0}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Shots</TableCell>
+                <TableCell className="text-center">{homeStats?.shots || 0}</TableCell>
+                <TableCell className="text-center">{awayStats?.shots || 0}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Hits</TableCell>
+                <TableCell className="text-center">{homeStats?.hits || 0}</TableCell>
+                <TableCell className="text-center">{awayStats?.hits || 0}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Faceoff %</TableCell>
+                <TableCell className="text-center">
+                  {getFaceoffPercentage(homeStats?.faceoff_wins || 0, homeStats?.faceoff_attempts || 0)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getFaceoffPercentage(awayStats?.faceoff_wins || 0, awayStats?.faceoff_attempts || 0)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Pass %</TableCell>
+                <TableCell className="text-center">
+                  {getPassPercentage(homeStats?.pass_completed || 0, homeStats?.pass_attempted || 0)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getPassPercentage(awayStats?.pass_completed || 0, awayStats?.pass_attempted || 0)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">PIM</TableCell>
+                <TableCell className="text-center">{homeStats?.pim || 0}</TableCell>
+                <TableCell className="text-center">{awayStats?.pim || 0}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Lineups Panel */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {match.home_team.name} Lineup
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {homePlayerStats.length > 0 ? (
+                homePlayerStats.map((player) => (
+                  <div key={player.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div>
+                      <div className="font-medium">{player.gamer_tag_id}</div>
+                      <div className="text-sm text-muted-foreground">{player.position}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{player.time_on_ice}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {player.goals}G {player.assists}A {player.points}P
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground">No lineup data available</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {match.away_team.name} Lineup
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {awayPlayerStats.length > 0 ? (
+                awayPlayerStats.map((player) => (
+                  <div key={player.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                    <div>
+                      <div className="font-medium">{player.gamer_tag_id}</div>
+                      <div className="text-sm text-muted-foreground">{player.position}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium">{player.time_on_ice}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {player.goals}G {player.assists}A {player.points}P
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground">No lineup data available</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Three Stars Panel */}
+      {threeStars && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5" />
+              Three Stars
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {threeStars.first_star && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+                  <Badge variant="default" className="bg-yellow-600">⭐ 1st Star</Badge>
+                  <div>
+                    <div className="font-medium">{threeStars.first_star.gamer_tag_id}</div>
+                    <div className="text-sm text-muted-foreground">{threeStars.first_star.team_name}</div>
+                  </div>
+                </div>
+              )}
+              {threeStars.second_star && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-950/20 border border-gray-200 dark:border-gray-800">
+                  <Badge variant="secondary">⭐ 2nd Star</Badge>
+                  <div>
+                    <div className="font-medium">{threeStars.second_star.gamer_tag_id}</div>
+                    <div className="text-sm text-muted-foreground">{threeStars.second_star.team_name}</div>
+                  </div>
+                </div>
+              )}
+              {threeStars.third_star && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+                  <Badge variant="outline">⭐ 3rd Star</Badge>
+                  <div>
+                    <div className="font-medium">{threeStars.third_star.gamer_tag_id}</div>
+                    <div className="text-sm text-muted-foreground">{threeStars.third_star.team_name}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Player Statistics Panels */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>{match.home_team.name} Player Stats</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Period</TableHead>
-                    <TableHead className="text-center">{match.home_team.name}</TableHead>
-                    <TableHead className="text-center">{match.away_team.name}</TableHead>
+                    <TableHead>Player</TableHead>
+                    <TableHead className="text-center">G</TableHead>
+                    <TableHead className="text-center">A</TableHead>
+                    <TableHead className="text-center">P</TableHead>
+                    <TableHead className="text-center">+/-</TableHead>
+                    <TableHead className="text-center">PIM</TableHead>
+                    <TableHead className="text-center">SOG</TableHead>
+                    <TableHead className="text-center">Hits</TableHead>
+                    <TableHead className="text-center">TOI</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">1st Period</TableCell>
-                    <TableCell className="text-center">
-                      {match.period_scores?.home?.[0] || 0}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {match.period_scores?.away?.[0] || 0}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">2nd Period</TableCell>
-                    <TableCell className="text-center">
-                      {match.period_scores?.home?.[1] || 0}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {match.period_scores?.away?.[1] || 0}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">3rd Period</TableCell>
-                    <TableCell className="text-center">
-                      {match.period_scores?.home?.[2] || 0}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {match.period_scores?.away?.[2] || 0}
-                    </TableCell>
-                  </TableRow>
-                  {wentToOvertime && (
-                    <TableRow>
-                      <TableCell className="font-medium">Overtime</TableCell>
-                      <TableCell className="text-center">
-                        {match.period_scores?.home?.[3] || 0}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {match.period_scores?.away?.[3] || 0}
-                      </TableCell>
+                  {homePlayerStats.map((player) => (
+                    <TableRow key={player.id}>
+                      <TableCell className="font-medium">{player.gamer_tag_id}</TableCell>
+                      <TableCell className="text-center">{player.goals}</TableCell>
+                      <TableCell className="text-center">{player.assists}</TableCell>
+                      <TableCell className="text-center">{player.points}</TableCell>
+                      <TableCell className="text-center">{player.plus_minus}</TableCell>
+                      <TableCell className="text-center">{player.pim}</TableCell>
+                      <TableCell className="text-center">{player.shots}</TableCell>
+                      <TableCell className="text-center">{player.hits}</TableCell>
+                      <TableCell className="text-center">{formatTimeOnIce(player.time_on_ice)}</TableCell>
                     </TableRow>
-                  )}
-                  <TableRow className="font-bold">
-                    <TableCell>Total</TableCell>
-                    <TableCell className="text-center">{match.home_score}</TableCell>
-                    <TableCell className="text-center">{match.away_score}</TableCell>
-                  </TableRow>
+                  ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Team Stats */}
-        <TabsContent value="team-stats" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Team Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader>
+            <CardTitle>{match.away_team.name} Player Stats</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Stat</TableHead>
-                    <TableHead className="text-center">{match.home_team.name}</TableHead>
-                    <TableHead className="text-center">{match.away_team.name}</TableHead>
+                    <TableHead>Player</TableHead>
+                    <TableHead className="text-center">G</TableHead>
+                    <TableHead className="text-center">A</TableHead>
+                    <TableHead className="text-center">P</TableHead>
+                    <TableHead className="text-center">+/-</TableHead>
+                    <TableHead className="text-center">PIM</TableHead>
+                    <TableHead className="text-center">SOG</TableHead>
+                    <TableHead className="text-center">Hits</TableHead>
+                    <TableHead className="text-center">TOI</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Goals</TableCell>
-                    <TableCell className="text-center">{homeStats?.goals || 0}</TableCell>
-                    <TableCell className="text-center">{awayStats?.goals || 0}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Shots</TableCell>
-                    <TableCell className="text-center">{homeStats?.shots || 0}</TableCell>
-                    <TableCell className="text-center">{awayStats?.shots || 0}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Hits</TableCell>
-                    <TableCell className="text-center">{homeStats?.hits || 0}</TableCell>
-                    <TableCell className="text-center">{awayStats?.hits || 0}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Faceoff %</TableCell>
-                    <TableCell className="text-center">
-                      {getFaceoffPercentage(homeStats?.faceoff_wins || 0, homeStats?.faceoff_attempts || 0)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getFaceoffPercentage(awayStats?.faceoff_wins || 0, awayStats?.faceoff_attempts || 0)}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Pass %</TableCell>
-                    <TableCell className="text-center">
-                      {getPassPercentage(homeStats?.pass_completed || 0, homeStats?.pass_attempted || 0)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getPassPercentage(awayStats?.pass_completed || 0, awayStats?.pass_attempted || 0)}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">PIM</TableCell>
-                    <TableCell className="text-center">{homeStats?.pim || 0}</TableCell>
-                    <TableCell className="text-center">{awayStats?.pim || 0}</TableCell>
-                  </TableRow>
+                  {awayPlayerStats.map((player) => (
+                    <TableRow key={player.id}>
+                      <TableCell className="font-medium">{player.gamer_tag_id}</TableCell>
+                      <TableCell className="text-center">{player.goals}</TableCell>
+                      <TableCell className="text-center">{player.assists}</TableCell>
+                      <TableCell className="text-center">{player.points}</TableCell>
+                      <TableCell className="text-center">{player.plus_minus}</TableCell>
+                      <TableCell className="text-center">{player.pim}</TableCell>
+                      <TableCell className="text-center">{player.shots}</TableCell>
+                      <TableCell className="text-center">{player.hits}</TableCell>
+                      <TableCell className="text-center">{formatTimeOnIce(player.time_on_ice)}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Lineups */}
-        <TabsContent value="lineups" className="space-y-4">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  {match.home_team.name} Lineup
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {homePlayerStats.length > 0 ? (
-                    homePlayerStats.map((player) => (
-                      <div key={player.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                        <div>
-                          <div className="font-medium">{player.gamer_tag_id}</div>
-                          <div className="text-sm text-muted-foreground">{player.position}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium">{player.time_on_ice}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {player.goals}G {player.assists}A {player.points}P
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground">No lineup data available</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  {match.away_team.name} Lineup
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {awayPlayerStats.length > 0 ? (
-                    awayPlayerStats.map((player) => (
-                      <div key={player.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                        <div>
-                          <div className="font-medium">{player.gamer_tag_id}</div>
-                          <div className="text-sm text-muted-foreground">{player.position}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium">{player.time_on_ice}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {player.goals}G {player.assists}A {player.points}P
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground">No lineup data available</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Player Stats */}
-        <TabsContent value="player-stats" className="space-y-4">
-          {/* Three Stars */}
-          {threeStars && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5" />
-                  Three Stars
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {threeStars.first_star && (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
-                      <Badge variant="default" className="bg-yellow-600">⭐ 1st Star</Badge>
-                      <div>
-                        <div className="font-medium">{threeStars.first_star.gamer_tag_id}</div>
-                        <div className="text-sm text-muted-foreground">{threeStars.first_star.team_name}</div>
-                      </div>
-                    </div>
-                  )}
-                  {threeStars.second_star && (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-950/20 border border-gray-200 dark:border-gray-800">
-                      <Badge variant="secondary">⭐ 2nd Star</Badge>
-                      <div>
-                        <div className="font-medium">{threeStars.second_star.gamer_tag_id}</div>
-                        <div className="text-sm text-muted-foreground">{threeStars.second_star.team_name}</div>
-                      </div>
-                    </div>
-                  )}
-                  {threeStars.third_star && (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
-                      <Badge variant="outline">⭐ 3rd Star</Badge>
-                      <div>
-                        <div className="font-medium">{threeStars.third_star.gamer_tag_id}</div>
-                        <div className="text-sm text-muted-foreground">{threeStars.third_star.team_name}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Player Statistics Tables */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>{match.home_team.name} Player Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Player</TableHead>
-                        <TableHead className="text-center">G</TableHead>
-                        <TableHead className="text-center">A</TableHead>
-                        <TableHead className="text-center">P</TableHead>
-                        <TableHead className="text-center">+/-</TableHead>
-                        <TableHead className="text-center">PIM</TableHead>
-                        <TableHead className="text-center">SOG</TableHead>
-                        <TableHead className="text-center">Hits</TableHead>
-                        <TableHead className="text-center">TOI</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {homePlayerStats.map((player) => (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-medium">{player.gamer_tag_id}</TableCell>
-                          <TableCell className="text-center">{player.goals}</TableCell>
-                          <TableCell className="text-center">{player.assists}</TableCell>
-                          <TableCell className="text-center">{player.points}</TableCell>
-                          <TableCell className="text-center">{player.plus_minus}</TableCell>
-                          <TableCell className="text-center">{player.pim}</TableCell>
-                          <TableCell className="text-center">{player.shots}</TableCell>
-                          <TableCell className="text-center">{player.hits}</TableCell>
-                          <TableCell className="text-center">{formatTimeOnIce(player.time_on_ice)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>{match.away_team.name} Player Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Player</TableHead>
-                        <TableHead className="text-center">G</TableHead>
-                        <TableHead className="text-center">A</TableHead>
-                        <TableHead className="text-center">P</TableHead>
-                        <TableHead className="text-center">+/-</TableHead>
-                        <TableHead className="text-center">PIM</TableHead>
-                        <TableHead className="text-center">SOG</TableHead>
-                        <TableHead className="text-center">Hits</TableHead>
-                        <TableHead className="text-center">TOI</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {awayPlayerStats.map((player) => (
-                        <TableRow key={player.id}>
-                          <TableCell className="font-medium">{player.gamer_tag_id}</TableCell>
-                          <TableCell className="text-center">{player.goals}</TableCell>
-                          <TableCell className="text-center">{player.assists}</TableCell>
-                          <TableCell className="text-center">{player.points}</TableCell>
-                          <TableCell className="text-center">{player.plus_minus}</TableCell>
-                          <TableCell className="text-center">{player.pim}</TableCell>
-                          <TableCell className="text-center">{player.shots}</TableCell>
-                          <TableCell className="text-center">{player.hits}</TableCell>
-                          <TableCell className="text-center">{formatTimeOnIce(player.time_on_ice)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
