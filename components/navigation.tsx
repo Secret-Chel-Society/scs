@@ -174,6 +174,7 @@ export default function Navigation() {
           ],
         },
         { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
+        { name: "Season Registration", href: "/register/season", icon: UserPlus, color: "from-green-500 to-emerald-500" },
       ]
     },
     {
@@ -335,23 +336,7 @@ export default function Navigation() {
                 </div>
               ))}
 
-              {session && (
-                <div className="animate-slide-in" style={{ animationDelay: "900ms" }}>
-                  <Link
-                    href="/register/season"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/register/season"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    <span>Season Registration</span>
-                  </Link>
-                </div>
-              )}
+
             </div>
 
             {/* Mobile User Section */}
@@ -426,7 +411,7 @@ export default function Navigation() {
                           <Settings className="h-5 w-5" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
+                      <DropdownMenuContent align="end" side="top" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
                         <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-white/20" />
                         <DropdownMenuGroup>
@@ -576,22 +561,7 @@ export default function Navigation() {
               </div>
             ))}
 
-            {session && (
-              <div className="animate-slide-in" style={{ animationDelay: "900ms" }}>
-                <Link
-                  href="/register/season"
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                    pathname === "/register/season"
-                      ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
-                      : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                  )}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span className="truncate">Season Registration</span>
-                </Link>
-              </div>
-            )}
+
           </div>
         </nav>
 
@@ -666,7 +636,7 @@ export default function Navigation() {
                       <Settings className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
+                  <DropdownMenuContent align="end" side="top" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
                     <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/20" />
                     <DropdownMenuGroup>
