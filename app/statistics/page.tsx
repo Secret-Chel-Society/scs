@@ -1824,12 +1824,12 @@ export default function StatisticsPage() {
           </motion.div>
 
           {/* Filters */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 mb-8"
-        >
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 mb-8"
+          >
           <div className="flex-1">
             <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
               <SelectTrigger className="bg-white/10 border-blue-300/30 text-white placeholder:text-blue-300/70 focus:bg-white/20 focus:border-blue-400 transition-all duration-300">

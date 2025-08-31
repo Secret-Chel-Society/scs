@@ -143,33 +143,48 @@ export default function Navigation() {
   }
 
   const navigation = [
-    { name: "Home", href: "/", icon: Home, color: "from-blue-500 to-cyan-500" },
-    { name: "Teams", href: "/teams", icon: Users, color: "from-green-500 to-emerald-500" },
-    { name: "Standings", href: "/standings", icon: Trophy, color: "from-yellow-500 to-amber-500" },
-    { name: "Stats", href: "/stats", icon: BarChart3, color: "from-purple-500 to-pink-500" },
-    { name: "Matches", href: "/matches", icon: Calendar, color: "from-indigo-500 to-blue-500" },
-    { name: "Awards", href: "/awards", icon: Award, color: "from-orange-500 to-red-500" },
     {
-      name: "Free Agency",
-      href: "/free-agency",
-      icon: DollarSign,
-      color: "from-emerald-500 to-teal-500",
-      submenu: [
-        { name: "Free Agency", href: "/free-agency" },
-        { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
-      ],
+      name: "SCS",
+      subtitle: "Secret Chel Society",
+      items: [
+        { name: "Home", href: "/", icon: Home, color: "from-blue-500 to-cyan-500" },
+        { name: "Teams", href: "/teams", icon: Users, color: "from-green-500 to-emerald-500" },
+        { name: "Standings", href: "/standings", icon: Trophy, color: "from-yellow-500 to-amber-500" },
+        { name: "Stats", href: "/statistics", icon: BarChart3, color: "from-purple-500 to-pink-500" },
+        { name: "Matches", href: "/matches", icon: Calendar, color: "from-indigo-500 to-blue-500" },
+        { name: "Awards", href: "/awards", icon: Award, color: "from-orange-500 to-red-500" },
+        {
+          name: "Free Agency",
+          href: "/free-agency",
+          icon: DollarSign,
+          color: "from-emerald-500 to-teal-500",
+          submenu: [
+            { name: "Free Agency", href: "/free-agency" },
+            { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
+          ],
+        },
+        {
+          name: "News",
+          href: "/news",
+          icon: Newspaper,
+          color: "from-rose-500 to-pink-500",
+          submenu: [
+            { name: "News", href: "/news" },
+            { name: "Daily Recap", href: "/news/daily-recap" },
+          ],
+        },
+        { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
+      ]
     },
     {
-      name: "News",
-      href: "/news",
-      icon: Newspaper,
-      color: "from-rose-500 to-pink-500",
-      submenu: [
-        { name: "News", href: "/news" },
-        { name: "Daily Recap", href: "/news/daily-recap" },
-      ],
-    },
-    { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
+      name: "SCSELOS",
+      subtitle: "ELO Rating System",
+      items: [
+        { name: "ELO Rankings", href: "/elo/rankings", icon: Target, color: "from-red-500 to-pink-500" },
+        { name: "ELO Statistics", href: "/elo/statistics", icon: BarChart3, color: "from-indigo-500 to-purple-500" },
+        { name: "ELO Matches", href: "/elo/matches", icon: Calendar, color: "from-green-500 to-emerald-500" },
+      ]
+    }
   ]
 
   const getRoleBadgeColor = (role: string) => {
@@ -249,69 +264,82 @@ export default function Navigation() {
 
           {/* Mobile Navigation */}
           <div className="relative z-10 flex-1 overflow-y-auto p-4">
-            <div className="space-y-2">
-              {navigation.map((item, index) => {
-                const Icon = item.icon
-                const isActive = item.href === "/" 
-                  ? pathname === "/" 
-                  : pathname === item.href || pathname.startsWith(item.href + "/")
-                const hasSubmenu = item.submenu && item.submenu.length > 0
-                const isExpanded = expandedMenus[item.name]
-
-                return (
-                  <div key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
-                    <div className="flex items-center">
-                      <Link
-                        href={item.href}
-                        onClick={() => setIsMobileOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
-                          isActive 
-                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
-                            : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                        )}
-                      >
-                        <Icon className="h-5 w-5 flex-shrink-0" />
-                        <span>{item.name}</span>
-                      </Link>
-                      {hasSubmenu && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white"
-                          onClick={() => toggleSubmenu(item.name)}
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="h-4 w-4" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4" />
-                          )}
-                        </Button>
-                      )}
-                    </div>
-
-                    {hasSubmenu && isExpanded && (
-                      <div className="mt-1 ml-8 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                        {item.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            onClick={() => setIsMobileOpen(false)}
-                            className={cn(
-                              "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                              pathname === subItem.href
-                                ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                            )}
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
+            <div className="space-y-6">
+              {navigation.map((section, sectionIndex) => (
+                <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
+                  {/* Section Header */}
+                  <div className="mb-3">
+                    <h3 className="text-lg font-bold text-white mb-1">{section.name}</h3>
+                    <p className="text-sm text-white/60">{section.subtitle}</p>
                   </div>
-                )
-              })}
+                  
+                  {/* Section Items */}
+                  <div className="space-y-2">
+                    {section.items.map((item, index) => {
+                      const Icon = item.icon
+                      const isActive = item.href === "/" 
+                        ? pathname === "/" 
+                        : pathname === item.href || pathname.startsWith(item.href + "/")
+                      const hasSubmenu = item.submenu && item.submenu.length > 0
+                      const isExpanded = expandedMenus[item.name]
+
+                      return (
+                        <div key={item.name} className="animate-slide-in" style={{ animationDelay: `${(sectionIndex * 100) + (index * 50)}ms` }}>
+                          <div className="flex items-center">
+                            <Link
+                              href={item.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className={cn(
+                                "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
+                                isActive 
+                                  ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                                  : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                              )}
+                            >
+                              <Icon className="h-5 w-5 flex-shrink-0" />
+                              <span>{item.name}</span>
+                            </Link>
+                            {hasSubmenu && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white"
+                                onClick={() => toggleSubmenu(item.name)}
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+
+                          {hasSubmenu && isExpanded && (
+                            <div className="mt-1 ml-8 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
+                              {item.submenu.map((subItem) => (
+                                <Link
+                                  key={subItem.name}
+                                  href={subItem.href}
+                                  onClick={() => setIsMobileOpen(false)}
+                                  className={cn(
+                                    "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                                    pathname === subItem.href
+                                      ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                      : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                                  )}
+                                >
+                                  {subItem.name}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
 
               {session && (
                 <div className="animate-slide-in" style={{ animationDelay: "900ms" }}>
@@ -480,68 +508,81 @@ export default function Navigation() {
 
         {/* Navigation */}
         <nav className="relative z-10 flex-1 overflow-y-auto p-4">
-          <ul className="space-y-1">
-            {navigation.map((item, index) => {
-              const Icon = item.icon
-              const isActive = item.href === "/" 
-                ? pathname === "/" 
-                : pathname === item.href || pathname.startsWith(item.href + "/")
-              const hasSubmenu = item.submenu && item.submenu.length > 0
-              const isExpanded = expandedMenus[item.name]
+          <div className="space-y-6">
+            {navigation.map((section, sectionIndex) => (
+              <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
+                {/* Section Header */}
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-white mb-1">{section.name}</h3>
+                  <p className="text-xs text-white/60">{section.subtitle}</p>
+                </div>
+                
+                {/* Section Items */}
+                <ul className="space-y-1">
+                  {section.items.map((item, index) => {
+                    const Icon = item.icon
+                    const isActive = item.href === "/" 
+                      ? pathname === "/" 
+                      : pathname === item.href || pathname.startsWith(item.href + "/")
+                    const hasSubmenu = item.submenu && item.submenu.length > 0
+                    const isExpanded = expandedMenus[item.name]
 
-              return (
-                <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
-                  <div className="flex items-center">
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
-                        isActive 
-                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">{item.name}</span>
-                    </Link>
-                    {hasSubmenu && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white"
-                        onClick={() => toggleSubmenu(item.name)}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="h-3 w-3" />
-                        ) : (
-                          <ChevronRight className="h-3 w-3" />
-                        )}
-                      </Button>
-                    )}
-                  </div>
-
-                  {hasSubmenu && isExpanded && (
-                    <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                      {item.submenu.map((subItem) => (
-                        <li key={subItem.name}>
+                    return (
+                      <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${(sectionIndex * 100) + (index * 50)}ms` }}>
+                        <div className="flex items-center">
                           <Link
-                            href={subItem.href}
+                            href={item.href}
                             className={cn(
-                              "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                              pathname === subItem.href
-                                ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
+                              isActive 
+                                ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                                : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                             )}
                           >
-                            {subItem.name}
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">{item.name}</span>
                           </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              )
-            })}
+                          {hasSubmenu && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white"
+                              onClick={() => toggleSubmenu(item.name)}
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-3 w-3" />
+                              ) : (
+                                <ChevronRight className="h-3 w-3" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+
+                        {hasSubmenu && isExpanded && (
+                          <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
+                            {item.submenu.map((subItem) => (
+                              <li key={subItem.name}>
+                                <Link
+                                  href={subItem.href}
+                                  className={cn(
+                                    "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                                    pathname === subItem.href
+                                      ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                      : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                                  )}
+                                >
+                                  {subItem.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
 
             {session && (
               <li className="animate-slide-in" style={{ animationDelay: "900ms" }}>
