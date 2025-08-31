@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/ui/page-header"
 import { Card, CardContent } from "@/components/ui/card"
-import { Shield, Users, Trophy, Calendar, AlertTriangle, Gavel, BookOpen, FileText } from "lucide-react"
+import { Shield, Users, Trophy, Calendar, AlertTriangle, Gavel, BookOpen, FileText, Award } from "lucide-react"
 
 function RulesStats() {
   return (

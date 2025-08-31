@@ -21,7 +21,12 @@ import {
   LogOut,
   ChevronDown,
   ChevronRight,
-  User
+  User,
+  Gamepad2,
+  Target,
+  Crown,
+  Shield,
+  Star
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -138,16 +143,17 @@ export default function Navigation() {
   }
 
   const navigation = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Teams", href: "/teams", icon: Users },
-    { name: "Standings", href: "/standings", icon: Trophy },
-    { name: "Stats", href: "/stats", icon: BarChart3 },
-    { name: "Matches", href: "/matches", icon: Calendar },
-    { name: "Awards", href: "/awards", icon: Award },
+    { name: "Home", href: "/", icon: Home, color: "from-blue-500 to-cyan-500" },
+    { name: "Teams", href: "/teams", icon: Users, color: "from-green-500 to-emerald-500" },
+    { name: "Standings", href: "/standings", icon: Trophy, color: "from-yellow-500 to-amber-500" },
+    { name: "Stats", href: "/stats", icon: BarChart3, color: "from-purple-500 to-pink-500" },
+    { name: "Matches", href: "/matches", icon: Calendar, color: "from-indigo-500 to-blue-500" },
+    { name: "Awards", href: "/awards", icon: Award, color: "from-orange-500 to-red-500" },
     {
       name: "Free Agency",
       href: "/free-agency",
       icon: DollarSign,
+      color: "from-emerald-500 to-teal-500",
       submenu: [
         { name: "Free Agency", href: "/free-agency" },
         { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
@@ -157,22 +163,23 @@ export default function Navigation() {
       name: "News",
       href: "/news",
       icon: Newspaper,
+      color: "from-rose-500 to-pink-500",
       submenu: [
         { name: "News", href: "/news" },
         { name: "Daily Recap", href: "/news/daily-recap" },
       ],
     },
-    { name: "Forum", href: "/forum", icon: MessageSquare },
+    { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
   ]
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "Owner": return "bg-purple-500"
-      case "GM": return "bg-red-500"
-      case "AGM": return "bg-blue-500"
-      case "Player": return "bg-green-500"
-      case "Admin": return "bg-amber-500"
-      default: return "bg-gray-500"
+      case "Owner": return "bg-gradient-to-r from-purple-500 to-pink-500"
+      case "GM": return "bg-gradient-to-r from-red-500 to-orange-500"
+      case "AGM": return "bg-gradient-to-r from-blue-500 to-cyan-500"
+      case "Player": return "bg-gradient-to-r from-green-500 to-emerald-500"
+      case "Admin": return "bg-gradient-to-r from-amber-500 to-yellow-500"
+      default: return "bg-gradient-to-r from-gray-500 to-slate-500"
     }
   }
 
@@ -191,16 +198,16 @@ export default function Navigation() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10"
+        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 hover:from-blue-500/30 hover:to-purple-500/30"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        {isMobileOpen ? <X className="h-5 w-5 text-white" /> : <Menu className="h-5 w-5 text-white" />}
       </Button>
 
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm" 
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -210,9 +217,16 @@ export default function Navigation() {
         "fixed inset-0 z-50 lg:hidden",
         isMobileOpen ? "block" : "hidden"
       )}>
-        <div className="absolute inset-0 bg-background/95 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+            <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+          </div>
+
           {/* Mobile Header */}
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="relative z-10 flex items-center justify-between p-4 border-b border-white/20 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm">
             <Link href="/" onClick={() => setIsMobileOpen(false)}>
               <Image
                 src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
@@ -226,7 +240,7 @@ export default function Navigation() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 bg-white/10 hover:bg-white/20 text-white"
               onClick={() => setIsMobileOpen(false)}
             >
               <X className="h-4 w-4" />
@@ -234,9 +248,9 @@ export default function Navigation() {
           </div>
 
           {/* Mobile Navigation */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="relative z-10 flex-1 overflow-y-auto p-4">
             <div className="space-y-2">
-              {navigation.map((item) => {
+              {navigation.map((item, index) => {
                 const Icon = item.icon
                 const isActive = item.href === "/" 
                   ? pathname === "/" 
@@ -245,7 +259,7 @@ export default function Navigation() {
                 const isExpanded = expandedMenus[item.name]
 
                 return (
-                  <div key={item.name}>
+                  <div key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
                     <div className="flex items-center">
                       <Link
                         href={item.href}
@@ -253,8 +267,8 @@ export default function Navigation() {
                         className={cn(
                           "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
                           isActive 
-                            ? "bg-primary text-primary-foreground" 
-                            : "text-foreground hover:bg-muted"
+                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                            : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                         )}
                       >
                         <Icon className="h-5 w-5 flex-shrink-0" />
@@ -264,7 +278,7 @@ export default function Navigation() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10"
+                          className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white"
                           onClick={() => toggleSubmenu(item.name)}
                         >
                           {isExpanded ? (
@@ -277,7 +291,7 @@ export default function Navigation() {
                     </div>
 
                     {hasSubmenu && isExpanded && (
-                      <div className="mt-1 ml-8 space-y-1">
+                      <div className="mt-1 ml-8 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
                         {item.submenu.map((subItem) => (
                           <Link
                             key={subItem.name}
@@ -286,8 +300,8 @@ export default function Navigation() {
                             className={cn(
                               "block px-3 py-2 rounded-md text-sm transition-all duration-200",
                               pathname === subItem.href
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                             )}
                           >
                             {subItem.name}
@@ -300,24 +314,26 @@ export default function Navigation() {
               })}
 
               {session && (
-                <Link
-                  href="/register/season"
-                  onClick={() => setIsMobileOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                    pathname === "/register/season"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-muted"
-                  )}
-                >
-                  <UserPlus className="h-5 w-5" />
-                  <span>Season Registration</span>
-                </Link>
+                <div className="animate-slide-in" style={{ animationDelay: "900ms" }}>
+                  <Link
+                    href="/register/season"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/register/season"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    <span>Season Registration</span>
+                  </Link>
+                </div>
               )}
             </div>
 
             {/* Mobile User Section */}
-            <div className="mt-8 pt-6 border-t">
+            <div className="mt-8 pt-6 border-t border-white/20 animate-slide-in" style={{ animationDelay: "1000ms" }}>
               {session ? (
                 <div className="space-y-4">
                   {/* Team Info */}
@@ -325,9 +341,9 @@ export default function Navigation() {
                     <Link 
                       href={`/teams/${teamInfo.id}`} 
                       onClick={() => setIsMobileOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 backdrop-blur-sm transition-colors border border-white/20"
                     >
-                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
                         {teamInfo.logo_url ? (
                           <Image
                             src={teamInfo.logo_url}
@@ -337,12 +353,12 @@ export default function Navigation() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <span className="text-sm font-bold">{teamInfo.name.substring(0, 2)}</span>
+                          <span className="text-sm font-bold text-white">{teamInfo.name.substring(0, 2)}</span>
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium">{teamInfo.name}</p>
-                        <p className="text-sm text-muted-foreground">Your Team</p>
+                        <p className="font-medium text-white">{teamInfo.name}</p>
+                        <p className="text-sm text-white/70">Your Team</p>
                       </div>
                     </Link>
                   )}
@@ -351,7 +367,7 @@ export default function Navigation() {
                   {getUniqueRoleBadges().length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {getUniqueRoleBadges().map((role) => (
-                        <Badge key={role} className={`${getRoleBadgeColor(role)} text-white`}>
+                        <Badge key={role} className={`${getRoleBadgeColor(role)} text-white border-0`}>
                           {role}
                         </Badge>
                       ))}
@@ -359,21 +375,21 @@ export default function Navigation() {
                   )}
 
                   {/* User Info */}
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                    <Avatar className="h-12 w-12 flex-shrink-0">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+                    <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-white/20">
                       <AvatarImage
                         src={userProfile?.avatar_url || "/placeholder.svg?height=48&width=48"}
                         alt={userProfile?.gamer_tag_id || "User"}
                       />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
                         {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="font-medium">
+                      <p className="font-medium text-white">
                         {userProfile?.gamer_tag_id || "User"}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/70">
                         {session?.user?.email}
                       </p>
                     </div>
@@ -384,36 +400,36 @@ export default function Navigation() {
                     <ModeToggle />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-10 w-10">
+                        <Button variant="ghost" size="icon" className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white">
                           <Settings className="h-5 w-5" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
+                      <DropdownMenuContent align="end" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
+                        <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-white/20" />
                         <DropdownMenuGroup>
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                             <Link href={`/players/${playerId || session.user.id}`}>
                               <User className="mr-2 h-4 w-4" />
                               View Profile
                             </Link>
                           </DropdownMenuItem>
                           {isTeamManager && (
-                            <DropdownMenuItem asChild>
+                            <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                               <Link href="/management">Management</Link>
                             </DropdownMenuItem>
                           )}
                           {isAdmin && (
-                            <DropdownMenuItem asChild>
+                            <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                               <Link href="/admin">Admin Dashboard</Link>
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                             <Link href="/settings">Settings</Link>
                           </DropdownMenuItem>
                         </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleSignOut}>
+                        <DropdownMenuSeparator className="bg-white/20" />
+                        <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-white/10">
                           <LogOut className="mr-2 h-4 w-4" />
                           Log out
                         </DropdownMenuItem>
@@ -423,10 +439,10 @@ export default function Navigation() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <Button variant="outline" asChild className="w-full h-12">
+                  <Button variant="outline" asChild className="w-full h-12 bg-white/10 border-white/20 text-white hover:bg-white/20">
                     <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
                   </Button>
-                  <Button asChild className="w-full h-12">
+                  <Button asChild className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
                     <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
                   </Button>
                   <div className="flex justify-center">
@@ -440,9 +456,16 @@ export default function Navigation() {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col">
+      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-64 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-r border-white/20 flex flex-col">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-center p-4 border-b">
+        <div className="relative z-10 flex items-center justify-center p-4 border-b border-white/20 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm">
           <Link href="/">
             <Image
               src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
@@ -456,9 +479,9 @@ export default function Navigation() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4">
+        <nav className="relative z-10 flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            {navigation.map((item) => {
+            {navigation.map((item, index) => {
               const Icon = item.icon
               const isActive = item.href === "/" 
                 ? pathname === "/" 
@@ -467,15 +490,15 @@ export default function Navigation() {
               const isExpanded = expandedMenus[item.name]
 
               return (
-                <li key={item.name}>
+                <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className="flex items-center">
                     <Link
                       href={item.href}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
                         isActive 
-                          ? "bg-primary text-primary-foreground shadow-sm" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                       )}
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
@@ -485,7 +508,7 @@ export default function Navigation() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 flex-shrink-0"
+                        className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white"
                         onClick={() => toggleSubmenu(item.name)}
                       >
                         {isExpanded ? (
@@ -498,7 +521,7 @@ export default function Navigation() {
                   </div>
 
                   {hasSubmenu && isExpanded && (
-                    <ul className="mt-1 ml-6 space-y-1">
+                    <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
                       {item.submenu.map((subItem) => (
                         <li key={subItem.name}>
                           <Link
@@ -506,8 +529,8 @@ export default function Navigation() {
                             className={cn(
                               "block px-3 py-2 rounded-md text-sm transition-all duration-200",
                               pathname === subItem.href
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                             )}
                           >
                             {subItem.name}
@@ -521,14 +544,14 @@ export default function Navigation() {
             })}
 
             {session && (
-              <li>
+              <li className="animate-slide-in" style={{ animationDelay: "900ms" }}>
                 <Link
                   href="/register/season"
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                     pathname === "/register/season"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                      : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                   )}
                 >
                   <UserPlus className="h-4 w-4" />
@@ -540,16 +563,16 @@ export default function Navigation() {
         </nav>
 
         {/* User Section */}
-        <div className="border-t p-4 space-y-4">
+        <div className="relative z-10 border-t border-white/20 p-4 space-y-4 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm">
           {session ? (
             <>
               {/* Team Info */}
               {teamInfo && (
                 <Link 
                   href={`/teams/${teamInfo.id}`} 
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 backdrop-blur-sm transition-colors border border-white/20"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border bg-background flex-shrink-0">
+                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
                     {teamInfo.logo_url ? (
                       <Image
                         src={teamInfo.logo_url}
@@ -559,12 +582,12 @@ export default function Navigation() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="text-xs font-bold">{teamInfo.name.substring(0, 2)}</span>
+                      <span className="text-xs font-bold text-white">{teamInfo.name.substring(0, 2)}</span>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{teamInfo.name}</p>
-                    <p className="text-xs text-muted-foreground">Your Team</p>
+                    <p className="text-sm font-medium truncate text-white">{teamInfo.name}</p>
+                    <p className="text-xs text-white/70">Your Team</p>
                   </div>
                 </Link>
               )}
@@ -573,7 +596,7 @@ export default function Navigation() {
               {getUniqueRoleBadges().length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {getUniqueRoleBadges().map((role) => (
-                    <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs`}>
+                    <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs border-0`}>
                       {role}
                     </Badge>
                   ))}
@@ -581,21 +604,21 @@ export default function Navigation() {
               )}
 
               {/* User Info */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <Avatar className="h-10 w-10 flex-shrink-0">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+                <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-white/20">
                   <AvatarImage
                     src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
                     alt={userProfile?.gamer_tag_id || "User"}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
                     {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-none truncate">
+                  <p className="text-sm font-medium leading-none truncate text-white">
                     {userProfile?.gamer_tag_id || "User"}
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground truncate mt-1">
+                  <p className="text-xs leading-none text-white/70 truncate mt-1">
                     {session?.user?.email}
                   </p>
                 </div>
@@ -606,36 +629,36 @@ export default function Navigation() {
                 <ModeToggle />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Button variant="ghost" size="icon" className="h-9 w-9 bg-white/10 hover:bg-white/20 text-white">
                       <Settings className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                  <DropdownMenuContent align="end" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
+                    <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/20" />
                     <DropdownMenuGroup>
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                         <Link href={`/players/${playerId || session.user.id}`}>
                           <User className="mr-2 h-4 w-4" />
                           View Profile
                         </Link>
                       </DropdownMenuItem>
                       {isTeamManager && (
-                        <DropdownMenuItem asChild>
+                        <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                           <Link href="/management">Management</Link>
                         </DropdownMenuItem>
                       )}
                       {isAdmin && (
-                        <DropdownMenuItem asChild>
+                        <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                           <Link href="/admin">Admin Dashboard</Link>
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem asChild className="text-white hover:bg-white/10">
                         <Link href="/settings">Settings</Link>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
+                    <DropdownMenuSeparator className="bg-white/20" />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-white/10">
                       <LogOut className="mr-2 h-4 w-4" />
                       Log out
                     </DropdownMenuItem>
@@ -645,10 +668,10 @@ export default function Navigation() {
             </>
           ) : (
             <div className="space-y-3">
-              <Button variant="outline" asChild className="w-full h-10">
+              <Button variant="outline" asChild className="w-full h-10 bg-white/10 border-white/20 text-white hover:bg-white/20">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild className="w-full h-10">
+              <Button asChild className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
                 <Link href="/register">Sign up</Link>
               </Button>
               <div className="flex justify-center">
