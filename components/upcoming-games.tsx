@@ -8,7 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock } from "lucide-react"
+import { Calendar, Clock, Gamepad2, Zap, Target } from "lucide-react"
 
 interface Game {
   id: string
@@ -34,8 +34,13 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
 
   if (!games || games.length === 0) {
     return (
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">No upcoming games scheduled.</p>
+      <Card className="p-8 text-center bg-gradient-to-br from-slate-900/50 to-slate-800/50 backdrop-blur-sm border border-white/20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full">
+            <Gamepad2 className="h-8 w-8 text-blue-400" />
+          </div>
+          <p className="text-white/70">No upcoming games scheduled.</p>
+        </div>
       </Card>
     )
   }
@@ -46,35 +51,51 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
         {games.map((game, index) => {
           const matchDate = new Date(game.match_date)
           const isToday = new Date().toDateString() === matchDate.toDateString()
+          const isTomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toDateString() === matchDate.toDateString()
 
           return (
             <CarouselItem key={game.id} className="basis-full md:basis-1/2 lg:basis-1/3 h-full">
               <Link href={`/matches/${game.id}`}>
-                <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+                <motion.div 
+                  whileHover={{ y: -8, scale: 1.02 }} 
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <Card
-                    className="h-full overflow-hidden border-2 transition-all duration-300"
+                    className="h-full overflow-hidden bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 hover:border-blue-500/50 transition-all duration-300 group"
                     style={{
                       borderColor: index === activeIndex ? "hsl(var(--primary))" : "hsl(var(--border))",
                     }}
                   >
-                    <CardContent className="flex flex-col items-center p-4 sm:p-6">
-                      <div className="w-full flex justify-between items-center mb-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <CardContent className="flex flex-col items-center p-6 relative">
+                      {/* Background glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      
+                      {/* Header with date and time */}
+                      <div className="w-full flex justify-between items-center mb-6 relative z-10">
+                        <div className="flex items-center gap-2 text-sm text-blue-300">
                           <Calendar className="h-4 w-4" />
                           {format(matchDate, "MMM d")}
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2 text-sm text-purple-300">
                           <Clock className="h-4 w-4" />
                           {format(matchDate, "h:mm a")}
                         </div>
                       </div>
 
-                      {isToday && <Badge className="mb-2 bg-primary">Today</Badge>}
+                      {/* Match timing badge */}
+                      {(isToday || isTomorrow) && (
+                        <Badge className={`mb-4 ${isToday ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-orange-500/20 text-orange-300 border-orange-500/30'}`}>
+                          <Target className="h-3 w-3 mr-1" />
+                          {isToday ? 'TODAY' : 'TOMORROW'}
+                        </Badge>
+                      )}
 
-                      <div className="flex items-center justify-between w-full">
+                      {/* Teams */}
+                      <div className="flex items-center justify-between w-full relative z-10">
+                        {/* Home Team */}
                         <div className="flex flex-col items-center">
-                          <div className="relative h-16 w-16 mb-2">
+                          <div className="relative h-20 w-20 mb-3 group-hover:scale-110 transition-transform duration-300">
                             {game.home_team.logo_url ? (
                               <Image
                                 src={game.home_team.logo_url || "/placeholder.svg"}
@@ -83,18 +104,23 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
                                 className="object-contain"
                               />
                             ) : (
-                              <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
-                                {game.home_team.name.substring(0, 2)}
+                              <div className="h-20 w-20 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full flex items-center justify-center border border-blue-500/30">
+                                <span className="text-blue-300 font-bold text-lg">{game.home_team.name.substring(0, 2)}</span>
                               </div>
                             )}
                           </div>
-                          <span className="text-sm font-medium text-center">{game.home_team.name}</span>
+                          <span className="text-sm font-medium text-center text-white mb-2">{game.home_team.name}</span>
                         </div>
 
-                        <div className="mx-4 text-xl font-bold">VS</div>
+                        {/* VS Divider */}
+                        <div className="mx-6 flex flex-col items-center">
+                          <div className="text-2xl font-bold text-white/50 mb-2">VS</div>
+                          <div className="w-px h-16 bg-gradient-to-b from-blue-500/50 to-purple-500/50" />
+                        </div>
 
+                        {/* Away Team */}
                         <div className="flex flex-col items-center">
-                          <div className="relative h-16 w-16 mb-2">
+                          <div className="relative h-20 w-20 mb-3 group-hover:scale-110 transition-transform duration-300">
                             {game.away_team.logo_url ? (
                               <Image
                                 src={game.away_team.logo_url || "/placeholder.svg"}
@@ -103,12 +129,20 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
                                 className="object-contain"
                               />
                             ) : (
-                              <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
-                                {game.away_team.name.substring(0, 2)}
+                              <div className="h-20 w-20 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-full flex items-center justify-center border border-purple-500/30">
+                                <span className="text-purple-300 font-bold text-lg">{game.away_team.name.substring(0, 2)}</span>
                               </div>
                             )}
                           </div>
-                          <span className="text-sm font-medium text-center">{game.away_team.name}</span>
+                          <span className="text-sm font-medium text-center text-white mb-2">{game.away_team.name}</span>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="mt-6 text-center relative z-10">
+                        <div className="flex items-center justify-center gap-2 text-blue-300">
+                          <Zap className="h-4 w-4" />
+                          <span className="text-sm font-medium">Upcoming Match</span>
                         </div>
                       </div>
                     </CardContent>
@@ -119,8 +153,8 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
           )
         })}
       </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
+      <CarouselPrevious className="bg-slate-800/80 border-white/20 text-white hover:bg-slate-700/80" />
+      <CarouselNext className="bg-slate-800/80 border-white/20 text-white hover:bg-slate-700/80" />
     </Carousel>
   )
 }

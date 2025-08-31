@@ -211,7 +211,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center">
                 <Award className="h-4 w-4 text-white" />
               </div>
-              <h3 className="font-bold text-lg text-white">Admin</h3>
+              <h3 className="font-bold text-lg text-white">Admin & User</h3>
             </div>
             <ul className="space-y-2">
               <li>
@@ -227,12 +227,26 @@ export default function Footer() {
                 </Link>
               </li>
               {user && (
-                <li>
-                  <Link href="/dashboard" className="text-blue-200 hover:text-white transition-colors flex items-center gap-2 group">
-                    <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-white transition-colors"></div>
-                    User Panel
-                  </Link>
-                </li>
+                <>
+                  <li>
+                    <Link href="/dashboard" className="text-blue-200 hover:text-white transition-colors flex items-center gap-2 group">
+                      <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-white transition-colors"></div>
+                      User Panel
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href={`/players/${user.id}`} className="text-blue-200 hover:text-white transition-colors flex items-center gap-2 group">
+                      <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-white transition-colors"></div>
+                      View Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/settings" className="text-blue-200 hover:text-white transition-colors flex items-center gap-2 group">
+                      <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-white transition-colors"></div>
+                      Settings
+                    </Link>
+                  </li>
+                </>
               )}
               <li>
                 <Link href="/login" className="text-blue-200 hover:text-white transition-colors flex items-center gap-2 group">

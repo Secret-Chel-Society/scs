@@ -5,13 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSupabase } from "@/lib/supabase/client"
 import { formatDistanceToNow } from "date-fns"
-import { ArrowLeftRight, AlertCircle } from "lucide-react"
+import { ArrowLeftRight, AlertCircle, TrendingUp, Users, Clock, Zap } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { motion } from "framer-motion"
 
 export function RecentTrades() {
   const { supabase } = useSupabase()
@@ -175,20 +176,24 @@ export function RecentTrades() {
         const salary = playerData.salary || 0
 
         return (
-          <div className="flex flex-col gap-1">
-            <span className="font-medium text-sm">{gamerTag}</span>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold text-sm text-white">{gamerTag}</span>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               {positions && (
-                <Badge variant="outline" className="text-xs py-0 h-5 w-fit">
+                <Badge variant="outline" className="text-xs py-1 h-6 w-fit bg-blue-500/10 text-blue-300 border-blue-500/30">
                   {positions}
                 </Badge>
               )}
-              {salary > 0 && <span className="text-xs text-muted-foreground">${(salary / 1000000).toFixed(2)}M</span>}
+              {salary > 0 && (
+                <Badge variant="outline" className="text-xs py-1 h-6 w-fit bg-green-500/10 text-green-300 border-green-500/30">
+                  ${(salary / 1000000).toFixed(2)}M
+                </Badge>
+              )}
             </div>
           </div>
         )
       }
-      return <span className="text-sm">{player}</span>
+      return <span className="text-sm text-white/70">{player}</span>
     }
 
     const playerId = player?.id || player?.player_id
@@ -211,15 +216,19 @@ export function RecentTrades() {
     const positions = [primaryPos, secondaryPos].filter(Boolean).join("/")
 
     return (
-      <div className="flex flex-col gap-1">
-        <span className="font-medium text-sm">{gamerTag}</span>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1">
+      <div className="flex flex-col gap-2">
+        <span className="font-semibold text-sm text-white">{gamerTag}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           {positions && (
-            <Badge variant="outline" className="text-xs py-0 h-5 w-fit">
+            <Badge variant="outline" className="text-xs py-1 h-6 w-fit bg-blue-500/10 text-blue-300 border-blue-500/30">
               {positions}
             </Badge>
           )}
-          {salary > 0 && <span className="text-xs text-muted-foreground">${(salary / 1000000).toFixed(2)}M</span>}
+          {salary > 0 && (
+            <Badge variant="outline" className="text-xs py-1 h-6 w-fit bg-green-500/10 text-green-300 border-green-500/30">
+              ${(salary / 1000000).toFixed(2)}M
+            </Badge>
+          )}
         </div>
       </div>
     )
@@ -244,44 +253,56 @@ export function RecentTrades() {
 
     if (team) {
       return (
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           {team.logo_url ? (
             <Image
               src={team.logo_url || "/placeholder.svg"}
               alt={team.name}
-              width={24}
-              height={24}
-              className="rounded-full flex-shrink-0"
+              width={32}
+              height={32}
+              className="rounded-full flex-shrink-0 border-2 border-white/20"
             />
           ) : (
-            <TeamLogo teamName={team.name} size="sm" />
+            <TeamLogo teamName={team.name} size="md" />
           )}
-          <span className="font-medium text-sm truncate">{team.name}</span>
+          <span className="font-semibold text-sm truncate text-white">{team.name}</span>
         </div>
       )
     }
 
     return (
-      <div className="flex items-center gap-2 min-w-0">
-        <div className="w-6 h-6 bg-muted rounded-full flex-shrink-0" />
-        <span className="font-medium text-sm truncate text-muted-foreground">{fallbackName || `Team ${teamId}`}</span>
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex-shrink-0 border border-white/20" />
+        <span className="font-semibold text-sm truncate text-white/70">{fallbackName || `Team ${teamId}`}</span>
       </div>
     )
   }
 
   if (!tableExists) {
     return (
-      <Card>
+      <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
         <CardHeader>
-          <CardTitle>Recent Trades</CardTitle>
-          <CardDescription>Latest player movements around the league</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <CardTitle className="text-white">Recent Trades</CardTitle>
+              <CardDescription className="text-white/70">Latest player movements around the league</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-4">
-            <p className="text-muted-foreground mb-2">Trades feature is not yet set up.</p>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/news/trades">Set Up Trades</Link>
-            </Button>
+          <div className="text-center py-8">
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full">
+                <Users className="h-8 w-8 text-blue-400" />
+              </div>
+              <p className="text-white/70 mb-4">Trades feature is not yet set up.</p>
+              <Button variant="outline" size="sm" asChild className="bg-transparent border-white/20 text-white hover:bg-white/10">
+                <Link href="/news/trades">Set Up Trades</Link>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -290,13 +311,20 @@ export function RecentTrades() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
         <CardHeader>
-          <CardTitle>Recent Trades</CardTitle>
-          <CardDescription>Latest player movements around the league</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <CardTitle className="text-white">Recent Trades</CardTitle>
+              <CardDescription className="text-white/70">Latest player movements around the league</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[200px] w-full" />
+          <Skeleton className="h-[300px] w-full bg-white/10" />
         </CardContent>
       </Card>
     )
@@ -304,13 +332,20 @@ export function RecentTrades() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
         <CardHeader>
-          <CardTitle>Recent Trades</CardTitle>
-          <CardDescription>Latest player movements around the league</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <CardTitle className="text-white">Recent Trades</CardTitle>
+              <CardDescription className="text-white/70">Latest player movements around the league</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="bg-red-500/10 border-red-500/30 text-red-300">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -321,26 +356,47 @@ export function RecentTrades() {
 
   if (trades.length === 0) {
     return (
-      <Card>
+      <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
         <CardHeader>
-          <CardTitle>Recent Trades</CardTitle>
-          <CardDescription>Latest player movements around the league</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <CardTitle className="text-white">Recent Trades</CardTitle>
+              <CardDescription className="text-white/70">Latest player movements around the league</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-center py-4">No trades found.</p>
+          <div className="text-center py-8">
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full">
+                <ArrowLeftRight className="h-8 w-8 text-blue-400" />
+              </div>
+              <p className="text-white/70">No trades found.</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="space-y-1">
-          <CardTitle>Recent Trades</CardTitle>
-          <CardDescription>Latest player movements around the league ({trades.length} total)</CardDescription>
+    <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg">
+            <TrendingUp className="h-5 w-5 text-blue-400" />
+          </div>
+          <div className="space-y-1">
+            <CardTitle className="text-white">Recent Trades</CardTitle>
+            <CardDescription className="text-white/70">
+              Latest player movements around the league ({trades.length} total)
+            </CardDescription>
+          </div>
         </div>
-        <Button variant="outline" size="sm" asChild className="shrink-0 bg-transparent">
+        <Button variant="outline" size="sm" asChild className="shrink-0 bg-transparent border-white/20 text-white hover:bg-white/10">
           <Link href="/news/trades" className="flex items-center gap-2">
             <ArrowLeftRight className="h-4 w-4" />
             <span className="hidden sm:inline">View All</span>
@@ -349,57 +405,90 @@ export function RecentTrades() {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {trades.slice(0, 5).map((trade) => {
+          {trades.slice(0, 5).map((trade, index) => {
             const team1Players = parsePlayerData(trade.team1_players)
             const team2Players = parsePlayerData(trade.team2_players)
 
             return (
-              <div key={trade.id} className="space-y-4 pb-6 border-b last:border-0 last:pb-0">
-                <div className="flex flex-col space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {renderTeamInfo(trade.team1_id)}
-                      <ArrowLeftRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mx-2" />
-                      {renderTeamInfo(trade.team2_id)}
+              <motion.div 
+                key={trade.id} 
+                className="space-y-4 pb-6 border-b border-white/10 last:border-0 last:pb-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                {/* Trade Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    {renderTeamInfo(trade.team1_id)}
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full">
+                        <ArrowLeftRight className="h-4 w-4 text-blue-400" />
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                      {formatDistanceToNow(new Date(trade.created_at), { addSuffix: true })}
-                    </div>
+                    {renderTeamInfo(trade.team2_id)}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-white/60 whitespace-nowrap ml-4">
+                    <Clock className="h-3 w-3" />
+                    {formatDistanceToNow(new Date(trade.created_at), { addSuffix: true })}
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                {/* Trade Details */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Team 1 Players */}
                   <div className="space-y-3">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      {teams[trade.team1_id]?.name || `Team ${trade.team1_id}`} Traded
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full" />
+                      <span className="text-xs font-semibold text-blue-300 uppercase tracking-wide">
+                        {teams[trade.team1_id]?.name || `Team ${trade.team1_id}`} Traded
+                      </span>
                     </div>
                     {team1Players && team1Players.length > 0 ? (
-                      <div className="space-y-2 pl-3 border-l-2 border-muted">
-                        {team1Players.map((player: any, index: number) => (
-                          <div key={`team1-${index}`}>{renderPlayer(player)}</div>
+                      <div className="space-y-3 pl-4 border-l-2 border-blue-500/30">
+                        {team1Players.map((player: any, playerIndex: number) => (
+                          <motion.div 
+                            key={`team1-${playerIndex}`}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.2, delay: index * 0.1 + playerIndex * 0.05 }}
+                          >
+                            {renderPlayer(player)}
+                          </motion.div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground italic text-sm pl-3">No players</p>
+                      <p className="text-white/50 italic text-sm pl-4">No players</p>
                     )}
                   </div>
 
+                  {/* Team 2 Players */}
                   <div className="space-y-3">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      {teams[trade.team2_id]?.name || `Team ${trade.team2_id}`} Traded
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                      <span className="text-xs font-semibold text-purple-300 uppercase tracking-wide">
+                        {teams[trade.team2_id]?.name || `Team ${trade.team2_id}`} Traded
+                      </span>
                     </div>
                     {team2Players && team2Players.length > 0 ? (
-                      <div className="space-y-2 pl-3 border-l-2 border-muted">
-                        {team2Players.map((player: any, index: number) => (
-                          <div key={`team2-${index}`}>{renderPlayer(player)}</div>
+                      <div className="space-y-3 pl-4 border-l-2 border-purple-500/30">
+                        {team2Players.map((player: any, playerIndex: number) => (
+                          <motion.div 
+                            key={`team2-${playerIndex}`}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.2, delay: index * 0.1 + playerIndex * 0.05 }}
+                          >
+                            {renderPlayer(player)}
+                          </motion.div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground italic text-sm pl-3">No players</p>
+                      <p className="text-white/50 italic text-sm pl-4">No players</p>
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>

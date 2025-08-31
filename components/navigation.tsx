@@ -29,18 +29,8 @@ import {
   Star
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ModeToggle } from "@/components/mode-toggle"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -402,47 +392,14 @@ export default function Navigation() {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-3">
-                    <ModeToggle />
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center">
-                          <Settings className="h-5 w-5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" side="left" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm z-[100]">
-                        <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-white/20" />
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                            <Link href={`/players/${playerId || session.user.id}`}>
-                              <User className="mr-2 h-4 w-4" />
-                              View Profile
-                            </Link>
-                          </DropdownMenuItem>
-                          {isTeamManager && (
-                            <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                              <Link href="/management">Management</Link>
-                            </DropdownMenuItem>
-                          )}
-                          {isAdmin && (
-                            <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                              <Link href="/admin">Admin Dashboard</Link>
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                            <Link href="/settings">Settings</Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                        <DropdownMenuSeparator className="bg-white/20" />
-                        <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-white/10">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Log out
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  {/* Sign Out Button */}
+                  <Button
+                    onClick={handleSignOut}
+                    className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign out
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -452,9 +409,6 @@ export default function Navigation() {
                   <Link href="/register" onClick={() => setIsMobileOpen(false)} className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
                     Sign up
                   </Link>
-                  <div className="flex justify-center">
-                    <ModeToggle />
-                  </div>
                 </div>
               )}
             </div>
@@ -627,47 +581,14 @@ export default function Navigation() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                <ModeToggle />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="h-9 w-9 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center">
-                      <Settings className="h-4 w-4" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" side="left" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm z-[100]">
-                    <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                        <Link href={`/players/${playerId || session.user.id}`}>
-                          <User className="mr-2 h-4 w-4" />
-                          View Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      {isTeamManager && (
-                        <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                          <Link href="/management">Management</Link>
-                        </DropdownMenuItem>
-                      )}
-                      {isAdmin && (
-                        <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                          <Link href="/admin">Admin Dashboard</Link>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem asChild className="text-white hover:bg-white/10">
-                        <Link href="/settings">Settings</Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator className="bg-white/20" />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-white/10">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              {/* Sign Out Button */}
+              <Button
+                onClick={handleSignOut}
+                className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign out
+              </Button>
             </>
           ) : (
             <div className="space-y-3">
@@ -677,9 +598,6 @@ export default function Navigation() {
               <Link href="/register" className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
                 Sign up
               </Link>
-              <div className="flex justify-center">
-                <ModeToggle />
-              </div>
             </div>
           )}
         </div>
