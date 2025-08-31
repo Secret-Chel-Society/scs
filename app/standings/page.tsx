@@ -7,47 +7,9 @@ import TeamStandings from "@/components/team-standings"
 import { PlayoffBracket } from "@/components/standings/playoff-bracket"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { motion } from "framer-motion"
-import { Trophy, Target, TrendingUp, Medal, Star, Award } from "lucide-react"
 
 interface StandingsPageProps {
   searchParams: { season?: string }
-}
-
-// Floating particles background
-function FloatingParticles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
-          key={i}
-          className={`absolute rounded-full ${
-            i % 4 === 0 ? 'bg-gradient-to-r from-blue-500/40 to-cyan-500/40' :
-            i % 4 === 1 ? 'bg-gradient-to-r from-red-500/40 to-pink-500/40' :
-            i % 4 === 2 ? 'bg-gradient-to-r from-green-500/40 to-emerald-500/40' :
-            'bg-gradient-to-r from-purple-500/40 to-violet-500/40'
-          }`}
-          style={{
-            width: Math.random() * 8 + 4,
-            height: Math.random() * 8 + 4,
-          }}
-          initial={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
-          }}
-          animate={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
-          }}
-          transition={{
-            duration: Math.random() * 25 + 15,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
-        />
-      ))}
-    </div>
-  )
 }
 
 async function getStandingsData(seasonId: number) {
@@ -85,163 +47,107 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="bg-gradient-to-br from-slate-800/90 via-green-900/20 to-slate-800/90 border-gradient-to-r from-green-500/30 to-emerald-500/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10" />
+      <Card className="bg-gradient-to-br from-slate-800/90 via-green-900/20 to-slate-800/90 border-gradient-to-r from-green-500/30 to-emerald-500/30 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10" />
+        <CardHeader className="relative">
+          <CardTitle className="flex items-center gap-2">
+            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600">
+              Playoff Teams
+            </Badge>
+            <span className="text-sm font-normal text-slate-300">Top 8 Teams</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="relative">
+          <div className="grid gap-2">
+            {playoffTeams.map((team, index) => (
+              <div
+                key={team.id}
+                className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 backdrop-blur-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <Badge
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500/50 text-green-300"
+                  >
+                    {index + 1}
+                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-white">{team.name}</span>
+                    {team.playoff_status === "clinched" && (
+                      <Badge
+                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs"
+                        title="Clinched Playoff Spot"
+                      >
+                        X
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className="font-semibold text-green-300">{team.points} PTS</span>
+                  <span className="text-slate-300">
+                    <span className="text-green-400">{team.wins}</span>-
+                    <span className="text-red-400">{team.losses}</span>-
+                    <span className="text-yellow-400">{team.otl}</span>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {bubbleTeams.length > 0 && (
+        <Card className="bg-gradient-to-br from-slate-800/90 via-orange-900/20 to-slate-800/90 border-gradient-to-r from-orange-500/30 to-red-500/30 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10" />
           <CardHeader className="relative">
             <CardTitle className="flex items-center gap-2">
-              <motion.div
-                whileHover={{ rotate: 360 }}
-                transition={{ duration: 0.6 }}
-              >
-                <Badge variant="default" className="bg-gradient-to-r from-green-600 to-emerald-600">
-                  <Trophy className="h-3 w-3 mr-1" />
-                  Playoff Teams
-                </Badge>
-              </motion.div>
-              <span className="text-sm font-normal text-slate-300">Top 8 Teams</span>
+              <Badge className="bg-gradient-to-r from-orange-600 to-red-600">
+                Bubble Teams
+              </Badge>
+              <span className="text-sm font-normal text-slate-300">Fighting for Playoff Spots</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="relative">
             <div className="grid gap-2">
-              {playoffTeams.map((team, index) => (
-                <motion.div
+              {bubbleTeams.map((team, index) => (
+                <div
                   key={team.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02, x: 5 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 backdrop-blur-sm"
+                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 backdrop-blur-sm"
                 >
                   <div className="flex items-center gap-3">
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ duration: 0.2 }}
+                    <Badge
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-600/20 to-red-600/20 border-orange-500/50 text-orange-300"
                     >
-                      <Badge
-                        variant="outline"
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500/50 text-green-300"
-                      >
-                        {index + 1}
-                      </Badge>
-                    </motion.div>
+                      {playoffTeams.length + index + 1}
+                    </Badge>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-white">{team.name}</span>
-                      {team.playoff_status === "clinched" && (
-                        <motion.div
-                          whileHover={{ scale: 1.2 }}
-                          transition={{ duration: 0.2 }}
+                      {team.playoff_status === "eliminated" && (
+                        <Badge
+                          className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-xs"
+                          title="Eliminated from Playoffs"
                         >
-                          <Badge
-                            variant="default"
-                            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs"
-                            title="Clinched Playoff Spot"
-                          >
-                            <Star className="h-3 w-3" />
-                          </Badge>
-                        </motion.div>
+                          E
+                        </Badge>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="font-semibold text-green-300">{team.points} PTS</span>
+                    <span className="font-semibold text-orange-300">{team.points} PTS</span>
                     <span className="text-slate-300">
                       <span className="text-green-400">{team.wins}</span>-
                       <span className="text-red-400">{team.losses}</span>-
                       <span className="text-yellow-400">{team.otl}</span>
                     </span>
+                    <span className="text-xs text-orange-400 font-medium">
+                      {playoffTeams[playoffTeams.length - 1].points - team.points} pts back
+                    </span>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
-
-      {bubbleTeams.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="bg-gradient-to-br from-slate-800/90 via-orange-900/20 to-slate-800/90 border-gradient-to-r from-orange-500/30 to-red-500/30 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10" />
-            <CardHeader className="relative">
-              <CardTitle className="flex items-center gap-2">
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <Badge variant="secondary" className="bg-gradient-to-r from-orange-600 to-red-600">
-                    <Target className="h-3 w-3 mr-1" />
-                    Bubble Teams
-                  </Badge>
-                </motion.div>
-                <span className="text-sm font-normal text-slate-300">Fighting for Playoff Spots</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="relative">
-              <div className="grid gap-2">
-                {bubbleTeams.map((team, index) => (
-                  <motion.div
-                    key={team.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 backdrop-blur-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Badge
-                          variant="outline"
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-600/20 to-red-600/20 border-orange-500/50 text-orange-300"
-                        >
-                          {playoffTeams.length + index + 1}
-                        </Badge>
-                      </motion.div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-white">{team.name}</span>
-                        {team.playoff_status === "eliminated" && (
-                          <motion.div
-                            whileHover={{ scale: 1.2 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <Badge
-                              variant="destructive"
-                              className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-xs"
-                              title="Eliminated from Playoffs"
-                            >
-                              <Medal className="h-3 w-3" />
-                            </Badge>
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="font-semibold text-orange-300">{team.points} PTS</span>
-                      <span className="text-slate-300">
-                        <span className="text-green-400">{team.wins}</span>-
-                        <span className="text-red-400">{team.losses}</span>-
-                        <span className="text-yellow-400">{team.otl}</span>
-                      </span>
-                      <span className="text-xs text-orange-400 font-medium">
-                        {playoffTeams[playoffTeams.length - 1].points - team.points} pts back
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       )}
     </div>
   )
@@ -263,39 +169,27 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="bg-gradient-to-br from-slate-800/90 via-blue-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 to-cyan-500/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
-          <CardHeader className="relative">
-            <CardTitle className="text-blue-300">{conference1Name}</CardTitle>
-            <CardDescription className="text-slate-300">{conference1Teams.length} teams</CardDescription>
-          </CardHeader>
-          <CardContent className="relative">
-            <TeamStandings teams={conference1Teams} />
-          </CardContent>
-        </Card>
-      </motion.div>
+      <Card className="bg-gradient-to-br from-slate-800/90 via-blue-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 to-cyan-500/30 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
+        <CardHeader className="relative">
+          <CardTitle className="text-blue-300">{conference1Name}</CardTitle>
+          <CardDescription className="text-slate-300">{conference1Teams.length} teams</CardDescription>
+        </CardHeader>
+        <CardContent className="relative">
+          <TeamStandings teams={conference1Teams} />
+        </CardContent>
+      </Card>
 
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <Card className="bg-gradient-to-br from-slate-800/90 via-purple-900/20 to-slate-800/90 border-gradient-to-r from-purple-500/30 to-pink-500/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10" />
-          <CardHeader className="relative">
-            <CardTitle className="text-purple-300">{conference2Name}</CardTitle>
-            <CardDescription className="text-slate-300">{conference2Teams.length} teams</CardDescription>
-          </CardHeader>
-          <CardContent className="relative">
-            <TeamStandings teams={conference2Teams} />
-          </CardContent>
-        </Card>
-      </motion.div>
+      <Card className="bg-gradient-to-br from-slate-800/90 via-purple-900/20 to-slate-800/90 border-gradient-to-r from-purple-500/30 to-pink-500/30 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10" />
+        <CardHeader className="relative">
+          <CardTitle className="text-purple-300">{conference2Name}</CardTitle>
+          <CardDescription className="text-slate-300">{conference2Teams.length} teams</CardDescription>
+        </CardHeader>
+        <CardContent className="relative">
+          <TeamStandings teams={conference2Teams} />
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -320,85 +214,72 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   if (!standings || standings.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 border-primary/20">
-          <CardContent className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <Award className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-300">No Standings Available</h3>
-              <p className="text-sm text-slate-400 mt-2">No team data found for this season.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      <Card className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 border-primary/20">
+        <CardContent className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-slate-300">No Standings Available</h3>
+            <p className="text-sm text-slate-400 mt-2">No team data found for this season.</p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Tabs defaultValue="overall" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-slate-800/50 to-purple-900/20 border-primary/20">
-          <TabsTrigger value="overall" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20">Overall Standings</TabsTrigger>
-          <TabsTrigger value="conference" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20">Conference</TabsTrigger>
-          <TabsTrigger value="playoffs" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20">Playoff Picture</TabsTrigger>
-          <TabsTrigger value="bracket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/20 data-[state=active]:to-red-500/20">Playoff Bracket</TabsTrigger>
-        </TabsList>
+    <Tabs defaultValue="overall" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-slate-800/50 to-purple-900/20 border-primary/20">
+        <TabsTrigger value="overall" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20">Overall Standings</TabsTrigger>
+        <TabsTrigger value="conference" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20">Conference</TabsTrigger>
+        <TabsTrigger value="playoffs" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20">Playoff Picture</TabsTrigger>
+        <TabsTrigger value="bracket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/20 data-[state=active]:to-red-500/20">Playoff Bracket</TabsTrigger>
+      </TabsList>
 
-        <TabsContent value="overall" className="space-y-6">
-          <Card className="bg-gradient-to-br from-slate-800/90 via-blue-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 to-cyan-500/30 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
-            <CardHeader className="relative">
-              <CardTitle className="text-blue-300">League Standings</CardTitle>
-              <CardDescription className="text-slate-300">
-                Complete standings for all teams in the league
-                <div className="flex items-center gap-4 mt-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Badge variant="default" className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs">
-                      <Star className="h-3 w-3" />
-                    </Badge>
-                    <span className="text-slate-300">Clinched Playoff Spot</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Badge variant="destructive" className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-xs">
-                      <Medal className="h-3 w-3" />
-                    </Badge>
-                    <span className="text-slate-300">Eliminated from Playoffs</span>
-                  </div>
+      <TabsContent value="overall" className="space-y-6">
+        <Card className="bg-gradient-to-br from-slate-800/90 via-blue-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 to-cyan-500/30 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
+          <CardHeader className="relative">
+            <CardTitle className="text-blue-300">League Standings</CardTitle>
+            <CardDescription className="text-slate-300">
+              Complete standings for all teams in the league
+              <div className="flex items-center gap-4 mt-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs">
+                    X
+                  </Badge>
+                  <span className="text-slate-300">Clinched Playoff Spot</span>
                 </div>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative">
-              <TeamStandings teams={standings} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+                <div className="flex items-center gap-1">
+                  <Badge className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-xs">
+                    E
+                  </Badge>
+                  <span className="text-slate-300">Eliminated from Playoffs</span>
+                </div>
+              </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="relative">
+            <TeamStandings teams={standings} />
+          </CardContent>
+        </Card>
+      </TabsContent>
 
-        <TabsContent value="conference" className="space-y-6">
-          <ConferenceStandings standings={standings} />
-        </TabsContent>
+      <TabsContent value="conference" className="space-y-6">
+        <ConferenceStandings standings={standings} />
+      </TabsContent>
 
-        <TabsContent value="playoffs" className="space-y-6">
-          <PlayoffPicture standings={standings} />
-        </TabsContent>
+      <TabsContent value="playoffs" className="space-y-6">
+        <PlayoffPicture standings={standings} />
+      </TabsContent>
 
-        <TabsContent value="bracket" className="space-y-6">
-          <Card className="bg-gradient-to-br from-slate-800/90 via-orange-900/20 to-slate-800/90 border-gradient-to-r from-orange-500/30 to-red-500/30 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10" />
-            <CardContent className="relative">
-              <PlayoffBracket seasonId={seasonId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </motion.div>
+      <TabsContent value="bracket" className="space-y-6">
+        <Card className="bg-gradient-to-br from-slate-800/90 via-orange-900/20 to-slate-800/90 border-gradient-to-r from-orange-500/30 to-red-500/30 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10" />
+          <CardContent className="relative">
+            <PlayoffBracket seasonId={seasonId} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   )
 }
 
@@ -408,42 +289,14 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-      <FloatingParticles />
-      
-      {/* Hockey-themed animated overlay elements */}
-      <motion.div
-        className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-      >
-        <Trophy className="h-8 w-8 text-primary/50" />
-      </motion.div>
-      <motion.div
-        className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
-        animate={{ y: [-10, 10, -10] }}
-        transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-      >
-        <TrendingUp className="h-8 w-8 text-primary/50" />
-      </motion.div>
-      <motion.div
-        className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-blue-500/20 to-red-500/20 rounded-full"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-      />
-
       <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="space-y-6">
-          <motion.div 
-            className="space-y-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="space-y-2">
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               League Standings
             </h1>
             <p className="text-slate-300 text-lg">Current team standings, conference rankings, and playoff picture</p>
-          </motion.div>
+          </div>
 
           <Suspense fallback={<StandingsLoadingSkeleton />}>
             <StandingsContent seasonId={selectedSeasonId} />

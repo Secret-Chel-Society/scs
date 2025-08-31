@@ -11,43 +11,9 @@ import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter, Gamepad2, Trophy, Calendar } from "lucide-react"
 import Image from "next/image"
-import { motion } from "framer-motion"
 
-// Floating particles background
-function FloatingParticles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
-        <motion.div
-          key={i}
-          className={`absolute rounded-full ${
-            i % 4 === 0 ? 'bg-gradient-to-r from-blue-500/40 to-cyan-500/40' :
-            i % 4 === 1 ? 'bg-gradient-to-r from-red-500/40 to-pink-500/40' :
-            i % 4 === 2 ? 'bg-gradient-to-r from-green-500/40 to-emerald-500/40' :
-            'bg-gradient-to-r from-purple-500/40 to-violet-500/40'
-          }`}
-          style={{
-            width: Math.random() * 8 + 4,
-            height: Math.random() * 8 + 4,
-          }}
-          initial={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
-          }}
-          animate={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
-          }}
-          transition={{
-            duration: Math.random() * 25 + 15,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
-        />
-      ))}
-    </div>
-  )
-}
+
+
 
 export default function MatchesPage() {
   const router = useRouter()
@@ -314,16 +280,10 @@ export default function MatchesPage() {
   if (loading) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-        <FloatingParticles />
         <div className="container mx-auto px-4 py-8 relative z-10">
-          <motion.h1 
-            className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             SCS Matches
-          </motion.h1>
+          </h1>
           <div className="mb-6 flex gap-4">
             <Skeleton className="h-10 w-48 bg-background/30" />
             <Skeleton className="h-10 w-32 bg-background/30" />
@@ -342,23 +302,12 @@ export default function MatchesPage() {
   if (error) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-        <FloatingParticles />
         <div className="container mx-auto px-4 py-8 relative z-10">
-          <motion.h1 
-            className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             SCS Matches
-          </motion.h1>
+          </h1>
 
-          <motion.div 
-            className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 p-8 rounded-lg text-center border border-primary/20"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
+          <div className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 p-8 rounded-lg text-center border border-primary/20">
             <AlertCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold mb-2 text-slate-300">Error Loading Matches</h2>
             <p className="text-slate-400 mb-2">{error}</p>
@@ -369,7 +318,7 @@ export default function MatchesPage() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh Page
             </Button>
-          </motion.div>
+          </div>
         </div>
       </div>
     )
@@ -379,46 +328,15 @@ export default function MatchesPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-      <FloatingParticles />
-      
-      {/* Hockey-themed animated overlay elements */}
-      <motion.div
-        className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-      >
-        <Gamepad2 className="h-8 w-8 text-primary/50" />
-      </motion.div>
-      <motion.div
-        className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
-        animate={{ y: [-10, 10, -10] }}
-        transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-      >
-        <Trophy className="h-8 w-8 text-primary/50" />
-      </motion.div>
-      <motion.div
-        className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-blue-500/20 to-red-500/20 rounded-full"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-      />
+
 
       <div className="container mx-auto px-4 py-8 relative z-10">
-        <motion.h1 
-          className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
           SCS Matches
-        </motion.h1>
+        </h1>
 
         {/* Filters */}
-        <motion.div 
-          className="mb-6 flex flex-col sm:flex-row gap-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
+        <div className="mb-6 flex flex-col sm:flex-row gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-400" />
             <Select value={selectedTeam} onValueChange={handleTeamFilter}>
@@ -442,16 +360,11 @@ export default function MatchesPage() {
               Season 1
             </Badge>
           </div>
-        </motion.div>
+        </div>
 
         {/* Week Navigation */}
         {totalWeeks > 1 && (
-          <motion.div 
-            className="mb-6 flex items-center justify-between"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+          <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
@@ -496,17 +409,12 @@ export default function MatchesPage() {
                 ))}
               </SelectContent>
             </Select>
-          </motion.div>
+          </div>
         )}
 
         {/* No matches message */}
         {weekMatches.length === 0 && (
-          <motion.div 
-            className="text-center py-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div className="text-center py-12">
             <div className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 rounded-lg p-8 border border-primary/20">
               <Gamepad2 className="h-12 w-12 text-slate-400 mx-auto mb-4" />
               <p className="text-slate-300 text-lg">
@@ -515,18 +423,13 @@ export default function MatchesPage() {
                   : `No matches found for the selected team in Week ${currentWeek}.`}
               </p>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Matches by date */}
         <div className="space-y-8">
           {Object.entries(matchesByDate).map(([date, dateMatches], dateIndex) => (
-            <motion.div 
-              key={date}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: dateIndex * 0.1 }}
-            >
+            <div key={date}>
               <h2 className="text-xl font-semibold mb-4 text-white">{date}</h2>
               <div className="grid gap-4 md:grid-cols-2">
                 {dateMatches.map((match, matchIndex) => {
@@ -534,12 +437,7 @@ export default function MatchesPage() {
                   const isCompleted = match.status === "Completed"
 
                   return (
-                    <motion.div
-                      key={match.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: matchIndex * 0.1 }}
-                    >
+                    <div key={match.id}>
                       <Card
                         className="overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer bg-gradient-to-br from-slate-800/90 via-purple-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30"
                         onClick={() => router.push(`/matches/${match.id}`)}
@@ -569,12 +467,9 @@ export default function MatchesPage() {
                             <div className="flex items-center justify-between">
                               {/* Home Team */}
                               <div className="flex flex-col items-center gap-2 w-1/3">
-                                <motion.div
-                                  whileHover={{ scale: 1.1, rotate: 5 }}
-                                  transition={{ duration: 0.2 }}
-                                >
+                                <div>
                                   {renderTeamLogo(match.home_team)}
-                                </motion.div>
+                                </div>
                                 <div className="flex flex-col items-center">
                                   <span className="font-medium text-center text-white">{match.home_team.name}</span>
                                   <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1 bg-blue-500/10 border-blue-500/30 text-blue-300">
@@ -597,12 +492,9 @@ export default function MatchesPage() {
 
                               {/* Away Team */}
                               <div className="flex flex-col items-center gap-2 w-1/3">
-                                <motion.div
-                                  whileHover={{ scale: 1.1, rotate: -5 }}
-                                  transition={{ duration: 0.2 }}
-                                >
+                                <div>
                                   {renderTeamLogo(match.away_team)}
-                                </motion.div>
+                                </div>
                                 <div className="flex flex-col items-center">
                                   <span className="font-medium text-center text-white">{match.away_team.name}</span>
                                   <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1 bg-purple-500/10 border-purple-500/30 text-purple-300">
@@ -621,22 +513,17 @@ export default function MatchesPage() {
                           </div>
                         </CardContent>
                       </Card>
-                    </motion.div>
+                    </div>
                   )
                 })}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Bottom pagination for convenience */}
         {totalWeeks > 1 && (
-          <motion.div 
-            className="mt-8 flex justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
+          <div className="mt-8 flex justify-center">
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
@@ -664,7 +551,7 @@ export default function MatchesPage() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>
