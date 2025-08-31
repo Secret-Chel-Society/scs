@@ -27,6 +27,8 @@ const formSchema = z.object({
   console: z.string().refine((value) => ["PS5", "Xbox"].includes(value), {
     message: "Please select a valid console",
   }),
+  primaryPosition: z.string().min(1, { message: "Please select a primary position" }),
+  secondaryPosition: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -161,6 +163,8 @@ export default function RegisterPage() {
       password: "",
       gamerTag: "",
       console: "",
+      primaryPosition: "",
+      secondaryPosition: "",
     },
   })
 
@@ -205,6 +209,9 @@ export default function RegisterPage() {
             is_active: true,
             discord_id: discordUserId,
             discord_username: discordUsername,
+            primary_position: data.primaryPosition,
+            secondary_position: data.secondaryPosition || null,
+            console: data.console,
           },
           // Include Discord info for saving to database
           discordInfo: {
@@ -457,6 +464,45 @@ export default function RegisterPage() {
                       <option value="Xbox">Xbox Series X</option>
                     </select>
                     {errors.console && <p className="text-sm text-red-400">{errors.console.message}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryPosition" className="text-white">Primary Position</Label>
+                      <select
+                        id="primaryPosition"
+                        className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        {...register("primaryPosition")}
+                      >
+                        <option value="">Select position</option>
+                        <option value="C">Center (C)</option>
+                        <option value="LW">Left Wing (LW)</option>
+                        <option value="RW">Right Wing (RW)</option>
+                        <option value="LD">Left Defense (LD)</option>
+                        <option value="RD">Right Defense (RD)</option>
+                        <option value="G">Goalie (G)</option>
+                      </select>
+                      <p className="text-sm text-green-300">Your preferred position to play</p>
+                      {errors.primaryPosition && <p className="text-sm text-red-400">{errors.primaryPosition.message}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="secondaryPosition" className="text-white">Secondary Position</Label>
+                      <select
+                        id="secondaryPosition"
+                        className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        {...register("secondaryPosition")}
+                      >
+                        <option value="">Select position (optional)</option>
+                        <option value="C">Center (C)</option>
+                        <option value="LW">Left Wing (LW)</option>
+                        <option value="RW">Right Wing (RW)</option>
+                        <option value="LD">Left Defense (LD)</option>
+                        <option value="RD">Right Defense (RD)</option>
+                        <option value="G">Goalie (G)</option>
+                      </select>
+                      <p className="text-sm text-green-300">Optional backup position</p>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">

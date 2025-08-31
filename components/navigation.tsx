@@ -210,14 +210,12 @@ export default function Navigation() {
   return (
     <>
       {/* Mobile menu button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 hover:from-blue-500/30 hover:to-purple-500/30"
+      <button
+        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 hover:from-blue-500/30 hover:to-purple-500/30 rounded-md flex items-center justify-center"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5 text-white" /> : <Menu className="h-5 w-5 text-white" />}
-      </Button>
+      </button>
 
       {/* Mobile overlay */}
       {isMobileOpen && (
@@ -252,14 +250,12 @@ export default function Navigation() {
                 priority
               />
             </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 bg-white/10 hover:bg-white/20 text-white"
+            <button
+              className="h-8 w-8 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
               onClick={() => setIsMobileOpen(false)}
             >
               <X className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
 
           {/* Mobile Navigation */}
@@ -300,10 +296,8 @@ export default function Navigation() {
                               <span>{item.name}</span>
                             </Link>
                             {hasSubmenu && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white"
+                              <button
+                                className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
                                 onClick={() => toggleSubmenu(item.name)}
                               >
                                 {isExpanded ? (
@@ -311,7 +305,7 @@ export default function Navigation() {
                                 ) : (
                                   <ChevronRight className="h-4 w-4" />
                                 )}
-                              </Button>
+                              </button>
                             )}
                           </div>
 
@@ -428,9 +422,9 @@ export default function Navigation() {
                     <ModeToggle />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white">
+                        <button className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center">
                           <Settings className="h-5 w-5" />
-                        </Button>
+                        </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
                         <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
@@ -467,12 +461,12 @@ export default function Navigation() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <Button variant="outline" asChild className="w-full h-12 bg-white/10 border-white/20 text-white hover:bg-white/20">
-                    <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
-                  </Button>
-                  <Button asChild className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                    <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
-                  </Button>
+                  <Link href="/login" onClick={() => setIsMobileOpen(false)} className="w-full h-12 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-md flex items-center justify-center">
+                    Log in
+                  </Link>
+                  <Link href="/register" onClick={() => setIsMobileOpen(false)} className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
+                    Sign up
+                  </Link>
                   <div className="flex justify-center">
                     <ModeToggle />
                   </div>
@@ -543,10 +537,8 @@ export default function Navigation() {
                             <span className="truncate">{item.name}</span>
                           </Link>
                           {hasSubmenu && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white"
+                            <button
+                              className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
                               onClick={() => toggleSubmenu(item.name)}
                             >
                               {isExpanded ? (
@@ -554,7 +546,7 @@ export default function Navigation() {
                               ) : (
                                 <ChevronRight className="h-3 w-3" />
                               )}
-                            </Button>
+                            </button>
                           )}
                         </div>
 
@@ -670,9 +662,9 @@ export default function Navigation() {
                 <ModeToggle />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 bg-white/10 hover:bg-white/20 text-white">
+                    <button className="h-9 w-9 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center">
                       <Settings className="h-4 w-4" />
-                    </Button>
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
                     <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
@@ -709,12 +701,12 @@ export default function Navigation() {
             </>
           ) : (
             <div className="space-y-3">
-              <Button variant="outline" asChild className="w-full h-10 bg-white/10 border-white/20 text-white hover:bg-white/20">
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                <Link href="/register">Sign up</Link>
-              </Button>
+              <Link href="/login" className="w-full h-10 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-md flex items-center justify-center">
+                Log in
+              </Link>
+              <Link href="/register" className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
+                Sign up
+              </Link>
               <div className="flex justify-center">
                 <ModeToggle />
               </div>

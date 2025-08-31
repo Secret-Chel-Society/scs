@@ -1968,6 +1968,7 @@ export default function StatisticsPage() {
           </TabsContent>
         </Tabs>
         </motion.div>
+        </motion.div>
       </div>
 
       <style jsx>{`
