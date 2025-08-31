@@ -54,7 +54,7 @@ export default function RootLayout({
               {/* Main content area */}
               <div className="flex-1 flex flex-col lg:ml-64 w-full min-w-0">
                 <Suspense>
-                  <main className="flex-1 p-2 lg:p-6 pt-16">
+                  <main className="flex-1 p-2 lg:p-6">
                     {children}
                   </main>
                 </Suspense>

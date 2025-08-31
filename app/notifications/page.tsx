@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { createServerComponentClient } from "@supabase/ssr"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/ui/page-header"

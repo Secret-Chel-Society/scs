@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Bell } from "lucide-react"
-import { createClientComponentClient } from "@supabase/ssr"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,

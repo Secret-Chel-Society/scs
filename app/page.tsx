@@ -284,33 +284,33 @@ export default function Home() {
       <BannedUserModal />
       <FloatingParticles />
 
-      {/* Modern Hero Section with Glassmorphism */}
+      {/* Enhanced Hockey-Themed Hero Section */}
       <div className="relative">
         <HeroCarousel images={heroImages} />
 
-        {/* Modern floating elements with glassmorphism */}
+        {/* Hockey-themed animated overlay elements */}
         <motion.div
-          className="absolute top-20 right-10 w-20 h-20 backdrop-blur-md bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-2xl"
+          className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         >
-          <Gamepad2 className="h-8 w-8 text-white/80" />
+          <Gamepad2 className="h-8 w-8 text-primary/50" />
         </motion.div>
         <motion.div
-          className="absolute bottom-20 left-10 w-16 h-16 backdrop-blur-md bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 rounded-xl flex items-center justify-center shadow-xl"
+          className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
           animate={{ y: [-10, 10, -10] }}
           transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >
-          <Trophy className="h-8 w-8 text-white/90" />
+          <Trophy className="h-8 w-8 text-primary/50" />
         </motion.div>
         <motion.div
-          className="absolute top-1/2 left-20 w-12 h-12 backdrop-blur-md bg-gradient-to-r from-blue-500/30 to-red-500/30 border border-white/20 rounded-full shadow-lg"
+          className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-blue-500/20 to-red-500/20 rounded-full"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
         />
       </div>
 
-      {/* Modern Action Buttons Section */}
+      {/* Action Buttons Section */}
       <motion.section
         className="relative mt-8 z-10 mx-4"
         initial={{ opacity: 0, y: 30 }}
@@ -318,37 +318,23 @@ export default function Home() {
         transition={{ duration: 0.6 }}
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button 
-                asChild 
-                size="lg" 
-                className="font-semibold text-base sm:text-lg px-10 py-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl border-0"
-              >
-                <Link href="/register/season" className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Season 1 Signup
-                </Link>
-              </Button>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="lg"
-                asChild
-                className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 font-semibold text-base sm:text-lg px-10 py-4 shadow-xl"
-              >
-                <Link href="/matches" className="flex items-center gap-2">
-                  <GamepadIcon className="h-5 w-5" />
-                  View Matches
-                </Link>
-              </Button>
-            </motion.div>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button asChild size="lg" className="font-semibold text-base sm:text-lg px-8 py-3">
+              <Link href="/register/season">Season 1 Signup</Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground hover:bg-background/50 font-semibold text-base sm:text-lg px-8 py-3"
+            >
+              <Link href="/matches">View Matches</Link>
+            </Button>
           </div>
         </div>
       </motion.section>
 
-      {/* Modern Stats Section with Glassmorphism */}
+      {/* Enhanced Stats Section with Hockey Theme */}
       <motion.section
         className="relative mt-8 z-10 mx-4"
         initial={{ opacity: 0, y: 50 }}
@@ -356,41 +342,41 @@ export default function Home() {
         transition={{ duration: 0.8 }}
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <Card className="backdrop-blur-xl bg-white/10 border-white/20 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-red-500/10" />
-            <CardContent className="relative p-6 lg:p-10">
-              <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-white mb-3">SCS League Statistics</h2>
-                <p className="text-white/80 text-lg">Real-time data from our advanced tracking system</p>
+          <Card className="backdrop-blur-md bg-background/90 border-primary/20 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
+            <CardContent className="relative p-4 lg:p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-foreground mb-2">SCS League Statistics</h2>
+                <p className="text-muted-foreground">Real-time data from our advanced tracking system</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
                 {[
                   {
                     icon: Users,
                     label: "Active Players",
                     value: stats.totalPlayers,
-                    color: "from-blue-400 to-blue-600",
+                    color: "text-blue-500",
                     desc: "Registered competitors",
                   },
                   {
                     icon: Trophy,
                     label: "Teams",
                     value: stats.totalTeams,
-                    color: "from-green-400 to-green-600",
+                    color: "text-green-500",
                     desc: "Active franchises",
                   },
                   {
                     icon: Calendar,
                     label: "Matches Played",
                     value: stats.totalMatches,
-                    color: "from-purple-400 to-purple-600",
+                    color: "text-purple-500",
                     desc: "Total games tracked",
                   },
                   {
                     icon: TrendingUp,
                     label: "Completed Trades",
                     value: stats.completedTrades,
-                    color: "from-orange-400 to-orange-600",
+                    color: "text-orange-500",
                     desc: "Completed transactions",
                   },
                 ].map((stat, index) => (
@@ -403,17 +389,17 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                   >
                     <motion.div
-                      className={`mb-4 mx-auto w-fit p-3 rounded-xl bg-gradient-to-r ${stat.color} shadow-lg`}
+                      className={`${stat.color} mb-2 mx-auto w-fit`}
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <stat.icon className="h-8 w-8 text-white" />
+                      <stat.icon className="h-8 w-8" />
                     </motion.div>
-                    <div className="text-4xl font-bold mb-2 text-white">
+                    <div className="text-3xl font-bold mb-1">
                       <AnimatedCounter end={stat.value} />
                     </div>
-                    <div className="text-lg font-semibold mb-2 text-white">{stat.label}</div>
-                    <div className="text-sm text-white/70">{stat.desc}</div>
+                    <div className="text-sm font-medium mb-1">{stat.label}</div>
+                    <div className="text-xs text-muted-foreground">{stat.desc}</div>
                   </motion.div>
                 ))}
               </div>

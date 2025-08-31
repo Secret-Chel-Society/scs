@@ -9,9 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter, Calendar, GamepadIcon, Trophy } from "lucide-react"
+import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter } from "lucide-react"
 import Image from "next/image"
-import { motion } from "framer-motion"
 
 export default function MatchesPage() {
   const router = useRouter()
@@ -234,13 +233,13 @@ export default function MatchesPage() {
 
     if (team.logo_url) {
       return (
-        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white/10 border border-white/20 shadow-lg">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-background border">
           <Image
             src={team.logo_url || "/placeholder.svg"}
             alt={team.name}
-            width={48}
-            height={48}
-            className="object-contain p-1"
+            width={40}
+            height={40}
+            className="object-contain"
           />
         </div>
       )
@@ -248,7 +247,7 @@ export default function MatchesPage() {
 
     // Fallback if no logo
     return (
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 flex items-center justify-center text-sm font-semibold text-white shadow-lg">
+      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
         {team.name.substring(0, 2)}
       </div>
     )
@@ -277,23 +276,16 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="space-y-6">
-            <div className="text-center">
-              <Skeleton className="h-12 w-64 bg-white/10 mx-auto mb-4" />
-              <Skeleton className="h-6 w-96 bg-white/10 mx-auto" />
-            </div>
-            <div className="flex gap-4 justify-center">
-              <Skeleton className="h-10 w-48 bg-white/10" />
-              <Skeleton className="h-10 w-32 bg-white/10" />
-            </div>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-40 w-full bg-white/10 rounded-2xl" />
-              ))}
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Matches</h1>
+        <div className="mb-6 flex gap-4">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
         </div>
       </div>
     )
@@ -302,27 +294,20 @@ export default function MatchesPage() {
   // Add a fallback UI for connection errors
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center gap-3 p-4 bg-gradient-to-r from-primary to-primary/60 rounded-2xl shadow-xl">
-              <GamepadIcon className="h-8 w-8 text-white" />
-              <h1 className="text-4xl font-bold text-white">Matches</h1>
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Matches</h1>
 
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 max-w-2xl mx-auto">
-              <AlertCircle className="h-16 w-16 text-white/50 mx-auto mb-4" />
-              <h2 className="text-2xl font-semibold text-white mb-2">Error Loading Matches</h2>
-              <p className="text-white/70 mb-2">{error}</p>
-              <p className="text-white/70 mb-6">
-                There was a problem connecting to the database. This could be due to a type mismatch or server issue.
-              </p>
-              <Button onClick={() => window.location.reload()} variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Page
-              </Button>
-            </div>
-          </div>
+        <div className="bg-muted p-8 rounded-lg text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Error Loading Matches</h2>
+          <p className="text-muted-foreground mb-2">{error}</p>
+          <p className="text-muted-foreground mb-6">
+            There was a problem connecting to the database. This could be due to a type mismatch or server issue.
+          </p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Page
+          </Button>
         </div>
       </div>
     )
@@ -331,274 +316,192 @@ export default function MatchesPage() {
   const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-8">
-          {/* Modern Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center space-y-4"
-          >
-            <div className="inline-flex items-center gap-3 p-4 bg-gradient-to-r from-primary to-primary/60 rounded-2xl shadow-xl">
-              <GamepadIcon className="h-8 w-8 text-white" />
-              <h1 className="text-4xl font-bold text-white">SCS Matches</h1>
-            </div>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">
-              View all matches, schedules, and results from the Secret Chel Society league
-            </p>
-          </motion.div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Matches</h1>
 
-          {/* Modern Filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex flex-col sm:flex-row justify-center items-center gap-4"
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg">
-                <Filter className="h-4 w-4 text-primary-300" />
-              </div>
-              <Select value={selectedTeam} onValueChange={handleTeamFilter}>
-                <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white backdrop-blur-md">
-                  <SelectValue placeholder="Filter by team" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
-                  <SelectItem value="all">All Teams</SelectItem>
-                  {teams.map((team) => (
-                    <SelectItem key={team.id} value={team.id}>
-                      {team.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Filters */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4" />
+          <Select value={selectedTeam} onValueChange={handleTeamFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by team" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Teams</SelectItem>
+              {teams.map((team) => (
+                <SelectItem key={team.id} value={team.id}>
+                  {team.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg">
-                <Calendar className="h-4 w-4 text-primary-300" />
-              </div>
-              <Badge variant="outline" className="bg-white/10 border-white/20 text-white px-4 py-2">
-                Season 1
-              </Badge>
-            </div>
-          </motion.div>
-
-          {/* Week Navigation */}
-          {totalWeeks > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex items-center justify-between backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4"
-            >
-              <div className="flex items-center gap-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => goToWeek(currentWeek - 1)} 
-                  disabled={currentWeek === 1}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous Week
-                </Button>
-
-                <div className="text-center">
-                  <div className="font-bold text-white">
-                    Week {currentWeek} of {totalWeeks}
-                  </div>
-                  <div className="text-sm text-white/70">{getWeekDateRange()}</div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => goToWeek(currentWeek + 1)}
-                  disabled={currentWeek === totalWeeks}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  Next Week
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Week selector for quick navigation */}
-              <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
-                <SelectTrigger className="w-32 bg-white/10 border-white/20 text-white backdrop-blur-md">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
-                  {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
-                    <SelectItem key={week} value={week.toString()}>
-                      Week {week}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </motion.div>
-          )}
-
-          {/* No matches message */}
-          {weekMatches.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="text-center py-12"
-            >
-              <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8 max-w-md mx-auto">
-                <Calendar className="h-16 w-16 text-white/50 mx-auto mb-4" />
-                <p className="text-white/80 text-lg">
-                  {selectedTeam === "all"
-                    ? `No matches found for Week ${currentWeek}.`
-                    : `No matches found for the selected team in Week ${currentWeek}.`}
-                </p>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Matches by date */}
-          <div className="space-y-8">
-            {Object.entries(matchesByDate).map(([date, dateMatches], dateIndex) => (
-              <motion.div
-                key={date}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: dateIndex * 0.1 }}
-              >
-                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                  <div className="p-2 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg">
-                    <Calendar className="h-5 w-5 text-primary-300" />
-                  </div>
-                  {date}
-                </h2>
-                <div className="grid gap-6 md:grid-cols-2">
-                  {dateMatches.map((match, matchIndex) => {
-                    const formattedDate = formatDate(match.match_date)
-                    const isCompleted = match.status === "Completed"
-
-                    return (
-                      <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, delay: matchIndex * 0.1 }}
-                        whileHover={{ y: -4, scale: 1.02 }}
-                      >
-                        <Card
-                          className="overflow-hidden backdrop-blur-xl bg-white/10 border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-300 cursor-pointer group"
-                          onClick={() => router.push(`/matches/${match.id}`)}
-                        >
-                          <CardContent className="p-0">
-                            <div className="p-6">
-                              <div className="flex justify-between items-center mb-4">
-                                <div className="flex items-center gap-2 text-sm text-white/70">
-                                  <Clock className="h-4 w-4" />
-                                  <span>{formattedDate.time}</span>
-                                </div>
-                                <Badge 
-                                  variant={getStatusBadgeVariant(match.status)}
-                                  className="bg-white/10 border-white/20 text-white"
-                                >
-                                  {match.status}
-                                </Badge>
-                              </div>
-
-                              <div className="flex items-center justify-between">
-                                {/* Home Team */}
-                                <div className="flex flex-col items-center gap-3 w-1/3">
-                                  {renderTeamLogo(match.home_team)}
-                                  <div className="flex flex-col items-center">
-                                    <span className="font-semibold text-white text-center">{match.home_team.name}</span>
-                                    <Badge variant="outline" className="mt-2 text-xs bg-blue-500/20 border-blue-400 text-blue-300 flex items-center gap-1">
-                                      <Home className="h-3 w-3" />
-                                      Home
-                                    </Badge>
-                                  </div>
-                                </div>
-
-                                {/* Score */}
-                                <div className="flex items-center justify-center w-1/3">
-                                  {isCompleted ? (
-                                    <div className="text-3xl font-bold tabular-nums text-white">
-                                      {match.home_score} - {match.away_score}
-                                    </div>
-                                  ) : (
-                                    <div className="text-2xl font-medium text-white/70">vs</div>
-                                  )}
-                                </div>
-
-                                {/* Away Team */}
-                                <div className="flex flex-col items-center gap-3 w-1/3">
-                                  {renderTeamLogo(match.away_team)}
-                                  <div className="flex flex-col items-center">
-                                    <span className="font-semibold text-white text-center">{match.away_team.name}</span>
-                                    <Badge variant="outline" className="mt-2 text-xs bg-red-500/20 border-red-400 text-red-300 flex items-center gap-1">
-                                      <ExternalLink className="h-3 w-3" />
-                                      Away
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="bg-white/5 p-3 flex justify-center border-t border-white/10">
-                              <Button variant="ghost" size="sm" className="text-xs text-white/70 hover:text-white hover:bg-white/10">
-                                View Details
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Bottom pagination for convenience */}
-          {totalWeeks > 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex justify-center"
-            >
-              <div className="flex items-center gap-4 backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => goToWeek(currentWeek - 1)} 
-                  disabled={currentWeek === 1}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-
-                <span className="px-4 py-2 text-sm text-white font-medium">
-                  Week {currentWeek} of {totalWeeks}
-                </span>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => goToWeek(currentWeek + 1)}
-                  disabled={currentWeek === totalWeeks}
-                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </motion.div>
-          )}
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-base py-1 px-3">
+            Season 1
+          </Badge>
         </div>
       </div>
+
+      {/* Week Navigation */}
+      {totalWeeks > 1 && (
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => goToWeek(currentWeek - 1)} disabled={currentWeek === 1}>
+              <ChevronLeft className="h-4 w-4" />
+              Previous Week
+            </Button>
+
+            <div className="text-center">
+              <div className="font-semibold">
+                Week {currentWeek} of {totalWeeks}
+              </div>
+              <div className="text-sm text-muted-foreground">{getWeekDateRange()}</div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goToWeek(currentWeek + 1)}
+              disabled={currentWeek === totalWeeks}
+            >
+              Next Week
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Week selector for quick navigation */}
+          <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
+                <SelectItem key={week} value={week.toString()}>
+                  Week {week}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* No matches message */}
+      {weekMatches.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            {selectedTeam === "all"
+              ? `No matches found for Week ${currentWeek}.`
+              : `No matches found for the selected team in Week ${currentWeek}.`}
+          </p>
+        </div>
+      )}
+
+      {/* Matches by date */}
+      <div className="space-y-8">
+        {Object.entries(matchesByDate).map(([date, dateMatches]) => (
+          <div key={date}>
+            <h2 className="text-xl font-semibold mb-4">{date}</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {dateMatches.map((match) => {
+                const formattedDate = formatDate(match.match_date)
+                const isCompleted = match.status === "Completed"
+
+                return (
+                  <Card
+                    key={match.id}
+                    className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/matches/${match.id}`)}
+                  >
+                    <CardContent className="p-0">
+                      <div className="p-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>{formattedDate.time}</span>
+                          </div>
+                          <Badge variant={getStatusBadgeVariant(match.status)}>{match.status}</Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          {/* Home Team */}
+                          <div className="flex flex-col items-center gap-2 w-1/3">
+                            {renderTeamLogo(match.home_team)}
+                            <div className="flex flex-col items-center">
+                              <span className="font-medium text-center">{match.home_team.name}</span>
+                              <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1">
+                                <Home className="h-3 w-3" />
+                                Home
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Score */}
+                          <div className="flex items-center justify-center w-1/3">
+                            {isCompleted ? (
+                              <div className="text-2xl font-bold tabular-nums">
+                                {match.home_score} - {match.away_score}
+                              </div>
+                            ) : (
+                              <div className="text-xl font-medium text-muted-foreground">vs</div>
+                            )}
+                          </div>
+
+                          {/* Away Team */}
+                          <div className="flex flex-col items-center gap-2 w-1/3">
+                            {renderTeamLogo(match.away_team)}
+                            <div className="flex flex-col items-center">
+                              <span className="font-medium text-center">{match.away_team.name}</span>
+                              <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1">
+                                <ExternalLink className="h-3 w-3" />
+                                Away
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-muted-foreground/5 p-2 flex justify-center">
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          View Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom pagination for convenience */}
+      {totalWeeks > 1 && (
+        <div className="mt-8 flex justify-center">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => goToWeek(currentWeek - 1)} disabled={currentWeek === 1}>
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+
+            <span className="px-4 py-2 text-sm">
+              Week {currentWeek} of {totalWeeks}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goToWeek(currentWeek + 1)}
+              disabled={currentWeek === totalWeeks}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
