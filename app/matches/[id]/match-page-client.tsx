@@ -8,7 +8,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MatchDetails } from "@/components/matches/match-details"
-import { ComprehensiveMatchView } from "@/components/matches/comprehensive-match-view"
 import { AlertCircle, Upload, Edit, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
@@ -17,6 +16,7 @@ import { EditScoreModal } from "@/components/matches/edit-score-modal"
 import { EaMatchStatistics } from "@/components/matches/ea-match-statistics"
 import { MatchLineups } from "@/components/matches/match-lineups"
 import { MatchHighlightsWrapper } from "@/components/matches/match-highlights-wrapper"
+import { ComprehensiveMatchView } from "@/components/matches/comprehensive-match-view"
 
 export default function MatchDetailPage() {
   const params = useParams()
@@ -282,7 +282,7 @@ export default function MatchDetailPage() {
 
       <div className="space-y-3 sm:space-y-6">
         {/* Comprehensive Match View */}
-        <ComprehensiveMatchView matchId={matchId} />
+        <ComprehensiveMatchView match={match} isAdmin={canManageMatch} />
       </div>
 
       {/* EA Match Import Modal */}

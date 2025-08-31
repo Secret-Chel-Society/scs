@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -38,6 +37,11 @@ import {
   Gamepad2,
   Medal,
   BarChartIcon as ChartBar,
+  Flame,
+  Sparkles,
+  Rocket,
+  Heart,
+  Gem,
 } from "lucide-react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
@@ -68,14 +72,23 @@ function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; d
   )
 }
 
-// Floating particles background
+// Enhanced floating particles with hockey theme
 function FloatingParticles() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(30)].map((_, i) => (
+      {[...Array(50)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 bg-primary/30 rounded-full"
+          className={`absolute rounded-full ${
+            i % 4 === 0 ? 'bg-gradient-to-r from-blue-500/40 to-cyan-500/40' :
+            i % 4 === 1 ? 'bg-gradient-to-r from-red-500/40 to-pink-500/40' :
+            i % 4 === 2 ? 'bg-gradient-to-r from-green-500/40 to-emerald-500/40' :
+            'bg-gradient-to-r from-purple-500/40 to-violet-500/40'
+          }`}
+          style={{
+            width: Math.random() * 8 + 4,
+            height: Math.random() * 8 + 4,
+          }}
           initial={{
             x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
             y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
@@ -85,7 +98,7 @@ function FloatingParticles() {
             y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
           }}
           transition={{
-            duration: Math.random() * 25 + 15,
+            duration: Math.random() * 30 + 20,
             repeat: Number.POSITIVE_INFINITY,
             repeatType: "reverse",
           }}
@@ -146,7 +159,7 @@ export default function Home() {
             .order("order", { ascending: true })
 
           if (!carouselError && carouselData && carouselData.length > 0) {
-            const validatedImages = carouselData.map((img) => ({
+            const validatedImages = carouselData.map((img: any) => ({
               ...img,
               url:
                 img.url && typeof img.url === "string" && img.url.trim() !== ""
@@ -159,16 +172,15 @@ export default function Home() {
           console.error("Error fetching carousel images:", carouselError)
         }
 
-        // Fetch stats - Updated to count completed trades instead of pending
+        // Fetch stats
         try {
           const [playersRes, teamsRes, matchesRes, tradesRes] = await Promise.all([
             supabase.from("users").select("id", { count: "exact" }),
             supabase
               .from("teams")
               .select("id", { count: "exact" })
-              .eq("is_active", true), // Only active teams
+              .eq("is_active", true),
             supabase.from("matches").select("id", { count: "exact" }),
-            // Check if trades table exists and get completed trades
             supabase
               .from("trades")
               .select("id", { count: "exact" })
@@ -176,7 +188,6 @@ export default function Home() {
               .then(
                 (result) => result,
                 (error) => {
-                  // If trades table doesn't exist, return 0
                   if (error.message.includes("relation") && error.message.includes("does not exist")) {
                     return { count: 0, error: null }
                   }
@@ -280,7 +291,7 @@ export default function Home() {
   }, [supabase, toast])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
       <BannedUserModal />
       <FloatingParticles />
 
@@ -288,29 +299,37 @@ export default function Home() {
       <div className="relative">
         <HeroCarousel images={heroImages} />
 
-        {/* Hockey-themed animated overlay elements */}
+        {/* Enhanced animated overlay elements */}
         <motion.div
-          className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
+          className="absolute top-20 right-10 w-24 h-24 border-4 border-gradient-to-r from-blue-500/50 to-cyan-500/50 rounded-full flex items-center justify-center bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm"
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         >
-          <Gamepad2 className="h-8 w-8 text-primary/50" />
+          <Gamepad2 className="h-10 w-10 text-blue-400" />
         </motion.div>
+        
         <motion.div
-          className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
+          className="absolute bottom-20 left-10 w-20 h-20 bg-gradient-to-r from-red-500/30 to-pink-500/30 rounded-xl flex items-center justify-center backdrop-blur-sm border border-red-500/30"
           animate={{ y: [-10, 10, -10] }}
           transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >
-          <Trophy className="h-8 w-8 text-primary/50" />
+          <Trophy className="h-10 w-10 text-red-400" />
         </motion.div>
+        
         <motion.div
-          className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-blue-500/20 to-red-500/20 rounded-full"
-          animate={{ scale: [1, 1.2, 1] }}
+          className="absolute top-1/2 left-20 w-16 h-16 bg-gradient-to-r from-green-500/30 to-emerald-500/30 rounded-full border border-green-500/30"
+          animate={{ scale: [1, 1.3, 1] }}
           transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+        />
+        
+        <motion.div
+          className="absolute top-1/3 right-1/4 w-12 h-12 bg-gradient-to-r from-purple-500/30 to-violet-500/30 rounded-lg border border-purple-500/30"
+          animate={{ rotate: [0, 180, 360] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
         />
       </div>
 
-      {/* Action Buttons Section */}
+      {/* Enhanced Action Buttons Section */}
       <motion.section
         className="relative mt-8 z-10 mx-4"
         initial={{ opacity: 0, y: 30 }}
@@ -319,64 +338,99 @@ export default function Home() {
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="font-semibold text-base sm:text-lg px-8 py-3">
-              <Link href="/register/season">Season 1 Signup</Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground hover:bg-background/50 font-semibold text-base sm:text-lg px-8 py-3"
-            >
-              <Link href="/matches">View Matches</Link>
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                asChild 
+                size="lg" 
+                className="font-semibold text-base sm:text-lg px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg border-0"
+              >
+                <Link href="/register/season" className="flex items-center gap-2">
+                  <Rocket className="h-5 w-5" />
+                  Season 1 Signup
+                </Link>
+              </Button>
+            </motion.div>
+            
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="bg-background/30 backdrop-blur-sm border-purple-500/30 text-foreground hover:bg-purple-500/20 font-semibold text-base sm:text-lg px-8 py-4 shadow-lg"
+              >
+                <Link href="/matches" className="flex items-center gap-2">
+                  <GamepadIcon className="h-5 w-5" />
+                  View Matches
+                </Link>
+              </Button>
+            </motion.div>
           </div>
         </div>
       </motion.section>
 
       {/* Enhanced Stats Section with Hockey Theme */}
       <motion.section
-        className="relative mt-8 z-10 mx-4"
+        className="relative mt-12 z-10 mx-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <Card className="backdrop-blur-md bg-background/90 border-primary/20 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
-            <CardContent className="relative p-4 lg:p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">SCS League Statistics</h2>
-                <p className="text-muted-foreground">Real-time data from our advanced tracking system</p>
+          <Card className="backdrop-blur-md bg-gradient-to-br from-slate-800/90 via-purple-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10" />
+            <CardContent className="relative p-6 lg:p-10">
+              <div className="text-center mb-10">
+                <motion.div 
+                  className="inline-flex items-center gap-3 mb-4"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="p-4 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl shadow-lg">
+                    <BarChart3 className="h-8 w-8 text-white" />
+                  </div>
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    SCS League Statistics
+                  </h2>
+                </motion.div>
+                <p className="text-slate-300 text-lg">Real-time data from our advanced tracking system</p>
+                <div className="h-1 w-32 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mx-auto mt-4" />
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
                 {[
                   {
                     icon: Users,
                     label: "Active Players",
                     value: stats.totalPlayers,
-                    color: "text-blue-500",
+                    gradient: "from-blue-500 to-cyan-500",
+                    bgGradient: "from-blue-500/20 to-cyan-500/20",
+                    borderColor: "border-blue-500/30",
                     desc: "Registered competitors",
                   },
                   {
                     icon: Trophy,
                     label: "Teams",
                     value: stats.totalTeams,
-                    color: "text-green-500",
+                    gradient: "from-green-500 to-emerald-500",
+                    bgGradient: "from-green-500/20 to-emerald-500/20",
+                    borderColor: "border-green-500/30",
                     desc: "Active franchises",
                   },
                   {
                     icon: Calendar,
                     label: "Matches Played",
                     value: stats.totalMatches,
-                    color: "text-purple-500",
+                    gradient: "from-purple-500 to-violet-500",
+                    bgGradient: "from-purple-500/20 to-violet-500/20",
+                    borderColor: "border-purple-500/30",
                     desc: "Total games tracked",
                   },
                   {
                     icon: TrendingUp,
                     label: "Completed Trades",
                     value: stats.completedTrades,
-                    color: "text-orange-500",
+                    gradient: "from-orange-500 to-red-500",
+                    bgGradient: "from-orange-500/20 to-red-500/20",
+                    borderColor: "border-orange-500/30",
                     desc: "Completed transactions",
                   },
                 ].map((stat, index) => (
@@ -386,20 +440,20 @@ export default function Home() {
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
                   >
                     <motion.div
-                      className={`${stat.color} mb-2 mx-auto w-fit`}
-                      whileHover={{ rotate: 360 }}
+                      className={`bg-gradient-to-r ${stat.bgGradient} border ${stat.borderColor} rounded-2xl p-4 mb-4 backdrop-blur-sm`}
+                      whileHover={{ rotate: 360, scale: 1.1 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <stat.icon className="h-8 w-8" />
+                      <stat.icon className={`h-10 w-10 mx-auto bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} />
                     </motion.div>
-                    <div className="text-3xl font-bold mb-1">
+                    <div className={`text-4xl font-bold mb-2 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
                       <AnimatedCounter end={stat.value} />
                     </div>
-                    <div className="text-sm font-medium mb-1">{stat.label}</div>
-                    <div className="text-xs text-muted-foreground">{stat.desc}</div>
+                    <div className="text-lg font-semibold mb-2 text-white">{stat.label}</div>
+                    <div className="text-sm text-slate-300">{stat.desc}</div>
                   </motion.div>
                 ))}
               </div>
