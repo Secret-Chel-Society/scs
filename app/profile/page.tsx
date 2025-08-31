@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClientComponentClient } from "@supabase/ssr"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ProfilePage() {

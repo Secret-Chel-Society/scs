@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer"
-import crypto from "crypto"
+import crypto from "node:crypto"
 import { createClient } from "@supabase/supabase-js"
 
 // Check if we're in the preview environment

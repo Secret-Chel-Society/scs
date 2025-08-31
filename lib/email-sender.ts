@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer"
 import { createClient } from "@supabase/supabase-js"
-import { randomBytes } from "crypto"
+import { randomBytes } from "node:crypto"
 
 // Create a type for email options
 type EmailOptions = {

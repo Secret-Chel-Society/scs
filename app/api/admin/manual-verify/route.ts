@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
-import crypto from "crypto"
+import crypto from "node:crypto"
 
 export async function POST(request: Request) {
   try {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import crypto from "crypto"
+import crypto from "node:crypto"
 
 // Store for temporary verification tokens
 // In production, this should be in a database or Redis
