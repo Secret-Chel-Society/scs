@@ -1130,15 +1130,15 @@ export default function AdminStatisticsPage() {
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex flex-col sm:flex-row gap-4">
-              <Input
-                placeholder="Search players or teams..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-sm bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-              />
+                <Input
+                  placeholder="Search players or teams..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-sm bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                />
 
-              <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
-                <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
+                <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
+                  <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                   <SelectValue placeholder="Filter by position" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
@@ -1154,8 +1154,8 @@ export default function AdminStatisticsPage() {
                 </SelectContent>
               </Select>
 
-              <Select defaultValue={statFilter} onValueChange={setStatFilter}>
-                <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
+                <Select defaultValue={statFilter} onValueChange={setStatFilter}>
+                  <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                   <SelectValue placeholder="Sort by stat" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
