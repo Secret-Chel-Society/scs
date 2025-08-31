@@ -6,7 +6,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, Gamepad2, Zap, Target } from "lucide-react"
 
@@ -56,9 +56,8 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
           return (
             <CarouselItem key={game.id} className="basis-full md:basis-1/2 lg:basis-1/3 h-full">
               <Link href={`/matches/${game.id}`}>
-                <motion.div 
-                  whileHover={{ y: -8, scale: 1.02 }} 
-                  transition={{ type: "spring", stiffness: 300 }}
+                <div 
+                  className="hover:scale-105 hover:-translate-y-2 transition-all duration-300"
                 >
                   <Card
                     className="h-full overflow-hidden bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 hover:border-blue-500/50 transition-all duration-300 group"
@@ -147,7 +146,7 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               </Link>
             </CarouselItem>
           )

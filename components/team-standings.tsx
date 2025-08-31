@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 import { Trophy, TrendingUp, TrendingDown, Minus, Target, Medal } from "lucide-react"
 import type { TeamStanding } from "@/lib/standings-calculator"
 
@@ -102,12 +102,9 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
             </TableHeader>
             <TableBody>
               {teams.map((team, index) => (
-                <motion.tr 
+                <tr 
                   key={team.id} 
                   className="border-white/10 hover:bg-white/10 transition-colors duration-200"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
                   <TableCell className="text-center">
                     {getPositionBadge(index + 1)}
@@ -172,7 +169,7 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
                   <TableCell className="text-center hidden lg:table-cell text-white/80">
                     {team.penalty_kill_percentage ? `${team.penalty_kill_percentage.toFixed(1)}%` : "0.0%"}
                   </TableCell>
-                </motion.tr>
+                </tr>
               ))}
             </TableBody>
           </Table>

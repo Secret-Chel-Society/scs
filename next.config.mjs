@@ -38,11 +38,16 @@ const nextConfig = {
     }
     return config;
   },
+  transpilePackages: ['framer-motion'],
   experimental: {
     // Disable the export * restriction for client boundaries
     clientComponents: {
       allowExportAll: true,
     },
+    // Additional settings for better compatibility
+    optimizePackageImports: ['framer-motion'],
+    // Enable more permissive module resolution
+    esmExternals: 'loose',
   },
 };
 

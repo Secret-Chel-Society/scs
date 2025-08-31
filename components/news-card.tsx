@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 import Image from "next/image"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -51,9 +51,8 @@ export default function NewsCard({ news }: NewsCardProps) {
 
   return (
     <>
-      <motion.div 
-        whileHover={{ y: -8, scale: 1.02 }} 
-        transition={{ type: "spring", stiffness: 300 }}
+      <div 
+        className="hover:scale-105 hover:-translate-y-2 transition-all duration-300"
       >
         <Card 
           className="relative overflow-hidden h-80 cursor-pointer group bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 hover:border-blue-500/50 transition-all duration-300" 
@@ -116,7 +115,7 @@ export default function NewsCard({ news }: NewsCardProps) {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 text-white">

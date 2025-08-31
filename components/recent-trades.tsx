@@ -12,7 +12,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 
 export function RecentTrades() {
   const { supabase } = useSupabase()
@@ -410,12 +410,9 @@ export function RecentTrades() {
             const team2Players = parsePlayerData(trade.team2_players)
 
             return (
-              <motion.div 
+              <div 
                 key={trade.id} 
                 className="space-y-4 pb-6 border-b border-white/10 last:border-0 last:pb-0"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 {/* Trade Header */}
                 <div className="flex items-center justify-between">
@@ -447,14 +444,11 @@ export function RecentTrades() {
                     {team1Players && team1Players.length > 0 ? (
                       <div className="space-y-3 pl-4 border-l-2 border-blue-500/30">
                         {team1Players.map((player: any, playerIndex: number) => (
-                          <motion.div 
+                          <div 
                             key={`team1-${playerIndex}`}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.2, delay: index * 0.1 + playerIndex * 0.05 }}
                           >
                             {renderPlayer(player)}
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     ) : (
@@ -473,14 +467,11 @@ export function RecentTrades() {
                     {team2Players && team2Players.length > 0 ? (
                       <div className="space-y-3 pl-4 border-l-2 border-purple-500/30">
                         {team2Players.map((player: any, playerIndex: number) => (
-                          <motion.div 
+                          <div 
                             key={`team2-${playerIndex}`}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.2, delay: index * 0.1 + playerIndex * 0.05 }}
                           >
                             {renderPlayer(player)}
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     ) : (
@@ -488,7 +479,7 @@ export function RecentTrades() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )
           })}
         </div>
