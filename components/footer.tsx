@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClientComponentClient } from "@supabase/ssr"
 import { useEffect, useState } from "react"
 
 export default function Footer() {

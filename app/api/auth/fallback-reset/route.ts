@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClientComponentClient } from "@supabase/ssr"
 
 export async function POST(request: Request) {
   try {

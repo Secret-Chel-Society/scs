@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Loader2, AlertCircle, CheckCircle2, KeyRound } from "lucide-react"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClientComponentClient } from "@supabase/ssr"
 
 export default function StandardResetPage() {
   const router = useRouter()

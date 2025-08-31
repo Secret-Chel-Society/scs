@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClientComponentClient } from "@supabase/ssr"
 import { BidPlayerModal as BidModal } from "@/components/management/bid-player-modal"
 import { BidHistoryModal } from "@/components/free-agency/bid-history-modal"
 import { Button } from "@/components/ui/button"
