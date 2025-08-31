@@ -349,7 +349,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-foreground mb-2">SCS League Statistics</h2>
                 <p className="text-muted-foreground">Real-time data from our advanced tracking system</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
                 {[
                   {
                     icon: Users,
@@ -404,12 +404,9 @@ export default function Home() {
                       <motion.div
                         className={`bg-gradient-to-r ${stat.bgGradient} border ${stat.borderColor} rounded-2xl p-4 mb-4 backdrop-blur-sm cursor-pointer`}
                         whileHover={{ rotate: 360, scale: 1.1 }}
-                        animate={{ rotate: [0, 360] }}
                         transition={{ 
-                          duration: 8, 
-                          repeat: Number.POSITIVE_INFINITY, 
-                          ease: "linear",
-                          hover: { duration: 0.5 }
+                          duration: 0.6,
+                          ease: "easeInOut"
                         }}
                       >
                         <stat.icon className={`h-10 w-10 mx-auto bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} />

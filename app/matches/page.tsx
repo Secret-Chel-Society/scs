@@ -9,8 +9,45 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter, Gamepad2, Trophy, Calendar } from "lucide-react"
 import Image from "next/image"
+import { motion } from "framer-motion"
+
+// Floating particles background
+function FloatingParticles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {[...Array(30)].map((_, i) => (
+        <motion.div
+          key={i}
+          className={`absolute rounded-full ${
+            i % 4 === 0 ? 'bg-gradient-to-r from-blue-500/40 to-cyan-500/40' :
+            i % 4 === 1 ? 'bg-gradient-to-r from-red-500/40 to-pink-500/40' :
+            i % 4 === 2 ? 'bg-gradient-to-r from-green-500/40 to-emerald-500/40' :
+            'bg-gradient-to-r from-purple-500/40 to-violet-500/40'
+          }`}
+          style={{
+            width: Math.random() * 8 + 4,
+            height: Math.random() * 8 + 4,
+          }}
+          initial={{
+            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
+            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
+          }}
+          animate={{
+            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
+            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
+          }}
+          transition={{
+            duration: Math.random() * 25 + 15,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 export default function MatchesPage() {
   const router = useRouter()
@@ -276,16 +313,26 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Matches</h1>
-        <div className="mb-6 flex gap-4">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32 w-full" />
-          ))}
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+        <FloatingParticles />
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <motion.h1 
+            className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            SCS Matches
+          </motion.h1>
+          <div className="mb-6 flex gap-4">
+            <Skeleton className="h-10 w-48 bg-background/30" />
+            <Skeleton className="h-10 w-32 bg-background/30" />
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-32 w-full bg-background/30" />
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -294,20 +341,35 @@ export default function MatchesPage() {
   // Add a fallback UI for connection errors
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Matches</h1>
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+        <FloatingParticles />
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          <motion.h1 
+            className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            SCS Matches
+          </motion.h1>
 
-        <div className="bg-muted p-8 rounded-lg text-center">
-          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Error Loading Matches</h2>
-          <p className="text-muted-foreground mb-2">{error}</p>
-          <p className="text-muted-foreground mb-6">
-            There was a problem connecting to the database. This could be due to a type mismatch or server issue.
-          </p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Page
-          </Button>
+          <motion.div 
+            className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 p-8 rounded-lg text-center border border-primary/20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <AlertCircle className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2 text-slate-300">Error Loading Matches</h2>
+            <p className="text-slate-400 mb-2">{error}</p>
+            <p className="text-slate-400 mb-6">
+              There was a problem connecting to the database. This could be due to a type mismatch or server issue.
+            </p>
+            <Button onClick={() => window.location.reload()} variant="outline" className="bg-background/30 border-primary/20">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Page
+            </Button>
+          </motion.div>
         </div>
       </div>
     )
@@ -316,192 +378,295 @@ export default function MatchesPage() {
   const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Matches</h1>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+      <FloatingParticles />
+      
+      {/* Hockey-themed animated overlay elements */}
+      <motion.div
+        className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+      >
+        <Gamepad2 className="h-8 w-8 text-primary/50" />
+      </motion.div>
+      <motion.div
+        className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
+        animate={{ y: [-10, 10, -10] }}
+        transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+      >
+        <Trophy className="h-8 w-8 text-primary/50" />
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-blue-500/20 to-red-500/20 rounded-full"
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+      />
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
-          <Select value={selectedTeam} onValueChange={handleTeamFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by team" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Teams</SelectItem>
-              {teams.map((team) => (
-                <SelectItem key={team.id} value={team.id}>
-                  {team.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        <motion.h1 
+          className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          SCS Matches
+        </motion.h1>
 
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-base py-1 px-3">
-            Season 1
-          </Badge>
-        </div>
-      </div>
-
-      {/* Week Navigation */}
-      {totalWeeks > 1 && (
-        <div className="mb-6 flex items-center justify-between">
+        {/* Filters */}
+        <motion.div 
+          className="mb-6 flex flex-col sm:flex-row gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => goToWeek(currentWeek - 1)} disabled={currentWeek === 1}>
-              <ChevronLeft className="h-4 w-4" />
-              Previous Week
-            </Button>
+            <Filter className="h-4 w-4 text-slate-400" />
+            <Select value={selectedTeam} onValueChange={handleTeamFilter}>
+              <SelectTrigger className="w-48 bg-background/30 backdrop-blur-sm border-primary/20 text-foreground">
+                <SelectValue placeholder="Filter by team" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Teams</SelectItem>
+                {teams.map((team) => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="text-center">
-              <div className="font-semibold">
-                Week {currentWeek} of {totalWeeks}
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-base py-1 px-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-300">
+              <Calendar className="h-3 w-3 mr-1" />
+              Season 1
+            </Badge>
+          </div>
+        </motion.div>
+
+        {/* Week Navigation */}
+        {totalWeeks > 1 && (
+          <motion.div 
+            className="mb-6 flex items-center justify-between"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => goToWeek(currentWeek - 1)} 
+                disabled={currentWeek === 1}
+                className="bg-background/30 border-primary/20 hover:bg-background/50"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous Week
+              </Button>
+
+              <div className="text-center">
+                <div className="font-semibold text-white">
+                  Week {currentWeek} of {totalWeeks}
+                </div>
+                <div className="text-sm text-slate-300">{getWeekDateRange()}</div>
               </div>
-              <div className="text-sm text-muted-foreground">{getWeekDateRange()}</div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => goToWeek(currentWeek + 1)}
+                disabled={currentWeek === totalWeeks}
+                className="bg-background/30 border-primary/20 hover:bg-background/50"
+              >
+                Next Week
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => goToWeek(currentWeek + 1)}
-              disabled={currentWeek === totalWeeks}
+            {/* Week selector for quick navigation */}
+            <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
+              <SelectTrigger className="w-32 bg-background/30 backdrop-blur-sm border-primary/20 text-foreground">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
+                  <SelectItem key={week} value={week.toString()}>
+                    Week {week}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </motion.div>
+        )}
+
+        {/* No matches message */}
+        {weekMatches.length === 0 && (
+          <motion.div 
+            className="text-center py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <div className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 rounded-lg p-8 border border-primary/20">
+              <Gamepad2 className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+              <p className="text-slate-300 text-lg">
+                {selectedTeam === "all"
+                  ? `No matches found for Week ${currentWeek}.`
+                  : `No matches found for the selected team in Week ${currentWeek}.`}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Matches by date */}
+        <div className="space-y-8">
+          {Object.entries(matchesByDate).map(([date, dateMatches], dateIndex) => (
+            <motion.div 
+              key={date}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: dateIndex * 0.1 }}
             >
-              Next Week
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+              <h2 className="text-xl font-semibold mb-4 text-white">{date}</h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                {dateMatches.map((match, matchIndex) => {
+                  const formattedDate = formatDate(match.match_date)
+                  const isCompleted = match.status === "Completed"
 
-          {/* Week selector for quick navigation */}
-          <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
-                <SelectItem key={week} value={week.toString()}>
-                  Week {week}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {/* No matches message */}
-      {weekMatches.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            {selectedTeam === "all"
-              ? `No matches found for Week ${currentWeek}.`
-              : `No matches found for the selected team in Week ${currentWeek}.`}
-          </p>
-        </div>
-      )}
-
-      {/* Matches by date */}
-      <div className="space-y-8">
-        {Object.entries(matchesByDate).map(([date, dateMatches]) => (
-          <div key={date}>
-            <h2 className="text-xl font-semibold mb-4">{date}</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {dateMatches.map((match) => {
-                const formattedDate = formatDate(match.match_date)
-                const isCompleted = match.status === "Completed"
-
-                return (
-                  <Card
-                    key={match.id}
-                    className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => router.push(`/matches/${match.id}`)}
-                  >
-                    <CardContent className="p-0">
-                      <div className="p-4">
-                        <div className="flex justify-between items-center mb-3">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>{formattedDate.time}</span>
-                          </div>
-                          <Badge variant={getStatusBadgeVariant(match.status)}>{match.status}</Badge>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          {/* Home Team */}
-                          <div className="flex flex-col items-center gap-2 w-1/3">
-                            {renderTeamLogo(match.home_team)}
-                            <div className="flex flex-col items-center">
-                              <span className="font-medium text-center">{match.home_team.name}</span>
-                              <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1">
-                                <Home className="h-3 w-3" />
-                                Home
-                              </Badge>
-                            </div>
-                          </div>
-
-                          {/* Score */}
-                          <div className="flex items-center justify-center w-1/3">
-                            {isCompleted ? (
-                              <div className="text-2xl font-bold tabular-nums">
-                                {match.home_score} - {match.away_score}
+                  return (
+                    <motion.div
+                      key={match.id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: matchIndex * 0.1 }}
+                    >
+                      <Card
+                        className="overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer bg-gradient-to-br from-slate-800/90 via-purple-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30"
+                        onClick={() => router.push(`/matches/${match.id}`)}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10" />
+                        <CardContent className="relative p-0">
+                          <div className="p-4">
+                            <div className="flex justify-between items-center mb-3">
+                              <div className="flex items-center gap-2 text-sm text-slate-300">
+                                <Clock className="h-4 w-4" />
+                                <span>{formattedDate.time}</span>
                               </div>
-                            ) : (
-                              <div className="text-xl font-medium text-muted-foreground">vs</div>
-                            )}
-                          </div>
-
-                          {/* Away Team */}
-                          <div className="flex flex-col items-center gap-2 w-1/3">
-                            {renderTeamLogo(match.away_team)}
-                            <div className="flex flex-col items-center">
-                              <span className="font-medium text-center">{match.away_team.name}</span>
-                              <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1">
-                                <ExternalLink className="h-3 w-3" />
-                                Away
+                              <Badge 
+                                variant={getStatusBadgeVariant(match.status)}
+                                className={`${
+                                  match.status === "Completed" 
+                                    ? "bg-gradient-to-r from-green-600 to-emerald-600" 
+                                    : match.status === "In Progress"
+                                    ? "bg-gradient-to-r from-orange-600 to-red-600"
+                                    : "bg-gradient-to-r from-blue-600 to-cyan-600"
+                                }`}
+                              >
+                                {match.status}
                               </Badge>
                             </div>
+
+                            <div className="flex items-center justify-between">
+                              {/* Home Team */}
+                              <div className="flex flex-col items-center gap-2 w-1/3">
+                                <motion.div
+                                  whileHover={{ scale: 1.1, rotate: 5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  {renderTeamLogo(match.home_team)}
+                                </motion.div>
+                                <div className="flex flex-col items-center">
+                                  <span className="font-medium text-center text-white">{match.home_team.name}</span>
+                                  <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1 bg-blue-500/10 border-blue-500/30 text-blue-300">
+                                    <Home className="h-3 w-3" />
+                                    Home
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              {/* Score */}
+                              <div className="flex items-center justify-center w-1/3">
+                                {isCompleted ? (
+                                  <div className="text-2xl font-bold tabular-nums text-white">
+                                    {match.home_score} - {match.away_score}
+                                  </div>
+                                ) : (
+                                  <div className="text-xl font-medium text-slate-300">vs</div>
+                                )}
+                              </div>
+
+                              {/* Away Team */}
+                              <div className="flex flex-col items-center gap-2 w-1/3">
+                                <motion.div
+                                  whileHover={{ scale: 1.1, rotate: -5 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  {renderTeamLogo(match.away_team)}
+                                </motion.div>
+                                <div className="flex flex-col items-center">
+                                  <span className="font-medium text-center text-white">{match.away_team.name}</span>
+                                  <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1 bg-purple-500/10 border-purple-500/30 text-purple-300">
+                                    <ExternalLink className="h-3 w-3" />
+                                    Away
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
-                      <div className="bg-muted-foreground/5 p-2 flex justify-center">
-                        <Button variant="ghost" size="sm" className="text-xs">
-                          View Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom pagination for convenience */}
-      {totalWeeks > 1 && (
-        <div className="mt-8 flex justify-center">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => goToWeek(currentWeek - 1)} disabled={currentWeek === 1}>
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-
-            <span className="px-4 py-2 text-sm">
-              Week {currentWeek} of {totalWeeks}
-            </span>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => goToWeek(currentWeek + 1)}
-              disabled={currentWeek === totalWeeks}
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+                          <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 p-2 flex justify-center">
+                            <Button variant="ghost" size="sm" className="text-xs bg-background/30 hover:bg-background/50">
+                              View Details
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
+          ))}
         </div>
-      )}
+
+        {/* Bottom pagination for convenience */}
+        {totalWeeks > 1 && (
+          <motion.div 
+            className="mt-8 flex justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => goToWeek(currentWeek - 1)} 
+                disabled={currentWeek === 1}
+                className="bg-background/30 border-primary/20 hover:bg-background/50"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+
+              <span className="px-4 py-2 text-sm text-slate-300">
+                Week {currentWeek} of {totalWeeks}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => goToWeek(currentWeek + 1)}
+                disabled={currentWeek === totalWeeks}
+                className="bg-background/30 border-primary/20 hover:bg-background/50"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }
