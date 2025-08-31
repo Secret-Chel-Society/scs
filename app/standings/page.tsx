@@ -309,7 +309,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                 <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
                   <CardContent className="p-6">
                     <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl bg-white/10" />}>
-                      <TeamStandings standings={standings} />
+                      <TeamStandings teams={standings} />
                     </Suspense>
                   </CardContent>
                 </Card>
@@ -327,7 +327,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                 <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
                   <CardContent className="p-6">
                     <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl bg-white/10" />}>
-                      <PlayoffBracket standings={standings} />
+                      <PlayoffBracket seasonId={selectedSeasonId} />
                     </Suspense>
                   </CardContent>
                 </Card>
