@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trophy, Users, BarChart3, Star, Clock, Target, Zap } from "lucide-react"
+import { Trophy, Users, BarChart3, Star, Clock, Target, Zap, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
 
 interface Match {
@@ -73,6 +73,9 @@ interface PlayerStats {
   saves?: number
   goals_against?: number
   save_percentage?: number
+  twp?: number
+  interceptions?: number
+  powerplay_goals?: number
 }
 
 interface ThreeStars {
@@ -105,6 +108,8 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
   const [awayPlayerStats, setAwayPlayerStats] = useState<PlayerStats[]>([])
   const [threeStars, setThreeStars] = useState<ThreeStars | null>(null)
   const [loading, setLoading] = useState(true)
+  const [playerStatsPage, setPlayerStatsPage] = useState(0)
+  const playersPerPage = 8
 
   useEffect(() => {
     fetchMatchData()
@@ -229,6 +234,9 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
           saves: stat.saves,
           goals_against: stat.goals_against,
           save_percentage: stat.save_percentage,
+          twp: stat.twp || 0,
+          interceptions: stat.interceptions || 0,
+          powerplay_goals: stat.powerplay_goals || 0,
         }))
         setPlayerStats(formattedStats)
       }
@@ -300,6 +308,16 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
     if (!time) return "0:00"
     return time
   }
+
+  const getPaginatedPlayers = (players: PlayerStats[]) => {
+    const startIndex = playerStatsPage * playersPerPage
+    return players.slice(startIndex, startIndex + playersPerPage)
+  }
+
+  const totalPages = Math.max(
+    Math.ceil(homePlayerStats.length / playersPerPage),
+    Math.ceil(awayPlayerStats.length / playersPerPage)
+  )
 
   if (loading) {
     return (
@@ -555,7 +573,7 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                 <div>
                   <h4 className="font-bold text-red-100 mb-2">{match.home_team.name}</h4>
                   <div className="space-y-1 max-h-48 overflow-y-auto text-xs">
-                    {homePlayerStats.slice(0, 6).map((player) => (
+                    {getPaginatedPlayers(homePlayerStats).map((player) => (
                       <div key={player.id} className="p-1 bg-red-600 rounded">
                         <div className="font-medium">{player.gamer_tag_id}</div>
                         <div className="text-red-200">
@@ -568,7 +586,7 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                 <div>
                   <h4 className="font-bold text-red-100 mb-2">{match.away_team.name}</h4>
                   <div className="space-y-1 max-h-48 overflow-y-auto text-xs">
-                    {awayPlayerStats.slice(0, 6).map((player) => (
+                    {getPaginatedPlayers(awayPlayerStats).map((player) => (
                       <div key={player.id} className="p-1 bg-red-600 rounded">
                         <div className="font-medium">{player.gamer_tag_id}</div>
                         <div className="text-red-200">
@@ -578,6 +596,117 @@ export function ComprehensiveMatchView({ matchId }: { matchId: string }) {
                     ))}
                   </div>
                 </div>
+              </div>
+              
+              {/* Player Stats Slider */}
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  onClick={() => setPlayerStatsPage(Math.max(0, playerStatsPage - 1))}
+                  disabled={playerStatsPage === 0}
+                  className="p-1 bg-red-600 rounded disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-sm">
+                  Page {playerStatsPage + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPlayerStatsPage(Math.min(totalPages - 1, playerStatsPage + 1))}
+                  disabled={playerStatsPage >= totalPages - 1}
+                  className="p-1 bg-red-600 rounded disabled:opacity-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Detailed Player Stats Table - Full Width Bottom */}
+        <div className="col-span-12">
+          <Card className="bg-gradient-to-b from-gray-600 to-gray-700 text-white border-0 shadow-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Detailed Player Statistics</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="overflow-x-auto">
+                <Table className="text-xs">
+                  <TableHeader>
+                    <TableRow className="border-gray-500">
+                      <TableHead className="text-white">Player</TableHead>
+                      <TableHead className="text-white text-center">Pos</TableHead>
+                      <TableHead className="text-white text-center">G</TableHead>
+                      <TableHead className="text-white text-center">A</TableHead>
+                      <TableHead className="text-white text-center">P</TableHead>
+                      <TableHead className="text-white text-center">+/-</TableHead>
+                      <TableHead className="text-white text-center">TWP</TableHead>
+                      <TableHead className="text-white text-center">S</TableHead>
+                      <TableHead className="text-white text-center">H</TableHead>
+                      <TableHead className="text-white text-center">BLK</TableHead>
+                      <TableHead className="text-white text-center">GVA</TableHead>
+                      <TableHead className="text-white text-center">TKA</TableHead>
+                      <TableHead className="text-white text-center">INT</TableHead>
+                      <TableHead className="text-white text-center">FOW</TableHead>
+                      <TableHead className="text-white text-center">FO%</TableHead>
+                      <TableHead className="text-white text-center">PassCom</TableHead>
+                      <TableHead className="text-white text-center">PassAtt</TableHead>
+                      <TableHead className="text-white text-center">PDraws</TableHead>
+                      <TableHead className="text-white text-center">PPG</TableHead>
+                      <TableHead className="text-white text-center">PIM</TableHead>
+                      <TableHead className="text-white text-center">TOI</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {getPaginatedPlayers([...homePlayerStats, ...awayPlayerStats]).map((player) => (
+                      <TableRow key={player.id} className="border-gray-500">
+                        <TableCell className="font-medium text-white">{player.gamer_tag_id}</TableCell>
+                        <TableCell className="text-center text-white">{player.position}</TableCell>
+                        <TableCell className="text-center text-white">{player.goals}</TableCell>
+                        <TableCell className="text-center text-white">{player.assists}</TableCell>
+                        <TableCell className="text-center text-white">{player.points}</TableCell>
+                        <TableCell className="text-center text-white">{player.plus_minus}</TableCell>
+                        <TableCell className="text-center text-white">{player.twp || 0}</TableCell>
+                        <TableCell className="text-center text-white">{player.shots}</TableCell>
+                        <TableCell className="text-center text-white">{player.hits}</TableCell>
+                        <TableCell className="text-center text-white">{player.blocks}</TableCell>
+                        <TableCell className="text-center text-white">{player.giveaways}</TableCell>
+                        <TableCell className="text-center text-white">{player.takeaways}</TableCell>
+                        <TableCell className="text-center text-white">{player.interceptions || 0}</TableCell>
+                        <TableCell className="text-center text-white">{player.faceoffs_won}</TableCell>
+                        <TableCell className="text-center text-white">
+                          {getFaceoffPercentage(player.faceoffs_won, player.faceoffs_taken)}
+                        </TableCell>
+                        <TableCell className="text-center text-white">{player.pass_completed}</TableCell>
+                        <TableCell className="text-center text-white">{player.pass_attempted}</TableCell>
+                        <TableCell className="text-center text-white">-</TableCell>
+                        <TableCell className="text-center text-white">{player.powerplay_goals || 0}</TableCell>
+                        <TableCell className="text-center text-white">{player.pim}</TableCell>
+                        <TableCell className="text-center text-white">{formatTimeOnIce(player.time_on_ice)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              {/* Detailed Stats Slider */}
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  onClick={() => setPlayerStatsPage(Math.max(0, playerStatsPage - 1))}
+                  disabled={playerStatsPage === 0}
+                  className="p-2 bg-gray-600 rounded disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="text-sm">
+                  Page {playerStatsPage + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPlayerStatsPage(Math.min(totalPages - 1, playerStatsPage + 1))}
+                  disabled={playerStatsPage >= totalPages - 1}
+                  className="p-2 bg-gray-600 rounded disabled:opacity-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             </CardContent>
           </Card>
