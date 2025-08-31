@@ -411,7 +411,7 @@ export default function Navigation() {
                           <Settings className="h-5 w-5" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" side="top" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
+                      <DropdownMenuContent align="start" side="left" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm z-[100]">
                         <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-white/20" />
                         <DropdownMenuGroup>
@@ -636,7 +636,7 @@ export default function Navigation() {
                       <Settings className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="top" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm">
+                  <DropdownMenuContent align="start" side="left" className="w-56 bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20 backdrop-blur-sm z-[100]">
                     <DropdownMenuLabel className="text-white">Account</DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-white/20" />
                     <DropdownMenuGroup>
