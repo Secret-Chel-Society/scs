@@ -526,36 +526,68 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             {periodScores.length > 0 && (
               <Card className="bg-slate-800 border-slate-700">
                 <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Period Stats</h3>
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-slate-300 border-b border-slate-600 pb-2">
+                  <h3 className="text-lg font-semibold mb-4 text-white flex items-center">
+                    <span className="text-blue-400 mr-2">📊</span>
+                    Period-by-Period Scoring
+                  </h3>
+                  <div className="space-y-3">
+                    {/* Header */}
+                    <div className="grid grid-cols-5 gap-2 text-sm font-semibold text-slate-300 border-b border-slate-600 pb-2">
                       <span>Team</span>
-                      <span className="text-center">1</span>
-                      <span className="text-center">2</span>
-                      <span className="text-center">3</span>
+                      <span className="text-center">1st</span>
+                      <span className="text-center">2nd</span>
+                      <span className="text-center">3rd</span>
+                      <span className="text-center">Total</span>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 text-sm">
+                    
+                    {/* Home Team */}
+                    <div className="grid grid-cols-5 gap-2 text-sm items-center">
                       <div className="flex items-center space-x-2">
                         <TeamLogo teamName={match.home_team.name} logoUrl={match.home_team.logo_url} size="xs" />
-                        <span className="text-white">{match.home_team.name}</span>
+                        <span className="text-white font-medium">{match.home_team.name}</span>
                       </div>
                       {periodScores.slice(0, 3).map((period) => (
-                        <span key={period.period} className="text-center text-white">
+                        <span key={period.period} className="text-center text-white font-semibold">
                           {period.home}
                         </span>
                       ))}
+                      <span className="text-center text-white font-bold text-lg">
+                        {match.home_score !== null ? match.home_score : "-"}
+                      </span>
                     </div>
-                    <div className="grid grid-cols-4 gap-2 text-sm">
+                    
+                    {/* Away Team */}
+                    <div className="grid grid-cols-5 gap-2 text-sm items-center">
                       <div className="flex items-center space-x-2">
                         <TeamLogo teamName={match.away_team.name} logoUrl={match.away_team.logo_url} size="xs" />
-                        <span className="text-white">{match.away_team.name}</span>
+                        <span className="text-white font-medium">{match.away_team.name}</span>
                       </div>
                       {periodScores.slice(0, 3).map((period) => (
-                        <span key={period.period} className="text-center text-white">
+                        <span key={period.period} className="text-center text-white font-semibold">
                           {period.away}
                         </span>
                       ))}
+                      <span className="text-center text-white font-bold text-lg">
+                        {match.away_score !== null ? match.away_score : "-"}
+                      </span>
                     </div>
+                    
+                    {/* Overtime Row */}
+                    {(match.overtime || match.has_overtime) && periodScores.length > 3 && (
+                      <div className="grid grid-cols-5 gap-2 text-sm items-center pt-2 border-t border-slate-600">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-orange-400 font-semibold">OT</span>
+                        </div>
+                        <div className="text-center text-orange-400 font-semibold">
+                          {periodScores[3]?.home || 0}
+                        </div>
+                        <div className="text-center text-orange-400 font-semibold">
+                          {periodScores[3]?.away || 0}
+                        </div>
+                        <div></div>
+                        <div></div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -564,7 +596,10 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             {/* Team Stats with Comparison Bars */}
             <Card className="bg-slate-800 border-slate-700">
               <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-4 text-white">Team Stats</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white flex items-center">
+                  <span className="text-green-400 mr-2">🏆</span>
+                  Team Statistics
+                </h3>
                 {homeTeamStats && awayTeamStats && (
                   <div className="space-y-6">
                     <StatComparisonBar
@@ -585,6 +620,13 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       label="Hits"
                       homeValue={homeTeamStats.hits}
                       awayValue={awayTeamStats.hits}
+                      homeTeam={match.home_team.name}
+                      awayTeam={match.away_team.name}
+                    />
+                    <StatComparisonBar
+                      label="Blocks"
+                      homeValue={homeTeamStats.blocks}
+                      awayValue={awayTeamStats.blocks}
                       homeTeam={match.home_team.name}
                       awayTeam={match.away_team.name}
                     />
@@ -611,6 +653,50 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       homeTeam={match.home_team.name}
                       awayTeam={match.away_team.name}
                     />
+                    <StatComparisonBar
+                      label="PP Goals"
+                      homeValue={homeTeamStats.pp_goals || 0}
+                      awayValue={awayTeamStats.pp_goals || 0}
+                      homeTeam={match.home_team.name}
+                      awayTeam={match.away_team.name}
+                    />
+                  </div>
+                )}
+                
+                {/* Additional Team Stats Summary */}
+                {homeTeamStats && awayTeamStats && (
+                  <div className="mt-6 pt-4 border-t border-slate-600">
+                    <h4 className="text-sm font-semibold mb-3 text-slate-300">Quick Stats</h4>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Home Faceoffs:</span>
+                          <span className="text-white font-semibold">
+                            {homeTeamStats.total_faceoffs_won || 0}/{homeTeamStats.total_faceoffs_taken || 0}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Home Passes:</span>
+                          <span className="text-white font-semibold">
+                            {homeTeamStats.total_pass_complete || 0}/{homeTeamStats.total_pass_attempts || 0}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Away Faceoffs:</span>
+                          <span className="text-white font-semibold">
+                            {awayTeamStats.total_faceoffs_won || 0}/{awayTeamStats.total_faceoffs_taken || 0}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Away Passes:</span>
+                          <span className="text-white font-semibold">
+                            {awayTeamStats.total_pass_complete || 0}/{awayTeamStats.total_pass_attempts || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -628,80 +714,164 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
           {/* Main Content Area */}
           <div className="lg:col-span-3 space-y-6">
-            {/* Three Stars */}
-            {playerStats.length > 0 && (
-              <div>
-                <h3 className="text-xl font-semibold mb-4 text-white">Three Stars</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {(() => {
-                    const allPlayers = [
-                      ...getTopPlayers(match.home_team_id, 10),
-                      ...getTopPlayers(match.away_team_id, 10),
-                    ].sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-
-                    return allPlayers.slice(0, 3).map((player, index) => {
-                      const isHomeTeam = player.team_id === match.home_team_id
-                      const teamData = isHomeTeam ? match.home_team : match.away_team
-                      const starNumber = index + 1
-
-                      return (
-                        <Card
-                          key={player.player_id}
-                          className="border-none relative overflow-hidden bg-slate-800"
-                          style={{
-                            backgroundImage: teamData.logo_url ? `url(${teamData.logo_url})` : "none",
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            backgroundRepeat: "no-repeat",
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black/60" />
-                          <CardContent className="p-6 text-center relative z-10">
-                            {/* Star Number */}
-                            <div className="absolute top-4 left-4">
-                              <div className="bg-yellow-500 text-black rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
-                                {starNumber}
-                              </div>
-                            </div>
-
-                            {/* Player Name */}
-                            <div className="text-xl font-bold text-white mb-4 mt-8">{player.player_name}</div>
-
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-4 gap-2 text-center text-white text-sm">
-                              <div>
-                                <div className="font-bold text-lg">{player.goals}</div>
-                                <div className="text-xs opacity-80">G</div>
-                              </div>
-                              <div>
-                                <div className="font-bold text-lg">{player.assists}</div>
-                                <div className="text-xs opacity-80">A</div>
-                              </div>
-                              <div>
-                                <div className="font-bold text-lg">{player.goals + player.assists}</div>
-                                <div className="text-xs opacity-80">P</div>
-                              </div>
-                              <div>
-                                <div className="font-bold text-lg">
-                                  {player.plus_minus > 0 ? "+" : ""}
-                                  {player.plus_minus}
-                                </div>
-                                <div className="text-xs opacity-80">+/-</div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )
-                    })
-                  })()}
+            {/* Match Summary */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4 text-white flex items-center">
+                  <span className="text-red-400 mr-2">🏒</span>
+                  Match Summary
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Final Score */}
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-white mb-2">Final Score</div>
+                    <div className="flex items-center justify-center space-x-4">
+                      <div className="text-center">
+                        <div className="text-4xl font-bold text-white">{match.home_score !== null ? match.home_score : "-"}</div>
+                        <div className="text-sm text-slate-300">{match.home_team.name}</div>
+                      </div>
+                      <div className="text-2xl font-bold text-slate-400">-</div>
+                      <div className="text-center">
+                        <div className="text-4xl font-bold text-white">{match.away_score !== null ? match.away_score : "-"}</div>
+                        <div className="text-sm text-slate-300">{match.away_team.name}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Game Info */}
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-white mb-2">Game Information</div>
+                    <div className="space-y-1 text-sm text-slate-300">
+                      <div>Status: <span className="text-white font-semibold">{match.status}</span></div>
+                      <div>Date: <span className="text-white font-semibold">{matchDate ? formatDate(matchDate) : "TBD"}</span></div>
+                      {(match.overtime || match.has_overtime) && (
+                        <div className="text-orange-400 font-semibold">Overtime Game</div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Season Info */}
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-white mb-2">Season Information</div>
+                    <div className="space-y-1 text-sm text-slate-300">
+                      <div>Season: <span className="text-white font-semibold">{match.season_name || "Unknown"}</span></div>
+                      <div>Week: <span className="text-white font-semibold">{seasonInfo?.week || "Unknown"}</span></div>
+                      <div>Match ID: <span className="text-white font-semibold text-xs">{match.id}</span></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+            {/* Three Stars of the Match */}
+            {playerStats.length > 0 && (
+              <Card className="bg-slate-800 border-slate-700">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-6 text-white flex items-center">
+                    <span className="text-yellow-400 mr-2">⭐</span>
+                    Three Stars of the Match
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {(() => {
+                      const allPlayers = [
+                        ...getTopPlayers(match.home_team_id, 10),
+                        ...getTopPlayers(match.away_team_id, 10),
+                      ].sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
+
+                      return allPlayers.slice(0, 3).map((player, index) => {
+                        const isHomeTeam = player.team_id === match.home_team_id
+                        const teamData = isHomeTeam ? match.home_team : match.away_team
+                        const starNumber = index + 1
+                        const starColors = [
+                          "bg-yellow-500 text-black",
+                          "bg-gray-400 text-black", 
+                          "bg-amber-600 text-white"
+                        ]
+
+                        return (
+                          <div
+                            key={player.player_id}
+                            className="relative overflow-hidden rounded-lg border border-slate-600 bg-gradient-to-br from-slate-700 to-slate-800"
+                            style={{
+                              backgroundImage: teamData.logo_url ? `url(${teamData.logo_url})` : "none",
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              backgroundRepeat: "no-repeat",
+                            }}
+                          >
+                            <div className="absolute inset-0 bg-black/70" />
+                            <div className="relative z-10 p-6 text-center">
+                              {/* Star Number */}
+                              <div className="absolute top-4 left-4">
+                                <div className={`${starColors[index]} rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl shadow-lg`}>
+                                  {starNumber}
+                                </div>
+                              </div>
+
+                              {/* Team Logo */}
+                              <div className="flex justify-center mb-4">
+                                <TeamLogo teamName={teamData.name} logoUrl={teamData.logo_url} size="lg" />
+                              </div>
+
+                              {/* Player Name */}
+                              <div className="text-2xl font-bold text-white mb-4 drop-shadow-lg">{player.player_name}</div>
+
+                              {/* Position */}
+                              <div className="text-slate-300 text-sm mb-4">{player.position || "Unknown Position"}</div>
+
+                              {/* Stats Grid */}
+                              <div className="grid grid-cols-3 gap-4 text-center text-white">
+                                <div className="bg-slate-800/50 rounded-lg p-3">
+                                  <div className="font-bold text-2xl text-blue-400">{player.goals}</div>
+                                  <div className="text-xs opacity-80">Goals</div>
+                                </div>
+                                <div className="bg-slate-800/50 rounded-lg p-3">
+                                  <div className="font-bold text-2xl text-green-400">{player.assists}</div>
+                                  <div className="text-xs opacity-80">Assists</div>
+                                </div>
+                                <div className="bg-slate-800/50 rounded-lg p-3">
+                                  <div className="font-bold text-2xl text-yellow-400">{player.goals + player.assists}</div>
+                                  <div className="text-xs opacity-80">Points</div>
+                                </div>
+                              </div>
+
+                              {/* Additional Stats */}
+                              <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
+                                <div className="text-slate-300">
+                                  <span className="opacity-70">+/-:</span> 
+                                  <span className={`ml-1 font-semibold ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-slate-300"}`}>
+                                    {player.plus_minus > 0 ? "+" : ""}{player.plus_minus}
+                                  </span>
+                                </div>
+                                <div className="text-slate-300">
+                                  <span className="opacity-70">Shots:</span> 
+                                  <span className="ml-1 font-semibold">{player.shots}</span>
+                                </div>
+                                <div className="text-slate-300">
+                                  <span className="opacity-70">Hits:</span> 
+                                  <span className="ml-1 font-semibold">{player.hits}</span>
+                                </div>
+                                <div className="text-slate-300">
+                                  <span className="opacity-70">TOI:</span> 
+                                  <span className="ml-1 font-semibold">{player.toi || "0:00"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Player Stats */}
             <Card className="bg-slate-800 border-slate-700">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4 text-white">Player Stats</h3>
+                <h3 className="text-xl font-semibold mb-4 text-white flex items-center">
+                  <span className="text-purple-400 mr-2">👥</span>
+                  Player Statistics
+                </h3>
                 {playerStats.length > 0 ? (
                   <div className="space-y-8">
                     {/* Home Team */}

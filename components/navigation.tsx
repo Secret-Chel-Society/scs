@@ -440,7 +440,7 @@ export default function Navigation() {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col">
+      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col pt-16">
         {/* Header */}
         <div className="flex items-center justify-center p-4 border-b">
           <Link href="/">

@@ -392,7 +392,7 @@ export default function SideNavigation() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-40 md:flex md:w-64 md:border-r md:bg-background">
+      <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-40 md:flex md:w-64 md:border-r md:bg-background pt-16">
         <NavContent />
       </aside>
 
@@ -411,7 +411,7 @@ export default function SideNavigation() {
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden" onClick={closeMenu}>
           <div
-            className="fixed inset-y-0 left-0 z-50 w-64 border-r bg-background"
+            className="fixed inset-y-0 left-0 z-50 w-64 border-r bg-background pt-16"
             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the menu
           >
             <NavContent />
