@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Plus, Pin, AlertCircle } from "lucide-react"
+import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Plus, Pin, AlertCircle, Users, TrendingUp, Clock, Award } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSupabase } from "@/lib/supabase/client"
@@ -46,6 +46,45 @@ interface Category {
 let categoriesCache: Category[] | null = null
 let cacheTimestamp = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+function ForumStats({ posts, categories }: { posts: ForumPost[], categories: Category[] }) {
+  const totalViews = posts.reduce((sum, post) => sum + (post.views || 0), 0)
+  const totalLikes = posts.reduce((sum, post) => sum + (post.like_count || 0), 0)
+  const totalComments = posts.reduce((sum, post) => sum + (post.comment_count || 0), 0)
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+        <div className="text-3xl font-bold text-green-200 mb-2">{posts.length}</div>
+        <div className="text-green-300 flex items-center justify-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          Total Posts
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
+        <div className="text-3xl font-bold text-blue-200 mb-2">{totalViews}</div>
+        <div className="text-blue-300 flex items-center justify-center gap-2">
+          <Eye className="h-5 w-5" />
+          Total Views
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <div className="text-3xl font-bold text-purple-200 mb-2">{totalLikes}</div>
+        <div className="text-purple-300 flex items-center justify-center gap-2">
+          <ThumbsUp className="h-5 w-5" />
+          Total Likes
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "400ms" }}>
+        <div className="text-3xl font-bold text-yellow-200 mb-2">{categories.length}</div>
+        <div className="text-yellow-300 flex items-center justify-center gap-2">
+          <Award className="h-5 w-5" />
+          Categories
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function ForumPage() {
   const [posts, setPosts] = useState<ForumPost[]>([])
@@ -201,14 +240,24 @@ export default function ForumPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-muted rounded w-1/2 mb-8"></div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded"></div>
-            ))}
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="relative z-10">
+            <div className="animate-pulse">
+              <div className="h-8 bg-white/20 rounded w-1/3 mb-4"></div>
+              <div className="h-4 bg-white/20 rounded w-1/2 mb-8"></div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-32 bg-white/20 rounded"></div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -216,129 +265,188 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">SCS Forum</h1>
-          <p className="text-muted-foreground">Discuss hockey, strategies, and connect with the community</p>
-        </div>
-        <Button onClick={handleCreatePost}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Post
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      {/* Error Display */}
-      {error && (
-        <Card className="border-destructive mb-6">
-          <CardContent className="p-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-destructive" />
-            <span className="text-destructive">{error}</span>
-            <Button variant="outline" size="sm" onClick={() => fetchPosts(selectedCategory)} className="ml-auto">
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <div className="relative container mx-auto px-4 py-8">
+        <div className="relative z-10">
+          {/* Header Section */}
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-green-200 to-emerald-200 bg-clip-text text-transparent">
+              SCS Forum
+            </h1>
+            <p className="text-xl text-green-200 mb-8">
+              Discuss hockey, strategies, and connect with the community
+            </p>
+          </div>
 
-      {/* Categories */}
-      <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="mb-8">
-        <TabsList>
-          <TabsTrigger value="all">All Posts</TabsTrigger>
-          {categories.map((category) => (
-            <TabsTrigger key={category.id} value={category.id}>
-              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }} />
-              {category.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+          {/* Forum Statistics */}
+          <ForumStats posts={posts} categories={categories} />
 
-        <TabsContent value={selectedCategory} className="mt-6">
-          {isLoadingPosts ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : posts.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                <p className="text-muted-foreground mb-4">Be the first to start a discussion!</p>
-                <Button onClick={handleCreatePost}>Create First Post</Button>
+          {/* Main Content */}
+          <div className="animate-slide-up" style={{ animationDelay: "500ms" }}>
+            <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+              <CardContent className="p-6">
+                {/* Header with Create Post Button */}
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Community Discussions</h2>
+                    <p className="text-green-200">Join the conversation and share your thoughts</p>
+                  </div>
+                  <Button 
+                    onClick={handleCreatePost}
+                    className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 text-green-200 hover:bg-green-500/30 transition-all duration-300"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Post
+                  </Button>
+                </div>
+
+                {/* Error Display */}
+                {error && (
+                  <Card className="bg-gradient-to-br from-red-500/20 to-red-600/20 backdrop-blur-sm border border-red-400/30 mb-6">
+                    <CardContent className="p-4 flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-red-300" />
+                      <span className="text-red-200">{error}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => fetchPosts(selectedCategory)} 
+                        className="ml-auto bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20"
+                      >
+                        Retry
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Categories and Posts */}
+                <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
+                  <TabsList className="grid w-full grid-cols-auto bg-white/10 backdrop-blur-sm border border-white/20 mb-6">
+                    <TabsTrigger 
+                      value="all"
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:text-white"
+                    >
+                      All Posts
+                    </TabsTrigger>
+                    {categories.map((category) => (
+                      <TabsTrigger 
+                        key={category.id} 
+                        value={category.id}
+                        className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:text-white"
+                      >
+                        <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }} />
+                        {category.name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  <TabsContent value={selectedCategory} className="mt-6">
+                    {isLoadingPosts ? (
+                      <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <Card key={i} className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/20">
+                            <CardContent className="p-6">
+                              <div className="animate-pulse">
+                                <div className="h-4 bg-white/20 rounded w-3/4 mb-2"></div>
+                                <div className="h-3 bg-white/20 rounded w-1/2"></div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : posts.length === 0 ? (
+                      <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                        <CardContent className="p-8 text-center">
+                          <MessageSquare className="w-12 h-12 mx-auto mb-4 text-green-300" />
+                          <h3 className="text-lg font-semibold text-white mb-2">No posts yet</h3>
+                          <p className="text-green-200 mb-4">Be the first to start a discussion!</p>
+                          <Button 
+                            onClick={handleCreatePost}
+                            className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 text-green-200 hover:bg-green-500/30 transition-all duration-300"
+                          >
+                            Create First Post
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="space-y-4">
+                        {posts.map((post, index) => (
+                          <Card 
+                            key={post.id} 
+                            className="bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/20 hover:border-white/40 transition-all duration-300 animate-slide-in"
+                            style={{ animationDelay: `${600 + index * 100}ms` }}
+                          >
+                            <CardContent className="p-6">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {post.pinned && <Pin className="w-4 h-4 text-yellow-400" />}
+                                    <Badge
+                                      className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20"
+                                      style={{ backgroundColor: post.category?.color + "20", color: post.category?.color }}
+                                    >
+                                      {post.category?.name}
+                                    </Badge>
+                                  </div>
+
+                                  <Link href={`/forum/posts/${post.id}`}>
+                                    <h3 className="text-xl font-semibold mb-2 hover:text-green-300 transition-colors cursor-pointer text-white">
+                                      {post.title}
+                                    </h3>
+                                  </Link>
+
+                                  <div className="flex items-center gap-4 text-sm text-white/60 mb-3">
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="w-6 h-6">
+                                        <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
+                                        <AvatarFallback className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-200">
+                                          {getAvatarFallback(post.author)}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <span className="text-white">{getDisplayName(post.author)}</span>
+                                    </div>
+                                    <span>•</span>
+                                    <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+                                  </div>
+
+                                  <div className="flex items-center gap-6 text-sm text-white/60">
+                                    <div className="flex items-center gap-1">
+                                      <Eye className="w-4 h-4" />
+                                      <span>{post.views || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <MessageSquare className="w-4 h-4" />
+                                      <span>{post.comment_count || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <ThumbsUp className="w-4 h-4" />
+                                      <span>{post.like_count || 0}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <ThumbsDown className="w-4 h-4" />
+                                      <span>{post.dislike_count || 0}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <Card key={post.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          {post.pinned && <Pin className="w-4 h-4 text-yellow-500" />}
-                          <Badge
-                            variant="secondary"
-                            style={{ backgroundColor: post.category?.color + "20", color: post.category?.color }}
-                          >
-                            {post.category?.name}
-                          </Badge>
-                        </div>
-
-                        <Link href={`/forum/posts/${post.id}`}>
-                          <h3 className="text-xl font-semibold mb-2 hover:text-primary transition-colors cursor-pointer">
-                            {post.title}
-                          </h3>
-                        </Link>
-
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="w-6 h-6">
-                              <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
-                              <AvatarFallback>{getAvatarFallback(post.author)}</AvatarFallback>
-                            </Avatar>
-                            <span>{getDisplayName(post.author)}</span>
-                          </div>
-                          <span>•</span>
-                          <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-                        </div>
-
-                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{post.views || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{post.comment_count || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ThumbsUp className="w-4 h-4" />
-                            <span>{post.like_count || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ThumbsDown className="w-4 h-4" />
-                            <span>{post.dislike_count || 0}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
