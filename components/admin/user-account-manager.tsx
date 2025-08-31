@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { AlertCircle, Search, Trash2, UserCheck, RefreshCw } from "lucide-react"
+import { AlertCircle, Search, Trash2, UserCheck, RefreshCw, User, Database, Shield, Key } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Label } from "@/components/ui/label"
 
 export function UserAccountManager() {
   const [email, setEmail] = useState("")
@@ -163,28 +164,31 @@ export function UserAccountManager() {
     return (
       <div className="space-y-6">
         {/* Show summary first */}
-        <Card>
+        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
           <CardHeader>
-            <CardTitle>Search Summary</CardTitle>
-            <CardDescription>Results for: {searchResults.searchEmail}</CardDescription>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-400" />
+              Search Summary
+            </CardTitle>
+            <CardDescription className="text-white/70">Results for: {searchResults.searchEmail}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-2">
-              <div className="flex justify-between">
-                <span>Auth User:</span>
-                <Badge variant={searchResults.authUser ? "success" : "secondary"}>
+            <div className="grid gap-3">
+              <div className="flex justify-between items-center">
+                <span className="text-white/80">Auth User:</span>
+                <Badge variant={searchResults.authUser ? "default" : "secondary"} className={searchResults.authUser ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30"}>
                   {searchResults.authUser ? "Found" : "Not Found"}
                 </Badge>
               </div>
-              <div className="flex justify-between">
-                <span>Database User:</span>
-                <Badge variant={searchResults.dbUser ? "success" : "secondary"}>
+              <div className="flex justify-between items-center">
+                <span className="text-white/80">Database User:</span>
+                <Badge variant={searchResults.dbUser ? "default" : "secondary"} className={searchResults.dbUser ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30"}>
                   {searchResults.dbUser ? "Found" : "Not Found"}
                 </Badge>
               </div>
-              <div className="flex justify-between">
-                <span>Verification Tokens:</span>
-                <Badge variant={hasTokens ? "warning" : "secondary"}>
+              <div className="flex justify-between items-center">
+                <span className="text-white/80">Verification Tokens:</span>
+                <Badge variant={hasTokens ? "warning" : "secondary"} className={hasTokens ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-slate-500/20 text-slate-400 border-slate-500/30"}>
                   {hasTokens ? `${searchResults.verificationTokens.length} Found` : "None"}
                 </Badge>
               </div>
@@ -193,41 +197,44 @@ export function UserAccountManager() {
         </Card>
 
         {searchResults.authUser && (
-          <Card>
-            <CardHeader className="bg-amber-50 dark:bg-amber-900/20">
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardHeader className="bg-amber-500/10 border-amber-500/20">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-amber-700 dark:text-amber-400">Supabase Auth User</CardTitle>
-                <Badge variant={searchResults.authUser.email_confirmed_at ? "success" : "destructive"}>
+                <CardTitle className="text-amber-400 flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Supabase Auth User
+                </CardTitle>
+                <Badge variant={searchResults.authUser.email_confirmed_at ? "default" : "destructive"} className={searchResults.authUser.email_confirmed_at ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}>
                   {searchResults.authUser.email_confirmed_at ? "Verified" : "Unverified"}
                 </Badge>
               </div>
-              <CardDescription>User authentication record</CardDescription>
+              <CardDescription className="text-amber-300/80">User authentication record</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid gap-4">
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">User ID:</span>
-                  <span className="col-span-2 font-mono text-sm">{searchResults.authUser.id}</span>
+                  <span className="font-medium text-white/80">User ID:</span>
+                  <span className="col-span-2 font-mono text-sm text-white/60">{searchResults.authUser.id}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">Email:</span>
-                  <span className="col-span-2">{searchResults.authUser.email}</span>
+                  <span className="font-medium text-white/80">Email:</span>
+                  <span className="col-span-2 text-white">{searchResults.authUser.email}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">Created:</span>
-                  <span className="col-span-2">{new Date(searchResults.authUser.created_at).toLocaleString()}</span>
+                  <span className="font-medium text-white/80">Created:</span>
+                  <span className="col-span-2 text-white/80">{new Date(searchResults.authUser.created_at).toLocaleString()}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">Last Sign In:</span>
-                  <span className="col-span-2">
+                  <span className="font-medium text-white/80">Last Sign In:</span>
+                  <span className="col-span-2 text-white/80">
                     {searchResults.authUser.last_sign_in_at
                       ? new Date(searchResults.authUser.last_sign_in_at).toLocaleString()
                       : "Never"}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">Email Verified:</span>
-                  <span className="col-span-2">
+                  <span className="font-medium text-white/80">Email Verified:</span>
+                  <span className="col-span-2 text-white/80">
                     {searchResults.authUser.email_confirmed_at
                       ? new Date(searchResults.authUser.email_confirmed_at).toLocaleString()
                       : "No"}
@@ -235,11 +242,12 @@ export function UserAccountManager() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between border-t bg-muted/20 px-6 py-4">
+            <CardFooter className="flex justify-between border-t border-white/20 bg-slate-800/30 px-6 py-4">
               <Button
                 variant="outline"
                 onClick={() => handleVerifyUser(searchResults.authUser.id)}
                 disabled={isLoading || searchResults.authUser.email_confirmed_at}
+                className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
               >
                 <UserCheck className="mr-2 h-4 w-4" />
                 Verify Email
@@ -248,6 +256,7 @@ export function UserAccountManager() {
                 variant="destructive"
                 onClick={() => handleDeleteUser(searchResults.authUser.id, "auth")}
                 disabled={isLoading}
+                className="bg-red-500 hover:bg-red-600 text-white"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Auth User
@@ -257,38 +266,42 @@ export function UserAccountManager() {
         )}
 
         {searchResults.dbUser && (
-          <Card>
-            <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
-              <CardTitle className="text-blue-700 dark:text-blue-400">Database User</CardTitle>
-              <CardDescription>User record in the database</CardDescription>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardHeader className="bg-blue-500/10 border-blue-500/20">
+              <CardTitle className="text-blue-400 flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Database User
+              </CardTitle>
+              <CardDescription className="text-blue-300/80">User record in the database</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid gap-4">
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">User ID:</span>
-                  <span className="col-span-2 font-mono text-sm">{searchResults.dbUser.id}</span>
+                  <span className="font-medium text-white/80">User ID:</span>
+                  <span className="col-span-2 font-mono text-sm text-white/60">{searchResults.dbUser.id}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">Email:</span>
-                  <span className="col-span-2">{searchResults.dbUser.email}</span>
+                  <span className="font-medium text-white/80">Email:</span>
+                  <span className="col-span-2 text-white">{searchResults.dbUser.email}</span>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-4">
-                  <span className="font-medium">Created:</span>
-                  <span className="col-span-2">{new Date(searchResults.dbUser.created_at).toLocaleString()}</span>
+                  <span className="font-medium text-white/80">Created:</span>
+                  <span className="col-span-2 text-white/80">{new Date(searchResults.dbUser.created_at).toLocaleString()}</span>
                 </div>
                 {searchResults.dbUser.is_active !== undefined && (
                   <div className="grid grid-cols-3 items-center gap-4">
-                    <span className="font-medium">Active:</span>
-                    <span className="col-span-2">{searchResults.dbUser.is_active ? "Yes" : "No"}</span>
+                    <span className="font-medium text-white/80">Active:</span>
+                    <span className="col-span-2 text-white/80">{searchResults.dbUser.is_active ? "Yes" : "No"}</span>
                   </div>
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t bg-muted/20 px-6 py-4">
+            <CardFooter className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
               <Button
                 variant="destructive"
                 onClick={() => handleDeleteUser(searchResults.dbUser.id, "database")}
                 disabled={isLoading}
+                className="bg-red-500 hover:bg-red-600 text-white"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete DB User
@@ -298,35 +311,38 @@ export function UserAccountManager() {
         )}
 
         {searchResults.verificationTokens && searchResults.verificationTokens.length > 0 && (
-          <Card>
-            <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
-              <CardTitle className="text-purple-700 dark:text-purple-400">Verification Tokens</CardTitle>
-              <CardDescription>Email verification tokens for this user</CardDescription>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardHeader className="bg-purple-500/10 border-purple-500/20">
+              <CardTitle className="text-purple-400 flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                Verification Tokens
+              </CardTitle>
+              <CardDescription className="text-purple-300/80">Email verification tokens for this user</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {searchResults.verificationTokens.map((token: any, index: number) => (
-                  <div key={index} className="rounded-md border p-4">
+                  <div key={index} className="rounded-md border border-white/20 p-4 bg-slate-800/30">
                     <div className="grid gap-2">
                       <div className="grid grid-cols-3 items-center gap-4">
-                        <span className="font-medium">Token:</span>
-                        <span className="col-span-2 font-mono text-sm truncate">{token.token}</span>
+                        <span className="font-medium text-white/80">Token:</span>
+                        <span className="col-span-2 font-mono text-sm truncate text-white/60">{token.token}</span>
                       </div>
                       <div className="grid grid-cols-3 items-center gap-4">
-                        <span className="font-medium">Created:</span>
-                        <span className="col-span-2">{new Date(token.created_at).toLocaleString()}</span>
+                        <span className="font-medium text-white/80">Created:</span>
+                        <span className="col-span-2 text-white/80">{new Date(token.created_at).toLocaleString()}</span>
                       </div>
                       <div className="grid grid-cols-3 items-center gap-4">
-                        <span className="font-medium">Expires:</span>
-                        <span className="col-span-2">{new Date(token.expires_at).toLocaleString()}</span>
+                        <span className="font-medium text-white/80">Expires:</span>
+                        <span className="col-span-2 text-white/80">{new Date(token.expires_at).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t bg-muted/20 px-6 py-4">
-              <Button variant="destructive" onClick={() => handleDeleteUser(email, "tokens")} disabled={isLoading}>
+            <CardFooter className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
+              <Button variant="destructive" onClick={() => handleDeleteUser(email, "tokens")} disabled={isLoading} className="bg-red-500 hover:bg-red-600 text-white">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete All Tokens
               </Button>
@@ -335,15 +351,18 @@ export function UserAccountManager() {
         )}
 
         {searchResults.roles && searchResults.roles.length > 0 && (
-          <Card>
-            <CardHeader className="bg-green-50 dark:bg-green-900/20">
-              <CardTitle className="text-green-700 dark:text-green-400">User Roles</CardTitle>
-              <CardDescription>Assigned roles for this user</CardDescription>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardHeader className="bg-green-500/10 border-green-500/20">
+              <CardTitle className="text-green-400 flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                User Roles
+              </CardTitle>
+              <CardDescription className="text-green-300/80">Assigned roles for this user</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="flex flex-wrap gap-2">
                 {searchResults.roles.map((role: any, index: number) => (
-                  <Badge key={index} variant="outline" className="bg-green-100 dark:bg-green-900/30">
+                  <Badge key={index} variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30">
                     {role.role}
                   </Badge>
                 ))}
@@ -353,20 +372,20 @@ export function UserAccountManager() {
         )}
 
         {!searchResults.authUser && !searchResults.dbUser && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>User Not Found</AlertTitle>
-            <AlertDescription>
+          <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+            <AlertCircle className="h-4 w-4 text-red-400" />
+            <AlertTitle className="text-red-400">User Not Found</AlertTitle>
+            <AlertDescription className="text-red-300/80">
               No user found with email {email}. This email is available for registration.
             </AlertDescription>
           </Alert>
         )}
 
         {searchResults.authUser && !searchResults.dbUser && (
-          <Alert variant="warning">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Orphaned Auth User</AlertTitle>
-            <AlertDescription>
+          <Alert className="bg-amber-500/10 border-amber-500/20">
+            <AlertCircle className="h-4 w-4 text-amber-400" />
+            <AlertTitle className="text-amber-400">Orphaned Auth User</AlertTitle>
+            <AlertDescription className="text-amber-300/80">
               This user exists in Auth but not in the database. This can cause issues with login and registration.
               Consider deleting the Auth user to allow re-registration.
             </AlertDescription>
@@ -374,10 +393,10 @@ export function UserAccountManager() {
         )}
 
         {!searchResults.authUser && searchResults.dbUser && (
-          <Alert variant="warning">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Orphaned Database User</AlertTitle>
-            <AlertDescription>
+          <Alert className="bg-amber-500/10 border-amber-500/20">
+            <AlertCircle className="h-4 w-4 text-amber-400" />
+            <AlertTitle className="text-amber-400">Orphaned Database User</AlertTitle>
+            <AlertDescription className="text-amber-300/80">
               This user exists in the database but not in Auth. This can cause issues with login and registration.
               Consider deleting the database user to allow re-registration.
             </AlertDescription>
@@ -390,53 +409,52 @@ export function UserAccountManager() {
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="search">Search User</TabsTrigger>
-          <TabsTrigger value="results" disabled={!searchResults}>
-            Results
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-white/20">
+          <TabsTrigger value="search" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Search User</TabsTrigger>
+          <TabsTrigger value="results" disabled={!searchResults} className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Results</TabsTrigger>
         </TabsList>
         <TabsContent value="search" className="space-y-4 pt-4">
-          <Card>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
             <CardHeader>
-              <CardTitle>Search for User Account</CardTitle>
-              <CardDescription>Enter an email address to search for a user across all systems</CardDescription>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Search className="h-5 w-5 text-blue-400" />
+                Search for User Account
+              </CardTitle>
+              <CardDescription className="text-white/70">Enter an email address to search for a user across all systems</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  User Email
-                </label>
+                <Label htmlFor="email" className="text-white">User Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="adminKey" className="text-sm font-medium">
-                  Admin Key
-                </label>
+                <Label htmlFor="adminKey" className="text-white">Admin Key</Label>
                 <Input
                   id="adminKey"
                   type="password"
                   placeholder="Enter your admin key"
                   value={adminKey}
                   onChange={(e) => setAdminKey(e.target.value)}
+                  className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
               {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <AlertTitle className="text-red-400">Error</AlertTitle>
+                  <AlertDescription className="text-red-300/80">{error}</AlertDescription>
                 </Alert>
               )}
             </CardContent>
             <CardFooter>
-              <Button onClick={handleSearch} disabled={isLoading || !email || !adminKey} className="w-full">
+              <Button onClick={handleSearch} disabled={isLoading || !email || !adminKey} className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
                 {isLoading ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -454,15 +472,20 @@ export function UserAccountManager() {
         </TabsContent>
         <TabsContent value="results" className="space-y-4 pt-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">
-              Results for: <span className="font-bold">{email}</span>
+            <h3 className="text-lg font-medium text-white">
+              Results for: <span className="font-bold text-blue-400">{email}</span>
             </h3>
-            <Button variant="outline" onClick={() => handleSearch()} disabled={isLoading}>
+            <Button 
+              variant="outline" 
+              onClick={() => handleSearch()} 
+              disabled={isLoading}
+              className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
+            >
               <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
           </div>
-          <Separator />
+          <Separator className="bg-white/20" />
           {renderUserDetails()}
         </TabsContent>
       </Tabs>

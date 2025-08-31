@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { Check, X, Star, StarOff, AlertCircle, RefreshCw } from "lucide-react"
+import { Check, X, Star, StarOff, AlertCircle, RefreshCw, Trophy, Calendar, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -11,6 +11,8 @@ import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSupabase } from "@/lib/supabase/client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 export default function AdminFeaturedGamesPage() {
   const { supabase, session } = useSupabase()
@@ -236,11 +238,10 @@ export default function AdminFeaturedGamesPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/3 mb-6" />
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-64 w-full" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <span className="text-white">Loading...</span>
         </div>
       </div>
     )
@@ -252,113 +253,214 @@ export default function AdminFeaturedGamesPage() {
 
   if (migrationStatus === "error") {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Featured Games Management</h1>
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Database Error</AlertTitle>
-          <AlertDescription>
-            {migrationError || "Failed to create or access the 'featured' column in the matches table."}
-            <div className="mt-2">
-              <Button onClick={retryMigration} variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry Migration
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+        <div className="container mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+              <Trophy className="h-8 w-8 text-yellow-400" />
+              Featured Games Management
+            </h1>
+            <p className="text-white/70 text-lg">
+              Manage which games are featured on the home page
+            </p>
+          </div>
+
+          <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+            <AlertCircle className="h-4 w-4 text-red-400" />
+            <AlertTitle className="text-red-400">Database Error</AlertTitle>
+            <AlertDescription className="text-red-300/80">
+              {migrationError || "Failed to create or access the 'featured' column in the matches table."}
+              <div className="mt-2">
+                <Button 
+                  onClick={retryMigration} 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Migration
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
       </div>
     )
   }
 
+  const featuredMatches = matches.filter(match => match.featured)
+  const regularMatches = matches.filter(match => !match.featured)
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Featured Games Management</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Trophy className="h-8 w-8 text-yellow-400" />
+            Featured Games Management
+          </h1>
+          <p className="text-white/70 text-lg">
+            Manage which games are featured on the home page
+          </p>
+        </div>
+
+        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 mb-6">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-400" />
+              About Featured Games
+            </CardTitle>
+            <CardDescription className="text-white/70">
+              Featured games will be displayed prominently on the home page. You can feature multiple games, and they will
+              be shown in order of their scheduled date.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <Calendar className="h-5 w-5 text-blue-400" />
+                <div>
+                  <div className="text-white font-medium">Total Matches</div>
+                  <div className="text-white/70 text-sm">{matches.length}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <Star className="h-5 w-5 text-yellow-400" />
+                <div>
+                  <div className="text-white font-medium">Featured</div>
+                  <div className="text-white/70 text-sm">{featuredMatches.length}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <Users className="h-5 w-5 text-green-400" />
+                <div>
+                  <div className="text-white font-medium">Regular</div>
+                  <div className="text-white/70 text-sm">{regularMatches.length}</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {matches.length === 0 ? (
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardContent className="text-center py-12">
+              <Trophy className="h-12 w-12 text-white/50 mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2 text-white">No Matches Found</h3>
+              <p className="text-white/70">No matches are available to feature at this time.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-400" />
+                All Matches
+              </CardTitle>
+              <CardDescription className="text-white/70">
+                Click the star button to feature or unfeature a match
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border border-white/20 rounded-md overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/20">
+                      <TableHead className="text-white">Date</TableHead>
+                      <TableHead className="text-white">Home Team</TableHead>
+                      <TableHead className="text-white">Away Team</TableHead>
+                      <TableHead className="text-white">Score</TableHead>
+                      <TableHead className="text-white">Status</TableHead>
+                      <TableHead className="text-white">Featured</TableHead>
+                      <TableHead className="text-right text-white">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {matches.map((match) => (
+                      <TableRow 
+                        key={match.id} 
+                        className={`border-white/20 hover:bg-slate-800/30 ${match.featured ? "bg-yellow-500/10" : ""}`}
+                      >
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-white">{format(new Date(match[dateColumnName]), "MMM d, yyyy")}</span>
+                            <span className="text-sm text-white/70">
+                              {format(new Date(match[dateColumnName]), "h:mm a")}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-white">{match.home_team?.name || "Unknown Team"}</TableCell>
+                        <TableCell className="text-white">{match.away_team?.name || "Unknown Team"}</TableCell>
+                        <TableCell>
+                          {match.home_score !== null && match.away_score !== null ? (
+                            <Badge variant="outline" className="bg-slate-700/50 border-white/20 text-white font-mono">
+                              {match.home_score} - {match.away_score}
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+                              TBD
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline" 
+                            className={`capitalize ${
+                              match.status === 'completed' 
+                                ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                : match.status === 'scheduled'
+                                ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                                : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                            }`}
+                          >
+                            {match.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {match.featured ? (
+                            <Check className="h-5 w-5 text-yellow-400" />
+                          ) : (
+                            <X className="h-5 w-5 text-white/50" />
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant={match.featured ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => toggleFeatured(match.id, !!match.featured)}
+                            disabled={updatingId === match.id}
+                            className={match.featured 
+                              ? "bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50" 
+                              : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                            }
+                          >
+                            {updatingId === match.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Updating...
+                              </>
+                            ) : match.featured ? (
+                              <>
+                                <StarOff className="h-4 w-4 mr-2" />
+                                Unfeature
+                              </>
+                            ) : (
+                              <>
+                                <Star className="h-4 w-4 mr-2" />
+                                Feature
+                              </>
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
-
-      <Alert className="mb-6">
-        <AlertTitle>About Featured Games</AlertTitle>
-        <AlertDescription>
-          Featured games will be displayed prominently on the home page. You can feature multiple games, and they will
-          be shown in order of their scheduled date.
-        </AlertDescription>
-      </Alert>
-
-      {matches.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No matches found</p>
-        </div>
-      ) : (
-        <div className="border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Home Team</TableHead>
-                <TableHead>Away Team</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {matches.map((match) => (
-                <TableRow key={match.id} className={match.featured ? "bg-primary/5" : ""}>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span>{format(new Date(match[dateColumnName]), "MMM d, yyyy")}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(match[dateColumnName]), "h:mm a")}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{match.home_team?.name || "Unknown Team"}</TableCell>
-                  <TableCell>{match.away_team?.name || "Unknown Team"}</TableCell>
-                  <TableCell>
-                    {match.home_score !== null && match.away_score !== null
-                      ? `${match.home_score} - ${match.away_score}`
-                      : "TBD"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="capitalize">{match.status}</div>
-                  </TableCell>
-                  <TableCell>
-                    {match.featured ? (
-                      <Check className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant={match.featured ? "outline" : "default"}
-                      size="sm"
-                      onClick={() => toggleFeatured(match.id, !!match.featured)}
-                      disabled={updatingId === match.id}
-                    >
-                      {updatingId === match.id ? (
-                        "Updating..."
-                      ) : match.featured ? (
-                        <>
-                          <StarOff className="h-4 w-4 mr-2" />
-                          Unfeature
-                        </>
-                      ) : (
-                        <>
-                          <Star className="h-4 w-4 mr-2" />
-                          Feature
-                        </>
-                      )}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
     </div>
   )
 }

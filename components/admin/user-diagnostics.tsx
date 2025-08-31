@@ -12,7 +12,20 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
-import { AlertCircle, CheckCircle, Search, Send, UserPlus, RefreshCw, ShieldAlert } from "lucide-react"
+import { 
+  AlertCircle, 
+  CheckCircle, 
+  Search, 
+  Send, 
+  UserPlus, 
+  RefreshCw, 
+  ShieldAlert,
+  Stethoscope,
+  Activity,
+  Database,
+  Shield,
+  Settings
+} from "lucide-react"
 
 export default function UserDiagnostics() {
   const { toast } = useToast()
@@ -296,61 +309,75 @@ export default function UserDiagnostics() {
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
       <CardHeader>
-        <CardTitle>User Diagnostics</CardTitle>
-        <CardDescription>Look up and fix issues with user accounts</CardDescription>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Stethoscope className="h-5 w-5" />
+          User Diagnostics
+        </CardTitle>
+        <CardDescription className="text-white/70">Look up and fix issues with user accounts</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-white">Email Address</Label>
               <div className="flex mt-1">
                 <Input
                   id="email"
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                 />
-                <Button onClick={handleLookup} disabled={loading || !email.trim()} className="ml-2">
+                <Button 
+                  onClick={handleLookup} 
+                  disabled={loading || !email.trim()} 
+                  className="ml-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+                >
                   {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
                   {loading ? "Searching..." : "Lookup"}
                 </Button>
               </div>
             </div>
             <div className="md:w-1/3">
-              <Label htmlFor="admin-key">Admin Key</Label>
+              <Label htmlFor="admin-key" className="text-white">Admin Key</Label>
               <Input
                 id="admin-key"
                 type="password"
                 placeholder="Enter admin key"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
-                className="mt-1"
+                className="mt-1 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
               />
             </div>
           </div>
 
           {lookupResults && (
             <Tabs defaultValue="status" className="mt-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="status">Status</TabsTrigger>
-                <TabsTrigger value="details">User Details</TabsTrigger>
-                <TabsTrigger value="verification">Verification</TabsTrigger>
-                <TabsTrigger value="actions">Actions</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-white/20">
+                <TabsTrigger value="status" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Status</TabsTrigger>
+                <TabsTrigger value="details" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">User Details</TabsTrigger>
+                <TabsTrigger value="verification" className="text-white data-[state=active]:bg-yellow-500/20 data-[state=active]:text-yellow-400">Verification</TabsTrigger>
+                <TabsTrigger value="actions" className="text-white data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">Actions</TabsTrigger>
               </TabsList>
 
               <TabsContent value="status" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Auth Status</h3>
+                    <h3 className="text-sm font-medium text-white">Auth Status</h3>
                     <div className="flex items-center">
-                      <Badge variant={lookupResults.status.inAuthSystem ? "default" : "destructive"} className="mr-2">
+                      <Badge 
+                        variant={lookupResults.status.inAuthSystem ? "default" : "destructive"} 
+                        className={`mr-2 ${
+                          lookupResults.status.inAuthSystem 
+                            ? "bg-green-500/20 text-green-400 border-green-500/30" 
+                            : "bg-red-500/20 text-red-400 border-red-500/30"
+                        }`}
+                      >
                         {lookupResults.status.inAuthSystem ? "Found" : "Not Found"}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-white/70">
                         {lookupResults.status.inAuthSystem
                           ? "User exists in auth system"
                           : "User not found in auth system"}
@@ -362,11 +389,15 @@ export default function UserDiagnostics() {
                         <div className="flex items-center">
                           <Badge
                             variant={lookupResults.status.isEmailConfirmed ? "default" : "destructive"}
-                            className="mr-2"
+                            className={`mr-2 ${
+                              lookupResults.status.isEmailConfirmed 
+                                ? "bg-green-500/20 text-green-400 border-green-500/30" 
+                                : "bg-red-500/20 text-red-400 border-red-500/30"
+                            }`}
                           >
                             {lookupResults.status.isEmailConfirmed ? "Verified" : "Not Verified"}
                           </Badge>
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-white/70">
                             {lookupResults.status.isEmailConfirmed ? "Email is confirmed" : "Email is not confirmed"}
                           </span>
                         </div>
@@ -374,11 +405,15 @@ export default function UserDiagnostics() {
                           <div className="flex items-center">
                             <Badge
                               variant={lookupResults.status.isMetadataVerified ? "default" : "destructive"}
-                              className="mr-2"
+                              className={`mr-2 ${
+                                lookupResults.status.isMetadataVerified 
+                                  ? "bg-green-500/20 text-green-400 border-green-500/30" 
+                                  : "bg-red-500/20 text-red-400 border-red-500/30"
+                              }`}
                             >
                               {lookupResults.status.isMetadataVerified ? "Verified" : "Not Verified"}
                             </Badge>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-white/70">
                               {lookupResults.status.isMetadataVerified
                                 ? "User metadata shows verified"
                                 : "User metadata shows not verified"}
@@ -390,12 +425,19 @@ export default function UserDiagnostics() {
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Database Status</h3>
+                    <h3 className="text-sm font-medium text-white">Database Status</h3>
                     <div className="flex items-center">
-                      <Badge variant={lookupResults.status.inPublicUsers ? "default" : "destructive"} className="mr-2">
+                      <Badge 
+                        variant={lookupResults.status.inPublicUsers ? "default" : "destructive"} 
+                        className={`mr-2 ${
+                          lookupResults.status.inPublicUsers 
+                            ? "bg-green-500/20 text-green-400 border-green-500/30" 
+                            : "bg-red-500/20 text-red-400 border-red-500/30"
+                        }`}
+                      >
                         {lookupResults.status.inPublicUsers ? "Found" : "Not Found"}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-white/70">
                         {lookupResults.status.inPublicUsers
                           ? "User exists in public.users table"
                           : "User not found in public.users table"}
@@ -406,15 +448,19 @@ export default function UserDiagnostics() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Verification History</h3>
+                    <h3 className="text-sm font-medium text-white">Verification History</h3>
                     <div className="flex items-center">
                       <Badge
                         variant={lookupResults.status.hasVerificationLogs ? "default" : "secondary"}
-                        className="mr-2"
+                        className={`mr-2 ${
+                          lookupResults.status.hasVerificationLogs 
+                            ? "bg-blue-500/20 text-blue-400 border-blue-500/30" 
+                            : "bg-slate-500/20 text-slate-400 border-slate-500/30"
+                        }`}
                       >
                         {lookupResults.status.hasVerificationLogs ? "Found" : "None"}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-white/70">
                         {lookupResults.status.hasVerificationLogs
                           ? `${lookupResults.verificationLogs?.length || 0} verification log entries`
                           : "No verification logs found"}
@@ -424,11 +470,15 @@ export default function UserDiagnostics() {
                     <div className="flex items-center">
                       <Badge
                         variant={lookupResults.status.hasVerificationTokens ? "default" : "secondary"}
-                        className="mr-2"
+                        className={`mr-2 ${
+                          lookupResults.status.hasVerificationTokens 
+                            ? "bg-blue-500/20 text-blue-400 border-blue-500/30" 
+                            : "bg-slate-500/20 text-slate-400 border-slate-500/30"
+                        }`}
                       >
                         {lookupResults.status.hasVerificationTokens ? "Found" : "None"}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-white/70">
                         {lookupResults.status.hasVerificationTokens
                           ? `${lookupResults.verificationTokens?.length || 0} verification tokens`
                           : "No verification tokens found"}
@@ -437,12 +487,12 @@ export default function UserDiagnostics() {
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Diagnosis</h3>
+                    <h3 className="text-sm font-medium text-white">Diagnosis</h3>
                     {lookupResults.status.inAuthSystem && !lookupResults.status.isEmailConfirmed && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Email Not Verified</AlertTitle>
-                        <AlertDescription>
+                      <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                        <AlertCircle className="h-4 w-4 text-red-400" />
+                        <AlertTitle className="text-red-400">Email Not Verified</AlertTitle>
+                        <AlertDescription className="text-red-300/80">
                           User exists but email is not verified. Try sending a verification email or use the Fix
                           Verification Status button.
                         </AlertDescription>
@@ -452,10 +502,10 @@ export default function UserDiagnostics() {
                     {lookupResults.status.inAuthSystem &&
                       lookupResults.status.hasOwnProperty("isMetadataVerified") &&
                       lookupResults.status.isEmailConfirmed !== lookupResults.status.isMetadataVerified && (
-                        <Alert variant="warning">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertTitle>Verification Status Mismatch</AlertTitle>
-                          <AlertDescription>
+                        <Alert variant="warning" className="bg-amber-500/10 border-amber-500/20">
+                          <AlertCircle className="h-4 w-4 text-amber-400" />
+                          <AlertTitle className="text-amber-400">Verification Status Mismatch</AlertTitle>
+                          <AlertDescription className="text-amber-300/80">
                             The email_confirmed_at field and user_metadata.email_verified are not in sync. Use the Fix
                             Verification Status button.
                           </AlertDescription>
@@ -463,20 +513,20 @@ export default function UserDiagnostics() {
                       )}
 
                     {lookupResults.status.inAuthSystem && !lookupResults.status.inPublicUsers && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Missing User Record</AlertTitle>
-                        <AlertDescription>
+                      <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                        <AlertCircle className="h-4 w-4 text-red-400" />
+                        <AlertTitle className="text-red-400">Missing User Record</AlertTitle>
+                        <AlertDescription className="text-red-300/80">
                           User exists in auth but not in the public.users table. Create a user record.
                         </AlertDescription>
                       </Alert>
                     )}
 
                     {!lookupResults.status.inAuthSystem && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>User Not Found</AlertTitle>
-                        <AlertDescription>
+                      <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                        <AlertCircle className="h-4 w-4 text-red-400" />
+                        <AlertTitle className="text-red-400">User Not Found</AlertTitle>
+                        <AlertDescription className="text-red-300/80">
                           User does not exist in the auth system. They need to register.
                         </AlertDescription>
                       </Alert>
@@ -487,10 +537,10 @@ export default function UserDiagnostics() {
                       (!lookupResults.status.hasOwnProperty("isMetadataVerified") ||
                         lookupResults.status.isMetadataVerified) &&
                       lookupResults.status.inPublicUsers && (
-                        <Alert>
-                          <CheckCircle className="h-4 w-4" />
-                          <AlertTitle>User Account Healthy</AlertTitle>
-                          <AlertDescription>
+                        <Alert className="bg-green-500/10 border-green-500/20">
+                          <CheckCircle className="h-4 w-4 text-green-400" />
+                          <AlertTitle className="text-green-400">User Account Healthy</AlertTitle>
+                          <AlertDescription className="text-green-300/80">
                             User exists, is verified, and has a complete user record. No issues detected.
                           </AlertDescription>
                         </Alert>
@@ -502,27 +552,27 @@ export default function UserDiagnostics() {
               <TabsContent value="details" className="space-y-4">
                 {lookupResults.authUser && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium">Auth User Details</h3>
-                    <div className="bg-muted p-4 rounded-md overflow-x-auto">
-                      <pre className="text-xs">{JSON.stringify(lookupResults.authUser, null, 2)}</pre>
+                    <h3 className="text-sm font-medium text-white">Auth User Details</h3>
+                    <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
+                      <pre className="text-xs text-white/80">{JSON.stringify(lookupResults.authUser, null, 2)}</pre>
                     </div>
                   </div>
                 )}
 
                 {lookupResults.publicUser && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium">Public User Details</h3>
-                    <div className="bg-muted p-4 rounded-md overflow-x-auto">
-                      <pre className="text-xs">{JSON.stringify(lookupResults.publicUser, null, 2)}</pre>
+                    <h3 className="text-sm font-medium text-white">Public User Details</h3>
+                    <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
+                      <pre className="text-xs text-white/80">{JSON.stringify(lookupResults.publicUser, null, 2)}</pre>
                     </div>
                   </div>
                 )}
 
                 {!lookupResults.authUser && !lookupResults.publicUser && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>No User Data</AlertTitle>
-                    <AlertDescription>No user details found in either auth or public.users tables.</AlertDescription>
+                  <Alert className="bg-slate-800/50 border-white/20">
+                    <AlertCircle className="h-4 w-4 text-white/70" />
+                    <AlertTitle className="text-white">No User Data</AlertTitle>
+                    <AlertDescription className="text-white/70">No user details found in either auth or public.users tables.</AlertDescription>
                   </Alert>
                 )}
               </TabsContent>
@@ -530,31 +580,31 @@ export default function UserDiagnostics() {
               <TabsContent value="verification" className="space-y-4">
                 {lookupResults.verificationLogs && lookupResults.verificationLogs.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium">Verification Logs</h3>
-                    <div className="bg-muted p-4 rounded-md overflow-x-auto">
-                      <pre className="text-xs">{JSON.stringify(lookupResults.verificationLogs, null, 2)}</pre>
+                    <h3 className="text-sm font-medium text-white">Verification Logs</h3>
+                    <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
+                      <pre className="text-xs text-white/80">{JSON.stringify(lookupResults.verificationLogs, null, 2)}</pre>
                     </div>
                   </div>
                 ) : (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>No Verification Logs</AlertTitle>
-                    <AlertDescription>No verification logs found for this user.</AlertDescription>
+                  <Alert className="bg-slate-800/50 border-white/20">
+                    <AlertCircle className="h-4 w-4 text-white/70" />
+                    <AlertTitle className="text-white">No Verification Logs</AlertTitle>
+                    <AlertDescription className="text-white/70">No verification logs found for this user.</AlertDescription>
                   </Alert>
                 )}
 
                 {lookupResults.verificationTokens && lookupResults.verificationTokens.length > 0 ? (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium">Verification Tokens</h3>
-                    <div className="bg-muted p-4 rounded-md overflow-x-auto">
-                      <pre className="text-xs">{JSON.stringify(lookupResults.verificationTokens, null, 2)}</pre>
+                    <h3 className="text-sm font-medium text-white">Verification Tokens</h3>
+                    <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
+                      <pre className="text-xs text-white/80">{JSON.stringify(lookupResults.verificationTokens, null, 2)}</pre>
                     </div>
                   </div>
                 ) : (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>No Verification Tokens</AlertTitle>
-                    <AlertDescription>No verification tokens found for this user.</AlertDescription>
+                  <Alert className="bg-slate-800/50 border-white/20">
+                    <AlertCircle className="h-4 w-4 text-white/70" />
+                    <AlertTitle className="text-white">No Verification Tokens</AlertTitle>
+                    <AlertDescription className="text-white/70">No verification tokens found for this user.</AlertDescription>
                   </Alert>
                 )}
               </TabsContent>
@@ -562,12 +612,12 @@ export default function UserDiagnostics() {
               <TabsContent value="actions" className="space-y-6">
                 {lookupResults.status.inAuthSystem && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium">Verification Actions</h3>
+                    <h3 className="text-sm font-medium text-white">Verification Actions</h3>
 
                     <Button
                       onClick={handleFixVerificationStatus}
                       disabled={fixVerificationLoading || !lookupResults.status.inAuthSystem}
-                      className="w-full mb-2"
+                      className="w-full mb-2 bg-red-500 hover:bg-red-600 text-white"
                       variant="destructive"
                     >
                       {fixVerificationLoading ? (
@@ -586,7 +636,7 @@ export default function UserDiagnostics() {
                       />
                       <label
                         htmlFor="force-verify"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
                       >
                         Force verify (skip email verification)
                       </label>
@@ -594,7 +644,7 @@ export default function UserDiagnostics() {
                     <Button
                       onClick={handleSendVerification}
                       disabled={verifyLoading || !lookupResults.status.inAuthSystem}
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
                     >
                       {verifyLoading ? (
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -614,75 +664,76 @@ export default function UserDiagnostics() {
 
                 {lookupResults.status.inAuthSystem && !lookupResults.status.inPublicUsers && (
                   <div className="space-y-4">
-                    <Separator />
-                    <h3 className="text-sm font-medium">Create User Record</h3>
+                    <Separator className="bg-white/20" />
+                    <h3 className="text-sm font-medium text-white">Create User Record</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="gamer-tag">Gamer Tag</Label>
+                        <Label htmlFor="gamer-tag" className="text-white">Gamer Tag</Label>
                         <Input
                           id="gamer-tag"
                           value={userData.gamer_tag_id}
                           onChange={(e) => setUserData({ ...userData, gamer_tag_id: e.target.value })}
                           placeholder="Gamer Tag"
+                          className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="console">Console</Label>
+                        <Label htmlFor="console" className="text-white">Console</Label>
                         <Select
                           value={userData.console}
                           onValueChange={(value) => setUserData({ ...userData, console: value })}
                         >
-                          <SelectTrigger id="console">
+                          <SelectTrigger id="console" className="bg-slate-800/50 border-white/20 text-white">
                             <SelectValue placeholder="Select console" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Xbox">Xbox</SelectItem>
-                            <SelectItem value="PS5">PS5</SelectItem>
-                            <SelectItem value="XSX">XSX</SelectItem>
+                          <SelectContent className="bg-slate-800 border-white/20">
+                            <SelectItem value="Xbox" className="text-white hover:bg-slate-700">Xbox</SelectItem>
+                            <SelectItem value="PS5" className="text-white hover:bg-slate-700">PS5</SelectItem>
+                            <SelectItem value="XSX" className="text-white hover:bg-slate-700">XSX</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="primary-position">Primary Position</Label>
+                        <Label htmlFor="primary-position" className="text-white">Primary Position</Label>
                         <Select
                           value={userData.primary_position}
                           onValueChange={(value) => setUserData({ ...userData, primary_position: value })}
                         >
-                          <SelectTrigger id="primary-position">
+                          <SelectTrigger id="primary-position" className="bg-slate-800/50 border-white/20 text-white">
                             <SelectValue placeholder="Select position" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Center">Center</SelectItem>
-                            <SelectItem value="Left Wing">Left Wing</SelectItem>
-                            <SelectItem value="Right Wing">Right Wing</SelectItem>
-                            <SelectItem value="Left Defense">Left Defense</SelectItem>
-                            <SelectItem value="Right Defense">Right Defense</SelectItem>
-                            <SelectItem value="Goalie">Goalie</SelectItem>
+                          <SelectContent className="bg-slate-800 border-white/20">
+                            <SelectItem value="Center" className="text-white hover:bg-slate-700">Center</SelectItem>
+                            <SelectItem value="Left Wing" className="text-white hover:bg-slate-700">Left Wing</SelectItem>
+                            <SelectItem value="Right Wing" className="text-white hover:bg-slate-700">Right Wing</SelectItem>
+                            <SelectItem value="Left Defense" className="text-white hover:bg-slate-700">Left Defense</SelectItem>
+                            <SelectItem value="Right Defense" className="text-white hover:bg-slate-700">Right Defense</SelectItem>
+                            <SelectItem value="Goalie" className="text-white hover:bg-slate-700">Goalie</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="secondary-position">Secondary Position (Optional)</Label>
+                        <Label htmlFor="secondary-position" className="text-white">Secondary Position (Optional)</Label>
                         <Select
                           value={userData.secondary_position || "None"}
                           onValueChange={(value) =>
                             setUserData({ ...userData, secondary_position: value === "None" ? "" : value })
                           }
                         >
-                          <SelectTrigger id="secondary-position">
+                          <SelectTrigger id="secondary-position" className="bg-slate-800/50 border-white/20 text-white">
                             <SelectValue placeholder="Select position" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="None">None</SelectItem>
-                            <SelectItem value="Center">Center</SelectItem>
-                            <SelectItem value="Left Wing">Left Wing</SelectItem>
-                            <SelectItem value="Right Wing">Right Wing</SelectItem>
-                            <SelectItem value="Left Defense">Left Defense</SelectItem>
-                            <SelectItem value="Right Defense">Right Defense</SelectItem>
-                            <SelectItem value="Goalie">Goalie</SelectItem>
+                          <SelectContent className="bg-slate-800 border-white/20">
+                            <SelectItem value="None" className="text-white hover:bg-slate-700">None</SelectItem>
+                            <SelectItem value="Center" className="text-white hover:bg-slate-700">Center</SelectItem>
+                            <SelectItem value="Left Wing" className="text-white hover:bg-slate-700">Left Wing</SelectItem>
+                            <SelectItem value="Right Wing" className="text-white hover:bg-slate-700">Right Wing</SelectItem>
+                            <SelectItem value="Left Defense" className="text-white hover:bg-slate-700">Left Defense</SelectItem>
+                            <SelectItem value="Right Defense" className="text-white hover:bg-slate-700">Right Defense</SelectItem>
+                            <SelectItem value="Goalie" className="text-white hover:bg-slate-700">Goalie</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -693,7 +744,7 @@ export default function UserDiagnostics() {
                       disabled={
                         createLoading || !userData.gamer_tag_id || !userData.primary_position || !userData.console
                       }
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
                     >
                       {createLoading ? (
                         <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -706,10 +757,10 @@ export default function UserDiagnostics() {
                 )}
 
                 {!lookupResults.status.inAuthSystem && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>User Not Found</AlertTitle>
-                    <AlertDescription>
+                  <Alert className="bg-slate-800/50 border-white/20">
+                    <AlertCircle className="h-4 w-4 text-white/70" />
+                    <AlertTitle className="text-white">User Not Found</AlertTitle>
+                    <AlertDescription className="text-white/70">
                       User does not exist in the auth system. They need to register before any actions can be taken.
                     </AlertDescription>
                   </Alert>
