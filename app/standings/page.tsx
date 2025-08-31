@@ -47,34 +47,35 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-br from-slate-800/90 via-green-900/20 to-slate-800/90 border-gradient-to-r from-green-500/30 to-emerald-500/30 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10" />
-        <CardHeader className="relative">
+      <Card>
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Badge className="bg-gradient-to-r from-green-600 to-emerald-600">
+            <Badge variant="default" className="bg-green-600">
               Playoff Teams
             </Badge>
-            <span className="text-sm font-normal text-slate-300">Top 8 Teams</span>
+            <span className="text-sm font-normal text-muted-foreground">Top 8 Teams</span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="relative">
+        <CardContent>
           <div className="grid gap-2">
             {playoffTeams.map((team, index) => (
               <div
                 key={team.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 backdrop-blur-sm"
+                className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800"
               >
                 <div className="flex items-center gap-3">
                   <Badge
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500/50 text-green-300"
+                    variant="outline"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
                   >
                     {index + 1}
                   </Badge>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-white">{team.name}</span>
+                    <span className="font-medium">{team.name}</span>
                     {team.playoff_status === "clinched" && (
                       <Badge
-                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs"
+                        variant="default"
+                        className="bg-green-600 text-white text-xs"
                         title="Clinched Playoff Spot"
                       >
                         X
@@ -83,11 +84,9 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="font-semibold text-green-300">{team.points} PTS</span>
-                  <span className="text-slate-300">
-                    <span className="text-green-400">{team.wins}</span>-
-                    <span className="text-red-400">{team.losses}</span>-
-                    <span className="text-yellow-400">{team.otl}</span>
+                  <span className="font-semibold">{team.points} PTS</span>
+                  <span className="text-muted-foreground">
+                    {team.wins}-{team.losses}-{team.otl}
                   </span>
                 </div>
               </div>
@@ -97,34 +96,35 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
       </Card>
 
       {bubbleTeams.length > 0 && (
-        <Card className="bg-gradient-to-br from-slate-800/90 via-orange-900/20 to-slate-800/90 border-gradient-to-r from-orange-500/30 to-red-500/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10" />
-          <CardHeader className="relative">
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge className="bg-gradient-to-r from-orange-600 to-red-600">
+              <Badge variant="secondary" className="bg-orange-600">
                 Bubble Teams
               </Badge>
-              <span className="text-sm font-normal text-slate-300">Fighting for Playoff Spots</span>
+              <span className="text-sm font-normal text-muted-foreground">Fighting for Playoff Spots</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent>
             <div className="grid gap-2">
               {bubbleTeams.map((team, index) => (
                 <div
                   key={team.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 backdrop-blur-sm"
+                  className="flex items-center justify-between p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800"
                 >
                   <div className="flex items-center gap-3">
                     <Badge
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-600/20 to-red-600/20 border-orange-500/50 text-orange-300"
+                      variant="outline"
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
                     >
                       {playoffTeams.length + index + 1}
                     </Badge>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-white">{team.name}</span>
+                      <span className="font-medium">{team.name}</span>
                       {team.playoff_status === "eliminated" && (
                         <Badge
-                          className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-xs"
+                          variant="destructive"
+                          className="bg-red-600 text-white text-xs"
                           title="Eliminated from Playoffs"
                         >
                           E
@@ -133,13 +133,11 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="font-semibold text-orange-300">{team.points} PTS</span>
-                    <span className="text-slate-300">
-                      <span className="text-green-400">{team.wins}</span>-
-                      <span className="text-red-400">{team.losses}</span>-
-                      <span className="text-yellow-400">{team.otl}</span>
+                    <span className="font-semibold">{team.points} PTS</span>
+                    <span className="text-muted-foreground">
+                      {team.wins}-{team.losses}-{team.otl}
                     </span>
-                    <span className="text-xs text-orange-400 font-medium">
+                    <span className="text-xs text-orange-600 font-medium">
                       {playoffTeams[playoffTeams.length - 1].points - team.points} pts back
                     </span>
                   </div>
@@ -169,24 +167,22 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <Card className="bg-gradient-to-br from-slate-800/90 via-blue-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 to-cyan-500/30 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
-        <CardHeader className="relative">
-          <CardTitle className="text-blue-300">{conference1Name}</CardTitle>
-          <CardDescription className="text-slate-300">{conference1Teams.length} teams</CardDescription>
+      <Card>
+        <CardHeader>
+          <CardTitle>{conference1Name}</CardTitle>
+          <CardDescription>{conference1Teams.length} teams</CardDescription>
         </CardHeader>
-        <CardContent className="relative">
+        <CardContent>
           <TeamStandings teams={conference1Teams} />
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-slate-800/90 via-purple-900/20 to-slate-800/90 border-gradient-to-r from-purple-500/30 to-pink-500/30 shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10" />
-        <CardHeader className="relative">
-          <CardTitle className="text-purple-300">{conference2Name}</CardTitle>
-          <CardDescription className="text-slate-300">{conference2Teams.length} teams</CardDescription>
+      <Card>
+        <CardHeader>
+          <CardTitle>{conference2Name}</CardTitle>
+          <CardDescription>{conference2Teams.length} teams</CardDescription>
         </CardHeader>
-        <CardContent className="relative">
+        <CardContent>
           <TeamStandings teams={conference2Teams} />
         </CardContent>
       </Card>
@@ -198,12 +194,12 @@ function StandingsLoadingSkeleton() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Skeleton className="h-8 w-64 bg-background/30" />
-        <Skeleton className="h-4 w-96 bg-background/30" />
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
       </div>
       <div className="space-y-4">
-        <Skeleton className="h-10 w-full bg-background/30" />
-        <Skeleton className="h-64 w-full bg-background/30" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     </div>
   )
@@ -214,11 +210,11 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   if (!standings || standings.length === 0) {
     return (
-      <Card className="bg-gradient-to-br from-slate-800/50 to-purple-900/20 border-primary/20">
+      <Card>
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-slate-300">No Standings Available</h3>
-            <p className="text-sm text-slate-400 mt-2">No team data found for this season.</p>
+            <h3 className="text-lg font-semibold text-muted-foreground">No Standings Available</h3>
+            <p className="text-sm text-muted-foreground mt-2">No team data found for this season.</p>
           </div>
         </CardContent>
       </Card>
@@ -227,37 +223,36 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   return (
     <Tabs defaultValue="overall" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-slate-800/50 to-purple-900/20 border-primary/20">
-        <TabsTrigger value="overall" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20">Overall Standings</TabsTrigger>
-        <TabsTrigger value="conference" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20">Conference</TabsTrigger>
-        <TabsTrigger value="playoffs" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20">Playoff Picture</TabsTrigger>
-        <TabsTrigger value="bracket" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/20 data-[state=active]:to-red-500/20">Playoff Bracket</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="overall">Overall Standings</TabsTrigger>
+        <TabsTrigger value="conference">Conference</TabsTrigger>
+        <TabsTrigger value="playoffs">Playoff Picture</TabsTrigger>
+        <TabsTrigger value="bracket">Playoff Bracket</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overall" className="space-y-6">
-        <Card className="bg-gradient-to-br from-slate-800/90 via-blue-900/20 to-slate-800/90 border-gradient-to-r from-blue-500/30 to-cyan-500/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
-          <CardHeader className="relative">
-            <CardTitle className="text-blue-300">League Standings</CardTitle>
-            <CardDescription className="text-slate-300">
+        <Card>
+          <CardHeader>
+            <CardTitle>League Standings</CardTitle>
+            <CardDescription>
               Complete standings for all teams in the league
               <div className="flex items-center gap-4 mt-2 text-xs">
                 <div className="flex items-center gap-1">
-                  <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white text-xs">
+                  <Badge variant="default" className="bg-green-600 text-white text-xs">
                     X
                   </Badge>
-                  <span className="text-slate-300">Clinched Playoff Spot</span>
+                  <span>Clinched Playoff Spot</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Badge className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-xs">
+                  <Badge variant="destructive" className="bg-red-600 text-white text-xs">
                     E
                   </Badge>
-                  <span className="text-slate-300">Eliminated from Playoffs</span>
+                  <span>Eliminated from Playoffs</span>
                 </div>
               </div>
             </CardDescription>
           </CardHeader>
-          <CardContent className="relative">
+          <CardContent>
             <TeamStandings teams={standings} />
           </CardContent>
         </Card>
@@ -272,12 +267,7 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
       </TabsContent>
 
       <TabsContent value="bracket" className="space-y-6">
-        <Card className="bg-gradient-to-br from-slate-800/90 via-orange-900/20 to-slate-800/90 border-gradient-to-r from-orange-500/30 to-red-500/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10" />
-          <CardContent className="relative">
-            <PlayoffBracket seasonId={seasonId} />
-          </CardContent>
-        </Card>
+        <PlayoffBracket seasonId={seasonId} />
       </TabsContent>
     </Tabs>
   )
@@ -288,20 +278,16 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
   const selectedSeasonId = searchParams.season ? Number.parseInt(searchParams.season) : currentSeasonId
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              League Standings
-            </h1>
-            <p className="text-slate-300 text-lg">Current team standings, conference rankings, and playoff picture</p>
-          </div>
-
-          <Suspense fallback={<StandingsLoadingSkeleton />}>
-            <StandingsContent seasonId={selectedSeasonId} />
-          </Suspense>
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">League Standings</h1>
+          <p className="text-muted-foreground">Current team standings, conference rankings, and playoff picture</p>
         </div>
+
+        <Suspense fallback={<StandingsLoadingSkeleton />}>
+          <StandingsContent seasonId={selectedSeasonId} />
+        </Suspense>
       </div>
     </div>
   )

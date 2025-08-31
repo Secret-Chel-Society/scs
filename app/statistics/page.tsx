@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown, Trophy, TrendingUp } from "lucide-react"
-
+import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PlayerClickableLinkFlexible } from "@/components/matches/player-clickable-link-flexible"
 import { useMobile } from "@/hooks/use-mobile"
@@ -1752,23 +1751,18 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-
-
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Player Statistics
-            </h1>
-            <p className="text-slate-300 text-lg">View comprehensive player statistics across all seasons</p>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
+          <p className="text-muted-foreground">View comprehensive player statistics across all seasons</p>
+        </div>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
-              <SelectTrigger className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground">
+              <SelectTrigger>
                 <SelectValue placeholder="Select season" />
               </SelectTrigger>
               <SelectContent>
@@ -1783,7 +1777,7 @@ export default function StatisticsPage() {
 
           <div className="flex-1">
             <Select value={selectedWeek} onValueChange={handleWeekChange}>
-              <SelectTrigger className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground">
+              <SelectTrigger>
                 <SelectValue placeholder="Select week" />
               </SelectTrigger>
               <SelectContent>
@@ -1798,7 +1792,7 @@ export default function StatisticsPage() {
 
           <div className="flex-1">
             <Select value={selectedTeam} onValueChange={handleTeamChange}>
-              <SelectTrigger className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground">
+              <SelectTrigger>
                 <SelectValue placeholder="Select team" />
               </SelectTrigger>
               <SelectContent>
@@ -1814,14 +1808,13 @@ export default function StatisticsPage() {
         </div>
 
         {/* Statistics Tabs */}
-        <div>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-slate-800/50 to-purple-900/20 border-primary/20">
-              <TabsTrigger value="total" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20">Total</TabsTrigger>
-              <TabsTrigger value="offense" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20">Offense</TabsTrigger>
-              <TabsTrigger value="defense" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20">Defense</TabsTrigger>
-              <TabsTrigger value="goalies" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/20 data-[state=active]:to-red-500/20">Goalies</TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="total">Total</TabsTrigger>
+            <TabsTrigger value="offense">Offense</TabsTrigger>
+            <TabsTrigger value="defense">Defense</TabsTrigger>
+            <TabsTrigger value="goalies">Goalies</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="total" className="space-y-4">
             <Card>

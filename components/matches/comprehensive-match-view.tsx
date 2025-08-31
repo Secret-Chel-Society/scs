@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Edit } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 
 interface ComprehensiveMatchViewProps {
@@ -366,6 +368,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           {/* Center Score Section */}
           <div className="bg-slate-800 px-8 py-8 flex flex-col items-center justify-center min-w-[300px] relative z-20">
             <Badge
+              variant={match.status === "completed" || match.status === "Completed" ? "default" : "secondary"}
               className="mb-4 text-lg px-4 py-2"
             >
               {match.status === "completed" || match.status === "Completed"
