@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
+import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown, Trophy, Award, Medal, Crown, Star, TrendingUp, BarChart3, Target, Users, Calendar, Clock, Zap, Activity, TrendingDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PlayerClickableLinkFlexible } from "@/components/matches/player-clickable-link-flexible"
 import { useMobile } from "@/hooks/use-mobile"
@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { PlayerStats } from "@/lib/statistics"
 import { useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion"
 
 // Week definitions for Season 1 - 7 weeks total
 const SEASON_1_WEEKS = [
@@ -485,10 +486,16 @@ export default function StatisticsPage() {
 
     return (
       <div className="flex items-center justify-center space-x-2 py-4">
-        <Button variant="outline" size="sm" onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1}>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => onPageChange(currentPage - 1)} 
+          disabled={currentPage === 1}
+          className="bg-white/10 border-blue-300/30 text-white hover:bg-white/20 hover:border-blue-400 transition-all duration-300"
+        >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span>
+        <span className="text-blue-200">
           Page {currentPage} of {totalPages}
         </span>
         <Button
@@ -496,6 +503,7 @@ export default function StatisticsPage() {
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
+          className="bg-white/10 border-blue-300/30 text-white hover:bg-white/20 hover:border-blue-400 transition-all duration-300"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -1288,7 +1296,7 @@ export default function StatisticsPage() {
     if (players.length === 0) {
       return (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">No player statistics available</p>
+          <p className="text-blue-200">No player statistics available</p>
         </div>
       )
     }
@@ -1344,13 +1352,13 @@ export default function StatisticsPage() {
     return (
       <div>
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg">
             <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs md:text-sm min-w-[40px]">Rank</TableHead>
-                <TableHead className="text-xs md:text-sm min-w-[100px]">Player</TableHead>
-                <TableHead className="text-xs md:text-sm min-w-[80px]">Team</TableHead>
-                <TableHead className="text-xs md:text-sm min-w-[40px]">Pos</TableHead>
+              <TableRow className="bg-white/10 hover:bg-white/20 transition-colors">
+                <TableHead className="text-xs md:text-sm min-w-[40px] text-white">Rank</TableHead>
+                <TableHead className="text-xs md:text-sm min-w-[100px] text-white">Player</TableHead>
+                <TableHead className="text-xs md:text-sm min-w-[80px] text-white">Team</TableHead>
+                <TableHead className="text-xs md:text-sm min-w-[40px] text-white">Pos</TableHead>
                 <TableHead
                   className="text-right text-xs md:text-sm min-w-[40px] cursor-pointer hover:bg-muted/50"
                   onClick={() => handleSort("games_played")}
@@ -1540,13 +1548,13 @@ export default function StatisticsPage() {
                 const ppg = stat.games_played > 0 ? (points / stat.games_played).toFixed(2) : "0.00"
 
                 return (
-                  <TableRow key={`${stat.player_name}-${index}`}>
-                    <TableCell className="text-xs md:text-sm font-medium">{overallRank}</TableCell>
-                    <TableCell className="text-xs md:text-sm">
+                  <TableRow key={`${stat.player_name}-${index}`} className="hover:bg-white/10 transition-colors border-b border-white/10">
+                    <TableCell className="text-xs md:text-sm font-medium text-white">{overallRank}</TableCell>
+                    <TableCell className="text-xs md:text-sm text-white">
                       <PlayerClickableLinkFlexible playerName={stat.player_name} />
                     </TableCell>
-                    <TableCell className="text-xs md:text-sm">{stat.team_name || "Free Agent"}</TableCell>
-                    <TableCell className="text-xs md:text-sm">{displayPosition}</TableCell>
+                    <TableCell className="text-xs md:text-sm text-white">{stat.team_name || "Free Agent"}</TableCell>
+                    <TableCell className="text-xs md:text-sm text-white">{displayPosition}</TableCell>
                     <TableCell className="text-right text-xs md:text-sm">{stat.games_played || 0}</TableCell>
                     <TableCell className="text-right text-xs md:text-sm">{stat.goals || 0}</TableCell>
                     <TableCell className="text-right text-xs md:text-sm">{stat.assists || 0}</TableCell>
@@ -1724,15 +1732,32 @@ export default function StatisticsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-48" />
-          <div className="flex space-x-4">
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="relative z-10 space-y-6">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+                Player Statistics
+              </h1>
+              <p className="text-xl text-blue-200 mb-8">
+                View comprehensive player statistics across all seasons
+              </p>
+            </div>
+            <div className="space-y-6">
+              <Skeleton className="h-8 w-48 bg-white/10" />
+              <div className="flex space-x-4">
+                <Skeleton className="h-10 w-32 bg-white/10" />
+                <Skeleton className="h-10 w-32 bg-white/10" />
+                <Skeleton className="h-10 w-32 bg-white/10" />
+              </div>
+              <Skeleton className="h-64 w-full bg-white/10" />
+            </div>
           </div>
-          <Skeleton className="h-64 w-full" />
         </div>
       </div>
     )
@@ -1740,29 +1765,74 @@ export default function StatisticsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="relative z-10">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+                Player Statistics
+              </h1>
+              <p className="text-xl text-blue-200 mb-8">
+                View comprehensive player statistics across all seasons
+              </p>
+            </div>
+            <Alert variant="destructive" className="bg-red-500/20 border-red-400/50 backdrop-blur-sm">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertTitle className="text-red-200">Error</AlertTitle>
+              <AlertDescription className="text-red-200">{error}</AlertDescription>
+            </Alert>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
-          <p className="text-muted-foreground">View comprehensive player statistics across all seasons</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative container mx-auto px-4 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.5 }}
+          className="relative z-10 space-y-6"
+        >
+          {/* Header Section */}
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+              Player Statistics
+            </h1>
+            <p className="text-xl text-blue-200 mb-8">
+              View comprehensive player statistics across all seasons
+            </p>
+          </motion.div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-col sm:flex-row gap-4 mb-8"
+        >
           <div className="flex-1">
             <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white/10 border-blue-300/30 text-white placeholder:text-blue-300/70 focus:bg-white/20 focus:border-blue-400 transition-all duration-300">
                 <SelectValue placeholder="Select season" />
               </SelectTrigger>
               <SelectContent>
@@ -1777,7 +1847,7 @@ export default function StatisticsPage() {
 
           <div className="flex-1">
             <Select value={selectedWeek} onValueChange={handleWeekChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white/10 border-blue-300/30 text-white placeholder:text-blue-300/70 focus:bg-white/20 focus:border-blue-400 transition-all duration-300">
                 <SelectValue placeholder="Select week" />
               </SelectTrigger>
               <SelectContent>
@@ -1792,7 +1862,7 @@ export default function StatisticsPage() {
 
           <div className="flex-1">
             <Select value={selectedTeam} onValueChange={handleTeamChange}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white/10 border-blue-300/30 text-white placeholder:text-blue-300/70 focus:bg-white/20 focus:border-blue-400 transition-all duration-300">
                 <SelectValue placeholder="Select team" />
               </SelectTrigger>
               <SelectContent>
@@ -1805,58 +1875,126 @@ export default function StatisticsPage() {
               </SelectContent>
             </Select>
           </div>
-        </div>
+        </motion.div>
 
         {/* Statistics Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="total">Total</TabsTrigger>
-            <TabsTrigger value="offense">Offense</TabsTrigger>
-            <TabsTrigger value="defense">Defense</TabsTrigger>
-            <TabsTrigger value="goalies">Goalies</TabsTrigger>
-          </TabsList>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 bg-white/10 backdrop-blur-sm border border-white/20">
+              <TabsTrigger value="total" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-blue-200 data-[state=active]:border-blue-400/50">Total</TabsTrigger>
+              <TabsTrigger value="offense" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:text-green-200 data-[state=active]:border-green-400/50">Offense</TabsTrigger>
+              <TabsTrigger value="defense" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:text-purple-200 data-[state=active]:border-purple-400/50">Defense</TabsTrigger>
+              <TabsTrigger value="goalies" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500/20 data-[state=active]:to-red-500/20 data-[state=active]:text-orange-200 data-[state=active]:border-orange-400/50">Goalies</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="total" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>All Players</CardTitle>
-                <CardDescription>Combined statistics for all skaters (excludes goalies)</CardDescription>
-              </CardHeader>
-              <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-blue-400/50 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-blue-400" />
+                    All Players
+                  </CardTitle>
+                  <CardDescription className="text-blue-200">Combined statistics for all skaters (excludes goalies)</CardDescription>
+                </CardHeader>
+                <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="offense" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Forwards</CardTitle>
-                <CardDescription>Statistics for centers, left wings, and right wings</CardDescription>
-              </CardHeader>
-              <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-green-400/50 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-400" />
+                    Forwards
+                  </CardTitle>
+                  <CardDescription className="text-green-200">Statistics for centers, left wings, and right wings</CardDescription>
+                </CardHeader>
+                <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="defense" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Defensemen</CardTitle>
-                <CardDescription>Statistics for left and right defensemen</CardDescription>
-              </CardHeader>
-              <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-purple-400/50 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-purple-400" />
+                    Defensemen
+                  </CardTitle>
+                  <CardDescription className="text-purple-200">Statistics for left and right defensemen</CardDescription>
+                </CardHeader>
+                <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
           <TabsContent value="goalies" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Goalies</CardTitle>
-                <CardDescription>Statistics for goaltenders</CardDescription>
-              </CardHeader>
-              <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-orange-400/50 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Target className="h-5 w-5 text-orange-400" />
+                    Goalies
+                  </CardTitle>
+                  <CardDescription className="text-orange-200">Statistics for goaltenders</CardDescription>
+                </CardHeader>
+                <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
         </Tabs>
+        </motion.div>
       </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }
