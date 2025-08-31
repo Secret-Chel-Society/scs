@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trophy, Award, Star } from "lucide-react"
+import { Trophy, Award, Star, Crown, Medal, Zap, Target, TrendingUp } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
@@ -98,11 +98,9 @@ export default function AwardsPage() {
         .select(`
           id,
           player_id,
-          players:player_id (
-            users:user_id (gamer_tag_id),
-            team_id,
-            teams:team_id (name, logo_url)
-          ),
+          gamer_tag_id,
+          team_id,
+          teams:team_id (name, logo_url),
           award_type,
           season_number,
           year,
@@ -116,10 +114,10 @@ export default function AwardsPage() {
       const formattedPlayerAwards = playerAwardsData.map((award) => ({
         id: award.id,
         player_id: award.player_id,
-        gamer_tag_id: award.players?.users?.gamer_tag_id || "Unknown Player",
-        team_id: award.players?.team_id || null,
-        team_name: award.players?.teams?.name || null,
-        team_logo: award.players?.teams?.logo_url || null,
+        gamer_tag_id: award.gamer_tag_id,
+        team_id: award.team_id,
+        team_name: award.teams?.name || null,
+        team_logo: award.teams?.logo_url || null,
         award_type: award.award_type,
         season_number: award.season_number,
         year: award.year,
@@ -129,60 +127,25 @@ export default function AwardsPage() {
       setPlayerAwards(formattedPlayerAwards || [])
 
       // Fetch seasons
-      try {
-        const { data: seasonsData, error: seasonsError } = await supabase
-          .from("seasons")
-          .select("id, name, number")
-          .order("name")
+      const { data: seasonsData, error: seasonsError } = await supabase
+        .from("seasons")
+        .select("id, name, season_number")
+        .order("season_number", { ascending: false })
 
-        if (seasonsData && !seasonsError) {
-          // Process seasons to ensure they have correct numbers
-          const processedSeasons = seasonsData
-            .map((season) => {
-              // If season already has a number, use it
-              if (season.number !== undefined && season.number !== null) {
-                return season
-              }
+      if (seasonsError) throw seasonsError
 
-              // Otherwise extract number from name
-              const nameMatch = season.name.match(/Season\s+(\d+)/i)
-              const seasonNumber = nameMatch ? Number.parseInt(nameMatch[1], 10) : null
+      const formattedSeasons = seasonsData.map((season) => ({
+        id: season.id,
+        name: season.name,
+        number: season.season_number,
+      }))
 
-              return {
-                ...season,
-                number: seasonNumber,
-              }
-            })
-            .sort((a, b) => (a.number || 0) - (b.number || 0)) // Sort by number
-
-          console.log("Processed seasons for awards page:", processedSeasons)
-          setSeasons(processedSeasons)
-        } else {
-          // Fallback to default seasons if table doesn't exist
-          const defaultSeasons = [
-            { id: "1", name: "Season 1", number: 1 },
-            { id: "2", name: "Season 2", number: 2 },
-            { id: "3", name: "Season 3", number: 3 },
-          ]
-          console.log("Using default seasons:", defaultSeasons)
-          setSeasons(defaultSeasons)
-        }
-      } catch (error) {
-        console.error("Error fetching seasons:", error)
-        // Fallback to default seasons
-        const defaultSeasons = [
-          { id: "1", name: "Season 1", number: 1 },
-          { id: "2", name: "Season 2", number: 2 },
-          { id: "3", name: "Season 3", number: 3 },
-        ]
-        console.log("Using default seasons due to error:", defaultSeasons)
-        setSeasons(defaultSeasons)
-      }
-    } catch (error: any) {
-      console.error("Error fetching data:", error)
+      setSeasons(formattedSeasons || [])
+    } catch (error) {
+      console.error("Error fetching awards data:", error)
       toast({
-        title: "Error loading awards",
-        description: error.message || "Failed to load awards data",
+        title: "Error",
+        description: "Failed to load awards data. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -190,242 +153,359 @@ export default function AwardsPage() {
     }
   }
 
-  // Filter awards based on selected season and year
   const filteredTeamAwards = teamAwards.filter((award) => {
-    const seasonMatch = selectedSeason === "all" || award.season_number === Number.parseInt(selectedSeason)
-    const yearMatch = selectedYear === "all" || award.year === Number.parseInt(selectedYear)
-    return seasonMatch && yearMatch
+    if (selectedSeason !== "all" && award.season_number !== parseInt(selectedSeason)) return false
+    if (selectedYear !== "all" && award.year !== parseInt(selectedYear)) return false
+    return true
   })
 
   const filteredPlayerAwards = playerAwards.filter((award) => {
-    const seasonMatch = selectedSeason === "all" || award.season_number === Number.parseInt(selectedSeason)
-    const yearMatch = selectedYear === "all" || award.year === Number.parseInt(selectedYear)
-    return seasonMatch && yearMatch
+    if (selectedSeason !== "all" && award.season_number !== parseInt(selectedSeason)) return false
+    if (selectedYear !== "all" && award.year !== parseInt(selectedYear)) return false
+    return true
   })
 
-  // Group team awards by type
-  const teamAwardsByType = filteredTeamAwards.reduce(
-    (acc, award) => {
-      if (!acc[award.award_type]) {
-        acc[award.award_type] = []
-      }
-      acc[award.award_type].push(award)
-      return acc
-    },
-    {} as Record<string, TeamAward[]>,
-  )
+  const getAwardIcon = (awardType: string) => {
+    switch (awardType.toLowerCase()) {
+      case "champion":
+      case "championship":
+        return <Crown className="h-6 w-6 text-yellow-400" />
+      case "mvp":
+      case "most valuable player":
+        return <Star className="h-6 w-6 text-yellow-400" />
+      case "runner up":
+      case "finalist":
+        return <Medal className="h-6 w-6 text-gray-400" />
+      case "third place":
+      case "bronze":
+        return <Award className="h-6 w-6 text-amber-600" />
+      default:
+        return <Trophy className="h-6 w-6 text-purple-400" />
+    }
+  }
 
-  // Group player awards by type
-  const playerAwardsByType = filteredPlayerAwards.reduce(
-    (acc, award) => {
-      if (!acc[award.award_type]) {
-        acc[award.award_type] = []
-      }
-      acc[award.award_type].push(award)
-      return acc
-    },
-    {} as Record<string, PlayerAward[]>,
-  )
+  const getAwardColor = (awardType: string) => {
+    switch (awardType.toLowerCase()) {
+      case "champion":
+      case "championship":
+        return "from-yellow-500/20 to-amber-500/20 border-yellow-400/30"
+      case "mvp":
+      case "most valuable player":
+        return "from-purple-500/20 to-pink-500/20 border-purple-400/30"
+      case "runner up":
+      case "finalist":
+        return "from-gray-500/20 to-slate-500/20 border-gray-400/30"
+      case "third place":
+      case "bronze":
+        return "from-amber-500/20 to-orange-500/20 border-amber-400/30"
+      default:
+        return "from-blue-500/20 to-indigo-500/20 border-blue-400/30"
+    }
+  }
 
-  // Function to get season name by number
-  const getSeasonName = (seasonNumber: number): string => {
-    // Find the season with matching number field
-    const season = seasons.find((s) => s.number === seasonNumber)
-    return season ? season.name : `Season ${seasonNumber}`
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <Skeleton className="h-64 w-full rounded-2xl bg-white/10 mb-8" />
+            <Skeleton className="h-96 w-full rounded-2xl bg-white/10" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">League Awards</h1>
-            <p className="text-muted-foreground">Celebrating excellence in the Secret Chel Society</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Select value={selectedSeason} onValueChange={setSelectedSeason}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by season" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Seasons</SelectItem>
-                {seasons.length > 0
-                  ? seasons.map((season) => (
-                      <SelectItem key={season.id} value={String(season.number)}>
-                        {season.name}
-                      </SelectItem>
-                    ))
-                  : [1, 2, 3, 4, 5].map((num) => (
-                      <SelectItem key={num} value={String(num)}>
-                        Season {num}
-                      </SelectItem>
-                    ))}
-              </SelectContent>
-            </Select>
+      <div className="relative container mx-auto px-4 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.5 }}
+          className="relative z-10"
+        >
+          {/* Header Section */}
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+              League Awards
+            </h1>
+            <p className="text-xl text-purple-200 mb-8">
+              Celebrating excellence and achievement in NHL 26
+            </p>
+          </motion.div>
 
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
-                {availableYears.map((year) => (
-                  <SelectItem key={year} value={String(year)}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+          {/* Awards Statistics */}
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-yellow-200 mb-2">{teamAwards.length + playerAwards.length}</div>
+              <div className="text-yellow-300">Total Awards</div>
+            </div>
+            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-purple-200 mb-2">{teamAwards.length}</div>
+              <div className="text-purple-300">Team Awards</div>
+            </div>
+            <div className="bg-gradient-to-r from-blue-500/20 to-indigo-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-blue-200 mb-2">{playerAwards.length}</div>
+              <div className="text-blue-300">Player Awards</div>
+            </div>
+            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-green-200 mb-2">{availableYears.length}</div>
+              <div className="text-green-300">Seasons</div>
+            </div>
+          </motion.div>
 
-        <Tabs defaultValue="team-awards">
-          <TabsList className="mb-6">
-            <TabsTrigger value="team-awards">Team Awards</TabsTrigger>
-            <TabsTrigger value="player-awards">Player Awards</TabsTrigger>
-          </TabsList>
+          {/* Filters */}
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row gap-4 items-center">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-purple-300" />
+                    <span className="text-purple-300 font-medium">Filters:</span>
+                  </div>
+                  
+                  <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+                    <SelectTrigger className="w-full lg:w-48 bg-white/10 border-purple-400/30 text-white">
+                      <SelectValue placeholder="All Seasons" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-purple-400/30">
+                      <SelectItem value="all">All Seasons</SelectItem>
+                      {seasons.map((season) => (
+                        <SelectItem key={season.id} value={season.number?.toString() || ""}>
+                          {season.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-          <TabsContent value="team-awards">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-64 w-full rounded-lg" />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-12">
-                {Object.entries(teamAwardsByType).length > 0 ? (
-                  Object.entries(teamAwardsByType).map(([awardType, awards]) => (
-                    <div key={awardType} className="space-y-6">
-                      <h2 className="text-2xl font-bold flex items-center gap-2">
-                        {awardType === "SCS Cup" ? (
-                          <Trophy className="h-6 w-6 text-yellow-500" />
-                        ) : (
-                          <Award className="h-6 w-6 text-blue-500" />
-                        )}
-                        {awardType}
-                      </h2>
+                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <SelectTrigger className="w-full lg:w-48 bg-white/10 border-purple-400/30 text-white">
+                      <SelectValue placeholder="All Years" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-purple-400/30">
+                      <SelectItem value="all">All Years</SelectItem>
+                      {availableYears.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
+          {/* Main Content Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Tabs defaultValue="team" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-white/10 backdrop-blur-sm border border-white/20">
+                <TabsTrigger 
+                  value="team" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-white"
+                >
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Team Awards
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="player" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:text-white"
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  Player Awards
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="team" className="mt-6">
+                <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                  <CardContent className="p-6">
+                    {filteredTeamAwards.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {awards.map((award) => (
+                        {filteredTeamAwards.map((award, index) => (
                           <motion.div
                             key={award.id}
-                            whileHover={{ y: -5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 + index * 0.1 }}
+                            className="group"
                           >
-                            <Link href={`/teams/${award.team_id}`}>
-                              <Card
-                                className={`overflow-hidden h-full hover:border-primary transition-colors ${
-                                  awardType === "SCS Cup" ? "border-yellow-200 dark:border-yellow-900" : ""
-                                }`}
-                              >
-                                <CardContent className="p-6">
-                                  <div className="flex flex-col items-center">
-                                    <div className="relative h-24 w-24 mb-4">
-                                      {award.team_logo ? (
-                                        <Image
-                                          src={award.team_logo || "/placeholder.svg"}
-                                          alt={award.team_name}
-                                          fill
-                                          className="object-contain"
-                                        />
-                                      ) : (
-                                        <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center text-3xl font-bold">
-                                          {award.team_name.substring(0, 2)}
-                                        </div>
-                                      )}
+                            <Card className={`bg-gradient-to-br ${getAwardColor(award.award_type)} backdrop-blur-sm border hover:scale-105 transition-all duration-300`}>
+                              <CardContent className="p-6 text-center">
+                                <div className="flex justify-center mb-4">
+                                  {getAwardIcon(award.award_type)}
+                                </div>
+                                
+                                <h3 className="text-xl font-bold text-white mb-2">{award.award_type}</h3>
+                                
+                                <div className="flex justify-center mb-4">
+                                  {award.team_logo ? (
+                                    <div className="relative h-16 w-16">
+                                      <Image
+                                        src={award.team_logo}
+                                        alt={award.team_name}
+                                        fill
+                                        className="object-contain"
+                                      />
                                     </div>
-                                    <h3 className="text-xl font-bold text-center mb-2">{award.team_name}</h3>
-                                    <div className="text-sm text-muted-foreground text-center mb-4">
-                                      {getSeasonName(award.season_number)} • {award.year}
+                                  ) : (
+                                    <div className="h-16 w-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center">
+                                      <span className="text-purple-200 font-bold text-lg">
+                                        {award.team_name.charAt(0)}
+                                      </span>
                                     </div>
-                                    {award.description && <p className="text-sm text-center">{award.description}</p>}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </Link>
+                                  )}
+                                </div>
+                                
+                                <h4 className="text-lg font-semibold text-white mb-2">{award.team_name}</h4>
+                                
+                                <div className="text-sm text-purple-300 mb-2">
+                                  Season {award.season_number} • {award.year}
+                                </div>
+                                
+                                {award.description && (
+                                  <p className="text-sm text-purple-300">{award.description}</p>
+                                )}
+                              </CardContent>
+                            </Card>
                           </motion.div>
                         ))}
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">No team awards found for the selected filters.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Trophy className="h-12 w-12 mx-auto mb-4 text-purple-400" />
+                        <h3 className="text-xl font-bold text-white mb-2">No Team Awards Found</h3>
+                        <p className="text-purple-300">Try adjusting your filters to see more results.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-          <TabsContent value="player-awards">
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-64 w-full rounded-lg" />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-12">
-                {Object.entries(playerAwardsByType).length > 0 ? (
-                  Object.entries(playerAwardsByType).map(([awardType, awards]) => (
-                    <div key={awardType} className="space-y-6">
-                      <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Star className="h-6 w-6 text-yellow-500" />
-                        {awardType}
-                      </h2>
-
+              <TabsContent value="player" className="mt-6">
+                <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                  <CardContent className="p-6">
+                    {filteredPlayerAwards.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {awards.map((award) => (
+                        {filteredPlayerAwards.map((award, index) => (
                           <motion.div
                             key={award.id}
-                            whileHover={{ y: -5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 + index * 0.1 }}
+                            className="group"
                           >
-                            <Link href={`/players/${award.player_id}`}>
-                              <Card className="overflow-hidden h-full hover:border-primary transition-colors">
-                                <CardContent className="p-6">
-                                  <div className="flex flex-col items-center">
-                                    <div className="flex items-center gap-3 mb-4">
-                                      <div className="text-2xl font-bold">{award.gamer_tag_id}</div>
-                                      {award.team_logo && (
-                                        <div className="relative h-6 w-6">
-                                          <Image
-                                            src={award.team_logo || "/placeholder.svg"}
-                                            alt={award.team_name || ""}
-                                            fill
-                                            className="object-contain"
-                                          />
-                                        </div>
-                                      )}
+                            <Card className={`bg-gradient-to-br ${getAwardColor(award.award_type)} backdrop-blur-sm border hover:scale-105 transition-all duration-300`}>
+                              <CardContent className="p-6 text-center">
+                                <div className="flex justify-center mb-4">
+                                  {getAwardIcon(award.award_type)}
+                                </div>
+                                
+                                <h3 className="text-xl font-bold text-white mb-2">{award.award_type}</h3>
+                                
+                                <div className="flex justify-center mb-4">
+                                  {award.team_logo ? (
+                                    <div className="relative h-16 w-16">
+                                      <Image
+                                        src={award.team_logo}
+                                        alt={award.team_name || "Team"}
+                                        fill
+                                        className="object-contain"
+                                      />
                                     </div>
-                                    <div className="text-sm text-muted-foreground text-center mb-4">
-                                      {getSeasonName(award.season_number)} • {award.year}
+                                  ) : (
+                                    <div className="h-16 w-16 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-full flex items-center justify-center">
+                                      <span className="text-blue-200 font-bold text-lg">
+                                        {award.team_name?.charAt(0) || "P"}
+                                      </span>
                                     </div>
-                                    {award.team_name && (
-                                      <div className="text-sm text-center mb-2">Team: {award.team_name}</div>
-                                    )}
-                                    {award.description && <p className="text-sm text-center">{award.description}</p>}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </Link>
+                                  )}
+                                </div>
+                                
+                                <h4 className="text-lg font-semibold text-white mb-2">{award.gamer_tag_id}</h4>
+                                
+                                {award.team_name && (
+                                  <p className="text-sm text-blue-300 mb-2">{award.team_name}</p>
+                                )}
+                                
+                                <div className="text-sm text-blue-300 mb-2">
+                                  Season {award.season_number} • {award.year}
+                                </div>
+                                
+                                {award.description && (
+                                  <p className="text-sm text-blue-300">{award.description}</p>
+                                )}
+                              </CardContent>
+                            </Card>
                           </motion.div>
                         ))}
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">No player awards found for the selected filters.</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </motion.div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <Star className="h-12 w-12 mx-auto mb-4 text-blue-400" />
+                        <h3 className="text-xl font-bold text-white mb-2">No Player Awards Found</h3>
+                        <p className="text-blue-300">Try adjusting your filters to see more results.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }
