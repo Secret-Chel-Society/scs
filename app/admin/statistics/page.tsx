@@ -1139,8 +1139,8 @@ export default function AdminStatisticsPage() {
 
                 <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
                   <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
-                  <SelectValue placeholder="Filter by position" />
-                </SelectTrigger>
+                    <SelectValue placeholder="Filter by position" />
+                  </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   <SelectItem value="all" className="text-white hover:bg-slate-700">All Positions</SelectItem>
                   <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
@@ -1156,7 +1156,7 @@ export default function AdminStatisticsPage() {
 
                 <Select defaultValue={statFilter} onValueChange={setStatFilter}>
                   <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
-                  <SelectValue placeholder="Sort by stat" />
+                    <SelectValue placeholder="Sort by stat" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-white/20">
                   <SelectItem value="points" className="text-white hover:bg-slate-700">Points</SelectItem>
