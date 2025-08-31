@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import Link from "next/link"
-import { Loader2, AlertCircle, CheckCircle2, Info, Settings } from "lucide-react"
+import { Loader2, AlertCircle, CheckCircle2, Info, Settings, UserPlus, Shield, Users, Gamepad2, MessageSquare } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import DiscordConnectButton from "@/components/auth/discord-connect-button"
 
@@ -30,6 +30,41 @@ const formSchema = z.object({
 })
 
 type FormValues = z.infer<typeof formSchema>
+
+function RegisterStats() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 animate-fade-in">
+      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+        <div className="text-3xl font-bold text-green-200 mb-2">Join</div>
+        <div className="text-green-300 flex items-center justify-center gap-2">
+          <UserPlus className="h-5 w-5" />
+          Community
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
+        <div className="text-3xl font-bold text-blue-200 mb-2">Connect</div>
+        <div className="text-blue-300 flex items-center justify-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          Discord
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
+        <div className="text-3xl font-bold text-purple-200 mb-2">Play</div>
+        <div className="text-purple-300 flex items-center justify-center gap-2">
+          <Gamepad2 className="h-5 w-5" />
+          & Compete
+        </div>
+      </div>
+      <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "400ms" }}>
+        <div className="text-3xl font-bold text-yellow-200 mb-2">Win</div>
+        <div className="text-yellow-300 flex items-center justify-center gap-2">
+          <Shield className="h-5 w-5" />
+          Championships
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -251,156 +286,208 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Create an Account</CardTitle>
-            <CardDescription>Join the SCS community today</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              {registrationError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>
-                    {registrationError}
-                    {discordConfigError && (
-                      <div className="mt-2 text-sm">
-                        <p>
-                          This appears to be a configuration issue. The Discord OAuth integration needs to be set up by
-                          an administrator.
-                        </p>
-                      </div>
-                    )}
-                    {registrationDetails && (
-                      <details className="mt-2 text-xs">
-                        <summary>Technical Details</summary>
-                        <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(registrationDetails, null, 2)}</pre>
-                      </details>
-                    )}
-                  </AlertDescription>
-                </Alert>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Important</AlertTitle>
-                <AlertDescription>
-                  You must connect your Discord account to register. This is required for league communications.
-                </AlertDescription>
-              </Alert>
+      <div className="relative container mx-auto px-4 py-8">
+        <div className="relative z-10">
+          {/* Header Section */}
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-green-200 to-emerald-200 bg-clip-text text-transparent">
+              Join SCS
+            </h1>
+            <p className="text-xl text-green-200 mb-8">
+              Create your account and become part of the Secret Chel Society
+            </p>
+          </div>
 
-              {/* Discord Connection Section */}
-              <div className="space-y-2 border rounded-md p-4 bg-slate-50 dark:bg-slate-900">
-                <h3 className="font-medium text-sm">Step 1: Connect Discord</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Discord connection is required for SCS communication
-                </p>
-                {discordConnected ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 text-green-600 dark:text-green-400">
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span>Discord Connected: {discordUsername || "User"}</span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={resetDiscordConnection}
-                      className="w-full bg-transparent"
-                    >
-                      Disconnect & Try Again
-                    </Button>
-                  </div>
-                ) : discordConfigError ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2 text-orange-600 dark:text-orange-400">
-                      <Settings className="h-5 w-5" />
-                      <span>Discord OAuth Not Configured</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      The Discord integration needs to be configured by an administrator before registration can
-                      proceed.
+          {/* Register Statistics */}
+          <RegisterStats />
+
+          {/* Main Registration Form */}
+          <div className="flex justify-center animate-slide-up" style={{ animationDelay: "500ms" }}>
+            <Card className="w-full max-w-md bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                  <UserPlus className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-white">Create an Account</CardTitle>
+                <CardDescription className="text-green-200">Join the SCS community today</CardDescription>
+              </CardHeader>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <CardContent className="space-y-4">
+                  {registrationError && (
+                    <Alert variant="destructive" className="bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-400/30">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle className="text-red-200">Error</AlertTitle>
+                      <AlertDescription className="text-red-300">
+                        {registrationError}
+                        {discordConfigError && (
+                          <div className="mt-2 text-sm">
+                            <p>
+                              This appears to be a configuration issue. The Discord OAuth integration needs to be set up by
+                              an administrator.
+                            </p>
+                          </div>
+                        )}
+                        {registrationDetails && (
+                          <details className="mt-2 text-xs">
+                            <summary>Technical Details</summary>
+                            <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(registrationDetails, null, 2)}</pre>
+                          </details>
+                        )}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Alert className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30">
+                    <Info className="h-4 w-4 text-blue-400" />
+                    <AlertTitle className="text-blue-200">Important</AlertTitle>
+                    <AlertDescription className="text-blue-300">
+                      You must connect your Discord account to register. This is required for league communications.
+                    </AlertDescription>
+                  </Alert>
+
+                  {/* Discord Connection Section */}
+                  <div className="space-y-2 border border-white/20 rounded-md p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm">
+                    <h3 className="font-medium text-sm text-white">Step 1: Connect Discord</h3>
+                    <p className="text-sm text-green-300 mb-2">
+                      Discord connection is required for SCS communication
                     </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={resetDiscordConnection}
-                      className="w-full bg-transparent"
-                    >
-                      Try Again
-                    </Button>
+                    {discordConnected ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-green-400">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span className="text-white">Discord Connected: {discordUsername || "User"}</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetDiscordConnection}
+                          className="w-full bg-transparent border-white/20 text-white hover:bg-white/10"
+                        >
+                          Disconnect & Try Again
+                        </Button>
+                      </div>
+                    ) : discordConfigError ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-orange-400">
+                          <Settings className="h-5 w-5" />
+                          <span className="text-white">Discord OAuth Not Configured</span>
+                        </div>
+                        <p className="text-xs text-green-300">
+                          The Discord integration needs to be configured by an administrator before registration can
+                          proceed.
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetDiscordConnection}
+                          className="w-full bg-transparent border-white/20 text-white hover:bg-white/10"
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : (
+                      <DiscordConnectButton
+                        userId="registration"
+                        source="register"
+                        className="w-full"
+                        onSuccess={handleDiscordConnect}
+                      />
+                    )}
                   </div>
-                ) : (
-                  <DiscordConnectButton
-                    userId="registration"
-                    source="register"
-                    className="w-full"
-                    onSuccess={handleDiscordConnect}
-                  />
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <h3 className="font-medium text-sm">Step 2: Account Information</h3>
-              </div>
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-sm text-white">Step 2: Account Information</h3>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="your.email@example.com" {...register("email")} />
-                {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-white">Email</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="your.email@example.com" 
+                      {...register("email")}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-green-400"
+                    />
+                    {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" {...register("password")} />
-                {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-white">Password</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      {...register("password")}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-green-400"
+                    />
+                    {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="gamerTag">Gamer Tag</Label>
-                <p className="text-sm text-muted-foreground mb-1">Your Xbox or PSN name (2-50 characters)</p>
-                <Input id="gamerTag" placeholder="Your in-game name" {...register("gamerTag")} />
-                {errors.gamerTag && <p className="text-sm text-red-500">{errors.gamerTag.message}</p>}
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gamerTag" className="text-white">Gamer Tag</Label>
+                    <p className="text-sm text-green-300 mb-1">Your Xbox or PSN name (2-50 characters)</p>
+                    <Input 
+                      id="gamerTag" 
+                      placeholder="Your in-game name" 
+                      {...register("gamerTag")}
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-green-400"
+                    />
+                    {errors.gamerTag && <p className="text-sm text-red-400">{errors.gamerTag.message}</p>}
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="console">Console</Label>
-                <select
-                  id="console"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  {...register("console")}
-                >
-                  <option value="">Select console</option>
-                  <option value="PS5">PlayStation 5</option>
-                  <option value="Xbox">Xbox Series X</option>
-                </select>
-                {errors.console && <p className="text-sm text-red-500">{errors.console.message}</p>}
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full" disabled={isLoading || !discordConnected || discordConfigError}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-              <p className="text-sm text-center text-muted-foreground">
-                Already have an account?{" "}
-                <Link href="/login" className="text-primary hover:underline">
-                  Log in
-                </Link>
-              </p>
-            </CardFooter>
-          </form>
-        </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="console" className="text-white">Console</Label>
+                    <select
+                      id="console"
+                      className="flex h-10 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-white ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      {...register("console")}
+                    >
+                      <option value="">Select console</option>
+                      <option value="PS5">PlayStation 5</option>
+                      <option value="Xbox">Xbox Series X</option>
+                    </select>
+                    {errors.console && <p className="text-sm text-red-400">{errors.console.message}</p>}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-4">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white" 
+                    disabled={isLoading || !discordConnected || discordConfigError}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Create Account
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-sm text-center text-green-200">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-green-300 hover:text-green-200 hover:underline font-medium">
+                      Log in
+                    </Link>
+                  </p>
+                </CardFooter>
+              </form>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )
