@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit } from "lucide-react"
+import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit, Calendar, Users, Filter, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -21,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function RegistrationsPage() {
   const { supabase } = useSupabase()
@@ -239,13 +240,13 @@ export default function RegistrationsPage() {
   function getStatusBadge(status: string) {
     switch (status) {
       case "Approved":
-        return <Badge className="bg-green-500">Approved</Badge>
+        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Approved</Badge>
       case "Rejected":
-        return <Badge className="bg-red-500">Rejected</Badge>
+        return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Rejected</Badge>
       case "Pending":
-        return <Badge className="bg-yellow-500">Pending</Badge>
+        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending</Badge>
       default:
-        return <Badge>{status}</Badge>
+        return <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">{status}</Badge>
     }
   }
 
@@ -431,488 +432,578 @@ export default function RegistrationsPage() {
     }
   }
 
-  return (
-    <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Season Registrations</CardTitle>
-          <CardDescription>
-            {activeSeason ? `Managing registrations for ${activeSeason.name}` : "Loading active season..."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+  const pendingCount = registrations.filter(r => r.status === "Pending").length
+  const approvedCount = registrations.filter(r => r.status === "Approved").length
+  const rejectedCount = registrations.filter(r => r.status === "Rejected").length
 
-          <div className="flex flex-col md:flex-row gap-4 mb-6 items-end">
-            <div className="w-full md:w-1/3">
-              <Label htmlFor="active-season" className="mb-2 block">
-                Active Season
-              </Label>
-              <div id="active-season" className="p-2 border rounded-md bg-muted">
-                {activeSeason ? activeSeason.name : "Loading..."}
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <span className="text-white">Loading...</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Users className="h-8 w-8 text-blue-400" />
+            Season Registrations
+          </h1>
+          <p className="text-white/70 text-lg">
+            {activeSeason ? `Managing registrations for ${activeSeason.name}` : "Loading active season..."}
+          </p>
+        </div>
+
+        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-400" />
+              Registration Management
+            </CardTitle>
+            <CardDescription className="text-white/70">
+              Review and manage player registrations for the current season
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <Alert variant="destructive" className="bg-red-500/10 border-red-500/20 mb-6">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <AlertTitle className="text-red-400">Error</AlertTitle>
+                <AlertDescription className="text-red-300/80">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Statistics Dashboard */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <Users className="h-5 w-5 text-blue-400" />
+                <div>
+                  <div className="text-white font-medium">Total</div>
+                  <div className="text-white/70 text-sm">{registrations.length}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <AlertCircle className="h-5 w-5 text-yellow-400" />
+                <div>
+                  <div className="text-white font-medium">Pending</div>
+                  <div className="text-white/70 text-sm">{pendingCount}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <AlertCircle className="h-5 w-5 text-green-400" />
+                <div>
+                  <div className="text-white font-medium">Approved</div>
+                  <div className="text-white/70 text-sm">{approvedCount}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg border border-white/20">
+                <AlertCircle className="h-5 w-5 text-red-400" />
+                <div>
+                  <div className="text-white font-medium">Rejected</div>
+                  <div className="text-white/70 text-sm">{rejectedCount}</div>
+                </div>
               </div>
             </div>
 
-            <div className="w-full md:w-1/3">
-              <Label htmlFor="search" className="mb-2 block">
-                Search
-              </Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            {/* Filters and Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="space-y-2">
+                <Label className="text-white">Active Season</Label>
+                <div className="p-3 border border-white/20 rounded-md bg-slate-800/30">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                      Active
+                    </Badge>
+                    <span className="text-white">{activeSeason ? activeSeason.name : "Loading..."}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white">Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+                  <Input
+                    placeholder="Search by name or email"
+                    className="pl-10 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-white hover:bg-slate-700/50"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-white">Filter by Status</Label>
+                <Select value={statusFilter || "all"} onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}>
+                  <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-white/20">
+                    <SelectItem value="all" className="text-white hover:bg-slate-700">All Statuses</SelectItem>
+                    <SelectItem value="Pending" className="text-white hover:bg-slate-700">Pending</SelectItem>
+                    <SelectItem value="Approved" className="text-white hover:bg-slate-700">Approved</SelectItem>
+                    <SelectItem value="Rejected" className="text-white hover:bg-slate-700">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-end gap-2">
+                <Button
+                  variant="outline"
+                  className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
+                  onClick={() => fetchRegistrations()}
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={exportToCSV} 
+                  disabled={filteredRegistrations.length === 0}
+                  className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Export CSV
+                </Button>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-white/70">
+                Showing {filteredRegistrations.length} of {registrations.length} registrations
+              </p>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
+              </div>
+            ) : filteredRegistrations.length === 0 ? (
+              <div className="text-center py-12 text-white/70">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                {registrations.length === 0
+                  ? "No registrations found for this season."
+                  : "No registrations match your search criteria."}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/20">
+                      <TableHead className="text-white">Player</TableHead>
+                      <TableHead className="text-white">Email</TableHead>
+                      <TableHead className="text-white">Primary Position</TableHead>
+                      <TableHead className="text-white">Secondary Position</TableHead>
+                      <TableHead className="text-white">Console</TableHead>
+                      <TableHead className="text-white">Status</TableHead>
+                      <TableHead className="text-white">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRegistrations.map((registration) => (
+                      <TableRow key={registration.id} className="border-white/20 hover:bg-slate-800/30">
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="link"
+                              className="p-0 h-auto font-medium text-left text-white hover:text-blue-400"
+                              onClick={() => viewRegistrationDetails(registration)}
+                            >
+                              {registration.gamer_tag}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-white hover:bg-slate-700/50"
+                              onClick={() => openEditName(registration)}
+                              title="Edit Player Name"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-white/80">{registration.users?.email}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white">{registration.primary_position}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-white hover:bg-slate-700/50"
+                              onClick={() => openEditPositions(registration)}
+                              title="Edit Positions"
+                            >
+                              <MapPin className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-white/80">{registration.secondary_position || "—"}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white">{registration.console}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-white hover:bg-slate-700/50"
+                              onClick={() => openEditConsole(registration)}
+                              title="Edit Console"
+                            >
+                              <Gamepad2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(registration.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            {registration.status !== "Approved" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30"
+                                onClick={() => updateStatus(registration.id, "Approved")}
+                              >
+                                Approve
+                              </Button>
+                            )}
+                            {registration.status !== "Rejected" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+                                onClick={() => updateStatus(registration.id, "Rejected")}
+                              >
+                                Reject
+                              </Button>
+                            )}
+                            {registration.status !== "Pending" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
+                                onClick={() => updateStatus(registration.id, "Pending")}
+                              >
+                                Reset
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Registration Details Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-md bg-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Registration Details</DialogTitle>
+              <DialogDescription className="text-white/70">Complete information about this registration</DialogDescription>
+            </DialogHeader>
+
+            {selectedRegistration && (
+              <div className="space-y-4">
+                <Tabs defaultValue="details">
+                  <TabsList className="grid w-full grid-cols-2 bg-slate-700/50 border border-white/20">
+                    <TabsTrigger value="details" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Details</TabsTrigger>
+                    <TabsTrigger value="actions" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Actions</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="details" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Gamer Tag</h4>
+                        <p className="text-base text-white">{selectedRegistration.gamer_tag}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Email</h4>
+                        <p className="text-base text-white">{selectedRegistration.users?.email}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Primary Position</h4>
+                        <p className="text-base text-white">{selectedRegistration.primary_position}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Secondary Position</h4>
+                        <p className="text-base text-white">{selectedRegistration.secondary_position || "—"}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Console</h4>
+                        <p className="text-base text-white">{selectedRegistration.console}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Status</h4>
+                        <p className="text-base">{getStatusBadge(selectedRegistration.status)}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Registered On</h4>
+                        <p className="text-base text-white">{new Date(selectedRegistration.created_at).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Last Updated</h4>
+                        <p className="text-base text-white">{new Date(selectedRegistration.updated_at).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-white/70">Season ID</h4>
+                        <p className="text-base text-white">
+                          {selectedRegistration.season_id ||
+                            "None (Season Number: " + selectedRegistration.season_number + ")"}
+                        </p>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="actions" className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
+                        onClick={() => {
+                          openEditName(selectedRegistration)
+                          setIsDialogOpen(false)
+                        }}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Update Player Name
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
+                        onClick={() => {
+                          openEditPositions(selectedRegistration)
+                          setIsDialogOpen(false)
+                        }}
+                      >
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Update Positions
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
+                        onClick={() => {
+                          openEditConsole(selectedRegistration)
+                          setIsDialogOpen(false)
+                        }}
+                      >
+                        <Gamepad2 className="mr-2 h-4 w-4" />
+                        Update Console
+                      </Button>
+
+                      <div className="flex justify-end space-x-2 pt-4">
+                        {selectedRegistration.status !== "Approved" && (
+                          <Button
+                            variant="outline"
+                            className="bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30"
+                            onClick={() => {
+                              updateStatus(selectedRegistration.id, "Approved")
+                              setIsDialogOpen(false)
+                            }}
+                          >
+                            Approve
+                          </Button>
+                        )}
+                        {selectedRegistration.status !== "Rejected" && (
+                          <Button
+                            variant="outline"
+                            className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+                            onClick={() => {
+                              updateStatus(selectedRegistration.id, "Rejected")
+                              setIsDialogOpen(false)
+                            }}
+                          >
+                            Reject
+                          </Button>
+                        )}
+                        {selectedRegistration.status !== "Pending" && (
+                          <Button
+                            variant="outline"
+                            className="bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
+                            onClick={() => {
+                              updateStatus(selectedRegistration.id, "Pending")
+                              setIsDialogOpen(false)
+                            }}
+                          >
+                            Reset
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Player Name Dialog */}
+        <Dialog open={isEditNameOpen} onOpenChange={setIsEditNameOpen}>
+          <DialogContent className="sm:max-w-md bg-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Update Player Name</DialogTitle>
+              <DialogDescription className="text-white/70">Change the player's gamer tag</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="gamer-tag" className="text-white">Gamer Tag</Label>
                 <Input
-                  id="search"
-                  placeholder="Search by name or email"
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  id="gamer-tag"
+                  placeholder="Enter player name"
+                  value={newGamerTag}
+                  onChange={(e) => setNewGamerTag(e.target.value)}
+                  className="bg-slate-700/50 border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
             </div>
 
-            <div className="w-full md:w-1/3">
-              <Label htmlFor="status-filter" className="mb-2 block">
-                Filter by Status
-              </Label>
-              <select
-                id="status-filter"
-                className="w-full p-2 border rounded-md"
-                value={statusFilter || "all"}
-                onChange={(e) => setStatusFilter(e.target.value === "all" ? null : e.target.value)}
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditNameOpen(false)}
+                className="bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
               >
-                <option value="all">All Statuses</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-              </select>
+                Cancel
+              </Button>
+              <Button 
+                onClick={updatePlayerName} 
+                disabled={isUpdating || !newGamerTag.trim()}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Positions Dialog */}
+        <Dialog open={isEditPositionsOpen} onOpenChange={setIsEditPositionsOpen}>
+          <DialogContent className="sm:max-w-md bg-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Update Positions</DialogTitle>
+              <DialogDescription className="text-white/70">Change the player's primary and secondary positions</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="primary-position" className="text-white">Primary Position</Label>
+                <Select value={newPrimaryPosition} onValueChange={setNewPrimaryPosition}>
+                  <SelectTrigger className="bg-slate-700/50 border-white/20 text-white">
+                    <SelectValue placeholder="Select a position" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-700 border-white/20">
+                    {positionOptions.map((position) => (
+                      <SelectItem key={position} value={position} className="text-white hover:bg-slate-600">
+                        {position}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="secondary-position" className="text-white">Secondary Position (Optional)</Label>
+                <Select value={newSecondaryPosition || ""} onValueChange={setNewSecondaryPosition}>
+                  <SelectTrigger className="bg-slate-700/50 border-white/20 text-white">
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-700 border-white/20">
+                    <SelectItem value="" className="text-white hover:bg-slate-600">None</SelectItem>
+                    {positionOptions.map((position) => (
+                      <SelectItem key={position} value={position} className="text-white hover:bg-slate-600">
+                        {position}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <Button
-              variant="outline"
-              className="ml-auto mr-2"
-              onClick={() => {
-                fetchRegistrations()
-              }}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh
-            </Button>
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditPositionsOpen(false)}
+                className="bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={updatePositions} 
+                disabled={isUpdating || !newPrimaryPosition}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-            <Button variant="outline" onClick={exportToCSV} disabled={filteredRegistrations.length === 0}>
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
-            </Button>
-          </div>
+        {/* Edit Console Dialog */}
+        <Dialog open={isEditConsoleOpen} onOpenChange={setIsEditConsoleOpen}>
+          <DialogContent className="sm:max-w-md bg-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Update Console</DialogTitle>
+              <DialogDescription className="text-white/70">Change the player's gaming console</DialogDescription>
+            </DialogHeader>
 
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredRegistrations.length} of {registrations.length} registrations
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : filteredRegistrations.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {registrations.length === 0
-                ? "No registrations found for this season."
-                : "No registrations match your search criteria."}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Player</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Primary Position</TableHead>
-                    <TableHead>Secondary Position</TableHead>
-                    <TableHead>Console</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRegistrations.map((registration) => (
-                    <TableRow key={registration.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="link"
-                            className="p-0 h-auto font-medium text-left"
-                            onClick={() => viewRegistrationDetails(registration)}
-                          >
-                            {registration.gamer_tag}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => openEditName(registration)}
-                            title="Edit Player Name"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>{registration.users?.email}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {registration.primary_position}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => openEditPositions(registration)}
-                            title="Edit Positions"
-                          >
-                            <MapPin className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>{registration.secondary_position || "—"}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {registration.console}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => openEditConsole(registration)}
-                            title="Edit Console"
-                          >
-                            <Gamepad2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(registration.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          {registration.status !== "Approved" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="bg-green-500 hover:bg-green-600 text-white"
-                              onClick={() => updateStatus(registration.id, "Approved")}
-                            >
-                              Approve
-                            </Button>
-                          )}
-                          {registration.status !== "Rejected" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="bg-red-500 hover:bg-red-600 text-white"
-                              onClick={() => updateStatus(registration.id, "Rejected")}
-                            >
-                              Reject
-                            </Button>
-                          )}
-                          {registration.status !== "Pending" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateStatus(registration.id, "Pending")}
-                            >
-                              Reset
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label className="text-white">Select Console</Label>
+                <RadioGroup value={newConsole} onValueChange={setNewConsole} className="flex flex-col space-y-3 mt-2">
+                  {consoleOptions.map((console) => (
+                    <div key={console} className="flex items-center space-x-2">
+                      <RadioGroupItem value={console} id={console.replace(/\s+/g, "-").toLowerCase()} />
+                      <Label htmlFor={console.replace(/\s+/g, "-").toLowerCase()} className="cursor-pointer text-white">
+                        {console}
+                      </Label>
+                    </div>
                   ))}
-                </TableBody>
-              </Table>
+                </RadioGroup>
+              </div>
             </div>
-          )}
-          {process.env.NODE_ENV === "development" && (
-            <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono overflow-auto max-h-60">
-              <p className="font-bold mb-2">Debug Information:</p>
-              <p>Active Season: {JSON.stringify(activeSeason)}</p>
-              <p>Total Registrations: {registrations.length}</p>
-              <p>Filtered Registrations: {filteredRegistrations.length}</p>
-              <details>
-                <summary>All Registrations Data</summary>
-                <pre>{JSON.stringify(registrations, null, 2)}</pre>
-              </details>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Registration Details Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Registration Details</DialogTitle>
-            <DialogDescription>Complete information about this registration</DialogDescription>
-          </DialogHeader>
-
-          {selectedRegistration && (
-            <div className="space-y-4">
-              <Tabs defaultValue="details">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="actions">Actions</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="details" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Gamer Tag</h4>
-                      <p className="text-base">{selectedRegistration.gamer_tag}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Email</h4>
-                      <p className="text-base">{selectedRegistration.users?.email}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Primary Position</h4>
-                      <p className="text-base">{selectedRegistration.primary_position}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Secondary Position</h4>
-                      <p className="text-base">{selectedRegistration.secondary_position || "—"}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Console</h4>
-                      <p className="text-base">{selectedRegistration.console}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
-                      <p className="text-base">{getStatusBadge(selectedRegistration.status)}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Registered On</h4>
-                      <p className="text-base">{new Date(selectedRegistration.created_at).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Last Updated</h4>
-                      <p className="text-base">{new Date(selectedRegistration.updated_at).toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Season ID</h4>
-                      <p className="text-base">
-                        {selectedRegistration.season_id ||
-                          "None (Season Number: " + selectedRegistration.season_number + ")"}
-                      </p>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="actions" className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        openEditName(selectedRegistration)
-                        setIsDialogOpen(false)
-                      }}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Update Player Name
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        openEditPositions(selectedRegistration)
-                        setIsDialogOpen(false)
-                      }}
-                    >
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Update Positions
-                    </Button>
-
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        openEditConsole(selectedRegistration)
-                        setIsDialogOpen(false)
-                      }}
-                    >
-                      <Gamepad2 className="mr-2 h-4 w-4" />
-                      Update Console
-                    </Button>
-
-                    <div className="flex justify-end space-x-2 pt-4">
-                      {selectedRegistration.status !== "Approved" && (
-                        <Button
-                          variant="outline"
-                          className="bg-green-500 hover:bg-green-600 text-white"
-                          onClick={() => {
-                            updateStatus(selectedRegistration.id, "Approved")
-                            setIsDialogOpen(false)
-                          }}
-                        >
-                          Approve
-                        </Button>
-                      )}
-                      {selectedRegistration.status !== "Rejected" && (
-                        <Button
-                          variant="outline"
-                          className="bg-red-500 hover:bg-red-600 text-white"
-                          onClick={() => {
-                            updateStatus(selectedRegistration.id, "Rejected")
-                            setIsDialogOpen(false)
-                          }}
-                        >
-                          Reject
-                        </Button>
-                      )}
-                      {selectedRegistration.status !== "Pending" && (
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            updateStatus(selectedRegistration.id, "Pending")
-                            setIsDialogOpen(false)
-                          }}
-                        >
-                          Reset
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Player Name Dialog */}
-      <Dialog open={isEditNameOpen} onOpenChange={setIsEditNameOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Update Player Name</DialogTitle>
-            <DialogDescription>Change the player's gamer tag</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="gamer-tag">Gamer Tag</Label>
-              <Input
-                id="gamer-tag"
-                placeholder="Enter player name"
-                value={newGamerTag}
-                onChange={(e) => setNewGamerTag(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditNameOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={updatePlayerName} disabled={isUpdating || !newGamerTag.trim()}>
-              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Positions Dialog */}
-      <Dialog open={isEditPositionsOpen} onOpenChange={setIsEditPositionsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Update Positions</DialogTitle>
-            <DialogDescription>Change the player's primary and secondary positions</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="primary-position">Primary Position</Label>
-              <select
-                id="primary-position"
-                className="w-full p-2 border rounded-md"
-                value={newPrimaryPosition}
-                onChange={(e) => setNewPrimaryPosition(e.target.value)}
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditConsoleOpen(false)}
+                className="bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
               >
-                <option value="">Select a position</option>
-                {positionOptions.map((position) => (
-                  <option key={position} value={position}>
-                    {position}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="secondary-position">Secondary Position (Optional)</Label>
-              <select
-                id="secondary-position"
-                className="w-full p-2 border rounded-md"
-                value={newSecondaryPosition || ""}
-                onChange={(e) => setNewSecondaryPosition(e.target.value)}
+                Cancel
+              </Button>
+              <Button 
+                onClick={updateConsole} 
+                disabled={isUpdating || !newConsole}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
               >
-                <option value="">None</option>
-                {positionOptions.map((position) => (
-                  <option key={position} value={position}>
-                    {position}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditPositionsOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={updatePositions} disabled={isUpdating || !newPrimaryPosition}>
-              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Console Dialog */}
-      <Dialog open={isEditConsoleOpen} onOpenChange={setIsEditConsoleOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Update Console</DialogTitle>
-            <DialogDescription>Change the player's gaming console</DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label>Select Console</Label>
-              <RadioGroup value={newConsole} onValueChange={setNewConsole} className="flex flex-col space-y-3 mt-2">
-                {consoleOptions.map((console) => (
-                  <div key={console} className="flex items-center space-x-2">
-                    <RadioGroupItem value={console} id={console.replace(/\s+/g, "-").toLowerCase()} />
-                    <Label htmlFor={console.replace(/\s+/g, "-").toLowerCase()} className="cursor-pointer">
-                      {console}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditConsoleOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={updateConsole} disabled={isUpdating || !newConsole}>
-              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   )
 }

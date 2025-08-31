@@ -1,25 +1,21 @@
-import { EmailTester } from "@/components/admin/email-tester"
-import { SmtpConfigTester } from "@/components/admin/smtp-config-tester"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PageHeader } from "@/components/ui/page-header"
+import { EmailDiagnostics } from "@/components/admin/email-diagnostics"
+import { Database, Mail } from "lucide-react"
 
 export default function EmailDiagnosticsPage() {
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <PageHeader heading="Email Diagnostics" subheading="Test and troubleshoot email system configuration" />
-
-      <Tabs defaultValue="tester" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="tester">Email Tester</TabsTrigger>
-          <TabsTrigger value="configs">SMTP Configurations</TabsTrigger>
-        </TabsList>
-        <TabsContent value="tester" className="mt-4">
-          <EmailTester />
-        </TabsContent>
-        <TabsContent value="configs" className="mt-4">
-          <SmtpConfigTester />
-        </TabsContent>
-      </Tabs>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Database className="h-8 w-8 text-blue-400" />
+            Email Diagnostics
+          </h1>
+          <p className="text-white/70 text-lg">
+            Diagnose and troubleshoot email system issues
+          </p>
+        </div>
+        <EmailDiagnostics />
+      </div>
     </div>
   )
 }

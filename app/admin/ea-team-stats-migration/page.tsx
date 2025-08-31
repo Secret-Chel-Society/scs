@@ -1,14 +1,21 @@
 import { EaTeamStatsMigration } from "@/components/admin/ea-team-stats-migration"
-import { PageHeader } from "@/components/ui/page-header"
+import { Database, Gamepad2 } from "lucide-react"
 
 export default function EaTeamStatsMigrationPage() {
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <PageHeader
-        heading="EA Team Stats Migration"
-        subheading="Create a table to store team-level statistics from EA Sports NHL matches"
-      />
-      <EaTeamStatsMigration />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Database className="h-8 w-8 text-purple-400" />
+            EA Team Stats Migration
+          </h1>
+          <p className="text-white/70 text-lg">
+            Migrate EA team statistics data and structure
+          </p>
+        </div>
+        <EaTeamStatsMigration />
+      </div>
     </div>
   )
 }

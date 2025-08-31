@@ -1,22 +1,19 @@
-import type { Metadata } from "next"
-import DiscordBotConfigMigration from "@/components/admin/discord-bot-config-migration"
-
-export const metadata: Metadata = {
-  title: "Discord Bot Config Migration - SCS Admin",
-  description: "Run Discord bot configuration table migration",
-}
+import { DiscordBotConfigMigration } from "@/components/admin/discord-bot-config-migration"
+import { Database, Bot } from "lucide-react"
 
 export default function DiscordBotConfigMigrationPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Discord Bot Config Migration</h1>
-          <p className="text-muted-foreground mt-2">
-            Set up the Discord bot configuration table with proper constraints and default settings.
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Database className="h-8 w-8 text-indigo-400" />
+            Discord Bot Config Migration
+          </h1>
+          <p className="text-white/70 text-lg">
+            Migrate Discord bot configuration data and structure
           </p>
         </div>
-
         <DiscordBotConfigMigration />
       </div>
     </div>

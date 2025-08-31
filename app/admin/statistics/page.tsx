@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { AlertCircle, FileUp, Plus, Edit, RefreshCw } from "lucide-react"
+import { AlertCircle, FileUp, Plus, Edit, RefreshCw, BarChart3, Users, Trophy } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Dialog,
@@ -1071,9 +1071,11 @@ export default function AdminStatisticsPage() {
 
   if (loading && !isAdmin) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/3 mb-6" />
-        <Skeleton className="h-[500px] w-full rounded-lg" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <span className="text-white">Loading...</span>
+        </div>
       </div>
     )
   }
@@ -1083,137 +1085,161 @@ export default function AdminStatisticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Statistics Management</h1>
-          <p className="text-muted-foreground">Manage player and goalie statistics for the league</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <BarChart3 className="h-8 w-8 text-blue-400" />
+            Statistics Management
+          </h1>
+          <p className="text-white/70 text-lg">
+            Manage player and goalie statistics for the league
+          </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Select
-            value={selectedSeason?.toString() || ""}
-            onValueChange={(value) => setSelectedSeason(Number.parseInt(value))}
-            disabled={loadingSeasons}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={loadingSeasons ? "Loading..." : "Select Season"} />
-            </SelectTrigger>
-            <SelectContent>
-              {seasons.map((season) => (
-                <SelectItem key={season.id} value={season.id.toString()}>
-                  {season.name} {season.is_active ? "(Active)" : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-2">Season: {getSeasonName(selectedSeason)}</h2>
+            <p className="text-white/70">Current season statistics and management</p>
+          </div>
 
-          <SyncStatsButton seasonId={selectedSeason || 0} onSuccess={fetchStats} />
-          <SyncEaStatsButton />
-        </div>
-      </div>
+                  <div className="flex flex-col sm:flex-row gap-4">
+            <Select
+              value={selectedSeason?.toString() || ""}
+              onValueChange={(value) => setSelectedSeason(Number.parseInt(value))}
+              disabled={loadingSeasons}
+            >
+              <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
+                <SelectValue placeholder={loadingSeasons ? "Loading..." : "Select Season"} />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-white/20">
+                {seasons.map((season) => (
+                  <SelectItem key={season.id} value={season.id.toString()} className="text-white hover:bg-slate-700">
+                    {season.name} {season.is_active ? "(Active)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Input
-            placeholder="Search players or teams..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-sm"
-          />
-
-          <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by position" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Positions</SelectItem>
-              <SelectItem value="offense">Offense (C, LW, RW)</SelectItem>
-              <SelectItem value="defense">Defense (LD, RD)</SelectItem>
-              <SelectItem value="goalie">Goalie (G)</SelectItem>
-              <SelectItem value="C">Center (C)</SelectItem>
-              <SelectItem value="LW">Left Wing (LW)</SelectItem>
-              <SelectItem value="RW">Right Wing (RW)</SelectItem>
-              <SelectItem value="LD">Left Defense (LD)</SelectItem>
-              <SelectItem value="RD">Right Defense (RD)</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select defaultValue={statFilter} onValueChange={setStatFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by stat" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="points">Points</SelectItem>
-              <SelectItem value="goals">Goals</SelectItem>
-              <SelectItem value="assists">Assists</SelectItem>
-              <SelectItem value="plusminus">Plus/Minus</SelectItem>
-            </SelectContent>
-          </Select>
+            <SyncStatsButton seasonId={selectedSeason || 0} onSuccess={fetchStats} />
+            <SyncEaStatsButton />
+          </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button onClick={() => setIsAddStatDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Stats
-          </Button>
-          <Button onClick={() => setIsImportDialogOpen(true)}>
-            <FileUp className="mr-2 h-4 w-4" /> Import Stats
-          </Button>
-          <Button variant="outline" onClick={() => fetchStats()}>
-            <RefreshCw className="mr-2 h-4 w-4" /> Refresh
-          </Button>
-        </div>
-      </div>
+      <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20 mb-8">
+        <CardContent className="p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Input
+                placeholder="Search players or teams..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="max-w-sm bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+              />
+
+              <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
+                <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
+                  <SelectValue placeholder="Filter by position" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-white/20">
+                  <SelectItem value="all" className="text-white hover:bg-slate-700">All Positions</SelectItem>
+                  <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
+                  <SelectItem value="defense" className="text-white hover:bg-slate-700">Defense (LD, RD)</SelectItem>
+                  <SelectItem value="goalie" className="text-white hover:bg-slate-700">Goalie (G)</SelectItem>
+                  <SelectItem value="C" className="text-white hover:bg-slate-700">Center (C)</SelectItem>
+                  <SelectItem value="LW" className="text-white hover:bg-slate-700">Left Wing (LW)</SelectItem>
+                  <SelectItem value="RW" className="text-white hover:bg-slate-700">Right Wing (RW)</SelectItem>
+                  <SelectItem value="LD" className="text-white hover:bg-slate-700">Left Defense (LD)</SelectItem>
+                  <SelectItem value="RD" className="text-white hover:bg-slate-700">Right Defense (RD)</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select defaultValue={statFilter} onValueChange={setStatFilter}>
+                <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
+                  <SelectValue placeholder="Sort by stat" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-white/20">
+                  <SelectItem value="points" className="text-white hover:bg-slate-700">Points</SelectItem>
+                  <SelectItem value="goals" className="text-white hover:bg-slate-700">Goals</SelectItem>
+                  <SelectItem value="assists" className="text-white hover:bg-slate-700">Assists</SelectItem>
+                  <SelectItem value="plusminus" className="text-white hover:bg-slate-700">Plus/Minus</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={() => setIsAddStatDialogOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white">
+                <Plus className="mr-2 h-4 w-4" /> Add Stats
+              </Button>
+              <Button onClick={() => setIsImportDialogOpen(true)} className="bg-green-500 hover:bg-green-600 text-white">
+                <FileUp className="mr-2 h-4 w-4" /> Import Stats
+              </Button>
+              <Button variant="outline" onClick={() => fetchStats()} className="border-white/20 text-white hover:bg-white/10">
+                <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="players" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="players">Player Stats</TabsTrigger>
-          <TabsTrigger value="goalies">Goalie Stats</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-800/50 border border-white/20">
+          <TabsTrigger value="players" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Player Stats
+          </TabsTrigger>
+          <TabsTrigger value="goalies" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400 flex items-center gap-2">
+            <Trophy className="h-4 w-4" />
+            Goalie Stats
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="players">
-          <Card>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
             <CardHeader>
-              <CardTitle>Player Statistics</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-400" />
+                Player Statistics
+              </CardTitle>
+              <CardDescription className="text-white/70">
                 {getSeasonName(selectedSeason)} - Sorted by {statFilter === "points" ? "total points" : statFilter}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <Skeleton className="w-full h-[500px]" />
+                <Skeleton className="w-full h-[500px] bg-slate-700" />
               ) : (
-                <div className="rounded-md border overflow-x-auto">
+                <div className="rounded-md border border-white/20 overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">Rank</TableHead>
-                        <TableHead>Player</TableHead>
-                        <TableHead>Team</TableHead>
-                        <TableHead className="text-center">Pos</TableHead>
-                        <TableHead className="text-center">GP</TableHead>
-                        <TableHead className="text-center">G</TableHead>
-                        <TableHead className="text-center">A</TableHead>
-                        <TableHead className="text-center">PTS</TableHead>
-                        <TableHead className="text-center">+/-</TableHead>
-                        <TableHead className="text-center">Actions</TableHead>
+                      <TableRow className="border-white/20">
+                        <TableHead className="w-12 text-white">Rank</TableHead>
+                        <TableHead className="text-white">Player</TableHead>
+                        <TableHead className="text-white">Team</TableHead>
+                        <TableHead className="text-center text-white">Pos</TableHead>
+                        <TableHead className="text-center text-white">GP</TableHead>
+                        <TableHead className="text-center text-white">G</TableHead>
+                        <TableHead className="text-center text-white">A</TableHead>
+                        <TableHead className="text-center text-white">PTS</TableHead>
+                        <TableHead className="text-center text-white">+/-</TableHead>
+                        <TableHead className="text-center text-white">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredPlayerStats.map((player, index) => (
-                        <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
-                          <TableCell className="font-medium">{index + 1}</TableCell>
-                          <TableCell>{player.player_name}</TableCell>
-                          <TableCell>{player.team_name || "Free Agent"}</TableCell>
-                          <TableCell className="text-center">{player.position}</TableCell>
-                          <TableCell className="text-center">{player.games_played}</TableCell>
-                          <TableCell className="text-center font-medium">{player.goals}</TableCell>
-                          <TableCell className="text-center font-medium">{player.assists}</TableCell>
-                          <TableCell className="text-center font-bold">{player.points}</TableCell>
+                        <TableRow key={player.id} className="hover:bg-white/5 transition-colors border-white/20">
+                          <TableCell className="font-medium text-white">{index + 1}</TableCell>
+                          <TableCell className="text-white">{player.player_name}</TableCell>
+                          <TableCell className="text-white">{player.team_name || "Free Agent"}</TableCell>
+                          <TableCell className="text-center text-white">{player.position}</TableCell>
+                          <TableCell className="text-center text-white">{player.games_played}</TableCell>
+                          <TableCell className="text-center font-medium text-white">{player.goals}</TableCell>
+                          <TableCell className="text-center font-medium text-white">{player.assists}</TableCell>
+                          <TableCell className="text-center font-bold text-white">{player.points}</TableCell>
                           <TableCell className="text-center">
                             <span
                               className={
-                                player.plus_minus > 0 ? "text-green-500" : player.plus_minus < 0 ? "text-red-500" : ""
+                                player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-white"
                               }
                             >
                               {player.plus_minus > 0 ? `+${player.plus_minus}` : player.plus_minus}
@@ -1226,6 +1252,7 @@ export default function AdminStatisticsPage() {
                                 size="icon"
                                 onClick={() => handleEditPlayer(player)}
                                 title="Edit stats"
+                                className="text-white hover:bg-white/10"
                               >
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -1235,7 +1262,7 @@ export default function AdminStatisticsPage() {
                       ))}
                       {filteredPlayerStats.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={10} className="text-center py-4">
+                          <TableCell colSpan={10} className="text-center py-4 text-white">
                             No player stats found matching your search.
                           </TableCell>
                         </TableRow>

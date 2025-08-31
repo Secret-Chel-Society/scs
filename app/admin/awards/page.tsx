@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trophy, Medal, Trash2, Plus, Pencil } from "lucide-react"
+import { Trophy, Medal, Trash2, Plus, Pencil, Award, Users } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -627,13 +627,10 @@ export default function AdminAwardsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/3 mb-6" />
-        <Skeleton className="h-8 w-1/4 mb-4" />
-        <div className="grid gap-6">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" />
-          ))}
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <span className="text-white">Loading...</span>
         </div>
       </div>
     )
@@ -644,49 +641,61 @@ export default function AdminAwardsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Manage Awards</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Award className="h-8 w-8 text-yellow-400" />
+            Manage Awards
+          </h1>
+          <p className="text-white/70 text-lg">
+            Manage team and player awards for all seasons
+          </p>
+        </div>
 
-      <Tabs defaultValue="team-awards">
-        <TabsList className="mb-4">
-          <TabsTrigger value="team-awards">Team Awards</TabsTrigger>
-          <TabsTrigger value="player-awards">Player Awards</TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="team-awards">
+          <TabsList className="mb-4 bg-slate-800/50 border border-white/20">
+            <TabsTrigger value="team-awards" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Team Awards</TabsTrigger>
+            <TabsTrigger value="player-awards" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Player Awards</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="team-awards">
-          <Card>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Team Awards</CardTitle>
-                  <CardDescription>Manage team awards like President Trophy and SCS Cup</CardDescription>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-blue-400" />
+                    Team Awards
+                  </CardTitle>
+                  <CardDescription className="text-white/70">Manage team awards like President Trophy and SCS Cup</CardDescription>
                 </div>
                 <Dialog open={isTeamDialogOpen} onOpenChange={setIsTeamDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Team Award
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="bg-slate-800 border border-white/20">
                     <DialogHeader>
-                      <DialogTitle>Add Team Award</DialogTitle>
-                      <DialogDescription>Create a new team award for a specific season</DialogDescription>
+                      <DialogTitle className="text-white">Add Team Award</DialogTitle>
+                      <DialogDescription className="text-white/70">Create a new team award for a specific season</DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="team">Team</Label>
+                        <Label htmlFor="team" className="text-white">Team</Label>
                         <Select
                           value={newTeamAward.team_id}
                           onValueChange={(value) => setNewTeamAward({ ...newTeamAward, team_id: value })}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-slate-700/50 border-white/20 text-white">
                             <SelectValue placeholder="Select team" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-slate-700 border-white/20">
                             {teams.map((team) => (
-                              <SelectItem key={team.id} value={team.id}>
+                              <SelectItem key={team.id} value={team.id} className="text-white hover:bg-slate-600">
                                 {team.name}
                               </SelectItem>
                             ))}
@@ -884,20 +893,20 @@ export default function AdminAwardsPage() {
             <CardContent>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Award</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Season</TableHead>
-                    <TableHead>Year</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                  <TableRow className="border-white/20">
+                    <TableHead className="text-white">Award</TableHead>
+                    <TableHead className="text-white">Team</TableHead>
+                    <TableHead className="text-white">Season</TableHead>
+                    <TableHead className="text-white">Year</TableHead>
+                    <TableHead className="text-white">Description</TableHead>
+                    <TableHead className="text-right text-white">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {teamAwards.length > 0 ? (
                     teamAwards.map((award) => (
-                      <TableRow key={award.id}>
-                        <TableCell className="font-medium">
+                      <TableRow key={award.id} className="border-white/20 hover:bg-slate-800/30">
+                        <TableCell className="font-medium text-white">
                           <div className="flex items-center gap-2">
                             {award.award_type === "SCS Cup" ? (
                               <Trophy className="h-5 w-5 text-yellow-500" />
@@ -907,14 +916,15 @@ export default function AdminAwardsPage() {
                             {award.award_type}
                           </div>
                         </TableCell>
-                        <TableCell>{award.team_name}</TableCell>
-                        <TableCell>{getSeasonName(award.season_number)}</TableCell>
-                        <TableCell>{award.year}</TableCell>
-                        <TableCell>{award.description || "-"}</TableCell>
+                        <TableCell className="text-white/80">{award.team_name}</TableCell>
+                        <TableCell className="text-white/80">{getSeasonName(award.season_number)}</TableCell>
+                        <TableCell className="text-white/80">{award.year}</TableCell>
+                        <TableCell className="text-white/80">{award.description || "-"}</TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="text-white hover:bg-slate-700/50"
                             onClick={() => {
                               setEditingTeamAward(award)
                               // Find the season ID that corresponds to this season number
@@ -930,7 +940,12 @@ export default function AdminAwardsPage() {
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteTeamAward(award.id)}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-white hover:bg-slate-700/50"
+                            onClick={() => handleDeleteTeamAward(award.id)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </TableCell>
@@ -938,7 +953,8 @@ export default function AdminAwardsPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                      <TableCell colSpan={6} className="text-center py-12 text-white/70">
+                        <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         No team awards found. Create one to get started.
                       </TableCell>
                     </TableRow>
@@ -950,16 +966,19 @@ export default function AdminAwardsPage() {
         </TabsContent>
 
         <TabsContent value="player-awards">
-          <Card>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Player Awards</CardTitle>
-                  <CardDescription>Manage player awards like MVP and Rookie of the Year</CardDescription>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Medal className="h-5 w-5 text-green-400" />
+                    Player Awards
+                  </CardTitle>
+                  <CardDescription className="text-white/70">Manage player awards like MVP and Rookie of the Year</CardDescription>
                 </div>
                 <Dialog open={isPlayerDialogOpen} onOpenChange={setIsPlayerDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button className="bg-green-500 hover:bg-green-600 text-white">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Player Award
                     </Button>

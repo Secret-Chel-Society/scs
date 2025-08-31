@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, CheckCircle2, AlertCircle, Info, Key } from "lucide-react"
+import { Loader2, CheckCircle2, AlertCircle, Info, Key, Mail, Shield } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -232,30 +232,43 @@ export default function AdminEmailVerificationPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Admin Email Verification Tools</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
+      <div className="container mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
+            <Mail className="h-8 w-8 text-blue-400" />
+            Admin Email Verification Tools
+          </h1>
+          <p className="text-white/70 text-lg">
+            Debug and manually verify user email addresses
+          </p>
+        </div>
 
-      <Tabs defaultValue="debug" onValueChange={handleTabChange}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="debug">Debug Email</TabsTrigger>
-          <TabsTrigger value="verify">Manual Verification</TabsTrigger>
-          <TabsTrigger value="direct">Direct Verification</TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue="debug" onValueChange={handleTabChange}>
+          <TabsList className="mb-4 bg-slate-800/50 border border-white/20">
+            <TabsTrigger value="debug" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Debug Email</TabsTrigger>
+            <TabsTrigger value="verify" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Manual Verification</TabsTrigger>
+            <TabsTrigger value="direct" className="text-white data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">Direct Verification</TabsTrigger>
+          </TabsList>
 
         <TabsContent value="debug">
-          <Card>
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
             <CardHeader>
-              <CardTitle>Email Verification Diagnostics</CardTitle>
-              <CardDescription>Check the status of a user's email verification</CardDescription>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Info className="h-5 w-5 text-blue-400" />
+                Email Verification Diagnostics
+              </CardTitle>
+              <CardDescription className="text-white/70">Check the status of a user's email verification</CardDescription>
             </CardHeader>
             <form onSubmit={handleDebugSubmit(onDebugSubmit)}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="debug-email">Email</Label>
+                  <Label htmlFor="debug-email" className="text-white">Email</Label>
                   <Input
                     id="debug-email"
                     type="email"
                     placeholder="user.email@example.com"
+                    className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                     {...registerDebug("email")}
                   />
                   {debugErrors.email && <p className="text-sm text-red-500">{debugErrors.email.message}</p>}
@@ -308,7 +321,11 @@ export default function AdminEmailVerificationPage() {
                 )}
               </CardContent>
               <CardFooter>
-                <Button type="submit" disabled={isDebugLoading}>
+                <Button 
+                  type="submit" 
+                  disabled={isDebugLoading}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
                   {isDebugLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
