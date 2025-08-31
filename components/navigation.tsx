@@ -577,7 +577,7 @@ export default function Navigation() {
             ))}
 
             {session && (
-              <li className="animate-slide-in" style={{ animationDelay: "900ms" }}>
+              <div className="animate-slide-in" style={{ animationDelay: "900ms" }}>
                 <Link
                   href="/register/season"
                   className={cn(
@@ -590,9 +590,9 @@ export default function Navigation() {
                   <UserPlus className="h-4 w-4" />
                   <span className="truncate">Season Registration</span>
                 </Link>
-              </li>
+              </div>
             )}
-          </ul>
+          </div>
         </nav>
 
         {/* User Section */}
@@ -714,45 +714,45 @@ export default function Navigation() {
           )}
         </div>
       </aside>
-    </>
 
-    <style jsx>{`
-      @keyframes slide-in {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out forwards;
         }
-      }
-      .animate-slide-in {
-        animation: slide-in 0.3s ease-out forwards;
-      }
-      @keyframes blob {
-        0% {
-          transform: translate(0px, 0px) scale(1);
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
         }
-        33% {
-          transform: translate(30px, -50px) scale(1.1);
+        .animate-blob {
+          animation: blob 7s infinite;
         }
-        66% {
-          transform: translate(-20px, 20px) scale(0.9);
+        .animation-delay-2000 {
+          animation-delay: 2s;
         }
-        100% {
-          transform: translate(0px, 0px) scale(1);
+        .animation-delay-4000 {
+          animation-delay: 4s;
         }
-      }
-      .animate-blob {
-        animation: blob 7s infinite;
-      }
-      .animation-delay-2000 {
-        animation-delay: 2s;
-      }
-      .animation-delay-4000 {
-        animation-delay: 4s;
-      }
-    `}</style>
+      `}</style>
+    </>
   )
 }
