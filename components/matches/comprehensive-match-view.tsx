@@ -6,10 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Edit } from "lucide-react"
-import { EditScoreModal } from "./edit-score-modal"
 import { TeamLogo } from "@/components/team-logo"
-import type { GoalieStats } from "../../types"
-import { fetchData } from "../../utils/api"
 
 interface ComprehensiveMatchViewProps {
   match: any
@@ -29,23 +26,15 @@ interface PlayerStat {
   blocks: number
   position?: string
   toi?: string
-  save_pct?: number
-  saves?: number
-  goals_against?: number
-  rating?: number
   takeaways?: number
   giveaways?: number
   faceoffs_won?: number
   faceoffs_taken?: number
   faceoff_pct?: number
-  passing_pct?: number
-  shot_attempts?: number
-  shot_pct?: number
   pass_attempts?: number
   pass_complete?: number
   penalties_drawn?: number
   ppg?: number
-  shg?: number
   time_with_puck?: number
   interceptions?: number
 }
@@ -59,10 +48,8 @@ interface TeamStats {
   passing_pct?: number
   faceoff_pct?: number
   pp_goals?: number
-  pp_opportunities?: number
   team_name: string
   team_id: string
-  toa?: number
   total_faceoffs_won?: number
   total_faceoffs_taken?: number
   total_pass_complete?: number
@@ -96,46 +83,34 @@ const getTeamColors = (teamName: string) => {
 
 export function ComprehensiveMatchView({ match, isAdmin = false }: ComprehensiveMatchViewProps) {
   const { supabase } = useSupabase()
-  const [openScoreModal, setOpenScoreModal] = useState(false)
   const [playerStats, setPlayerStats] = useState<PlayerStat[]>([])
   const [teamStats, setTeamStats] = useState<TeamStats[]>([])
   const [teamStandings, setTeamStandings] = useState<{ [key: string]: TeamStanding }>({})
   const [loading, setLoading] = useState(true)
   const [standingsLoading, setStandingsLoading] = useState(true)
   const [seasonInfo, setSeasonInfo] = useState<{ week: number; season: string } | null>(null)
-  const [goalieStats, setGoalieStats] = useState<GoalieStats[]>([])
-  const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home')
-  const [playerStatsPage, setPlayerStatsPage] = useState(0)
-  const playersPerPage = 8
 
   useEffect(() => {
     fetchMatchStats()
     fetchTeamStandings()
     fetchSeasonInfo()
-    fetchGoalieStats()
   }, [match.id])
 
   const fetchSeasonInfo = async () => {
     try {
-      // Get season information from the match
       if (match.season_name) {
-        // Extract season number from season name (e.g., "Season 51" -> 51)
         const seasonMatch = match.season_name.match(/Season (\d+)/)
         const seasonNumber = seasonMatch ? seasonMatch[1] : "51"
-
-        // Calculate week based on match date or use a default
-        // This is a simplified calculation - you might want to implement proper week calculation
         const matchDate = new Date(match.match_date || match.date)
-        const seasonStart = new Date(matchDate.getFullYear(), 8, 1) // Assume season starts Sept 1
+        const seasonStart = new Date(matchDate.getFullYear(), 8, 1)
         const weeksDiff = Math.floor((matchDate.getTime() - seasonStart.getTime()) / (7 * 24 * 60 * 60 * 1000))
-        const week = Math.max(1, Math.min(weeksDiff + 1, 20)) // Cap between 1-20 weeks
+        const week = Math.max(1, Math.min(weeksDiff + 1, 20))
 
         setSeasonInfo({
           week: week,
           season: `Season ${seasonNumber}`,
         })
       } else {
-        // Fallback to default
         setSeasonInfo({
           week: 8,
           season: "Season 51",
@@ -153,33 +128,21 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
   const fetchTeamStandings = async () => {
     try {
       setStandingsLoading(true)
-      console.log("Fetching standings for season:", match.season_name)
-
-      // Try to get season-specific standings, but fallback to general standings
       const url = "/api/standings"
-
       const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
-        console.log("Standings response:", data)
-
-        // Handle both array response and object with standings property
         const standings = Array.isArray(data) ? data : data.standings || []
-
         const standingsMap: { [key: string]: TeamStanding } = {}
         standings.forEach((team: TeamStanding) => {
           standingsMap[team.id] = team
         })
         setTeamStandings(standingsMap)
-        console.log("Standings map:", standingsMap)
       } else {
-        console.error("Failed to fetch standings:", response.status, response.statusText)
-        // Set empty standings to prevent loading state from hanging
         setTeamStandings({})
       }
     } catch (error) {
       console.error("Error fetching team standings:", error)
-      // Set empty standings to prevent loading state from hanging
       setTeamStandings({})
     } finally {
       setStandingsLoading(false)
@@ -189,14 +152,11 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
   const fetchMatchStats = async () => {
     try {
       setLoading(true)
-
-      // Fetch EA player stats
       const { data: statsData } = await supabase.from("ea_player_stats").select("*").eq("match_id", match.id)
 
       if (statsData && statsData.length > 0) {
         setPlayerStats(statsData)
 
-        // Calculate team stats from player stats
         const homeStats: TeamStats = {
           team_id: match.home_team_id,
           team_name: match.home_team.name,
@@ -206,8 +166,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           pim: 0,
           blocks: 0,
           pp_goals: 0,
-          pp_opportunities: 0,
-          toa: 0,
           total_faceoffs_won: 0,
           total_faceoffs_taken: 0,
           total_pass_complete: 0,
@@ -223,15 +181,13 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           pim: 0,
           blocks: 0,
           pp_goals: 0,
-          pp_opportunities: 0,
-          toa: 0,
           total_faceoffs_won: 0,
           total_faceoffs_taken: 0,
           total_pass_complete: 0,
           total_pass_attempts: 0,
         }
 
-        statsData.forEach((stat) => {
+        statsData.forEach((stat: any) => {
           const teamStat = stat.team_id === match.home_team_id ? homeStats : awayStats
           teamStat.goals += stat.goals || 0
           teamStat.shots += stat.shots || 0
@@ -246,15 +202,10 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
         })
 
         // Calculate percentages
-        homeStats.faceoff_pct =
-          homeStats.total_faceoffs_taken > 0 ? (homeStats.total_faceoffs_won / homeStats.total_faceoffs_taken) * 100 : 0
-        awayStats.faceoff_pct =
-          awayStats.total_faceoffs_taken > 0 ? (awayStats.total_faceoffs_won / awayStats.total_faceoffs_taken) * 100 : 0
-
-        homeStats.passing_pct =
-          homeStats.total_pass_attempts > 0 ? (homeStats.total_pass_complete / homeStats.total_pass_attempts) * 100 : 0
-        awayStats.passing_pct =
-          awayStats.total_pass_attempts > 0 ? (awayStats.total_pass_complete / awayStats.total_pass_attempts) * 100 : 0
+        homeStats.faceoff_pct = (homeStats.total_faceoffs_taken || 0) > 0 ? ((homeStats.total_faceoffs_won || 0) / (homeStats.total_faceoffs_taken || 0)) * 100 : 0
+        awayStats.faceoff_pct = (awayStats.total_faceoffs_taken || 0) > 0 ? ((awayStats.total_faceoffs_won || 0) / (awayStats.total_faceoffs_taken || 0)) * 100 : 0
+        homeStats.passing_pct = (homeStats.total_pass_attempts || 0) > 0 ? ((homeStats.total_pass_complete || 0) / (homeStats.total_pass_attempts || 0)) * 100 : 0
+        awayStats.passing_pct = (awayStats.total_pass_attempts || 0) > 0 ? ((awayStats.total_pass_complete || 0) / (awayStats.total_pass_attempts || 0)) * 100 : 0
 
         setTeamStats([homeStats, awayStats])
       }
@@ -262,16 +213,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
       console.error("Error fetching match stats:", error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const fetchGoalieStats = async () => {
-    try {
-      const data = await fetchData(`/api/matches/${match.id}/goalie-stats`)
-      setGoalieStats(data)
-    } catch (error) {
-      console.error("Error fetching goalie stats:", error)
-      setGoalieStats([])
     }
   }
 
@@ -299,34 +240,8 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
       .slice(0, limit)
   }
 
-  const getGoalies = (teamId: string) => {
-    return playerStats.filter((p) => p.team_id === teamId && p.position === "G")
-  }
-
   const getSkaters = (teamId: string) => {
     return playerStats.filter((p) => p.team_id === teamId && p.position !== "G")
-  }
-
-  // Helper function to calculate GAA
-  const calculateGAA = (goalsAgainst: number, toi: string) => {
-    if (!toi || !goalsAgainst) return "0.00"
-
-    // Parse TOI (format: "MM:SS")
-    const [minutes, seconds] = toi.split(":").map(Number)
-    const totalMinutes = minutes + seconds / 60
-
-    if (totalMinutes === 0) return "0.00"
-
-    // GAA = (Goals Against * 60) / Minutes Played
-    const gaa = (goalsAgainst * 60) / totalMinutes
-    return gaa.toFixed(2)
-  }
-
-  // Helper function to format save percentage
-  const formatSavePercentage = (savePct: number) => {
-    if (!savePct) return ".000"
-    // Convert to decimal format (e.g., 0.875 becomes ".875")
-    return savePct.toFixed(3)
   }
 
   const homeTeamStats = teamStats.find((t) => t.team_id === match.home_team_id)
@@ -334,17 +249,10 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
   const homeColors = getTeamColors(match.home_team.name)
   const awayColors = getTeamColors(match.away_team.name)
 
-  // Get team standings
   const homeStanding = teamStandings[match.home_team_id]
   const awayStanding = teamStandings[match.away_team_id]
-
-  // Use match_date or date field
   const matchDate = match.match_date || match.date
 
-  // Show edit button only for "in progress" games
-  const showEditButton = isAdmin && (match.status === "in progress" || match.status === "In Progress")
-
-  // Get period scores from match data
   const getPeriodScores = () => {
     if (!match.period_scores) return []
 
@@ -419,24 +327,22 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
     )
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <div className="text-xl">Loading match data...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-white">
-      {/* Header Section with Team Logos as Full Backgrounds */}
+      {/* Header Section */}
       <div className="relative">
         <div className="flex">
-          {/* Home Team Side - Full Logo Background */}
-          <div
-            className="flex-1 relative overflow-hidden min-h-[200px]"
-            style={{
-              backgroundImage: match.home_team.logo_url ? `url(${match.home_team.logo_url})` : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            {/* Team color overlay */}
+          {/* Home Team Side */}
+          <div className="flex-1 relative overflow-hidden min-h-[200px]">
             <div className={`absolute inset-0 ${homeColors.primary} opacity-80`} />
-            {/* Dark overlay for text readability */}
             <div className="absolute inset-0 bg-black/40" />
 
             <div className="relative z-10 p-8 h-full flex items-center justify-between">
@@ -470,32 +376,11 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                 : match.status?.toUpperCase() || "SCHEDULED"}
             </Badge>
             {matchDate && <p className="text-slate-300 text-center">{formatDate(matchDate)}</p>}
-            {showEditButton && (
-              <Button
-                onClick={() => setOpenScoreModal(true)}
-                variant="outline"
-                size="sm"
-                className="mt-4 bg-white/10 border-white/20 text-white hover:bg-white/20"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Score
-              </Button>
-            )}
           </div>
 
-          {/* Away Team Side - Full Logo Background */}
-          <div
-            className="flex-1 relative overflow-hidden min-h-[200px]"
-            style={{
-              backgroundImage: match.away_team.logo_url ? `url(${match.away_team.logo_url})` : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          >
-            {/* Team color overlay */}
+          {/* Away Team Side */}
+          <div className="flex-1 relative overflow-hidden min-h-[200px]">
             <div className={`absolute inset-0 ${awayColors.primary} opacity-80`} />
-            {/* Dark overlay for text readability */}
             <div className="absolute inset-0 bg-black/40" />
 
             <div className="relative z-10 p-8 h-full flex items-center justify-between">
@@ -523,7 +408,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left Sidebar - Period Stats and Team Stats */}
+          {/* Left Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Period Stats */}
             {periodScores.length > 0 && (
@@ -534,7 +419,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     Period-by-Period Scoring
                   </h3>
                   <div className="space-y-3">
-                    {/* Header */}
                     <div className="grid grid-cols-5 gap-2 text-sm font-semibold text-slate-300 border-b border-slate-600 pb-2">
                       <span>Team</span>
                       <span className="text-center">1st</span>
@@ -543,7 +427,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <span className="text-center">Total</span>
                     </div>
                     
-                    {/* Home Team */}
                     <div className="grid grid-cols-5 gap-2 text-sm items-center">
                       <div className="flex items-center space-x-2">
                         <TeamLogo teamName={match.home_team.name} logoUrl={match.home_team.logo_url} size="xs" />
@@ -559,7 +442,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       </span>
                     </div>
                     
-                    {/* Away Team */}
                     <div className="grid grid-cols-5 gap-2 text-sm items-center">
                       <div className="flex items-center space-x-2">
                         <TeamLogo teamName={match.away_team.name} logoUrl={match.away_team.logo_url} size="xs" />
@@ -574,29 +456,12 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                         {match.away_score !== null ? match.away_score : "-"}
                       </span>
                     </div>
-                    
-                    {/* Overtime Row */}
-                    {(match.overtime || match.has_overtime) && periodScores.length > 3 && (
-                      <div className="grid grid-cols-5 gap-2 text-sm items-center pt-2 border-t border-slate-600">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-orange-400 font-semibold">OT</span>
-                        </div>
-                        <div className="text-center text-orange-400 font-semibold">
-                          {periodScores[3]?.home || 0}
-                        </div>
-                        <div className="text-center text-orange-400 font-semibold">
-                          {periodScores[3]?.away || 0}
-                        </div>
-                        <div></div>
-                        <div></div>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Team Stats with Comparison Bars */}
+            {/* Team Stats */}
             <Card className="bg-slate-800 border-slate-700">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-4 text-white flex items-center">
@@ -627,13 +492,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       awayTeam={match.away_team.name}
                     />
                     <StatComparisonBar
-                      label="Blocks"
-                      homeValue={homeTeamStats.blocks}
-                      awayValue={awayTeamStats.blocks}
-                      homeTeam={match.home_team.name}
-                      awayTeam={match.away_team.name}
-                    />
-                    <StatComparisonBar
                       label="Faceoff %"
                       homeValue={homeTeamStats.faceoff_pct || 0}
                       awayValue={awayTeamStats.faceoff_pct || 0}
@@ -649,57 +507,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       awayTeam={match.away_team.name}
                       isPercentage={true}
                     />
-                    <StatComparisonBar
-                      label="PIM"
-                      homeValue={homeTeamStats.pim}
-                      awayValue={awayTeamStats.pim}
-                      homeTeam={match.home_team.name}
-                      awayTeam={match.away_team.name}
-                    />
-                    <StatComparisonBar
-                      label="PP Goals"
-                      homeValue={homeTeamStats.pp_goals || 0}
-                      awayValue={awayTeamStats.pp_goals || 0}
-                      homeTeam={match.home_team.name}
-                      awayTeam={match.away_team.name}
-                    />
-                  </div>
-                )}
-                
-                {/* Additional Team Stats Summary */}
-                {homeTeamStats && awayTeamStats && (
-                  <div className="mt-6 pt-4 border-t border-slate-600">
-                    <h4 className="text-sm font-semibold mb-3 text-slate-300">Quick Stats</h4>
-                    <div className="grid grid-cols-2 gap-4 text-xs">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Home Faceoffs:</span>
-                          <span className="text-white font-semibold">
-                            {homeTeamStats.total_faceoffs_won || 0}/{homeTeamStats.total_faceoffs_taken || 0}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Home Passes:</span>
-                          <span className="text-white font-semibold">
-                            {homeTeamStats.total_pass_complete || 0}/{homeTeamStats.total_pass_attempts || 0}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Away Faceoffs:</span>
-                          <span className="text-white font-semibold">
-                            {awayTeamStats.total_faceoffs_won || 0}/{awayTeamStats.total_faceoffs_taken || 0}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Away Passes:</span>
-                          <span className="text-white font-semibold">
-                            {awayTeamStats.total_pass_complete || 0}/{awayTeamStats.total_pass_attempts || 0}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 )}
               </CardContent>
@@ -725,7 +532,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                   Match Summary
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Final Score */}
                   <div className="text-center">
                     <div className="text-3xl font-bold text-white mb-2">Final Score</div>
                     <div className="flex items-center justify-center space-x-4">
@@ -741,7 +547,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   </div>
                   
-                  {/* Game Info */}
                   <div className="text-center">
                     <div className="text-lg font-semibold text-white mb-2">Game Information</div>
                     <div className="space-y-1 text-sm text-slate-300">
@@ -753,7 +558,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   </div>
                   
-                  {/* Season Info */}
                   <div className="text-center">
                     <div className="text-lg font-semibold text-white mb-2">Season Information</div>
                     <div className="space-y-1 text-sm text-slate-300">
@@ -765,7 +569,8 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                 </div>
               </CardContent>
             </Card>
-            {/* Three Stars of the Match */}
+
+            {/* Three Stars */}
             {playerStats.length > 0 && (
               <Card className="bg-slate-800 border-slate-700">
                 <CardContent className="p-6">
@@ -794,34 +599,22 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                           <div
                             key={player.player_id}
                             className="relative overflow-hidden rounded-lg border border-slate-600 bg-gradient-to-br from-slate-700 to-slate-800"
-                            style={{
-                              backgroundImage: teamData.logo_url ? `url(${teamData.logo_url})` : "none",
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                              backgroundRepeat: "no-repeat",
-                            }}
                           >
                             <div className="absolute inset-0 bg-black/70" />
                             <div className="relative z-10 p-6 text-center">
-                              {/* Star Number */}
                               <div className="absolute top-4 left-4">
                                 <div className={`${starColors[index]} rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl shadow-lg`}>
                                   {starNumber}
                                 </div>
                               </div>
 
-                              {/* Team Logo */}
                               <div className="flex justify-center mb-4">
                                 <TeamLogo teamName={teamData.name} logoUrl={teamData.logo_url} size="lg" />
                               </div>
 
-                              {/* Player Name */}
                               <div className="text-2xl font-bold text-white mb-4 drop-shadow-lg">{player.player_name}</div>
-
-                              {/* Position */}
                               <div className="text-slate-300 text-sm mb-4">{player.position || "Unknown Position"}</div>
 
-                              {/* Stats Grid */}
                               <div className="grid grid-cols-3 gap-4 text-center text-white">
                                 <div className="bg-slate-800/50 rounded-lg p-3">
                                   <div className="font-bold text-2xl text-blue-400">{player.goals}</div>
@@ -837,7 +630,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                                 </div>
                               </div>
 
-                              {/* Additional Stats */}
                               <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
                                 <div className="text-slate-300">
                                   <span className="opacity-70">+/-:</span> 
@@ -900,19 +692,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                               <th className="text-center py-2 px-1">A</th>
                               <th className="text-center py-2 px-1">P</th>
                               <th className="text-center py-2 px-1">+/-</th>
-                              <th className="text-center py-2 px-1">TWP</th>
                               <th className="text-center py-2 px-1">S</th>
                               <th className="text-center py-2 px-1">H</th>
                               <th className="text-center py-2 px-1">BLK</th>
-                              <th className="text-center py-2 px-1">GVA</th>
-                              <th className="text-center py-2 px-1">TKA</th>
-                              <th className="text-center py-2 px-1">INT</th>
-                              <th className="text-center py-2 px-1">FOW</th>
-                              <th className="text-center py-2 px-1">FO%</th>
-                              <th className="text-center py-2 px-1">PassCom</th>
-                              <th className="text-center py-2 px-1">PassAtt</th>
-                              <th className="text-center py-2 px-1">PDraws</th>
-                              <th className="text-center py-2 px-1">PPG</th>
                               <th className="text-center py-2 px-1">PIM</th>
                               <th className="text-center py-2 px-1">TOI</th>
                             </tr>
@@ -920,7 +702,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                           <tbody>
                             {getSkaters(match.home_team_id)
                               .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-                              .map((player, index) => (
+                              .map((player) => (
                                 <tr
                                   key={player.player_id}
                                   className="border-b border-slate-700/50 hover:bg-slate-700/30"
@@ -948,29 +730,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                                     {player.plus_minus > 0 ? "+" : ""}
                                     {player.plus_minus}
                                   </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.time_with_puck
-                                      ? `${Math.floor(player.time_with_puck / 60)}:${(player.time_with_puck % 60).toString().padStart(2, "0")}`
-                                      : "0:00"}
-                                  </td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.shots}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.hits}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.blocks}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.giveaways || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.takeaways || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.interceptions || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.faceoffs_won || 0}/{player.faceoffs_taken || 0}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.faceoff_pct ? player.faceoff_pct.toFixed(1) : "0.0"}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.pass_complete || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.pass_attempts || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.penalties_drawn || 0}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.ppg || 0}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.pim}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.toi || "0:00"}</td>
                                 </tr>
@@ -1003,19 +765,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                               <th className="text-center py-2 px-1">A</th>
                               <th className="text-center py-2 px-1">P</th>
                               <th className="text-center py-2 px-1">+/-</th>
-                              <th className="text-center py-2 px-1">TWP</th>
                               <th className="text-center py-2 px-1">S</th>
                               <th className="text-center py-2 px-1">H</th>
                               <th className="text-center py-2 px-1">BLK</th>
-                              <th className="text-center py-2 px-1">GVA</th>
-                              <th className="text-center py-2 px-1">TKA</th>
-                              <th className="text-center py-2 px-1">INT</th>
-                              <th className="text-center py-2 px-1">FOW</th>
-                              <th className="text-center py-2 px-1">FO%</th>
-                              <th className="text-center py-2 px-1">PassCom</th>
-                              <th className="text-center py-2 px-1">PassAtt</th>
-                              <th className="text-center py-2 px-1">PDraws</th>
-                              <th className="text-center py-2 px-1">PPG</th>
                               <th className="text-center py-2 px-1">PIM</th>
                               <th className="text-center py-2 px-1">TOI</th>
                             </tr>
@@ -1023,7 +775,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                           <tbody>
                             {getSkaters(match.away_team_id)
                               .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-                              .map((player, index) => (
+                              .map((player) => (
                                 <tr
                                   key={player.player_id}
                                   className="border-b border-slate-700/50 hover:bg-slate-700/30"
@@ -1051,141 +803,13 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                                     {player.plus_minus > 0 ? "+" : ""}
                                     {player.plus_minus}
                                   </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.time_with_puck
-                                      ? `${Math.floor(player.time_with_puck / 60)}:${(player.time_with_puck % 60).toString().padStart(2, "0")}`
-                                      : "0:00"}
-                                  </td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.shots}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.hits}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.blocks}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.giveaways || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.takeaways || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.interceptions || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.faceoffs_won || 0}/{player.faceoffs_taken || 0}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.faceoff_pct ? player.faceoff_pct.toFixed(1) : "0.0"}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.pass_complete || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.pass_attempts || 0}</td>
-                                  <td className="py-2 px-1 text-center text-slate-300">
-                                    {player.penalties_drawn || 0}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-slate-300">{player.ppg || 0}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.pim}</td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.toi || "0:00"}</td>
                                 </tr>
                               ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* Goalie Stats Section */}
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4 text-white border-b border-slate-600 pb-2">
-                        Goalie Stats
-                      </h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
-                              <th className="text-left py-2 px-2">Player</th>
-                              <th className="text-center py-2 px-2">TOI</th>
-                              <th className="text-center py-2 px-2">S</th>
-                              <th className="text-center py-2 px-2">SV%</th>
-                              <th className="text-center py-2 px-2">GA</th>
-                              <th className="text-center py-2 px-2">Sv</th>
-                              <th className="text-center py-2 px-2">GAA</th>
-                              <th className="text-center py-2 px-2">PCHK</th>
-                              <th className="text-center py-2 px-2">DSV</th>
-                              <th className="text-center py-2 px-2">brks</th>
-                              <th className="text-center py-2 px-2">BA%</th>
-                              <th className="text-center py-2 px-2">PS%</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {goalieStats
-                              .filter((goalie) => goalie.teamId === match.home_team_id)
-                              .map((goalie) => (
-                                <tr
-                                  key={goalie.playerId}
-                                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
-                                >
-                                  <td className="py-2 px-2 text-white font-medium">
-                                    <div className="flex items-center">
-                                      <TeamLogo
-                                        teamName={match.home_team.name}
-                                        logoUrl={match.home_team.logo_url}
-                                        size="xs"
-                                        className="mr-2"
-                                      />
-                                      {goalie.playerName}
-                                    </div>
-                                  </td>
-                                  <td className="py-2 px-2 text-center text-white">{goalie.minutesPlayed}</td>
-                                  <td className="py-2 px-2 text-center text-white">{goalie.goalsAgainst}</td>
-                                  <td className="py-2 px-2 text-center text-white">
-                                    {(() => {
-                                      // Try multiple sources for shots against
-                                      const shotsAgainst =
-                                        (typeof goalie.glshots === "string"
-                                          ? Number.parseInt(goalie.glshots)
-                                          : goalie.glshots) ||
-                                        goalie.shots_against ||
-                                        goalie.shots ||
-                                        0
-                                      return shotsAgainst
-                                    })()}
-                                  </td>
-                                  <td className="py-2 px-2 text-center text-white">{goalie.saves}</td>
-                                </tr>
-                              ))}
-                            {goalieStats
-                              .filter((goalie) => goalie.teamId === match.away_team_id)
-                              .map((goalie) => (
-                                <tr
-                                  key={goalie.playerId}
-                                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
-                                >
-                                  <td className="py-2 px-2 text-white font-medium">
-                                    <div className="flex items-center">
-                                      <TeamLogo
-                                        teamName={match.away_team.name}
-                                        logoUrl={match.away_team.logo_url}
-                                        size="xs"
-                                        className="mr-2"
-                                      />
-                                      {goalie.playerName}
-                                    </div>
-                                  </td>
-                                  <td className="py-2 px-2 text-center text-white">{goalie.minutesPlayed}</td>
-                                  <td className="py-2 px-2 text-center text-white">{goalie.goalsAgainst}</td>
-                                  <td className="py-2 px-2 text-center text-white">
-                                    {(() => {
-                                      // Try multiple sources for shots against
-                                      const shotsAgainst =
-                                        (typeof goalie.glshots === "string"
-                                          ? Number.parseInt(goalie.glshots)
-                                          : goalie.glshots) ||
-                                        goalie.shots_against ||
-                                        goalie.shots ||
-                                        0
-                                      return shotsAgainst
-                                    })()}
-                                  </td>
-                                  <td className="py-2 px-2 text-center text-white">{goalie.saves}</td>
-                                </tr>
-                              ))}
-                            {goalieStats.length === 0 && (
-                              <tr>
-                                <td colSpan={12} className="py-4 text-center text-slate-400">
-                                  No goalie statistics available for this match.
-                                </td>
-                              </tr>
-                            )}
                           </tbody>
                         </table>
                       </div>
@@ -1199,18 +823,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           </div>
         </div>
       </div>
-
-      {/* Edit Score Modal */}
-      <EditScoreModal
-        open={openScoreModal}
-        onOpenChange={setOpenScoreModal}
-        match={match}
-        canEdit={isAdmin}
-        onUpdate={() => {
-          // Refresh match data
-          window.location.reload()
-        }}
-      />
     </div>
   )
 }
