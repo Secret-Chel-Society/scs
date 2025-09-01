@@ -956,35 +956,6 @@ export default function AdminDashboardPage() {
   )
 }
 
-  // Helper function to get team seeding within a conference
-  function getConferenceSeeding(teams: Team[], conferences: Conference[], conferenceName: string, seed: number) {
-    const conference = conferences.find(c => c.name === conferenceName)
-    if (!conference) return null
 
-    const teamsInConference = teams
-      .filter(team => team.conference_id === conference.id)
-      .sort((a, b) => {
-        // This is a placeholder sorting - in reality, you'd sort by actual standings
-        // For now, we'll sort alphabetically as a fallback
-        return a.name.localeCompare(b.name)
-      })
 
-    return teamsInConference[seed - 1] || null
-  }
 
-  // Helper function to get eliminated teams (bottom 2) from a conference
-  function getEliminatedTeams(teams: Team[], conferences: Conference[], conferenceName: string) {
-    const conference = conferences.find(c => c.name === conferenceName)
-    if (!conference) return []
-
-    const teamsInConference = teams
-      .filter(team => team.conference_id === conference.id)
-      .sort((a, b) => {
-        // This is a placeholder sorting - in reality, you'd sort by actual standings
-        // For now, we'll sort alphabetically as a fallback
-        return a.name.localeCompare(b.name)
-      })
-
-    // Return bottom 2 teams (eliminated)
-    return teamsInConference.slice(-2)
-  }
