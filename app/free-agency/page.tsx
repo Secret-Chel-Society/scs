@@ -7,39 +7,12 @@ import { PlayerSignupsList } from "@/components/free-agency/player-signups-list"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Users, UserPlus, Target, TrendingUp, DollarSign, Award } from "lucide-react"
+import { DynamicFreeAgencyStats } from "@/components/free-agency/dynamic-free-agency-stats"
 
 // Force dynamic rendering and disable caching
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 export const fetchCache = "force-no-store"
-
-function FreeAgencyStats() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
-      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
-        <div className="text-3xl font-bold text-blue-200 mb-2">150+</div>
-        <div className="text-blue-300 flex items-center justify-center gap-2">
-          <Users className="h-5 w-5" />
-          Available Players
-        </div>
-      </div>
-      <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
-        <div className="text-3xl font-bold text-green-200 mb-2">$2.5M</div>
-        <div className="text-green-300 flex items-center justify-center gap-2">
-          <DollarSign className="h-5 w-5" />
-          Total Bids
-        </div>
-      </div>
-      <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
-        <div className="text-3xl font-bold text-purple-200 mb-2">24</div>
-        <div className="text-purple-300 flex items-center justify-center gap-2">
-          <Target className="h-5 w-5" />
-          Active Teams
-        </div>
-      </div>
-    </div>
-  )
-}
 
 function FreeAgencyLoadingSkeleton() {
   return (
@@ -83,7 +56,33 @@ export default function FreeAgencyPage({
           </div>
 
           {/* Free Agency Statistics */}
-          <FreeAgencyStats />
+          <Suspense fallback={
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
+              <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "100ms" }}>
+                <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                <div className="text-blue-300 flex items-center justify-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Available Players
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
+                <Skeleton className="h-8 w-20 mx-auto mb-2" />
+                <div className="text-green-300 flex items-center justify-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Total Bids
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
+                <Skeleton className="h-8 w-8 mx-auto mb-2" />
+                <div className="text-purple-300 flex items-center justify-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Active Teams
+                </div>
+              </div>
+            </div>
+          }>
+            <DynamicFreeAgencyStats />
+          </Suspense>
 
           {/* Main Content Tabs */}
           <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
