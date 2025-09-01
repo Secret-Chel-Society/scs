@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { 
   Clock, 
   Home, 
@@ -26,7 +26,12 @@ import {
   Star,
   GamepadIcon,
   Users,
-  TrendingUp
+  TrendingUp,
+  CalendarDays,
+  BarChart3,
+  Play,
+  CheckCircle,
+  Pause
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -219,6 +224,34 @@ export default function MatchesPage() {
 
   const matchStats = getMatchStats()
 
+  // Get status icon
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "Completed":
+        return <CheckCircle className="h-4 w-4 text-green-400" />
+      case "In Progress":
+        return <Play className="h-4 w-4 text-blue-400" />
+      case "Scheduled":
+        return <Clock className="h-4 w-4 text-yellow-400" />
+      default:
+        return <Clock className="h-4 w-4 text-gray-400" />
+    }
+  }
+
+  // Get status color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Completed":
+        return "from-green-500/20 to-emerald-500/20 border-green-400/30"
+      case "In Progress":
+        return "from-blue-500/20 to-cyan-500/20 border-blue-400/30"
+      case "Scheduled":
+        return "from-yellow-500/20 to-amber-500/20 border-yellow-400/30"
+      default:
+        return "from-gray-500/20 to-slate-500/20 border-gray-400/30"
+    }
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -265,11 +298,15 @@ export default function MatchesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
+            <div className="inline-flex items-center gap-3 mb-6 p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-400/30">
+              <GamepadIcon className="h-8 w-8 text-purple-300" />
+              <span className="text-purple-300 font-medium">NHL 26 Season</span>
+            </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-              NHL 26 Matches
+              Match Center
             </h1>
-            <p className="text-xl text-purple-200 mb-8">
-              Live competitive matches with real-time statistics and streaming
+            <p className="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">
+              Experience the thrill of competitive hockey with real-time match updates, statistics, and live streaming
             </p>
           </motion.div>
 
@@ -280,21 +317,40 @@ export default function MatchesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-blue-200 mb-2">{matchStats.totalMatches}</div>
-              <div className="text-blue-300">Total Matches</div>
+            <div className="group relative overflow-hidden bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className="text-4xl font-bold text-blue-200 mb-2">{matchStats.totalMatches}</div>
+                <div className="text-blue-300 font-medium">Total Matches</div>
+                <BarChart3 className="h-6 w-6 mx-auto mt-3 text-blue-400 opacity-60" />
+              </div>
             </div>
-            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-green-200 mb-2">{matchStats.completedMatches}</div>
-              <div className="text-green-300">Completed</div>
+            
+            <div className="group relative overflow-hidden bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className="text-4xl font-bold text-green-200 mb-2">{matchStats.completedMatches}</div>
+                <div className="text-green-300 font-medium">Completed</div>
+                <CheckCircle className="h-6 w-6 mx-auto mt-3 text-green-400 opacity-60" />
+              </div>
             </div>
-            <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-yellow-200 mb-2">{matchStats.scheduledMatches}</div>
-              <div className="text-yellow-300">Scheduled</div>
+            
+            <div className="group relative overflow-hidden bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-yellow-500/25">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className="text-4xl font-bold text-yellow-200 mb-2">{matchStats.scheduledMatches}</div>
+                <div className="text-yellow-300 font-medium">Scheduled</div>
+                <Calendar className="h-6 w-6 mx-auto mt-3 text-yellow-400 opacity-60" />
+              </div>
             </div>
-            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-purple-200 mb-2">{matchStats.inProgressMatches}</div>
-              <div className="text-purple-300">In Progress</div>
+            
+            <div className="group relative overflow-hidden bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10">
+                <div className="text-4xl font-bold text-purple-200 mb-2">{matchStats.inProgressMatches}</div>
+                <div className="text-purple-300 font-medium">In Progress</div>
+                <Play className="h-6 w-6 mx-auto mt-3 text-purple-400 opacity-60" />
+              </div>
             </div>
           </motion.div>
 
@@ -314,7 +370,7 @@ export default function MatchesPage() {
                   </div>
                   
                   <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                    <SelectTrigger className="w-full lg:w-48 bg-white/10 border-purple-400/30 text-white">
+                    <SelectTrigger className="w-full lg:w-48 bg-white/10 border-purple-400/30 text-white hover:bg-white/20 transition-colors">
                       <SelectValue placeholder="All Teams" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-purple-400/30">
@@ -328,7 +384,7 @@ export default function MatchesPage() {
                   </Select>
 
                   <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger className="w-full lg:w-48 bg-white/10 border-purple-400/30 text-white">
+                    <SelectTrigger className="w-full lg:w-48 bg-white/10 border-purple-400/30 text-white hover:bg-white/20 transition-colors">
                       <SelectValue placeholder="All Status" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-purple-400/30">
@@ -357,21 +413,24 @@ export default function MatchesPage() {
                     variant="outline"
                     onClick={() => setCurrentWeek(Math.max(1, currentWeek - 1))}
                     disabled={currentWeek === 1}
-                    className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20"
+                    className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20 transition-all duration-200 disabled:opacity-50"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-white">Week {currentWeek}</div>
-                    <div className="text-purple-300">{getWeekDateRange(currentWeek)}</div>
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <CalendarDays className="h-5 w-5 text-purple-300" />
+                      <span className="text-2xl font-bold text-white">Week {currentWeek}</span>
+                    </div>
+                    <div className="text-purple-300 text-sm">{getWeekDateRange(currentWeek)}</div>
                   </div>
                   
                   <Button
                     variant="outline"
                     onClick={() => setCurrentWeek(Math.min(totalWeeks, currentWeek + 1))}
                     disabled={currentWeek === totalWeeks}
-                    className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20"
+                    className="bg-white/10 border-purple-400/30 text-purple-200 hover:bg-white/20 transition-all duration-200 disabled:opacity-50"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -387,133 +446,137 @@ export default function MatchesPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0 }}
           >
-            {loading ? (
-              // Loading skeletons
-              [...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
+            <AnimatePresence>
+              {loading ? (
+                // Loading skeletons
+                [...Array(6)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <Skeleton className="h-72 w-full rounded-2xl bg-white/10" />
+                  </motion.div>
+                ))
+              ) : weekMatches.length > 0 ? (
+                weekMatches.map((match, index) => (
+                  <motion.div
+                    key={match.id}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    transition={{ delay: index * 0.1, duration: 0.3 }}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    className="group"
+                  >
+                    <Link href={`/matches/${match.id}`}>
+                      <Card className="overflow-hidden h-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-purple-400/50 transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-purple-500/25">
+                        <CardContent className="p-6">
+                          {/* Match Status Badge */}
+                          <div className="flex justify-between items-start mb-4">
+                            <Badge 
+                              className={`bg-gradient-to-r ${getStatusColor(match.status)} backdrop-blur-sm flex items-center gap-1`}
+                            >
+                              {getStatusIcon(match.status)}
+                              {match.status}
+                            </Badge>
+                            <div className="text-sm text-purple-300 font-medium">
+                              {new Date(match.match_date).toLocaleDateString()}
+                            </div>
+                          </div>
+
+                          {/* Teams */}
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="text-center flex-1">
+                              <div className="relative h-20 w-20 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                                {match.home_team.logo_url ? (
+                                  <Image
+                                    src={match.home_team.logo_url}
+                                    alt={match.home_team.name}
+                                    fill
+                                    className="object-contain drop-shadow-lg"
+                                  />
+                                ) : (
+                                  <div className="h-20 w-20 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full flex items-center justify-center border-2 border-blue-400/30">
+                                    <span className="text-blue-200 font-bold text-2xl">
+                                      {match.home_team.name.charAt(0)}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-lg font-semibold text-white group-hover:text-blue-200 transition-colors mb-2">
+                                {match.home_team.name}
+                              </div>
+                              <div className="text-3xl font-bold text-blue-200 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-lg px-3 py-1">
+                                {match.home_score !== null ? match.home_score : "-"}
+                              </div>
+                            </div>
+
+                            <div className="text-center mx-4">
+                              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full p-3 border border-purple-400/30">
+                                <div className="text-purple-300 font-bold text-lg">VS</div>
+                              </div>
+                            </div>
+
+                            <div className="text-center flex-1">
+                              <div className="relative h-20 w-20 mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                                {match.away_team.logo_url ? (
+                                  <Image
+                                    src={match.away_team.logo_url}
+                                    alt={match.away_team.name}
+                                    fill
+                                    className="object-contain drop-shadow-lg"
+                                  />
+                                ) : (
+                                  <div className="h-20 w-20 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-full flex items-center justify-center border-2 border-red-400/30">
+                                    <span className="text-red-200 font-bold text-2xl">
+                                      {match.away_team.name.charAt(0)}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-lg font-semibold text-white group-hover:text-red-200 transition-colors mb-2">
+                                {match.away_team.name}
+                              </div>
+                              <div className="text-3xl font-bold text-red-200 bg-gradient-to-r from-red-500/20 to-red-600/20 rounded-lg px-3 py-1">
+                                {match.away_score !== null ? match.away_score : "-"}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Match Time */}
+                          <div className="text-center">
+                            <div className="flex items-center justify-center gap-2 text-purple-300 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg px-4 py-2 border border-purple-400/20">
+                              <Clock className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                {new Date(match.match_date).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div 
+                  className="col-span-full text-center py-16"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                 >
-                  <Skeleton className="h-64 w-full rounded-2xl bg-white/10" />
+                  <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <Calendar className="h-12 w-12 text-purple-400" />
+                  </div>
+                  <div className="text-purple-300 text-xl font-medium mb-2">No matches found for this week.</div>
+                  <div className="text-purple-400">Try adjusting your filters or check back later.</div>
                 </motion.div>
-              ))
-            ) : weekMatches.length > 0 ? (
-              weekMatches.map((match, index) => (
-                <motion.div
-                  key={match.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="group"
-                >
-                  <Link href={`/matches/${match.id}`}>
-                    <Card className="overflow-hidden h-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-purple-400/50 transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-purple-500/25">
-                      <CardContent className="p-6">
-                        {/* Match Status Badge */}
-                        <div className="flex justify-between items-start mb-4">
-                          <Badge 
-                            className={`${
-                              match.status === "Completed" 
-                                ? "bg-green-500/20 border-green-400/50 text-green-200"
-                                : match.status === "In Progress"
-                                ? "bg-blue-500/20 border-blue-400/50 text-blue-200"
-                                : "bg-yellow-500/20 border-yellow-400/50 text-yellow-200"
-                            } backdrop-blur-sm`}
-                          >
-                            {match.status}
-                          </Badge>
-                          <div className="text-sm text-purple-300">
-                            {new Date(match.match_date).toLocaleDateString()}
-                          </div>
-                        </div>
-
-                        {/* Teams */}
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="text-center flex-1">
-                            <div className="relative h-16 w-16 mx-auto mb-2">
-                              {match.home_team.logo_url ? (
-                                <Image
-                                  src={match.home_team.logo_url}
-                                  alt={match.home_team.name}
-                                  fill
-                                  className="object-contain"
-                                />
-                              ) : (
-                                <div className="h-16 w-16 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full flex items-center justify-center">
-                                  <span className="text-blue-200 font-bold text-lg">
-                                    {match.home_team.name.charAt(0)}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-lg font-semibold text-white group-hover:text-purple-200 transition-colors">
-                              {match.home_team.name}
-                            </div>
-                            <div className="text-2xl font-bold text-blue-200">
-                              {match.home_score !== null ? match.home_score : "-"}
-                            </div>
-                          </div>
-
-                          <div className="text-center mx-4">
-                            <div className="text-purple-300 font-medium text-sm">VS</div>
-                          </div>
-
-                          <div className="text-center flex-1">
-                            <div className="relative h-16 w-16 mx-auto mb-2">
-                              {match.away_team.logo_url ? (
-                                <Image
-                                  src={match.away_team.logo_url}
-                                  alt={match.away_team.name}
-                                  fill
-                                  className="object-contain"
-                                />
-                              ) : (
-                                <div className="h-16 w-16 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-full flex items-center justify-center">
-                                  <span className="text-red-200 font-bold text-lg">
-                                    {match.away_team.name.charAt(0)}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-lg font-semibold text-white group-hover:text-purple-200 transition-colors">
-                              {match.away_team.name}
-                            </div>
-                            <div className="text-2xl font-bold text-red-200">
-                              {match.away_score !== null ? match.away_score : "-"}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Match Time */}
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-2 text-purple-300">
-                            <Clock className="h-4 w-4" />
-                            <span className="text-sm">
-                              {new Date(match.match_date).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))
-            ) : (
-              <motion.div 
-                className="col-span-full text-center py-12"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
-                <div className="text-purple-300 text-lg mb-4">No matches found for this week.</div>
-                <div className="text-purple-400">Try adjusting your filters or check back later.</div>
-              </motion.div>
-            )}
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       </div>

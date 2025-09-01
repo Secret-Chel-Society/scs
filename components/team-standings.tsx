@@ -2,10 +2,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { TeamLogo } from "@/components/team-logo"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-// import { motion } from "framer-motion"
-import { Trophy, TrendingUp, TrendingDown, Minus, Target, Medal } from "lucide-react"
+import { Trophy, TrendingUp, TrendingDown, Minus, Target, Medal, Crown, Star } from "lucide-react"
 import type { TeamStanding } from "@/lib/standings-calculator"
 
 interface TeamStandingsProps {
@@ -22,16 +22,16 @@ function getStreakColor(streak: string): string {
 function getPlayoffStatusIndicator(status?: "clinched" | "eliminated" | "active"): JSX.Element | null {
   if (status === "clinched") {
     return (
-      <Badge variant="default" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs ml-2">
-        <Trophy className="h-3 w-3 mr-1" />
+      <Badge variant="default" className="bg-green-600/20 text-green-300 border-green-500/30 text-xs ml-2 flex items-center gap-1">
+        <Trophy className="h-3 w-3" />
         CLINCHED
       </Badge>
     )
   }
   if (status === "eliminated") {
     return (
-      <Badge variant="destructive" className="bg-red-600/20 text-red-300 border-red-500/30 text-xs ml-2">
-        <Minus className="h-3 w-3 mr-1" />
+      <Badge variant="destructive" className="bg-red-600/20 text-red-300 border-red-500/30 text-xs ml-2 flex items-center gap-1">
+        <Minus className="h-3 w-3" />
         ELIMINATED
       </Badge>
     )
@@ -42,19 +42,19 @@ function getPlayoffStatusIndicator(status?: "clinched" | "eliminated" | "active"
 function getPositionBadge(position: number): JSX.Element {
   if (position <= 3) {
     const colors = {
-      1: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
-      2: "bg-gray-400/20 text-gray-300 border-gray-400/30", 
-      3: "bg-orange-600/20 text-orange-300 border-orange-600/30"
+      1: "bg-gradient-to-r from-yellow-500/30 to-amber-500/30 text-yellow-300 border-yellow-500/50",
+      2: "bg-gradient-to-r from-gray-400/30 to-slate-400/30 text-gray-300 border-gray-400/50", 
+      3: "bg-gradient-to-r from-orange-600/30 to-red-600/30 text-orange-300 border-orange-600/50"
     }
     return (
-      <Badge className={`${colors[position as keyof typeof colors]} text-xs font-bold`}>
-        <Medal className="h-3 w-3 mr-1" />
+      <Badge className={`${colors[position as keyof typeof colors]} text-xs font-bold flex items-center gap-1`}>
+        <Medal className="h-3 w-3" />
         {position}
       </Badge>
     )
   }
   return (
-    <Badge className="bg-slate-700/50 text-slate-300 border-slate-600/50 text-xs font-bold">
+    <Badge className="bg-gradient-to-r from-slate-700/50 to-slate-600/50 text-slate-300 border-slate-600/50 text-xs font-bold">
       {position}
     </Badge>
   )
@@ -82,7 +82,7 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10 hover:bg-white/5">
+              <TableRow className="border-white/10 hover:bg-white/5 transition-colors duration-200">
                 <TableHead className="w-12 text-center text-white/70 font-semibold">#</TableHead>
                 <TableHead className="min-w-[250px] text-white/70 font-semibold">Team</TableHead>
                 <TableHead className="text-center text-white/70 font-semibold">GP</TableHead>
@@ -102,9 +102,12 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
             </TableHeader>
             <TableBody>
               {teams.map((team, index) => (
-                <tr 
+                <motion.tr 
                   key={team.id} 
-                  className="border-white/10 hover:bg-white/10 transition-colors duration-200"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
+                  className="border-white/10 hover:bg-white/10 transition-all duration-200 group"
                 >
                   <TableCell className="text-center">
                     {getPositionBadge(index + 1)}
@@ -113,20 +116,22 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
                     <Link href={`/teams/${team.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
                       <div className="flex-shrink-0">
                         {team.logo_url ? (
-                          <div className="relative h-10 w-10">
+                          <div className="relative h-10 w-10 group-hover:scale-110 transition-transform duration-200">
                             <Image
                               src={team.logo_url || "/placeholder.svg"}
                               alt={team.name}
                               fill
-                              className="object-contain"
+                              className="object-contain drop-shadow-lg"
                             />
                           </div>
                         ) : (
-                          <TeamLogo teamName={team.name} size="md" />
+                          <div className="group-hover:scale-110 transition-transform duration-200">
+                            <TeamLogo teamName={team.name} size="md" />
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center">
-                        <span className="font-semibold text-white truncate">{team.name}</span>
+                        <span className="font-semibold text-white truncate group-hover:text-purple-200 transition-colors">{team.name}</span>
                         {getPlayoffStatusIndicator(team.playoff_status)}
                       </div>
                     </Link>
@@ -135,17 +140,19 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
                   <TableCell className="text-center text-green-400 font-semibold">{team.wins}</TableCell>
                   <TableCell className="text-center text-red-400 font-semibold">{team.losses}</TableCell>
                   <TableCell className="text-center text-orange-400 font-semibold">{team.otl}</TableCell>
-                  <TableCell className="text-center font-bold text-2xl text-blue-400">{team.points}</TableCell>
+                  <TableCell className="text-center font-bold text-2xl text-blue-400 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg px-2 py-1">
+                    {team.points}
+                  </TableCell>
                   <TableCell className="text-center">
-                    <Badge className="bg-slate-700/50 text-slate-300 border-slate-600/50 text-xs font-mono">
+                    <Badge className="bg-gradient-to-r from-slate-700/50 to-slate-600/50 text-slate-300 border-slate-600/50 text-xs font-mono">
                       {team.last_10 || "0-0-0"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     {team.current_streak && team.current_streak !== "-" ? (
-                      <Badge className={`text-xs font-bold ${getStreakColor(team.current_streak)}`}>
-                        {team.current_streak.startsWith("W") && <TrendingUp className="h-3 w-3 mr-1" />}
-                        {team.current_streak.startsWith("L") && <TrendingDown className="h-3 w-3 mr-1" />}
+                      <Badge className={`text-xs font-bold ${getStreakColor(team.current_streak)} flex items-center gap-1`}>
+                        {team.current_streak.startsWith("W") && <TrendingUp className="h-3 w-3" />}
+                        {team.current_streak.startsWith("L") && <TrendingDown className="h-3 w-3" />}
                         {team.current_streak}
                       </Badge>
                     ) : (
@@ -155,7 +162,11 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
                   <TableCell className="text-center text-green-400 font-semibold">{team.goals_for}</TableCell>
                   <TableCell className="text-center text-red-400 font-semibold">{team.goals_against}</TableCell>
                   <TableCell className="text-center">
-                    <span className={`font-bold ${team.goal_differential >= 0 ? "text-green-400" : "text-red-400"}`}>
+                    <span className={`font-bold px-2 py-1 rounded-lg ${
+                      team.goal_differential >= 0 
+                        ? "text-green-400 bg-green-500/10 border border-green-400/20" 
+                        : "text-red-400 bg-red-500/10 border border-red-400/20"
+                    }`}>
                       {team.goal_differential >= 0 ? "+" : ""}
                       {team.goal_differential}
                     </span>
@@ -169,7 +180,7 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
                   <TableCell className="text-center hidden lg:table-cell text-white/80">
                     {team.penalty_kill_percentage ? `${team.penalty_kill_percentage.toFixed(1)}%` : "0.0%"}
                   </TableCell>
-                </tr>
+                </motion.tr>
               ))}
             </TableBody>
           </Table>
