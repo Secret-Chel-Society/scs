@@ -439,9 +439,84 @@ export default function UsersManagementClient() {
   }
 
   const fetchUsers = async () => {
-    // Implementation would go here
-    console.log("Fetching users...")
-    setLoading(false)
+    try {
+      setLoading(true)
+      
+      // Fetch users with their roles, team info, and season registrations
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select(`
+          *,
+          user_roles!inner(role),
+          team_memberships(
+            team:teams(
+              id,
+              name
+            )
+          ),
+          season_registrations(
+            id,
+            season_number,
+            status,
+            primary_position,
+            secondary_position,
+            console
+          )
+        `)
+        .order("created_at", { ascending: false })
+
+      if (usersError) {
+        console.error("Error fetching users:", usersError)
+        toast({
+          title: "Error fetching users",
+          description: usersError.message,
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Transform the data to match the expected format
+      const transformedUsers = usersData?.map((user: any) => {
+        // Extract roles from the user_roles array
+        const roles = user.user_roles?.map((ur: any) => ur.role) || []
+        
+        // Get team info from team_memberships
+        const teamMembership = user.team_memberships?.[0]
+        const teamName = teamMembership?.team?.name || null
+        
+        // Get latest season registration
+        const latestRegistration = user.season_registrations?.[0] || {}
+        
+        return {
+          id: user.id,
+          email: user.email,
+          gamer_tag_id: user.gamer_tag_id,
+          primary_position: latestRegistration.primary_position || user.primary_position,
+          secondary_position: latestRegistration.secondary_position || user.secondary_position,
+          console: latestRegistration.console || user.console,
+          team_name: teamName,
+          roles: roles,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          is_active: user.is_active !== false, // Default to true if not set
+          season_registration_status: latestRegistration.status || null,
+          season_number: latestRegistration.season_number || null
+        }
+      }) || []
+
+      console.log("Fetched users:", transformedUsers)
+      setUsers(transformedUsers)
+      setFilteredUsers(transformedUsers)
+    } catch (error: any) {
+      console.error("Error in fetchUsers:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fetch users",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const refreshUsers = async () => {
@@ -861,9 +936,54 @@ export default function UsersManagementClient() {
         onOpenChange={setPositionDialogOpen}
         user={selectedUser}
         onSubmit={async (values) => {
-          // Implementation would go here
-          console.log("Updating positions:", values)
-          setPositionDialogOpen(false)
+          setSubmitting(true)
+          try {
+            // Update the user's positions in the database
+            const { error } = await supabase
+              .from("users")
+              .update({
+                primary_position: values.primary_position,
+                secondary_position: values.secondary_position,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", values.userId)
+
+            if (error) {
+              throw error
+            }
+
+            // Also update any season registrations for this user
+            const { error: regError } = await supabase
+              .from("season_registrations")
+              .update({
+                primary_position: values.primary_position,
+                secondary_position: values.secondary_position,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("user_id", values.userId)
+
+            if (regError) {
+              console.warn("Could not update season registrations:", regError)
+            }
+
+            toast({
+              title: "Positions updated",
+              description: `Positions for ${selectedUser?.gamer_tag_id || selectedUser?.email} have been updated.`,
+            })
+
+            // Refresh the user list
+            await fetchUsers()
+            setPositionDialogOpen(false)
+          } catch (error: any) {
+            console.error("Error updating positions:", error)
+            toast({
+              title: "Error",
+              description: error.message || "Failed to update positions",
+              variant: "destructive",
+            })
+          } finally {
+            setSubmitting(false)
+          }
         }}
         submitting={submitting}
       />
