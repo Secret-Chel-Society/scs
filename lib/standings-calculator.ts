@@ -494,7 +494,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
 
     console.log(`Found ${teams.length} teams for season ${seasonId}`)
 
-    // Get all completed matches for the season - try multiple season name formats
+    // Get all completed matches for the season using the season_name field - use original logic
     const { data: matches, error: matchesError } = await supabase
       .from("matches")
       .select(
@@ -507,11 +507,10 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         away_score,
         overtime,
         has_overtime,
-        status,
-        season_name
+        status
       `,
       )
-      .or(`season_name.eq.${seasonName},season_name.eq.Season ${seasonId},season_name.eq.Season${seasonId}`)
+      .eq("season_name", seasonName) // Use original exact season name matching
       .in("status", ["completed", "Completed", "COMPLETED"])
       .not("home_score", "is", null)
       .not("away_score", "is", null)

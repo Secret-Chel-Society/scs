@@ -5,15 +5,24 @@ import { createClient } from "@supabase/supabase-js"
 const isDevelopment = process.env.NODE_ENV === "development"
 
 // Use environment variables for security
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1403504252508307476"
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "placeholder_secret"
-const SITE_URL = isDevelopment
-  ? "http://localhost:3000"
-  : "https://www.secretchelsociety.com"
-const DISCORD_REDIRECT_URI = `${SITE_URL}/api/auth/discord/callback`
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || (isDevelopment ? "http://localhost:3000" : "https://www.secretchelsociety.com")
+const DISCORD_REDIRECT_URI = process.env.REDIRECT_URI || `${SITE_URL}/api/auth/discord/callback`
 
 export async function GET(request: Request) {
   try {
+    // Validate environment variables first
+    if (!DISCORD_CLIENT_ID) {
+      console.error("Discord client ID not configured")
+      return NextResponse.redirect(`${SITE_URL}/login?discord_error=not_configured`)
+    }
+
+    if (!DISCORD_CLIENT_SECRET) {
+      console.error("Discord client secret not configured")
+      return NextResponse.redirect(`${SITE_URL}/login?discord_error=not_configured`)
+    }
+
     const { searchParams } = new URL(request.url)
     const code = searchParams.get("code")
     const state = searchParams.get("state")

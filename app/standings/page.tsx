@@ -151,48 +151,40 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
 }
 
 function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
-  // Group teams by conference
-  const easternTeams = standings.filter((team) => team.conference === "Eastern Elites")
-  const westernTeams = standings.filter((team) => team.conference === "Western Warriors")
-  const unassignedTeams = standings.filter((team) => !team.conference || team.conference === "Unassigned")
+  // Group teams by conference/division - use original logic
+  const nhlTeams = standings.filter((team) => team.division === "NHL" || team.conference === "NHL")
+  const customTeams = standings.filter((team) => team.division === "Custom" || team.conference === "Custom")
+
+  // If no division data, split teams roughly in half
+  const hasConferenceData = nhlTeams.length > 0 || customTeams.length > 0
+
+  const conference1Teams = hasConferenceData ? nhlTeams : standings.slice(0, Math.ceil(standings.length / 2))
+  const conference2Teams = hasConferenceData ? customTeams : standings.slice(Math.ceil(standings.length / 2))
+
+  const conference1Name = hasConferenceData ? "NHL Conference" : "Eastern Conference"
+  const conference2Name = hasConferenceData ? "Custom Conference" : "Western Conference"
 
   return (
-    <div className="space-y-6">
-      {easternTeams.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Eastern Elites Conference</CardTitle>
-            <CardDescription>{easternTeams.length} teams</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamStandings teams={easternTeams} />
-          </CardContent>
-        </Card>
-      )}
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>{conference1Name}</CardTitle>
+          <CardDescription>{conference1Teams.length} teams</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TeamStandings teams={conference1Teams} />
+        </CardContent>
+      </Card>
 
-      {westernTeams.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Western Warriors Conference</CardTitle>
-            <CardDescription>{westernTeams.length} teams</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamStandings teams={westernTeams} />
-          </CardContent>
-        </Card>
-      )}
-
-      {unassignedTeams.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Unassigned Teams</CardTitle>
-            <CardDescription>{unassignedTeams.length} teams need conference assignment</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamStandings teams={unassignedTeams} />
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>{conference2Name}</CardTitle>
+          <CardDescription>{conference2Teams.length} teams</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TeamStandings teams={conference2Teams} />
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -230,11 +222,10 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   return (
     <Tabs defaultValue="overall" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="overall">Overall Standings</TabsTrigger>
         <TabsTrigger value="conference">Conference</TabsTrigger>
         <TabsTrigger value="playoffs">Playoff Picture</TabsTrigger>
-        <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overall" className="space-y-6">
@@ -271,24 +262,6 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
       <TabsContent value="playoffs" className="space-y-6">
         <PlayoffPicture standings={standings} />
-      </TabsContent>
-
-      <TabsContent value="unassigned" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Unassigned Teams</CardTitle>
-            <CardDescription>Teams that need to be assigned to a conference</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {standings.filter(team => !team.conference || team.conference === "Unassigned").length > 0 ? (
-              <TeamStandings teams={standings.filter(team => !team.conference || team.conference === "Unassigned")} />
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">All teams have been assigned to conferences.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </TabsContent>
     </Tabs>
   )

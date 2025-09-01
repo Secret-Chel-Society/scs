@@ -69,7 +69,7 @@ export default function SetupBotConfig() {
         <div className="space-y-2">
           <h4 className="font-medium">Configuration Details:</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Guild ID: 1345946042281234442</li>
+            <li>• Guild ID: {process.env.NEXT_PUBLIC_DISCORD_GUILD_ID || "Not configured"}</li>
             <li>• Registered Role ID: 1376351990354804848</li>
             <li>• Bot Token: Configured securely</li>
           </ul>

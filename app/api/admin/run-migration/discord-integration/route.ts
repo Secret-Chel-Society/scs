@@ -91,7 +91,7 @@ CREATE INDEX IF NOT EXISTS idx_live_streams_is_active ON live_streams(is_active)
 
 -- Insert default bot configuration (will be overridden by environment variables)
 INSERT INTO discord_bot_config (guild_id, bot_token, registered_role_id)
-VALUES ('1345946042281234442', 'placeholder_token', '1376312623728951339')
+VALUES ('', '', '1376312623728951339')
 ON CONFLICT DO NOTHING;
     `
 

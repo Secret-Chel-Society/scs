@@ -193,6 +193,7 @@ export default function LoginPage() {
                       <AlertCircle className="h-4 w-4" />
                       <AlertTitle className="text-red-200">Discord Login Error</AlertTitle>
                       <AlertDescription className="text-red-300">
+                        {discordError === "not_configured" && "Discord login is not properly configured. Please contact support."}
                         {discordError === "token_failed" && "Failed to authenticate with Discord. Please try again."}
                         {discordError === "user_info_failed" && "Failed to get Discord user information. Please try again."}
                         {discordError === "user_not_found" && "No account found with this Discord account. Please register first."}

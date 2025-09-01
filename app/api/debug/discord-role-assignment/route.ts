@@ -72,9 +72,8 @@ export async function POST(request: Request) {
     let discordInfo = null
     if (userInfo.discord_id) {
       try {
-        const GUILD_ID = process.env.DISCORD_GUILD_ID || "1345946042281234442"
-        const BOT_TOKEN =
-          process.env.DISCORD_BOT_TOKEN || "placeholder_token"
+        const GUILD_ID = process.env.DISCORD_GUILD_ID || ""
+        const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN || ""
 
         const memberResponse = await fetch(
           `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${userInfo.discord_id}`,
