@@ -1,21 +1,13 @@
-import { EnsureSeasonNumbers } from "@/components/admin/ensure-season-numbers"
-import { Database, Calendar } from "lucide-react"
+import { EnsureSeasonNumbersMigration } from "@/components/admin/ensure-season-numbers-migration"
 
 export default function EnsureSeasonNumbersPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Database className="h-8 w-8 text-orange-400" />
-            Ensure Season Numbers
-          </h1>
-          <p className="text-white/70 text-lg">
-            Ensure season numbers are properly configured
-          </p>
-        </div>
-        <EnsureSeasonNumbers />
-      </div>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Ensure Season Numbers</h1>
+      <p className="mb-6 text-muted-foreground">
+        This page allows you to run a migration that ensures all season numbers match their names.
+      </p>
+      <EnsureSeasonNumbersMigration />
     </div>
   )
 }

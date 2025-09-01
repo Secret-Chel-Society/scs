@@ -1,166 +1,186 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { useSupabase } from "@/lib/supabase/client"
-import { useToast } from "@/components/ui/use-toast"
-import { Calendar, Bug, Database } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Textarea } from "@/components/ui/textarea"
 
-export default function DebugSeasonsPage() {
+export default function SeasonsDebugPage() {
   const { supabase } = useSupabase()
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
-  const [tableInfo, setTableInfo] = useState<any>(null)
   const [seasons, setSeasons] = useState<any[]>([])
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [sqlQuery, setSqlQuery] = useState("SELECT * FROM seasons ORDER BY name")
+  const [queryResult, setQueryResult] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function checkAdminStatus() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (user) {
-        const { data } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .single()
-
-        setIsAdmin(!!data)
-      }
-    }
-
-    checkAdminStatus()
+    fetchSeasons()
   }, [supabase])
 
-  async function fetchSeasonsInfo() {
+  async function fetchSeasons() {
+    setLoading(true)
     try {
-      setLoading(true)
+      // Fetch seasons
+      const { data, error } = await supabase.from("seasons").select("*").order("name")
 
-      // First, let's get table information
-      const { data: tableData, error: tableError } = await supabase.rpc("get_table_info", {
-        table_name: "seasons",
-      })
+      if (error) throw error
+      setSeasons(data || [])
 
-      if (tableError) {
-        console.error("Error fetching table info:", tableError)
-        // Try a simpler approach
-        const { data: sampleData, error: sampleError } = await supabase
-          .from("seasons")
-          .select("*")
-          .limit(1)
-          .single()
+      // Process seasons to extract numbers from names
+      const processedSeasons = data.map((season) => {
+        const nameMatch = season.name.match(/Season\s+(\d+)/i)
+        const seasonNumber = nameMatch ? Number.parseInt(nameMatch[1], 10) : null
 
-        if (sampleError && sampleError.code !== "PGRST116") {
-          console.error("Error fetching sample season:", sampleError)
-        } else {
-          console.log("Sample season data:", sampleData)
-          setTableInfo(sampleData ? Object.keys(sampleData).map((key) => ({ column_name: key })) : [])
+        return {
+          ...season,
+          extracted_number: seasonNumber,
         }
-      } else {
-        console.log("Table info:", tableData)
-        setTableInfo(tableData)
-      }
-
-      // Now fetch some seasons
-      const { data: seasonsData, error: seasonsError } = await supabase.from("seasons").select("*").limit(10)
-
-      if (seasonsError) {
-        console.error("Error fetching seasons:", seasonsError)
-        throw seasonsError
-      }
-
-      console.log("Seasons data:", seasonsData)
-      setSeasons(seasonsData || [])
-
-      toast({
-        title: "Debug info loaded",
-        description: "Seasons table information has been loaded",
       })
+
+      console.log("Processed seasons:", processedSeasons)
     } catch (error: any) {
-      console.error("Error in debug page:", error)
-      toast({
-        title: "Debug Error",
-        description: error.message || "Failed to load debug information",
-        variant: "destructive",
-      })
+      console.error("Error fetching seasons:", error)
+      setError(error.message)
     } finally {
       setLoading(false)
     }
   }
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
-        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-          <CardContent className="p-12 text-center">
-            <h1 className="text-2xl font-bold mb-4 text-white">Access Denied</h1>
-            <p className="text-white/70">You need admin privileges to access this page.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  async function runQuery() {
+    try {
+      setError(null)
+      const { data, error } = await supabase.rpc("run_sql", { query: sqlQuery })
+
+      if (error) throw error
+      setQueryResult(data)
+    } catch (error: any) {
+      console.error("Error running query:", error)
+      setError(error.message)
+      setQueryResult(null)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Calendar className="h-8 w-8 text-orange-400" />
-            Seasons Table Debug
-          </h1>
-          <p className="text-white/70 text-lg">
-            Debug and inspect the seasons table structure and data
-          </p>
-        </div>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Seasons Debug</h1>
 
-        <div className="mb-8">
-          <Button 
-            onClick={fetchSeasonsInfo} 
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            {loading ? "Loading..." : "Fetch Seasons Info"}
-          </Button>
-        </div>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Seasons Table</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <p>Loading seasons...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Number (if exists)</TableHead>
+                    <TableHead>Extracted Number</TableHead>
+                    <TableHead>Created At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {seasons.map((season) => {
+                    // Extract number from season name
+                    const nameMatch = season.name.match(/Season\s+(\d+)/i)
+                    const extractedNumber = nameMatch ? Number.parseInt(nameMatch[1], 10) : null
 
-        {tableInfo && (
-          <Card className="mb-8 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-400" />
-                Table Structure
-              </CardTitle>
-              <CardDescription className="text-white/70">Columns in the seasons table</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
-                <pre className="text-sm text-white">{JSON.stringify(tableInfo, null, 2)}</pre>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                    return (
+                      <TableRow key={season.id}>
+                        <TableCell className="font-mono text-xs">{season.id}</TableCell>
+                        <TableCell>{season.name}</TableCell>
+                        <TableCell>{season.number !== undefined ? season.number : "N/A"}</TableCell>
+                        <TableCell>{extractedNumber !== null ? extractedNumber : "N/A"}</TableCell>
+                        <TableCell>{new Date(season.created_at).toLocaleString()}</TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
 
-        {seasons.length > 0 && (
-          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Bug className="h-5 w-5 text-green-400" />
-                Sample Seasons
-              </CardTitle>
-              <CardDescription className="text-white/70">Up to 10 seasons from the database</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
-                <pre className="text-sm text-white">{JSON.stringify(seasons, null, 2)}</pre>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle>Run SQL Query</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Textarea value={sqlQuery} onChange={(e) => setSqlQuery(e.target.value)} rows={5} className="font-mono" />
+              <Button onClick={runQuery}>Run Query</Button>
+
+              {error && (
+                <div className="p-4 bg-red-50 text-red-800 rounded-md">
+                  <p className="font-bold">Error:</p>
+                  <p>{error}</p>
+                </div>
+              )}
+
+              {queryResult && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold mb-2">Query Result:</h3>
+                  <pre className="bg-muted p-4 rounded-md overflow-auto max-h-96 text-xs">
+                    {JSON.stringify(queryResult, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Awards Debug</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Button
+                onClick={async () => {
+                  setSqlQuery("SELECT * FROM player_awards ORDER BY season_number, created_at DESC")
+                  await runQuery()
+                }}
+              >
+                View Player Awards
+              </Button>
+              <Button
+                onClick={async () => {
+                  setSqlQuery("SELECT * FROM team_awards ORDER BY season_number, created_at DESC")
+                  await runQuery()
+                }}
+              >
+                View Team Awards
+              </Button>
+              <Button
+                onClick={async () => {
+                  setSqlQuery(`
+                    SELECT 
+                      pa.id, 
+                      pa.award_type, 
+                      pa.season_number,
+                      s.name as season_name,
+                      pa.year
+                    FROM 
+                      player_awards pa
+                    LEFT JOIN 
+                      seasons s ON s.number = pa.season_number
+                    ORDER BY 
+                      pa.season_number, pa.created_at DESC
+                  `)
+                  await runQuery()
+                }}
+              >
+                Join Player Awards with Seasons
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

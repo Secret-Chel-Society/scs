@@ -1,23 +1,56 @@
 "use client"
 
-import { DiscordUsersTableMigration } from "@/components/admin/discord-users-table-migration"
-import { Database, MessageSquare } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export default function DiscordUsersTableMigrationPage() {
+  const [migrationStatus, setMigrationStatus] = useState<"idle" | "running" | "completed" | "error">("idle")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function runMigration() {
+      setMigrationStatus("running")
+      try {
+        const response = await fetch("/api/admin/migrate-discord-users-table", {
+          method: "POST",
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Migration failed with an unknown error.")
+        }
+
+        setMigrationStatus("completed")
+      } catch (error: any) {
+        setMigrationStatus("error")
+        setErrorMessage(error.message)
+      }
+    }
+
+    runMigration()
+  }, [])
+
+  let statusMessage = ""
+  if (migrationStatus === "running") {
+    statusMessage = "Migration is running..."
+  } else if (migrationStatus === "completed") {
+    statusMessage = "Migration completed successfully!"
+  } else if (migrationStatus === "error") {
+    statusMessage = `Migration failed: ${errorMessage}`
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Database className="h-8 w-8 text-indigo-400" />
-            Discord Users Table Migration
-          </h1>
-          <p className="text-white/70 text-lg">
-            Migrate Discord users table and structure
-          </p>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Discord Users Table Migration</h1>
+      {statusMessage && (
+        <div
+          className={`mb-4 p-3 rounded-md ${
+            migrationStatus === "error" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
+          }`}
+        >
+          {statusMessage}
         </div>
-        <DiscordUsersTableMigration />
-      </div>
+      )}
+      {migrationStatus === "idle" && <p>Migration will start automatically.</p>}
     </div>
   )
 }

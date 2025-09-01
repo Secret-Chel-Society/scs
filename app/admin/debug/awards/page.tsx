@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
-import { Award, Bug, Database } from "lucide-react"
 
 export default function DebugAwardsPage() {
   const { supabase } = useSupabase()
@@ -94,11 +93,11 @@ export default function DebugAwardsPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
-        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+      <div className="container mx-auto px-4 py-8">
+        <Card>
           <CardContent className="p-12 text-center">
-            <h1 className="text-2xl font-bold mb-4 text-white">Access Denied</h1>
-            <p className="text-white/70">You need admin privileges to access this page.</p>
+            <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+            <p className="text-muted-foreground">You need admin privileges to access this page.</p>
           </CardContent>
         </Card>
       </div>
@@ -106,62 +105,42 @@ export default function DebugAwardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Award className="h-8 w-8 text-yellow-400" />
-            Awards Table Debug
-          </h1>
-          <p className="text-white/70 text-lg">
-            Debug and inspect the player awards table structure and data
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Awards Table Debug</h1>
 
-        <div className="mb-8">
-          <Button 
-            onClick={fetchAwardsInfo} 
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            {loading ? "Loading..." : "Fetch Awards Info"}
-          </Button>
-        </div>
-
-        {tableInfo && (
-          <Card className="mb-8 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-400" />
-                Table Structure
-              </CardTitle>
-              <CardDescription className="text-white/70">Columns in the player_awards table</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
-                <pre className="text-sm text-white">{JSON.stringify(tableInfo, null, 2)}</pre>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {awards.length > 0 && (
-          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Bug className="h-5 w-5 text-green-400" />
-                Sample Awards
-              </CardTitle>
-              <CardDescription className="text-white/70">Up to 10 awards from the database</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
-                <pre className="text-sm text-white">{JSON.stringify(awards, null, 2)}</pre>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <div className="mb-8">
+        <Button onClick={fetchAwardsInfo} disabled={loading}>
+          {loading ? "Loading..." : "Fetch Awards Info"}
+        </Button>
       </div>
+
+      {tableInfo && (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Table Structure</CardTitle>
+            <CardDescription>Columns in the player_awards table</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-muted p-4 rounded-md overflow-x-auto">
+              <pre className="text-sm">{JSON.stringify(tableInfo, null, 2)}</pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {awards.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Sample Awards</CardTitle>
+            <CardDescription>Up to 10 awards from the database</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-muted p-4 rounded-md overflow-x-auto">
+              <pre className="text-sm">{JSON.stringify(awards, null, 2)}</pre>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

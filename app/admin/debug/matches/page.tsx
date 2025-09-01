@@ -1,167 +1,217 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
-import { Gamepad2, Bug, Database } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
+import { TeamLogo } from "@/components/team-logo"
+import Link from "next/link"
 
 export default function DebugMatchesPage() {
-  const { supabase } = useSupabase()
-  const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
-  const [tableInfo, setTableInfo] = useState<any>(null)
   const [matches, setMatches] = useState<any[]>([])
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [columnInfo, setColumnInfo] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
-    async function checkAdminStatus() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+    async function fetchMatches() {
+      try {
+        setLoading(true)
+        const response = await fetch("/api/debug/all-matches")
 
-      if (user) {
-        const { data } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .single()
+        if (!response.ok) {
+          throw new Error("Failed to fetch matches")
+        }
 
-        setIsAdmin(!!data)
+        const data = await response.json()
+        setMatches(data.matches || [])
+        setColumnInfo(data.columnInfo)
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load matches",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
       }
     }
 
-    checkAdminStatus()
-  }, [supabase])
+    fetchMatches()
+  }, [toast])
 
-  async function fetchMatchesInfo() {
+  const updateSeasonName = async (matchId: string) => {
     try {
-      setLoading(true)
-
-      // First, let's get table information
-      const { data: tableData, error: tableError } = await supabase.rpc("get_table_info", {
-        table_name: "matches",
+      const response = await fetch(`/api/admin/update-season-name?matchId=${matchId}`, {
+        method: "POST",
       })
 
-      if (tableError) {
-        console.error("Error fetching table info:", tableError)
-        // Try a simpler approach
-        const { data: sampleData, error: sampleError } = await supabase
-          .from("matches")
-          .select("*")
-          .limit(1)
-          .single()
-
-        if (sampleError && sampleError.code !== "PGRST116") {
-          console.error("Error fetching sample match:", sampleError)
-        } else {
-          console.log("Sample match data:", sampleData)
-          setTableInfo(sampleData ? Object.keys(sampleData).map((key) => ({ column_name: key })) : [])
-        }
-      } else {
-        console.log("Table info:", tableData)
-        setTableInfo(tableData)
+      if (!response.ok) {
+        throw new Error("Failed to update season name")
       }
-
-      // Now fetch some matches
-      const { data: matchesData, error: matchesError } = await supabase.from("matches").select("*").limit(10)
-
-      if (matchesError) {
-        console.error("Error fetching matches:", matchesError)
-        throw matchesError
-      }
-
-      console.log("Matches data:", matchesData)
-      setMatches(matchesData || [])
 
       toast({
-        title: "Debug info loaded",
-        description: "Matches table information has been loaded",
+        title: "Success",
+        description: "Season name updated successfully",
       })
+
+      // Refresh matches
+      const refreshResponse = await fetch("/api/debug/all-matches")
+      const data = await refreshResponse.json()
+      setMatches(data.matches || [])
     } catch (error: any) {
-      console.error("Error in debug page:", error)
       toast({
-        title: "Debug Error",
-        description: error.message || "Failed to load debug information",
+        title: "Error",
+        description: error.message || "Failed to update season name",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const updateAllSeasonNames = async () => {
+    try {
+      setUpdating(true)
+      const response = await fetch("/api/admin/update-all-season-names", {
+        method: "POST",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update all season names")
+      }
+
+      const data = await response.json()
+      toast({
+        title: "Success",
+        description: data.message || "All season names updated successfully",
+      })
+
+      // Refresh matches
+      const refreshResponse = await fetch("/api/debug/all-matches")
+      const refreshData = await refreshResponse.json()
+      setMatches(refreshData.matches || [])
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update all season names",
         variant: "destructive",
       })
     } finally {
-      setLoading(false)
+      setUpdating(false)
     }
   }
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
-        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-          <CardContent className="p-12 text-center">
-            <h1 className="text-2xl font-bold mb-4 text-white">Access Denied</h1>
-            <p className="text-white/70">You need admin privileges to access this page.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Gamepad2 className="h-8 w-8 text-purple-400" />
-            Matches Table Debug
-          </h1>
-          <p className="text-white/70 text-lg">
-            Debug and inspect the matches table structure and data
-          </p>
-        </div>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Debug Matches</h1>
 
-        <div className="mb-8">
-          <Button 
-            onClick={fetchMatchesInfo} 
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            {loading ? "Loading..." : "Fetch Matches Info"}
-          </Button>
-        </div>
-
-        {tableInfo && (
-          <Card className="mb-8 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-400" />
-                Table Structure
-              </CardTitle>
-              <CardDescription className="text-white/70">Columns in the matches table</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
-                <pre className="text-sm text-white">{JSON.stringify(tableInfo, null, 2)}</pre>
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Database Information</CardTitle>
+          <CardDescription>Information about the matches table structure</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <Skeleton className="h-20 w-full" />
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold">Season ID Column Type:</h3>
+                <p>{columnInfo || "Unknown"}</p>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {matches.length > 0 && (
-          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Bug className="h-5 w-5 text-green-400" />
-                Sample Matches
-              </CardTitle>
-              <CardDescription className="text-white/70">Up to 10 matches from the database</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-slate-800/50 p-4 rounded-md overflow-x-auto border border-white/20">
-                <pre className="text-sm text-white">{JSON.stringify(matches, null, 2)}</pre>
+              <div>
+                <h3 className="font-semibold">Total Matches:</h3>
+                <p>{matches.length}</p>
               </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+              <div className="pt-4">
+                <Button onClick={updateAllSeasonNames} disabled={updating}>
+                  {updating ? "Updating..." : "Update All Season Names"}
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This will update the season_name field for all matches based on their season_id.
+                </p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Matches</CardTitle>
+          <CardDescription>Showing up to 100 most recent matches</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <Skeleton className="h-96 w-full" />
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Teams</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Season ID</TableHead>
+                    <TableHead>Season Name</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {matches.map((match) => (
+                    <TableRow key={match.id}>
+                      <TableCell className="font-mono text-xs">{match.id}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <TeamLogo teamName={match.home_team?.name || "Unknown"} size="xs" />
+                          <span>{match.home_team?.name || "Unknown"}</span>
+                          <span className="mx-1">vs</span>
+                          <TeamLogo teamName={match.away_team?.name || "Unknown"} size="xs" />
+                          <span>{match.away_team?.name || "Unknown"}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {match.home_score !== null && match.away_score !== null
+                          ? `${match.home_score} - ${match.away_score}`
+                          : "Not played"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            match.status === "completed" || match.status === "Completed" ? "success" : "secondary"
+                          }
+                        >
+                          {match.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {match.season_id !== null ? match.season_id : "null"}
+                      </TableCell>
+                      <TableCell>{match.season_name || "Not set"}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Link href={`/matches/${match.id}`}>
+                            <Button variant="outline" size="sm">
+                              View
+                            </Button>
+                          </Link>
+                          <Button variant="outline" size="sm" onClick={() => updateSeasonName(match.id)}>
+                            Update Season Name
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
