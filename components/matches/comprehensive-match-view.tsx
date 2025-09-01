@@ -39,6 +39,10 @@ interface PlayerStat {
   ppg?: number
   time_with_puck?: number
   interceptions?: number
+  // Goalie-specific fields
+  saves?: number
+  shots_against?: number
+  goals_against?: number
 }
 
 interface TeamStats {
