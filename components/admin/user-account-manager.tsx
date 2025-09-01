@@ -3,14 +3,15 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { AlertCircle, Search, Trash2, UserCheck, RefreshCw, User, Database, Shield, Key } from "lucide-react"
+import { AlertCircle, Search, Trash2, UserCheck, RefreshCw, User, Database, Shield, Key, ArrowLeft } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Label } from "@/components/ui/label"
+import Link from "next/link"
 
 export function UserAccountManager() {
   const [email, setEmail] = useState("")
@@ -242,7 +243,7 @@ export function UserAccountManager() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between border-t border-white/20 bg-slate-800/30 px-6 py-4">
+            <CardContent className="flex justify-between border-t border-white/20 bg-slate-800/30 px-6 py-4">
               <Button
                 variant="outline"
                 onClick={() => handleVerifyUser(searchResults.authUser.id)}
@@ -261,7 +262,7 @@ export function UserAccountManager() {
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Auth User
               </Button>
-            </CardFooter>
+            </CardContent>
           </Card>
         )}
 
@@ -296,7 +297,7 @@ export function UserAccountManager() {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
+            <CardContent className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
               <Button
                 variant="destructive"
                 onClick={() => handleDeleteUser(searchResults.dbUser.id, "database")}
@@ -306,7 +307,7 @@ export function UserAccountManager() {
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete DB User
               </Button>
-            </CardFooter>
+            </CardContent>
           </Card>
         )}
 
@@ -341,12 +342,12 @@ export function UserAccountManager() {
                 ))}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
+            <CardContent className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
               <Button variant="destructive" onClick={() => handleDeleteUser(email, "tokens")} disabled={isLoading} className="bg-red-500 hover:bg-red-600 text-white">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete All Tokens
               </Button>
-            </CardFooter>
+            </CardContent>
           </Card>
         )}
 
@@ -408,6 +409,14 @@ export function UserAccountManager() {
 
   return (
     <div className="space-y-6">
+      {/* Back to Admin Dashboard */}
+      <div className="flex items-center gap-2 mb-6">
+        <ArrowLeft className="h-5 w-5 text-white/70" />
+        <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
+          Back to Admin Dashboard
+        </Link>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-white/20">
           <TabsTrigger value="search" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Search User</TabsTrigger>
@@ -453,8 +462,8 @@ export function UserAccountManager() {
                 </Alert>
               )}
             </CardContent>
-            <CardFooter>
-              <Button onClick={handleSearch} disabled={isLoading || !email || !adminKey} className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
+            <CardContent className="flex justify-end border-t border-white/20 bg-slate-800/30 px-6 py-4">
+              <Button onClick={handleSearch} disabled={isLoading || !email || !adminKey} className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
                 {isLoading ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -467,7 +476,7 @@ export function UserAccountManager() {
                   </>
                 )}
               </Button>
-            </CardFooter>
+            </CardContent>
           </Card>
         </TabsContent>
         <TabsContent value="results" className="space-y-4 pt-4">

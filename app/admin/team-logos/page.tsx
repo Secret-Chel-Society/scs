@@ -13,13 +13,14 @@ import { useSupabase } from "@/lib/supabase/client"
 import { TEAM_LOGOS } from "@/lib/team-logos"
 import Image from "next/image"
 import { TeamLogo } from "@/components/team-logo"
-import { Loader2, Check, AlertCircle, Upload, RefreshCw, Info } from "lucide-react"
+import { Loader2, Check, AlertCircle, Upload, RefreshCw, Info, ArrowLeft, Shield } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
+import Link from "next/link"
 
 export default function AdminTeamLogosPage() {
   const { supabase, session } = useSupabase()
@@ -361,9 +362,15 @@ export default function AdminTeamLogosPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/3 mb-6" />
-        <Skeleton className="h-[400px] w-full rounded-lg" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+              <p className="text-white/70">Loading team logo management...</p>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -373,191 +380,128 @@ export default function AdminTeamLogosPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Team Logo Management</h1>
-        <Button onClick={handleUpdateAllLogos} disabled={updating}>
-          {updating ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Updating...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Update All Team Logos from Storage
-            </>
-          )}
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Header */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-6">
+            <ArrowLeft className="h-5 w-5 text-white/70" />
+            <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
+              Back to Admin Dashboard
+            </Link>
+          </div>
+
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
+                <Shield className="h-8 w-8 text-blue-400" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Team Logo Management
+                </h1>
+                <p className="text-white/70 mt-1">Manage team logos and storage assets</p>
+              </div>
+            </div>
+            <Button 
+              onClick={handleUpdateAllLogos} 
+              disabled={updating}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+            >
+              {updating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Update All Team Logos from Storage
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="current">Current Logos</TabsTrigger>
-          <TabsTrigger value="storage">Storage Management</TabsTrigger>
-          <TabsTrigger value="debug">Debug Info</TabsTrigger>
-          {updateResults.length > 0 && <TabsTrigger value="results">Update Results</TabsTrigger>}
-        </TabsList>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 pb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6 bg-slate-800/50 border border-white/20">
+            <TabsTrigger value="current" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Current Logos</TabsTrigger>
+            <TabsTrigger value="storage" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Storage Management</TabsTrigger>
+            <TabsTrigger value="debug" className="text-white data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400">Debug Info</TabsTrigger>
+            {updateResults.length > 0 && <TabsTrigger value="results" className="text-white data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">Update Results</TabsTrigger>}
+          </TabsList>
 
-        <TabsContent value="current">
-          <Card>
-            <CardHeader>
-              <CardTitle>Current Team Logos</CardTitle>
-              <CardDescription>Current logos assigned to teams in the database</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Team Name</TableHead>
-                      <TableHead>Current Logo</TableHead>
-                      <TableHead>Storage Logo</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {teams.map((team) => {
-                      const storageUrl = storageLogos[team.name]
-                      const hasStorageLogo = !!storageUrl
-                      const isUsingStorageLogo = team.logo_url === storageUrl
+          <TabsContent value="current">
+            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white">Current Team Logos</CardTitle>
+                <CardDescription className="text-white/70">Current logos assigned to teams in the database</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border border-white/20 overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-white/20">
+                        <TableHead className="text-white">Team Name</TableHead>
+                        <TableHead className="text-white">Current Logo</TableHead>
+                        <TableHead className="text-white">Storage Logo</TableHead>
+                        <TableHead className="text-white">Status</TableHead>
+                        <TableHead className="text-white">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {teams.map((team) => {
+                        const storageUrl = storageLogos[team.name]
+                        const hasStorageLogo = !!storageUrl
+                        const isUsingStorageLogo = team.logo_url === storageUrl
 
-                      return (
-                        <TableRow key={team.id}>
-                          <TableCell className="font-medium">{team.name}</TableCell>
-                          <TableCell>
-                            <div className="h-16 w-16 relative">
-                              {team.logo_url ? (
-                                <>
-                                  <Image
-                                    src={team.logo_url || "/placeholder.svg"}
-                                    alt={`${team.name} logo`}
-                                    fill
-                                    className="object-contain"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = "none"
-                                      const parent = e.currentTarget.parentElement
-                                      if (parent) {
-                                        const fallback = document.createElement("div")
-                                        fallback.className = "flex items-center justify-center h-full w-full"
-                                        fallback.innerHTML = `<span class="text-xs text-red-500">Image not found</span>`
-                                        parent.appendChild(fallback)
-                                      }
-                                    }}
-                                  />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
-                                    onClick={() => setSelectedImage(team.logo_url)}
-                                  >
-                                    <Info className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              ) : (
-                                <TeamLogo teamName={team.name} size="lg" />
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {hasStorageLogo ? (
+                        return (
+                          <TableRow key={team.id} className="border-white/20 hover:bg-white/5">
+                            <TableCell className="font-medium text-white">{team.name}</TableCell>
+                            <TableCell>
                               <div className="h-16 w-16 relative">
-                                <Image
-                                  src={storageUrl || "/placeholder.svg"}
-                                  alt={`Storage ${team.name} logo`}
-                                  fill
-                                  className="object-contain"
-                                  onError={(e) => {
-                                    e.currentTarget.style.display = "none"
-                                    const parent = e.currentTarget.parentElement
-                                    if (parent) {
-                                      const fallback = document.createElement("div")
-                                      fallback.className = "flex items-center justify-center h-full w-full"
-                                      fallback.innerHTML = `<span class="text-xs text-red-500">Image not found</span>`
-                                      parent.appendChild(fallback)
-                                    }
-                                  }}
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
-                                  onClick={() => setSelectedImage(storageUrl)}
-                                >
-                                  <Info className="h-4 w-4" />
-                                </Button>
+                                {team.logo_url ? (
+                                  <>
+                                    <Image
+                                      src={team.logo_url || "/placeholder.svg"}
+                                      alt={`${team.name} logo`}
+                                      fill
+                                      className="object-contain"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = "none"
+                                        const parent = e.currentTarget.parentElement
+                                        if (parent) {
+                                          const fallback = document.createElement("div")
+                                          fallback.className = "flex items-center justify-center h-full w-full"
+                                          fallback.innerHTML = `<span class="text-xs text-red-500">Image not found</span>`
+                                          parent.appendChild(fallback)
+                                        }
+                                      }}
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                                      onClick={() => setSelectedImage(team.logo_url)}
+                                    >
+                                      <Info className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <TeamLogo teamName={team.name} size="lg" />
+                                )}
                               </div>
-                            ) : (
-                              <span className="text-muted-foreground">No storage logo</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {!hasStorageLogo ? (
-                              <span className="flex items-center text-amber-500">
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                No logo in storage
-                              </span>
-                            ) : isUsingStorageLogo ? (
-                              <span className="flex items-center text-green-500">
-                                <Check className="h-4 w-4 mr-1" />
-                                Using storage logo
-                              </span>
-                            ) : (
-                              <span className="flex items-center text-amber-500">
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                Not using storage logo
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="outline" size="sm" onClick={() => openEditDialog(team)}>
-                              Edit URL
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="storage">
-          <Card>
-            <CardHeader>
-              <CardTitle>Logo Storage Management</CardTitle>
-              <CardDescription>Upload and manage team logos in storage</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Team Name</TableHead>
-                      <TableHead>Storage Filename</TableHead>
-                      <TableHead>Preview</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Object.entries(TEAM_LOGOS).map(([teamName, filename]) => {
-                      const storageUrl = storageLogos[teamName]
-                      const debug = debugInfo[teamName] || {}
-
-                      return (
-                        <TableRow key={teamName}>
-                          <TableCell className="font-medium">{teamName}</TableCell>
-                          <TableCell>teams/{filename}</TableCell>
-                          <TableCell>
-                            <div className="h-16 w-16 relative">
-                              {storageUrl ? (
-                                <>
+                            </TableCell>
+                            <TableCell>
+                              {hasStorageLogo ? (
+                                <div className="h-16 w-16 relative">
                                   <Image
                                     src={storageUrl || "/placeholder.svg"}
-                                    alt={`${teamName} logo`}
+                                    alt={`Storage ${team.name} logo`}
                                     fill
                                     className="object-contain"
                                     onError={(e) => {
@@ -574,160 +518,209 @@ export default function AdminTeamLogosPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full text-white/70 hover:text-white hover:bg-white/10"
                                     onClick={() => setSelectedImage(storageUrl)}
                                   >
                                     <Info className="h-4 w-4" />
                                   </Button>
-                                </>
-                              ) : (
-                                <div className="flex items-center justify-center h-full w-full bg-gray-100 rounded">
-                                  <span className="text-xs text-muted-foreground">No logo</span>
                                 </div>
+                              ) : (
+                                <span className="text-white/50">No storage logo</span>
                               )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-2">
-                              <div className="relative">
-                                <input
-                                  type="file"
-                                  id={`logo-upload-${teamName}`}
-                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                  accept="image/png,image/jpeg,image/gif"
-                                  onChange={(e) => handleUploadLogo(teamName, e)}
-                                  disabled={uploadingTeam !== null}
-                                />
-                                <Button variant="outline" className="w-full" disabled={uploadingTeam !== null}>
-                                  {uploadingTeam === teamName ? (
-                                    <>
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                      Uploading...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Upload className="h-4 w-4 mr-2" />
-                                      Upload Logo
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-
-                              {uploadingTeam === teamName && <Progress value={uploadProgress} className="h-2" />}
-
-                              {debug.fileExists === false && (
-                                <p className="text-xs text-amber-500 mt-1">File not found in storage</p>
+                            </TableCell>
+                            <TableCell>
+                              {!hasStorageLogo ? (
+                                <span className="flex items-center text-amber-400">
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  No logo in storage
+                                </span>
+                              ) : isUsingStorageLogo ? (
+                                <span className="flex items-center text-green-400">
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Using storage logo
+                                </span>
+                              ) : (
+                                <span className="flex items-center text-amber-400">
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Not using storage logo
+                                </span>
                               )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                            </TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => openEditDialog(team)}
+                                className="border-white/20 text-white hover:bg-white/10"
+                              >
+                                Edit URL
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <TabsContent value="debug">
-          <Card>
-            <CardHeader>
-              <CardTitle>Debug Information</CardTitle>
-              <CardDescription>Detailed information about team logos and storage</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Team Name</TableHead>
-                      <TableHead>Storage Path</TableHead>
-                      <TableHead>Public URL</TableHead>
-                      <TableHead>File Exists</TableHead>
-                      <TableHead>Error</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Object.entries(debugInfo).map(([teamName, info]) => (
-                      <TableRow key={teamName}>
-                        <TableCell className="font-medium">{teamName}</TableCell>
-                        <TableCell>
-                          <code className="text-xs">{info.storagePath}</code>
-                        </TableCell>
-                        <TableCell>
-                          <div className="max-w-[200px] truncate">
-                            <code className="text-xs">{info.publicUrl || "N/A"}</code>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {info.fileExists === true ? (
-                            <span className="text-green-500">Yes</span>
-                          ) : info.fileExists === false ? (
-                            <span className="text-red-500">No</span>
-                          ) : (
-                            <span className="text-muted-foreground">Unknown</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {info.error || info.fileListError ? (
-                            <div className="max-w-[200px] truncate text-red-500 text-xs">
-                              {info.error || info.fileListError}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">None</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {updateResults.length > 0 && (
-          <TabsContent value="results">
-            <Card>
+          <TabsContent value="storage">
+            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
               <CardHeader>
-                <CardTitle>Update Results</CardTitle>
-                <CardDescription>Results from the last logo update operation</CardDescription>
+                <CardTitle className="text-white">Logo Storage Management</CardTitle>
+                <CardDescription className="text-white/70">Upload and manage team logos in storage</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border overflow-x-auto">
+                <div className="rounded-md border border-white/20 overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Team Name</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Details</TableHead>
+                      <TableRow className="border-white/20">
+                        <TableHead className="text-white">Team Name</TableHead>
+                        <TableHead className="text-white">Storage Filename</TableHead>
+                        <TableHead className="text-white">Preview</TableHead>
+                        <TableHead className="text-white">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {updateResults.map((result, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{result.team}</TableCell>
+                      {Object.entries(TEAM_LOGOS).map(([teamName, filename]) => {
+                        const storageUrl = storageLogos[teamName]
+                        const debug = debugInfo[teamName] || {}
+
+                        return (
+                          <TableRow key={teamName} className="border-white/20 hover:bg-white/5">
+                            <TableCell className="font-medium text-white">{teamName}</TableCell>
+                            <TableCell className="text-white">teams/{filename}</TableCell>
+                            <TableCell>
+                              <div className="h-16 w-16 relative">
+                                {storageUrl ? (
+                                  <>
+                                    <Image
+                                      src={storageUrl || "/placeholder.svg"}
+                                      alt={`${teamName} logo`}
+                                      fill
+                                      className="object-contain"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = "none"
+                                        const parent = e.currentTarget.parentElement
+                                        if (parent) {
+                                          const fallback = document.createElement("div")
+                                          fallback.className = "flex items-center justify-center h-full w-full"
+                                          fallback.innerHTML = `<span class="text-xs text-red-500">Image not found</span>`
+                                          parent.appendChild(fallback)
+                                        }
+                                      }}
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full text-white/70 hover:text-white hover:bg-white/10"
+                                      onClick={() => setSelectedImage(storageUrl)}
+                                    >
+                                      <Info className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <div className="flex items-center justify-center h-full w-full bg-slate-800 rounded">
+                                    <span className="text-xs text-white/50">No logo</span>
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-2">
+                                <div className="relative">
+                                  <input
+                                    type="file"
+                                    id={`logo-upload-${teamName}`}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    accept="image/png,image/jpeg,image/gif"
+                                    onChange={(e) => handleUploadLogo(teamName, e)}
+                                    disabled={uploadingTeam !== null}
+                                  />
+                                  <Button 
+                                    variant="outline" 
+                                    className="w-full border-white/20 text-white hover:bg-white/10" 
+                                    disabled={uploadingTeam !== null}
+                                  >
+                                    {uploadingTeam === teamName ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Uploading...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Upload className="h-4 w-4 mr-2" />
+                                        Upload Logo
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+
+                                {uploadingTeam === teamName && <Progress value={uploadProgress} className="h-2" />}
+
+                                {debug.fileExists === false && (
+                                  <p className="text-xs text-amber-400 mt-1">File not found in storage</p>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="debug">
+            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+              <CardHeader>
+                <CardTitle className="text-white">Debug Information</CardTitle>
+                <CardDescription className="text-white/70">Detailed information about team logos and storage</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border border-white/20 overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-white/20">
+                        <TableHead className="text-white">Team Name</TableHead>
+                        <TableHead className="text-white">Storage Path</TableHead>
+                        <TableHead className="text-white">Public URL</TableHead>
+                        <TableHead className="text-white">File Exists</TableHead>
+                        <TableHead className="text-white">Error</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Object.entries(debugInfo).map(([teamName, info]) => (
+                        <TableRow key={teamName} className="border-white/20 hover:bg-white/5">
+                          <TableCell className="font-medium text-white">{teamName}</TableCell>
                           <TableCell>
-                            {result.success ? (
-                              <span className="flex items-center text-green-500">
-                                <Check className="h-4 w-4 mr-1" />
-                                Success
-                              </span>
+                            <code className="text-xs text-white/70">{info.storagePath}</code>
+                          </TableCell>
+                          <TableCell>
+                            <div className="max-w-[200px] truncate">
+                              <code className="text-xs text-white/70">{info.publicUrl || "N/A"}</code>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {info.fileExists === true ? (
+                              <span className="text-green-400">Yes</span>
+                            ) : info.fileExists === false ? (
+                              <span className="text-red-400">No</span>
                             ) : (
-                              <span className="flex items-center text-red-500">
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                Failed
-                              </span>
+                              <span className="text-white/50">Unknown</span>
                             )}
                           </TableCell>
                           <TableCell>
-                            {result.success ? (
-                              <span className="text-xs text-muted-foreground truncate max-w-[200px] block">
-                                {result.url}
-                              </span>
+                            {info.error || info.fileListError ? (
+                              <div className="max-w-[200px] truncate text-red-400 text-xs">
+                                {info.error || info.fileListError}
+                              </div>
                             ) : (
-                              <span className="text-xs text-red-500">{result.error}</span>
+                              <span className="text-white/50">None</span>
                             )}
                           </TableCell>
                         </TableRow>
@@ -738,78 +731,140 @@ export default function AdminTeamLogosPage() {
               </CardContent>
             </Card>
           </TabsContent>
-        )}
-      </Tabs>
 
-      {/* Edit URL Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Logo URL for {editingTeam?.name}</DialogTitle>
-            <DialogDescription>Enter a new URL for the team logo</DialogDescription>
-          </DialogHeader>
-          <Form {...logoForm}>
-            <form onSubmit={logoForm.handleSubmit(handleManualLogoUpdate)} className="space-y-4 py-4">
-              <FormField
-                control={logoForm.control}
-                name="logoUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Logo URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/logo.png" {...field} disabled={updating} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end">
-                <Button type="submit" disabled={updating}>
-                  {updating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save"
+          {updateResults.length > 0 && (
+            <TabsContent value="results">
+              <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+                <CardHeader>
+                  <CardTitle className="text-white">Update Results</CardTitle>
+                  <CardDescription className="text-white/70">Results from the last logo update operation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border border-white/20 overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-white/20">
+                          <TableHead className="text-white">Team Name</TableHead>
+                          <TableHead className="text-white">Status</TableHead>
+                          <TableHead className="text-white">Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {updateResults.map((result, index) => (
+                          <TableRow key={index} className="border-white/20 hover:bg-white/5">
+                            <TableCell className="font-medium text-white">{result.team}</TableCell>
+                            <TableCell>
+                              {result.success ? (
+                                <span className="flex items-center text-green-400">
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Success
+                                </span>
+                              ) : (
+                                <span className="flex items-center text-red-400">
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Failed
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {result.success ? (
+                                <span className="text-xs text-white/70 truncate max-w-[200px] block">
+                                  {result.url}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-red-400">{result.error}</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+        </Tabs>
+
+        {/* Edit URL Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Edit Logo URL for {editingTeam?.name}</DialogTitle>
+              <DialogDescription className="text-white/70">Enter a new URL for the team logo</DialogDescription>
+            </DialogHeader>
+            <Form {...logoForm}>
+              <form onSubmit={logoForm.handleSubmit(handleManualLogoUpdate)} className="space-y-4 py-4">
+                <FormField
+                  control={logoForm.control}
+                  name="logoUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Logo URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://example.com/logo.png" 
+                          {...field} 
+                          disabled={updating}
+                          className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                        />
+                      </FormControl>
+                    </FormItem>
                   )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Image preview dialog */}
-      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Image Preview</DialogTitle>
-            <DialogDescription>
-              URL: <code className="text-xs">{selectedImage}</code>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center p-4 bg-gray-100 rounded-md">
-            {selectedImage && (
-              <div className="relative h-[300px] w-full">
-                <Image
-                  src={selectedImage || "/placeholder.svg"}
-                  alt="Image preview"
-                  fill
-                  className="object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none"
-                    const parent = e.currentTarget.parentElement
-                    if (parent) {
-                      parent.innerHTML =
-                        '<div class="flex items-center justify-center h-full w-full"><span class="text-red-500">Failed to load image</span></div>'
-                    }
-                  }}
                 />
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                <div className="flex justify-end">
+                  <Button 
+                    type="submit" 
+                    disabled={updating}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+                  >
+                    {updating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Image preview dialog */}
+        <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+          <DialogContent className="max-w-3xl bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Image Preview</DialogTitle>
+              <DialogDescription className="text-white/70">
+                URL: <code className="text-xs text-white/70">{selectedImage}</code>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center p-4 bg-slate-800 rounded-md">
+              {selectedImage && (
+                <div className="relative h-[300px] w-full">
+                  <Image
+                    src={selectedImage || "/placeholder.svg"}
+                    alt="Image preview"
+                    fill
+                    className="object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none"
+                      const parent = e.currentTarget.parentElement
+                      if (parent) {
+                        parent.innerHTML =
+                          '<div class="flex items-center justify-center h-full w-full"><span class="text-red-400">Failed to load image</span></div>'
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   )
 }
