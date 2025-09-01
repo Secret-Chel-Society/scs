@@ -334,7 +334,11 @@ export default function UsersManagementClient() {
   // Check authorization and load data
   useEffect(() => {
     async function checkAuthorization() {
+      console.log("checkAuthorization running...")
+      console.log("Session user:", session?.user)
+      
       if (!session?.user) {
+        console.log("No session user found")
         toast({
           title: "Unauthorized",
           description: "You must be logged in to access this page.",
@@ -345,11 +349,14 @@ export default function UsersManagementClient() {
       }
 
       try {
+        console.log("Checking admin role for user:", session.user.id)
         const { data: adminRoleData, error: adminRoleError } = await supabase
           .from("user_roles")
           .select("*")
           .eq("user_id", session.user.id)
           .eq("role", "Admin")
+
+        console.log("Admin role check result:", { adminRoleData, adminRoleError })
 
         if (adminRoleError || !adminRoleData || adminRoleData.length === 0) {
           console.log("No admin role found in user_roles")
@@ -362,7 +369,7 @@ export default function UsersManagementClient() {
           return
         }
 
-        console.log("User has admin access")
+        console.log("User has admin access, loading data...")
         setIsAdmin(true)
 
         // Load data in sequence to avoid rate limits
@@ -385,6 +392,7 @@ export default function UsersManagementClient() {
         }
 
         await fetchValidRoles()
+        console.log("About to call fetchUsers...")
         fetchUsers()
       } catch (error: any) {
         console.error("Error checking authorization:", error)
@@ -496,80 +504,90 @@ export default function UsersManagementClient() {
     }
   }
 
-  const fetchUsers = async () => {
+  async function fetchUsers(retryCount = 0) {
+    setLoading(true)
     try {
-      setLoading(true)
-      
-      // Fetch users with their roles, team info, and season registrations
+      // Fetch users with their player roles and user_roles
       const { data: usersData, error: usersError } = await supabase
         .from("users")
         .select(`
-          *,
-          user_roles!inner(role),
-          team_memberships(
-            team:teams(
-              id,
-              name
-            )
-          ),
-          season_registrations(
+        *,
+        players(
+          id,
+          role,
+          team_id,
+          salary,
+          teams:teams(
             id,
-            season_number,
-            status,
-            primary_position,
-            secondary_position,
-            console
+            name
           )
-        `)
+        ),
+        user_roles(
+          id,
+          role
+        )
+      `)
         .order("created_at", { ascending: false })
 
       if (usersError) {
-        console.error("Error fetching users:", usersError)
-        toast({
-          title: "Error fetching users",
-          description: usersError.message,
-          variant: "destructive",
-        })
-        return
+        // Check if this is a rate limit error
+        if (usersError.message && usersError.message.includes("Too Many Requests") && retryCount < 3) {
+          console.log(`Rate limited, retrying in ${(retryCount + 1) * 1000}ms...`)
+          setTimeout(() => fetchUsers(retryCount + 1), (retryCount + 1) * 1000)
+          return
+        }
+        throw usersError
       }
 
-      // Transform the data to match the expected format
-      const transformedUsers = usersData?.map((user: any) => {
-        // Extract roles from the user_roles array
-        const roles = user.user_roles?.map((ur: any) => ur.role) || []
-        
-        // Get team info from team_memberships
-        const teamMembership = user.team_memberships?.[0]
-        const teamName = teamMembership?.team?.name || null
-        
-        // Get latest season registration
-        const latestRegistration = user.season_registrations?.[0] || {}
-        
-        return {
-          id: user.id,
-          email: user.email,
-          gamer_tag_id: user.gamer_tag_id,
-          primary_position: latestRegistration.primary_position || user.primary_position,
-          secondary_position: latestRegistration.secondary_position || user.secondary_position,
-          console: latestRegistration.console || user.console,
-          team_name: teamName,
-          roles: roles,
-          created_at: user.created_at,
-          updated_at: user.updated_at,
-          is_active: user.is_active !== false, // Default to true if not set
-          season_registration_status: latestRegistration.status || null,
-          season_number: latestRegistration.season_number || null
-        }
-      }) || []
+      // Debug team assignments
+      console.log("Raw user data:", usersData)
 
-      console.log("Fetched users:", transformedUsers)
-      setUsers(transformedUsers)
-      setFilteredUsers(transformedUsers)
+      // For users without player records, create them automatically
+      const usersWithoutPlayers = usersData?.filter((user) => !user.players || user.players.length === 0) || []
+
+      if (usersWithoutPlayers.length > 0) {
+        // Create player records for users who don't have them
+        for (const user of usersWithoutPlayers) {
+          try {
+            await supabase.from("players").insert({
+              user_id: user.id,
+              role: "Player",
+            })
+
+            // Update the user object to include the new player record
+            user.players = [
+              {
+                id: null, // Will be filled in next fetch
+                role: "Player",
+                team_id: null,
+                teams: null,
+              },
+            ]
+          } catch (error) {
+            console.error(`Error creating player record for user ${user.id}:`, error)
+          }
+        }
+      }
+
+      // Process users to ensure secondary_position is properly handled
+      const processedUsers =
+        usersData?.map((user) => {
+          return {
+            ...user,
+            is_active: user.is_active === undefined ? true : user.is_active,
+            // Ensure secondary_position is properly handled - convert empty strings to null
+            // but preserve actual values
+            secondary_position: user.secondary_position === "" ? null : user.secondary_position,
+          }
+        }) || []
+
+      setUsers(processedUsers)
+      setFilteredUsers(processedUsers)
     } catch (error: any) {
-      console.error("Error in fetchUsers:", error)
+      console.error("Error fetching users:", error)
       toast({
-        title: "Error",
-        description: error.message || "Failed to fetch users",
+        title: "Error loading users",
+        description: error.message || "Failed to load users",
         variant: "destructive",
       })
     } finally {
