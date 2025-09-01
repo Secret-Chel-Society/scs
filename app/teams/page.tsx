@@ -64,18 +64,20 @@ export default function TeamsPage() {
         setLoading(true)
         setError(null)
 
-        // Get all teams (like matches page does)
+        // Get active teams (like matches page does)
         const { data: teamsData, error: teamsError } = await supabase
           .from("teams")
           .select("id, name, logo_url, conference")
+          .eq("is_active", true)
           .order("name")
 
         if (teamsError) throw teamsError
 
-        // Get completed matches
+        // Get completed matches for Season 1 (like matches page does)
         const { data: matches, error: matchesError } = await supabase
           .from("matches")
-          .select("id, home_team_id, away_team_id, home_score, away_score, status")
+          .select("id, home_team_id, away_team_id, home_score, away_score, status, season_name")
+          .eq("season_name", "Season 1")
           .eq("status", "Completed")
           .not("home_score", "is", null)
           .not("away_score", "is", null)
@@ -90,10 +92,12 @@ export default function TeamsPage() {
 
         if (awardsError) throw awardsError
 
+        console.log(`Found ${teamsData?.length || 0} active teams and ${matches?.length || 0} completed matches for Season 1`)
+
         // Calculate team stats from matches
         const teamStats: { [key: string]: TeamStats } = {}
 
-        // Initialize all teams with zero stats
+        // Initialize all active teams with zero stats
         teamsData?.forEach(team => {
           teamStats[team.id] = {
             id: team.id,
@@ -112,7 +116,7 @@ export default function TeamsPage() {
           }
         })
 
-        // Calculate stats from matches
+        // Calculate stats from completed matches
         matches?.forEach(match => {
           const homeTeam = teamStats[match.home_team_id]
           const awayTeam = teamStats[match.away_team_id]
