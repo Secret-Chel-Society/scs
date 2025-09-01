@@ -5,7 +5,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Trophy, Target, Zap, Star, Users, TrendingUp, Award, Medal, Crown, Clock, Home, ExternalLink, Shield } from "lucide-react"
+import { Edit, Trophy, Target, Zap, Star, Users, TrendingUp, Award, Medal, Crown, Clock, Home, ExternalLink } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -39,10 +39,6 @@ interface PlayerStat {
   ppg?: number
   time_with_puck?: number
   interceptions?: number
-  // Goalie-specific fields
-  saves?: number
-  shots_against?: number
-  goals_against?: number
 }
 
 interface TeamStats {
@@ -248,10 +244,6 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
   const getSkaters = (teamId: string) => {
     return playerStats.filter((p) => p.team_id === teamId && p.position !== "G")
-  }
-
-  const getGoalies = (teamId: string) => {
-    return playerStats.filter((p) => p.team_id === teamId && p.position === "G")
   }
 
   const homeTeamStats = teamStats.find((t) => t.team_id === match.home_team_id)
@@ -608,318 +600,160 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 hover:border-blue-400/50 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
             <CardContent className="p-6">
-              <motion.h3 
-                className="text-2xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-              >
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
+              <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
+                <Users className="h-5 w-5" />
                 Player Statistics
-              </motion.h3>
+              </h3>
               
               <div className="space-y-8">
                 {/* Home Team */}
                 <div>
-                  <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-400/30 rounded-xl p-4 mb-6">
-                    <h4 className="text-xl font-bold text-white flex items-center justify-center gap-3">
-                      <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
-                        <TeamLogo
-                          teamName={match.home_team.name}
-                          logoUrl={match.home_team.logo_url}
-                          size="sm"
-                          className="text-white"
-                        />
-                      </div>
-                      <span className="bg-gradient-to-r from-blue-200 to-cyan-200 bg-clip-text text-transparent">
-                        {match.home_team.name}
-                      </span>
+                  <div className={`${homeColors.primary} py-2 px-4 rounded-t-md`}>
+                    <h4 className="text-lg font-semibold text-white flex items-center">
+                      <TeamLogo
+                        teamName={match.home_team.name}
+                        logoUrl={match.home_team.logo_url}
+                        size="sm"
+                        className="mr-2"
+                      />
+                      {match.home_team.name}
                     </h4>
                   </div>
-                  
-                  {/* Skaters */}
-                  <div className="mb-6">
-                    <h5 className="text-md font-semibold text-purple-300 mb-3 px-4 pt-2">Skaters</h5>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
-                            <th className="text-left py-2 px-2">Player</th>
-                            <th className="text-center py-2 px-1">Pos</th>
-                            <th className="text-center py-2 px-1">G</th>
-                            <th className="text-center py-2 px-1">A</th>
-                            <th className="text-center py-2 px-1">P</th>
-                            <th className="text-center py-2 px-1">+/-</th>
-                            <th className="text-center py-2 px-1">S</th>
-                            <th className="text-center py-2 px-1">H</th>
-                            <th className="text-center py-2 px-1">BLK</th>
-                            <th className="text-center py-2 px-1">PIM</th>
-                            <th className="text-center py-2 px-1">TOI</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {getSkaters(match.home_team_id)
-                            .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-                            .map((player) => (
-                              <tr
-                                key={player.player_id}
-                                className="border-b border-purple-600/20 hover:bg-white/5"
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
+                          <th className="text-left py-2 px-2">Player</th>
+                          <th className="text-center py-2 px-1">Pos</th>
+                          <th className="text-center py-2 px-1">G</th>
+                          <th className="text-center py-2 px-1">A</th>
+                          <th className="text-center py-2 px-1">P</th>
+                          <th className="text-center py-2 px-1">+/-</th>
+                          <th className="text-center py-2 px-1">S</th>
+                          <th className="text-center py-2 px-1">H</th>
+                          <th className="text-center py-2 px-1">BLK</th>
+                          <th className="text-center py-2 px-1">PIM</th>
+                          <th className="text-center py-2 px-1">TOI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getSkaters(match.home_team_id)
+                          .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
+                          .map((player) => (
+                            <tr
+                              key={player.player_id}
+                              className="border-b border-purple-600/20 hover:bg-white/5"
+                            >
+                              <td className="py-2 px-2 text-white font-medium">
+                                <div className="flex items-center">
+                                  <TeamLogo
+                                    teamName={match.home_team.name}
+                                    logoUrl={match.home_team.logo_url}
+                                    size="xs"
+                                    className="mr-2"
+                                  />
+                                  {player.player_name}
+                                </div>
+                              </td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.position || "-"}</td>
+                              <td className="py-2 px-1 text-center text-white">{player.goals}</td>
+                              <td className="py-2 px-1 text-center text-white">{player.assists}</td>
+                              <td className="py-2 px-1 text-center text-white font-semibold">
+                                {player.goals + player.assists}
+                              </td>
+                              <td
+                                className={`py-2 px-1 text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}
                               >
-                                <td className="py-2 px-2 text-white font-medium">
-                                  <div className="flex items-center">
-                                    <TeamLogo
-                                      teamName={match.home_team.name}
-                                      logoUrl={match.home_team.logo_url}
-                                      size="xs"
-                                      className="mr-2"
-                                    />
-                                    {player.player_name}
-                                  </div>
-                                </td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.position || "-"}</td>
-                                <td className="py-2 px-1 text-center text-white">{player.goals}</td>
-                                <td className="py-2 px-1 text-center text-white">{player.assists}</td>
-                                <td className="py-2 px-1 text-center text-white font-semibold">
-                                  {player.goals + player.assists}
-                                </td>
-                                <td
-                                  className={`py-2 px-1 text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}
-                                >
-                                  {player.plus_minus > 0 ? "+" : ""}
-                                  {player.plus_minus}
-                                </td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.shots}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.hits}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.blocks}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.pim}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.toi || "0:00"}</td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Goalies */}
-                  {getGoalies(match.home_team_id).length > 0 && (
-                    <div>
-                      <motion.h5 
-                        className="text-lg font-bold text-white mb-4 flex items-center gap-2"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 1.1 }}
-                      >
-                        <div className="p-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg">
-                          <Target className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="bg-gradient-to-r from-orange-200 to-red-200 bg-clip-text text-transparent">
-                          Goalies
-                        </span>
-                      </motion.h5>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
-                              <th className="text-left py-2 px-2">Player</th>
-                              <th className="text-center py-2 px-1">Pos</th>
-                              <th className="text-center py-2 px-1">SA</th>
-                              <th className="text-center py-2 px-1">SV</th>
-                              <th className="text-center py-2 px-1">GA</th>
-                              <th className="text-center py-2 px-1">SV%</th>
-                              <th className="text-center py-2 px-1">GAA</th>
-                              <th className="text-center py-2 px-1">TOI</th>
+                                {player.plus_minus > 0 ? "+" : ""}
+                                {player.plus_minus}
+                              </td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.shots}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.hits}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.blocks}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.pim}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.toi || "0:00"}</td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {getGoalies(match.home_team_id)
-                              .sort((a, b) => (b.saves || 0) - (a.saves || 0))
-                              .map((goalie) => (
-                                <tr
-                                  key={goalie.player_id}
-                                  className="border-b border-purple-600/20 hover:bg-white/5"
-                                >
-                                  <td className="py-2 px-2 text-white font-medium">
-                                    <div className="flex items-center">
-                                      <TeamLogo
-                                        teamName={match.home_team.name}
-                                        logoUrl={match.home_team.logo_url}
-                                        size="xs"
-                                        className="mr-2"
-                                      />
-                                      {goalie.player_name}
-                                    </div>
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-purple-300">{goalie.position || "G"}</td>
-                                  <td className="py-2 px-1 text-center text-white">{goalie.shots_against || 0}</td>
-                                  <td className="py-2 px-1 text-center text-white">{goalie.saves || 0}</td>
-                                  <td className="py-2 px-1 text-center text-white">{goalie.goals_against || 0}</td>
-                                  <td className="py-2 px-1 text-center text-white">
-                                    {goalie.shots_against && goalie.shots_against > 0 
-                                      ? ((goalie.saves || 0) / goalie.shots_against * 100).toFixed(1) 
-                                      : "0.0"}%
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-white">
-                                    {goalie.goals_against && goalie.toi 
-                                      ? ((goalie.goals_against / parseFloat(goalie.toi.replace(":", "."))) * 60).toFixed(2)
-                                      : "0.00"}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-purple-300">{goalie.toi || "0:00"}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
 
                 {/* Away Team */}
                 <div>
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-xl p-4 mb-6">
-                    <h4 className="text-xl font-bold text-white flex items-center justify-center gap-3">
-                      <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
-                        <TeamLogo
-                          teamName={match.away_team.name}
-                          logoUrl={match.away_team.logo_url}
-                          size="sm"
-                          className="text-white"
-                        />
-                      </div>
-                      <span className="bg-gradient-to-r from-purple-200 to-pink-200 bg-clip-text text-transparent">
-                        {match.away_team.name}
-                      </span>
+                  <div className={`${awayColors.primary} py-2 px-4 rounded-t-md`}>
+                    <h4 className="text-lg font-semibold text-white flex items-center">
+                      <TeamLogo
+                        teamName={match.away_team.name}
+                        logoUrl={match.away_team.logo_url}
+                        size="sm"
+                        className="mr-2"
+                      />
+                      {match.away_team.name}
                     </h4>
                   </div>
-                  
-                  {/* Skaters */}
-                  <div className="mb-6">
-                    <h5 className="text-md font-semibold text-purple-300 mb-3 px-4 pt-2">Skaters</h5>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
-                            <th className="text-left py-2 px-2">Player</th>
-                            <th className="text-center py-2 px-1">Pos</th>
-                            <th className="text-center py-2 px-1">G</th>
-                            <th className="text-center py-2 px-1">A</th>
-                            <th className="text-center py-2 px-1">P</th>
-                            <th className="text-center py-2 px-1">+/-</th>
-                            <th className="text-center py-2 px-1">S</th>
-                            <th className="text-center py-2 px-1">H</th>
-                            <th className="text-center py-2 px-1">BLK</th>
-                            <th className="text-center py-2 px-1">PIM</th>
-                            <th className="text-center py-2 px-1">TOI</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {getSkaters(match.away_team_id)
-                            .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-                            .map((player) => (
-                              <tr
-                                key={player.player_id}
-                                className="border-b border-purple-600/20 hover:bg-white/5"
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
+                          <th className="text-left py-2 px-2">Player</th>
+                          <th className="text-center py-2 px-1">Pos</th>
+                          <th className="text-center py-2 px-1">G</th>
+                          <th className="text-center py-2 px-1">A</th>
+                          <th className="text-center py-2 px-1">P</th>
+                          <th className="text-center py-2 px-1">+/-</th>
+                          <th className="text-center py-2 px-1">S</th>
+                          <th className="text-center py-2 px-1">H</th>
+                          <th className="text-center py-2 px-1">BLK</th>
+                          <th className="text-center py-2 px-1">PIM</th>
+                          <th className="text-center py-2 px-1">TOI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getSkaters(match.away_team_id)
+                          .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
+                          .map((player) => (
+                            <tr
+                              key={player.player_id}
+                              className="border-b border-purple-600/20 hover:bg-white/5"
+                            >
+                              <td className="py-2 px-2 text-white font-medium">
+                                <div className="flex items-center">
+                                  <TeamLogo
+                                    teamName={match.away_team.name}
+                                    logoUrl={match.away_team.logo_url}
+                                    size="xs"
+                                    className="mr-2"
+                                  />
+                                  {player.player_name}
+                                </div>
+                              </td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.position || "-"}</td>
+                              <td className="py-2 px-1 text-center text-white">{player.goals}</td>
+                              <td className="py-2 px-1 text-center text-white">{player.assists}</td>
+                              <td className="py-2 px-1 text-center text-white font-semibold">
+                                {player.goals + player.assists}
+                              </td>
+                              <td
+                                className={`py-2 px-1 text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}
                               >
-                                <td className="py-2 px-2 text-white font-medium">
-                                  <div className="flex items-center">
-                                    <TeamLogo
-                                      teamName={match.away_team.name}
-                                      logoUrl={match.away_team.logo_url}
-                                      size="xs"
-                                      className="mr-2"
-                                    />
-                                    {player.player_name}
-                                  </div>
-                                </td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.position || "-"}</td>
-                                <td className="py-2 px-1 text-center text-white">{player.goals}</td>
-                                <td className="py-2 px-1 text-center text-white">{player.assists}</td>
-                                <td className="py-2 px-1 text-center text-white font-semibold">
-                                  {player.goals + player.assists}
-                                </td>
-                                <td
-                                  className={`py-2 px-1 text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}
-                                >
-                                  {player.plus_minus > 0 ? "+" : ""}
-                                  {player.plus_minus}
-                                </td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.shots}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.hits}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.blocks}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.pim}</td>
-                                <td className="py-2 px-1 text-center text-purple-300">{player.toi || "0:00"}</td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Goalies */}
-                  {getGoalies(match.away_team_id).length > 0 && (
-                    <div>
-                      <h5 className="text-md font-semibold text-purple-300 mb-3 px-4 pt-2">Goalies</h5>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
-                              <th className="text-left py-2 px-2">Player</th>
-                              <th className="text-center py-2 px-1">Pos</th>
-                              <th className="text-center py-2 px-1">SA</th>
-                              <th className="text-center py-2 px-1">SV</th>
-                              <th className="text-center py-2 px-1">GA</th>
-                              <th className="text-center py-2 px-1">SV%</th>
-                              <th className="text-center py-2 px-1">GAA</th>
-                              <th className="text-center py-2 px-1">TOI</th>
+                                {player.plus_minus > 0 ? "+" : ""}
+                                {player.plus_minus}
+                              </td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.shots}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.hits}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.blocks}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.pim}</td>
+                              <td className="py-2 px-1 text-center text-purple-300">{player.toi || "0:00"}</td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {getGoalies(match.away_team_id)
-                              .sort((a, b) => (b.saves || 0) - (a.saves || 0))
-                              .map((goalie) => (
-                                <tr
-                                  key={goalie.player_id}
-                                  className="border-b border-purple-600/20 hover:bg-white/5"
-                                >
-                                  <td className="py-2 px-2 text-white font-medium">
-                                    <div className="flex items-center">
-                                      <TeamLogo
-                                        teamName={match.away_team.name}
-                                        logoUrl={match.away_team.logo_url}
-                                        size="xs"
-                                        className="mr-2"
-                                      />
-                                      {goalie.player_name}
-                                    </div>
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-purple-300">{goalie.position || "G"}</td>
-                                  <td className="py-2 px-1 text-center text-white">{goalie.shots_against || 0}</td>
-                                  <td className="py-2 px-1 text-center text-white">{goalie.saves || 0}</td>
-                                  <td className="py-2 px-1 text-center text-white">{goalie.goals_against || 0}</td>
-                                  <td className="py-2 px-1 text-center text-white">
-                                    {goalie.shots_against && goalie.shots_against > 0 
-                                      ? ((goalie.saves || 0) / goalie.shots_against * 100).toFixed(1) 
-                                      : "0.0"}%
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-white">
-                                    {goalie.goals_against && goalie.toi 
-                                      ? ((goalie.goals_against / parseFloat(goalie.toi.replace(":", "."))) * 60).toFixed(2)
-                                      : "0.00"}
-                                  </td>
-                                  <td className="py-2 px-1 text-center text-purple-300">{goalie.toi || "0:00"}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </motion.div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -981,7 +815,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
