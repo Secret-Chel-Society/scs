@@ -5,73 +5,97 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
+import { useSupabase } from "@/lib/supabase/client"
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { Trophy, Award, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { TeamLogo } from "@/components/team-logo"
-import { getAllTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
 
 // Maximum roster size constant
 const MAX_ROSTER_SIZE = 15
 
 export default function TeamsPage() {
+  const { supabase } = useSupabase()
   const { toast } = useToast()
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchTeams() {
       try {
         setLoading(true)
-        setError(null)
 
-        // Get current season ID
-        const seasonId = await getCurrentSeasonId()
+        // Get all teams with basic info
+        const { data: teamsData, error: teamsError } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("is_active", true)
+          .order("name")
 
-        // Get team stats using original function
-        const teamStats = await getAllTeamStats(seasonId)
+        if (teamsError) {
+          throw teamsError
+        }
 
-        if (!teamStats || teamStats.length === 0) {
-          setError("No teams found for the current season")
+        if (!teamsData || teamsData.length === 0) {
           setTeams([])
           return
         }
 
-        // Get team awards
-        try {
-          const response = await fetch("/api/teams/awards")
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
-          }
-          const { awards } = await response.json()
+        // Get player counts for each team
+        const { data: playerData, error: playerError } = await supabase
+          .from("players")
+          .select("team_id, salary")
+          .not("team_id", "is", null)
 
-          // Group awards by team
-          const awardsByTeam: Record<string, any[]> = {}
-          awards?.forEach((award: any) => {
-            if (!awardsByTeam[award.team_id]) {
-              awardsByTeam[award.team_id] = []
-            }
-            awardsByTeam[award.team_id].push(award)
-          })
-
-          // Combine team stats with awards
-          const teamsWithAwards = teamStats.map((team) => ({
-            ...team,
-            awards: awardsByTeam[team.id] || [],
-          }))
-
-          setTeams(teamsWithAwards)
-        } catch (awardsError) {
-          console.warn("Could not load team awards:", awardsError)
-          // Continue without awards if they fail to load
-          setTeams(teamStats.map((team) => ({ ...team, awards: [] })))
+        if (playerError) {
+          console.error("Error fetching player data:", playerError)
         }
+
+        // Calculate player counts and salaries by team
+        const playerCountByTeam: Record<string, number> = {}
+        const totalSalaryByTeam: Record<string, number> = {}
+
+        playerData?.forEach((player) => {
+          if (player.team_id) {
+            playerCountByTeam[player.team_id] = (playerCountByTeam[player.team_id] || 0) + 1
+            totalSalaryByTeam[player.team_id] = (totalSalaryByTeam[player.team_id] || 0) + (player.salary || 0)
+          }
+        })
+
+        // Get team awards
+        const { data: awardsData, error: awardsError } = await supabase
+          .from("team_awards")
+          .select("id, team_id, award_type, season_number, year")
+          .order("year", { ascending: false })
+
+        if (awardsError) {
+          console.error("Error fetching team awards:", awardsError)
+        }
+
+        // Group awards by team
+        const awardsByTeam: Record<string, any[]> = {}
+        awardsData?.forEach((award) => {
+          if (!awardsByTeam[award.team_id]) {
+            awardsByTeam[award.team_id] = []
+          }
+          awardsByTeam[award.team_id].push(award)
+        })
+
+        // Combine all data
+        const teamsWithData = teamsData.map((team) => ({
+          ...team,
+          player_count: playerCountByTeam[team.id] || 0,
+          total_salary: totalSalaryByTeam[team.id] || 0,
+          cap_space: 30000000 - (totalSalaryByTeam[team.id] || 0),
+          awards: awardsByTeam[team.id] || [],
+        }))
+
+        setTeams(teamsWithData)
       } catch (error: any) {
         console.error("Error loading teams:", error)
-        setError(error.message || "Failed to load teams data")
         toast({
           title: "Error loading teams",
           description: error.message || "Failed to load teams data.",
@@ -83,29 +107,12 @@ export default function TeamsPage() {
     }
 
     fetchTeams()
-  }, [toast])
+  }, [supabase, toast])
 
   // Filter teams based on search query
   const filteredTeams = teams.filter((team) => 
     team.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  if (error && !loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">Teams</h1>
-          <p className="text-red-500 mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -135,87 +142,83 @@ export default function TeamsPage() {
             {filteredTeams.map((team) => (
               <Link key={team.id} href={`/teams/${team.id}`}>
                 <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
-                  <Card className="h-full cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-blue-300">
+                  <Card className="overflow-hidden h-full hover:border-primary transition-colors">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <TeamLogo team={team} size={48} />
-                          <div>
-                            <h3 className="font-semibold text-lg">{team.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {team.player_count || 0}/{MAX_ROSTER_SIZE} Players
-                            </p>
-                          </div>
+                      <div className="flex flex-col items-center">
+                        <div className="relative h-32 w-32 mb-4">
+                          {team.logo_url ? (
+                            <Image
+                              src={team.logo_url || "/placeholder.svg"}
+                              alt={team.name}
+                              fill
+                              className="object-contain"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                          ) : (
+                            <TeamLogo teamName={team.name} size="xl" />
+                          )}
                         </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-blue-600">{team.points || 0}</div>
-                          <div className="text-xs text-muted-foreground">Points</div>
+                        <h2 className="text-xl font-bold text-center mb-2">{team.name}</h2>
+                        <div className="text-sm text-muted-foreground text-center mb-4">
+                          Record: {team.wins || 0}-{team.losses || 0}-{team.otl || 0}
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-                        <div>
-                          <div className="text-lg font-semibold text-green-600">{team.wins || 0}</div>
-                          <div className="text-xs text-muted-foreground">Wins</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold text-red-600">{team.losses || 0}</div>
-                          <div className="text-xs text-muted-foreground">Losses</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold text-orange-600">{team.otl || 0}</div>
-                          <div className="text-xs text-muted-foreground">OTL</div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Goals For:</span>
-                          <span className="font-semibold">{team.goals_for || 0}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Goals Against:</span>
-                          <span className="font-semibold">{team.goals_against || 0}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Goal Differential:</span>
-                          <span className={`font-semibold ${(team.goal_differential || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {(team.goal_differential || 0) >= 0 ? '+' : ''}{team.goal_differential || 0}
-                          </span>
-                        </div>
-                      </div>
-
-                      {team.awards && team.awards.length > 0 && (
-                        <div className="mt-4 pt-4 border-t">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Trophy className="h-4 w-4 text-yellow-500" />
-                            <span className="text-sm font-medium">Awards</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
+                        {/* Team Awards */}
+                        {team.awards && team.awards.length > 0 && (
+                          <div className="flex flex-wrap justify-center gap-2 mb-4">
                             {team.awards.slice(0, 3).map((award: any) => (
-                              <Badge key={award.id} variant="outline" className="text-xs">
-                                {award.award_type}
+                              <Badge
+                                key={award.id}
+                                variant="outline"
+                                className={`flex items-center gap-1 ${
+                                  award.award_type === "SCS Cup"
+                                    ? "border-yellow-500 text-yellow-500"
+                                    : "border-blue-500 text-blue-500"
+                                }`}
+                              >
+                                {award.award_type === "SCS Cup" ? (
+                                  <Trophy className="h-3 w-3" />
+                                ) : (
+                                  <Award className="h-3 w-3" />
+                                )}
+                                {award.award_type === "SCS Cup" ? "Cup" : "Trophy"} {award.year}
                               </Badge>
                             ))}
-                            {team.awards.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{team.awards.length - 3} more
-                              </Badge>
-                            )}
+                            {team.awards.length > 3 && <Badge variant="outline">+{team.awards.length - 3} more</Badge>}
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-3 gap-4 w-full text-center">
+                          <div>
+                            <div className="text-lg font-bold">{team.points || 0}</div>
+                            <div className="text-xs text-muted-foreground">PTS</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold">${((team.total_salary || 0) / 1000000).toFixed(1)}M</div>
+                            <div className="text-xs text-muted-foreground">SALARY</div>
+                            <div className="text-xs text-muted-foreground flex items-center justify-center mt-1">
+                              <Users className="h-3 w-3 mr-1" />
+                              <span>
+                                {team.player_count || 0}/{MAX_ROSTER_SIZE} Players
+                              </span>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold">${((team.cap_space || 0) / 1000000).toFixed(1)}M</div>
+                            <div className="text-xs text-muted-foreground">CAP SPACE</div>
                           </div>
                         </div>
-                      )}
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
               </Link>
             ))}
-          </div>
-        )}
-
-        {!loading && filteredTeams.length === 0 && searchQuery && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No teams found matching "{searchQuery}"</p>
+            {filteredTeams.length === 0 && (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground">No teams found matching your search.</p>
+              </div>
+            )}
           </div>
         )}
       </motion.div>
