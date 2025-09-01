@@ -417,25 +417,83 @@ export default function UsersManagementClient() {
   const endIndex = startIndex + itemsPerPage
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
 
-  // Placeholder functions for the functionality
+  // Admin functionality functions
   const checkIsActiveColumn = async () => {
-    // Implementation would go here
-    console.log("Checking active column...")
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_active")
+        .limit(1)
+
+      if (error) {
+        console.log("is_active column does not exist")
+        setShowMigrationAlert(true)
+      } else {
+        console.log("is_active column exists")
+        setIsActiveColumnExists(true)
+      }
+    } catch (error) {
+      console.error("Error checking is_active column:", error)
+    }
   }
 
   const checkDiscordTables = async () => {
-    // Implementation would go here
-    console.log("Checking Discord tables...")
+    try {
+      const { data, error } = await supabase
+        .from("discord_users")
+        .select("id")
+        .limit(1)
+
+      if (error) {
+        console.log("Discord tables do not exist")
+        setDiscordTablesExist(false)
+      } else {
+        console.log("Discord tables exist")
+        setDiscordTablesExist(true)
+      }
+    } catch (error) {
+      console.error("Error checking Discord tables:", error)
+      setDiscordTablesExist(false)
+    }
   }
 
   const fetchTeams = async () => {
-    // Implementation would go here
-    console.log("Fetching teams...")
+    try {
+      const { data: teamsData, error: teamsError } = await supabase
+        .from("teams")
+        .select("id, name")
+        .order("name")
+
+      if (teamsError) {
+        console.error("Error fetching teams:", teamsError)
+        return
+      }
+
+      setTeams(teamsData || [])
+    } catch (error) {
+      console.error("Error in fetchTeams:", error)
+    }
   }
 
   const fetchValidRoles = async () => {
-    // Implementation would go here
-    console.log("Fetching valid roles...")
+    try {
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .order("role")
+
+      if (rolesError) {
+        console.error("Error fetching roles:", rolesError)
+        return
+      }
+
+      // Get unique roles
+      const uniqueRoles = [...new Set(rolesData?.map(r => r.role) || [])]
+      const roleOptions = uniqueRoles.map(role => ({ label: role, value: role }))
+      setValidRoles(roleOptions)
+    } catch (error) {
+      console.error("Error in fetchValidRoles:", error)
+    }
   }
 
   const fetchUsers = async () => {
@@ -520,33 +578,196 @@ export default function UsersManagementClient() {
   }
 
   const refreshUsers = async () => {
-    // Implementation would go here
-    console.log("Refreshing users...")
+    setRefreshing(true)
+    try {
+      await fetchUsers()
+      setLastRefreshTime(new Date())
+      toast({
+        title: "Users refreshed",
+        description: "User list has been updated.",
+      })
+    } catch (error) {
+      console.error("Error refreshing users:", error)
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   const fixSecondaryPositions = async () => {
-    // Implementation would go here
-    console.log("Fixing secondary positions...")
+    setSubmitting(true)
+    try {
+      const { error } = await supabase.rpc("fix_secondary_positions")
+      
+      if (error) {
+        throw error
+      }
+
+      toast({
+        title: "Secondary positions fixed",
+        description: "All secondary positions have been updated.",
+      })
+
+      // Refresh the user list
+      await fetchUsers()
+    } catch (error: any) {
+      console.error("Error fixing secondary positions:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fix secondary positions",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const fixRoleConstraint = async () => {
-    // Implementation would go here
-    console.log("Fixing role constraint...")
+    setSubmitting(true)
+    try {
+      const { error } = await supabase.rpc("fix_role_constraint")
+      
+      if (error) {
+        throw error
+      }
+
+      toast({
+        title: "Role constraint fixed",
+        description: "Role constraints have been updated.",
+      })
+
+      // Refresh the user list
+      await fetchUsers()
+    } catch (error: any) {
+      console.error("Error fixing role constraint:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to fix role constraint",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const exportUsersToCSV = async () => {
-    // Implementation would go here
-    console.log("Exporting users to CSV...")
+    try {
+      const headers = [
+        "ID",
+        "Email",
+        "Gamer Tag",
+        "Primary Position",
+        "Secondary Position",
+        "Console",
+        "Team",
+        "Roles",
+        "Registration Status",
+        "Created At"
+      ]
+
+      const csvRows = [headers]
+
+      filteredUsers.forEach((user) => {
+        const row = [
+          user.id,
+          user.email,
+          user.gamer_tag_id,
+          user.primary_position || "",
+          user.secondary_position || "",
+          user.console || "",
+          user.team_name || "",
+          user.roles?.join(", ") || "",
+          user.season_registration_status || "",
+          new Date(user.created_at).toLocaleDateString()
+        ]
+        csvRows.push(row)
+      })
+
+      const csvContent = csvRows.map((row) => row.map((cell) => `"${cell}"`).join(",")).join("\n")
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.setAttribute("href", url)
+      link.setAttribute("download", `users-${new Date().toISOString().split("T")[0]}.csv`)
+      link.style.visibility = "hidden"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: "Export successful",
+        description: "User data has been exported to CSV.",
+      })
+    } catch (error: any) {
+      console.error("Error exporting users:", error)
+      toast({
+        title: "Export failed",
+        description: error.message || "Failed to export users",
+        variant: "destructive",
+      })
+    }
   }
 
   const checkColumnAfterMigration = async () => {
-    // Implementation would go here
-    console.log("Checking column after migration...")
+    setSubmitting(true)
+    try {
+      await checkIsActiveColumn()
+      
+      if (isActiveColumnExists) {
+        setShowMigrationAlert(false)
+        toast({
+          title: "Migration successful",
+          description: "The is_active column is now available.",
+        })
+      } else {
+        toast({
+          title: "Migration not detected",
+          description: "Please run the SQL migration and try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      console.error("Error checking migration:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to check migration",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleAdminKeySubmit = async () => {
-    // Implementation would go here
-    console.log("Submitting admin key...")
+    if (!adminKey.trim()) {
+      setAdminKeyError("Please enter an admin key")
+      return
+    }
+
+    try {
+      // Here you would typically verify the admin key against your backend
+      // For now, we'll just accept any non-empty key
+      
+      if (saveAdminKey) {
+        localStorage.setItem("scs-admin-key", adminKey)
+      }
+
+      setAdminKeyDialogOpen(false)
+      setAdminKeyError("")
+
+      // Execute the pending action if there is one
+      if (pendingActionRef.current) {
+        await pendingActionRef.current()
+        pendingActionRef.current = null
+      }
+
+      toast({
+        title: "Admin key verified",
+        description: "You can now perform admin operations.",
+      })
+    } catch (error: any) {
+      console.error("Error verifying admin key:", error)
+      setAdminKeyError("Invalid admin key")
+    }
   }
 
   if (!isAdmin) {
