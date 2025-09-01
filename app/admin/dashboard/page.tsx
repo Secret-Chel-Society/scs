@@ -40,6 +40,7 @@ import {
 } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import PlayoffBracket from "@/components/playoff-bracket"
 
 interface Conference {
   id: string
@@ -57,6 +58,10 @@ interface Team {
   conference_id?: string
   conference_name?: string
   is_active: boolean
+  points?: number
+  wins?: number
+  goal_differential?: number
+  goals_for?: number
 }
 
 interface LeagueStats {
@@ -100,7 +105,7 @@ export default function AdminDashboardPage() {
 
       if (conferencesError) throw conferencesError
 
-      // Fetch teams with conference info
+      // Fetch teams with conference info and standings data
       const { data: teamsData, error: teamsError } = await supabase
         .from("teams")
         .select(`
@@ -109,7 +114,11 @@ export default function AdminDashboardPage() {
           logo_url,
           conference_id,
           is_active,
-          conferences!left(name)
+          conferences!left(name),
+          points,
+          wins,
+          goal_differential,
+          goals_for
         `)
         .eq("is_active", true)
         .order("name")
@@ -640,6 +649,186 @@ export default function AdminDashboardPage() {
                     </CardContent>
                   </Card>
 
+                  {/* Playoff Bracket Visualization */}
+                  <PlayoffBracket teams={teams} conferences={conferences} />
+
+
+                    <CardContent>
+                      <div className="space-y-8">
+                        {/* Eastern Conference Bracket */}
+                        <div>
+                          <h3 className="text-orange-200 font-semibold text-lg mb-4 flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                            Eastern Conference
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Quarterfinal 1: 1v4 */}
+                            <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
+                              <div className="text-center mb-3">
+                                <Badge variant="outline" className="border-orange-400/30 text-orange-200">
+                                  Quarterfinal 1
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between p-2 bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded border border-orange-400/20">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-blue-500 text-white">1</Badge>
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 1)?.name || "TBD"}
+                                    </span>
+                                  </div>
+                                  <span className="text-orange-300 text-sm">vs</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 4)?.name || "TBD"}
+                                    </span>
+                                    <Badge className="bg-gray-500 text-white">4</Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Quarterfinal 2: 2v3 */}
+                            <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
+                              <div className="text-center mb-3">
+                                <Badge variant="outline" className="border-orange-400/30 text-orange-200">
+                                  Quarterfinal 2
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between p-2 bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded border border-orange-400/20">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-blue-500 text-white">2</Badge>
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 2)?.name || "TBD"}
+                                    </span>
+                                  </div>
+                                  <span className="text-orange-300 text-sm">vs</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 3)?.name || "TBD"}
+                                    </span>
+                                    <Badge className="bg-blue-500 text-white">3</Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Western Conference Bracket */}
+                        <div>
+                          <h3 className="text-orange-200 font-semibold text-lg mb-4 flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                            Western Conference
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Quarterfinal 1: 1v4 */}
+                            <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
+                              <div className="text-center mb-3">
+                                <Badge variant="outline" className="border-orange-400/30 text-orange-200">
+                                  Quarterfinal 1
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between p-2 bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded border border-orange-400/20">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-purple-500 text-white">1</Badge>
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Western Warriors", 1)?.name || "TBD"}
+                                    </span>
+                                  </div>
+                                  <span className="text-orange-300 text-sm">vs</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Western Warriors", 4)?.name || "TBD"}
+                                    </span>
+                                    <Badge className="bg-gray-500 text-white">4</Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Quarterfinal 2: 2v3 */}
+                            <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
+                              <div className="text-center mb-3">
+                                <Badge variant="outline" className="border-orange-400/30 text-orange-200">
+                                  Quarterfinal 2
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between p-2 bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded border border-orange-400/20">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-purple-500 text-white">2</Badge>
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Western Warriors", 2)?.name || "TBD"}
+                                    </span>
+                                  </div>
+                                  <span className="text-orange-300 text-sm">vs</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-white font-medium">
+                                      {getConferenceSeeding(teams, conferences, "Western Warriors", 3)?.name || "TBD"}
+                                    </span>
+                                    <Badge className="bg-purple-500 text-white">3</Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Eliminated Teams */}
+                        <div>
+                          <h3 className="text-red-200 font-semibold text-lg mb-4 flex items-center gap-2">
+                            <Minus className="h-5 w-5" />
+                            Eliminated Teams
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Eastern Eliminated */}
+                            <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-lg p-4 border border-red-400/30">
+                              <div className="text-center mb-3">
+                                <Badge variant="outline" className="border-red-400/30 text-red-200">
+                                  Eastern Conference
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                {getEliminatedTeams(teams, conferences, "Eastern Elites").map((team, index) => (
+                                  <div key={team.id} className="flex items-center gap-2 p-2 bg-gradient-to-r from-red-500/30 to-pink-500/30 rounded border border-red-400/20">
+                                    <Badge className="bg-red-500 text-white">{5 + index}</Badge>
+                                    <span className="text-white font-medium">{team.name}</span>
+                                  </div>
+                                ))}
+                                {getEliminatedTeams(teams, conferences, "Eastern Elites").length === 0 && (
+                                  <div className="text-red-300 text-center py-2">No teams eliminated yet</div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Western Eliminated */}
+                            <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-lg p-4 border border-red-400/30">
+                              <div className="text-center mb-3">
+                                <Badge variant="outline" className="border-red-400/30 text-red-200">
+                                  Western Conference
+                                </Badge>
+                              </div>
+                              <div className="space-y-2">
+                                {getEliminatedTeams(teams, conferences, "Western Warriors").map((team, index) => (
+                                  <div key={team.id} className="flex items-center gap-2 p-2 bg-gradient-to-r from-red-500/30 to-pink-500/30 rounded border border-red-400/20">
+                                    <Badge className="bg-red-500 text-white">{5 + index}</Badge>
+                                    <span className="text-white font-medium">{team.name}</span>
+                                  </div>
+                                ))}
+                                {getEliminatedTeams(teams, conferences, "Western Warriors").length === 0 && (
+                                  <div className="text-red-300 text-center py-2">No teams eliminated yet</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                   {/* Conference Summary */}
                   <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/30">
                     <CardHeader>
@@ -766,3 +955,36 @@ export default function AdminDashboardPage() {
     </div>
   )
 }
+
+  // Helper function to get team seeding within a conference
+  function getConferenceSeeding(teams: Team[], conferences: Conference[], conferenceName: string, seed: number) {
+    const conference = conferences.find(c => c.name === conferenceName)
+    if (!conference) return null
+
+    const teamsInConference = teams
+      .filter(team => team.conference_id === conference.id)
+      .sort((a, b) => {
+        // This is a placeholder sorting - in reality, you'd sort by actual standings
+        // For now, we'll sort alphabetically as a fallback
+        return a.name.localeCompare(b.name)
+      })
+
+    return teamsInConference[seed - 1] || null
+  }
+
+  // Helper function to get eliminated teams (bottom 2) from a conference
+  function getEliminatedTeams(teams: Team[], conferences: Conference[], conferenceName: string) {
+    const conference = conferences.find(c => c.name === conferenceName)
+    if (!conference) return []
+
+    const teamsInConference = teams
+      .filter(team => team.conference_id === conference.id)
+      .sort((a, b) => {
+        // This is a placeholder sorting - in reality, you'd sort by actual standings
+        // For now, we'll sort alphabetically as a fallback
+        return a.name.localeCompare(b.name)
+      })
+
+    // Return bottom 2 teams (eliminated)
+    return teamsInConference.slice(-2)
+  }
