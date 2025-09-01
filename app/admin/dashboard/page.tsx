@@ -653,75 +653,10 @@ export default function AdminDashboardPage() {
                   <PlayoffBracket teams={teams} conferences={conferences} />
 
 
-                    <CardContent>
-                      <div className="space-y-8">
-                        {/* Eastern Conference Bracket */}
-                        <div>
-                          <h3 className="text-orange-200 font-semibold text-lg mb-4 flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                            Eastern Conference
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Quarterfinal 1: 1v4 */}
-                            <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
-                              <div className="text-center mb-3">
-                                <Badge variant="outline" className="border-orange-400/30 text-orange-200">
-                                  Quarterfinal 1
-                                </Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between p-2 bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded border border-orange-400/20">
-                                  <div className="flex items-center gap-2">
-                                    <Badge className="bg-blue-500 text-white">1</Badge>
-                                    <span className="text-white font-medium">
-                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 1)?.name || "TBD"}
-                                    </span>
-                                  </div>
-                                  <span className="text-orange-300 text-sm">vs</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white font-medium">
-                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 4)?.name || "TBD"}
-                                    </span>
-                                    <Badge className="bg-gray-500 text-white">4</Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
 
-                            {/* Quarterfinal 2: 2v3 */}
-                            <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
-                              <div className="text-center mb-3">
-                                <Badge variant="outline" className="border-orange-400/30 text-orange-200">
-                                  Quarterfinal 2
-                                </Badge>
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between p-2 bg-gradient-to-r from-orange-500/30 to-amber-500/30 rounded border border-orange-400/20">
-                                  <div className="flex items-center gap-2">
-                                    <Badge className="bg-blue-500 text-white">2</Badge>
-                                    <span className="text-white font-medium">
-                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 2)?.name || "TBD"}
-                                    </span>
-                                  </div>
-                                  <span className="text-orange-300 text-sm">vs</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white font-medium">
-                                      {getConferenceSeeding(teams, conferences, "Eastern Elites", 3)?.name || "TBD"}
-                                    </span>
-                                    <Badge className="bg-blue-500 text-white">3</Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
 
-                        {/* Western Conference Bracket */}
-                        <div>
-                          <h3 className="text-orange-200 font-semibold text-lg mb-4 flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                            Western Conference
-                          </h3>
+
+
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Quarterfinal 1: 1v4 */}
                             <div className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-lg p-4 border border-orange-400/30">
@@ -955,7 +890,3 @@ export default function AdminDashboardPage() {
     </div>
   )
 }
-
-
-
-
