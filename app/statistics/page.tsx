@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown, Trophy, Award, Medal, Crown, Star, TrendingUp, BarChart3, Target, Users, Calendar, Clock, Zap, Activity, TrendingDown } from "lucide-react"
+import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown, Trophy, Award, Medal, Crown, Star, TrendingUp, BarChart3, Target, Users, Calendar, Clock, Zap, Activity, TrendingDown, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PlayerClickableLinkFlexible } from "@/components/matches/player-clickable-link-flexible"
 import { useMobile } from "@/hooks/use-mobile"
@@ -1785,6 +1785,92 @@ export default function StatisticsPage() {
               <AlertCircle className="h-4 w-4 text-red-400" />
               <AlertTitle className="text-red-200">Error</AlertTitle>
               <AlertDescription className="text-red-200">{error}</AlertDescription>
+            </Alert>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="relative z-10 space-y-6">
+            {/* Header Section */}
+            <div className="text-center mb-12">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+                Player Statistics
+              </h1>
+              <p className="text-xl text-blue-200 mb-8">
+                View comprehensive player statistics across all seasons
+              </p>
+            </div>
+
+            {/* Loading skeleton */}
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <Skeleton className="h-10 flex-1" />
+                <Skeleton className="h-10 flex-1" />
+                <Skeleton className="h-10 flex-1" />
+              </div>
+              
+              <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+                <CardHeader>
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-64" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div className="relative container mx-auto px-4 py-8">
+          <div className="relative z-10 space-y-6">
+            {/* Header Section */}
+            <div className="text-center mb-12">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+                Player Statistics
+              </h1>
+              <p className="text-xl text-blue-200 mb-8">
+                View comprehensive player statistics across all seasons
+              </p>
+            </div>
+
+            {/* Error Alert */}
+            <Alert variant="destructive" className="bg-red-500/20 border-red-400/50 text-red-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error Loading Statistics</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           </div>
         </div>
