@@ -1,4 +1,9 @@
-import { Suspense } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSupabase } from "@/lib/supabase/client"
+import { useToast } from "@/components/ui/use-toast"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import DailyRecap from "@/components/admin/daily-recap"
@@ -24,6 +29,85 @@ function LoadingSkeleton() {
 }
 
 export default function DailyRecapPage() {
+  const { supabase, session } = useSupabase()
+  const { toast } = useToast()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // Check if user is admin
+  useEffect(() => {
+    async function checkAuthAndLoadData() {
+      if (!session?.user) {
+        toast({
+          title: "Unauthorized",
+          description: "You must be logged in to access this page.",
+          variant: "destructive",
+        })
+        router.push("/login")
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        // Check for Admin role
+        const { data: adminRoleData, error: adminRoleError } = await supabase
+          .from("user_roles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .eq("role", "Admin")
+
+        if (adminRoleError || !adminRoleData || adminRoleData.length === 0) {
+          toast({
+            title: "Access denied",
+            description: "You don't have permission to access the admin panel.",
+            variant: "destructive",
+          })
+          router.push("/")
+          return
+        }
+
+        setIsAdmin(true)
+      } catch (error: any) {
+        console.error("Error checking authorization:", error)
+        toast({
+          title: "Error",
+          description: error.message || "An error occurred",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuthAndLoadData()
+  }, [supabase, session, toast, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="container mx-auto px-4 py-8">
+          <LoadingSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="container mx-auto px-4 py-8">
+          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+            <CardContent className="p-6">
+              <Skeleton className="h-8 w-64 mb-2 bg-slate-700" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
@@ -56,9 +140,7 @@ export default function DailyRecapPage() {
         <div className="space-y-6">
           <DailyRecapsTableMigration />
 
-          <Suspense fallback={<LoadingSkeleton />}>
-            <DailyRecap />
-          </Suspense>
+          <DailyRecap />
         </div>
       </div>
     </div>

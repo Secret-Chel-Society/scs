@@ -2,17 +2,25 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSupabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, AlertCircle, CheckCircle2, ShieldAlert } from "lucide-react"
+import { Loader2, AlertCircle, CheckCircle2, ShieldAlert, ArrowLeft } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
 
 export default function AdminPasswordResetPage() {
+  const { supabase, session } = useSupabase()
   const { toast } = useToast()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -20,6 +28,55 @@ export default function AdminPasswordResetPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Check if user is admin
+  useEffect(() => {
+    async function checkAuthAndLoadData() {
+      if (!session?.user) {
+        toast({
+          title: "Unauthorized",
+          description: "You must be logged in to access this page.",
+          variant: "destructive",
+        })
+        router.push("/login")
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        // Check for Admin role
+        const { data: adminRoleData, error: adminRoleError } = await supabase
+          .from("user_roles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .eq("role", "Admin")
+
+        if (adminRoleError || !adminRoleData || adminRoleData.length === 0) {
+          toast({
+            title: "Access denied",
+            description: "You don't have permission to access the admin panel.",
+            variant: "destructive",
+          })
+          router.push("/")
+          return
+        }
+
+        setIsAdmin(true)
+      } catch (error: any) {
+        console.error("Error checking authorization:", error)
+        toast({
+          title: "Error",
+          description: error.message || "An error occurred",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuthAndLoadData()
+  }, [supabase, session, toast, router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -83,113 +140,160 @@ export default function AdminPasswordResetPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <Skeleton className="h-8 w-64 mb-4" />
+          <Skeleton className="h-4 w-96 mb-8" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <Skeleton className="h-8 w-64" />
+        </div>
+      </div>
+    )
+  }
+
   if (isSuccess) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-            <CardTitle className="mt-4">Password Updated</CardTitle>
-            <CardDescription>The password for {email} has been successfully updated.</CardDescription>
-          </CardHeader>
-          <CardFooter className="flex justify-center">
-            <Button
-              onClick={() => {
-                setIsSuccess(false)
-                setEmail("")
-                setPassword("")
-                setConfirmPassword("")
-              }}
-            >
-              Reset Another Password
-            </Button>
-          </CardFooter>
-        </Card>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center gap-2 mb-6">
+            <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+            <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
+              Back to Admin Dashboard
+            </Link>
+          </div>
+
+          <Card>
+            <CardHeader className="text-center">
+              <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
+              <CardTitle className="mt-4">Password Updated</CardTitle>
+              <CardDescription>The password for {email} has been successfully updated.</CardDescription>
+            </CardHeader>
+            <CardFooter className="flex justify-center">
+              <Button
+                onClick={() => {
+                  setIsSuccess(false)
+                  setEmail("")
+                  setPassword("")
+                  setConfirmPassword("")
+                  setAdminKey("")
+                  setError(null)
+                }}
+              >
+                Reset Another Password
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <ShieldAlert className="h-12 w-12 text-amber-500" />
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center gap-2 mb-6">
+          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
+            Back to Admin Dashboard
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 bg-red-100 rounded-xl">
+            <ShieldAlert className="h-8 w-8 text-red-600" />
           </div>
-          <CardTitle className="text-center">Admin Password Reset</CardTitle>
-          <CardDescription className="text-center">Reset a user's password directly by email</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">User Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="user@example.com"
-                required
-              />
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold">Admin Password Reset</h1>
+            <p className="text-muted-foreground mt-1">Reset a user's password using admin privileges</p>
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={8}
-              />
-              <p className="text-xs text-muted-foreground">Password must be at least 8 characters long</p>
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Reset User Password</CardTitle>
+            <CardDescription>
+              Use this tool to reset a user's password. This should only be used when a user cannot reset their own
+              password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">New Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter new password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={8}
+                />
+                <p className="text-sm text-muted-foreground">Password must be at least 8 characters long</p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="adminKey">Admin Verification Key</Label>
-              <Input
-                id="adminKey"
-                type="password"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                placeholder="Enter admin key"
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+              <div className="space-y-2">
+                <Label htmlFor="admin-key">Admin Verification Key</Label>
+                <Input
+                  id="admin-key"
+                  type="password"
+                  placeholder="Enter admin key"
+                  value={adminKey}
+                  onChange={(e) => setAdminKey(e.target.value)}
+                  required
+                />
+              </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...
-                </>
-              ) : (
-                "Reset Password"
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+
+              <Button type="submit" disabled={isSubmitting} className="w-full">
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting ? "Resetting Password..." : "Reset Password"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

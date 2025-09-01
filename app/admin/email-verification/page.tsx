@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSupabase } from "@/lib/supabase/client"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -12,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Loader2, CheckCircle2, AlertCircle, Info, Key, ArrowLeft, Mail } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 
 // Define the form schemas with Zod
@@ -28,7 +31,11 @@ type DebugFormValues = z.infer<typeof debugFormSchema>
 type VerifyFormValues = z.infer<typeof verifyFormSchema>
 
 export default function AdminEmailVerificationPage() {
+  const { supabase, session } = useSupabase()
   const { toast } = useToast()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [isDebugLoading, setIsDebugLoading] = useState(false)
   const [isVerifyLoading, setIsVerifyLoading] = useState(false)
   const [debugResult, setDebugResult] = useState<any>(null)
@@ -66,6 +73,55 @@ export default function AdminEmailVerificationPage() {
   // Watch the email field for changes
   const emailValue = watchVerify("email")
 
+  // Check if user is admin
+  useEffect(() => {
+    async function checkAuthAndLoadData() {
+      if (!session?.user) {
+        toast({
+          title: "Unauthorized",
+          description: "You must be logged in to access this page.",
+          variant: "destructive",
+        })
+        router.push("/login")
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        // Check for Admin role
+        const { data: adminRoleData, error: adminRoleError } = await supabase
+          .from("user_roles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .eq("role", "Admin")
+
+        if (adminRoleError || !adminRoleData || adminRoleData.length === 0) {
+          toast({
+            title: "Access denied",
+            description: "You don't have permission to access the admin panel.",
+            variant: "destructive",
+          })
+          router.push("/")
+          return
+        }
+
+        setIsAdmin(true)
+      } catch (error: any) {
+        console.error("Error checking authorization:", error)
+        toast({
+          title: "Error",
+          description: error.message || "An error occurred",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    checkAuthAndLoadData()
+  }, [supabase, session, toast, router])
+
   // Load admin key from localStorage if available
   useEffect(() => {
     const savedKey = localStorage.getItem("scs-admin-key")
@@ -73,7 +129,7 @@ export default function AdminEmailVerificationPage() {
       setAdminKeyValue(savedKey)
       setVerifyValue("adminKey", savedKey)
     }
-  }, [])
+  }, [setVerifyValue])
 
   // Handle debug form submission
   const onDebugSubmit = async (data: DebugFormValues) => {
@@ -98,14 +154,14 @@ export default function AdminEmailVerificationPage() {
       setDebugResult(result)
 
       toast({
-        title: "Email diagnostics completed",
-        description: "Check the results below",
+        title: "Debug completed",
+        description: "Email debug information retrieved successfully.",
       })
     } catch (error: any) {
       console.error("Error debugging email:", error)
       toast({
-        title: "Failed to debug email",
-        description: error.message || "An error occurred",
+        title: "Error",
+        description: error.message || "Failed to debug email",
         variant: "destructive",
       })
     } finally {
@@ -113,22 +169,14 @@ export default function AdminEmailVerificationPage() {
     }
   }
 
-  // Add this function after the onVerifySubmit function
-  const saveAdminKey = (key: string) => {
-    if (typeof window !== "undefined" && key) {
-      localStorage.setItem("scs-admin-key", key)
-    }
-  }
-
   // Handle verify form submission
   const onVerifySubmit = async (data: VerifyFormValues) => {
     setIsVerifyLoading(true)
-    setVerifyResult(null)
     setVerifyError(null)
-    setVerifiedEmail(null)
+    setVerifyResult(null)
 
     try {
-      const response = await fetch("/api/manual-verify", {
+      const response = await fetch("/api/verify-account", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,39 +184,33 @@ export default function AdminEmailVerificationPage() {
         body: JSON.stringify({
           email: data.email,
           adminKey: data.adminKey,
-          forceVerify: true, // Always force verify
         }),
       })
 
       const result = await response.json()
 
       if (!response.ok) {
-        if (response.status === 401) {
-          setVerifyError("Unauthorized: Invalid admin key")
-          throw new Error("Unauthorized: Invalid admin key")
-        } else {
-          setVerifyError(result.error || "Failed to verify user")
-          throw new Error(result.error || "Failed to verify user")
-        }
+        throw new Error(result.error || "Failed to verify email")
       }
 
       setVerifyResult(result)
-      setVerifiedEmail(result.email || data.email) // Store the email that was actually verified
-      setAdminKeyValue(data.adminKey) // Save admin key for other tabs
-      saveAdminKey(data.adminKey)
+      setVerifiedEmail(data.email)
+
+      // Save admin key if provided
+      if (data.adminKey) {
+        localStorage.setItem("scs-admin-key", data.adminKey)
+      }
 
       toast({
-        title: result.alreadyVerified ? "User already verified" : "User verified successfully",
-        description: result.alreadyVerified
-          ? "This user's email was already confirmed"
-          : `User ${result.email || data.email} has been manually verified`,
-        variant: result.alreadyVerified ? "default" : "default",
+        title: "Email verified",
+        description: `Email ${data.email} has been successfully verified.`,
       })
     } catch (error: any) {
-      console.error("Error verifying user:", error)
+      console.error("Error verifying email:", error)
+      setVerifyError(error.message || "Failed to verify email")
       toast({
-        title: "Failed to verify user",
-        description: error.message || "An error occurred",
+        title: "Error",
+        description: error.message || "Failed to verify email",
         variant: "destructive",
       })
     } finally {
@@ -176,356 +218,168 @@ export default function AdminEmailVerificationPage() {
     }
   }
 
-  // Function to directly verify a user using the direct-verify endpoint
-  const handleDirectVerify = async (email: string, adminKey: string) => {
-    setIsVerifyLoading(true)
-    setVerifyResult(null)
-    setVerifyError(null)
-    setVerifiedEmail(null)
-
-    try {
-      const response = await fetch("/api/direct-verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, adminKey }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        setVerifyError(result.error || "Failed to verify user")
-        throw new Error(result.error || "Failed to verify user")
-      }
-
-      setVerifyResult(result)
-      setVerifiedEmail(result.email || email) // Store the email that was actually verified
-      setAdminKeyValue(adminKey) // Save admin key for other tabs
-      saveAdminKey(adminKey)
-
-      toast({
-        title: "User verified successfully",
-        description: `User ${result.email || email} has been verified using the direct method`,
-      })
-    } catch (error: any) {
-      console.error("Error with direct verification:", error)
-      toast({
-        title: "Failed to verify user",
-        description: error.message || "An error occurred",
-        variant: "destructive",
-      })
-    } finally {
-      setIsVerifyLoading(false)
-    }
-  }
-
-  // Function to copy admin key between tabs
-  const handleTabChange = (value: string) => {
-    if (value === "verify" || value === "direct") {
-      // Copy admin key to the selected tab
-      if (adminKeyValue) {
-        if (value === "verify") {
-          setVerifyValue("adminKey", adminKeyValue)
-        }
-      }
-    }
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
-        <div className="relative container mx-auto px-4 py-8">
-          <div className="flex items-center gap-2 mb-6">
-            <ArrowLeft className="h-5 w-5 text-white/70" />
-            <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
-              Back to Admin Dashboard
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
-              <Mail className="h-8 w-8 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Email Verification Tools
-              </h1>
-              <p className="text-white/70 mt-1">Debug and manually verify user email addresses</p>
-            </div>
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-96 w-full" />
+            <Skeleton className="h-96 w-full" />
           </div>
         </div>
       </div>
+    )
+  }
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-8">
-        <Tabs defaultValue="debug" onValueChange={handleTabChange}>
-          <TabsList className="mb-6 bg-slate-800/50 border border-white/20">
-            <TabsTrigger value="debug" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Debug Email</TabsTrigger>
-            <TabsTrigger value="verify" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Manual Verification</TabsTrigger>
-            <TabsTrigger value="direct" className="text-white data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400">Direct Verification</TabsTrigger>
+  if (!isAdmin) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Skeleton className="h-8 w-64" />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-6">
+          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
+            Back to Admin Dashboard
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-4 mb-8">
+          <div className="p-3 bg-blue-100 rounded-xl">
+            <Mail className="h-8 w-8 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Email Verification Management</h1>
+            <p className="text-muted-foreground mt-1">Debug and verify user email accounts</p>
+          </div>
+        </div>
+
+        <Tabs defaultValue="debug" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="debug">Debug Email</TabsTrigger>
+            <TabsTrigger value="verify">Verify Email</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="debug">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+          <TabsContent value="debug" className="space-y-6">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Email Verification Diagnostics</CardTitle>
-                <CardDescription className="text-white/70">Check the status of a user's email verification</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="h-5 w-5" />
+                  Debug Email Account
+                </CardTitle>
+                <CardDescription>
+                  Check the status and details of an email account in the system
+                </CardDescription>
               </CardHeader>
-              <form onSubmit={handleDebugSubmit(onDebugSubmit)}>
-                <CardContent className="space-y-4">
+              <CardContent>
+                <form onSubmit={handleDebugSubmit(onDebugSubmit)} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="debug-email" className="text-white">Email</Label>
+                    <Label htmlFor="debug-email">Email Address</Label>
                     <Input
                       id="debug-email"
                       type="email"
-                      placeholder="user.email@example.com"
+                      placeholder="user@example.com"
                       {...registerDebug("email")}
-                      className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                     />
-                    {debugErrors.email && <p className="text-sm text-red-400">{debugErrors.email.message}</p>}
-                  </div>
-
-                  {debugResult && (
-                    <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-white">Diagnostic Results</h3>
-
-                      <Alert variant={debugResult.userExists ? "default" : "destructive"} className="bg-slate-800/50 border-white/20">
-                        <Info className="h-4 w-4" />
-                        <AlertTitle className="text-white">User Status</AlertTitle>
-                        <AlertDescription className="text-white/70">
-                          {debugResult.userExists
-                            ? `User exists (created ${new Date(debugResult.userDetails.createdAt).toLocaleString()})`
-                            : "User does not exist in the auth system"}
-                        </AlertDescription>
-                      </Alert>
-
-                      {debugResult.userExists && (
-                        <Alert variant={debugResult.userDetails.emailConfirmed ? "default" : "destructive"} className="bg-slate-800/50 border-white/20">
-                          <Info className="h-4 w-4" />
-                          <AlertTitle className="text-white">Email Verification Status</AlertTitle>
-                          <AlertDescription className="text-white/70">
-                            {debugResult.userDetails.emailConfirmed ? "Email is verified" : "Email is NOT verified"}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-
-                      <Alert variant={debugResult.smtpConfigured ? "default" : "destructive"} className="bg-slate-800/50 border-white/20">
-                        <Info className="h-4 w-4" />
-                        <AlertTitle className="text-white">SMTP Configuration</AlertTitle>
-                        <AlertDescription className="text-white/70">
-                          {debugResult.smtpConfigured
-                            ? "SMTP appears to be configured"
-                            : "SMTP configuration is missing or incomplete"}
-                        </AlertDescription>
-                      </Alert>
-
-                      <Alert variant={debugResult.testEmailSent ? "default" : "destructive"} className="bg-slate-800/50 border-white/20">
-                        <Info className="h-4 w-4" />
-                        <AlertTitle className="text-white">Test Email</AlertTitle>
-                        <AlertDescription className="text-white/70">
-                          {debugResult.testEmailSent
-                            ? "Test password reset email was sent successfully"
-                            : `Failed to send test email: ${debugResult.testEmailError}`}
-                        </AlertDescription>
-                      </Alert>
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    type="submit" 
-                    disabled={isDebugLoading}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
-                  >
-                    {isDebugLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Running Diagnostics...
-                      </>
-                    ) : (
-                      "Run Diagnostics"
+                    {debugErrors.email && (
+                      <p className="text-sm text-destructive">{debugErrors.email.message}</p>
                     )}
+                  </div>
+                  <Button type="submit" disabled={isDebugLoading}>
+                    {isDebugLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Debug Email
                   </Button>
-                </CardFooter>
-              </form>
+                </form>
+
+                {debugResult && (
+                  <div className="mt-6 space-y-4">
+                    <h3 className="font-semibold">Debug Results:</h3>
+                    <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto">
+                      {JSON.stringify(debugResult, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="verify">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+          <TabsContent value="verify" className="space-y-6">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Manual Email Verification</CardTitle>
-                <CardDescription className="text-white/70">Manually verify a user's email address (admin only)</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Verify Email Account
+                </CardTitle>
+                <CardDescription>
+                  Manually verify an email account using admin privileges
+                </CardDescription>
               </CardHeader>
-              <form onSubmit={handleVerifySubmit(onVerifySubmit)}>
-                <CardContent className="space-y-4">
-                  <Alert className="bg-amber-500/10 border-amber-500/20">
-                    <AlertCircle className="h-4 w-4 text-amber-400" />
-                    <AlertTitle className="text-amber-400">Admin Only</AlertTitle>
-                    <AlertDescription className="text-amber-300">
-                      This tool should only be used by administrators when users cannot verify their email through normal
-                      means.
-                    </AlertDescription>
-                  </Alert>
-
+              <CardContent>
+                <form onSubmit={handleVerifySubmit(onVerifySubmit)} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="verify-email" className="text-white">User Email</Label>
+                    <Label htmlFor="verify-email">Email Address</Label>
                     <Input
                       id="verify-email"
                       type="email"
-                      placeholder="user.email@example.com"
+                      placeholder="user@example.com"
                       {...registerVerify("email")}
-                      className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                     />
-                    {verifyErrors.email && <p className="text-sm text-red-400">{verifyErrors.email.message}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-key" className="text-white">Admin Key</Label>
-                    <Input 
-                      id="admin-key" 
-                      type="password" 
-                      {...registerVerify("adminKey")}
-                      className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                    />
-                    {verifyErrors.adminKey && <p className="text-sm text-red-400">{verifyErrors.adminKey.message}</p>}
-                  </div>
-
-                  {verifyError && (
-                    <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle className="text-red-400">Verification Failed</AlertTitle>
-                      <AlertDescription className="text-red-300">{verifyError}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  {verifyResult && (
-                    <Alert variant="default" className="bg-green-500/10 border-green-500/20">
-                      <CheckCircle2 className="h-4 w-4 text-green-400" />
-                      <AlertTitle className="text-green-400">
-                        {verifyResult.alreadyVerified ? "Already Verified" : "Verification Successful"}
-                      </AlertTitle>
-                      <AlertDescription className="text-green-300">
-                        {verifyResult.alreadyVerified
-                          ? "This user's email was already confirmed."
-                          : `User ${verifiedEmail || emailValue} has been manually verified.`}
-                        {verifiedEmail && verifiedEmail !== emailValue && (
-                          <p className="mt-2 font-medium text-amber-400">
-                            Note: The verified email ({verifiedEmail}) is different from what you entered ({emailValue}).
-                          </p>
-                        )}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    type="submit" 
-                    disabled={isVerifyLoading}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
-                  >
-                    {isVerifyLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      "Manually Verify User"
+                    {verifyErrors.email && (
+                      <p className="text-sm text-destructive">{verifyErrors.email.message}</p>
                     )}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="direct">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Direct Verification (Fallback Method)</CardTitle>
-                <CardDescription className="text-white/70">Use this method if the standard verification fails</CardDescription>
-              </CardHeader>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  const formData = new FormData(e.currentTarget)
-                  const email = formData.get("direct-email") as string
-                  const adminKey = formData.get("direct-admin-key") as string
-                  handleDirectVerify(email, adminKey)
-                }}
-              >
-                <CardContent className="space-y-4">
-                  <Alert className="bg-orange-500/10 border-orange-500/20">
-                    <Key className="h-4 w-4 text-orange-400" />
-                    <AlertTitle className="text-orange-400">Alternative Method</AlertTitle>
-                    <AlertDescription className="text-orange-300">
-                      This is an alternative verification method that bypasses the standard flow. Use only if the regular
-                      verification method fails. This method will work even if the user cannot be found through the normal
-                      API.
-                    </AlertDescription>
-                  </Alert>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="direct-email" className="text-white">User Email</Label>
-                    <Input
-                      id="direct-email"
-                      name="direct-email"
-                      type="email"
-                      placeholder="user.email@example.com"
-                      required
-                      className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                    />
                   </div>
-
                   <div className="space-y-2">
-                    <Label htmlFor="direct-admin-key" className="text-white">Admin Key</Label>
+                    <Label htmlFor="admin-key">Admin Key</Label>
                     <Input
-                      id="direct-admin-key"
-                      name="direct-admin-key"
+                      id="admin-key"
                       type="password"
-                      defaultValue={adminKeyValue}
-                      required
-                      className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Enter admin verification key"
+                      {...registerVerify("adminKey")}
                     />
+                    {verifyErrors.adminKey && (
+                      <p className="text-sm text-destructive">{verifyErrors.adminKey.message}</p>
+                    )}
                   </div>
+                  <Button type="submit" disabled={isVerifyLoading}>
+                    {isVerifyLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Verify Email
+                  </Button>
+                </form>
 
-                  {verifyError && (
-                    <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle className="text-red-400">Verification Failed</AlertTitle>
-                      <AlertDescription className="text-red-300">{verifyError}</AlertDescription>
-                    </Alert>
-                  )}
+                {verifyError && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>{verifyError}</AlertDescription>
+                  </Alert>
+                )}
 
-                  {verifyResult && (
-                    <Alert variant="default" className="bg-green-500/10 border-green-500/20">
-                      <CheckCircle2 className="h-4 w-4 text-green-400" />
-                      <AlertTitle className="text-green-400">Verification Successful</AlertTitle>
-                      <AlertDescription className="text-green-300">
-                        User {verifiedEmail} has been manually verified using the direct method.
+                {verifyResult && (
+                  <div className="mt-6 space-y-4">
+                    <Alert>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <AlertTitle>Success</AlertTitle>
+                      <AlertDescription>
+                        Email {verifiedEmail} has been successfully verified.
                       </AlertDescription>
                     </Alert>
-                  )}
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    type="submit" 
-                    disabled={isVerifyLoading}
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
-                  >
-                    {isVerifyLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      "Direct Verify User"
-                    )}
-                  </Button>
-                </CardFooter>
-              </form>
+                    <h3 className="font-semibold">Verification Results:</h3>
+                    <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto">
+                      {JSON.stringify(verifyResult, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
