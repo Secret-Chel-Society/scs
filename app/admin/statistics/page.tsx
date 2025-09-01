@@ -1142,27 +1142,27 @@ export default function AdminStatisticsPage() {
                     <SelectValue placeholder="Filter by position" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/20">
-                  <SelectItem value="all" className="text-white hover:bg-slate-700">All Positions</SelectItem>
-                  <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
-                  <SelectItem value="defense" className="text-white hover:bg-slate-700">Defense (LD, RD)</SelectItem>
-                  <SelectItem value="goalie" className="text-white hover:bg-slate-700">Goalie (G)</SelectItem>
-                  <SelectItem value="C" className="text-white hover:bg-slate-700">Center (C)</SelectItem>
-                  <SelectItem value="LW" className="text-white hover:bg-slate-700">Left Wing (LW)</SelectItem>
-                  <SelectItem value="RW" className="text-white hover:bg-slate-700">Right Wing (RW)</SelectItem>
-                  <SelectItem value="LD" className="text-white hover:bg-slate-700">Left Defense (LD)</SelectItem>
-                  <SelectItem value="RD" className="text-white hover:bg-slate-700">Right Defense (RD)</SelectItem>
+                    <SelectItem value="all" className="text-white hover:bg-slate-700">All Positions</SelectItem>
+                                        <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
+                      <SelectItem value="defense" className="text-white hover:bg-slate-700">Defense (LD, RD)</SelectItem>
+                      <SelectItem value="goalie" className="text-white hover:bg-slate-700">Goalie (G)</SelectItem>
+                      <SelectItem value="C" className="text-white hover:bg-slate-700">Center (C)</SelectItem>
+                      <SelectItem value="LW" className="text-white hover:bg-slate-700">Left Wing (LW)</SelectItem>
+                      <SelectItem value="RW" className="text-white hover:bg-slate-700">Right Wing (RW)</SelectItem>
+                      <SelectItem value="LD" className="text-white hover:bg-slate-700">Left Defense (LD)</SelectItem>
+                      <SelectItem value="RD" className="text-white hover:bg-slate-700">Right Defense (RD)</SelectItem>
                   </SelectContent>
                 </Select>
 
                 <Select defaultValue={statFilter} onValueChange={setStatFilter}>
                   <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                     <SelectValue placeholder="Sort by stat" />
-                </SelectTrigger>
+                  </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/20">
-                  <SelectItem value="points" className="text-white hover:bg-slate-700">Points</SelectItem>
-                  <SelectItem value="goals" className="text-white hover:bg-slate-700">Goals</SelectItem>
-                  <SelectItem value="assists" className="text-white hover:bg-slate-700">Assists</SelectItem>
-                  <SelectItem value="plusminus" className="text-white hover:bg-slate-700">Plus/Minus</SelectItem>
+                    <SelectItem value="points" className="text-white hover:bg-slate-700">Points</SelectItem>
+                    <SelectItem value="goals" className="text-white hover:bg-slate-700">Goals</SelectItem>
+                    <SelectItem value="assists" className="text-white hover:bg-slate-700">Assists</SelectItem>
+                    <SelectItem value="plusminus" className="text-white hover:bg-slate-700">Plus/Minus</SelectItem>
                   </SelectContent>
                 </Select>
             </div>
