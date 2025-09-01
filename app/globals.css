@@ -263,7 +263,7 @@
   }
 
   .card-modern:hover {
-    @apply from-white/15 to-white/8 border-white/30;
+    @apply from-white/15 to-white/5 border-white/30;
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   }
@@ -380,7 +380,7 @@
   }
 
   .stats-card:hover {
-    @apply from-white/15 to-white/8;
+    @apply from-white/15 to-white/5;
     transform: translateY(-4px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
   }
