@@ -476,11 +476,11 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
       hasDivisionColumn = false
     }
 
-    // Get all teams for the season
+    // Get all teams for the season - include inactive teams for now
     const { data: teams, error: teamsError } = await supabase
       .from("teams")
       .select("id, name, logo_url" + (hasDivisionColumn ? ", division, conference" : ""))
-      .eq("is_active", true)
+      // .eq("is_active", true) // Temporarily removed to show all teams
 
     if (teamsError) {
       console.error("Error fetching teams:", teamsError)
@@ -494,7 +494,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
 
     console.log(`Found ${teams.length} teams for season ${seasonId}`)
 
-    // Get all completed matches for the season using the season_name field
+    // Get all completed matches for the season - try multiple season name formats
     const { data: matches, error: matchesError } = await supabase
       .from("matches")
       .select(
@@ -507,10 +507,11 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         away_score,
         overtime,
         has_overtime,
-        status
+        status,
+        season_name
       `,
       )
-      .eq("season_name", seasonName)
+      .or(`season_name.eq.${seasonName},season_name.eq.Season ${seasonId},season_name.eq.Season${seasonId}`)
       .in("status", ["completed", "Completed", "COMPLETED"])
       .not("home_score", "is", null)
       .not("away_score", "is", null)

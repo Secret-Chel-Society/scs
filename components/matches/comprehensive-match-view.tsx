@@ -653,66 +653,66 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
               
               <div className="space-y-8">
                 {/* Home Team */}
-                <div>
-                  <div className={`${homeColors.primary} py-2 px-4 rounded-t-md`}>
+                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/20 rounded-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-500 to-cyan-500 py-3 px-6">
                     <h4 className="text-lg font-semibold text-white flex items-center">
                       <TeamLogo
                         teamName={match.home_team.name}
                         logoUrl={match.home_team.logo_url}
                         size="sm"
-                        className="mr-2"
+                        className="mr-3"
                       />
-                      {match.home_team.name}
+                      {match.home_team.name} Skaters
                     </h4>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="table-modern">
                       <thead>
-                        <tr>
-                          <th>Player</th>
-                          <th>Pos</th>
-                          <th>G</th>
-                          <th>A</th>
-                          <th>P</th>
-                          <th>+/-</th>
-                          <th>S</th>
-                          <th>H</th>
-                          <th>BLK</th>
-                          <th>PIM</th>
-                          <th>TOI</th>
+                        <tr className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+                          <th className="text-blue-200">Player</th>
+                          <th className="text-blue-200">Pos</th>
+                          <th className="text-blue-200">G</th>
+                          <th className="text-blue-200">A</th>
+                          <th className="text-blue-200">P</th>
+                          <th className="text-blue-200">+/-</th>
+                          <th className="text-blue-200">S</th>
+                          <th className="text-blue-200">H</th>
+                          <th className="text-blue-200">BLK</th>
+                          <th className="text-blue-200">PIM</th>
+                          <th className="text-blue-200">TOI</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getSkaters(match.home_team_id)
                           .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-                          .map((player) => (
-                            <tr key={player.player_id}>
-                              <td>
+                          .map((player, index) => (
+                            <tr key={player.player_id} className={`${index % 2 === 0 ? 'bg-blue-500/5' : 'bg-blue-500/10'} hover:bg-blue-500/15 transition-colors`}>
+                              <td className="py-3">
                                 <div className="flex items-center">
                                   <TeamLogo
                                     teamName={match.home_team.name}
                                     logoUrl={match.home_team.logo_url}
                                     size="xs"
-                                    className="mr-2"
+                                    className="mr-3"
                                   />
-                                  {player.player_name}
+                                  <span className="font-medium text-white">{player.player_name}</span>
                                 </div>
                               </td>
-                              <td className="text-center">{player.position || "-"}</td>
-                              <td className="text-center">{player.goals}</td>
-                              <td className="text-center">{player.assists}</td>
-                              <td className="text-center font-semibold">
+                              <td className="text-center text-blue-200 font-medium">{player.position || "-"}</td>
+                              <td className="text-center text-white font-bold">{player.goals}</td>
+                              <td className="text-center text-white font-bold">{player.assists}</td>
+                              <td className="text-center text-blue-300 font-bold text-lg">
                                 {player.goals + player.assists}
                               </td>
-                              <td className={`text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}>
+                              <td className={`text-center font-bold ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-blue-200"}`}>
                                 {player.plus_minus > 0 ? "+" : ""}
                                 {player.plus_minus}
                               </td>
-                              <td className="text-center">{player.shots}</td>
-                              <td className="text-center">{player.hits}</td>
-                              <td className="text-center">{player.blocks}</td>
-                              <td className="text-center">{player.pim}</td>
-                              <td className="text-center">{player.toi || "0:00"}</td>
+                              <td className="text-center text-blue-200">{player.shots}</td>
+                              <td className="text-center text-blue-200">{player.hits}</td>
+                              <td className="text-center text-blue-200">{player.blocks}</td>
+                              <td className="text-center text-blue-200">{player.pim}</td>
+                              <td className="text-center text-blue-200 font-mono">{player.toi || "0:00"}</td>
                             </tr>
                           ))}
                       </tbody>
@@ -721,66 +721,66 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                 </div>
 
                 {/* Away Team */}
-                <div>
-                  <div className={`${awayColors.primary} py-2 px-4 rounded-t-md`}>
+                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-400/20 rounded-xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 py-3 px-6">
                     <h4 className="text-lg font-semibold text-white flex items-center">
                       <TeamLogo
                         teamName={match.away_team.name}
                         logoUrl={match.away_team.logo_url}
                         size="sm"
-                        className="mr-2"
+                        className="mr-3"
                       />
-                      {match.away_team.name}
+                      {match.away_team.name} Skaters
                     </h4>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="table-modern">
                       <thead>
-                        <tr>
-                          <th>Player</th>
-                          <th>Pos</th>
-                          <th>G</th>
-                          <th>A</th>
-                          <th>P</th>
-                          <th>+/-</th>
-                          <th>S</th>
-                          <th>H</th>
-                          <th>BLK</th>
-                          <th>PIM</th>
-                          <th>TOI</th>
+                        <tr className="bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+                          <th className="text-purple-200">Player</th>
+                          <th className="text-purple-200">Pos</th>
+                          <th className="text-purple-200">G</th>
+                          <th className="text-purple-200">A</th>
+                          <th className="text-purple-200">P</th>
+                          <th className="text-purple-200">+/-</th>
+                          <th className="text-purple-200">S</th>
+                          <th className="text-purple-200">H</th>
+                          <th className="text-purple-200">BLK</th>
+                          <th className="text-purple-200">PIM</th>
+                          <th className="text-purple-200">TOI</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getSkaters(match.away_team_id)
                           .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
-                          .map((player) => (
-                            <tr key={player.player_id}>
-                              <td>
+                          .map((player, index) => (
+                            <tr key={player.player_id} className={`${index % 2 === 0 ? 'bg-purple-500/5' : 'bg-purple-500/10'} hover:bg-purple-500/15 transition-colors`}>
+                              <td className="py-3">
                                 <div className="flex items-center">
                                   <TeamLogo
                                     teamName={match.away_team.name}
                                     logoUrl={match.away_team.logo_url}
                                     size="xs"
-                                    className="mr-2"
+                                    className="mr-3"
                                   />
-                                  {player.player_name}
+                                  <span className="font-medium text-white">{player.player_name}</span>
                                 </div>
                               </td>
-                              <td className="text-center">{player.position || "-"}</td>
-                              <td className="text-center">{player.goals}</td>
-                              <td className="text-center">{player.assists}</td>
-                              <td className="text-center font-semibold">
+                              <td className="text-center text-purple-200 font-medium">{player.position || "-"}</td>
+                              <td className="text-center text-white font-bold">{player.goals}</td>
+                              <td className="text-center text-white font-bold">{player.assists}</td>
+                              <td className="text-center text-purple-300 font-bold text-lg">
                                 {player.goals + player.assists}
                               </td>
-                              <td className={`text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}>
+                              <td className={`text-center font-bold ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-200"}`}>
                                 {player.plus_minus > 0 ? "+" : ""}
                                 {player.plus_minus}
                               </td>
-                              <td className="text-center">{player.shots}</td>
-                              <td className="text-center">{player.hits}</td>
-                              <td className="text-center">{player.blocks}</td>
-                              <td className="text-center">{player.pim}</td>
-                              <td className="text-center">{player.toi || "0:00"}</td>
+                              <td className="text-center text-purple-200">{player.shots}</td>
+                              <td className="text-center text-purple-200">{player.hits}</td>
+                              <td className="text-center text-purple-200">{player.blocks}</td>
+                              <td className="text-center text-purple-200">{player.pim}</td>
+                              <td className="text-center text-purple-200 font-mono">{player.toi || "0:00"}</td>
                             </tr>
                           ))}
                       </tbody>
@@ -810,14 +810,14 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
               <div className="space-y-8">
                 {/* Home Team Goalies */}
                 {getGoalies(match.home_team_id).length > 0 && (
-                  <div>
-                    <div className={`${homeColors.primary} py-2 px-4 rounded-t-md`}>
+                  <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/20 rounded-xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 py-3 px-6">
                       <h4 className="text-lg font-semibold text-white flex items-center">
                         <TeamLogo
                           teamName={match.home_team.name}
                           logoUrl={match.home_team.logo_url}
                           size="sm"
-                          className="mr-2"
+                          className="mr-3"
                         />
                         {match.home_team.name} Goalies
                       </h4>
@@ -825,42 +825,42 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     <div className="overflow-x-auto">
                       <table className="table-modern">
                         <thead>
-                          <tr>
-                            <th>Goalie</th>
-                            <th>SA</th>
-                            <th>S</th>
-                            <th>GA</th>
-                            <th>SV%</th>
-                            <th>GAA</th>
-                            <th>SO</th>
-                            <th>W</th>
-                            <th>L</th>
-                            <th>TOI</th>
+                          <tr className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+                            <th className="text-blue-200">Goalie</th>
+                            <th className="text-blue-200">SA</th>
+                            <th className="text-blue-200">S</th>
+                            <th className="text-blue-200">GA</th>
+                            <th className="text-blue-200">SV%</th>
+                            <th className="text-blue-200">GAA</th>
+                            <th className="text-blue-200">SO</th>
+                            <th className="text-blue-200">W</th>
+                            <th className="text-blue-200">L</th>
+                            <th className="text-blue-200">TOI</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {getGoalies(match.home_team_id).map((goalie) => (
-                            <tr key={goalie.player_id}>
-                              <td>
+                          {getGoalies(match.home_team_id).map((goalie, index) => (
+                            <tr key={goalie.player_id} className={`${index % 2 === 0 ? 'bg-blue-500/5' : 'bg-blue-500/10'} hover:bg-blue-500/15 transition-colors`}>
+                              <td className="py-3">
                                 <div className="flex items-center">
                                   <TeamLogo
                                     teamName={match.home_team.name}
                                     logoUrl={match.home_team.logo_url}
                                     size="xs"
-                                    className="mr-2"
+                                    className="mr-3"
                                   />
-                                  {goalie.player_name}
+                                  <span className="font-medium text-white">{goalie.player_name}</span>
                                 </div>
                               </td>
-                              <td className="text-center">{goalie.shots_against}</td>
-                              <td className="text-center">{goalie.saves}</td>
-                              <td className="text-center">{goalie.goals_against}</td>
-                              <td className="text-center">{goalie.save_percentage.toFixed(3)}</td>
-                              <td className="text-center">{goalie.goals_against_average.toFixed(2)}</td>
-                              <td className="text-center">{goalie.shutouts}</td>
-                              <td className="text-center text-green-400">{goalie.wins}</td>
-                              <td className="text-center text-red-400">{goalie.losses}</td>
-                              <td className="text-center">{goalie.toi || "0:00"}</td>
+                              <td className="text-center text-blue-200 font-bold">{goalie.shots_against}</td>
+                              <td className="text-center text-white font-bold">{goalie.saves}</td>
+                              <td className="text-center text-white font-bold">{goalie.goals_against}</td>
+                              <td className="text-center text-blue-300 font-bold">{goalie.save_percentage.toFixed(3)}</td>
+                              <td className="text-center text-blue-200 font-bold">{goalie.goals_against_average.toFixed(2)}</td>
+                              <td className="text-center text-blue-200 font-bold">{goalie.shutouts}</td>
+                              <td className="text-center text-green-400 font-bold">{goalie.wins}</td>
+                              <td className="text-center text-red-400 font-bold">{goalie.losses}</td>
+                              <td className="text-center text-blue-200 font-mono">{goalie.toi || "0:00"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -871,14 +871,14 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
                 {/* Away Team Goalies */}
                 {getGoalies(match.away_team_id).length > 0 && (
-                  <div>
-                    <div className={`${awayColors.primary} py-2 px-4 rounded-t-md`}>
+                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-400/20 rounded-xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 py-3 px-6">
                       <h4 className="text-lg font-semibold text-white flex items-center">
                         <TeamLogo
                           teamName={match.away_team.name}
                           logoUrl={match.away_team.logo_url}
                           size="sm"
-                          className="mr-2"
+                          className="mr-3"
                         />
                         {match.away_team.name} Goalies
                       </h4>
@@ -886,42 +886,42 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     <div className="overflow-x-auto">
                       <table className="table-modern">
                         <thead>
-                          <tr>
-                            <th>Goalie</th>
-                            <th>SA</th>
-                            <th>S</th>
-                            <th>GA</th>
-                            <th>SV%</th>
-                            <th>GAA</th>
-                            <th>SO</th>
-                            <th>W</th>
-                            <th>L</th>
-                            <th>TOI</th>
+                          <tr className="bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+                            <th className="text-purple-200">Goalie</th>
+                            <th className="text-purple-200">SA</th>
+                            <th className="text-purple-200">S</th>
+                            <th className="text-purple-200">GA</th>
+                            <th className="text-purple-200">SV%</th>
+                            <th className="text-purple-200">GAA</th>
+                            <th className="text-purple-200">SO</th>
+                            <th className="text-purple-200">W</th>
+                            <th className="text-purple-200">L</th>
+                            <th className="text-purple-200">TOI</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {getGoalies(match.away_team_id).map((goalie) => (
-                            <tr key={goalie.player_id}>
-                              <td>
+                          {getGoalies(match.away_team_id).map((goalie, index) => (
+                            <tr key={goalie.player_id} className={`${index % 2 === 0 ? 'bg-purple-500/5' : 'bg-purple-500/10'} hover:bg-purple-500/15 transition-colors`}>
+                              <td className="py-3">
                                 <div className="flex items-center">
                                   <TeamLogo
                                     teamName={match.away_team.name}
                                     logoUrl={match.away_team.logo_url}
                                     size="xs"
-                                    className="mr-2"
+                                    className="mr-3"
                                   />
-                                  {goalie.player_name}
+                                  <span className="font-medium text-white">{goalie.player_name}</span>
                                 </div>
                               </td>
-                              <td className="text-center">{goalie.shots_against}</td>
-                              <td className="text-center">{goalie.saves}</td>
-                              <td className="text-center">{goalie.goals_against}</td>
-                              <td className="text-center">{goalie.save_percentage.toFixed(3)}</td>
-                              <td className="text-center">{goalie.goals_against_average.toFixed(2)}</td>
-                              <td className="text-center">{goalie.shutouts}</td>
-                              <td className="text-center text-green-400">{goalie.wins}</td>
-                              <td className="text-center text-red-400">{goalie.losses}</td>
-                              <td className="text-center">{goalie.toi || "0:00"}</td>
+                              <td className="text-center text-purple-200 font-bold">{goalie.shots_against}</td>
+                              <td className="text-center text-white font-bold">{goalie.saves}</td>
+                              <td className="text-center text-white font-bold">{goalie.goals_against}</td>
+                              <td className="text-center text-purple-300 font-bold">{goalie.save_percentage.toFixed(3)}</td>
+                              <td className="text-center text-purple-200 font-bold">{goalie.goals_against_average.toFixed(2)}</td>
+                              <td className="text-center text-purple-200 font-bold">{goalie.shutouts}</td>
+                              <td className="text-center text-green-400 font-bold">{goalie.wins}</td>
+                              <td className="text-center text-red-400 font-bold">{goalie.losses}</td>
+                              <td className="text-center text-purple-200 font-mono">{goalie.toi || "0:00"}</td>
                             </tr>
                           ))}
                         </tbody>
