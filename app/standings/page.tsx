@@ -40,43 +40,70 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
     return b.goals_for - a.goals_for
   })
 
-  const playoffTeams = sortedTeams.slice(0, 8) // Top 8 teams make playoffs
-  const bubbleTeams = sortedTeams.slice(8, 12) // Next 4 teams in the hunt
+  // Get teams by conference
+  const easternTeams = standings.filter(team => team.conference === "Eastern Elites")
+  const westernTeams = standings.filter(team => team.conference === "Western Warriors")
+
+  // Sort teams within each conference
+  const sortConferenceTeams = (teams: TeamStanding[]) => {
+    return teams.sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points
+      if (a.wins !== b.wins) return b.wins - a.wins
+      if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
+      return b.goals_for - a.goals_for
+    })
+  }
+
+  const sortedEastern = sortConferenceTeams(easternTeams)
+  const sortedWestern = sortConferenceTeams(westernTeams)
+
+  // Top 4 teams from each conference make playoffs
+  const easternPlayoffTeams = sortedEastern.slice(0, 4)
+  const westernPlayoffTeams = sortedWestern.slice(0, 4)
+
+  // Bottom 2 teams from each conference are eliminated
+  const easternEliminatedTeams = sortedEastern.slice(-2)
+  const westernEliminatedTeams = sortedWestern.slice(-2)
+
+  // Bubble teams (5th and 6th place in each conference)
+  const easternBubbleTeams = sortedEastern.slice(4, 6)
+  const westernBubbleTeams = sortedWestern.slice(4, 6)
 
   return (
     <div className="space-y-8">
+      {/* Eastern Conference Playoff Teams */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-400/30 overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-b border-green-400/30">
-            <CardTitle className="flex items-center gap-3 text-green-200">
-              <div className="p-2 bg-gradient-to-r from-green-500/30 to-emerald-500/30 rounded-lg">
-                <Crown className="h-6 w-6 text-green-300" />
+        <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/30 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-b border-blue-400/30">
+            <CardTitle className="flex items-center gap-3 text-blue-200">
+              <div className="p-2 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-lg">
+                <Crown className="h-6 w-6 text-blue-300" />
               </div>
               <div>
-                <div className="text-xl font-bold">Playoff Teams</div>
-                <div className="text-sm font-normal text-green-300">Top 8 Teams - Clinched Spots</div>
+                <div className="text-xl font-bold">Eastern Elites - Playoff Teams</div>
+                <div className="text-sm font-normal text-blue-300">Top 4 Teams - Quarterfinals: 1v4, 2v3</div>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid gap-3">
-              {playoffTeams.map((team, index) => (
+              {easternPlayoffTeams.map((team, index) => (
                 <motion.div
                   key={team.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * index }}
-                  className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/20 hover:border-green-400/40 transition-all duration-200 hover:scale-[1.02]"
+                  className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-400/20 hover:border-blue-400/40 transition-all duration-200 hover:scale-[1.02]"
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Badge
                         variant="outline"
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-green-500/30 to-emerald-500/30 border-green-400/50 text-green-200"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border-blue-400/50 text-blue-200"
                       >
                         {index + 1}
                       </Badge>
@@ -91,28 +118,26 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-semibold text-white text-lg">{team.name}</span>
-                      {team.playoff_status === "clinched" && (
-                        <Badge
-                          variant="default"
-                          className="bg-green-600/80 text-white text-xs px-2 py-1"
-                          title="Clinched Playoff Spot"
-                        >
-                          <Trophy className="h-3 w-3 mr-1" />
-                          CLINCHED
-                        </Badge>
-                      )}
+                      <Badge
+                        variant="default"
+                        className="bg-blue-600/80 text-white text-xs px-2 py-1"
+                        title="Playoff Qualifier"
+                      >
+                        <Trophy className="h-3 w-3 mr-1" />
+                        PLAYOFF
+                      </Badge>
                     </div>
                   </div>
                   <div className="flex items-center gap-6 text-sm">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-300">{team.points}</div>
-                      <div className="text-green-400 text-xs">PTS</div>
+                      <div className="text-2xl font-bold text-blue-300">{team.points}</div>
+                      <div className="text-blue-400 text-xs">PTS</div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-semibold text-white">
                         {team.wins}-{team.losses}-{team.otl}
                       </div>
-                      <div className="text-green-400 text-xs">RECORD</div>
+                      <div className="text-blue-400 text-xs">RECORD</div>
                     </div>
                   </div>
                 </motion.div>
@@ -122,7 +147,84 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
         </Card>
       </motion.div>
 
-      {bubbleTeams.length > 0 && (
+      {/* Western Conference Playoff Teams */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-400/30 overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-b border-purple-400/30">
+            <CardTitle className="flex items-center gap-3 text-purple-200">
+              <div className="p-2 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-lg">
+                <Star className="h-6 w-6 text-purple-300" />
+              </div>
+              <div>
+                <div className="text-xl font-bold">Western Warriors - Playoff Teams</div>
+                <div className="text-sm font-normal text-purple-300">Top 4 Teams - Quarterfinals: 1v4, 2v3</div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid gap-3">
+              {westernPlayoffTeams.map((team, index) => (
+                <motion.div
+                  key={team.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-400/20 hover:border-purple-400/40 transition-all duration-200 hover:scale-[1.02]"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <Badge
+                        variant="outline"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-purple-400/50 text-purple-200"
+                      >
+                        {index + 1}
+                      </Badge>
+                      {index < 3 && (
+                        <div className="absolute -top-1 -right-1">
+                          <Medal className={`h-4 w-4 ${
+                            index === 0 ? 'text-yellow-400' : 
+                            index === 1 ? 'text-gray-300' : 'text-orange-400'
+                          }`} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-white text-lg">{team.name}</span>
+                      <Badge
+                        variant="default"
+                        className="bg-purple-600/80 text-white text-xs px-2 py-1"
+                        title="Playoff Qualifier"
+                      >
+                        <Trophy className="h-3 w-3 mr-1" />
+                        PLAYOFF
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-300">{team.points}</div>
+                      <div className="text-purple-400 text-xs">PTS</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-semibold text-white">
+                        {team.wins}-{team.losses}-{team.otl}
+                      </div>
+                      <div className="text-purple-400 text-xs">RECORD</div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Bubble Teams Section */}
+      {(easternBubbleTeams.length > 0 || westernBubbleTeams.length > 0) && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -136,61 +238,249 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                 </div>
                 <div>
                   <div className="text-xl font-bold">Bubble Teams</div>
-                  <div className="text-sm font-normal text-orange-300">Fighting for Playoff Spots</div>
+                  <div className="text-sm font-normal text-orange-300">Fighting for Playoff Spots (5th & 6th Place)</div>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid gap-3">
-                {bubbleTeams.map((team, index) => (
-                  <motion.div
-                    key={team.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-400/20 hover:border-orange-400/40 transition-all duration-200 hover:scale-[1.02]"
-                  >
-                    <div className="flex items-center gap-4">
-                      <Badge
-                        variant="outline"
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200"
-                      >
-                        {playoffTeams.length + index + 1}
-                      </Badge>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold text-white text-lg">{team.name}</span>
-                        {team.playoff_status === "eliminated" && (
-                          <Badge
-                            variant="destructive"
-                            className="bg-red-600/80 text-white text-xs px-2 py-1"
-                            title="Eliminated from Playoffs"
-                          >
-                            <Minus className="h-3 w-3 mr-1" />
-                            ELIMINATED
-                          </Badge>
-                        )}
-                      </div>
+              <div className="grid gap-4">
+                {/* Eastern Bubble Teams */}
+                {easternBubbleTeams.length > 0 && (
+                  <div>
+                    <h3 className="text-orange-200 font-semibold mb-3">Eastern Elites</h3>
+                    <div className="grid gap-3">
+                      {easternBubbleTeams.map((team, index) => (
+                        <motion.div
+                          key={team.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * index }}
+                          className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-400/20 hover:border-orange-400/40 transition-all duration-200 hover:scale-[1.02]"
+                        >
+                          <div className="flex items-center gap-4">
+                            <Badge
+                              variant="outline"
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200"
+                            >
+                              {5 + index}
+                            </Badge>
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-white text-lg">{team.name}</span>
+                              <Badge
+                                variant="secondary"
+                                className="bg-orange-600/80 text-white text-xs px-2 py-1"
+                                title="Bubble Team"
+                              >
+                                <Target className="h-3 w-3 mr-1" />
+                                BUBBLE
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-orange-300">{team.points}</div>
+                              <div className="text-orange-400 text-xs">PTS</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-white">
+                                {team.wins}-{team.losses}-{team.otl}
+                              </div>
+                              <div className="text-orange-400 text-xs">RECORD</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-orange-400">
+                                {easternPlayoffTeams[3]?.points - team.points}
+                              </div>
+                              <div className="text-orange-500 text-xs">PTS BACK</div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-orange-300">{team.points}</div>
-                        <div className="text-orange-400 text-xs">PTS</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-semibold text-white">
-                          {team.wins}-{team.losses}-{team.otl}
-                        </div>
-                        <div className="text-orange-400 text-xs">RECORD</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-lg font-bold text-orange-400">
-                          {playoffTeams[playoffTeams.length - 1].points - team.points}
-                        </div>
-                        <div className="text-orange-500 text-xs">PTS BACK</div>
-                      </div>
+                  </div>
+                )}
+
+                {/* Western Bubble Teams */}
+                {westernBubbleTeams.length > 0 && (
+                  <div>
+                    <h3 className="text-orange-200 font-semibold mb-3">Western Warriors</h3>
+                    <div className="grid gap-3">
+                      {westernBubbleTeams.map((team, index) => (
+                        <motion.div
+                          key={team.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * index }}
+                          className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-400/20 hover:border-orange-400/40 transition-all duration-200 hover:scale-[1.02]"
+                        >
+                          <div className="flex items-center gap-4">
+                            <Badge
+                              variant="outline"
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200"
+                            >
+                              {5 + index}
+                            </Badge>
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-white text-lg">{team.name}</span>
+                              <Badge
+                                variant="secondary"
+                                className="bg-orange-600/80 text-white text-xs px-2 py-1"
+                                title="Bubble Team"
+                              >
+                                <Target className="h-3 w-3 mr-1" />
+                                BUBBLE
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-orange-300">{team.points}</div>
+                              <div className="text-orange-400 text-xs">PTS</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-white">
+                                {team.wins}-{team.losses}-{team.otl}
+                              </div>
+                              <div className="text-orange-400 text-xs">RECORD</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-orange-400">
+                                {westernPlayoffTeams[3]?.points - team.points}
+                              </div>
+                              <div className="text-orange-500 text-xs">PTS BACK</div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                  </motion.div>
-                ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Eliminated Teams Section */}
+      {(easternEliminatedTeams.length > 0 || westernEliminatedTeams.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card className="bg-gradient-to-br from-red-500/10 to-rose-500/10 backdrop-blur-sm border border-red-400/30 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-red-500/20 to-rose-500/20 border-b border-red-400/30">
+              <CardTitle className="flex items-center gap-3 text-red-200">
+                <div className="p-2 bg-gradient-to-r from-red-500/30 to-rose-500/30 rounded-lg">
+                  <Minus className="h-6 w-6 text-red-300" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold">Eliminated Teams</div>
+                  <div className="text-sm font-normal text-red-300">Bottom 2 Teams from Each Conference</div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid gap-4">
+                {/* Eastern Eliminated Teams */}
+                {easternEliminatedTeams.length > 0 && (
+                  <div>
+                    <h3 className="text-red-200 font-semibold mb-3">Eastern Elites</h3>
+                    <div className="grid gap-3">
+                      {easternEliminatedTeams.map((team, index) => (
+                        <motion.div
+                          key={team.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * index }}
+                          className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-400/20 hover:border-red-400/40 transition-all duration-200 hover:scale-[1.02]"
+                        >
+                          <div className="flex items-center gap-4">
+                            <Badge
+                              variant="outline"
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-red-500/30 to-rose-500/30 border-red-400/50 text-red-200"
+                            >
+                              {sortedEastern.length - 1 + index}
+                            </Badge>
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-white text-lg">{team.name}</span>
+                              <Badge
+                                variant="destructive"
+                                className="bg-red-600/80 text-white text-xs px-2 py-1"
+                                title="Eliminated from Playoffs"
+                              >
+                                <Minus className="h-3 w-3 mr-1" />
+                                ELIMINATED
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-red-300">{team.points}</div>
+                              <div className="text-red-400 text-xs">PTS</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-white">
+                                {team.wins}-{team.losses}-{team.otl}
+                              </div>
+                              <div className="text-red-400 text-xs">RECORD</div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Western Eliminated Teams */}
+                {westernEliminatedTeams.length > 0 && (
+                  <div>
+                    <h3 className="text-red-200 font-semibold mb-3">Western Warriors</h3>
+                    <div className="grid gap-3">
+                      {westernEliminatedTeams.map((team, index) => (
+                        <motion.div
+                          key={team.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.1 * index }}
+                          className="group flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-rose-500/10 border border-red-400/20 hover:border-red-400/40 transition-all duration-200 hover:scale-[1.02]"
+                        >
+                          <div className="flex items-center gap-4">
+                            <Badge
+                              variant="outline"
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-red-500/30 to-rose-500/30 border-red-400/50 text-red-200"
+                            >
+                              {sortedWestern.length - 1 + index}
+                            </Badge>
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold text-white text-lg">{team.name}</span>
+                              <Badge
+                                variant="destructive"
+                                className="bg-red-600/80 text-white text-xs px-2 py-1"
+                                title="Eliminated from Playoffs"
+                              >
+                                <Minus className="h-3 w-3 mr-1" />
+                                ELIMINATED
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-sm">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-red-300">{team.points}</div>
+                              <div className="text-red-400 text-xs">PTS</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-white">
+                                {team.wins}-{team.losses}-{team.otl}
+                              </div>
+                              <div className="text-red-400 text-xs">RECORD</div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
