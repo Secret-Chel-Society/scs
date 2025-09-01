@@ -79,6 +79,7 @@ export function AdminSettingsPageClient() {
     return null
   }
 
+  // Debug: Ensure all functions are properly closed before return
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
       <div className="container mx-auto">
