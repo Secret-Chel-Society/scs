@@ -1143,7 +1143,7 @@ export default function AdminStatisticsPage() {
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/20">
                     <SelectItem value="all" className="text-white hover:bg-slate-700">All Positions</SelectItem>
-                                        <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
+                      <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
                       <SelectItem value="defense" className="text-white hover:bg-slate-700">Defense (LD, RD)</SelectItem>
                       <SelectItem value="goalie" className="text-white hover:bg-slate-700">Goalie (G)</SelectItem>
                       <SelectItem value="C" className="text-white hover:bg-slate-700">Center (C)</SelectItem>
