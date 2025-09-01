@@ -5,7 +5,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Edit, Trophy, Target, Zap, Star, Users, TrendingUp, Award, Medal, Crown, Clock, Home, ExternalLink } from "lucide-react"
+import { Edit, Trophy, Target, Zap, Star, Users, TrendingUp, Award, Medal, Crown, Clock, Home, ExternalLink, Shield } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -39,6 +39,22 @@ interface PlayerStat {
   ppg?: number
   time_with_puck?: number
   interceptions?: number
+}
+
+interface GoalieStat {
+  player_name: string
+  player_id: string
+  team_id: string
+  position: string
+  saves: number
+  shots_against: number
+  goals_against: number
+  save_percentage: number
+  goals_against_average: number
+  shutouts: number
+  wins: number
+  losses: number
+  toi?: string
 }
 
 interface TeamStats {
@@ -86,6 +102,7 @@ const getTeamColors = (teamName: string) => {
 export function ComprehensiveMatchView({ match, isAdmin = false }: ComprehensiveMatchViewProps) {
   const { supabase } = useSupabase()
   const [playerStats, setPlayerStats] = useState<PlayerStat[]>([])
+  const [goalieStats, setGoalieStats] = useState<GoalieStat[]>([])
   const [teamStats, setTeamStats] = useState<TeamStats[]>([])
   const [teamStandings, setTeamStandings] = useState<{ [key: string]: TeamStanding }>({})
   const [loading, setLoading] = useState(true)
@@ -133,7 +150,30 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
       const { data: statsData } = await supabase.from("ea_player_stats").select("*").eq("match_id", match.id)
 
       if (statsData && statsData.length > 0) {
-        setPlayerStats(statsData)
+        // Separate skaters and goalies
+        const skaters = statsData.filter((stat: any) => stat.position !== "G")
+        const goalies = statsData.filter((stat: any) => stat.position === "G")
+
+        setPlayerStats(skaters)
+
+        // Process goalie stats
+        const processedGoalies: GoalieStat[] = goalies.map((goalie: any) => ({
+          player_name: goalie.player_name,
+          player_id: goalie.player_id,
+          team_id: goalie.team_id,
+          position: goalie.position,
+          saves: goalie.saves || 0,
+          shots_against: goalie.shots_against || 0,
+          goals_against: goalie.goals_against || 0,
+          save_percentage: goalie.save_percentage || 0,
+          goals_against_average: goalie.goals_against_average || 0,
+          shutouts: goalie.shutouts || 0,
+          wins: goalie.wins || 0,
+          losses: goalie.losses || 0,
+          toi: goalie.toi || "0:00"
+        }))
+
+        setGoalieStats(processedGoalies)
 
         const homeStats: TeamStats = {
           team_id: match.home_team_id,
@@ -246,6 +286,10 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
     return playerStats.filter((p) => p.team_id === teamId && p.position !== "G")
   }
 
+  const getGoalies = (teamId: string) => {
+    return goalieStats.filter((g) => g.team_id === teamId)
+  }
+
   const homeTeamStats = teamStats.find((t) => t.team_id === match.home_team_id)
   const awayTeamStats = teamStats.find((t) => t.team_id === match.away_team_id)
   const homeColors = getTeamColors(match.home_team.name)
@@ -349,7 +393,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+        <Card className="card-modern">
           <CardContent className="p-6">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-white mb-2">Match Overview</h3>
@@ -386,7 +430,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+          <Card className="card-modern">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
                 <Clock className="h-5 w-5" />
@@ -443,7 +487,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+          <Card className="card-modern">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
                 <Trophy className="h-5 w-5" />
@@ -501,7 +545,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+          <Card className="card-modern">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
                 <Star className="h-5 w-5" />
@@ -600,7 +644,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+          <Card className="card-modern">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
                 <Users className="h-5 w-5" />
@@ -622,31 +666,28 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </h4>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="table-modern">
                       <thead>
-                        <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
-                          <th className="text-left py-2 px-2">Player</th>
-                          <th className="text-center py-2 px-1">Pos</th>
-                          <th className="text-center py-2 px-1">G</th>
-                          <th className="text-center py-2 px-1">A</th>
-                          <th className="text-center py-2 px-1">P</th>
-                          <th className="text-center py-2 px-1">+/-</th>
-                          <th className="text-center py-2 px-1">S</th>
-                          <th className="text-center py-2 px-1">H</th>
-                          <th className="text-center py-2 px-1">BLK</th>
-                          <th className="text-center py-2 px-1">PIM</th>
-                          <th className="text-center py-2 px-1">TOI</th>
+                        <tr>
+                          <th>Player</th>
+                          <th>Pos</th>
+                          <th>G</th>
+                          <th>A</th>
+                          <th>P</th>
+                          <th>+/-</th>
+                          <th>S</th>
+                          <th>H</th>
+                          <th>BLK</th>
+                          <th>PIM</th>
+                          <th>TOI</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getSkaters(match.home_team_id)
                           .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
                           .map((player) => (
-                            <tr
-                              key={player.player_id}
-                              className="border-b border-purple-600/20 hover:bg-white/5"
-                            >
-                              <td className="py-2 px-2 text-white font-medium">
+                            <tr key={player.player_id}>
+                              <td>
                                 <div className="flex items-center">
                                   <TeamLogo
                                     teamName={match.home_team.name}
@@ -657,23 +698,21 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                                   {player.player_name}
                                 </div>
                               </td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.position || "-"}</td>
-                              <td className="py-2 px-1 text-center text-white">{player.goals}</td>
-                              <td className="py-2 px-1 text-center text-white">{player.assists}</td>
-                              <td className="py-2 px-1 text-center text-white font-semibold">
+                              <td className="text-center">{player.position || "-"}</td>
+                              <td className="text-center">{player.goals}</td>
+                              <td className="text-center">{player.assists}</td>
+                              <td className="text-center font-semibold">
                                 {player.goals + player.assists}
                               </td>
-                              <td
-                                className={`py-2 px-1 text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}
-                              >
+                              <td className={`text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}>
                                 {player.plus_minus > 0 ? "+" : ""}
                                 {player.plus_minus}
                               </td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.shots}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.hits}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.blocks}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.pim}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.toi || "0:00"}</td>
+                              <td className="text-center">{player.shots}</td>
+                              <td className="text-center">{player.hits}</td>
+                              <td className="text-center">{player.blocks}</td>
+                              <td className="text-center">{player.pim}</td>
+                              <td className="text-center">{player.toi || "0:00"}</td>
                             </tr>
                           ))}
                       </tbody>
@@ -695,31 +734,28 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </h4>
                   </div>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="table-modern">
                       <thead>
-                        <tr className="border-b border-purple-600/30 text-purple-300 bg-white/5">
-                          <th className="text-left py-2 px-2">Player</th>
-                          <th className="text-center py-2 px-1">Pos</th>
-                          <th className="text-center py-2 px-1">G</th>
-                          <th className="text-center py-2 px-1">A</th>
-                          <th className="text-center py-2 px-1">P</th>
-                          <th className="text-center py-2 px-1">+/-</th>
-                          <th className="text-center py-2 px-1">S</th>
-                          <th className="text-center py-2 px-1">H</th>
-                          <th className="text-center py-2 px-1">BLK</th>
-                          <th className="text-center py-2 px-1">PIM</th>
-                          <th className="text-center py-2 px-1">TOI</th>
+                        <tr>
+                          <th>Player</th>
+                          <th>Pos</th>
+                          <th>G</th>
+                          <th>A</th>
+                          <th>P</th>
+                          <th>+/-</th>
+                          <th>S</th>
+                          <th>H</th>
+                          <th>BLK</th>
+                          <th>PIM</th>
+                          <th>TOI</th>
                         </tr>
                       </thead>
                       <tbody>
                         {getSkaters(match.away_team_id)
                           .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
                           .map((player) => (
-                            <tr
-                              key={player.player_id}
-                              className="border-b border-purple-600/20 hover:bg-white/5"
-                            >
-                              <td className="py-2 px-2 text-white font-medium">
+                            <tr key={player.player_id}>
+                              <td>
                                 <div className="flex items-center">
                                   <TeamLogo
                                     teamName={match.away_team.name}
@@ -730,23 +766,21 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                                   {player.player_name}
                                 </div>
                               </td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.position || "-"}</td>
-                              <td className="py-2 px-1 text-center text-white">{player.goals}</td>
-                              <td className="py-2 px-1 text-center text-white">{player.assists}</td>
-                              <td className="py-2 px-1 text-center text-white font-semibold">
+                              <td className="text-center">{player.position || "-"}</td>
+                              <td className="text-center">{player.goals}</td>
+                              <td className="text-center">{player.assists}</td>
+                              <td className="text-center font-semibold">
                                 {player.goals + player.assists}
                               </td>
-                              <td
-                                className={`py-2 px-1 text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}
-                              >
+                              <td className={`text-center ${player.plus_minus > 0 ? "text-green-400" : player.plus_minus < 0 ? "text-red-400" : "text-purple-300"}`}>
                                 {player.plus_minus > 0 ? "+" : ""}
                                 {player.plus_minus}
                               </td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.shots}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.hits}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.blocks}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.pim}</td>
-                              <td className="py-2 px-1 text-center text-purple-300">{player.toi || "0:00"}</td>
+                              <td className="text-center">{player.shots}</td>
+                              <td className="text-center">{player.hits}</td>
+                              <td className="text-center">{player.blocks}</td>
+                              <td className="text-center">{player.pim}</td>
+                              <td className="text-center">{player.toi || "0:00"}</td>
                             </tr>
                           ))}
                       </tbody>
@@ -759,14 +793,156 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
         </motion.div>
       )}
 
-      {/* Team Standings Impact */}
-      {!standingsLoading && Object.keys(teamStandings).length > 0 && (
+      {/* Goalie Statistics */}
+      {goalieStats.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+          <Card className="card-modern">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
+                <Shield className="h-5 w-5" />
+                Goalie Statistics
+              </h3>
+              
+              <div className="space-y-8">
+                {/* Home Team Goalies */}
+                {getGoalies(match.home_team_id).length > 0 && (
+                  <div>
+                    <div className={`${homeColors.primary} py-2 px-4 rounded-t-md`}>
+                      <h4 className="text-lg font-semibold text-white flex items-center">
+                        <TeamLogo
+                          teamName={match.home_team.name}
+                          logoUrl={match.home_team.logo_url}
+                          size="sm"
+                          className="mr-2"
+                        />
+                        {match.home_team.name} Goalies
+                      </h4>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="table-modern">
+                        <thead>
+                          <tr>
+                            <th>Goalie</th>
+                            <th>SA</th>
+                            <th>S</th>
+                            <th>GA</th>
+                            <th>SV%</th>
+                            <th>GAA</th>
+                            <th>SO</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>TOI</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {getGoalies(match.home_team_id).map((goalie) => (
+                            <tr key={goalie.player_id}>
+                              <td>
+                                <div className="flex items-center">
+                                  <TeamLogo
+                                    teamName={match.home_team.name}
+                                    logoUrl={match.home_team.logo_url}
+                                    size="xs"
+                                    className="mr-2"
+                                  />
+                                  {goalie.player_name}
+                                </div>
+                              </td>
+                              <td className="text-center">{goalie.shots_against}</td>
+                              <td className="text-center">{goalie.saves}</td>
+                              <td className="text-center">{goalie.goals_against}</td>
+                              <td className="text-center">{goalie.save_percentage.toFixed(3)}</td>
+                              <td className="text-center">{goalie.goals_against_average.toFixed(2)}</td>
+                              <td className="text-center">{goalie.shutouts}</td>
+                              <td className="text-center text-green-400">{goalie.wins}</td>
+                              <td className="text-center text-red-400">{goalie.losses}</td>
+                              <td className="text-center">{goalie.toi || "0:00"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Away Team Goalies */}
+                {getGoalies(match.away_team_id).length > 0 && (
+                  <div>
+                    <div className={`${awayColors.primary} py-2 px-4 rounded-t-md`}>
+                      <h4 className="text-lg font-semibold text-white flex items-center">
+                        <TeamLogo
+                          teamName={match.away_team.name}
+                          logoUrl={match.away_team.logo_url}
+                          size="sm"
+                          className="mr-2"
+                        />
+                        {match.away_team.name} Goalies
+                      </h4>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="table-modern">
+                        <thead>
+                          <tr>
+                            <th>Goalie</th>
+                            <th>SA</th>
+                            <th>S</th>
+                            <th>GA</th>
+                            <th>SV%</th>
+                            <th>GAA</th>
+                            <th>SO</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>TOI</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {getGoalies(match.away_team_id).map((goalie) => (
+                            <tr key={goalie.player_id}>
+                              <td>
+                                <div className="flex items-center">
+                                  <TeamLogo
+                                    teamName={match.away_team.name}
+                                    logoUrl={match.away_team.logo_url}
+                                    size="xs"
+                                    className="mr-2"
+                                  />
+                                  {goalie.player_name}
+                                </div>
+                              </td>
+                              <td className="text-center">{goalie.shots_against}</td>
+                              <td className="text-center">{goalie.saves}</td>
+                              <td className="text-center">{goalie.goals_against}</td>
+                              <td className="text-center">{goalie.save_percentage.toFixed(3)}</td>
+                              <td className="text-center">{goalie.goals_against_average.toFixed(2)}</td>
+                              <td className="text-center">{goalie.shutouts}</td>
+                              <td className="text-center text-green-400">{goalie.wins}</td>
+                              <td className="text-center text-red-400">{goalie.losses}</td>
+                              <td className="text-center">{goalie.toi || "0:00"}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Team Standings Impact */}
+      {!standingsLoading && Object.keys(teamStandings).length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
+          <Card className="card-modern">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-white mb-6 text-center flex items-center justify-center gap-2">
                 <TrendingUp className="h-5 w-5" />
@@ -828,7 +1004,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
+          <Card className="card-modern">
             <CardContent className="p-8 text-center">
               <div className="text-purple-300 mb-4">
                 <Trophy className="h-12 w-12 mx-auto mb-4" />

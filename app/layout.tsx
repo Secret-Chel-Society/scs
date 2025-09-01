@@ -52,7 +52,7 @@ export default function RootLayout({
             <div className="flex min-h-screen w-full overflow-x-hidden">
               <Navigation />
               {/* Main content area */}
-              <div className="flex-1 flex flex-col lg:ml-64 w-full min-w-0">
+              <div className="flex-1 flex flex-col lg:ml-56 w-full min-w-0">
                 <div className="pt-16 lg:pt-16">
                   <Suspense>
                     <main className="flex-1 p-2 lg:p-6">

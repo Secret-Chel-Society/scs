@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import TeamStandings from "@/components/team-standings"
 import { PlayoffBracket } from "@/components/standings/playoff-bracket"
-import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
+import { calculateStandings, getCurrentSeasonId, getSeasons, CONFERENCES, generatePlayoffBracket } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { Trophy, Target, TrendingUp, Star, Award, Medal, Crown, Zap } from "lucide-react"
+import { Trophy, Target, TrendingUp, Star, Award, Medal, Crown, Zap, MapPin, Shield } from "lucide-react"
 import Image from "next/image"
 
 interface StandingsPageProps {
@@ -36,44 +36,57 @@ async function getSeasonsData() {
 }
 
 function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
-  // Sort teams by points for playoff seeding
-  const sortedTeams = [...standings].sort((a, b) => {
-    if (a.points !== b.points) return b.points - a.points
-    if (a.wins !== b.wins) return b.wins - a.wins
-    if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
-    return b.goals_for - a.goals_for
-  })
+  // Generate playoff bracket
+  const playoffBracket = generatePlayoffBracket(standings)
+  
+  // Get teams by conference for playoff picture
+  const easternTeams = standings
+    .filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
+    .sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points
+      if (a.wins !== b.wins) return b.wins - a.wins
+      if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
+      return b.goals_for - a.goals_for
+    })
+    .slice(0, 4)
 
-  const playoffTeams = sortedTeams.slice(0, 8) // Top 8 teams make playoffs
-  const bubbleTeams = sortedTeams.slice(8, 12) // Next 4 teams in the hunt
+  const westernTeams = standings
+    .filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
+    .sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points
+      if (a.wins !== b.wins) return b.wins - a.wins
+      if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
+      return b.goals_for - a.goals_for
+    })
+    .slice(0, 4)
 
   return (
     <div className="space-y-8">
-      {/* Playoff Teams */}
+      {/* Eastern Conference Playoff Teams */}
       <div className="animate-fade-in">
-        <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30">
+        <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-400/30">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-200">
-              <Trophy className="h-6 w-6" />
-              Playoff Teams
-              <Badge variant="outline" className="bg-green-500/20 border-green-400/50 text-green-200">
-                Top 8
+            <CardTitle className="flex items-center gap-2 text-blue-200">
+              <MapPin className="h-6 w-6" />
+              Eastern Elites Playoff Teams
+              <Badge variant="outline" className="bg-blue-500/20 border-blue-400/50 text-blue-200">
+                Top 4
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3">
-              {playoffTeams.map((team, index) => (
+              {easternTeams.map((team, index) => (
                 <div
                   key={team.id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-400/20 hover:border-green-400/40 transition-all duration-300 animate-slide-in"
+                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/20 hover:border-blue-400/40 transition-all duration-300 animate-slide-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Badge
                         variant="outline"
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/50 text-green-200"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-400/50 text-blue-200"
                       >
                         {index + 1}
                       </Badge>
@@ -90,7 +103,7 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                       {team.playoff_status === "clinched" && (
                         <Badge
                           variant="default"
-                          className="bg-green-600/20 border-green-400/50 text-green-200 text-xs"
+                          className="bg-blue-600/20 border-blue-400/50 text-blue-200 text-xs"
                           title="Clinched Playoff Spot"
                         >
                           CLINCHED
@@ -98,11 +111,11 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="font-bold text-green-200">{team.points} PTS</span>
-                    <span className="text-green-300">
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-blue-200">{team.points} pts</div>
+                    <div className="text-sm text-blue-300">
                       {team.wins}-{team.losses}-{team.otl}
-                    </span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -111,52 +124,123 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
         </Card>
       </div>
 
-      {/* Bubble Teams */}
-      {bubbleTeams.length > 0 && (
-        <div className="animate-fade-in" style={{ animationDelay: "400ms" }}>
-          <Card className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-yellow-200">
-                <Target className="h-6 w-6" />
-                Playoff Bubble
-                <Badge variant="outline" className="bg-yellow-500/20 border-yellow-400/50 text-yellow-200">
-                  In the Hunt
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3">
-                {bubbleTeams.map((team, index) => (
-                  <div
-                    key={team.id}
-                    className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 backdrop-blur-sm border border-yellow-400/20 hover:border-yellow-400/40 transition-all duration-300 animate-slide-in"
-                    style={{ animationDelay: `${500 + index * 100}ms` }}
-                  >
-                    <div className="flex items-center gap-4">
+      {/* Western Conference Playoff Teams */}
+      <div className="animate-fade-in">
+        <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-200">
+              <Shield className="h-6 w-6" />
+              Western Warriors Playoff Teams
+              <Badge variant="outline" className="bg-purple-500/20 border-purple-400/50 text-purple-200">
+                Top 4
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3">
+              {westernTeams.map((team, index) => (
+                <div
+                  key={team.id}
+                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-400/20 hover:border-purple-400/40 transition-all duration-300 animate-slide-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
                       <Badge
                         variant="outline"
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-yellow-400/50 text-yellow-200"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-400/50 text-purple-200"
                       >
-                        {index + 9}
+                        {index + 1}
                       </Badge>
-                      <span className="font-semibold text-white">{team.name}</span>
+                      {index < 3 && (
+                        <div className="absolute -top-1 -right-1">
+                          {index === 0 && <Crown className="h-4 w-4 text-yellow-400" />}
+                          {index === 1 && <Medal className="h-4 w-4 text-gray-400" />}
+                          {index === 2 && <Award className="h-4 w-4 text-amber-600" />}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="font-bold text-yellow-200">{team.points} PTS</span>
-                      <span className="text-yellow-300">
-                        {team.wins}-{team.losses}-{team.otl}
-                      </span>
-                      <span className="text-yellow-400">
-                        {playoffTeams[7] ? `${playoffTeams[7].points - team.points} back` : ""}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-white">{team.name}</span>
+                      {team.playoff_status === "clinched" && (
+                        <Badge
+                          variant="default"
+                          className="bg-purple-600/20 border-purple-400/50 text-purple-200 text-xs"
+                          title="Clinched Playoff Spot"
+                        >
+                          CLINCHED
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-purple-200">{team.points} pts</div>
+                    <div className="text-sm text-purple-300">
+                      {team.wins}-{team.losses}-{team.otl}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Playoff Bracket Preview */}
+      <div className="animate-fade-in">
+        <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-200">
+              <Trophy className="h-6 w-6" />
+              Playoff Bracket Preview
+            </CardTitle>
+            <CardDescription className="text-green-300/80">
+              1v4, 2v3 format for each conference
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Eastern Conference Bracket */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-blue-200 text-center">Eastern Elites</h4>
+                <div className="space-y-2">
+                  <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-400/20">
+                    <div className="text-sm text-blue-300">Quarterfinal 1</div>
+                    <div className="font-semibold text-white">
+                      {easternTeams[0]?.name || "TBD"} vs {easternTeams[3]?.name || "TBD"}
+                    </div>
+                  </div>
+                  <div className="bg-blue-500/10 rounded-lg p-3 border border-blue-400/20">
+                    <div className="text-sm text-blue-300">Quarterfinal 2</div>
+                    <div className="font-semibold text-white">
+                      {easternTeams[1]?.name || "TBD"} vs {easternTeams[2]?.name || "TBD"}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+
+              {/* Western Conference Bracket */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-purple-200 text-center">Western Warriors</h4>
+                <div className="space-y-2">
+                  <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-400/20">
+                    <div className="text-sm text-purple-300">Quarterfinal 1</div>
+                    <div className="font-semibold text-white">
+                      {westernTeams[0]?.name || "TBD"} vs {westernTeams[3]?.name || "TBD"}
+                    </div>
+                  </div>
+                  <div className="bg-purple-500/10 rounded-lg p-3 border border-purple-400/20">
+                    <div className="text-sm text-purple-300">Quarterfinal 2</div>
+                    <div className="font-semibold text-white">
+                      {westernTeams[1]?.name || "TBD"} vs {westernTeams[2]?.name || "TBD"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -244,27 +328,41 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
           {/* Main Content Tabs */}
           <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
             <Tabs defaultValue="standings" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-white/10 backdrop-blur-sm border border-white/20">
+              <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-sm border border-white/20">
                 <TabsTrigger 
                   value="standings" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-indigo-500/20 data-[state=active]:text-white"
                 >
                   <TrendingUp className="h-4 w-4 mr-2" />
-                  Standings
+                  Overall
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="eastern" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-white"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Eastern
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="western" 
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-white"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Western
                 </TabsTrigger>
                 <TabsTrigger 
                   value="playoffs" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500/20 data-[state=active]:to-emerald-500/20 data-[state=active]:text-white"
                 >
                   <Trophy className="h-4 w-4 mr-2" />
-                  Playoff Picture
+                  Playoffs
                 </TabsTrigger>
                 <TabsTrigger 
                   value="bracket" 
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500/20 data-[state=active]:to-pink-500/20 data-[state=active]:text-white"
                 >
                   <Star className="h-4 w-4 mr-2" />
-                  Playoff Bracket
+                  Bracket
                 </TabsTrigger>
               </TabsList>
 
@@ -273,6 +371,38 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                   <CardContent className="p-6">
                     <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl bg-white/10" />}>
                       <TeamStandings teams={standings} />
+                    </Suspense>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="eastern" className="mt-6">
+                <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/20">
+                  <CardHeader>
+                    <CardTitle className="text-blue-200 flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Eastern Elites Conference
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl bg-white/10" />}>
+                      <TeamStandings teams={standings.filter(team => team.conference === CONFERENCES.EASTERN_ELITES)} />
+                    </Suspense>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="western" className="mt-6">
+                <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-400/20">
+                  <CardHeader>
+                    <CardTitle className="text-purple-200 flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      Western Warriors Conference
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl bg-white/10" />}>
+                      <TeamStandings teams={standings.filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)} />
                     </Suspense>
                   </CardContent>
                 </Card>

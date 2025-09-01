@@ -417,7 +417,7 @@ export default function Navigation() {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-64 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-r border-white/20 flex flex-col">
+      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-56 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-r border-white/20 flex flex-col">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>

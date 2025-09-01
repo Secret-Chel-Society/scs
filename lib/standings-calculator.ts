@@ -32,6 +32,14 @@ export interface TeamStanding {
   playoff_status?: "clinched" | "eliminated" | "active" // New field for playoff status
 }
 
+// Conference names
+export const CONFERENCES = {
+  EASTERN_ELITES: "Eastern Elites",
+  WESTERN_WARRIORS: "Western Warriors"
+} as const
+
+export type ConferenceType = typeof CONFERENCES[keyof typeof CONFERENCES]
+
 // Division assignment logic - used if division column doesn't exist
 const nhlDivisionTeams = [
   "Winnipeg Jets",
@@ -55,71 +63,127 @@ const customDivisionTeams = [
 ]
 
 const MAX_GAMES_PER_SEASON = 60
-const PLAYOFF_SPOTS = 8
+const PLAYOFF_SPOTS_PER_CONFERENCE = 4 // Top 4 from each conference
+const TOTAL_PLAYOFF_SPOTS = 8 // 4 from each conference
 
 /**
- * Determines playoff status for teams based on their current standings
+ * Determines playoff status for teams based on their current standings within conferences
  * @param standings Array of team standings sorted by points
  * @returns Updated standings with playoff status
  */
 function calculatePlayoffStatus(standings: TeamStanding[]): TeamStanding[] {
-  const sortedStandings = [...standings].sort((a, b) => {
-    if (a.points !== b.points) return b.points - a.points
-    if (a.wins !== b.wins) return b.wins - a.wins
-    if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
-    return b.goals_for - a.goals_for
-  })
+  // Separate teams by conference
+  const easternTeams = standings.filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
+  const westernTeams = standings.filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
 
-  return sortedStandings.map((team, index) => {
-    const gamesRemaining = MAX_GAMES_PER_SEASON - team.games_played
-    const maxPossiblePoints = team.points + gamesRemaining * 2 // Assuming all wins
+  // Sort teams within each conference
+  const sortTeams = (teams: TeamStanding[]) => {
+    return teams.sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points
+      if (a.wins !== b.wins) return b.wins - a.wins
+      if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
+      return b.goals_for - a.goals_for
+    })
+  }
 
-    // Check if team has clinched playoff spot
-    let hasClinched = false
-    if (index < PLAYOFF_SPOTS) {
-      // Team is currently in playoff position
-      // They clinch if the 9th place team (or first team outside playoffs) can't catch them
-      const ninthPlaceTeam = sortedStandings[PLAYOFF_SPOTS]
-      if (ninthPlaceTeam) {
-        const ninthPlaceGamesRemaining = MAX_GAMES_PER_SEASON - ninthPlaceTeam.games_played
-        const ninthPlaceMaxPoints = ninthPlaceTeam.points + ninthPlaceGamesRemaining * 2
+  const sortedEastern = sortTeams(easternTeams)
+  const sortedWestern = sortTeams(westernTeams)
 
-        // Team clinches if even if 9th place wins all remaining games, they can't catch this team
-        // assuming this team loses all remaining games
-        const teamMinPoints = team.points // Current points (assuming all losses)
-        hasClinched = teamMinPoints > ninthPlaceMaxPoints
-      } else {
-        // If there's no 9th place team, top 8 teams have clinched
-        hasClinched = true
+  // Calculate playoff status for each conference
+  const calculateConferencePlayoffStatus = (teams: TeamStanding[], conferenceName: string) => {
+    return teams.map((team, index) => {
+      const gamesRemaining = MAX_GAMES_PER_SEASON - team.games_played
+      const maxPossiblePoints = team.points + gamesRemaining * 2
+
+      // Check if team has clinched playoff spot (top 4 in conference)
+      let hasClinched = false
+      if (index < PLAYOFF_SPOTS_PER_CONFERENCE) {
+        // Team is currently in playoff position
+        // They clinch if the 5th place team (or first team outside playoffs) can't catch them
+        const fifthPlaceTeam = teams[PLAYOFF_SPOTS_PER_CONFERENCE]
+        if (fifthPlaceTeam) {
+          const fifthPlaceGamesRemaining = MAX_GAMES_PER_SEASON - fifthPlaceTeam.games_played
+          const fifthPlaceMaxPoints = fifthPlaceTeam.points + fifthPlaceGamesRemaining * 2
+
+          // Team clinches if even if 5th place wins all remaining games, they can't catch this team
+          const teamMinPoints = team.points
+          hasClinched = teamMinPoints > fifthPlaceMaxPoints
+        } else {
+          // If there's no 5th place team, top 4 teams have clinched
+          hasClinched = true
+        }
       }
-    }
 
-    // Check if team is eliminated
-    let isEliminated = false
-    if (index >= PLAYOFF_SPOTS) {
-      // Team is currently outside playoff position
-      const eighthPlaceTeam = sortedStandings[PLAYOFF_SPOTS - 1]
-      if (eighthPlaceTeam) {
-        const eighthPlaceGamesRemaining = MAX_GAMES_PER_SEASON - eighthPlaceTeam.games_played
-        const eighthPlaceMinPoints = eighthPlaceTeam.points // Assuming 8th place loses all remaining games
-
-        // Team is eliminated if even winning all remaining games won't get them to 8th place
-        isEliminated = maxPossiblePoints < eighthPlaceMinPoints
+      // Check if team is eliminated (bottom 2 in conference)
+      let isEliminated = false
+      if (index >= teams.length - 2) {
+        // Team is in bottom 2 of conference
+        isEliminated = true
+      } else if (index >= PLAYOFF_SPOTS_PER_CONFERENCE) {
+        // Team is currently outside playoff position
+        // They're eliminated if even if they win all remaining games, they can't catch the 4th place team
+        const fourthPlaceTeam = teams[PLAYOFF_SPOTS_PER_CONFERENCE - 1]
+        if (fourthPlaceTeam) {
+          const fourthPlaceGamesRemaining = MAX_GAMES_PER_SEASON - fourthPlaceTeam.games_played
+          const fourthPlaceMinPoints = fourthPlaceTeam.points // Assuming all losses
+          isEliminated = maxPossiblePoints < fourthPlaceMinPoints
+        }
       }
-    }
 
-    let playoff_status: "clinched" | "eliminated" | "active" = "active"
-    if (hasClinched) {
-      playoff_status = "clinched"
-    } else if (isEliminated) {
-      playoff_status = "eliminated"
-    }
+      return {
+        ...team,
+        playoff_status: hasClinched ? "clinched" : isEliminated ? "eliminated" : "active"
+      }
+    })
+  }
 
-    return {
-      ...team,
-      playoff_status,
+  const easternWithStatus = calculateConferencePlayoffStatus(sortedEastern, CONFERENCES.EASTERN_ELITES)
+  const westernWithStatus = calculateConferencePlayoffStatus(sortedWestern, CONFERENCES.WESTERN_WARRIORS)
+
+  // Combine and return all teams
+  return [...easternWithStatus, ...westernWithStatus]
+}
+
+/**
+ * Generates playoff bracket matchups based on conference standings
+ * @param standings Array of team standings
+ * @returns Playoff bracket structure
+ */
+export function generatePlayoffBracket(standings: TeamStanding[]) {
+  const easternTeams = standings
+    .filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
+    .sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points
+      if (a.wins !== b.wins) return b.wins - a.wins
+      if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
+      return b.goals_for - a.goals_for
+    })
+    .slice(0, 4) // Top 4 teams
+
+  const westernTeams = standings
+    .filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
+    .sort((a, b) => {
+      if (a.points !== b.points) return b.points - a.points
+      if (a.wins !== b.wins) return b.wins - a.wins
+      if (a.goal_differential !== b.goal_differential) return b.goal_differential - a.goal_differential
+      return b.goals_for - a.goals_for
+    })
+    .slice(0, 4) // Top 4 teams
+
+  return {
+    eastern: {
+      quarterfinals: [
+        { seed1: easternTeams[0], seed4: easternTeams[3] }, // 1v4
+        { seed2: easternTeams[1], seed3: easternTeams[2] }  // 2v3
+      ]
+    },
+    western: {
+      quarterfinals: [
+        { seed1: westernTeams[0], seed4: westernTeams[3] }, // 1v4
+        { seed2: westernTeams[1], seed3: westernTeams[2] }  // 2v3
+      ]
     }
-  })
+  }
 }
 
 /**
