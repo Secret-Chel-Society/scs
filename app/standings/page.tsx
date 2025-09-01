@@ -424,10 +424,13 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         setLoading(true)
         setError(null)
 
-        // Get all teams
+        // Get all teams with conference information
         const { data: teamsData, error: teamsError } = await supabase
           .from("teams")
-          .select("*")
+          .select(`
+            *,
+            conferences!left(name)
+          `)
           .eq("is_active", true)
           .order("name")
 
@@ -452,7 +455,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         }
 
         // Calculate standings manually
-        const calculatedStandings: TeamStanding[] = teamsData.map((team) => {
+        const calculatedStandings: TeamStanding[] = teamsData.map((team, index) => {
           let wins = 0
           let losses = 0
           let otl = 0
@@ -511,7 +514,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
             goals_against: goalsAgainst,
             goal_differential: goalDifferential,
             division: team.division || "Custom",
-            conference: team.conference || "Custom",
+            conference: team.conferences?.name || (index < Math.ceil(teamsData.length / 2) ? "Eastern Elites" : "Western Warriors"),
             playoff_status: "active" as const,
           }
         })
