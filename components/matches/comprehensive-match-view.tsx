@@ -624,11 +624,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
               
               <div className="space-y-8">
                 {/* Home Team */}
-                <motion.div
-                  initial={{ opacity: 0, x: -50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 }}
-                >
+                <div>
                   <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-400/30 rounded-xl p-4 mb-6">
                     <h4 className="text-xl font-bold text-white flex items-center justify-center gap-3">
                       <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg">
@@ -780,6 +776,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   )}
                 </div>
+              </div>
 
                 {/* Away Team */}
                 <motion.div
@@ -926,7 +923,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </CardContent>
           </Card>
         </motion.div>
