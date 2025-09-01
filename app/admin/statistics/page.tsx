@@ -1141,7 +1141,7 @@ export default function AdminStatisticsPage() {
                   <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                     <SelectValue placeholder="Filter by position" />
                   </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
+                  <SelectContent className="bg-slate-800 border-white/20">
                   <SelectItem value="all" className="text-white hover:bg-slate-700">All Positions</SelectItem>
                   <SelectItem value="offense" className="text-white hover:bg-slate-700">Offense (C, LW, RW)</SelectItem>
                   <SelectItem value="defense" className="text-white hover:bg-slate-700">Defense (LD, RD)</SelectItem>
@@ -1151,20 +1151,20 @@ export default function AdminStatisticsPage() {
                   <SelectItem value="RW" className="text-white hover:bg-slate-700">Right Wing (RW)</SelectItem>
                   <SelectItem value="LD" className="text-white hover:bg-slate-700">Left Defense (LD)</SelectItem>
                   <SelectItem value="RD" className="text-white hover:bg-slate-700">Right Defense (RD)</SelectItem>
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
 
                 <Select defaultValue={statFilter} onValueChange={setStatFilter}>
                   <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                     <SelectValue placeholder="Sort by stat" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/20">
+                  <SelectContent className="bg-slate-800 border-white/20">
                   <SelectItem value="points" className="text-white hover:bg-slate-700">Points</SelectItem>
                   <SelectItem value="goals" className="text-white hover:bg-slate-700">Goals</SelectItem>
                   <SelectItem value="assists" className="text-white hover:bg-slate-700">Assists</SelectItem>
                   <SelectItem value="plusminus" className="text-white hover:bg-slate-700">Plus/Minus</SelectItem>
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
             </div>
 
             <div className="flex gap-2">
