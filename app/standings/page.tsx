@@ -98,10 +98,10 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-orange-600">
+              <Badge variant="outline" className="border-yellow-500 text-yellow-600">
                 Bubble Teams
               </Badge>
-              <span className="text-sm font-normal text-muted-foreground">Fighting for Playoff Spots</span>
+              <span className="text-sm font-normal text-muted-foreground">In the Hunt</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -109,35 +109,21 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
               {bubbleTeams.map((team, index) => (
                 <div
                   key={team.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800"
+                  className="flex items-center justify-between p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800"
                 >
                   <div className="flex items-center gap-3">
                     <Badge
                       variant="outline"
                       className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
                     >
-                      {playoffTeams.length + index + 1}
+                      {index + 9}
                     </Badge>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{team.name}</span>
-                      {team.playoff_status === "eliminated" && (
-                        <Badge
-                          variant="destructive"
-                          className="bg-red-600 text-white text-xs"
-                          title="Eliminated from Playoffs"
-                        >
-                          E
-                        </Badge>
-                      )}
-                    </div>
+                    <span className="font-medium">{team.name}</span>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
                     <span className="font-semibold">{team.points} PTS</span>
                     <span className="text-muted-foreground">
                       {team.wins}-{team.losses}-{team.otl}
-                    </span>
-                    <span className="text-xs text-orange-600 font-medium">
-                      {playoffTeams[playoffTeams.length - 1].points - team.points} pts back
                     </span>
                   </div>
                 </div>
@@ -192,13 +178,14 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
 function StandingsLoadingSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-8 w-32" />
       </div>
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="grid gap-4">
+        {[...Array(10)].map((_, i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
       </div>
     </div>
   )
@@ -209,23 +196,18 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   if (!standings || standings.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">No Standings Available</h3>
-            <p className="text-sm text-muted-foreground mt-2">No team data found for this season.</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">No standings data available for this season.</p>
+      </div>
     )
   }
 
   return (
     <Tabs defaultValue="overall" className="space-y-6">
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="overall">Overall Standings</TabsTrigger>
+        <TabsTrigger value="overall">Overall</TabsTrigger>
         <TabsTrigger value="conference">Conference</TabsTrigger>
-        <TabsTrigger value="playoffs">Playoff Picture</TabsTrigger>
+        <TabsTrigger value="playoffs">Playoffs</TabsTrigger>
       </TabsList>
 
       <TabsContent value="overall" className="space-y-6">
