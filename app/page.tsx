@@ -281,16 +281,7 @@ export default function Home() {
     fetchData()
   }, [supabase, toast])
 
-  // Handle Discord login success message
-  useEffect(() => {
-    if (searchParams?.get("discord_login_success") === "true") {
-      toast({
-        title: "Welcome back! 🎉",
-        description: "Successfully logged in with Discord",
-        variant: "default",
-      })
-    }
-  }, [searchParams, toast])
+
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">

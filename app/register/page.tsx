@@ -44,10 +44,10 @@ function RegisterStats() {
         </div>
       </div>
       <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "200ms" }}>
-        <div className="text-3xl font-bold text-blue-200 mb-2">Connect</div>
+        <div className="text-3xl font-bold text-blue-200 mb-2">Free</div>
         <div className="text-blue-300 flex items-center justify-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          Discord
+          <Users className="h-5 w-5" />
+          Agent
         </div>
       </div>
       <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/30 rounded-2xl p-6 text-center animate-slide-up" style={{ animationDelay: "300ms" }}>
@@ -238,7 +238,7 @@ export default function RegisterPage() {
 
       toast({
         title: "Registration successful",
-        description: "Your account has been created successfully!",
+        description: "Your account has been created successfully! You are now a free agent.",
       })
 
       // Redirect to login page or dashboard
@@ -414,6 +414,14 @@ export default function RegisterPage() {
 
                   <div className="space-y-2">
                     <h3 className="font-medium text-sm text-white">Step 2: Account Information</h3>
+                  </div>
+
+                  {/* Free Agent Notice */}
+                  <div className="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-blue-400/30 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Free Agent Status</h3>
+                    <p className="text-sm text-white/80">
+                      All new registrations automatically become free agents. You'll be available for teams to bid on during the free agency period.
+                    </p>
                   </div>
 
                   <div className="space-y-2">

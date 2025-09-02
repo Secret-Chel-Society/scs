@@ -227,12 +227,12 @@ export async function POST(request: Request) {
 
     const seasonId = currentSeason?.id || 1
 
-    // Create player record
+    // Create player record - ALL NEW REGISTRATIONS ARE FREE AGENTS
     const { data: playerData, error: playerError } = await supabase
       .from("players")
       .insert({
         user_id: authData.user.id,
-        team_id: null,
+        team_id: null, // This ensures they are free agents
         salary: 750000,
         role: "Player",
       })
@@ -318,14 +318,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: discordId
-        ? "Registration successful! Your Discord account has been verified and roles assigned."
-        : "Registration successful! Please connect your Discord account to complete verification.",
+      message: "Registration successful! You are now registered as a free agent.",
       userId: authData.user.id,
       playerId: playerData.id,
-      discordRoleAssignment: discordId ? "initiated" : "skipped",
-      discordConnectionCreated: discordId ? true : false,
-      requiresDiscordConnection: !discordId,
+      status: "free_agent",
+      team_id: null,
     })
   } catch (error: any) {
     console.error("Registration error:", error)

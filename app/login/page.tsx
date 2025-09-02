@@ -14,7 +14,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import Link from "next/link"
 import { Loader2, AlertCircle, CheckCircle2, LogIn, Shield, Users, Gamepad2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import DiscordLoginButton from "@/components/auth/discord-login-button"
+
 
 // Define the form schema with Zod
 const formSchema = z.object({
@@ -60,18 +60,12 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
   const [justRegistered, setJustRegistered] = useState(false)
-  const [discordError, setDiscordError] = useState<string | null>(null)
 
-  // Check for registered=true query parameter and Discord errors
+
+  // Check for registered=true query parameter
   useEffect(() => {
     if (searchParams?.get("registered") === "true") {
       setJustRegistered(true)
-    }
-    
-    // Check for Discord login errors
-    const discordError = searchParams?.get("discord_error")
-    if (discordError) {
-      setDiscordError(discordError)
     }
   }, [searchParams])
 
@@ -188,27 +182,7 @@ export default function LoginPage() {
                     </Alert>
                   )}
 
-                  {discordError && (
-                    <Alert variant="destructive" className="bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-400/30">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle className="text-red-200">Discord Login Error</AlertTitle>
-                      <AlertDescription className="text-red-300">
-                        {discordError === "not_configured" && "Discord login is not properly configured. Please contact support."}
-                        {discordError === "token_failed" && "Failed to authenticate with Discord. Please try again."}
-                        {discordError === "user_info_failed" && "Failed to get Discord user information. Please try again."}
-                        {discordError === "user_not_found" && "No account found with this Discord account. Please register first."}
-                        {discordError === "session_failed" && "Failed to create login session. Please try again."}
-                        {discordError === "database_error" && "Database error occurred. Please try again."}
-                        {discordError === "login_flow_failed" && "Login process failed. Please try again."}
-                        {discordError === "no_code" && "Discord authorization failed. Please try again."}
-                        {discordError === "callback_failed" && "Discord callback failed. Please try again."}
-                        {!discordError.includes("_") && "Discord login failed. Please try again."}
-                      </AlertDescription>
-                      <div className="mt-2 text-xs text-red-400">
-                        Error code: {discordError}
-                      </div>
-                    </Alert>
-                  )}
+
 
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-white">Email</Label>
@@ -257,21 +231,6 @@ export default function LoginPage() {
                       </>
                     )}
                   </Button>
-
-                  {/* Divider */}
-                  <div className="relative my-4">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-white/20" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm px-2 text-white/60">Or continue with</span>
-                    </div>
-                  </div>
-
-                  {/* Discord Login Button */}
-                  <DiscordLoginButton 
-                    onError={(error) => setDiscordError(error)}
-                  />
 
                   <p className="text-sm text-center text-blue-200">
                     Don't have an account?{" "}
