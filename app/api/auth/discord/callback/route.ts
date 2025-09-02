@@ -163,6 +163,8 @@ export async function GET(request: Request) {
         // Check if user exists with this Discord ID
         const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
         
+        console.log("Looking up user with Discord ID:", discordUser.id)
+        
         // First check discord_users table
         const { data: discordConnection, error: discordError } = await supabase
           .from("discord_users")
@@ -171,12 +173,38 @@ export async function GET(request: Request) {
           .single()
 
         if (discordError && discordError.code !== "PGRST116") {
-          console.error("Error checking Discord connection:", discordError)
+          console.error("Error checking discord_users table:", discordError)
           return NextResponse.redirect(`${SITE_URL}/login?discord_error=database_error`)
         }
 
-        if (!discordConnection) {
+        let userId = null
+
+        if (discordConnection) {
+          console.log("Found user in discord_users table:", discordConnection.user_id)
+          userId = discordConnection.user_id
+        } else {
+          // If not in discord_users, check users table directly
+          console.log("User not found in discord_users, checking users table...")
+          const { data: userWithDiscord, error: userLookupError } = await supabase
+            .from("users")
+            .select("id")
+            .eq("discord_id", discordUser.id)
+            .single()
+
+          if (userLookupError && userLookupError.code !== "PGRST116") {
+            console.error("Error checking users table:", userLookupError)
+            return NextResponse.redirect(`${SITE_URL}/login?discord_error=database_error`)
+          }
+
+          if (userWithDiscord) {
+            console.log("Found user in users table:", userWithDiscord.id)
+            userId = userWithDiscord.id
+          }
+        }
+
+        if (!userId) {
           // User doesn't exist, redirect to register with Discord info
+          console.log("No user found with Discord ID, redirecting to registration")
           const discordInfo = {
             id: discordUser.id,
             username: discordUser.username,
@@ -199,14 +227,18 @@ export async function GET(request: Request) {
         }
 
         // User exists, get their auth user
-        const { data: user, error: userError } = await supabase.auth.admin.getUserById(discordConnection.user_id)
+        console.log("Getting auth user for ID:", userId)
+        const { data: user, error: userError } = await supabase.auth.admin.getUserById(userId)
 
         if (userError || !user.user) {
           console.error("Error getting user:", userError)
           return NextResponse.redirect(`${SITE_URL}/login?discord_error=user_not_found`)
         }
 
+        console.log("Successfully found user:", user.user.email)
+
         // Create a session for the user
+        console.log("Creating session for user:", userId)
         const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession({
           user_id: user.user.id,
         })
@@ -215,6 +247,8 @@ export async function GET(request: Request) {
           console.error("Error creating session:", sessionError)
           return NextResponse.redirect(`${SITE_URL}/login?discord_error=session_failed`)
         }
+
+        console.log("Session created successfully, redirecting to auth-callback")
 
         // Redirect with session tokens in URL parameters for proper Supabase integration
         const redirectUrl = new URL(`${SITE_URL}/auth-callback`, SITE_URL)

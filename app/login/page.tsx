@@ -200,8 +200,13 @@ export default function LoginPage() {
                         {discordError === "session_failed" && "Failed to create login session. Please try again."}
                         {discordError === "database_error" && "Database error occurred. Please try again."}
                         {discordError === "login_flow_failed" && "Login process failed. Please try again."}
+                        {discordError === "no_code" && "Discord authorization failed. Please try again."}
+                        {discordError === "callback_failed" && "Discord callback failed. Please try again."}
                         {!discordError.includes("_") && "Discord login failed. Please try again."}
                       </AlertDescription>
+                      <div className="mt-2 text-xs text-red-400">
+                        Error code: {discordError}
+                      </div>
                     </Alert>
                   )}
 

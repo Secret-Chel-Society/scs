@@ -9,6 +9,13 @@ const DISCORD_REDIRECT_URI = process.env.REDIRECT_URI || `${SITE_URL}/api/auth/d
 export async function GET(request: Request) {
   try {
     console.log("Discord login OAuth request initiated")
+    console.log("Environment check:", {
+      NODE_ENV: process.env.NODE_ENV,
+      DISCORD_CLIENT_ID: DISCORD_CLIENT_ID ? "Set" : "Not set",
+      DISCORD_CLIENT_SECRET: DISCORD_CLIENT_SECRET ? "Set" : "Not set",
+      SITE_URL,
+      DISCORD_REDIRECT_URI
+    })
 
     // Check if Discord is properly configured
     if (!DISCORD_CLIENT_ID) {

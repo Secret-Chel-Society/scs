@@ -22,6 +22,7 @@ export default function DiscordLoginButton({
   const handleDiscordLogin = async () => {
     try {
       setIsLoading(true)
+      console.log("Initiating Discord login...")
 
       // Redirect to Discord OAuth
       window.location.href = "/api/auth/discord/login"
