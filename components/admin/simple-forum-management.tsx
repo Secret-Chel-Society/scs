@@ -33,7 +33,7 @@ import {
   RefreshCw,
   AlertTriangle,
 } from "lucide-react"
-import { useSupabase } from "@/hooks/use-supabase"
+import { useSupabase } from "@/lib/supabase/client"
 
 interface ForumCategory {
   id: string
