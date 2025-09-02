@@ -21,33 +21,37 @@ import {
   Calendar,
   Zap,
   Activity,
-  TrendingUpDown
+  TrendingUpDown,
+  Flame,
+  Target as TargetIcon
 } from "lucide-react"
 
-interface EloPlayer {
+interface EloLeaderboardPlayer {
   id: string
-  name: string
+  discord_id: string
+  discord_username: string
+  display_name: string
+  position: string
   elo_rating: number
-  previous_rating: number
-  rank: number
-  previous_rank: number
+  total_matches: number
   wins: number
   losses: number
   draws: number
-  total_matches: number
-  win_percentage: number
-  team_name?: string
-  team_logo?: string
+  win_streak: number
+  highest_rating: number
+  points_earned: number
+  last_match_at: string
 }
 
-export default function EloRankingsPage() {
+export default function EloLeaderboardPage() {
   const { supabase } = useSupabase()
-  const [players, setPlayers] = useState<EloPlayer[]>([])
+  const [players, setPlayers] = useState<EloLeaderboardPlayer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [filter, setFilter] = useState<string>("all") // all, position, streak
 
   useEffect(() => {
-    async function fetchEloRankings() {
+    async function fetchEloLeaderboard() {
       try {
         setLoading(true)
         
@@ -65,18 +69,9 @@ export default function EloRankingsPage() {
         if (data) {
           // Calculate win percentage and format data
           const formattedPlayers = data.map((player, index) => ({
-            id: player.id,
-            name: player.display_name || player.discord_username,
-            elo_rating: player.elo_rating,
-            previous_rating: player.elo_rating, // We'll need to track this separately
-            rank: index + 1,
-            previous_rank: index + 1, // We'll need to track this separately
-            wins: player.wins || 0,
-            losses: player.losses || 0,
-            draws: player.draws || 0,
-            total_matches: player.total_matches || 0,
-            win_percentage: player.total_matches > 0 ? ((player.wins || 0) / player.total_matches) * 100 : 0,
-            team_name: "Free Agent" // We can add team integration later
+            ...player,
+            win_percentage: player.total_matches > 0 ? (player.wins / player.total_matches) * 100 : 0,
+            rank: index + 1
           }))
           
           setPlayers(formattedPlayers)
@@ -84,14 +79,14 @@ export default function EloRankingsPage() {
           setPlayers([])
         }
       } catch (error: any) {
-        console.error("Error fetching ELO rankings:", error)
-        setError(error.message || "Failed to load ELO rankings")
+        console.error("Error fetching ELO leaderboard:", error)
+        setError(error.message || "Failed to load ELO leaderboard")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchEloRankings()
+    fetchEloLeaderboard()
   }, [supabase])
 
   const getRankIcon = (rank: number) => {
@@ -107,46 +102,49 @@ export default function EloRankingsPage() {
     }
   }
 
-  const getRatingChange = (current: number, previous: number) => {
-    const change = current - previous
-    if (change > 0) {
-      return <TrendingUp className="h-4 w-4 text-green-400" />
-    } else if (change < 0) {
-      return <TrendingDown className="h-4 w-4 text-red-400" />
-    } else {
-      return <TrendingUpDown className="h-4 w-4 text-gray-400" />
+  const getPositionBadge = (position: string) => {
+    const colors = {
+      'C': 'bg-blue-500',
+      'LW': 'bg-green-500',
+      'RW': 'bg-purple-500',
+      'D': 'bg-orange-500',
+      'G': 'bg-red-500'
     }
+    return (
+      <Badge className={`${colors[position as keyof typeof colors] || 'bg-gray-500'} text-white text-xs`}>
+        {position}
+      </Badge>
+    )
   }
 
-  const getRatingChangeText = (current: number, previous: number) => {
-    const change = current - previous
-    if (change > 0) {
-      return `+${change}`
-    } else if (change < 0) {
-      return `${change}`
-    } else {
-      return "0"
+  const getWinStreakBadge = (streak: number) => {
+    if (streak >= 5) {
+      return <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs">
+        <Flame className="h-3 w-3 mr-1" />
+        {streak}
+      </Badge>
+    } else if (streak >= 3) {
+      return <Badge className="bg-orange-500 text-white text-xs">
+        {streak}
+      </Badge>
     }
+    return null
   }
 
-  const getRatingChangeColor = (current: number, previous: number) => {
-    const change = current - previous
-    if (change > 0) {
-      return "text-green-400"
-    } else if (change < 0) {
-      return "text-red-400"
-    } else {
-      return "text-gray-400"
-    }
-  }
+  const filteredPlayers = players.filter(player => {
+    if (filter === "all") return true
+    if (filter === "position" && player.position !== "TBD") return true
+    if (filter === "streak" && player.win_streak >= 3) return true
+    return false
+  })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-yellow-900 to-slate-900">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
         <div className="relative container mx-auto px-4 py-8">
           <div className="relative z-10 space-y-6">
@@ -163,19 +161,19 @@ export default function EloRankingsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-yellow-900 to-slate-900">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
         <div className="relative container mx-auto px-4 py-8">
           <div className="relative z-10 text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-red-200 to-orange-200 bg-clip-text text-transparent">
-              ELO Rankings
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-yellow-200 to-orange-200 bg-clip-text text-transparent">
+              ELO Leaderboard
             </h1>
-            <p className="text-xl text-red-200 mb-8">
-              Error loading ELO rankings: {error}
+            <p className="text-xl text-yellow-200 mb-8">
+              Error loading ELO leaderboard: {error}
             </p>
           </div>
         </div>
@@ -184,12 +182,12 @@ export default function EloRankingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-yellow-900 to-slate-900">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
       <div className="relative container mx-auto px-4 py-8">
@@ -206,11 +204,11 @@ export default function EloRankingsPage() {
             transition={{ delay: 0.2 }}
             className="text-center mb-12"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-red-200 to-orange-200 bg-clip-text text-transparent">
-              ELO Rankings
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-yellow-200 to-orange-200 bg-clip-text text-transparent">
+              ELO Leaderboard
             </h1>
-            <p className="text-xl text-red-200 mb-8">
-              Competitive player rankings based on ELO rating system
+            <p className="text-xl text-yellow-200 mb-8">
+              Top players ranked by ELO rating and performance
             </p>
           </motion.div>
 
@@ -221,43 +219,82 @@ export default function EloRankingsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-red-200 mb-2">{players.length}</div>
-              <div className="text-red-300 flex items-center justify-center gap-2">
+            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-yellow-200 mb-2">{players.length}</div>
+              <div className="text-yellow-300 flex items-center justify-center gap-2">
                 <Users className="h-5 w-5" />
                 Ranked Players
               </div>
             </div>
-            <div className="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-6 text-center">
+            <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-400/30 rounded-2xl p-6 text-center">
               <div className="text-3xl font-bold text-orange-200 mb-2">
-                {Math.max(...players.map(p => p.elo_rating))}
+                {players.length > 0 ? Math.max(...players.map(p => p.elo_rating)) : 0}
               </div>
               <div className="text-orange-300 flex items-center justify-center gap-2">
                 <Trophy className="h-5 w-5" />
                 Highest Rating
               </div>
             </div>
-            <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-yellow-200 mb-2">
-                {Math.round(players.reduce((acc, p) => acc + p.elo_rating, 0) / players.length)}
+            <div className="bg-gradient-to-r from-red-500/20 to-pink-500/20 backdrop-blur-sm border border-red-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-red-200 mb-2">
+                {players.length > 0 ? Math.round(players.reduce((acc, p) => acc + p.elo_rating, 0) / players.length) : 0}
               </div>
-              <div className="text-yellow-300 flex items-center justify-center gap-2">
+              <div className="text-red-300 flex items-center justify-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 Average Rating
               </div>
             </div>
-            <div className="bg-gradient-to-r from-amber-500/20 to-red-500/20 backdrop-blur-sm border border-amber-400/30 rounded-2xl p-6 text-center">
-              <div className="text-3xl font-bold text-amber-200 mb-2">
+            <div className="bg-gradient-to-r from-pink-500/20 to-yellow-500/20 backdrop-blur-sm border border-pink-400/30 rounded-2xl p-6 text-center">
+              <div className="text-3xl font-bold text-pink-200 mb-2">
                 {players.reduce((acc, p) => acc + p.total_matches, 0)}
               </div>
-              <div className="text-amber-300 flex items-center justify-center gap-2">
+              <div className="text-pink-300 flex items-center justify-center gap-2">
                 <Calendar className="h-5 w-5" />
                 Total Matches
               </div>
             </div>
           </motion.div>
 
-          {/* Rankings Table */}
+          {/* Filter Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex justify-center gap-4 mb-6"
+          >
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                filter === "all" 
+                  ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg" 
+                  : "bg-white/10 text-white/80 hover:bg-white/20"
+              }`}
+            >
+              All Players
+            </button>
+            <button
+              onClick={() => setFilter("position")}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                filter === "position" 
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg" 
+                  : "bg-white/10 text-white/80 hover:bg-white/20"
+              }`}
+            >
+              With Position
+            </button>
+            <button
+              onClick={() => setFilter("streak")}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                filter === "streak" 
+                  ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg" 
+                  : "bg-white/10 text-white/80 hover:bg-white/20"
+              }`}
+            >
+              Hot Streaks
+            </button>
+          </motion.div>
+
+          {/* Leaderboard Table */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -266,11 +303,11 @@ export default function EloRankingsPage() {
             <Card className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <Target className="h-5 w-5 text-red-400" />
-                  Player Rankings
+                  <TargetIcon className="h-5 w-5 text-yellow-400" />
+                  ELO Leaderboard
                 </CardTitle>
-                <CardDescription className="text-red-200">
-                  Current ELO ratings and performance statistics
+                <CardDescription className="text-yellow-200">
+                  Top players ranked by ELO rating and performance metrics
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -280,16 +317,17 @@ export default function EloRankingsPage() {
                       <TableRow className="bg-white/10 hover:bg-white/20 transition-colors">
                         <TableHead className="text-white">Rank</TableHead>
                         <TableHead className="text-white">Player</TableHead>
-                        <TableHead className="text-white">Team</TableHead>
+                        <TableHead className="text-white">Position</TableHead>
                         <TableHead className="text-right text-white">ELO Rating</TableHead>
-                        <TableHead className="text-right text-white">Change</TableHead>
                         <TableHead className="text-right text-white">Record</TableHead>
                         <TableHead className="text-right text-white">Win %</TableHead>
+                        <TableHead className="text-right text-white">Streak</TableHead>
                         <TableHead className="text-right text-white">Matches</TableHead>
+                        <TableHead className="text-right text-white">Points</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {players.map((player, index) => (
+                      {filteredPlayers.map((player, index) => (
                         <TableRow 
                           key={player.id} 
                           className="hover:bg-white/10 transition-colors border-b border-white/10"
@@ -300,22 +338,17 @@ export default function EloRankingsPage() {
                               <span className="font-bold">{player.rank}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-white font-medium">
-                            {player.name}
+                          <TableCell className="text-white">
+                            <div>
+                              <div className="font-medium">{player.display_name}</div>
+                              <div className="text-sm text-yellow-300">@{player.discord_username}</div>
+                            </div>
                           </TableCell>
                           <TableCell className="text-white">
-                            {player.team_name || "Free Agent"}
+                            {getPositionBadge(player.position)}
                           </TableCell>
                           <TableCell className="text-right text-white font-bold">
                             {player.elo_rating}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              {getRatingChange(player.elo_rating, player.previous_rating)}
-                              <span className={getRatingChangeColor(player.elo_rating, player.previous_rating)}>
-                                {getRatingChangeText(player.elo_rating, player.previous_rating)}
-                              </span>
-                            </div>
                           </TableCell>
                           <TableCell className="text-right text-white">
                             {player.wins}-{player.losses}-{player.draws}
@@ -324,13 +357,25 @@ export default function EloRankingsPage() {
                             {player.win_percentage.toFixed(1)}%
                           </TableCell>
                           <TableCell className="text-right text-white">
+                            {getWinStreakBadge(player.win_streak)}
+                          </TableCell>
+                          <TableCell className="text-right text-white">
                             {player.total_matches}
+                          </TableCell>
+                          <TableCell className="text-right text-white font-bold text-green-400">
+                            {player.points_earned}
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
+                
+                {filteredPlayers.length === 0 && (
+                  <div className="text-center py-8 text-white/60">
+                    No players found matching the current filter.
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>

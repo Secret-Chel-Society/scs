@@ -62,39 +62,79 @@ export default function EloStatisticsPage() {
       try {
         setLoading(true)
         
-        // Mock data for now - replace with actual ELO statistics from your database
-        const mockStats: EloStats = {
-          total_players: 150,
-          average_rating: 1650,
-          highest_rating: 1850,
-          lowest_rating: 1200,
-          total_matches: 1250,
-          rating_distribution: [
-            { range: "1800+", count: 15, percentage: 10.0 },
-            { range: "1700-1799", count: 25, percentage: 16.7 },
-            { range: "1600-1699", count: 35, percentage: 23.3 },
-            { range: "1500-1599", count: 40, percentage: 26.7 },
-            { range: "1400-1499", count: 25, percentage: 16.7 },
-            { range: "1300-1399", count: 8, percentage: 5.3 },
-            { range: "1200-1299", count: 2, percentage: 1.3 }
-          ],
-          top_performers: [
-            { name: "LispDoge", rating_gain: 150, matches_played: 60 },
-            { name: "HockeyPro99", rating_gain: 120, matches_played: 58 },
-            { name: "IceWarrior", rating_gain: 95, matches_played: 55 },
-            { name: "PuckMaster", rating_gain: 85, matches_played: 52 },
-            { name: "GoalScorer", rating_gain: 75, matches_played: 50 }
-          ],
-          rating_changes: [
-            { date: "2025-01-15", average_change: 12.5, total_matches: 45 },
-            { date: "2025-01-14", average_change: -8.2, total_matches: 38 },
-            { date: "2025-01-13", average_change: 15.3, total_matches: 52 },
-            { date: "2025-01-12", average_change: 5.7, total_matches: 41 },
-            { date: "2025-01-11", average_change: -3.1, total_matches: 35 }
-          ]
+        // Fetch real data from the database
+        const { data: playersData, error: playersError } = await supabase
+          .from('elo_players')
+          .select('*')
+
+        if (playersError) {
+          throw playersError
         }
 
-        setStats(mockStats)
+        if (playersData) {
+          const totalPlayers = playersData.length
+          const averageRating = totalPlayers > 0 ? Math.round(playersData.reduce((acc, p) => acc + p.elo_rating, 0) / totalPlayers) : 0
+          const highestRating = totalPlayers > 0 ? Math.max(...playersData.map(p => p.elo_rating)) : 0
+          const lowestRating = totalPlayers > 0 ? Math.min(...playersData.map(p => p.elo_rating)) : 0
+
+          // Calculate rating distribution
+          const ratingRanges = [
+            { min: 1800, max: Infinity, label: "1800+" },
+            { min: 1700, max: 1799, label: "1700-1799" },
+            { min: 1600, max: 1699, label: "1600-1699" },
+            { min: 1500, max: 1599, label: "1500-1599" },
+            { min: 1400, max: 1499, label: "1400-1499" },
+            { min: 1300, max: 1399, label: "1300-1399" },
+            { min: 0, max: 1299, label: "1200-1299" }
+          ]
+
+          const ratingDistribution = ratingRanges.map(range => {
+            const count = playersData.filter(p => p.elo_rating >= range.min && p.elo_rating <= range.max).length
+            return {
+              range: range.label,
+              count,
+              percentage: totalPlayers > 0 ? (count / totalPlayers) * 100 : 0
+            }
+          })
+
+          // Calculate top performers (players with highest rating gains)
+          const topPerformers = playersData
+            .filter(p => p.total_matches > 0)
+            .sort((a, b) => (b.elo_rating - 1200) - (a.elo_rating - 1200))
+            .slice(0, 5)
+            .map(player => ({
+              name: player.display_name || player.discord_username,
+              rating_gain: player.elo_rating - 1200, // Assuming 1200 is starting rating
+              matches_played: player.total_matches
+            }))
+
+          // Get total matches from elo_matches table
+          const { data: matchesData, error: matchesError } = await supabase
+            .from('elo_matches')
+            .select('id, created_at')
+
+          const totalMatches = matchesData?.length || 0
+
+          // Create mock rating changes data (we can enhance this later)
+          const ratingChanges = [
+            { date: new Date().toISOString().split('T')[0], average_change: 0, total_matches: 0 }
+          ]
+
+          const realStats: EloStats = {
+            total_players: totalPlayers,
+            average_rating: averageRating,
+            highest_rating: highestRating,
+            lowest_rating: lowestRating,
+            total_matches: totalMatches,
+            rating_distribution: ratingDistribution,
+            top_performers: topPerformers,
+            rating_changes: ratingChanges
+          }
+
+          setStats(realStats)
+        } else {
+          setStats(null)
+        }
       } catch (error: any) {
         console.error("Error fetching ELO statistics:", error)
         setError(error.message || "Failed to load ELO statistics")

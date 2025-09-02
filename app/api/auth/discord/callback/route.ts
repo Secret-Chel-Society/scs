@@ -216,20 +216,13 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${SITE_URL}/login?discord_error=session_failed`)
         }
 
-        // Redirect with session
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <body>
-            <script>
-              // Set the session in localStorage
-              localStorage.setItem('supabase.auth.token', '${JSON.stringify(sessionData.session).replace(/'/g, "\\'")}')
-              window.location.href = '${SITE_URL}/?discord_login_success=true'
-            </script>
-          </body>
-          </html>
-        `
-        return new NextResponse(html, { headers: { "Content-Type": "text/html" } })
+        // Redirect with session tokens in URL parameters for proper Supabase integration
+        const redirectUrl = new URL(`${SITE_URL}/auth-callback`, SITE_URL)
+        redirectUrl.searchParams.set('access_token', sessionData.session.access_token)
+        redirectUrl.searchParams.set('refresh_token', sessionData.session.refresh_token)
+        redirectUrl.searchParams.set('discord_login', 'true')
+        
+        return NextResponse.redirect(redirectUrl.toString())
       } catch (error) {
         console.error("Error in login flow:", error)
         return NextResponse.redirect(`${SITE_URL}/login?discord_error=login_flow_failed`)

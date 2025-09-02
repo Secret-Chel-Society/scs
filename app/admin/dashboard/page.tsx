@@ -613,6 +613,162 @@ export default function AdminDashboardPage() {
                 </Card>
               </TabsContent>
 
+              {/* ELO System Tab */}
+              <TabsContent value="elo" className="mt-8">
+                <div className="grid gap-6">
+                  {/* ELO System Overview */}
+                  <Card className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-sm border border-orange-400/30">
+                    <CardHeader>
+                      <CardTitle className="text-orange-200 text-2xl flex items-center gap-2">
+                        <Target className="h-6 w-6" />
+                        ELO System Management
+                      </CardTitle>
+                      <CardDescription className="text-orange-300">
+                        Manage ELO rating system, players, and settings
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h3 className="text-orange-200 font-semibold text-lg">System Status</h3>
+                          <div className="space-y-2 text-orange-300">
+                            <div>• ELO System: Active</div>
+                            <div>• Rating Algorithm: Standard ELO</div>
+                            <div>• Starting Rating: 1200</div>
+                            <div>• K-Factor: Dynamic (32-16)</div>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <h3 className="text-orange-200 font-semibold text-lg">Quick Actions</h3>
+                          <div className="space-y-2">
+                            <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+                              <Target className="h-4 w-4 mr-2" />
+                              View ELO Rankings
+                            </Button>
+                            <Button className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white">
+                              <GamepadIcon className="h-4 w-4 mr-2" />
+                              View ELO Matches
+                            </Button>
+                            <Button className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white">
+                              <BarChart3 className="h-4 w-4 mr-2" />
+                              View ELO Statistics
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* ELO Players Management */}
+                  <Card className="bg-gradient-to-br from-red-500/10 to-pink-500/10 backdrop-blur-sm border border-red-400/30">
+                    <CardHeader>
+                      <CardTitle className="text-red-200 text-2xl flex items-center gap-2">
+                        <Users className="h-6 w-6" />
+                        ELO Players
+                      </CardTitle>
+                      <CardDescription className="text-red-300">
+                        Manage registered ELO players and their ratings
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="text-red-200">
+                            <span className="text-2xl font-bold">0</span> players registered
+                          </div>
+                          <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Player
+                          </Button>
+                        </div>
+                        <div className="text-center py-8 text-red-300/60">
+                          No ELO players registered yet. Players will appear here after using the Discord bot commands.
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* ELO Settings */}
+                  <Card className="bg-gradient-to-br from-pink-500/10 to-purple-500/10 backdrop-blur-sm border border-pink-400/30">
+                    <CardHeader>
+                      <CardTitle className="text-pink-200 text-2xl flex items-center gap-2">
+                        <Settings className="h-6 w-6" />
+                        ELO Settings
+                      </CardTitle>
+                      <CardDescription className="text-pink-300">
+                        Configure ELO system parameters and rules
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h3 className="text-pink-200 font-semibold text-lg">Rating Parameters</h3>
+                          <div className="space-y-2 text-pink-300">
+                            <div>• Initial Rating: 1200</div>
+                            <div>• K-Factor Range: 16-32</div>
+                            <div>• Rating Floor: 100</div>
+                            <div>• Rating Ceiling: 3000</div>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <h3 className="text-pink-200 font-semibold text-lg">Match Settings</h3>
+                          <div className="space-y-2 text-pink-300">
+                            <div>• Points per Win: 3</div>
+                            <div>• Points per Loss: 0</div>
+                            <div>• Points per Draw: 1</div>
+                            <div>• Lobby Timeout: 15 minutes</div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Discord Bot Status */}
+                  <Card className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur-sm border border-purple-400/30">
+                    <CardHeader>
+                      <CardTitle className="text-purple-200 text-2xl flex items-center gap-2">
+                        <Zap className="h-6 w-6" />
+                        Discord Bot Status
+                      </CardTitle>
+                      <CardDescription className="text-purple-300">
+                        Monitor Discord bot connection and commands
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-400/20">
+                          <div className="flex items-center gap-3">
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span className="text-white font-semibold">Bot Status</span>
+                          </div>
+                          <Badge className="bg-green-500 text-white">Online</Badge>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-4 text-purple-300">
+                          <div>
+                            <h4 className="font-semibold mb-2">Available Commands:</h4>
+                            <div className="space-y-1 text-sm">
+                              <div>• !register @username</div>
+                              <div>• !position [C/LW/RW/D/G]</div>
+                              <div>• !join - Join lobby</div>
+                              <div>• !lobby - View current lobby</div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-2">Admin Commands:</h4>
+                            <div className="space-y-1 text-sm">
+                              <div>• !pick @username - Captain pick</div>
+                              <div>• !start - Begin match</div>
+                              <div>• !result [score] - Record result</div>
+                              <div>• !stats - View player stats</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
               {/* Overview Tab */}
               <TabsContent value="overview" className="mt-8">
                 <div className="grid gap-6">

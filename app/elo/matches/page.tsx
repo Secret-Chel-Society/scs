@@ -67,126 +67,78 @@ export default function EloMatchesPage() {
       try {
         setLoading(true)
         
-        // Mock data for now - replace with actual ELO matches from your database
-        const mockMatches: EloMatch[] = [
-          {
-            id: "1",
-            date: "2025-01-15T20:30:00Z",
-            player1: {
-              name: "LispDoge",
-              rating_before: 1850,
-              rating_after: 1870,
-              rating_change: 20,
-              team: "St Louis Skyhawks"
-            },
-            player2: {
-              name: "HockeyPro99",
-              rating_before: 1820,
-              rating_after: 1800,
-              rating_change: -20,
-              team: "Toronto Maple Leafs"
-            },
-            winner: "LispDoge",
-            score: "4-2",
-            expected_winner: "LispDoge",
-            upset: false,
-            rating_difference: 30
-          },
-          {
-            id: "2",
-            date: "2025-01-15T19:00:00Z",
-            player1: {
-              name: "IceWarrior",
-              rating_before: 1780,
-              rating_after: 1760,
-              rating_change: -20,
-              team: "Boston Bruins"
-            },
-            player2: {
-              name: "PuckMaster",
-              rating_before: 1750,
-              rating_after: 1770,
-              rating_change: 20,
-              team: "Montreal Canadiens"
-            },
-            winner: "PuckMaster",
-            score: "3-1",
-            expected_winner: "IceWarrior",
-            upset: true,
-            rating_difference: 30
-          },
-          {
-            id: "3",
-            date: "2025-01-15T18:30:00Z",
-            player1: {
-              name: "GoalScorer",
-              rating_before: 1720,
-              rating_after: 1740,
-              rating_change: 20,
-              team: "Chicago Blackhawks"
-            },
-            player2: {
-              name: "DefenseFirst",
-              rating_before: 1680,
-              rating_after: 1660,
-              rating_change: -20,
-              team: "Detroit Red Wings"
-            },
-            winner: "GoalScorer",
-            score: "5-2",
-            expected_winner: "GoalScorer",
-            upset: false,
-            rating_difference: 40
-          },
-          {
-            id: "4",
-            date: "2025-01-15T17:00:00Z",
-            player1: {
-              name: "SpeedDemon",
-              rating_before: 1650,
-              rating_after: 1630,
-              rating_change: -20,
-              team: "New York Rangers"
-            },
-            player2: {
-              name: "PowerForward",
-              rating_before: 1620,
-              rating_after: 1640,
-              rating_change: 20,
-              team: "Philadelphia Flyers"
-            },
-            winner: "PowerForward",
-            score: "2-1",
-            expected_winner: "SpeedDemon",
-            upset: true,
-            rating_difference: 30
-          },
-          {
-            id: "5",
-            date: "2025-01-15T16:30:00Z",
-            player1: {
-              name: "Playmaker",
-              rating_before: 1700,
-              rating_after: 1720,
-              rating_change: 20,
-              team: "Pittsburgh Penguins"
-            },
-            player2: {
-              name: "Sniper",
-              rating_before: 1690,
-              rating_after: 1670,
-              rating_change: -20,
-              team: "Washington Capitals"
-            },
-            winner: "Playmaker",
-            score: "4-3",
-            expected_winner: "Playmaker",
-            upset: false,
-            rating_difference: 10
-          }
-        ]
+        // Fetch real data from the database
+        const { data: matchesData, error: matchesError } = await supabase
+          .from('elo_matches')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100)
 
-        setMatches(mockMatches)
+        if (matchesError) {
+          throw matchesError
+        }
+
+        if (matchesData) {
+          // Fetch player details for each match
+          const matchesWithPlayers = await Promise.all(
+            matchesData.map(async (match) => {
+              const { data: matchPlayers, error: playersError } = await supabase
+                .from('elo_match_players')
+                .select(`
+                  *,
+                  elo_players!inner(
+                    discord_username,
+                    display_name
+                  )
+                `)
+                .eq('match_id', match.id)
+
+              if (playersError) {
+                console.error('Error fetching match players:', playersError)
+                return null
+              }
+
+              // Group players by team
+              const team1Players = matchPlayers?.filter(mp => mp.team_number === 1) || []
+              const team2Players = matchPlayers?.filter(mp => mp.team_number === 2) || []
+
+              // Find the first player from each team for display
+              const player1 = team1Players[0]
+              const player2 = team2Players[0]
+
+              if (!player1 || !player2) return null
+
+              return {
+                id: match.id,
+                date: match.created_at,
+                player1: {
+                  name: player1.elo_players?.display_name || player1.elo_players?.discord_username || 'Unknown',
+                  rating_before: player1.rating_before,
+                  rating_after: player1.rating_after,
+                  rating_change: player1.rating_change,
+                  team: "Team 1"
+                },
+                player2: {
+                  name: player2.elo_players?.display_name || player2.elo_players?.discord_username || 'Unknown',
+                  rating_before: player2.rating_before,
+                  rating_after: player2.rating_after,
+                  rating_change: player2.rating_change,
+                  team: "Team 2"
+                },
+                winner: match.winner_team === 1 ? "Team 1" : "Team 2",
+                score: `${match.team1_score}-${match.team2_score}`,
+                expected_winner: "Team 1", // We can calculate this based on ratings later
+                upset: false, // We can calculate this based on ratings later
+                rating_difference: Math.abs((player1.rating_before || 0) - (player2.rating_before || 0))
+              }
+            })
+          )
+
+          const validMatches = matchesWithPlayers.filter(match => match !== null) as EloMatch[]
+          setMatches(validMatches)
+        } else {
+          setMatches([])
+        }
       } catch (error: any) {
         console.error("Error fetching ELO matches:", error)
         setError(error.message || "Failed to load ELO matches")

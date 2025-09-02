@@ -40,6 +40,7 @@ import {
   BarChartIcon as ChartBar,
 } from "lucide-react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
+import { useSearchParams } from "next/navigation"
 
 // Animated counter component
 function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
@@ -98,6 +99,7 @@ function FloatingParticles() {
 export default function Home() {
   const { supabase } = useSupabase()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
   const [news, setNews] = useState([])
   const [upcomingGames, setUpcomingGames] = useState([])
   const [completedGames, setCompletedGames] = useState([])
@@ -278,6 +280,17 @@ export default function Home() {
 
     fetchData()
   }, [supabase, toast])
+
+  // Handle Discord login success message
+  useEffect(() => {
+    if (searchParams?.get("discord_login_success") === "true") {
+      toast({
+        title: "Welcome back! 🎉",
+        description: "Successfully logged in with Discord",
+        variant: "default",
+      })
+    }
+  }, [searchParams, toast])
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
