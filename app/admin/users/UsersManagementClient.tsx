@@ -1228,11 +1228,28 @@ export default function UsersManagementClient() {
                                   size="sm"
                                   onClick={() => {
                                     setSelectedUser(user)
+                                    // Initialize selected roles with current user roles
+                                    setSelectedRoles(user.roles || [])
                                     setDialogOpen(true)
                                   }}
                                   className="text-white/70 hover:text-white hover:bg-white/10"
                                 >
                                   <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedUser(user)
+                                    setTeamAssignmentForm({
+                                      playerId: user.id,
+                                      teamId: user.team_id || null,
+                                    })
+                                    setTeamAssignDialogOpen(true)
+                                  }}
+                                  className="text-white/70 hover:text-white hover:bg-white/10"
+                                >
+                                  <Users className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"

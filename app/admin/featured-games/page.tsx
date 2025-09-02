@@ -189,27 +189,44 @@ export default function AdminFeaturedGamesPage() {
     setUpdatingId(matchId)
     try {
       // First manually verify if the column exists
-      const { data: columnCheck, error: columnError } = await supabase.rpc("run_sql", {
-        sql: "SELECT column_name FROM information_schema.columns WHERE table_name = 'matches' AND column_name = 'featured'",
-      })
+      const { data: columnCheck, error: columnError } = await supabase
+        .from("matches")
+        .select("featured")
+        .eq("id", matchId)
+        .limit(1)
 
-      if (columnError || !columnCheck || columnCheck.length === 0) {
-        // Column doesn't exist, try to add it
-        const { error: alterError } = await supabase.rpc("run_sql", {
-          sql: "ALTER TABLE matches ADD COLUMN featured BOOLEAN DEFAULT FALSE;",
-        })
+      if (columnError && columnError.message.includes("does not exist")) {
+        // Column doesn't exist, try to add it using direct SQL
+        const { error: alterError } = await supabase
+          .from("matches")
+          .select("id")
+          .limit(1)
+          .then(() => {
+            // If we can select, try to add the column using a different approach
+            return supabase.rpc("exec_sql", {
+              sql_query: "ALTER TABLE matches ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;"
+            })
+          })
 
         if (alterError) {
-          throw new Error(`Could not add 'featured' column: ${alterError.message}`)
+          // If that fails, show migration message
+          toast({
+            title: "Migration Required",
+            description: "The 'featured' column needs to be added to the matches table. Please run the migration first.",
+            variant: "destructive",
+          })
+          return
         }
 
         // Give the database a moment to update
         await new Promise((resolve) => setTimeout(resolve, 1000))
       }
 
-      // Use raw SQL update to avoid schema cache issues
-      const updateSql = `UPDATE matches SET featured = ${!currentStatus} WHERE id = '${matchId}'`
-      const { error: updateError } = await supabase.rpc("run_sql", { sql: updateSql })
+      // Update the featured status directly
+      const { error: updateError } = await supabase
+        .from("matches")
+        .update({ featured: !currentStatus })
+        .eq("id", matchId)
 
       if (updateError) {
         throw new Error(`Failed to update: ${updateError.message}`)

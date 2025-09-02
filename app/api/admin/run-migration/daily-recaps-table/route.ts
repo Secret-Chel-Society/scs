@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       CREATE INDEX IF NOT EXISTS idx_daily_recaps_date ON daily_recaps(date);
     `
 
-    const { error: indexError } = await supabase.rpc("run_sql", {
-      query: createIndexQuery,
+    const { error: indexError } = await supabase.rpc("exec_sql", {
+      sql_query: createIndexQuery,
     })
 
     if (indexError) {

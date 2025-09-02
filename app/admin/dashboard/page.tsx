@@ -41,6 +41,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import PlayoffBracket from "@/components/playoff-bracket"
+import { FixDailyRecapsTable } from "@/components/admin/fix-daily-recaps-table"
 
 interface Conference {
   id: string
@@ -808,14 +809,8 @@ export default function AdminDashboardPage() {
                   {/* Playoff Bracket Visualization */}
                   <PlayoffBracket teams={teams} conferences={conferences} />
 
-
-
-
-
-
-
-
-
+                  {/* Fix Daily Recaps Table */}
+                  <FixDailyRecapsTable />
 
                   {/* Conference Summary */}
                   <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-400/30">
