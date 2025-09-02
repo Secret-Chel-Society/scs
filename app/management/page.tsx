@@ -348,10 +348,12 @@ const ManagementPage = () => {
       try {
         const response = await fetch("/api/bidding/status")
         const data = await response.json()
+        console.log("Bidding status response:", data)
         setIsBiddingEnabled(data.enabled)
       } catch (error) {
         console.error("Error checking bidding status:", error)
-        setIsBiddingEnabled(false) // Default to disabled on error
+        setIsBiddingEnabled(true) // Default to enabled on error to allow testing
+        console.warn("Defaulting bidding to enabled due to API error")
       }
     }
 
@@ -1382,8 +1384,8 @@ const ManagementPage = () => {
 
   // Effect to reload free agents when switching to free-agents tab
   useEffect(() => {
-    if (activeTab === "free-agents" && teamData?.id) {
-      console.log("Switching to free-agents tab, reloading free agents") // Debug log
+    if (activeTab === "bids" && teamData?.id) {
+      console.log("Switching to bids tab, loading free agents") // Debug log
       loadFreeAgents()
     }
   }, [activeTab, teamData?.id])
@@ -1843,7 +1845,7 @@ const ManagementPage = () => {
                   <CardHeader>
                     <CardTitle className="text-lg md:text-xl">Free Agents</CardTitle>
                     <CardDescription className="text-sm md:text-base">
-                      Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
+                      Available players for bidding. {!isBiddingEnabled && "⚠️ Bidding is currently disabled by league administrators."}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1962,10 +1964,16 @@ const ManagementPage = () => {
                       </div>
                     ) : freeAgentsError ? (
                       <div className="text-center py-8">
-                        <div className="text-red-500 mb-4">{freeAgentsError}</div>
-                        <Button onClick={loadFreeAgents} variant="outline">
-                          Try Again
-                        </Button>
+                        <div className="text-red-500 mb-4">Error loading free agents:</div>
+                        <div className="text-sm text-gray-600 mb-4">{freeAgentsError}</div>
+                        <div className="flex gap-2 justify-center">
+                          <Button onClick={loadFreeAgents} variant="outline">
+                            Try Again
+                          </Button>
+                          <Button onClick={() => window.open('/admin/settings', '_blank')} variant="outline">
+                            Check Admin Settings
+                          </Button>
+                        </div>
                       </div>
                     ) : filteredFreeAgents.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
