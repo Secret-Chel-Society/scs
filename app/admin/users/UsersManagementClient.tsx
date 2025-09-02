@@ -578,7 +578,7 @@ export default function UsersManagementClient() {
         }
       }
 
-      // Process users to ensure secondary_position is properly handled
+      // Process users to ensure secondary_position is properly handled and roles are mapped correctly
       const processedUsers =
         usersData?.map((user) => {
           return {
@@ -587,6 +587,8 @@ export default function UsersManagementClient() {
             // Ensure secondary_position is properly handled - convert empty strings to null
             // but preserve actual values
             secondary_position: user.secondary_position === "" ? null : user.secondary_position,
+            // Map user_roles array to roles array for display
+            roles: user.user_roles?.map((ur: any) => ur.role) || [],
           }
         }) || []
 
