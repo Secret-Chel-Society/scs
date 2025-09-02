@@ -426,7 +426,7 @@ export default function Navigation() {
         </div>
 
         {/* Header */}
-        <div className="relative z-10 flex items-center justify-center p-4 border-b border-white/20 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm">
+        <div className="relative z-10 flex items-center justify-center p-4 border-b border-white/20 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm flex-shrink-0">
           <Link href="/">
             <Image
               src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
@@ -439,167 +439,168 @@ export default function Navigation() {
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className="relative z-10 flex-1 overflow-y-auto p-4">
-          <div className="space-y-6">
-            {navigation.map((section, sectionIndex) => (
-              <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
-                {/* Section Header */}
-                <div className="mb-3">
-                  <h3 className="text-sm font-bold text-white mb-1">{section.name}</h3>
-                  <p className="text-xs text-white/60">{section.subtitle}</p>
-                </div>
-                
-                {/* Section Items */}
-                <ul className="space-y-1">
-                  {section.items.map((item, index) => {
-                    const Icon = item.icon
-                    const isActive = item.href === "/" 
-                      ? pathname === "/" 
-                      : pathname === item.href || pathname.startsWith(item.href + "/")
-                    const hasSubmenu = item.submenu && item.submenu.length > 0
-                    const isExpanded = expandedMenus[item.name]
+        {/* Scrollable Navigation Container */}
+        <div className="relative z-10 flex-1 overflow-hidden flex flex-col">
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+            <div className="space-y-6">
+              {navigation.map((section, sectionIndex) => (
+                <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
+                  {/* Section Header */}
+                  <div className="mb-3">
+                    <h3 className="text-sm font-bold text-white mb-1">{section.name}</h3>
+                    <p className="text-xs text-white/60">{section.subtitle}</p>
+                  </div>
+                  
+                  {/* Section Items */}
+                  <ul className="space-y-1">
+                    {section.items.map((item, index) => {
+                      const Icon = item.icon
+                      const isActive = item.href === "/" 
+                        ? pathname === "/" 
+                        : pathname === item.href || pathname.startsWith(item.href + "/")
+                      const hasSubmenu = item.submenu && item.submenu.length > 0
+                      const isExpanded = expandedMenus[item.name]
 
-                    return (
-                      <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${(sectionIndex * 100) + (index * 50)}ms` }}>
-                        <div className="flex items-center">
-                          <Link
-                            href={item.href}
-                            className={cn(
-                              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
-                              isActive 
-                                ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
-                                : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                            )}
-                          >
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">{item.name}</span>
-                          </Link>
-                          {hasSubmenu && (
-                            <button
-                              className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
-                              onClick={() => toggleSubmenu(item.name)}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-3 w-3" />
-                              ) : (
-                                <ChevronRight className="h-3 w-3" />
+                      return (
+                        <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${(sectionIndex * 100) + (index * 50)}ms` }}>
+                          <div className="flex items-center">
+                            <Link
+                              href={item.href}
+                              className={cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
+                                isActive 
+                                  ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
+                                  : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                               )}
-                            </button>
+                            >
+                              <Icon className="h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{item.name}</span>
+                            </Link>
+                            {hasSubmenu && (
+                              <button
+                                className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
+                                onClick={() => toggleSubmenu(item.name)}
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="h-3 w-3" />
+                                ) : (
+                                  <ChevronRight className="h-3 w-3" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+
+                          {hasSubmenu && isExpanded && (
+                            <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
+                              {item.submenu.map((subItem) => (
+                                <li key={subItem.name}>
+                                  <Link
+                                    href={subItem.href}
+                                    className={cn(
+                                      "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                                      pathname === subItem.href
+                                        ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                        : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                                    )}
+                                  >
+                                    {subItem.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           )}
-                        </div>
-
-                        {hasSubmenu && isExpanded && (
-                          <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                            {item.submenu.map((subItem) => (
-                              <li key={subItem.name}>
-                                <Link
-                                  href={subItem.href}
-                                  className={cn(
-                                    "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                                    pathname === subItem.href
-                                      ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                      : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                                  )}
-                                >
-                                  {subItem.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            ))}
-
-
-          </div>
-        </nav>
-
-        {/* User Section */}
-        <div className="relative z-10 border-t border-white/20 p-4 space-y-4 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm">
-          {session ? (
-            <>
-              {/* Team Info */}
-              {teamInfo && (
-                <Link 
-                  href={`/teams/${teamInfo.id}`} 
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 backdrop-blur-sm transition-colors border border-white/20"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
-                    {teamInfo.logo_url ? (
-                      <Image
-                        src={teamInfo.logo_url}
-                        alt={teamInfo.name}
-                        width={32}
-                        height={32}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-xs font-bold text-white">{teamInfo.name.substring(0, 2)}</span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate text-white">{teamInfo.name}</p>
-                    <p className="text-xs text-white/70">Your Team</p>
-                  </div>
-                </Link>
-              )}
-
-              {/* Role Badges */}
-              {getUniqueRoleBadges().length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {getUniqueRoleBadges().map((role) => (
-                    <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs border-0`}>
-                      {role}
-                    </Badge>
-                  ))}
+                        </li>
+                      )
+                    })}
+                  </ul>
                 </div>
-              )}
-
-              {/* User Info */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-white/20">
-                  <AvatarImage
-                    src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
-                    alt={userProfile?.gamer_tag_id || "User"}
-                  />
-                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                    {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-none truncate text-white">
-                    {userProfile?.gamer_tag_id || "User"}
-                  </p>
-                  <p className="text-xs leading-none text-white/70 truncate mt-1">
-                    {session?.user?.email}
-                  </p>
-                </div>
-              </div>
-
-              {/* Sign Out Button */}
-              <Button
-                onClick={handleSignOut}
-                className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </Button>
-            </>
-          ) : (
-            <div className="space-y-3">
-              <Link href="/login" className="w-full h-10 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-md flex items-center justify-center">
-                Log in
-              </Link>
-              <Link href="/register" className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
-                Sign up
-              </Link>
+              ))}
             </div>
-          )}
+          </nav>
+
+          {/* User Section - Fixed at bottom */}
+          <div className="relative z-10 border-t border-white/20 p-4 space-y-4 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm flex-shrink-0">
+            {session ? (
+              <>
+                {/* Team Info */}
+                {teamInfo && (
+                  <Link 
+                    href={`/teams/${teamInfo.id}`} 
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 backdrop-blur-sm transition-colors border border-white/20"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
+                      {teamInfo.logo_url ? (
+                        <Image
+                          src={teamInfo.logo_url}
+                          alt={teamInfo.name}
+                          width={32}
+                          height={32}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-xs font-bold text-white">{teamInfo.name.substring(0, 2)}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate text-white">{teamInfo.name}</p>
+                      <p className="text-xs text-white/70">Your Team</p>
+                    </div>
+                  </Link>
+                )}
+
+                {/* Role Badges */}
+                {getUniqueRoleBadges().length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {getUniqueRoleBadges().map((role) => (
+                      <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs border-0`}>
+                        {role}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* User Info */}
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
+                  <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-white/20">
+                    <AvatarImage
+                      src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
+                      alt={userProfile?.gamer_tag_id || "User"}
+                    />
+                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                      {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-none truncate text-white">
+                      {userProfile?.gamer_tag_id || "User"}
+                    </p>
+                    <p className="text-xs leading-none text-white/70 truncate mt-1">
+                      {session?.user?.email}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sign Out Button */}
+                <Button
+                  onClick={handleSignOut}
+                  className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <div className="space-y-3">
+                <Link href="/login" className="w-full h-10 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-md flex items-center justify-center">
+                  Log in
+                </Link>
+                <Link href="/register" className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
 
@@ -639,6 +640,27 @@ export default function Navigation() {
         }
         .animation-delay-4000 {
           animation-delay: 4s;
+        }
+        
+        /* Custom scrollbar styles */
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+        .scrollbar-track-transparent::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thumb-white\/20::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
         }
       `}</style>
     </>

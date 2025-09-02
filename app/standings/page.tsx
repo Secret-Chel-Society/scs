@@ -251,88 +251,166 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                 <Target className="h-6 w-6 text-purple-300" />
               </div>
               <div>
-                <div className="text-xl font-bold">Playoff Bracket</div>
-                <div className="text-sm font-normal text-purple-300">Conference Quarterfinals - 1v4, 2v3</div>
+                <div className="text-xl font-bold">Complete Playoff Bracket</div>
+                <div className="text-sm font-normal text-purple-300">From Quarterfinals to Finals</div>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Eastern Conference Bracket */}
-              <div className="space-y-4">
-                <h3 className="text-center text-lg font-semibold text-blue-200 mb-4">Eastern Elites</h3>
-                <div className="space-y-3">
-                  {/* 1v4 Matchup */}
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20">
-                    <div className="flex items-center gap-3">
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-yellow-500/30 to-amber-500/30 border-yellow-400/50 text-yellow-200">
-                        1
-                      </Badge>
-                      <span className="text-white font-medium">{easternPlayoffTeams[0]?.name || "TBD"}</span>
-                    </div>
-                    <div className="text-center text-sm text-blue-300">vs</div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-white font-medium">{easternPlayoffTeams[3]?.name || "TBD"}</span>
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border-blue-400/50 text-blue-200">
-                        4
-                      </Badge>
+            <div className="overflow-x-auto">
+              <div className="grid grid-cols-5 gap-4 min-w-[800px]">
+                {/* Quarterfinals Column */}
+                <div className="space-y-4">
+                  <h3 className="text-center text-sm font-semibold text-purple-300 mb-4">Quarterfinals</h3>
+                  
+                  {/* Eastern Quarterfinals */}
+                  <div className="space-y-3">
+                    <div className="text-xs text-blue-300 font-medium mb-2 text-center">Eastern Elites</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20">
+                        <div className="flex items-center gap-2">
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-yellow-500/30 to-amber-500/30 border-yellow-400/50 text-yellow-200">
+                            1
+                          </Badge>
+                          <span className="text-white text-sm font-medium truncate">{easternPlayoffTeams[0]?.name || "TBD"}</span>
+                        </div>
+                        <div className="text-center text-xs text-blue-300">vs</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white text-sm font-medium truncate">{easternPlayoffTeams[3]?.name || "TBD"}</span>
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border-blue-400/50 text-blue-200">
+                            4
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20">
+                        <div className="flex items-center gap-2">
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-gray-300/30 to-slate-400/30 border-gray-400/50 text-gray-200">
+                            2
+                          </Badge>
+                          <span className="text-white text-sm font-medium truncate">{easternPlayoffTeams[1]?.name || "TBD"}</span>
+                        </div>
+                        <div className="text-center text-xs text-blue-300">vs</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white text-sm font-medium truncate">{easternPlayoffTeams[2]?.name || "TBD"}</span>
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200">
+                            3
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* 2v3 Matchup */}
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20">
-                    <div className="flex items-center gap-3">
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-gray-300/30 to-slate-400/30 border-gray-400/50 text-gray-200">
-                        2
-                      </Badge>
-                      <span className="text-white font-medium">{easternPlayoffTeams[1]?.name || "TBD"}</span>
-                    </div>
-                    <div className="text-center text-sm text-blue-300">vs</div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-white font-medium">{easternPlayoffTeams[2]?.name || "TBD"}</span>
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200">
-                        3
-                      </Badge>
+
+                  {/* Western Quarterfinals */}
+                  <div className="space-y-3 mt-4">
+                    <div className="text-xs text-purple-300 font-medium mb-2 text-center">Western Warriors</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
+                        <div className="flex items-center gap-2">
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-yellow-500/30 to-amber-500/30 border-yellow-400/50 text-yellow-200">
+                            1
+                          </Badge>
+                          <span className="text-white text-sm font-medium truncate">{westernPlayoffTeams[0]?.name || "TBD"}</span>
+                        </div>
+                        <div className="text-center text-xs text-purple-300">vs</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white text-sm font-medium truncate">{westernPlayoffTeams[3]?.name || "TBD"}</span>
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border-blue-400/50 text-blue-200">
+                            4
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
+                        <div className="flex items-center gap-2">
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-gray-300/30 to-slate-400/30 border-gray-400/50 text-gray-200">
+                            2
+                          </Badge>
+                          <span className="text-white text-sm font-medium truncate">{westernPlayoffTeams[1]?.name || "TBD"}</span>
+                        </div>
+                        <div className="text-center text-xs text-purple-300">vs</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white text-sm font-medium truncate">{westernPlayoffTeams[2]?.name || "TBD"}</span>
+                          <Badge className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200">
+                            3
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Western Conference Bracket */}
-              <div className="space-y-4">
-                <h3 className="text-center text-lg font-semibold text-purple-200 mb-4">Western Warriors</h3>
-                <div className="space-y-3">
-                  {/* 1v4 Matchup */}
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
-                    <div className="flex items-center gap-3">
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-yellow-500/30 to-amber-500/30 border-yellow-400/50 text-yellow-200">
-                        1
-                      </Badge>
-                      <span className="text-white font-medium">{westernPlayoffTeams[0]?.name || "TBD"}</span>
-                    </div>
-                    <div className="text-center text-sm text-purple-300">vs</div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-white font-medium">{westernPlayoffTeams[3]?.name || "TBD"}</span>
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-blue-500/30 to-cyan-500/30 border-blue-400/50 text-blue-200">
-                        4
-                      </Badge>
+                {/* Conference Semifinals Column */}
+                <div className="space-y-4">
+                  <h3 className="text-center text-sm font-semibold text-purple-300 mb-4">Conference Semifinals</h3>
+                  
+                  {/* Eastern Semifinal */}
+                  <div className="space-y-3">
+                    <div className="text-xs text-blue-300 font-medium mb-2 text-center">Eastern Elites</div>
+                    <div className="h-20 flex items-center justify-center">
+                      <div className="p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20 min-w-[120px] text-center">
+                        <span className="text-white text-sm font-medium">Winner 1v4</span>
+                        <div className="text-xs text-blue-300 mt-1">vs</div>
+                        <span className="text-white text-sm font-medium">Winner 2v3</span>
+                      </div>
                     </div>
                   </div>
-                  
-                  {/* 2v3 Matchup */}
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20">
-                    <div className="flex items-center gap-3">
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-gray-300/30 to-slate-400/30 border-gray-400/50 text-gray-200">
-                        2
-                      </Badge>
-                      <span className="text-white font-medium">{westernPlayoffTeams[1]?.name || "TBD"}</span>
+
+                  {/* Western Semifinal */}
+                  <div className="space-y-3 mt-4">
+                    <div className="text-xs text-purple-300 font-medium mb-2 text-center">Western Warriors</div>
+                    <div className="h-20 flex items-center justify-center">
+                      <div className="p-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20 min-w-[120px] text-center">
+                        <span className="text-white text-sm font-medium">Winner 1v4</span>
+                        <div className="text-xs text-purple-300 mt-1">vs</div>
+                        <span className="text-white text-sm font-medium">Winner 2v3</span>
+                      </div>
                     </div>
-                    <div className="text-center text-sm text-purple-300">vs</div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-white font-medium">{westernPlayoffTeams[2]?.name || "TBD"}</span>
-                      <Badge className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-gradient-to-r from-orange-500/30 to-amber-500/30 border-orange-400/50 text-orange-200">
-                        3
-                      </Badge>
+                  </div>
+                </div>
+
+                {/* Conference Finals Column */}
+                <div className="space-y-4">
+                  <h3 className="text-center text-sm font-semibold text-purple-300 mb-4">Conference Finals</h3>
+                  
+                  {/* Eastern Final */}
+                  <div className="space-y-3">
+                    <div className="text-xs text-blue-300 font-medium mb-2 text-center">Eastern Elites</div>
+                    <div className="h-20 flex items-center justify-center">
+                      <div className="p-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg border border-blue-400/20 min-w-[120px] text-center">
+                        <span className="text-white text-sm font-medium">Eastern Champion</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Western Final */}
+                  <div className="space-y-3 mt-4">
+                    <div className="text-xs text-purple-300 font-medium mb-2 text-center">Western Warriors</div>
+                    <div className="h-20 flex items-center justify-center">
+                      <div className="p-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/20 min-w-[120px] text-center">
+                        <span className="text-white text-sm font-medium">Western Champion</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* League Semifinal Column */}
+                <div className="space-y-4">
+                  <h3 className="text-center text-sm font-semibold text-purple-300 mb-4">League Semifinal</h3>
+                  <div className="h-20 flex items-center justify-center">
+                    <div className="p-2 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg border border-green-400/20 min-w-[120px] text-center">
+                      <span className="text-white text-sm font-medium">Eastern Champion</span>
+                      <div className="text-xs text-green-300 mt-1">vs</div>
+                      <span className="text-white text-sm font-medium">Western Champion</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Finals Column */}
+                <div className="space-y-4">
+                  <h3 className="text-center text-sm font-semibold text-purple-300 mb-4">League Finals</h3>
+                  <div className="h-20 flex items-center justify-center">
+                    <div className="p-2 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-lg border border-yellow-400/20 min-w-[120px] text-center">
+                      <span className="text-white text-sm font-medium">League Champion</span>
+                      <div className="text-xs text-yellow-300 mt-1">🏆</div>
                     </div>
                   </div>
                 </div>
