@@ -165,6 +165,11 @@ export default function Navigation() {
         },
         { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
         { name: "Season Registration", href: "/register/season", icon: UserPlus, color: "from-green-500 to-emerald-500" },
+        { name: "Player Profiles", href: "/players", icon: User, color: "from-cyan-500 to-blue-500" },
+        { name: "Game Schedule", href: "/schedule", icon: Calendar, color: "from-orange-500 to-red-500" },
+        { name: "League Rules", href: "/rules", icon: Shield, color: "from-gray-500 to-slate-500" },
+        { name: "Hall of Fame", href: "/hall-of-fame", icon: Crown, color: "from-yellow-500 to-amber-500" },
+        { name: "Achievements", href: "/achievements", icon: Star, color: "from-purple-500 to-pink-500" },
       ]
     },
     {
@@ -174,6 +179,19 @@ export default function Navigation() {
         { name: "ELO Rankings", href: "/elo/rankings", icon: Target, color: "from-red-500 to-pink-500" },
         { name: "ELO Statistics", href: "/elo/statistics", icon: BarChart3, color: "from-indigo-500 to-purple-500" },
         { name: "ELO Matches", href: "/elo/matches", icon: Calendar, color: "from-green-500 to-emerald-500" },
+        { name: "ELO Leaderboard", href: "/elo/leaderboard", icon: Trophy, color: "from-yellow-500 to-orange-500" },
+        { name: "ELO History", href: "/elo/history", icon: BarChart3, color: "from-blue-500 to-cyan-500" },
+      ]
+    },
+    {
+      name: "ADMIN",
+      subtitle: "Administrative Tools",
+      items: [
+        { name: "Dashboard", href: "/admin/dashboard", icon: Settings, color: "from-gray-500 to-slate-500" },
+        { name: "User Management", href: "/admin/users", icon: Users, color: "from-blue-500 to-cyan-500" },
+        { name: "Team Management", href: "/admin/teams", icon: Shield, color: "from-green-500 to-emerald-500" },
+        { name: "Match Management", href: "/admin/matches", icon: Calendar, color: "from-orange-500 to-red-500" },
+        { name: "System Settings", href: "/admin/settings", icon: Settings, color: "from-purple-500 to-pink-500" },
       ]
     }
   ]
@@ -442,7 +460,7 @@ export default function Navigation() {
         {/* Scrollable Navigation Container */}
         <div className="relative z-10 flex-1 overflow-hidden flex flex-col">
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+          <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/5 hover:scrollbar-thumb-white/40 transition-all duration-200">
             <div className="space-y-6">
               {navigation.map((section, sectionIndex) => (
                 <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
@@ -644,23 +662,37 @@ export default function Navigation() {
         
         /* Custom scrollbar styles */
         .scrollbar-thin::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .scrollbar-thin::-webkit-scrollbar-track {
-          background: transparent;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 4px;
         }
         .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 3px;
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.4);
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:active {
+          background: rgba(255, 255, 255, 0.5);
+        }
+        .scrollbar-track-white\/5::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        .scrollbar-thumb-white\/30::-webkit-scrollbar-thumb {
           background: rgba(255, 255, 255, 0.3);
         }
-        .scrollbar-track-transparent::-webkit-scrollbar-track {
-          background: transparent;
+        .scrollbar-thumb-white\/40::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.4);
         }
-        .scrollbar-thumb-white\/20::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
+        
+        /* Firefox scrollbar styles */
+        .scrollbar-thin {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
         }
       `}</style>
     </>
