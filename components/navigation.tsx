@@ -179,17 +179,6 @@ export default function Navigation() {
           ],
         },
       ]
-    },
-    {
-      name: "ADMIN",
-      subtitle: "Administrative Tools",
-      items: [
-        { name: "Dashboard", href: "/admin/dashboard", icon: Settings, color: "from-gray-500 to-slate-500" },
-        { name: "User Management", href: "/admin/users", icon: Users, color: "from-blue-500 to-cyan-500" },
-        { name: "Team Management", href: "/admin/teams", icon: Shield, color: "from-green-500 to-emerald-500" },
-        { name: "Match Management", href: "/admin/matches", icon: Calendar, color: "from-orange-500 to-red-500" },
-        { name: "System Settings", href: "/admin/settings", icon: Settings, color: "from-purple-500 to-pink-500" },
-      ]
     }
   ]
 
