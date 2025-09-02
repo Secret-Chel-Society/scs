@@ -109,6 +109,10 @@ const consoles = [
 
 const userRoleSchema = z.object({
   userId: z.string().uuid(),
+  gamer_tag_id: z.string().min(3, "Gamer tag must be at least 3 characters"),
+  primary_position: z.string().min(1, "Please select a primary position"),
+  secondary_position: z.string().optional(),
+  console: z.string().min(1, "Please select a console"),
   roles: z.array(z.string()).min(1, "Select at least one role"),
 })
 
@@ -246,6 +250,7 @@ export default function UsersManagementClient() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [userEditDialogOpen, setUserEditDialogOpen] = useState(false)
   const [newUserDialogOpen, setNewUserDialogOpen] = useState(false)
   const [teamAssignDialogOpen, setTeamAssignDialogOpen] = useState(false)
   const [positionDialogOpen, setPositionDialogOpen] = useState(false)
@@ -277,6 +282,10 @@ export default function UsersManagementClient() {
     resolver: zodResolver(userRoleSchema),
     defaultValues: {
       userId: "",
+      gamer_tag_id: "",
+      primary_position: "",
+      secondary_position: "",
+      console: "",
       roles: [],
     },
   })
@@ -639,14 +648,7 @@ export default function UsersManagementClient() {
     }
   }
 
-  const updateUser = async (values: {
-    userId: string
-    gamer_tag_id: string
-    primary_position: string
-    secondary_position: string | null
-    console: string
-    roles: string[]
-  }) => {
+  const updateUser = async (values: z.infer<typeof userRoleSchema>) => {
     setSubmitting(true)
     try {
       // Update the user's basic information
@@ -655,7 +657,7 @@ export default function UsersManagementClient() {
         .update({
           gamer_tag_id: values.gamer_tag_id,
           primary_position: values.primary_position,
-          secondary_position: values.secondary_position,
+          secondary_position: values.secondary_position === "none" ? null : values.secondary_position,
           console: values.console,
           updated_at: new Date().toISOString(),
         })
@@ -671,7 +673,7 @@ export default function UsersManagementClient() {
         .update({
           gamer_tag: values.gamer_tag_id,
           primary_position: values.primary_position,
-          secondary_position: values.secondary_position,
+          secondary_position: values.secondary_position === "none" ? null : values.secondary_position,
           console: values.console,
           updated_at: new Date().toISOString(),
         })
@@ -1172,6 +1174,7 @@ export default function UsersManagementClient() {
                         <TableHead className="text-white">Position</TableHead>
                         <TableHead className="text-white">Console</TableHead>
                         <TableHead className="text-white">Team</TableHead>
+                        <TableHead className="text-white">Salary</TableHead>
                         <TableHead className="text-white">Roles</TableHead>
                         <TableHead className="text-white">Actions</TableHead>
                       </TableRow>
@@ -1179,7 +1182,7 @@ export default function UsersManagementClient() {
                     <TableBody>
                       {paginatedUsers.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center text-white/70 py-8">
+                          <TableCell colSpan={7} className="text-center text-white/70 py-8">
                             {searchQuery ? "No users found matching your search." : "No users found."}
                           </TableCell>
                         </TableRow>
@@ -1210,7 +1213,16 @@ export default function UsersManagementClient() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-white">
-                              {user.team_name || "No Team"}
+                              {user.players?.[0]?.teams?.name || "No Team"}
+                            </TableCell>
+                            <TableCell className="text-white">
+                              {user.players?.[0]?.salary ? (
+                                <Badge variant="outline" className="border-green-500/30 text-green-300">
+                                  ${user.players[0].salary.toLocaleString()}
+                                </Badge>
+                              ) : (
+                                <span className="text-white/50">No salary</span>
+                              )}
                             </TableCell>
                             <TableCell className="text-white">
                               <div className="flex gap-1">
@@ -1230,7 +1242,14 @@ export default function UsersManagementClient() {
                                     setSelectedUser(user)
                                     // Initialize selected roles with current user roles
                                     setSelectedRoles(user.roles || [])
-                                    setDialogOpen(true)
+                                    // Initialize form values
+                                    form.setValue("userId", user.id)
+                                    form.setValue("roles", user.roles || [])
+                                    form.setValue("gamer_tag_id", user.gamer_tag_id || "")
+                                    form.setValue("primary_position", user.primary_position || "")
+                                    form.setValue("secondary_position", user.secondary_position || "")
+                                    form.setValue("console", user.console || "")
+                                    setUserEditDialogOpen(true)
                                   }}
                                   className="text-white/70 hover:text-white hover:bg-white/10"
                                 >
@@ -1241,10 +1260,8 @@ export default function UsersManagementClient() {
                                   size="sm"
                                   onClick={() => {
                                     setSelectedUser(user)
-                                    setTeamAssignmentForm({
-                                      playerId: user.id,
-                                      teamId: user.team_id || null,
-                                    })
+                                    teamAssignmentForm.setValue("playerId", user.id)
+                                    teamAssignmentForm.setValue("teamId", user.players?.[0]?.team_id || null)
                                     setTeamAssignDialogOpen(true)
                                   }}
                                   className="text-white/70 hover:text-white hover:bg-white/10"
@@ -1261,6 +1278,19 @@ export default function UsersManagementClient() {
                                   className="text-white/70 hover:text-white hover:bg-white/10"
                                 >
                                   <Target className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedUser(user)
+                                    salaryForm.setValue("playerId", user.id)
+                                    salaryForm.setValue("salary", user.players?.[0]?.salary || 0)
+                                    setSalaryDialogOpen(true)
+                                  }}
+                                  className="text-white/70 hover:text-white hover:bg-white/10"
+                                >
+                                  <DollarSign className="h-4 w-4" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -1333,6 +1363,545 @@ export default function UsersManagementClient() {
         }}
         submitting={submitting}
       />
+
+      {/* User Edit Dialog */}
+      <Dialog open={userEditDialogOpen} onOpenChange={setUserEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit User</DialogTitle>
+            <DialogDescription className="text-white/70">
+              {selectedUser && `Update information for ${selectedUser.gamer_tag_id || selectedUser.email}`}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(updateUser)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="gamer_tag_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Gamer Tag</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          className="bg-slate-800/50 border-white/20 text-white"
+                          disabled={submitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="console"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Console</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={submitting}>
+                        <FormControl>
+                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                            <SelectValue placeholder="Select console" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-slate-800 border-white/20">
+                          {consoles.map((console) => (
+                            <SelectItem key={console.value} value={console.value} className="text-white hover:bg-slate-700">
+                              {console.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="primary_position"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Primary Position</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={submitting}>
+                        <FormControl>
+                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                            <SelectValue placeholder="Select primary position" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-slate-800 border-white/20">
+                          {positions.map((position) => (
+                            <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
+                              {position.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="secondary_position"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Secondary Position (Optional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || "none"} disabled={submitting}>
+                        <FormControl>
+                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                            <SelectValue placeholder="Select secondary position" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-slate-800 border-white/20">
+                          <SelectItem value="none" className="text-white hover:bg-slate-700">None</SelectItem>
+                          {positions.map((position) => (
+                            <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
+                              {position.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="space-y-3">
+                <FormLabel className="text-white">Roles</FormLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {validRoles.map((role) => (
+                    <div key={role.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`role-${role.value}`}
+                        checked={selectedRoles.includes(role.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedRoles([...selectedRoles, role.value])
+                          } else {
+                            setSelectedRoles(selectedRoles.filter((r) => r !== role.value))
+                          }
+                        }}
+                        disabled={submitting}
+                      />
+                      <label
+                        htmlFor={`role-${role.value}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
+                      >
+                        {role.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={submitting || selectedRoles.length === 0}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  {submitting ? "Updating..." : "Update User"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* New User Dialog */}
+      <Dialog open={newUserDialogOpen} onOpenChange={setNewUserDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-white">Add New User</DialogTitle>
+            <DialogDescription className="text-white/70">
+              Create a new user account with roles and positions
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...newUserForm}>
+            <form onSubmit={newUserForm.handleSubmit(async (values) => {
+              setSubmitting(true)
+              try {
+                // Create user with auth
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                  email: values.email,
+                  password: Math.random().toString(36).slice(-8), // Generate random password
+                })
+
+                if (authError) throw authError
+
+                if (authData.user) {
+                  // Create user profile
+                  const { error: userError } = await supabase
+                    .from("users")
+                    .insert({
+                      id: authData.user.id,
+                      email: values.email,
+                      gamer_tag_id: values.gamer_tag_id,
+                      primary_position: values.primary_position,
+                      secondary_position: values.secondary_position === "none" ? null : values.secondary_position,
+                      console: values.console,
+                    })
+
+                  if (userError) throw userError
+
+                  // Create player record
+                  const playerRole = values.roles.find(role => VALID_PLAYER_ROLES.includes(role)) || "Player"
+                  const { error: playerError } = await supabase
+                    .from("players")
+                    .insert({
+                      user_id: authData.user.id,
+                      role: playerRole,
+                    })
+
+                  if (playerError) throw playerError
+
+                  // Add user roles
+                  const roleInserts = values.roles.map(role => ({
+                    user_id: authData.user.id,
+                    role: role,
+                  }))
+
+                  const { error: rolesError } = await supabase
+                    .from("user_roles")
+                    .insert(roleInserts)
+
+                  if (rolesError) throw rolesError
+
+                  toast({
+                    title: "User created",
+                    description: `User ${values.gamer_tag_id} has been created successfully.`,
+                  })
+
+                  await fetchUsers()
+                  setNewUserDialogOpen(false)
+                  newUserForm.reset()
+                  setNewUserSelectedRoles(["Player"])
+                }
+              } catch (error: any) {
+                console.error("Error creating user:", error)
+                toast({
+                  title: "Error",
+                  description: error.message || "Failed to create user",
+                  variant: "destructive",
+                })
+              } finally {
+                setSubmitting(false)
+              }
+            })} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={newUserForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="email"
+                          className="bg-slate-800/50 border-white/20 text-white"
+                          disabled={submitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={newUserForm.control}
+                  name="gamer_tag_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Gamer Tag</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          className="bg-slate-800/50 border-white/20 text-white"
+                          disabled={submitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={newUserForm.control}
+                  name="console"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Console</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={submitting}>
+                        <FormControl>
+                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                            <SelectValue placeholder="Select console" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-slate-800 border-white/20">
+                          {consoles.map((console) => (
+                            <SelectItem key={console.value} value={console.value} className="text-white hover:bg-slate-700">
+                              {console.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={newUserForm.control}
+                  name="primary_position"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-white">Primary Position</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={submitting}>
+                        <FormControl>
+                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                            <SelectValue placeholder="Select primary position" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-slate-800 border-white/20">
+                          {positions.map((position) => (
+                            <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
+                              {position.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={newUserForm.control}
+                name="secondary_position"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Secondary Position (Optional)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || "none"} disabled={submitting}>
+                      <FormControl>
+                        <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                          <SelectValue placeholder="Select secondary position" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-slate-800 border-white/20">
+                        <SelectItem value="none" className="text-white hover:bg-slate-700">None</SelectItem>
+                        {positions.map((position) => (
+                          <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
+                            {position.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="space-y-3">
+                <FormLabel className="text-white">Roles</FormLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {validRoles.map((role) => (
+                    <div key={role.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`new-user-role-${role.value}`}
+                        checked={newUserSelectedRoles.includes(role.value)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setNewUserSelectedRoles([...newUserSelectedRoles, role.value])
+                          } else {
+                            setNewUserSelectedRoles(newUserSelectedRoles.filter((r) => r !== role.value))
+                          }
+                        }}
+                        disabled={submitting}
+                      />
+                      <label
+                        htmlFor={`new-user-role-${role.value}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
+                      >
+                        {role.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={submitting || newUserSelectedRoles.length === 0}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  {submitting ? "Creating..." : "Create User"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Team Assignment Dialog */}
+      <Dialog open={teamAssignDialogOpen} onOpenChange={setTeamAssignDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-white">Assign Team</DialogTitle>
+            <DialogDescription className="text-white/70">
+              {selectedUser && `Assign ${selectedUser.gamer_tag_id || selectedUser.email} to a team`}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...teamAssignmentForm}>
+            <form onSubmit={teamAssignmentForm.handleSubmit(async (values) => {
+              setSubmitting(true)
+              try {
+                // Update player's team assignment
+                const { error } = await supabase
+                  .from("players")
+                  .update({
+                    team_id: values.teamId === "none" ? null : values.teamId,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq("user_id", values.playerId)
+
+                if (error) throw error
+
+                toast({
+                  title: "Team assignment updated",
+                  description: `${selectedUser?.gamer_tag_id || selectedUser?.email} has been ${values.teamId ? 'assigned to a team' : 'removed from team'}.`,
+                })
+
+                await fetchUsers()
+                setTeamAssignDialogOpen(false)
+              } catch (error: any) {
+                console.error("Error updating team assignment:", error)
+                toast({
+                  title: "Error",
+                  description: error.message || "Failed to update team assignment",
+                  variant: "destructive",
+                })
+              } finally {
+                setSubmitting(false)
+              }
+            })} className="space-y-6">
+              <FormField
+                control={teamAssignmentForm.control}
+                name="teamId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Team</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || "none"} disabled={submitting}>
+                      <FormControl>
+                        <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
+                          <SelectValue placeholder="Select team" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-slate-800 border-white/20">
+                        <SelectItem value="none" className="text-white hover:bg-slate-700">No Team</SelectItem>
+                        {teams.map((team) => (
+                          <SelectItem key={team.id} value={team.id} className="text-white hover:bg-slate-700">
+                            {team.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={submitting}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  {submitting ? "Updating..." : "Update Team"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Salary Dialog */}
+      <Dialog open={salaryDialogOpen} onOpenChange={setSalaryDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+          <DialogHeader>
+            <DialogTitle className="text-white">Update Salary</DialogTitle>
+            <DialogDescription className="text-white/70">
+              {selectedUser && `Update salary for ${selectedUser.gamer_tag_id || selectedUser.email}`}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...salaryForm}>
+            <form onSubmit={salaryForm.handleSubmit(async (values) => {
+              setSubmitting(true)
+              try {
+                // Update player's salary
+                const { error } = await supabase
+                  .from("players")
+                  .update({
+                    salary: values.salary,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq("user_id", values.playerId)
+
+                if (error) throw error
+
+                toast({
+                  title: "Salary updated",
+                  description: `Salary for ${selectedUser?.gamer_tag_id || selectedUser?.email} has been updated to $${values.salary.toLocaleString()}.`,
+                })
+
+                await fetchUsers()
+                setSalaryDialogOpen(false)
+              } catch (error: any) {
+                console.error("Error updating salary:", error)
+                toast({
+                  title: "Error",
+                  description: error.message || "Failed to update salary",
+                  variant: "destructive",
+                })
+              } finally {
+                setSubmitting(false)
+              }
+            })} className="space-y-6">
+              <FormField
+                control={salaryForm.control}
+                name="salary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Salary</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        min="0"
+                        max="15000000"
+                        className="bg-slate-800/50 border-white/20 text-white"
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={submitting}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  {submitting ? "Updating..." : "Update Salary"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       {/* Admin Key Dialog */}
       <Dialog open={adminKeyDialogOpen} onOpenChange={setAdminKeyDialogOpen}>

@@ -26,7 +26,9 @@ import {
   Target,
   Crown,
   Shield,
-  Star
+  Star,
+  Database,
+  Bot
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -181,6 +183,25 @@ export default function Navigation() {
       ]
     }
   ]
+
+  // Add admin navigation section for admin users
+  if (isAdmin) {
+    navigation.push({
+      name: "Admin",
+      subtitle: "Administration Panel",
+      items: [
+        { name: "User Management", href: "/admin/users", icon: Users, color: "from-red-500 to-pink-500" },
+        { name: "Team Management", href: "/admin/teams", icon: Shield, color: "from-blue-500 to-cyan-500" },
+        { name: "Settings", href: "/admin/settings", icon: Settings, color: "from-purple-500 to-indigo-500" },
+        { name: "Statistics", href: "/admin/statistics", icon: BarChart3, color: "from-green-500 to-emerald-500" },
+        { name: "Schedule", href: "/admin/schedule", icon: Calendar, color: "from-orange-500 to-red-500" },
+        { name: "Photos", href: "/admin/photos", icon: Star, color: "from-yellow-500 to-amber-500" },
+        { name: "Tokens", href: "/admin/tokens", icon: Crown, color: "from-violet-500 to-purple-500" },
+        { name: "Waiver Management", href: "/admin/waiver-management", icon: Database, color: "from-teal-500 to-cyan-500" },
+        { name: "SCS Bot", href: "/admin/scs-bot", icon: Bot, color: "from-indigo-500 to-blue-500" },
+      ]
+    })
+  }
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
