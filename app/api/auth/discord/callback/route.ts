@@ -101,15 +101,12 @@ export async function GET(request: Request) {
                 discord_username: '${discordUser.username}'
               }, '*');
             } else {
-              // Fallback for non-popup
-              localStorage.setItem('discord_temp_info', JSON.stringify({
-                discord_id: '${discordUser.id}',
-                discord_username: '${discordUser.username}'
-              }));
-              window.location.href = '/register?discord_connected=true';
+              // Fallback for non-popup - use URL parameters for more reliable transfer
+              const redirectUrl = '/register?discord_connected=true&discord_id=${discordUser.id}&discord_username=${encodeURIComponent(discordUser.username)}';
+              window.location.href = redirectUrl;
             }
           </script>
-          <p>Discord account connected successfully! You can close this window.</p>
+          <p>Discord account connected successfully! Redirecting...</p>
         </body>
         </html>
       `

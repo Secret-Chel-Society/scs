@@ -639,6 +639,96 @@ export default function UsersManagementClient() {
     }
   }
 
+  const updateUser = async (values: {
+    userId: string
+    gamer_tag_id: string
+    primary_position: string
+    secondary_position: string | null
+    console: string
+    roles: string[]
+  }) => {
+    setSubmitting(true)
+    try {
+      // Update the user's basic information
+      const { error: userError } = await supabase
+        .from("users")
+        .update({
+          gamer_tag_id: values.gamer_tag_id,
+          primary_position: values.primary_position,
+          secondary_position: values.secondary_position,
+          console: values.console,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", values.userId)
+
+      if (userError) {
+        throw userError
+      }
+
+      // Update any season registrations for this user
+      const { error: regError } = await supabase
+        .from("season_registrations")
+        .update({
+          gamer_tag: values.gamer_tag_id,
+          primary_position: values.primary_position,
+          secondary_position: values.secondary_position,
+          console: values.console,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", values.userId)
+
+      if (regError) {
+        console.warn("Could not update season registrations:", regError)
+      }
+
+      // Update user roles
+      if (values.roles.length > 0) {
+        // First, remove all existing roles for this user
+        const { error: deleteError } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", values.userId)
+
+        if (deleteError) {
+          console.warn("Could not delete existing roles:", deleteError)
+        }
+
+        // Then add the new roles
+        const roleInserts = values.roles.map(role => ({
+          user_id: values.userId,
+          role: role,
+          created_at: new Date().toISOString(),
+        }))
+
+        const { error: insertError } = await supabase
+          .from("user_roles")
+          .insert(roleInserts)
+
+        if (insertError) {
+          console.warn("Could not insert new roles:", insertError)
+        }
+      }
+
+      toast({
+        title: "User updated",
+        description: `User ${values.gamer_tag_id} has been updated successfully.`,
+      })
+
+      // Refresh the user list
+      await fetchUsers()
+      setUserEditDialogOpen(false)
+    } catch (error: any) {
+      console.error("Error updating user:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update user",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const fixRoleConstraint = async () => {
     setSubmitting(true)
     try {

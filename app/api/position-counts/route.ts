@@ -58,18 +58,6 @@ export async function GET() {
     // Get all user_ids from registrations
     const userIds = registrations.map((reg) => reg.user_id)
 
-    // Get active users
-    const { data: activeUsers, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("is_active", true)
-      .in("id", userIds)
-
-    if (userError) {
-      console.error("Error fetching active users:", userError)
-      return NextResponse.json({ positionCounts }, { status: 200 })
-    }
-
     // Get users with teams
     const { data: playersWithTeams, error: playerError } = await supabase
       .from("players")
@@ -82,13 +70,13 @@ export async function GET() {
       return NextResponse.json({ positionCounts }, { status: 200 })
     }
 
-    // Create sets for faster lookups
-    const activeUserIds = new Set(activeUsers?.map((user) => user.id) || [])
+    // Create set for faster lookups
     const userIdsWithTeams = new Set(playersWithTeams?.map((player) => player.user_id) || [])
 
-    // Filter to only include active users who don't have a team (free agents)
+    // Filter to only include approved registrations who don't have a team (free agents)
+    // Removed the active user filter to show all available free agents
     const freeAgents = registrations.filter(
-      (reg) => activeUserIds.has(reg.user_id) && !userIdsWithTeams.has(reg.user_id),
+      (reg) => !userIdsWithTeams.has(reg.user_id)
     )
 
     // Normalize position names

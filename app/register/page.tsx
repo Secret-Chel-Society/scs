@@ -86,24 +86,49 @@ export default function RegisterPage() {
 
     // Handle Discord connection success
     if (params.get("discord_connected") === "true") {
-      // Try to get Discord info from localStorage
-      const storedDiscordInfo = localStorage.getItem("discord_connection_info")
-      if (storedDiscordInfo) {
-        try {
-          const discordInfo = JSON.parse(storedDiscordInfo)
-          setDiscordConnected(true)
-          setDiscordUserId(discordInfo.id)
-          setDiscordUsername(discordInfo.username)
-          toast({
-            title: "Discord Connected",
-            description: `Successfully connected as ${discordInfo.username}`,
-          })
-        } catch (e) {
-          console.error("Failed to parse Discord info:", e)
-          setRegistrationError("Failed to process Discord connection. Please try again.")
-        }
+      // First try to get Discord info from URL parameters (more reliable)
+      const discordId = params.get("discord_id")
+      const discordUsername = params.get("discord_username")
+      
+      if (discordId && discordUsername) {
+        console.log("Discord info from URL params:", { discordId, discordUsername })
+        setDiscordConnected(true)
+        setDiscordUserId(discordId)
+        setDiscordUsername(discordUsername)
+        
+        toast({
+          title: "Discord Connected",
+          description: `Successfully connected as ${discordUsername}`,
+        })
       } else {
-        setRegistrationError("Discord connection data not found. Please try connecting again.")
+        // Fallback to localStorage
+        const storedDiscordInfo = localStorage.getItem("discord_temp_info")
+        console.log("Discord connection success, stored info:", storedDiscordInfo)
+        
+        if (storedDiscordInfo) {
+          try {
+            const discordInfo = JSON.parse(storedDiscordInfo)
+            console.log("Parsed Discord info:", discordInfo)
+            
+            setDiscordConnected(true)
+            setDiscordUserId(discordInfo.discord_id)
+            setDiscordUsername(discordInfo.username)
+            
+            // Clean up localStorage to prevent stale data
+            localStorage.removeItem("discord_temp_info")
+            
+            toast({
+              title: "Discord Connected",
+              description: `Successfully connected as ${discordInfo.username}`,
+            })
+          } catch (e) {
+            console.error("Failed to parse Discord info:", e)
+            setRegistrationError("Failed to process Discord connection. Please try again.")
+          }
+        } else {
+          console.error("No Discord info found in URL params or localStorage")
+          setRegistrationError("Discord connection data not found. Please try connecting again.")
+        }
       }
     }
 
