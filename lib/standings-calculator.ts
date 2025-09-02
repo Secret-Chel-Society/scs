@@ -464,8 +464,13 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
     console.log(`Calculating standings for season ${seasonId}`)
 
     // Get the season name first - this is more reliable than using the ID directly
-    const seasonName = await getSeasonName(seasonId)
-    console.log(`Using season name: "${seasonName}" for calculations`)
+    let seasonName = "Season 1" // Default fallback
+    try {
+      seasonName = await getSeasonName(seasonId)
+      console.log(`Using season name: "${seasonName}" for calculations`)
+    } catch (error) {
+      console.log(`Could not get season name, using default: "${seasonName}"`)
+    }
 
     // Check if division column exists by trying to query it
     let hasDivisionColumn = false
