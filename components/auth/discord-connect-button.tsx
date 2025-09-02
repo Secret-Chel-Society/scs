@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { MessageSquare, Loader2, AlertTriangle } from "lucide-react"
 
 interface DiscordConnectButtonProps {
-  userId: string
+  userId?: string
   source?: "register" | "settings"
   className?: string
   onSuccess?: (discordId: string, discordUsername: string) => void
@@ -36,6 +36,10 @@ export default function DiscordConnectButton({
       }
 
       // For settings flow, use popup
+      if (!userId) {
+        throw new Error("User ID is required for settings flow")
+      }
+      
       const finalUserId = userId
       const state = `${userId}:${source}`
 
