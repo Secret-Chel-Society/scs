@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight } from "lucide-react"
+import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight, Shield, Target, Activity } from "lucide-react"
 import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-display"
 import { SalaryProgress } from "@/components/management/salary-progress"
 import { RosterProgress } from "@/components/management/roster-progress"
@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
+import "./management-styles.css"
 import { TeamLogos } from "@/components/management/team-logos"
 import { BidPlayerModal } from "@/components/management/bid-player-modal"
 import { Textarea } from "@/components/ui/textarea"
@@ -196,11 +197,11 @@ const getPositionColor = (position: string): string => {
 }
 
 const tabs = [
-  { id: "overview", label: "Overview", icon: Home },
-  { id: "bids", label: "Bids", icon: Gavel },
-  { id: "lineups", label: "Lineups", icon: Users },
-  { id: "availability", label: "Availability", icon: Calendar },
-  { id: "waivers", label: "Waivers", icon: History },
+  { id: "overview", label: "Overview", icon: Home, color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
+  { id: "bids", label: "Bids", icon: Gavel, color: "bg-green-500/10 text-green-500 border-green-500/20" },
+  { id: "lineups", label: "Lineups", icon: Users, color: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
+  { id: "availability", label: "Availability", icon: Calendar, color: "bg-orange-500/10 text-orange-500 border-orange-500/20" },
+  { id: "waivers", label: "Waivers", icon: History, color: "bg-pink-500/10 text-pink-500 border-pink-500/20" },
 ]
 
 const ManagementPage = () => {
@@ -232,8 +233,8 @@ const ManagementPage = () => {
   const [freeAgentsError, setFreeAgentsError] = useState<string | null>(null)
   const [freeAgentsLoading, setFreeAgentsLoading] = useState(false)
 
-  // Get active tab from search params or default to "roster"
-  const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "roster")
+  // Get active tab from search params or default to "overview"
+  const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "overview")
 
   // Trade state
   const [allTeams, setAllTeams] = useState<any[]>([])

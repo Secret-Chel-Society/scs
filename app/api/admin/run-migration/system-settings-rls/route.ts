@@ -72,6 +72,10 @@ export async function POST(request: NextRequest) {
 
       -- Ensure service_role can bypass RLS for system operations
       GRANT ALL ON system_settings TO service_role;
+      
+      -- Grant sequence permissions to authenticated users and service_role
+      GRANT USAGE, SELECT ON SEQUENCE system_settings_id_seq TO authenticated;
+      GRANT ALL ON SEQUENCE system_settings_id_seq TO service_role;
     `
 
     // Execute the migration
