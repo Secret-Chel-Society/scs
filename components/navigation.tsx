@@ -165,22 +165,19 @@ export default function Navigation() {
         },
         { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
         { name: "Season Registration", href: "/register/season", icon: UserPlus, color: "from-green-500 to-emerald-500" },
-        { name: "Player Profiles", href: "/players", icon: User, color: "from-cyan-500 to-blue-500" },
-        { name: "Game Schedule", href: "/schedule", icon: Calendar, color: "from-orange-500 to-red-500" },
-        { name: "League Rules", href: "/rules", icon: Shield, color: "from-gray-500 to-slate-500" },
-        { name: "Hall of Fame", href: "/hall-of-fame", icon: Crown, color: "from-yellow-500 to-amber-500" },
-        { name: "Achievements", href: "/achievements", icon: Star, color: "from-purple-500 to-pink-500" },
-      ]
-    },
-    {
-      name: "SCSELOS",
-      subtitle: "ELO Rating System",
-      items: [
-        { name: "ELO Rankings", href: "/elo/rankings", icon: Target, color: "from-red-500 to-pink-500" },
-        { name: "ELO Statistics", href: "/elo/statistics", icon: BarChart3, color: "from-indigo-500 to-purple-500" },
-        { name: "ELO Matches", href: "/elo/matches", icon: Calendar, color: "from-green-500 to-emerald-500" },
-        { name: "ELO Leaderboard", href: "/elo/leaderboard", icon: Trophy, color: "from-yellow-500 to-orange-500" },
-        { name: "ELO History", href: "/elo/history", icon: BarChart3, color: "from-blue-500 to-cyan-500" },
+        {
+          name: "ELO System",
+          href: "/elo/rankings",
+          icon: Target,
+          color: "from-red-500 to-pink-500",
+          submenu: [
+            { name: "ELO Rankings", href: "/elo/rankings" },
+            { name: "ELO Statistics", href: "/elo/statistics" },
+            { name: "ELO Matches", href: "/elo/matches" },
+            { name: "ELO Leaderboard", href: "/elo/leaderboard" },
+            { name: "ELO History", href: "/elo/history" },
+          ],
+        },
       ]
     },
     {
