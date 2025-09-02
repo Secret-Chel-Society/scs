@@ -803,40 +803,127 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <Card className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/10 rounded-full translate-y-12 -translate-x-12" />
+          <Card className="relative bg-gradient-to-br from-slate-900/80 via-purple-900/40 to-slate-900/80 border border-purple-500/30 overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-blue-500/5" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full -translate-y-20 translate-x-20 blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full translate-y-16 -translate-x-16 blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full -translate-x-12 -translate-y-12 blur-2xl" />
 
-            <CardContent className="relative p-12 text-center">
-              <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
-                className="mb-6"
+            <CardContent className="relative p-8 md:p-12">
+              {/* Header Section */}
+              <div className="text-center mb-8">
+                <motion.div
+                  className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full mb-6 shadow-2xl"
+                  animate={{ 
+                    rotate: [0, 5, -5, 0],
+                    scale: [1, 1.05, 1]
+                  }}
+                  transition={{ 
+                    rotate: { duration: 4, repeat: Number.POSITIVE_INFINITY },
+                    scale: { duration: 2, repeat: Number.POSITIVE_INFINITY }
+                  }}
+                >
+                  <Crown className="h-10 w-10 text-white" />
+                </motion.div>
+
+                <motion.h2 
+                  className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  Join the Premier NHL 26 League
+                </motion.h2>
+                
+                <motion.p 
+                  className="text-lg md:text-xl mb-6 max-w-4xl mx-auto text-white/80 leading-relaxed"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking, 
+                  free token rewards, and authentic hockey league management.
+                </motion.p>
+
+                <motion.div 
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-full text-green-300 text-sm font-medium"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Shield className="h-4 w-4" />
+                  No entry fees, no pay-to-win mechanics - just pure competitive hockey gaming with real rewards!
+                </motion.div>
+              </div>
+
+              {/* Feature Grid */}
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
               >
-                <Crown className="h-16 w-16 mx-auto text-primary" />
+                <motion.div 
+                  className="text-center p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 hover:scale-105"
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Free to Play</h3>
+                  <p className="text-sm text-blue-200/80">Zero entry fees, pure competition</p>
+                </motion.div>
+
+                <motion.div 
+                  className="text-center p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 hover:scale-105"
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <BarChart3 className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Pro Stats</h3>
+                  <p className="text-sm text-purple-200/80">Professional-grade tracking</p>
+                </motion.div>
+
+                <motion.div 
+                  className="text-center p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 hover:border-green-400/40 transition-all duration-300 hover:scale-105"
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <Coins className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Token Rewards</h3>
+                  <p className="text-sm text-green-200/80">Earn real rewards</p>
+                </motion.div>
+
+                <motion.div 
+                  className="text-center p-4 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 hover:border-orange-400/40 transition-all duration-300 hover:scale-105"
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Community</h3>
+                  <p className="text-sm text-orange-200/80">Active Discord community</p>
+                </motion.div>
               </motion.div>
 
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Join the Premier NHL 26 League
-              </h2>
-              <p className="text-xl mb-4 max-w-3xl mx-auto text-muted-foreground">
-                Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking,
-                free token rewards, and authentic hockey league management.
-              </p>
-              <p className="text-lg mb-8 max-w-2xl mx-auto text-muted-foreground">
-                No entry fees, no pay-to-win mechanics - just pure competitive hockey gaming with real rewards!
-              </p>
-
-              <div className="flex flex-wrap justify-center gap-6">
+              {/* Action Buttons */}
+              <motion.div 
+                className="flex flex-col sm:flex-row justify-center gap-4 mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     asChild
                     size="lg"
-                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-2xl text-white font-semibold px-8 py-4 text-lg"
                   >
-                    <Link href="/register" className="flex items-center gap-2">
-                      <Zap className="h-5 w-5" />
+                    <Link href="/register" className="flex items-center gap-3">
+                      <Zap className="h-6 w-6" />
                       Register for Season 1
                     </Link>
                   </Button>
@@ -847,39 +934,51 @@ export default function Home() {
                     variant="outline"
                     size="lg"
                     asChild
-                    className="border-primary/30 hover:bg-primary/10 backdrop-blur-sm bg-transparent"
+                    className="border-purple-400/50 hover:bg-purple-500/10 backdrop-blur-sm bg-transparent text-white font-semibold px-8 py-4 text-lg"
                   >
                     <Link
                       href="https://discord.gg/secretchelsociety"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-3"
                     >
                       <img
                         src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/general/Discord-removebg-preview.png"
                         alt="Discord"
-                        className="h-5 w-5"
+                        className="h-6 w-6"
                       />
                       Join Discord Community
                     </Link>
                   </Button>
                 </motion.div>
-              </div>
+              </motion.div>
 
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">100%</div>
-                  <div className="text-sm text-muted-foreground">Free to Play</div>
+              {/* Stats Row */}
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+              >
+                <div className="text-center p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20">
+                  <div className="text-3xl font-bold text-blue-300 mb-1">
+                    <AnimatedCounter end={100} suffix="%" />
+                  </div>
+                  <div className="text-sm text-blue-200/80 font-medium">Free to Play</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">24/7</div>
-                  <div className="text-sm text-muted-foreground">Stat Tracking</div>
+                <div className="text-center p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20">
+                  <div className="text-3xl font-bold text-purple-300 mb-1">
+                    <AnimatedCounter end={24} suffix="/7" />
+                  </div>
+                  <div className="text-sm text-purple-200/80 font-medium">Stat Tracking</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">Real</div>
-                  <div className="text-sm text-muted-foreground">Prize Rewards</div>
+                <div className="text-center p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/20">
+                  <div className="text-3xl font-bold text-green-300 mb-1">
+                    <AnimatedCounter end={100} suffix="%" />
+                  </div>
+                  <div className="text-sm text-green-200/80 font-medium">Real Rewards</div>
                 </div>
-              </div>
+              </motion.div>
             </CardContent>
           </Card>
         </motion.section>

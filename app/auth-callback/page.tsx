@@ -17,32 +17,6 @@ export default function AuthCallbackPage() {
       try {
         setIsProcessing(true)
         
-        // Check if this is a Discord login callback
-        const accessToken = searchParams.get('access_token')
-        const refreshToken = searchParams.get('refresh_token')
-        const isDiscordLogin = searchParams.get('discord_login') === 'true'
-        
-        if (isDiscordLogin && accessToken && refreshToken) {
-          console.log("Processing Discord login callback")
-          
-          // Set the session in Supabase
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-          
-          if (sessionError) {
-            console.error("Error setting Discord session:", sessionError)
-            setError("Failed to complete Discord login. Please try again.")
-            return
-          }
-          
-          // Successfully logged in with Discord
-          console.log("Discord login successful")
-          router.push("/?discord_login_success=true")
-          return
-        }
-        
         // Default behavior - redirect to auth-success
         router.push("/auth-success")
       } catch (err: any) {
