@@ -136,13 +136,17 @@ export default function RegistrationsPage() {
     setError(null)
 
     try {
-      // Get all registrations without requiring a season
+      // Get all registrations with user data - using the proper join structure
       const { data: allRegistrations, error: allRegError } = await supabase
         .from("season_registrations")
         .select(`
           *,
           users:user_id (
-            email
+            id,
+            email,
+            gamer_tag_id,
+            primary_position,
+            secondary_position
           )
         `)
         .order("created_at", { ascending: false })
@@ -183,7 +187,10 @@ export default function RegistrationsPage() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(
-        (reg) => reg.gamer_tag?.toLowerCase().includes(term) || reg.users?.email?.toLowerCase().includes(term),
+        (reg) => 
+          reg.gamer_tag?.toLowerCase().includes(term) || 
+          reg.users?.email?.toLowerCase().includes(term) ||
+          reg.users?.gamer_tag_id?.toLowerCase().includes(term)
       )
     }
 
@@ -246,10 +253,10 @@ export default function RegistrationsPage() {
 
     filteredRegistrations.forEach((reg) => {
       const row = [
-        reg.gamer_tag || "",
+        reg.gamer_tag || reg.users?.gamer_tag_id || "",
         reg.users?.email || "",
-        reg.primary_position || "",
-        reg.secondary_position || "",
+        reg.primary_position || reg.users?.primary_position || "",
+        reg.secondary_position || reg.users?.secondary_position || "",
         reg.console || "",
         reg.status || "",
         new Date(reg.created_at).toLocaleString() || "",
@@ -279,14 +286,14 @@ export default function RegistrationsPage() {
 
   function openEditName(registration: any) {
     setEditingRegistration(registration)
-    setNewGamerTag(registration.gamer_tag || "")
+    setNewGamerTag(registration.gamer_tag || registration.users?.gamer_tag_id || "")
     setIsEditNameOpen(true)
   }
 
   function openEditPositions(registration: any) {
     setEditingRegistration(registration)
-    setNewPrimaryPosition(registration.primary_position || "")
-    setNewSecondaryPosition(registration.secondary_position || "")
+    setNewPrimaryPosition(registration.primary_position || registration.users?.primary_position || "")
+    setNewSecondaryPosition(registration.secondary_position || registration.users?.secondary_position || "")
     setIsEditPositionsOpen(true)
   }
 
@@ -301,22 +308,47 @@ export default function RegistrationsPage() {
 
     setIsUpdating(true)
     try {
-      const { error } = await supabase
-        .from("season_registrations")
-        .update({ gamer_tag: newGamerTag.trim() })
-        .eq("id", editingRegistration.id)
+      // Update both season_registrations and users table
+      const updates = []
 
-      if (error) throw error
+      // Update season_registrations if it has gamer_tag
+      if (editingRegistration.gamer_tag !== undefined) {
+        const { error: regError } = await supabase
+          .from("season_registrations")
+          .update({ gamer_tag: newGamerTag.trim() })
+          .eq("id", editingRegistration.id)
+
+        if (regError) throw regError
+        updates.push("registration")
+      }
+
+      // Update users table gamer_tag_id
+      if (editingRegistration.users?.id) {
+        const { error: userError } = await supabase
+          .from("users")
+          .update({ gamer_tag_id: newGamerTag.trim() })
+          .eq("id", editingRegistration.users.id)
+
+        if (userError) throw userError
+        updates.push("user profile")
+      }
 
       // Update local state
-      const updatedRegistrations = registrations.map((reg) =>
-        reg.id === editingRegistration.id ? { ...reg, gamer_tag: newGamerTag.trim() } : reg,
-      )
+      const updatedRegistrations = registrations.map((reg) => {
+        if (reg.id === editingRegistration.id) {
+          return {
+            ...reg,
+            gamer_tag: newGamerTag.trim(),
+            users: reg.users ? { ...reg.users, gamer_tag_id: newGamerTag.trim() } : reg.users
+          }
+        }
+        return reg
+      })
       setRegistrations(updatedRegistrations)
 
       toast({
         title: "Player name updated",
-        description: `Player name updated to ${newGamerTag.trim()}`,
+        description: `Player name updated to ${newGamerTag.trim()} in ${updates.join(" and ")}`,
       })
 
       setIsEditNameOpen(false)
@@ -337,31 +369,57 @@ export default function RegistrationsPage() {
 
     setIsUpdating(true)
     try {
-      const { error } = await supabase
-        .from("season_registrations")
-        .update({
-          primary_position: newPrimaryPosition,
-          secondary_position: newSecondaryPosition || null,
-        })
-        .eq("id", editingRegistration.id)
+      const updates = []
 
-      if (error) throw error
+      // Update season_registrations if it has position fields
+      if (editingRegistration.primary_position !== undefined) {
+        const { error: regError } = await supabase
+          .from("season_registrations")
+          .update({
+            primary_position: newPrimaryPosition,
+            secondary_position: newSecondaryPosition || null,
+          })
+          .eq("id", editingRegistration.id)
+
+        if (regError) throw regError
+        updates.push("registration")
+      }
+
+      // Update users table positions
+      if (editingRegistration.users?.id) {
+        const { error: userError } = await supabase
+          .from("users")
+          .update({
+            primary_position: newPrimaryPosition,
+            secondary_position: newSecondaryPosition || null,
+          })
+          .eq("id", editingRegistration.users.id)
+
+        if (userError) throw userError
+        updates.push("user profile")
+      }
 
       // Update local state
-      const updatedRegistrations = registrations.map((reg) =>
-        reg.id === editingRegistration.id
-          ? {
-              ...reg,
+      const updatedRegistrations = registrations.map((reg) => {
+        if (reg.id === editingRegistration.id) {
+          return {
+            ...reg,
+            primary_position: newPrimaryPosition,
+            secondary_position: newSecondaryPosition || null,
+            users: reg.users ? { 
+              ...reg.users, 
               primary_position: newPrimaryPosition,
-              secondary_position: newSecondaryPosition || null,
-            }
-          : reg,
-      )
+              secondary_position: newSecondaryPosition || null
+            } : reg.users
+          }
+        }
+        return reg
+      })
       setRegistrations(updatedRegistrations)
 
       toast({
         title: "Positions updated",
-        description: `Player positions have been updated`,
+        description: `Player positions have been updated in ${updates.join(" and ")}`,
       })
 
       setIsEditPositionsOpen(false)
@@ -476,7 +534,7 @@ export default function RegistrationsPage() {
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-white/50" />
                   <Input
                     id="search"
-                    placeholder="Search by name or email"
+                    placeholder="Search by name, email, or gamer tag"
                     className="pl-8 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -563,7 +621,7 @@ export default function RegistrationsPage() {
                               className="p-0 h-auto font-medium text-left text-white hover:text-blue-300"
                               onClick={() => viewRegistrationDetails(registration)}
                             >
-                              {registration.gamer_tag}
+                              {registration.gamer_tag || registration.users?.gamer_tag_id || "No Name"}
                             </Button>
                             <Button
                               variant="ghost"
@@ -576,10 +634,10 @@ export default function RegistrationsPage() {
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-white">{registration.users?.email}</TableCell>
+                        <TableCell className="text-white">{registration.users?.email || "No Email"}</TableCell>
                         <TableCell className="text-white">
                           <div className="flex items-center gap-2">
-                            {registration.primary_position}
+                            {registration.primary_position || registration.users?.primary_position || "No Position"}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -591,10 +649,12 @@ export default function RegistrationsPage() {
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-white">{registration.secondary_position || "—"}</TableCell>
+                        <TableCell className="text-white">
+                          {registration.secondary_position || registration.users?.secondary_position || "—"}
+                        </TableCell>
                         <TableCell className="text-white">
                           <div className="flex items-center gap-2">
-                            {registration.console}
+                            {registration.console || "No Console"}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -682,23 +742,29 @@ export default function RegistrationsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h4 className="text-sm font-medium text-white/70">Gamer Tag</h4>
-                        <p className="text-base text-white">{selectedRegistration.gamer_tag}</p>
+                        <p className="text-base text-white">
+                          {selectedRegistration.gamer_tag || selectedRegistration.users?.gamer_tag_id || "No Name"}
+                        </p>
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-white/70">Email</h4>
-                        <p className="text-base text-white">{selectedRegistration.users?.email}</p>
+                        <p className="text-base text-white">{selectedRegistration.users?.email || "No Email"}</p>
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-white/70">Primary Position</h4>
-                        <p className="text-base text-white">{selectedRegistration.primary_position}</p>
+                        <p className="text-base text-white">
+                          {selectedRegistration.primary_position || selectedRegistration.users?.primary_position || "No Position"}
+                        </p>
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-white/70">Secondary Position</h4>
-                        <p className="text-base text-white">{selectedRegistration.secondary_position || "—"}</p>
+                        <p className="text-base text-white">
+                          {selectedRegistration.secondary_position || selectedRegistration.users?.secondary_position || "—"}
+                        </p>
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-white/70">Console</h4>
-                        <p className="text-base text-white">{selectedRegistration.console}</p>
+                        <p className="text-base text-white">{selectedRegistration.console || "No Console"}</p>
                       </div>
                       <div>
                         <h4 className="text-sm font-medium text-white/70">Status</h4>

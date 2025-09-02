@@ -17,20 +17,24 @@ export async function GET(request: Request) {
     }
 
     // Otherwise, this is the initial OAuth request
-    return await initiateOAuth(userId, state)
+    return await initiateOAuth(userId, state, request)
   } catch (error: any) {
     console.error("Error in Discord OAuth:", error)
     return NextResponse.json({ error: "OAuth process failed" }, { status: 500 })
   }
 }
 
-async function initiateOAuth(userId: string | null, state: string | null) {
+async function initiateOAuth(userId: string | null, state: string | null, request: Request) {
   const clientId = process.env.DISCORD_CLIENT_ID
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/discord`
-
+  
   if (!clientId) {
     return NextResponse.json({ error: "Discord OAuth not configured" }, { status: 500 })
   }
+
+  // Use the correct callback URL
+  const redirectUri = "https://www.secretchelsociety.com/api/auth/discord/callback"
+  
+  console.log("Discord OAuth redirect URI:", redirectUri)
 
   const scope = "identify"
   const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${encodeURIComponent(state || "")}`
@@ -42,11 +46,15 @@ async function handleOAuthCallback(code: string, state: string | null) {
   try {
     const clientId = process.env.DISCORD_CLIENT_ID
     const clientSecret = process.env.DISCORD_CLIENT_SECRET
-    const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/discord`
-
+    
     if (!clientId || !clientSecret) {
       return NextResponse.json({ error: "Discord OAuth not configured" }, { status: 500 })
     }
+
+    // Use the same callback URL that was used in the initial request
+    const redirectUri = "https://www.secretchelsociety.com/api/auth/discord/callback"
+
+    console.log("Discord OAuth callback redirect URI:", redirectUri)
 
     // Exchange code for access token
     const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
@@ -64,8 +72,9 @@ async function handleOAuthCallback(code: string, state: string | null) {
     })
 
     if (!tokenResponse.ok) {
-      console.error("Token exchange failed:", await tokenResponse.text())
-      return NextResponse.json({ error: "Failed to exchange code for token" }, { status: 500 })
+      const errorText = await tokenResponse.text()
+      console.error("Token exchange failed:", errorText)
+      return NextResponse.json({ error: "Failed to exchange code for token", details: errorText }, { status: 500 })
     }
 
     const tokenData = await tokenResponse.json()
