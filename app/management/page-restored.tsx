@@ -228,59 +228,23 @@ const ManagementPage = () => {
 
     setLoading(true)
     try {
-      // Check if user is a team manager (GM, AGM, Owner) in players table OR has admin/owner roles in user_roles
+      // Check if user is a team manager (GM, AGM, Owner)
       const { data: playerData, error: playerError } = await supabase
         .from("players")
         .select("role, team_id")
         .eq("user_id", session.user.id)
         .single()
 
-      // Also check user_roles table for admin or owner permissions
-      const { data: userRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .in("role", ["Admin", "Owner"])
+      if (playerError || !playerData) {
+        setIsAuthorized(false)
+        throw new Error("You don't have permission to access team management")
+      }
 
-      // Check if user has management permissions via players table
-      const isPlayerManager = playerData && ["GM", "AGM", "Owner"].includes(playerData.role)
-      
-      // Check if user has management permissions via user_roles table
-      const hasManagementRole = userRoles && userRoles.length > 0
-      
-      const isManager = isPlayerManager || hasManagementRole
+      const isManager = ["GM", "AGM", "Owner"].includes(playerData.role)
       setIsAuthorized(isManager)
 
-      if (!isManager) {
+      if (!isManager || !playerData.team_id) {
         throw new Error("You must be a team manager to access this page")
-      }
-
-      // If user has admin/owner role but no player data, they can still access (admin override)
-      if (!playerData && hasManagementRole) {
-        console.log("Admin/Owner accessing management without player record")
-        // Set basic team data for admin users
-        const defaultTeam = {
-          id: "admin-override",
-          name: "Admin Access",
-          logo_url: null,
-          salary_cap: 30000000,
-          max_players: 15,
-          wins: 0,
-          losses: 0,
-          otl: 0,
-          points: 0,
-          games_played: 0,
-          goals_for: 0,
-          goals_against: 0,
-          goal_differential: 0,
-        }
-        setTeamData(defaultTeam)
-        setLoading(false)
-        return
-      }
-
-      if (!playerData?.team_id) {
-        throw new Error("You must be assigned to a team to access team management")
       }
 
       // Get current season ID for team stats calculation
