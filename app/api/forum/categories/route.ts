@@ -77,6 +77,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log("Forum categories POST request received")
+    console.log("Request headers:", Object.fromEntries(request.headers.entries()))
+    console.log("Request cookies:", request.headers.get("cookie"))
+    
     const supabase = createClient()
 
     // Get the authenticated user
