@@ -1,9 +1,22 @@
 import { NextResponse } from "next/server"
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
+import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
+  
+  // Create service role client for system_settings operations (bypasses RLS)
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
 
   try {
     console.log("=== BID DURATION API ROUTE START ===")
@@ -82,7 +95,7 @@ export async function POST(request: Request) {
       }
 
       // Update the bidding_duration setting without auth check
-      const { error } = await supabase
+      const { error } = await supabaseAdmin
         .from("system_settings")
         .upsert({ key: "bidding_duration", value: durationSeconds }, { onConflict: "key" })
 
@@ -208,7 +221,7 @@ export async function POST(request: Request) {
     }
 
     // Update the bidding_duration setting
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("system_settings")
       .upsert({ key: "bidding_duration", value: durationSeconds }, { onConflict: "key" })
 
