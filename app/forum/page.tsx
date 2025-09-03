@@ -11,7 +11,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSupabase } from "@/lib/supabase/client"
 import { formatDistanceToNow } from "date-fns"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 
 interface ForumPost {
@@ -232,33 +232,22 @@ export default function ForumPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
         
         {/* Professional forum floating elements */}
-        <motion.div
+        <div
           className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
-        <motion.div
+        <div
           className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
-          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+        <div
           className="space-y-12"
         >
           {/* Enhanced Professional Forum Header */}
           <div className="text-center mb-16">
-            <motion.div 
+            <div 
               className="inline-flex items-center gap-6 mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", delay: 0.2, stiffness: 120 }}
-              whileHover={{ scale: 1.05 }}
             >
               <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
@@ -268,7 +257,7 @@ export default function ForumPage() {
               <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                 Championship Forum
               </h1>
-            </motion.div>
+            </div>
             
             <div className="flex items-center justify-center gap-6 mb-8">
               <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
@@ -276,34 +265,25 @@ export default function ForumPage() {
               <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
             </div>
             
-            <motion.p 
+            <p 
               className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
             >
               Discuss <span className="font-bold text-primary">hockey strategies</span> and connect with the Secret Chel Society <span className="font-semibold text-secondary">championship community</span>
-            </motion.p>
+            </p>
           </div>
 
           {/* Enhanced Actions Section */}
           <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+            <div
               className="flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
             >
               <Users className="h-5 w-5 text-primary" />
               <span className="text-white font-semibold">
                 {posts.length} Active Discussions
               </span>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+            <div
             >
               <Button 
                 onClick={handleCreatePost}
@@ -312,15 +292,12 @@ export default function ForumPage() {
                 <Plus className="w-5 h-5 mr-2" />
                 New Post
               </Button>
-            </motion.div>
+            </div>
           </div>
 
           {/* Error Display */}
           {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+            <div
             >
               <Card className="border-destructive/50 bg-red-500/10 backdrop-blur-sm">
                 <CardContent className="p-6 flex items-center gap-3">
@@ -336,7 +313,7 @@ export default function ForumPage() {
                   </Button>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           )}
 
           {/* Enhanced Categories */}
@@ -355,7 +332,6 @@ export default function ForumPage() {
                   value={category.id}
                   className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
                 >
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }} />
                   {category.name}
                 </TabsTrigger>
               ))}
@@ -365,11 +341,8 @@ export default function ForumPage() {
               {isLoadingPosts ? (
                 <div className="space-y-6">
                   {[...Array(3)].map((_, i) => (
-                    <motion.div
+                    <div
                       key={i}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
                     >
                       <Card className="bg-white/5 backdrop-blur-sm border-white/20">
                         <CardContent className="p-6">
@@ -379,14 +352,11 @@ export default function ForumPage() {
                           </div>
                         </CardContent>
                       </Card>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               ) : posts.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
+                <div
                 >
                   <Card className="bg-white/5 backdrop-blur-sm border-white/20">
                     <CardContent className="p-12 text-center">
@@ -401,16 +371,12 @@ export default function ForumPage() {
                       </Button>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               ) : (
                 <div className="space-y-6">
                   {posts.map((post, index) => (
-                    <motion.div
+                    <div
                       key={post.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      whileHover={{ y: -4 }}
                       className="group"
                     >
                       <Card className="bg-white/5 backdrop-blur-sm border-white/20 hover:border-primary/30 hover:bg-white/10 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20">
@@ -428,7 +394,6 @@ export default function ForumPage() {
                                 )}
                                 <Badge
                                   variant="secondary"
-                                  style={{ backgroundColor: post.category?.color + "20", color: post.category?.color }}
                                   className="border-0"
                                 >
                                   {post.category?.name}
@@ -480,13 +445,13 @@ export default function ForumPage() {
                           </div>
                         </CardContent>
                       </Card>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               )}
             </TabsContent>
           </Tabs>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

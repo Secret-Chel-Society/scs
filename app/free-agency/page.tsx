@@ -5,7 +5,7 @@ import { PositionCountsClient } from "@/components/free-agency/position-counts-c
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlayerSignupsList } from "@/components/free-agency/player-signups-list"
 import { Users, Target, Star, TrendingUp } from "lucide-react"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 
 // Force dynamic rendering and disable caching
 export const dynamic = "force-dynamic"
@@ -25,33 +25,22 @@ export default function FreeAgencyPage({
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
         
         {/* Professional market floating elements */}
-        <motion.div
+        <div
           className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
-        <motion.div
+        <div
           className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
-          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+        <div
           className="space-y-12"
         >
           {/* Enhanced Professional Free Agent Market Header */}
           <div className="text-center mb-16">
-            <motion.div 
+            <div 
               className="inline-flex items-center gap-6 mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", delay: 0.2, stiffness: 120 }}
-              whileHover={{ scale: 1.05 }}
             >
               <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
@@ -61,7 +50,7 @@ export default function FreeAgencyPage({
               <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                 Free Agent Market
               </h1>
-            </motion.div>
+            </div>
             
             <div className="flex items-center justify-center gap-6 mb-8">
               <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
@@ -69,14 +58,11 @@ export default function FreeAgencyPage({
               <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
             </div>
             
-            <motion.p 
+            <p 
               className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
             >
               Browse and bid on <span className="font-bold text-primary">available professional players</span> in the Secret Chel Society Championship League
-            </motion.p>
+            </p>
           </div>
 
           {/* Enhanced Professional Market Tabs */}
@@ -102,10 +88,7 @@ export default function FreeAgencyPage({
 
             <TabsContent value="free-agents" className="space-y-8">
               {/* Position Counts Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+              <div
               >
                 <div className="mb-6">
                   <Suspense fallback={
@@ -119,40 +102,31 @@ export default function FreeAgencyPage({
                     <PositionCountsClient />
                   </Suspense>
                 </div>
-              </motion.div>
+              </div>
 
               {/* Filters Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+              <div
               >
                 <div className="mb-6">
                   <FreeAgencyFilters initialParams={searchParams} />
                 </div>
-              </motion.div>
+              </div>
 
               {/* Free Agency List */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+              <div
               >
                 <FreeAgencyList searchParams={searchParams} />
-              </motion.div>
+              </div>
             </TabsContent>
 
             <TabsContent value="player-signups" className="space-y-8 mt-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
+              <div
               >
                 <PlayerSignupsList />
-              </motion.div>
+              </div>
             </TabsContent>
           </Tabs>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

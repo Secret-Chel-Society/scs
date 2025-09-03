@@ -7,7 +7,8 @@ import Image from "next/image"
 import { 
   Menu, 
   X, 
-  ChevronRight,
+  ChevronRight, 
+  ChevronDown,
   Home,
   Trophy,
   BarChart3,
@@ -39,6 +40,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { useMobile } from "@/hooks/use-mobile"
 import { useSupabase } from "@/lib/supabase/client"
 import { avatarSync } from "@/lib/avatar-sync"
+// import { motion } from "framer-motion" // Commented out to fix build issues
 import { cn } from "@/lib/utils"
 
 export default function Sidebar() {
@@ -196,7 +198,7 @@ export default function Sidebar() {
     setIsMobileOpen(false)
   }, [pathname])
 
-  // Auto-collapse on mobile
+  // Auto-collapse on mobile and emit sidebar state changes
   useEffect(() => {
     if (isMobile) {
       setIsOpen(false)
@@ -204,6 +206,14 @@ export default function Sidebar() {
       setIsOpen(true)
     }
   }, [isMobile])
+
+  // Emit sidebar state changes for layout adjustment
+  useEffect(() => {
+    const event = new CustomEvent('sidebarToggle', {
+      detail: { isOpen: isMobile ? isMobileOpen : isOpen }
+    })
+    window.dispatchEvent(event)
+  }, [isOpen, isMobileOpen, isMobile])
 
   const handleSignOut = async () => {
     if (!supabase) {
@@ -385,10 +395,8 @@ export default function Sidebar() {
   const showErrorFallback = !isLoading && session && loadingProfile && fetchError
   const uniqueRoles = getUniqueRoleBadges()
 
-  const sidebarWidth = isMobile ? (isMobileOpen ? "280px" : "0px") : (isOpen ? "280px" : "80px")
-
   return (
-    <div>
+    <>
       {/* Mobile Sidebar Toggle */}
       {isMobile && (
         <Button
@@ -403,12 +411,16 @@ export default function Sidebar() {
 
       {/* Professional Championship Sidebar */}
       <aside
+          width: isMobile ? (isMobileOpen ? "280px" : "0px") : (isOpen ? "280px" : "80px"),
+        }}
         className={cn(
-          "fixed left-0 top-0 z-40 h-full bg-background/95 backdrop-blur-lg border-r-2 border-primary/30 shadow-2xl overflow-hidden transition-all duration-300",
+          "fixed left-0 top-0 z-40 h-full bg-background/95 backdrop-blur-lg border-r-2 border-primary/30 shadow-2xl overflow-hidden",
           isMobile && !isMobileOpen && "w-0",
           !isMobile && "min-w-[80px]"
         )}
-        style={{ width: sidebarWidth }}
+        style={{
+          width: isMobile ? (isMobileOpen ? "280px" : "0px") : (isOpen ? "280px" : "80px")
+        }}
       >
         {/* Enhanced Hockey-Themed Sidebar Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/8 via-secondary/5 to-primary/8" />
@@ -416,7 +428,9 @@ export default function Sidebar() {
         
         <div className="relative h-full flex flex-col">
           {/* Enhanced Professional Logo Section */}
-          <div className="p-6 border-b border-primary/20">
+          <div 
+            className="p-6 border-b border-primary/20"
+          >
             <Link 
               href="/" 
               className="group flex items-center gap-4 transition-all duration-300 hover:scale-105"
@@ -433,7 +447,9 @@ export default function Sidebar() {
                 />
               </div>
               {(isOpen || isMobileOpen) && (
-                <div className="flex flex-col">
+                <div
+                  className="flex flex-col"
+                >
                   <h1 className="font-bold text-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     Secret Chel Society
                   </h1>
@@ -447,8 +463,10 @@ export default function Sidebar() {
 
           {/* Enhanced Navigation Items */}
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {navigationItems.map((item) => (
-              <div key={item.name}>
+            {navigationItems.map((item, index) => (
+              <div
+                key={item.name}
+              >
                 {item.submenu ? (
                   <div className="space-y-1">
                     <Button
@@ -468,17 +486,17 @@ export default function Sidebar() {
                         )}
                       </div>
                       {(isOpen || isMobileOpen) && (
-                        <div>
-                          <ChevronRight className={cn(
-                            "h-4 w-4 transition-transform duration-200",
-                            expandedMenus.includes(item.name) && "rotate-90"
-                          )} />
+                        <div
+                        >
+                          <ChevronRight className="h-4 w-4" />
                         </div>
                       )}
                     </Button>
                     
                     {(isOpen || isMobileOpen) && expandedMenus.includes(item.name) && (
-                      <div className="ml-6 space-y-1">
+                      <div
+                        className="ml-6 space-y-1"
+                      >
                         {item.submenu.map((subItem) => (
                           <Link key={subItem.name} href={subItem.href}>
                             <Button
@@ -523,7 +541,8 @@ export default function Sidebar() {
 
             {/* Season Registration - Special Item */}
             {session && (
-              <div>
+              <div
+              >
                 <Link href="/register/season">
                   <Button
                     variant="ghost"
@@ -767,11 +786,10 @@ export default function Sidebar() {
                       onClick={() => setIsOpen(!isOpen)}
                       className="h-12 w-full rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg group"
                     >
-                      <div className="relative">
-                        <ChevronRight className={cn(
-                          "h-6 w-6 text-primary group-hover:text-secondary transition-all duration-300",
-                          isOpen && "rotate-180"
-                        )} />
+                      <div
+                        className="relative"
+                      >
+                        <ChevronRight className="h-6 w-6 text-primary group-hover:text-secondary transition-colors duration-300" />
                       </div>
                     </Button>
                   </TooltipTrigger>
@@ -791,10 +809,10 @@ export default function Sidebar() {
       {/* Mobile Overlay */}
       {isMobile && isMobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm transition-opacity duration-200"
+          className="fixed inset-0 z-30 bg-background/80 backdrop-blur-sm"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
-    </div>
+    </>
   )
 }

@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter, Calendar, Gamepad2, Trophy, Target } from "lucide-react"
 import Image from "next/image"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function MatchesPage() {
@@ -308,15 +308,11 @@ export default function MatchesPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
         
         {/* Championship arena floating elements */}
-        <motion.div
+        <div
           className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
-        <motion.div
+        <div
           className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
-          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         />
       </div>
 
@@ -324,12 +320,8 @@ export default function MatchesPage() {
         <div className="space-y-12">
           {/* Enhanced Professional Championship Header */}
           <div className="text-center mb-16">
-            <motion.div 
+            <div 
               className="inline-flex items-center gap-6 mb-8"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", delay: 0.2, stiffness: 120 }}
-              whileHover={{ scale: 1.05 }}
             >
               <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
@@ -339,7 +331,7 @@ export default function MatchesPage() {
               <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                 Championship Arena
               </h1>
-            </motion.div>
+            </div>
             
             <div className="flex items-center justify-center gap-6 mb-8">
               <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
@@ -347,14 +339,11 @@ export default function MatchesPage() {
               <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
             </div>
             
-            <motion.p 
+            <p 
               className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
             >
               View all <span className="font-bold text-primary">scheduled and completed matches</span> from the Secret Chel Society Championship League
-            </motion.p>
+            </p>
           </div>
 
           {/* Enhanced Professional Filters Section */}
@@ -447,11 +436,8 @@ export default function MatchesPage() {
           {/* Enhanced Matches Display */}
           <div className="space-y-8">
             {Object.entries(matchesByDate).map(([date, dateMatches], dateIndex) => (
-              <motion.div
+              <div
                 key={date}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: dateIndex * 0.1 }}
               >
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-primary/20 rounded-xl">
@@ -471,12 +457,8 @@ export default function MatchesPage() {
                     const awayWon = isCompleted && match.away_score > match.home_score
 
                     return (
-                      <motion.div
+                      <div
                         key={match.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.3, delay: matchIndex * 0.1 }}
-                        whileHover={{ scale: 1.02, y: -5 }}
                         className="group"
                       >
                         <Card
@@ -561,19 +543,16 @@ export default function MatchesPage() {
                             </div>
                           </CardContent>
                         </Card>
-                      </motion.div>
+                      </div>
                     )
                   })}
                 </div>
-              </motion.div>
+              </div>
             ))}
 
             {/* No Matches Message */}
             {Object.keys(matchesByDate).length === 0 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+              <div
                 className="text-center py-16"
               >
                 <div className="max-w-md mx-auto">
@@ -585,7 +564,7 @@ export default function MatchesPage() {
                     </p>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )}
           </div>
 

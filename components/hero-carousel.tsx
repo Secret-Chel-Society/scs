@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight, Trophy, Gamepad2 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+// import { motion, AnimatePresence } from "framer-motion" // Commented out to fix build issues
 
 interface HeroImage {
   url: string
@@ -70,39 +70,24 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
       <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-secondary via-primary to-secondary opacity-80" />
       
       {/* Carousel Images with Enhanced Container */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.1 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="absolute inset-0 flex items-center justify-center"
-        >
-          <div className="relative h-full w-full flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-50" />
-            <Image
-              src={currentImage.url || "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png"}
-              alt={currentImage.title || "Championship carousel"}
-              width={600}
-              height={600}
-              className="object-contain relative z-10 filter drop-shadow-2xl"
-              priority
-              onError={() => handleImageError(current)}
-            />
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative h-full w-full flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-50" />
+          <Image
+            src={currentImage.url || "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png"}
+            alt={currentImage.title || "Championship carousel"}
+            width={600}
+            height={600}
+            className="object-contain relative z-10 filter drop-shadow-2xl"
+            priority
+            onError={() => handleImageError(current)}
+          />
+        </div>
+      </div>
 
       {/* Enhanced Professional Content Overlay */}
       <div className="absolute bottom-20 inset-x-0 flex flex-col items-center text-center p-6">
-        <motion.div
-          key={`content-${current}`}
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
-          className="max-w-4xl"
-        >
+        <div className="max-w-4xl">
           <div className="relative mb-6">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-primary/90 to-secondary/90 bg-clip-text text-transparent drop-shadow-2xl">
               {currentImage.title}
@@ -114,13 +99,8 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
             {currentImage.subtitle}
           </p>
           
-          <motion.div 
-            className="flex flex-wrap justify-center gap-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <motion.div whileHover={{ scale: 1.08, y: -3 }} whileTap={{ scale: 0.98 }}>
+          <div className="flex flex-wrap justify-center gap-8">
+            <div>
               <Button 
                 asChild 
                 size="lg" 
@@ -131,9 +111,9 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
                   Championship Signup
                 </Link>
               </Button>
-            </motion.div>
+            </div>
             
-            <motion.div whileHover={{ scale: 1.08, y: -3 }} whileTap={{ scale: 0.98 }}>
+            <div>
               <Button
                 variant="outline"
                 size="lg"
@@ -145,18 +125,15 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
                   View Arena
                 </Link>
               </Button>
-            </motion.div>
-          </motion.div>
-        </motion.div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Enhanced Professional Navigation Arrows */}
       {validImages.length > 1 && (
         <>
-          <motion.div
-            whileHover={{ scale: 1.1, x: -2 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <div>
             <Button
               variant="ghost"
               size="icon"
@@ -165,12 +142,9 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
             >
               <ChevronLeft className="h-8 w-8" />
             </Button>
-          </motion.div>
+          </div>
           
-          <motion.div
-            whileHover={{ scale: 1.1, x: 2 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <div>
             <Button
               variant="ghost"
               size="icon"
@@ -179,7 +153,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
             >
               <ChevronRight className="h-8 w-8" />
             </Button>
-          </motion.div>
+          </div>
         </>
       )}
     </div>
