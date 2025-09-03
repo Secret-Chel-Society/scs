@@ -11,7 +11,7 @@ import { motion } from "framer-motion"
 import { Trophy, Award, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { TeamLogo } from "@/components/team-logo"
-import { getAllTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
+import { getAllTeamStats } from "@/lib/team-utils"
 
 // Maximum roster size constant
 const MAX_ROSTER_SIZE = 15
@@ -28,7 +28,17 @@ export default function TeamsPage() {
         setLoading(true)
 
         // Get current season ID
-        const seasonId = await getCurrentSeasonId()
+        let seasonId = 1 // Default fallback
+        try {
+          const response = await fetch("/api/seasons?current=true")
+          if (response.ok) {
+            const { currentSeason } = await response.json()
+            seasonId = currentSeason
+          }
+        } catch (error) {
+          console.error("Error getting current season:", error)
+          // Use default season 1
+        }
 
         // Get team stats
         const teamStats = await getAllTeamStats(seasonId)

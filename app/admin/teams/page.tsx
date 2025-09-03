@@ -26,7 +26,7 @@ import { TeamsActiveMigration } from "@/components/admin/teams-active-migration"
 import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
-import { getCurrentSeasonId } from "@/lib/team-utils"
+
 
 interface Season {
   id: number
@@ -156,30 +156,34 @@ export default function AdminTeamsPage() {
 
         // Load seasons
         try {
-          const { data: seasonsData, error: seasonsError } = await supabase
-            .from("system_settings")
-            .select("value")
-            .eq("key", "seasons")
-            .single()
-
-          if (seasonsError) {
-            console.error("Error loading seasons:", seasonsError)
-            // Use default season if can't load from database
-            setSeasons([{ id: 1, name: "Season 1", is_active: true }])
-            setSelectedSeason(1)
-          } else if (seasonsData) {
-            const seasonsArray = seasonsData.value || []
+          const response = await fetch("/api/seasons")
+          if (!response.ok) {
+            throw new Error("Failed to fetch seasons")
+          }
+          const { seasons: seasonsArray } = await response.json()
+          
+          if (seasonsArray && Array.isArray(seasonsArray)) {
             setSeasons(seasonsArray)
-
+            
             // Get current season
             try {
-              const currentSeason = await getCurrentSeasonId()
-              setSelectedSeason(currentSeason)
+              const currentResponse = await fetch("/api/seasons?current=true")
+              if (currentResponse.ok) {
+                const { currentSeason } = await currentResponse.json()
+                setSelectedSeason(currentSeason)
+              } else {
+                // Use first season from the list or default to 1
+                setSelectedSeason(seasonsArray.length > 0 ? seasonsArray[0].id : 1)
+              }
             } catch (error) {
               console.error("Error getting current season:", error)
               // Use first season from the list or default to 1
               setSelectedSeason(seasonsArray.length > 0 ? seasonsArray[0].id : 1)
             }
+          } else {
+            // Fallback to default season
+            setSeasons([{ id: 1, name: "Season 1", is_active: true }])
+            setSelectedSeason(1)
           }
         } catch (error) {
           console.error("Error loading seasons:", error)
@@ -189,6 +193,13 @@ export default function AdminTeamsPage() {
         }
 
         // Load teams - will be done by effect that watches selectedSeason
+        // Also load teams immediately if we have a default season
+        if (selectedSeason) {
+          loadTeams(selectedSeason)
+        } else {
+          // If no season selected, try to load teams anyway
+          loadTeams()
+        }
       } catch (error: any) {
         console.error("Setup error:", error)
         setLoadError(`Setup error: ${error.message}`)
@@ -465,6 +476,7 @@ export default function AdminTeamsPage() {
 
   // Load teams based on selected season
   const loadTeams = async (seasonId?: number) => {
+    console.log("loadTeams called with seasonId:", seasonId)
     if (!supabase) {
       console.error("Supabase client not available")
       setLoadError("Database client not available")
@@ -475,9 +487,33 @@ export default function AdminTeamsPage() {
       setIsLoadingStats(true)
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
+      console.log("Using season:", season)
 
       // Use standard Supabase query instead of exec_sql
-      const { data, error } = await supabase.from("teams").select("*").eq("season_id", season).order("name")
+      // First try to get teams with the specific season_id
+      let { data, error } = await supabase.from("teams").select("*").eq("season_id", season).order("name")
+      
+      // If no teams found with that season_id, try to get all teams
+      if (!error && (!data || data.length === 0)) {
+        console.log("No teams found with season_id:", season, "trying to get all teams")
+        const { data: allTeams, error: allTeamsError } = await supabase.from("teams").select("*").order("name")
+        if (!allTeamsError) {
+          data = allTeams
+          console.log("Found", allTeams?.length || 0, "teams total")
+        }
+      }
+      
+      // If still no data, try without any filters
+      if (!data || data.length === 0) {
+        console.log("Still no teams found, trying basic query")
+        const { data: basicTeams, error: basicError } = await supabase.from("teams").select("*").limit(10)
+        if (!basicError) {
+          data = basicTeams
+          console.log("Found", basicTeams?.length || 0, "teams with basic query")
+        } else {
+          console.error("Basic query also failed:", basicError)
+        }
+      }
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -491,6 +527,7 @@ export default function AdminTeamsPage() {
       }
 
       console.log("Loaded teams from database:", data?.length || 0, "teams")
+      console.log("Teams data:", data)
 
       // Set teams and apply filters
       setTeams(data || [])
@@ -532,7 +569,9 @@ export default function AdminTeamsPage() {
 
   // Update filtered teams when selected season changes
   useEffect(() => {
+    console.log("selectedSeason changed:", selectedSeason, "loading:", loading)
     if (selectedSeason && !loading) {
+      console.log("Calling loadTeams with season:", selectedSeason)
       loadTeams(selectedSeason)
     }
   }, [selectedSeason, loading])
@@ -543,6 +582,19 @@ export default function AdminTeamsPage() {
       loadTeams(selectedSeason)
     }
   }, [lastRefresh])
+
+  // Fallback: load teams if none loaded yet
+  useEffect(() => {
+    if (!loading && teams.length === 0) {
+      console.log("Fallback: loading teams because none loaded yet")
+      if (selectedSeason) {
+        loadTeams(selectedSeason)
+      } else {
+        // If no season selected, try to load teams anyway
+        loadTeams()
+      }
+    }
+  }, [loading, teams.length, selectedSeason])
 
   const handleAddTeam = () => {
     setIsAddingTeam(true)

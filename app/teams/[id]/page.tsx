@@ -14,7 +14,7 @@ import { motion } from "framer-motion"
 import { ArrowLeft, Calendar, Trophy, Award, RefreshCw, ChevronLeft, ChevronRight, Users, Target, Zap, TrendingUp, Star, Crown, Medal } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { Button } from "@/components/ui/button"
-import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
+import { getTeamStats } from "@/lib/team-utils"
 import { GameAvailabilityButton } from "@/components/team-schedule/game-availability-button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { InjuryReserveButton } from "@/components/team-schedule/injury-reserve-button"
@@ -266,7 +266,17 @@ export default function TeamDetailPage() {
         setLoading(true)
 
         // Get current season ID as a number for team stats
-        const seasonIdNumber = await getCurrentSeasonId()
+        let seasonIdNumber = 1 // Default fallback
+        try {
+          const response = await fetch("/api/seasons?current=true")
+          if (response.ok) {
+            const { currentSeason } = await response.json()
+            seasonIdNumber = currentSeason
+          }
+        } catch (error) {
+          console.error("Error getting current season:", error)
+          // Use default season 1
+        }
 
         // Get the actual UUID for the current season from the seasons table
         const { data: seasonData, error: seasonError } = await supabase

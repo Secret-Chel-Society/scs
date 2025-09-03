@@ -23,7 +23,7 @@ import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TeamLogos } from "@/components/management/team-logos"
 import { BidPlayerModal } from "@/components/management/bid-player-modal"
-import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
+import { getTeamStats } from "@/lib/team-utils"
 
 interface Player {
   id: string
@@ -283,8 +283,18 @@ const ManagementPage = () => {
         throw new Error("You must be assigned to a team to access team management")
       }
 
-      // Get current season ID for team stats calculation
-      const currentSeasonId = await getCurrentSeasonId()
+             // Get current season ID for team stats calculation
+       let currentSeasonId = 1 // Default fallback
+       try {
+         const response = await fetch("/api/seasons?current=true")
+         if (response.ok) {
+           const { currentSeason } = await response.json()
+           currentSeasonId = currentSeason
+         }
+       } catch (error) {
+         console.error("Error getting current season:", error)
+         // Use default season 1
+       }
 
       // Get calculated team stats
       const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonId)
