@@ -3,12 +3,11 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import Sidebar from "@/components/sidebar"
-import MainContent from "@/components/layout/main-content"
+import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
-import { Analytics } from "@vercel/analytics/next"
+// import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
@@ -19,7 +18,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Secret Chel Society (SCS)",
+  title: "Secret Chel Society",
   description: "Official website for the NHL 26 Secret Chel Society",
   viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
@@ -43,29 +42,28 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.ico" />
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3668249624265877"
+          src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
           crossOrigin="anonymous"
         />
       </head>
-      <body className={`${inter.className} sidebar-layout`}>
+      <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen">
-              {/* Enhanced Professional Championship Sidebar */}
-              <Sidebar />
-              
-              {/* Main Content Area with Dynamic Sidebar Layout */}
-              <MainContent>
+            <div className="flex min-h-screen w-full overflow-x-hidden">
+              <Navigation />
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col lg:ml-64 w-full min-w-0">
                 <Suspense>
-                  {children}
+                  <main className="flex-1 p-2 lg:p-6">
+                    {children}
+                  </main>
                 </Suspense>
                 <Footer />
-              </MainContent>
+              </div>
             </div>
-            
             <Toaster />
             <BannedUserModal />
-            <Analytics />
+            {/* <Analytics /> */}
           </SupabaseProvider>
         </ThemeProvider>
       </body>

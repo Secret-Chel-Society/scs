@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, UserX, Clock, AlertCircle, Ban, Users, RefreshCw } from "lucide-react"
-// import { motion } from "framer-motion"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
@@ -375,11 +374,9 @@ export default function BannedUsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="relative z-10 container mx-auto px-4 py-12">
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       </div>
     )
@@ -390,126 +387,86 @@ export default function BannedUsersPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
-      {/* Professional Hockey Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 hockey-grid opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center gap-2 mb-6">
+        <UserX className="h-8 w-8" />
+        <h1 className="text-3xl font-bold">Banned Users Management</h1>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div className="space-y-8">
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-4 mb-6">
-              <div className="p-4 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-xl">
-                <UserX className="h-10 w-10 text-white" />
+      <Tabs defaultValue="list" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="list" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Banned Users List ({filteredBannedUsers.length})
+          </TabsTrigger>
+          <TabsTrigger value="ban" className="flex items-center gap-2">
+            <Ban className="h-4 w-4" />
+            Ban User ({filteredUsers.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="list">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserX className="h-5 w-5" />
+                    Banned Users ({filteredBannedUsers.length}
+                    {bannedUsers.length !== filteredBannedUsers.length ? ` of ${bannedUsers.length}` : ""})
+                  </CardTitle>
+                  <CardDescription>View and manage banned users</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={fetchBannedUsers} disabled={loadingBannedUsers}>
+                  {loadingBannedUsers ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  Refresh
+                </Button>
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
-                Banned Users Management
-              </h1>
-            </div>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Manage user bans, view banned users, and control access to the Secret Chel Society
-            </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-red-500 to-transparent rounded-full mx-auto mt-6" />
-          </div>
-
-          {/* Enhanced Tabs */}
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 mb-8">
-              <TabsTrigger 
-                value="list" 
-                className="flex items-center gap-2 py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Users className="h-5 w-5" />
-                Banned Users List ({filteredBannedUsers.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="ban" 
-                className="flex items-center gap-2 py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Ban className="h-5 w-5" />
-                Ban User ({filteredUsers.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="list" className="mt-8">
-              <div>
-                <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-                  <CardHeader className="border-b border-white/20 pb-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                      <div>
-                        <CardTitle className="flex items-center gap-3 text-2xl text-white">
-                          <div className="p-2 bg-red-500/20 rounded-lg">
-                            <UserX className="h-6 w-6 text-red-400" />
-                          </div>
-                          Banned Users ({filteredBannedUsers.length}
-                          {bannedUsers.length !== filteredBannedUsers.length ? ` of ${bannedUsers.length}` : ""})
-                        </CardTitle>
-                        <CardDescription className="text-white/70 mt-2">View and manage banned users</CardDescription>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={fetchBannedUsers} 
-                        disabled={loadingBannedUsers}
-                        className="border-white/30 text-white hover:bg-white/10"
-                      >
-                        {loadingBannedUsers ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <RefreshCw className="h-4 w-4 mr-2" />
-                        )}
-                        Refresh
+              <div className="flex items-center gap-2 mt-4">
+                <div className="relative flex-1 max-w-sm">
+                  <Input
+                    placeholder="Search by gamer tag ID, discord name, email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pr-8"
+                  />
+                  {searchTerm && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      ×
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingBannedUsers ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : filteredBannedUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  {searchTerm ? (
+                    <div>
+                      <p>No banned users found matching "{searchTerm}"</p>
+                      <Button variant="outline" size="sm" className="mt-2" onClick={() => setSearchTerm("")}>
+                        Clear search
                       </Button>
                     </div>
-                    <div className="flex items-center gap-2 mt-6">
-                      <div className="relative flex-1 max-w-md">
-                        <Input
-                          placeholder="Search by gamer tag ID, discord name, email..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                        />
-                        {searchTerm && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-white/70 hover:text-white"
-                            onClick={() => setSearchTerm("")}
-                          >
-                            ×
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                              <CardContent className="pt-6">
-                    {loadingBannedUsers ? (
-                      <div className="flex justify-center items-center py-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                      </div>
-                    ) : filteredBannedUsers.length === 0 ? (
-                      <div className="text-center py-12">
-                        <UserX className="h-16 w-16 mx-auto mb-4 text-white/50" />
-                        {searchTerm ? (
-                          <div>
-                            <p className="text-white/70 mb-4">No banned users found matching "{searchTerm}"</p>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="mt-2 border-white/30 text-white hover:bg-white/10" 
-                              onClick={() => setSearchTerm("")}
-                            >
-                              Clear search
-                            </Button>
-                          </div>
-                        ) : (
-                          <p className="text-white/70">No banned users found</p>
-                        )}
-                      </div>
-                    ) : (
+                  ) : (
+                    <p>No banned users found</p>
+                  )}
+                </div>
+              ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -754,9 +711,8 @@ export default function BannedUsersPage() {
               </div>
             </CardContent>
           </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
+        </TabsContent>
+      </Tabs>
 
       {/* Unban Confirmation Dialog */}
       <Dialog open={unbanDialogOpen} onOpenChange={setUnbanDialogOpen}>
@@ -885,8 +841,6 @@ export default function BannedUsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-        </div>
-      </div>
     </div>
   )
 }

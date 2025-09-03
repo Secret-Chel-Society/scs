@@ -29,146 +29,125 @@ export default function Footer() {
   }, [supabase.auth])
 
   return (
-    <footer className="border-t bg-gradient-to-br from-muted/50 to-background relative overflow-hidden">
-      <div className="absolute inset-0 hockey-grid opacity-30" />
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5" />
-      <div className="container mx-auto px-6 py-12 relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-2xl mb-3 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Secret Chel Society
-              </h3>
-              <div className="h-1 w-16 bg-gradient-to-r from-primary to-secondary rounded-full mb-4" />
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                The premier competitive NHL 26 league for elite console players across North America, powered by Midnight Studios.
-              </p>
-              <Link
-                href="https://discord.gg/secretchelsociety"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-primary/10 to-secondary/10 hover:from-primary/20 hover:to-secondary/20 border border-primary/20 rounded-lg text-primary hover:text-white hover:bg-gradient-to-r hover:from-primary hover:to-secondary transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg group"
-              >
-                <img
-                  src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/general/Discord-removebg-preview.png"
-                  alt="Discord"
-                  className="h-5 w-5 group-hover:scale-110 transition-transform duration-300"
-                />
-                Join our Discord
-              </Link>
-            </div>
+    <footer className="border-t">
+      <div className="container mx-auto px-2 lg:px-4 py-4 lg:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+          <div>
+            <h3 className="font-bold text-lg mb-4">Secret Chel Society</h3>
+            <p className="text-muted-foreground mb-4">
+              The premier competitive NHL 26 league for elite console players across North America, powered by Midnight Studios.
+            </p>
+            <Link
+              href="https://discord.gg/secretchelsociety"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-primary hover:underline"
+            >
+              <img
+                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/general/Discord-removebg-preview.png"
+                alt="Discord"
+                className="h-5 w-5"
+              />
+              Join our Discord
+            </Link>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-xl mb-3 text-foreground">Quick Links</h3>
-              <div className="h-1 w-12 bg-gradient-to-r from-primary to-secondary rounded-full mb-4" />
-            </div>
-            <ul className="space-y-3">
+          <div>
+            <h3 className="font-bold text-lg mb-4">Quick Links</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Home
+                <Link href="/" className="text-muted-foreground hover:text-foreground">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/standings" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Standings
+                <Link href="/standings" className="text-muted-foreground hover:text-foreground">
+                  Standings
                 </Link>
               </li>
               <li>
-                <Link href="/statistics" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Statistics
+                <Link href="/statistics" className="text-muted-foreground hover:text-foreground">
+                  Statistics
                 </Link>
               </li>
               <li>
-                <Link href="/teams" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Teams
+                <Link href="/teams" className="text-muted-foreground hover:text-foreground">
+                  Teams
                 </Link>
               </li>
               <li>
-                <Link href="/matches" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Matches
+                <Link href="/matches" className="text-muted-foreground hover:text-foreground">
+                  Matches
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-xl mb-3 text-foreground">Resources</h3>
-              <div className="h-1 w-12 bg-gradient-to-r from-primary to-secondary rounded-full mb-4" />
-            </div>
-            <ul className="space-y-3">
+          <div>
+            <h3 className="font-bold text-lg mb-4">Resources</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/rules" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Rules
+                <Link href="/rules" className="text-muted-foreground hover:text-foreground">
+                  Rules
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → FAQ
+                <Link href="/faq" className="text-muted-foreground hover:text-foreground">
+                  FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Privacy Policy
+                <Link href="/privacy" className="text-muted-foreground hover:text-foreground">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/disclaimer" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Disclaimer
+                <Link href="/disclaimer" className="text-muted-foreground hover:text-foreground">
+                  Disclaimer
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Contact Us
+                <Link href="/contact" className="text-muted-foreground hover:text-foreground">
+                  Contact Us
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-bold text-xl mb-3 text-foreground">Admin</h3>
-              <div className="h-1 w-12 bg-gradient-to-r from-primary to-secondary rounded-full mb-4" />
-            </div>
-            <ul className="space-y-3">
+          <div>
+            <h3 className="font-bold text-lg mb-4">Admin</h3>
+            <ul className="space-y-2">
               <li>
-                <Link href="/admin" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Admin Panel
+                <Link href="/admin" className="text-muted-foreground hover:text-foreground">
+                  Admin Panel
                 </Link>
               </li>
               <li>
-                <Link href="/management" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Management Panel
+                <Link href="/management" className="text-muted-foreground hover:text-foreground">
+                  Management Panel
                 </Link>
               </li>
               {user && (
                 <li>
-                  <Link href="/dashboard" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                    → User Panel
+                  <Link href="/dashboard" className="text-muted-foreground hover:text-foreground">
+                    User Panel
                   </Link>
                 </li>
               )}
               <li>
-                <Link href="/login" className="text-muted-foreground hover:text-primary transition-colors duration-300 hover:translate-x-2 block">
-                  → Sign In
+                <Link href="/login" className="text-muted-foreground hover:text-foreground">
+                  Sign In
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-primary/20 mt-12 pt-8 text-center">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="h-0.5 w-20 bg-gradient-to-r from-transparent to-primary" />
-            <div className="h-2 w-2 bg-primary rounded-full" />
-            <div className="h-0.5 w-20 bg-gradient-to-r from-primary to-transparent" />
-          </div>
-          <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl mx-auto">
-            &copy; {currentYear} <span className="font-semibold text-primary">Secret Chel Society</span>. All rights reserved.
-            <br className="sm:hidden" /> In official partnership with <span className="font-semibold text-secondary">Midnight Studios</span>.
-            <br />This site is an independent entity and is not affiliated with or endorsed by EA Sports.
+        <div className="border-t mt-4 lg:mt-8 pt-4 lg:pt-8 text-center text-muted-foreground">
+          <p>
+            &copy; {currentYear} Secret Chel Society. All rights reserved.
+             In official partnership with Midnight Studios.
+            This site is an independent entity and is not affiliated with or endorsed by EA Sports.
           </p>
         </div>
       </div>

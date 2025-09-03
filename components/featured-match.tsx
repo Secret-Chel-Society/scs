@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
 import { Calendar, Clock } from "lucide-react"
-// import { motion } from "framer-motion" // Commented out to fix build issues
+import { motion } from "framer-motion"
 
 interface FeaturedMatchProps {
   match: {
@@ -87,7 +87,7 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Teams */}
             <div className="flex flex-1 items-center justify-center gap-4 md:gap-8">
-              <divdiv
+              <motion.div
                 className="flex flex-col items-center text-center"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -112,13 +112,13 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
                 >
                   {match.home_team.name}
                 </Link>
-              </divdiv>
+              </motion.div>
 
               <div className="text-center">
                 <div className="text-3xl font-bold mb-2">VS</div>
               </div>
 
-              <divdiv
+              <motion.div
                 className="flex flex-col items-center text-center"
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -143,7 +143,7 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
                 >
                   {match.away_team.name}
                 </Link>
-              </divdiv>
+              </motion.div>
             </div>
 
             {/* Match Info */}

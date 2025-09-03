@@ -2,17 +2,15 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Plus, Pin, AlertCircle, Users, Target, TrendingUp, Clock } from "lucide-react"
+import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Plus, Pin, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSupabase } from "@/lib/supabase/client"
 import { formatDistanceToNow } from "date-fns"
-// import { motion } from "framer-motion"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface ForumPost {
   id: string
@@ -203,21 +201,14 @@ export default function ForumPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-background pt-4">
-        <div className="relative z-10 container mx-auto px-4 py-12">
-          <div className="space-y-8">
-            <div className="text-center mb-12">
-              <Skeleton className="h-16 w-80 mx-auto mb-6" />
-              <Skeleton className="h-6 w-96 mx-auto" />
-            </div>
-            <div className="flex justify-center">
-              <Skeleton className="h-12 w-48" />
-            </div>
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-32 w-full rounded-2xl bg-white/10" />
-              ))}
-            </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-muted rounded w-1/2 mb-8"></div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 bg-muted rounded"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -225,234 +216,129 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
-      {/* Professional Hockey Forum Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 hockey-grid opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
-        
-        {/* Professional forum floating elements */}
-        <div
-          className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
-        />
-        <div
-          className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
-        />
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">SCS Forum</h1>
+          <p className="text-muted-foreground">Discuss hockey, strategies, and connect with the community</p>
+        </div>
+        <Button onClick={handleCreatePost}>
+          <Plus className="w-4 h-4 mr-2" />
+          New Post
+        </Button>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div
-          className="space-y-12"
-        >
-          {/* Enhanced Professional Forum Header */}
-          <div className="text-center mb-16">
-            <div 
-              className="inline-flex items-center gap-6 mb-8"
-            >
-              <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
-                <MessageSquare className="h-12 w-12 text-white relative z-10" />
-                <div className="absolute -inset-2 bg-gradient-to-br from-primary to-secondary rounded-2xl blur opacity-40" />
-              </div>
-              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
-                Championship Forum
-              </h1>
-            </div>
-            
-            <div className="flex items-center justify-center gap-6 mb-8">
-              <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
-              <div className="h-3 w-3 bg-primary rounded-full animate-pulse" />
-              <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
-            </div>
-            
-            <p 
-              className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
-            >
-              Discuss <span className="font-bold text-primary">hockey strategies</span> and connect with the Secret Chel Society <span className="font-semibold text-secondary">championship community</span>
-            </p>
-          </div>
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive mb-6">
+          <CardContent className="p-4 flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+            <span className="text-destructive">{error}</span>
+            <Button variant="outline" size="sm" onClick={() => fetchPosts(selectedCategory)} className="ml-auto">
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Enhanced Actions Section */}
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
-            <div
-              className="flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
-            >
-              <Users className="h-5 w-5 text-primary" />
-              <span className="text-white font-semibold">
-                {posts.length} Active Discussions
-              </span>
-            </div>
+      {/* Categories */}
+      <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="mb-8">
+        <TabsList>
+          <TabsTrigger value="all">All Posts</TabsTrigger>
+          {categories.map((category) => (
+            <TabsTrigger key={category.id} value={category.id}>
+              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }} />
+              {category.name}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-            <div
-            >
-              <Button 
-                onClick={handleCreatePost}
-                className="px-8 py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/90 text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                New Post
-              </Button>
+        <TabsContent value={selectedCategory} className="mt-6">
+          {isLoadingPosts ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-6">
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                      <div className="h-3 bg-muted rounded w-1/2"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </div>
+          ) : posts.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+                <p className="text-muted-foreground mb-4">Be the first to start a discussion!</p>
+                <Button onClick={handleCreatePost}>Create First Post</Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {posts.map((post) => (
+                <Card key={post.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {post.pinned && <Pin className="w-4 h-4 text-yellow-500" />}
+                          <Badge
+                            variant="secondary"
+                            style={{ backgroundColor: post.category?.color + "20", color: post.category?.color }}
+                          >
+                            {post.category?.name}
+                          </Badge>
+                        </div>
 
-          {/* Error Display */}
-          {error && (
-            <div
-            >
-              <Card className="border-destructive/50 bg-red-500/10 backdrop-blur-sm">
-                <CardContent className="p-6 flex items-center gap-3">
-                  <AlertCircle className="w-6 h-6 text-red-400" />
-                  <span className="text-red-400 font-medium">{error}</span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => fetchPosts(selectedCategory)} 
-                    className="ml-auto border-red-400/30 text-red-400 hover:bg-red-400/10"
-                  >
-                    Retry
-                  </Button>
-                </CardContent>
-              </Card>
+                        <Link href={`/forum/posts/${post.id}`}>
+                          <h3 className="text-xl font-semibold mb-2 hover:text-primary transition-colors cursor-pointer">
+                            {post.title}
+                          </h3>
+                        </Link>
+
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="w-6 h-6">
+                              <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
+                              <AvatarFallback>{getAvatarFallback(post.author)}</AvatarFallback>
+                            </Avatar>
+                            <span>{getDisplayName(post.author)}</span>
+                          </div>
+                          <span>•</span>
+                          <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+                        </div>
+
+                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Eye className="w-4 h-4" />
+                            <span>{post.views || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MessageSquare className="w-4 h-4" />
+                            <span>{post.comment_count || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <ThumbsUp className="w-4 h-4" />
+                            <span>{post.like_count || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <ThumbsDown className="w-4 h-4" />
+                            <span>{post.dislike_count || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
-
-          {/* Enhanced Categories */}
-          <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 mb-8">
-              <TabsTrigger 
-                value="all" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Target className="h-5 w-5 mr-2" />
-                All Posts
-              </TabsTrigger>
-              {categories.map((category) => (
-                <TabsTrigger 
-                  key={category.id} 
-                  value={category.id}
-                  className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-                >
-                  {category.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value={selectedCategory} className="mt-8">
-              {isLoadingPosts ? (
-                <div className="space-y-6">
-                  {[...Array(3)].map((_, i) => (
-                    <div
-                      key={i}
-                    >
-                      <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-                        <CardContent className="p-6">
-                          <div className="animate-pulse">
-                            <div className="h-4 bg-white/20 rounded w-3/4 mb-2"></div>
-                            <div className="h-3 bg-white/20 rounded w-1/2"></div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
-              ) : posts.length === 0 ? (
-                <div
-                >
-                  <Card className="bg-white/5 backdrop-blur-sm border-white/20">
-                    <CardContent className="p-12 text-center">
-                      <MessageSquare className="w-16 h-16 mx-auto mb-6 text-white/50" />
-                      <h3 className="text-2xl font-semibold text-white mb-3">No posts yet</h3>
-                      <p className="text-white/70 mb-6 text-lg">Be the first to start a discussion!</p>
-                      <Button 
-                        onClick={handleCreatePost}
-                        className="px-8 py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/90 text-white rounded-xl"
-                      >
-                        Create First Post
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {posts.map((post, index) => (
-                    <div
-                      key={post.id}
-                      className="group"
-                    >
-                      <Card className="bg-white/5 backdrop-blur-sm border-white/20 hover:border-primary/30 hover:bg-white/10 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-3">
-                                {post.pinned && (
-                                  <div className="flex items-center gap-2">
-                                    <Pin className="w-5 h-5 text-yellow-400" />
-                                    <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                                      Pinned
-                                    </Badge>
-                                  </div>
-                                )}
-                                <Badge
-                                  variant="secondary"
-                                  className="border-0"
-                                >
-                                  {post.category?.name}
-                                </Badge>
-                              </div>
-
-                              <Link href={`/forum/posts/${post.id}`}>
-                                <h3 className="text-xl font-semibold mb-3 hover:text-primary transition-colors cursor-pointer text-white group-hover:text-primary">
-                                  {post.title}
-                                </h3>
-                              </Link>
-
-                              <div className="flex items-center gap-4 text-sm text-white/70 mb-4">
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="w-7 h-7 border-2 border-white/20">
-                                    <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
-                                    <AvatarFallback className="bg-primary/20 text-primary font-semibold">
-                                      {getAvatarFallback(post.author)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="font-medium">{getDisplayName(post.author)}</span>
-                                </div>
-                                <span className="text-white/40">•</span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                                </span>
-                              </div>
-
-                              <div className="flex items-center gap-6 text-sm text-white/60">
-                                <div className="flex items-center gap-2">
-                                  <Eye className="h-4 w-4" />
-                                  <span>{post.views || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <MessageSquare className="h-4 w-4" />
-                                  <span>{post.comment_count || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <ThumbsUp className="h-4 w-4" />
-                                  <span>{post.like_count || 0}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <ThumbsDown className="h-4 w-4" />
-                                  <span>{post.dislike_count || 0}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

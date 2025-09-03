@@ -6,7 +6,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
-// import { motion } from "framer-motion" // Commented out to fix build issues
+import { motion } from "framer-motion"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock } from "lucide-react"
 
@@ -48,16 +48,16 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
           const isToday = new Date().toDateString() === matchDate.toDateString()
 
           return (
-            <CarouselItem key={game.id} className="md:basis-1/2 lg:basis-1/3 h-full">
+            <CarouselItem key={game.id} className="basis-full md:basis-1/2 lg:basis-1/3 h-full">
               <Link href={`/matches/${game.id}`}>
-                <div className="hover:translate-y-[-5px] transition-transform duration-300">
+                <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
                   <Card
                     className="h-full overflow-hidden border-2 transition-all duration-300"
                     style={{
                       borderColor: index === activeIndex ? "hsl(var(--primary))" : "hsl(var(--border))",
                     }}
                   >
-                    <CardContent className="flex flex-col items-center p-6">
+                    <CardContent className="flex flex-col items-center p-4 sm:p-6">
                       <div className="w-full flex justify-between items-center mb-4">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
@@ -113,7 +113,7 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </motion.div>
               </Link>
             </CarouselItem>
           )

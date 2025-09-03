@@ -3,9 +3,9 @@ import { NextResponse } from "next/server"
 // Toggle this when debugging locally
 const isDevelopment = process.env.NODE_ENV === "development"
 
-// ✅ Hardcoded production values
-const DISCORD_CLIENT_ID = "1407947416094900245"
-const DISCORD_CLIENT_SECRET = "d9zvMCTusY97n7yx2rXl8tzCyaFXUCZm"
+// Use environment variables for security
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1403504252508307476"
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "placeholder_secret"
 const SITE_URL = isDevelopment
   ? "http://localhost:3000"
   : "https://www.secretchelsociety.com"
