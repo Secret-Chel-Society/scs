@@ -7,15 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { 
-  Loader2, 
-  Search, 
-  GamepadIcon as GameController,
-  BarChart3,
-  Database,
-  Activity,
-  Zap
-} from "lucide-react"
+import { Loader2, Search, GamepadIcon as GameController } from "lucide-react"
 
 export default function EAStatsPage() {
   const { supabase, session } = useSupabase()
@@ -154,7 +146,7 @@ export default function EAStatsPage() {
         <div className="relative container mx-auto px-4 py-8">
           <div className="flex items-center gap-4 mb-6">
             <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
-              <BarChart3 className="h-8 w-8 text-white" />
+              <GameController className="h-8 w-8 text-white" />
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -202,7 +194,7 @@ export default function EAStatsPage() {
         <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <Database className="h-5 w-5" />
+              <GameController className="h-5 w-5" />
               Teams with EA Club IDs
             </CardTitle>
             <CardDescription className="text-white/70">
@@ -214,7 +206,7 @@ export default function EAStatsPage() {
               <div className="text-center py-8">
                 <div className="flex items-center justify-center mb-4">
                   <div className="p-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl">
-                    <Activity className="h-8 w-8 text-amber-400" />
+                    <GameController className="h-8 w-8 text-amber-400" />
                   </div>
                 </div>
                 <p className="text-white/50 mb-2">No teams with EA Club IDs found</p>
@@ -247,7 +239,7 @@ export default function EAStatsPage() {
                         variant="outline"
                         className="w-full border-white/20 text-white hover:bg-white/10 group/btn"
                       >
-                        <Zap className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
+                        <GameController className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform duration-200" />
                         View Stats
                       </Button>
                     </CardContent>

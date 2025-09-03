@@ -648,6 +648,86 @@ const ManagementPage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+                      {/* Team Salary */}
+                      <Card className="bg-slate-800 border-slate-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Team Salary</h3>
+                          <SalaryProgress
+                            current={currentTeamSalary}
+                            max={currentSalaryCap}
+                            projected={projectedSalary}
+                          />
+                        </CardContent>
+                      </Card>
+
+                      {/* Roster Size */}
+                      <Card className="bg-slate-800 border-slate-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
+                          <RosterProgress current={teamPlayers.length} max={15} projected={projectedRosterSize} />
+                        </CardContent>
+                      </Card>
+
+                      {/* Position Breakdown */}
+                      <Card className="bg-slate-800 border-slate-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">
+                            Position Breakdown
+                          </h3>
+                          <div className="grid grid-cols-3 gap-1 md:gap-2 text-xs md:text-sm">
+                            {/* Calculate position counts */}
+                            {(() => {
+                              const positions = {
+                                C: 0,
+                                LW: 0,
+                                RW: 0,
+                                LD: 0,
+                                RD: 0,
+                                G: 0,
+                              }
+
+                              teamPlayers.forEach((player) => {
+                                const pos = getPositionAbbreviation(player.users?.primary_position || "")
+                                if (positions.hasOwnProperty(pos)) {
+                                  positions[pos as keyof typeof positions]++
+                                }
+                              })
+
+                              return (
+                                <>
+                                  <div className="flex justify-between">
+                                    <span className="text-red-400 font-medium">C:</span>
+                                    <span className="text-white">{positions.C}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-green-400 font-medium">LW:</span>
+                                    <span className="text-white">{positions.LW}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-blue-400 font-medium">RW:</span>
+                                    <span className="text-white">{positions.RW}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-cyan-400 font-medium">LD:</span>
+                                    <span className="text-white">{positions.LD}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-yellow-400 font-medium">RD:</span>
+                                    <span className="text-white">{positions.RD}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-purple-400 font-medium">G:</span>
+                                    <span className="text-white">{positions.G}</span>
+                                  </div>
+                                </>
+                              )
+                            })()}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
                     <div className="flex flex-col sm:flex-row gap-2 md:gap-4 mb-4 md:mb-6">
                       <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4" />
@@ -782,57 +862,101 @@ const ManagementPage = () => {
               <TabsContent value="roster">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Team Roster</CardTitle>
-                    <CardDescription>Manage your team's players and roles</CardDescription>
+                    <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
+                      Manage your team's players and roles
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {teamPlayers.length > 0 ? (
-                      <div className="rounded-md border overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Player</TableHead>
-                              <TableHead className="text-center">Position</TableHead>
-                              <TableHead className="text-center">Role</TableHead>
-                              <TableHead className="text-center">Console</TableHead>
-                              <TableHead className="text-center">Salary</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {teamPlayers.map((player) => (
-                              <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
-                                <TableCell>
-                                  <div className="font-medium">{player.users?.gamer_tag_id || "Unknown Player"}</div>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <div className="flex items-center justify-center gap-1">
-                                    <span className={getPositionColor(player.users?.primary_position)}>
-                                      {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                      <>
+                        {/* Desktop Table */}
+                        <div className="hidden md:block rounded-md border overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Player</TableHead>
+                                <TableHead className="text-center">Position</TableHead>
+                                <TableHead className="text-center">Role</TableHead>
+                                <TableHead className="text-center">Console</TableHead>
+                                <TableHead className="text-center">Salary</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {teamPlayers.map((player) => (
+                                <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
+                                  <TableCell>
+                                    <div className="font-medium">{player.users?.gamer_tag_id || "Unknown Player"}</div>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-1">
+                                      <span className={getPositionColor(player.users?.primary_position)}>
+                                        {getPositionColor(player.users?.primary_position)}
+                                      </span>
+                                      {player.users?.secondary_position && (
+                                        <>
+                                          {" / "}
+                                          <span className={getPositionColor(player.users?.secondary_position)}>
+                                            {getPositionAbbreviation(player.users?.secondary_position)}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <Badge variant={player.role === "Owner" ? "default" : "outline"}>
+                                      {player.role}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
+                                  <TableCell className="text-center font-mono">
+                                    ${(player.salary / 1000000).toFixed(2)}M
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+
+                        {/* Mobile Cards */}
+                        <div className="md:hidden space-y-3">
+                          {teamPlayers.map((player) => (
+                            <div key={player.id} className="border rounded-lg p-4 bg-card">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-base">
+                                    {player.users?.gamer_tag_id || "Unknown Player"}
+                                  </h3>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span
+                                      className={`${getPositionColor(player.users?.primary_position)} text-sm font-medium`}
+                                    >
+                                      {getPositionColor(player.users?.primary_position || "Unknown")}
                                     </span>
                                     {player.users?.secondary_position && (
                                       <>
-                                        {" / "}
-                                        <span className={getPositionColor(player.users?.secondary_position)}>
+                                        <span className="text-muted-foreground text-sm">/</span>
+                                        <span
+                                          className={`${getPositionColor(player.users?.secondary_position)} text-sm font-medium`}
+                                        >
                                           {getPositionAbbreviation(player.users?.secondary_position)}
                                         </span>
                                       </>
                                     )}
                                   </div>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <Badge variant={player.role === "Owner" ? "default" : "outline"}>
-                                    {player.role}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
-                                <TableCell className="text-center font-mono">
-                                  ${(player.salary / 1000000).toFixed(2)}M
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
+                                </div>
+                                <Badge variant={player.role === "Owner" ? "default" : "outline"} className="text-xs">
+                                  {player.role}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                                <span>{player.users?.console || "Unknown"}</span>
+                                <span className="font-mono font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">No players on this team.</div>
                     )}
@@ -848,7 +972,7 @@ const ManagementPage = () => {
                   </CardHeader>
                   <CardContent>
                     {teamData ? (
-                      <TeamAvailabilityTab teamId={teamData.id} />
+                      <TeamAvailabilityTab teamId={teamData.id} teamName={teamData.name} />
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">Loading team data...</div>
                     )}
@@ -872,9 +996,76 @@ const ManagementPage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Team Schedule</CardTitle>
+                    <CardDescription>Upcoming and recent matches for {teamData?.name}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-8 text-muted-foreground">Schedule coming soon...</div>
+                    {teamMatches.length > 0 ? (
+                      <div className="space-y-4">
+                        {teamMatches.map((match) => {
+                          const isHomeTeam = match.home_team_id === teamData?.id
+                          const opponent = isHomeTeam ? match.away_team : match.home_team
+                          const matchDate = new Date(match.match_date)
+
+                          return (
+                            <div
+                              key={match.id}
+                              className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="text-center">
+                                  <div className="text-sm text-muted-foreground">{matchDate.toLocaleDateString()}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {isHomeTeam ? "HOME" : "AWAY"}
+                                  </Badge>
+                                  <span>vs {opponent?.name}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                {match.status === "Completed" ? (
+                                  <div className="text-right">
+                                    <div className="font-bold">
+                                      {isHomeTeam
+                                        ? `${match.home_score} - ${match.away_score}`
+                                        : `${match.away_score} - ${match.home_score}`}
+                                    </div>
+                                    <Badge
+                                      variant={
+                                        (isHomeTeam && match.home_score > match.away_score) ||
+                                        (!isHomeTeam && match.away_score > match.home_score)
+                                          ? "default"
+                                          : "destructive"
+                                      }
+                                    >
+                                      {(isHomeTeam && match.home_score > match.away_score) ||
+                                      (!isHomeTeam && match.away_score > match.home_score)
+                                        ? "WIN"
+                                        : "LOSS"}
+                                    </Badge>
+                                  </div>
+                                ) : (
+                                  <Badge variant="outline">{match.status}</Badge>
+                                )}
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link href={`/matches/${match.id}`}>View</Link>
+                                </Button>
+                                {match.status === "Scheduled" && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/management/lineups/${match.id}`}>Set Lineup</Link>
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">No matches scheduled.</div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

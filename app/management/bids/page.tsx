@@ -22,29 +22,17 @@ export default async function ManagementBidsPage() {
     .eq("user_id", session.user.id)
     .single()
 
-  // Also check user_roles table for admin or owner permissions
-  const { data: userRoles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", session.user.id)
-    .in("role", ["Admin", "Owner"])
-
-  const isPlayerManager = player?.team_id && ["Owner", "GM", "AGM"].includes(player?.role || "")
-  const hasManagementRole = userRoles && userRoles.length > 0
-
   // If user is not on a team or not a manager, redirect to home
-  if (!isPlayerManager && !hasManagementRole) {
+  if (!player?.team_id || !["Owner", "GM", "AGM"].includes(player?.role || "")) {
     redirect("/")
   }
-
-  const teamId = player?.team_id || "admin-override"
 
   return (
     <div className="container py-6">
       <PageHeader heading="Team Bids" text="Manage your team's active bids on free agents" />
 
       <div className="mt-6">
-        <TeamBids teamId={teamId} />
+        <TeamBids teamId={player.team_id} />
       </div>
 
       <div className="mt-8 p-4 bg-muted rounded-lg">

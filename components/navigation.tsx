@@ -301,13 +301,27 @@ export default function Navigation() {
                 </div>
               </div>
 
-              {/* Season Registration */}
-              {session && (
-                <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
-                  <div className="mb-3">
-                    <h3 className="text-lg font-bold text-white mb-1">Registration</h3>
-                    <p className="text-sm text-white/60">Join the season</p>
-                  </div>
+              {/* Registration */}
+              <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
+                <div className="mb-3">
+                  <h3 className="text-lg font-bold text-white mb-1">Registration</h3>
+                  <p className="text-sm text-white/60">Join the league</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/register"
+                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    Sign Up
+                  </Link>
                   
                   <Link
                     href="/register/season"
@@ -323,7 +337,7 @@ export default function Navigation() {
                     Season Registration
                   </Link>
                 </div>
-              )}
+              </div>
 
               {/* ELO System */}
               <div className="animate-slide-in" style={{ animationDelay: "500ms" }}>
@@ -591,28 +605,45 @@ export default function Navigation() {
                 </ul>
               </div>
 
-              {/* Season Registration */}
-              {session && (
-                <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
-                  <div className="mb-3">
-                    <h3 className="text-sm font-bold text-white mb-1">Registration</h3>
-                    <p className="text-xs text-white/60">Join the season</p>
-                  </div>
-                  
-                  <Link
-                    href="/register/season"
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                      pathname === "/register/season"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <UserPlus className="h-4 w-4" />
-                    <span className="truncate">Season Registration</span>
-                  </Link>
+              {/* Registration */}
+              <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-white mb-1">Registration</h3>
+                  <p className="text-xs text-white/60">Join the league</p>
                 </div>
-              )}
+                
+                <ul className="space-y-1">
+                  <li>
+                    <Link
+                      href="/register"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/register"
+                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      <span className="truncate">Sign Up</span>
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/register/season"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/register/season"
+                          ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      <span className="truncate">Season Registration</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
               {/* ELO System */}
               <div className="animate-slide-in" style={{ animationDelay: "500ms" }}>

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { ChevronLeft, ChevronRight, Users, Calendar, TrendingUp, AlertCircle, Activity, Clock, Filter } from "lucide-react"
+import { ChevronLeft, ChevronRight, Users, Calendar, TrendingUp, AlertCircle, Activity } from "lucide-react"
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, parseISO } from "date-fns"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -56,36 +56,9 @@ interface TeamAvailabilityData {
 
 const InjuryReservesManagement = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Activity className="h-8 w-8 text-orange-400" />
-            Injury Reserves Management
-          </h1>
-          <p className="text-white/70 text-lg">
-            Manage player injury reserve status and availability
-          </p>
-        </div>
-        
-        <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-400" />
-              Under Development
-            </CardTitle>
-            <CardDescription className="text-white/70">
-              This section is currently under development and will be available soon.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8">
-              <Activity className="h-16 w-16 text-orange-400/50 mx-auto mb-4" />
-              <p className="text-white/70">Injury reserves management features are coming soon.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+    <div>
+      <h2>Injury Reserves Management</h2>
+      <p>This section is under development.</p>
     </div>
   )
 }

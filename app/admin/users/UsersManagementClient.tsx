@@ -1,9 +1,11 @@
 "use client"
 
 import type React from "react"
+
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -39,34 +41,13 @@ import {
   Search,
   X,
   Download,
-  Crown,
-  Shield,
-  Gamepad2,
-  Calendar,
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  Zap,
-  Target,
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  Filter,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  UserPlus,
-  Settings,
-  Database,
-  Bot,
 } from "lucide-react"
 
 // Define valid player roles - these must match the database constraint
 const VALID_PLAYER_ROLES = ["Player", "GM", "AGM", "Owner"]
 
 // Update the roles array to match the database constraint
+// Replace the existing roles array with this one
 const roles = [
   { label: "Player", value: "Player" },
   { label: "GM", value: "GM" },
@@ -109,10 +90,6 @@ const consoles = [
 
 const userRoleSchema = z.object({
   userId: z.string().uuid(),
-  gamer_tag_id: z.string().min(3, "Gamer tag must be at least 3 characters"),
-  primary_position: z.string().min(1, "Please select a primary position"),
-  secondary_position: z.string().optional(),
-  console: z.string().min(1, "Please select a console"),
   roles: z.array(z.string()).min(1, "Select at least one role"),
 })
 
@@ -122,7 +99,7 @@ const newUserSchema = z.object({
   primary_position: z.string().min(1, "Please select a primary position"),
   secondary_position: z.string().optional(),
   console: z.string().min(1, "Please select a console"),
-  roles: z.array(z.string()).min(1, "Select at least one role"),
+  salary: z.number().min(0, "Salary must be non-negative"),
 })
 
 const teamAssignmentSchema = z.object({
@@ -282,10 +259,6 @@ export default function UsersManagementClient() {
     resolver: zodResolver(userRoleSchema),
     defaultValues: {
       userId: "",
-      gamer_tag_id: "",
-      primary_position: "",
-      secondary_position: "",
-      console: "",
       roles: [],
     },
   })
@@ -298,7 +271,7 @@ export default function UsersManagementClient() {
       primary_position: "",
       secondary_position: "",
       console: "",
-      roles: ["Player"],
+      salary: 0,
     },
   })
 
@@ -657,32 +630,13 @@ export default function UsersManagementClient() {
       const { error: userError } = await supabase
         .from("users")
         .update({
-          gamer_tag_id: values.gamer_tag_id,
-          primary_position: values.primary_position,
-          secondary_position: values.secondary_position === "none" ? null : values.secondary_position,
-          console: values.console,
+          roles: values.roles,
           updated_at: new Date().toISOString(),
         })
         .eq("id", values.userId)
 
       if (userError) {
         throw userError
-      }
-
-      // Update any season registrations for this user
-      const { error: regError } = await supabase
-        .from("season_registrations")
-        .update({
-          gamer_tag: values.gamer_tag_id,
-          primary_position: values.primary_position,
-          secondary_position: values.secondary_position === "none" ? null : values.secondary_position,
-          console: values.console,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", values.userId)
-
-      if (regError) {
-        console.warn("Could not update season registrations:", regError)
       }
 
       // Update user roles
@@ -715,7 +669,7 @@ export default function UsersManagementClient() {
 
       toast({
         title: "User updated",
-        description: `User ${values.gamer_tag_id} has been updated successfully.`,
+        description: `User ${values.userId} has been updated successfully.`,
       })
 
       // Refresh the user list
@@ -923,7 +877,7 @@ export default function UsersManagementClient() {
                   onClick={() => setNewUserDialogOpen(true)}
                   className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                 >
-                  <UserPlus className="mr-2 h-4 w-4" />
+                  <UserCog className="mr-2 h-4 w-4" />
                   Add User
                 </Button>
                 <Button 
@@ -1247,15 +1201,11 @@ export default function UsersManagementClient() {
                                     // Initialize form values
                                     form.setValue("userId", user.id)
                                     form.setValue("roles", user.roles || [])
-                                    form.setValue("gamer_tag_id", user.gamer_tag_id || "")
-                                    form.setValue("primary_position", user.primary_position || "")
-                                    form.setValue("secondary_position", user.secondary_position || "")
-                                    form.setValue("console", user.console || "")
                                     setUserEditDialogOpen(true)
                                   }}
                                   className="text-white/70 hover:text-white hover:bg-white/10"
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <UserCog className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -1380,124 +1330,40 @@ export default function UsersManagementClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="gamer_tag_id"
+                  name="roles"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-white">Gamer Tag</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          className="bg-slate-800/50 border-white/20 text-white"
-                          disabled={submitting}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="console"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Console</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={submitting}>
-                        <FormControl>
-                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                            <SelectValue placeholder="Select console" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-slate-800 border-white/20">
-                          {consoles.map((console) => (
-                            <SelectItem key={console.value} value={console.value} className="text-white hover:bg-slate-700">
-                              {console.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="primary_position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Primary Position</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={submitting}>
-                        <FormControl>
-                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                            <SelectValue placeholder="Select primary position" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-slate-800 border-white/20">
-                          {positions.map((position) => (
-                            <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
-                              {position.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="secondary_position"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-white">Secondary Position (Optional)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || "none"} disabled={submitting}>
-                        <FormControl>
-                          <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                            <SelectValue placeholder="Select secondary position" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-slate-800 border-white/20">
-                          <SelectItem value="none" className="text-white hover:bg-slate-700">None</SelectItem>
-                          {positions.map((position) => (
-                            <SelectItem key={position.value} value={position.value} className="text-white hover:bg-slate-700">
-                              {position.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel className="text-white">Roles</FormLabel>
+                      <div className="grid grid-cols-2 gap-2">
+                        {validRoles.map((role) => (
+                          <div key={role.value} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`role-${role.value}`}
+                              checked={selectedRoles.includes(role.value)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedRoles([...selectedRoles, role.value])
+                                } else {
+                                  setSelectedRoles(selectedRoles.filter((r) => r !== role.value))
+                                }
+                              }}
+                              disabled={submitting}
+                            />
+                            <label
+                              htmlFor={`role-${role.value}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
+                            >
+                              {role.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
               
-              <div className="space-y-3">
-                <FormLabel className="text-white">Roles</FormLabel>
-                <div className="grid grid-cols-2 gap-2">
-                  {validRoles.map((role) => (
-                    <div key={role.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`role-${role.value}`}
-                        checked={selectedRoles.includes(role.value)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedRoles([...selectedRoles, role.value])
-                          } else {
-                            setSelectedRoles(selectedRoles.filter((r) => r !== role.value))
-                          }
-                        }}
-                        disabled={submitting}
-                      />
-                      <label
-                        htmlFor={`role-${role.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white"
-                      >
-                        {role.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               <DialogFooter>
                 <Button 
                   type="submit" 
@@ -1699,6 +1565,27 @@ export default function UsersManagementClient() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={newUserForm.control}
+                name="salary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Salary</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number"
+                        min="0"
+                        max="15000000"
+                        className="bg-slate-800/50 border-white/20 text-white"
+                        disabled={submitting}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

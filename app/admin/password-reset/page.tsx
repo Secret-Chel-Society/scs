@@ -2,25 +2,17 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useSupabase } from "@/lib/supabase/client"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, AlertCircle, CheckCircle2, ShieldAlert, ArrowLeft } from "lucide-react"
+import { Loader2, AlertCircle, CheckCircle2, ShieldAlert } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Skeleton } from "@/components/ui/skeleton"
-import Link from "next/link"
 
 export default function AdminPasswordResetPage() {
-  const { supabase, session } = useSupabase()
   const { toast } = useToast()
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -28,55 +20,6 @@ export default function AdminPasswordResetPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Check if user is admin
-  useEffect(() => {
-    async function checkAuthAndLoadData() {
-      if (!session?.user) {
-        toast({
-          title: "Unauthorized",
-          description: "You must be logged in to access this page.",
-          variant: "destructive",
-        })
-        router.push("/login")
-        return
-      }
-
-      try {
-        setLoading(true)
-
-        // Check for Admin role
-        const { data: adminRoleData, error: adminRoleError } = await supabase
-          .from("user_roles")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .eq("role", "Admin")
-
-        if (adminRoleError || !adminRoleData || adminRoleData.length === 0) {
-          toast({
-            title: "Access denied",
-            description: "You don't have permission to access the admin panel.",
-            variant: "destructive",
-          })
-          router.push("/")
-          return
-        }
-
-        setIsAdmin(true)
-      } catch (error: any) {
-        console.error("Error checking authorization:", error)
-        toast({
-          title: "Error",
-          description: error.message || "An error occurred",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuthAndLoadData()
-  }, [supabase, session, toast, router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -140,34 +83,11 @@ export default function AdminPasswordResetPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <Skeleton className="h-8 w-64 mb-4" />
-          <Skeleton className="h-4 w-96 mb-8" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <Skeleton className="h-8 w-64" />
-        </div>
-      </div>
-    )
-  }
-
   if (isSuccess) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto">
           <div className="flex items-center gap-2 mb-6">
-            <ArrowLeft className="h-5 w-5 text-muted-foreground" />
             <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
               Back to Admin Dashboard
             </Link>
@@ -203,7 +123,6 @@ export default function AdminPasswordResetPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-md mx-auto">
         <div className="flex items-center gap-2 mb-6">
-          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
             Back to Admin Dashboard
           </Link>

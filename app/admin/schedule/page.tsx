@@ -5,24 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { format, parse } from "date-fns"
-import { 
-  Calendar, 
-  Clock, 
-  Edit, 
-  Plus, 
-  Trash2, 
-  AlertCircle, 
-  Download, 
-  Upload, 
-  FileUp,
-  CalendarDays,
-  Settings,
-  Database,
-  AlertTriangle,
-  Trophy,
-  Users,
-  Activity
-} from "lucide-react"
+import { Calendar, Clock, Edit, Plus, Trash2, AlertCircle, Download, Upload, FileUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -44,8 +27,6 @@ import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 
 // Define match status type based on database constraints
 type MatchStatus = "Scheduled" | "In Progress" | "Completed" | "Postponed" | "Cancelled"
@@ -1368,7 +1349,7 @@ export default function AdminSchedulePage() {
         <div className="relative container mx-auto px-4 py-8">
           <div className="flex items-center gap-4 mb-6">
             <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl">
-              <CalendarDays className="h-8 w-8 text-white" />
+              <Calendar className="h-8 w-8 text-white" />
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -1423,7 +1404,7 @@ export default function AdminSchedulePage() {
           <Card className="mb-6 bg-gradient-to-br from-red-500/10 to-red-600/10 border-red-500/20">
             <CardContent className="pt-6">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-red-400 mt-0.5" />
                 <div className="flex-1">
                   <h3 className="font-semibold text-red-400 mb-2">Season Error</h3>
                   <p className="text-red-300/80">{seasonError}</p>

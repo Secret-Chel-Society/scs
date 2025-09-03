@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { Loader2, Search, Activity, ArrowLeft, Gamepad2 } from "lucide-react"
+import { Loader2, Search, Activity } from "lucide-react"
 import Link from "next/link"
 
 export default function EAMatchesPage() {
@@ -146,7 +146,6 @@ export default function EAMatchesPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
         <div className="relative container mx-auto px-4 py-8">
           <div className="flex items-center gap-2 mb-6">
-            <ArrowLeft className="h-5 w-5 text-white/70" />
             <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
               Back to Admin Dashboard
             </Link>
@@ -154,7 +153,7 @@ export default function EAMatchesPage() {
 
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
-              <Gamepad2 className="h-8 w-8 text-blue-400" />
+              <Search className="h-8 w-8 text-blue-400" />
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -233,7 +232,7 @@ export default function EAMatchesPage() {
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-lg text-white">{team.name}</CardTitle>
                       <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg group-hover:scale-110 transition-transform duration-200">
-                        <Gamepad2 className="h-5 w-5 text-blue-400" />
+                        <Search className="h-5 w-5 text-blue-400" />
                       </div>
                     </CardHeader>
                     <CardContent>

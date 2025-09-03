@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trophy, Medal, Trash2, Plus, Pencil, ArrowLeft } from "lucide-react"
+import { Trophy, Medal, Trash2, Plus, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -652,7 +652,6 @@ export default function AdminAwardsPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
         <div className="relative container mx-auto px-4 py-8">
           <div className="flex items-center gap-2 mb-6">
-            <ArrowLeft className="h-5 w-5 text-white/70" />
             <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
               Back to Admin Dashboard
             </Link>

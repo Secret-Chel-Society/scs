@@ -19,25 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { 
-  Loader2, 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  Search, 
-  RefreshCw, 
-  AlertTriangle, 
-  Eye, 
-  EyeOff,
-  Users,
-  Trophy,
-  Settings,
-  Database,
-  Shield,
-  Activity,
-  MapPin,
-  Target
-} from "lucide-react"
+import { Loader2, Plus, Pencil, Trash2, Search, RefreshCw, AlertTriangle, Eye, EyeOff } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { DirectColumnMigration } from "@/components/admin/direct-column-migration"
 import { TeamsActiveMigration } from "@/components/admin/teams-active-migration"
@@ -45,7 +27,6 @@ import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
 import { getCurrentSeasonId } from "@/lib/team-utils"
-import { CONFERENCES, type ConferenceType } from "@/lib/standings-calculator"
 
 interface Season {
   id: number
@@ -72,7 +53,6 @@ interface Team {
   powerplay_opportunities?: number
   penalty_kill_goals_against?: number
   penalty_kill_opportunities?: number
-  conference?: string
 }
 
 interface EATeam {
@@ -99,7 +79,6 @@ export default function AdminTeamsPage() {
     season_id: 1,
     ea_club_id: "",
     is_active: true,
-    conference: "" as ConferenceType | "",
   })
   const [seasons, setSeasons] = useState<Season[]>([])
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
@@ -357,7 +336,7 @@ export default function AdminTeamsPage() {
   }
 
   // Update team conference
-  const updateTeamConference = async (teamId: string, conference: ConferenceType) => {
+  const updateTeamConference = async (teamId: string, conference: string) => {
     try {
       setIsUpdatingConference(true)
       
@@ -393,8 +372,8 @@ export default function AdminTeamsPage() {
 
   // Get conference statistics
   const getConferenceStats = () => {
-    const easternTeams = teams.filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
-    const westernTeams = teams.filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
+    const easternTeams = teams.filter(team => team.conference === "Eastern Elites")
+    const westernTeams = teams.filter(team => team.conference === "Western Warriors")
     const unassignedTeams = teams.filter(team => !team.conference || team.conference === "")
 
     return {
@@ -574,7 +553,6 @@ export default function AdminTeamsPage() {
       season_id: selectedSeason || 1,
       ea_club_id: "",
       is_active: true,
-      conference: "",
     })
   }
 
@@ -587,7 +565,6 @@ export default function AdminTeamsPage() {
       season_id: team.season_id,
       ea_club_id: team.ea_club_id || "",
       is_active: team.is_active !== false, // Default to true if undefined
-      conference: team.conference || "",
     })
   }
 
@@ -930,7 +907,7 @@ export default function AdminTeamsPage() {
                         {team.conference && (
                           <Badge 
                             variant="outline" 
-                            className={team.conference === CONFERENCES.EASTERN_ELITES 
+                            className={team.conference === "Eastern Elites" 
                               ? "border-blue-500/30 text-blue-400" 
                               : "border-purple-500/30 text-purple-400"
                             }
@@ -941,15 +918,15 @@ export default function AdminTeamsPage() {
                       </div>
                       <Select
                         value={team.conference || ""}
-                        onValueChange={(value) => updateTeamConference(team.id, value as ConferenceType)}
+                        onValueChange={(value) => updateTeamConference(team.id, value)}
                         disabled={isUpdatingConference}
                       >
                         <SelectTrigger className="w-48 bg-slate-800/50 border-white/20 text-white">
                           <SelectValue placeholder="Select conference" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={CONFERENCES.EASTERN_ELITES}>Eastern Elites</SelectItem>
-                          <SelectItem value={CONFERENCES.WESTERN_WARRIORS}>Western Warriors</SelectItem>
+                          <SelectItem value="Eastern Elites">Eastern Elites</SelectItem>
+                          <SelectItem value="Western Warriors">Western Warriors</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

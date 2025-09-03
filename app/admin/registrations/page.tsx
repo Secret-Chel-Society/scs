@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit, ArrowLeft } from "lucide-react"
+import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -478,7 +478,6 @@ export default function RegistrationsPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
         <div className="relative container mx-auto px-4 py-8">
           <div className="flex items-center gap-2 mb-6">
-            <ArrowLeft className="h-5 w-5 text-white/70" />
             <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
               Back to Admin Dashboard
             </Link>
