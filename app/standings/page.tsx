@@ -1,6 +1,4 @@
-"use client"
-
-import { Suspense, useState, useEffect } from "react"
+import { Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import TeamStandings from "@/components/team-standings"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { motion } from "framer-motion"
 import { Trophy, Target, TrendingUp, Award, Medal, Star, Zap, Users, TrendingDown, ArrowUp, ArrowDown, Minus } from "lucide-react"
 
 interface StandingsPageProps {
@@ -51,11 +48,7 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
 
   return (
     <div className="space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <div>
         <Card className="hockey-card hockey-card-hover">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3">
@@ -75,11 +68,8 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
           <CardContent>
             <div className="grid gap-3">
               {playoffTeams.map((team, index) => (
-                <motion.div
+                <div
                   key={team.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
                   className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-assist-green-50 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-800/20 border border-assist-green-200 dark:border-assist-green-700 hover:shadow-lg hover:shadow-assist-green-500/20 transition-all duration-200"
                 >
                   <div className="flex items-center gap-4">
@@ -116,19 +106,15 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
       {bubbleTeams.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
+        <div>
           <Card className="hockey-card hockey-card-hover">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3">
@@ -148,11 +134,8 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
             <CardContent>
               <div className="grid gap-3">
                 {bubbleTeams.map((team, index) => (
-                  <motion.div
+                  <div
                     key={team.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
                     className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/20 dark:to-goal-red-800/20 border border-goal-red-200 dark:border-goal-red-700 hover:shadow-lg hover:shadow-goal-red-500/20 transition-all duration-200"
                   >
                     <div className="flex items-center gap-4">
@@ -197,12 +180,12 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
     </div>
   )
@@ -224,11 +207,7 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-2">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <div>
         <Card className="hockey-card hockey-card-hover h-full">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3">
@@ -249,13 +228,9 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
             <TeamStandings teams={conference1Teams} />
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
+      <div>
         <Card className="hockey-card hockey-card-hover h-full">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-3">
@@ -276,7 +251,7 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
             <TeamStandings teams={conference2Teams} />
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   )
 }
@@ -336,7 +311,7 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
         </TabsTrigger>
         <TabsTrigger 
           value="playoffs" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
         >
           <Trophy className="h-4 w-4 mr-2" />
           Playoff Picture
@@ -344,11 +319,7 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
       </TabsList>
 
       <TabsContent value="overall" className="space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div>
           <Card className="hockey-card hockey-card-hover">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center gap-3">
@@ -383,7 +354,7 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
               <TeamStandings teams={standings} />
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </TabsContent>
 
       <TabsContent value="conference" className="space-y-8">
@@ -406,11 +377,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
       {/* Hero Header Section */}
       <div className="hockey-header relative py-16 px-4">
         <div className="container mx-auto text-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
+          <div>
             <h1 className="hockey-title mb-6">
               League Standings
             </h1>
@@ -433,21 +400,17 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                 </SelectContent>
               </Select>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
+        <div>
           <Suspense fallback={<StandingsLoadingSkeleton />}>
             <StandingsContent seasonId={selectedSeasonId} />
           </Suspense>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

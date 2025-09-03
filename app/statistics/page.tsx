@@ -1751,111 +1751,266 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
-          <p className="text-muted-foreground">View comprehensive player statistics across all seasons</p>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Hero Header Section */}
+      <div className="hockey-header relative py-16 px-4">
+        <div className="container mx-auto text-center">
+          <div>
+            <h1 className="hockey-title mb-6">
+              Player Statistics
+            </h1>
+            <p className="hockey-subtitle mb-8">
+              Comprehensive player performance data across all seasons and positions
+            </p>
+            
+            {/* Stats Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
+              <div className="hockey-stat-item bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/20">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg mb-3 mx-auto w-fit">
+                  <div className="h-6 w-6 text-white">📊</div>
+                </div>
+                <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                  {totalPlayers.length + goalieStats.length}
+                </div>
+                <div className="text-xs text-ice-blue-600 dark:text-ice-blue-400 font-medium uppercase tracking-wide">
+                  Total Players
+                </div>
+              </div>
+              
+              <div className="hockey-stat-item bg-gradient-to-br from-assist-green-100 to-assist-green-200 dark:from-assist-green-900/30 dark:to-assist-green-800/20">
+                <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg mb-3 mx-auto w-fit">
+                  <div className="h-6 w-6 text-white">🎯</div>
+                </div>
+                <div className="text-2xl font-bold text-assist-green-700 dark:text-assist-green-300">
+                  {forwards.length}
+                </div>
+                <div className="text-xs text-assist-green-600 dark:text-assist-green-400 font-medium uppercase tracking-wide">
+                  Forwards
+                </div>
+              </div>
+              
+              <div className="hockey-stat-item bg-gradient-to-br from-rink-blue-100 to-rink-blue-200 dark:from-rink-blue-900/30 dark:to-rink-blue-800/20">
+                <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg mb-3 mx-auto w-fit">
+                  <div className="h-6 w-6 text-white">🛡️</div>
+                </div>
+                <div className="text-2xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
+                  {defensemen.length}
+                </div>
+                <div className="text-xs text-rink-blue-600 dark:text-rink-blue-400 font-medium uppercase tracking-wide">
+                  Defensemen
+                </div>
+              </div>
+              
+              <div className="hockey-stat-item bg-gradient-to-br from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/20">
+                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg mb-3 mx-auto w-fit">
+                  <div className="h-6 w-6 text-white">🥅</div>
+                </div>
+                <div className="text-2xl font-bold text-goal-red-700 dark:text-goal-red-300">
+                  {goalieStats.length}
+                </div>
+                <div className="text-xs text-goal-red-600 dark:text-goal-red-400 font-medium uppercase tracking-wide">
+                  Goalies
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select season" />
-              </SelectTrigger>
-              <SelectContent>
-                {seasons.map((season) => (
-                  <SelectItem key={season.id} value={season.id.toString()}>
-                    {season.name || `Season ${season.number || season.id}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="space-y-8">
+          {/* Filters */}
+          <Card className="hockey-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg">
+                  <div className="h-6 w-6 text-white">⚙️</div>
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    Filters & Settings
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                    Customize your statistics view
+                  </div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 mb-2 block">
+                    Season
+                  </label>
+                  <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
+                    <SelectTrigger className="hockey-search">
+                      <SelectValue placeholder="Select season" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons.map((season) => (
+                        <SelectItem key={season.id} value={season.id.toString()}>
+                          {season.name || `Season ${season.number || season.id}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <div className="flex-1">
-            <Select value={selectedWeek} onValueChange={handleWeekChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select week" />
-              </SelectTrigger>
-              <SelectContent>
-                {SEASON_1_WEEKS.map((week) => (
-                  <SelectItem key={week.id} value={week.id}>
-                    {week.displayName || week.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                <div>
+                  <label className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 mb-2 block">
+                    Week
+                  </label>
+                  <Select value={selectedWeek} onValueChange={handleWeekChange}>
+                    <SelectTrigger className="hockey-search">
+                      <SelectValue placeholder="Select week" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SEASON_1_WEEKS.map((week) => (
+                        <SelectItem key={week.id} value={week.id}>
+                          {week.displayName || week.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <div className="flex-1">
-            <Select value={selectedTeam} onValueChange={handleTeamChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select team" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Teams</SelectItem>
-                {teams.map((team) => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+                <div>
+                  <label className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 mb-2 block">
+                    Team
+                  </label>
+                  <Select value={selectedTeam} onValueChange={handleTeamChange}>
+                    <SelectTrigger className="hockey-search">
+                      <SelectValue placeholder="Select team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Teams</SelectItem>
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Statistics Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+              <TabsTrigger 
+                value="total" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+              >
+                📊 Total
+              </TabsTrigger>
+              <TabsTrigger 
+                value="offense" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+              >
+                🎯 Offense
+              </TabsTrigger>
+              <TabsTrigger 
+                value="defense" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+              >
+                🛡️ Defense
+              </TabsTrigger>
+              <TabsTrigger 
+                value="goalies" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+              >
+                🥅 Goalies
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="total" className="space-y-4 mt-6">
+              <Card className="hockey-card hockey-card-hover">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                      <div className="h-6 w-6 text-white">📊</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        All Players
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Combined statistics for all skaters (excludes goalies)
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="offense" className="space-y-4 mt-6">
+              <Card className="hockey-card hockey-card-hover">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                      <div className="h-6 w-6 text-white">🎯</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Forwards
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Statistics for centers, left wings, and right wings
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="defense" className="space-y-4 mt-6">
+              <Card className="hockey-card hockey-card-hover">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                      <div className="h-6 w-6 text-white">🛡️</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Defensemen
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Statistics for left and right defensemen
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="goalies" className="space-y-4 mt-6">
+              <Card className="hockey-card hockey-card-hover">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                      <div className="h-6 w-6 text-white">🥅</div>
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Goalies
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Statistics for goaltenders
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
-
-        {/* Statistics Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="total">Total</TabsTrigger>
-            <TabsTrigger value="offense">Offense</TabsTrigger>
-            <TabsTrigger value="defense">Defense</TabsTrigger>
-            <TabsTrigger value="goalies">Goalies</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="total" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>All Players</CardTitle>
-                <CardDescription>Combined statistics for all skaters (excludes goalies)</CardDescription>
-              </CardHeader>
-              <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="offense" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Forwards</CardTitle>
-                <CardDescription>Statistics for centers, left wings, and right wings</CardDescription>
-              </CardHeader>
-              <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="defense" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Defensemen</CardTitle>
-                <CardDescription>Statistics for left and right defensemen</CardDescription>
-              </CardHeader>
-              <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="goalies" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Goalies</CardTitle>
-                <CardDescription>Statistics for goaltenders</CardDescription>
-              </CardHeader>
-              <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   )
