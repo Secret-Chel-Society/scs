@@ -59,7 +59,7 @@ export default function AdminPhotosPage() {
 
           <TabsContent value="logos" className="space-y-4">
             <LogoManager />
-          </TabsTrigger>
+          </TabsContent>
         </Tabs>
       </div>
     </AdminProtected>
