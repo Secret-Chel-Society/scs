@@ -1,6 +1,31 @@
 import { Suspense } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { motion } from "framer-motion"
+import { 
+  Calendar, 
+  Clock, 
+  TrendingUp, 
+  Star, 
+  Trophy, 
+  Users, 
+  Award, 
+  Activity,
+  BarChart3,
+  Coins,
+  Gift,
+  Heart,
+  Flame,
+  Lightning,
+  Zap,
+  Target,
+  Crown,
+  Medal,
+  Shield,
+  Gamepad2
+} from "lucide-react"
 import DailyRecapDisplay from "@/components/shared/daily-recap-display"
 import { createClient } from "@supabase/supabase-js"
 
@@ -118,17 +143,65 @@ async function DailyRecapContent() {
 
 export default function DailyRecapPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Daily Recap</h1>
-        <p className="text-muted-foreground mt-2">
-          Comprehensive AI-powered analysis of recent matches and team performances
-        </p>
+    <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-hockey-green/20 via-hockey-blue/20 to-hockey-green/20 border-b border-hockey-green/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-hockey-green/5 to-transparent" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-hockey-green/10 rounded-full -translate-y-16 translate-x-16" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-blue/10 rounded-full translate-y-12 -translate-x-12" />
+        
+        <div className="relative container mx-auto px-4 py-16">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-xl">
+                <Calendar className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold hockey-gradient-text">Daily Recap</h1>
+            </div>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+              Stay updated with the latest highlights, statistics, and stories from the Secret Chel Society. 
+              Your daily dose of SCS action and insights.
+            </p>
+            <div className="h-1 w-32 bg-gradient-to-r from-hockey-green to-transparent rounded-full mx-auto" />
+          </motion.div>
+        </div>
       </div>
 
-      <Suspense fallback={<LoadingSkeleton />}>
-        <DailyRecapContent />
-      </Suspense>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Today's Highlights</h2>
+              <p className="text-muted-foreground">Comprehensive AI-powered analysis of recent matches and team performances</p>
+            </div>
+            <div className="flex gap-2">
+              <Button className="btn-ice" variant="outline">
+                <Calendar className="h-4 w-4 mr-2" />
+                View Archive
+              </Button>
+              <Button className="btn-championship">
+                <Share2 className="h-4 w-4 mr-2" />
+                Share Recap
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+        <Suspense fallback={<LoadingSkeleton />}>
+          <DailyRecapContent />
+        </Suspense>
+      </div>
     </div>
   )
 }

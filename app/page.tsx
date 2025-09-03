@@ -1,8 +1,6 @@
 "use client"
 
-import React from "react"
-
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import NewsCard from "@/components/news-card"
@@ -44,7 +42,7 @@ import { BannedUserModal } from "@/components/auth/banned-user-modal"
 // Animated counter component
 function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
   const [count, setCount] = useState(0)
-  const ref = React.useRef(null)
+  const ref = useRef(null)
   const isInView = useInView(ref)
 
   useEffect(() => {
@@ -75,7 +73,7 @@ function FloatingParticles() {
       {[...Array(30)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 bg-primary/30 rounded-full"
+          className="absolute w-1 h-1 bg-hockey-blue/30 rounded-full"
           initial={{
             x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
             y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
@@ -280,7 +278,7 @@ export default function Home() {
   }, [supabase, toast])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10">
       <BannedUserModal />
       <FloatingParticles />
 
@@ -290,21 +288,21 @@ export default function Home() {
 
         {/* Hockey-themed animated overlay elements */}
         <motion.div
-          className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
+          className="absolute top-20 right-10 w-20 h-20 border-2 border-hockey-blue/30 rounded-full flex items-center justify-center"
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         >
-          <Gamepad2 className="h-8 w-8 text-primary/50" />
+          <Gamepad2 className="h-8 w-8 text-hockey-blue/50" />
         </motion.div>
         <motion.div
-          className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
+          className="absolute bottom-20 left-10 w-16 h-16 bg-hockey-gold/20 rounded-lg flex items-center justify-center"
           animate={{ y: [-10, 10, -10] }}
           transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >
-          <Trophy className="h-8 w-8 text-primary/50" />
+          <Trophy className="h-8 w-8 text-hockey-gold/50" />
         </motion.div>
         <motion.div
-          className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-blue-500/20 to-red-500/20 rounded-full"
+          className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-hockey-blue/20 to-hockey-purple/20 rounded-full"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
         />
@@ -319,14 +317,14 @@ export default function Home() {
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="font-semibold text-base sm:text-lg px-8 py-3">
+            <Button asChild size="lg" className="btn-championship">
               <Link href="/register/season">Season 1 Signup</Link>
             </Button>
             <Button
               variant="outline"
               size="lg"
               asChild
-              className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground hover:bg-background/50 font-semibold text-base sm:text-lg px-8 py-3"
+              className="btn-ice"
             >
               <Link href="/matches">View Matches</Link>
             </Button>
@@ -342,12 +340,13 @@ export default function Home() {
         transition={{ duration: 0.8 }}
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <Card className="backdrop-blur-md bg-background/90 border-primary/20 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
+          <Card className="enhanced-card">
+            <div className="absolute inset-0 bg-gradient-to-r from-hockey-blue/5 via-transparent to-hockey-purple/5" />
             <CardContent className="relative p-4 lg:p-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">SCS League Statistics</h2>
-                <p className="text-muted-foreground">Real-time data from our advanced tracking system</p>
+                <h2 className="section-title">SCS League Statistics</h2>
+                <p className="section-subtitle">Real-time data from our advanced tracking system</p>
+                <div className="section-divider" />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
                 {[
@@ -355,28 +354,28 @@ export default function Home() {
                     icon: Users,
                     label: "Active Players",
                     value: stats.totalPlayers,
-                    color: "text-blue-500",
+                    color: "text-hockey-blue",
                     desc: "Registered competitors",
                   },
                   {
                     icon: Trophy,
                     label: "Teams",
                     value: stats.totalTeams,
-                    color: "text-green-500",
+                    color: "text-hockey-green",
                     desc: "Active franchises",
                   },
                   {
                     icon: Calendar,
                     label: "Matches Played",
                     value: stats.totalMatches,
-                    color: "text-purple-500",
+                    color: "text-hockey-purple",
                     desc: "Total games tracked",
                   },
                   {
                     icon: TrendingUp,
                     label: "Completed Trades",
                     value: stats.completedTrades,
-                    color: "text-orange-500",
+                    color: "text-hockey-orange",
                     desc: "Completed transactions",
                   },
                 ].map((stat, index) => (
@@ -416,16 +415,14 @@ export default function Home() {
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="text-center mb-12">
+        <div className="section-header">
           <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-primary to-primary/60 rounded-xl">
+            <div className="p-3 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl">
               <Crown className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              About SCS
-            </h2>
+            <h2 className="section-title">About SCS</h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mb-6" />
+          <div className="section-divider" />
         </div>
 
         <div className="grid md:grid-cols-2 gap-4 lg:gap-8 mb-8 lg:mb-12">
@@ -435,10 +432,10 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20">
+            <Card className="enhanced-card h-full">
               <CardContent className="p-4 lg:p-8">
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                  <GamepadIcon className="h-6 w-6 text-primary" />
+                  <GamepadIcon className="h-6 w-6 text-hockey-blue" />
                   Premier NHL 26 League
                 </h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
@@ -461,10 +458,10 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20">
+            <Card className="enhanced-card h-full">
               <CardContent className="p-4 lg:p-8">
                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
-                  <Users className="h-6 w-6 text-primary" />
+                  <Users className="h-6 w-6 text-hockey-purple" />
                   Professional Community
                 </h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
@@ -491,16 +488,14 @@ export default function Home() {
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="text-center mb-12">
+        <div className="section-header">
           <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl">
+            <div className="p-3 bg-gradient-to-r from-hockey-blue to-hockey-cyan rounded-xl">
               <Database className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-              Advanced League Features
-            </h2>
+            <h2 className="section-title">Advanced League Features</h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-transparent rounded-full mx-auto mb-6" />
+          <div className="section-divider" />
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 lg:gap-8">
@@ -510,11 +505,11 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-blue-500/20 bg-gradient-to-br from-background to-blue-500/5 hover:shadow-lg transition-shadow">
+            <Card className="enhanced-card h-full">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-blue-500" />
+                  <div className="p-2 bg-hockey-blue/20 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-hockey-blue" />
                   </div>
                   <CardTitle className="text-xl">Custom API Statistics</CardTitle>
                 </div>
@@ -526,15 +521,15 @@ export default function Home() {
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-center gap-2">
-                    <ChartBar className="h-4 w-4 text-blue-500" />
+                    <ChartBar className="h-4 w-4 text-hockey-blue" />
                     Real-time match statistics
                   </li>
                   <li className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-blue-500" />
+                    <Activity className="h-4 w-4 text-hockey-blue" />
                     Advanced player analytics
                   </li>
                   <li className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-blue-500" />
+                    <Database className="h-4 w-4 text-hockey-blue" />
                     Historical performance data
                   </li>
                 </ul>
@@ -548,11 +543,11 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-green-500/20 bg-gradient-to-br from-background to-green-500/5 hover:shadow-lg transition-shadow">
+            <Card className="enhanced-card h-full">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500/20 rounded-lg">
-                    <Coins className="h-6 w-6 text-green-500" />
+                  <div className="p-2 bg-hockey-green/20 rounded-lg">
+                    <Coins className="h-6 w-6 text-hockey-green" />
                   </div>
                   <CardTitle className="text-xl">Token Reward System</CardTitle>
                 </div>
@@ -564,15 +559,15 @@ export default function Home() {
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-center gap-2">
-                    <Gift className="h-4 w-4 text-green-500" />
+                    <Gift className="h-4 w-4 text-hockey-green" />
                     Free prize redemption
                   </li>
                   <li className="flex items-center gap-2">
-                    <Medal className="h-4 w-4 text-green-500" />
+                    <Medal className="h-4 w-4 text-hockey-green" />
                     Achievement rewards
                   </li>
                   <li className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-green-500" />
+                    <Star className="h-4 w-4 text-hockey-green" />
                     Exclusive league perks
                   </li>
                 </ul>
@@ -586,11 +581,11 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-purple-500/20 bg-gradient-to-br from-background to-purple-500/5 hover:shadow-lg transition-shadow">
+            <Card className="enhanced-card h-full">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <Shield className="h-6 w-6 text-purple-500" />
+                  <div className="p-2 bg-hockey-purple/20 rounded-lg">
+                    <Shield className="h-6 w-6 text-hockey-purple" />
                   </div>
                   <CardTitle className="text-xl">Professional Management</CardTitle>
                 </div>
@@ -602,15 +597,15 @@ export default function Home() {
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-purple-500" />
+                    <TrendingUp className="h-4 w-4 text-hockey-purple" />
                     Trade & waiver system
                   </li>
                   <li className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-purple-500" />
+                    <Clock className="h-4 w-4 text-hockey-purple" />
                     Scheduled seasons
                   </li>
                   <li className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-purple-500" />
+                    <Award className="h-4 w-4 text-hockey-purple" />
                     Championship playoffs
                   </li>
                 </ul>
@@ -621,7 +616,7 @@ export default function Home() {
       </motion.section>
 
       {/* Main Content with Enhanced Animations */}
-              <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16 space-y-12 lg:space-y-32">
+      <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16 space-y-12 lg:space-y-32">
         {/* Enhanced Upcoming Games Section */}
         <motion.section
           className="relative z-40"
@@ -633,22 +628,22 @@ export default function Home() {
         >
           <div className="flex items-center gap-4 mb-8">
             <motion.div
-              className="p-3 bg-gradient-to-r from-primary to-primary/60 rounded-xl"
+              className="p-3 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl"
               whileHover={{ scale: 1.1, rotate: 5 }}
             >
               <GamepadIcon className="h-6 w-6 text-white" />
             </motion.div>
             <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold hockey-gradient-text">
                 Upcoming NHL 26 Matches
               </h2>
               <p className="text-muted-foreground mt-1">Live-streamed competitive games with real-time statistics</p>
-              <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent rounded-full mt-2" />
+              <div className="h-1 w-20 bg-gradient-to-r from-hockey-blue to-transparent rounded-full mt-2" />
             </div>
           </div>
 
           <motion.div
-            className="relative z-40 bg-background/95 backdrop-blur-sm rounded-lg"
+            className="relative z-40 enhanced-card"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           >
@@ -689,20 +684,20 @@ export default function Home() {
         >
           <div className="flex items-center gap-4 mb-8">
             <motion.div
-              className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl"
+              className="p-3 bg-gradient-to-r from-hockey-green to-hockey-emerald rounded-xl"
               whileHover={{ scale: 1.1, rotate: -5 }}
             >
               <TrendingUp className="h-6 w-6 text-white" />
             </motion.div>
             <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-hockey-green to-hockey-emerald bg-clip-text text-transparent">
                 Recent Player Trades
               </h2>
               <p className="text-muted-foreground mt-1">Live transaction feed from our professional trade system</p>
-              <div className="h-1 w-20 bg-gradient-to-r from-green-500 to-transparent rounded-full mt-2" />
+              <div className="h-1 w-20 bg-gradient-to-r from-hockey-green to-transparent rounded-full mt-2" />
             </div>
           </div>
-          <div className="relative z-30 bg-background/95 backdrop-blur-sm rounded-lg">
+          <div className="relative z-30 enhanced-card">
             <RecentTrades />
           </div>
         </motion.section>
@@ -719,14 +714,14 @@ export default function Home() {
             <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 backdrop-blur-sm">
               <TabsTrigger
                 value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-blue data-[state=active]:to-hockey-purple data-[state=active]:text-white"
               >
                 <Trophy className="h-4 w-4 mr-2" />
                 Recent Match Results
               </TabsTrigger>
               <TabsTrigger
                 value="standings"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-blue data-[state=active]:to-hockey-purple data-[state=active]:text-white"
               >
                 <Target className="h-4 w-4 mr-2" />
                 League Standings
@@ -775,10 +770,10 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <Card className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/30 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/10 rounded-full translate-y-12 -translate-x-12" />
+          <Card className="relative enhanced-card bg-gradient-to-br from-hockey-blue/20 via-hockey-purple/10 to-transparent overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-hockey-blue/5 to-transparent" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-hockey-blue/10 rounded-full -translate-y-16 translate-x-16" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-blue/10 rounded-full translate-y-12 -translate-x-12" />
 
             <CardContent className="relative p-12 text-center">
               <motion.div
@@ -786,10 +781,10 @@ export default function Home() {
                 transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
                 className="mb-6"
               >
-                <Crown className="h-16 w-16 mx-auto text-primary" />
+                <Crown className="h-16 w-16 mx-auto text-hockey-blue" />
               </motion.div>
 
-              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold mb-4 hockey-gradient-text">
                 Join the Premier NHL 26 League
               </h2>
               <p className="text-xl mb-4 max-w-3xl mx-auto text-muted-foreground">
@@ -805,7 +800,7 @@ export default function Home() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg"
+                    className="btn-championship"
                   >
                     <Link href="/register" className="flex items-center gap-2">
                       <Zap className="h-5 w-5" />
@@ -819,7 +814,7 @@ export default function Home() {
                     variant="outline"
                     size="lg"
                     asChild
-                    className="border-primary/30 hover:bg-primary/10 backdrop-blur-sm bg-transparent"
+                    className="btn-ice"
                   >
                     <Link
                       href="https://discord.gg/secretchelsociety"
@@ -840,15 +835,15 @@ export default function Home() {
 
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">100%</div>
+                  <div className="text-2xl font-bold text-hockey-blue">100%</div>
                   <div className="text-sm text-muted-foreground">Free to Play</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">24/7</div>
+                  <div className="text-2xl font-bold text-hockey-blue">24/7</div>
                   <div className="text-sm text-muted-foreground">Stat Tracking</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">Real</div>
+                  <div className="text-2xl font-bold text-hockey-blue">Real</div>
                   <div className="text-sm text-muted-foreground">Prize Rewards</div>
                 </div>
               </div>
@@ -867,22 +862,22 @@ export default function Home() {
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-4">
               <motion.div
-                className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl"
+                className="p-3 bg-gradient-to-r from-hockey-purple to-hockey-pink rounded-xl"
                 whileHover={{ scale: 1.1, rotate: 5 }}
               >
                 <Star className="h-6 w-6 text-white" />
               </motion.div>
               <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-hockey-purple to-hockey-pink bg-clip-text text-transparent">
                   Latest SCS News
                 </h2>
                 <p className="text-muted-foreground mt-1">Stay updated with league announcements and highlights</p>
-                <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-transparent rounded-full mt-2" />
+                <div className="h-1 w-20 bg-gradient-to-r from-hockey-purple to-transparent rounded-full mt-2" />
               </div>
             </div>
 
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Button variant="ghost" asChild className="hover:bg-primary/10">
+              <Button variant="ghost" asChild className="hover:bg-hockey-blue/10">
                 <Link href="/news">View All News</Link>
               </Button>
             </motion.div>

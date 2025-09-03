@@ -2,11 +2,50 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MessageSquare, ThumbsUp, ThumbsDown, Eye, Plus, Pin, AlertCircle } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { motion } from "framer-motion"
+import { 
+  MessageSquare, 
+  ThumbsUp, 
+  ThumbsDown, 
+  Eye, 
+  Plus, 
+  Pin, 
+  AlertCircle,
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Users,
+  TrendingUp,
+  Star,
+  Crown,
+  Medal,
+  Shield,
+  Gamepad2,
+  Activity,
+  BarChart3,
+  Calendar,
+  Clock,
+  Coins,
+  Gift,
+  Heart,
+  Flame,
+  Lightning,
+  UserPlus,
+  UserCheck,
+  UserX,
+  ExternalLink,
+  Share2,
+  Bookmark,
+  MessageCircle,
+  Zap
+} from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useSupabase } from "@/lib/supabase/client"
@@ -51,6 +90,9 @@ export default function ForumPage() {
   const [posts, setPosts] = useState<ForumPost[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState("created_at")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingPosts, setIsLoadingPosts] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -94,6 +136,59 @@ export default function ForumPage() {
     // Fallback to default categories
     setCategories(defaultCategories)
   }, [defaultCategories])
+
+  // Filter and sort posts
+  const filteredAndSortedPosts = useMemo(() => {
+    let filtered = posts.filter(post => {
+      const matchesCategory = selectedCategory === "all" || post.category.id === selectedCategory
+      const matchesSearch = searchTerm === "" || 
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.author.gamer_tag.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      return matchesCategory && matchesSearch
+    })
+
+    // Sort posts
+    filtered.sort((a, b) => {
+      let aValue: any
+      let bValue: any
+      
+      switch (sortBy) {
+        case "created_at":
+          aValue = new Date(a.created_at).getTime()
+          bValue = new Date(b.created_at).getTime()
+          break
+        case "views":
+          aValue = a.views
+          bValue = b.views
+          break
+        case "like_count":
+          aValue = a.like_count
+          bValue = b.like_count
+          break
+        case "comment_count":
+          aValue = a.comment_count
+          bValue = b.comment_count
+          break
+        case "title":
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        default:
+          aValue = new Date(a.created_at).getTime()
+          bValue = new Date(b.created_at).getTime()
+      }
+      
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
+    })
+
+    return filtered
+  }, [posts, selectedCategory, searchTerm, sortBy, sortOrder])
 
   // Fetch posts with debouncing
   const fetchPosts = useCallback(async (categoryId: string) => {
@@ -216,18 +311,53 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">SCS Forum</h1>
-          <p className="text-muted-foreground">Discuss hockey, strategies, and connect with the community</p>
+    <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-hockey-blue/20 via-hockey-purple/20 to-hockey-blue/20 border-b border-hockey-blue/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-hockey-blue/5 to-transparent" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-hockey-blue/10 rounded-full -translate-y-16 translate-x-16" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-purple/10 rounded-full translate-y-12 -translate-x-12" />
+        
+        <div className="relative container mx-auto px-4 py-16">
+          <motion.div 
+            className="text-center"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl">
+                <MessageSquare className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold hockey-gradient-text">SCS Forum</h1>
+            </div>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+              Discuss, share, and connect with the Secret Chel Society community. 
+              Share strategies, discuss matches, and build lasting friendships.
+            </p>
+            <div className="h-1 w-32 bg-gradient-to-r from-hockey-blue to-transparent rounded-full mx-auto" />
+          </motion.div>
         </div>
-        <Button onClick={handleCreatePost}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Post
-        </Button>
       </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <motion.div
+          className="flex justify-between items-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Community Discussions</h2>
+            <p className="text-muted-foreground">Join the conversation with fellow SCS members</p>
+          </div>
+          <Button className="btn-championship" onClick={handleCreatePost}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Post
+          </Button>
+        </motion.div>
 
       {/* Error Display */}
       {error && (
@@ -339,6 +469,8 @@ export default function ForumPage() {
           )}
         </TabsContent>
       </Tabs>
+        </div>
+      </div>
     </div>
   )
 }
