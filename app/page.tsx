@@ -691,52 +691,179 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
+          <div className="text-center mb-12">
+            <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
+              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="hockey-title text-4xl font-bold bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 bg-clip-text text-transparent">
+                Match Results & Standings
+              </h2>
+            </motion.div>
+            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-transparent rounded-full mx-auto mb-6" />
+            <p className="hockey-subtitle text-lg max-w-2xl mx-auto">
+              Track recent match outcomes and current league standings in real-time
+            </p>
+          </div>
+
           <Tabs defaultValue="completed" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+            <TabsList className="grid w-full grid-cols-2 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg">
               <TabsTrigger
                 value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center gap-2"
               >
-                <Trophy className="h-4 w-4 mr-2" />
+                <div className="p-1 bg-white/20 rounded-lg">
+                  <Trophy className="h-4 w-4" />
+                </div>
                 Recent Match Results
               </TabsTrigger>
               <TabsTrigger
                 value="standings"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center gap-2"
               >
-                <Target className="h-4 w-4 mr-2" />
+                <div className="p-1 bg-white/20 rounded-lg">
+                  <Target className="h-4 w-4" />
+                </div>
                 League Standings
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="completed">
+            <TabsContent value="completed" className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
               >
                 {loading.games ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-40 rounded-lg" />
-                    ))}
-                  </div>
+                  <Card className="hockey-card">
+                    <CardContent className="p-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(6)].map((_, i) => (
+                          <div key={i} className="space-y-3">
+                            <Skeleton className="w-full h-32 rounded-xl" />
+                            <Skeleton className="w-3/4 h-4 rounded" />
+                            <Skeleton className="w-1/2 h-3 rounded" />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : completedGames.length > 0 ? (
+                  <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg">
+                          <Trophy className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                            Recent Match Results
+                          </div>
+                          <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                            Latest completed games with final scores and statistics
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CompletedGames games={completedGames} />
+                    </CardContent>
+                  </Card>
                 ) : (
-                  <CompletedGames games={completedGames} />
+                  <Card className="hockey-card text-center p-12 border-dashed border-2 border-hockey-silver-300/50 dark:border-hockey-silver-600/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                    <CardContent className="pt-6">
+                      <motion.div
+                        animate={{ y: [-5, 5, -5] }}
+                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                        className="mb-6"
+                      >
+                        <div className="p-4 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded-full w-fit mx-auto">
+                          <Trophy className="h-16 w-16 text-ice-blue-600 dark:text-ice-blue-400" />
+                        </div>
+                      </motion.div>
+                      <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-3">
+                        No Completed Matches Yet
+                      </h3>
+                      <p className="text-hockey-silver-600 dark:text-hockey-silver-400 max-w-md mx-auto">
+                        Matches will appear here once they're completed. Check back soon for the latest results!
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
               </motion.div>
             </TabsContent>
 
-            <TabsContent value="standings">
+            <TabsContent value="standings" className="space-y-6">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
               >
                 {loading.standings ? (
-                  <Skeleton className="w-full h-96 rounded-lg" />
+                  <Card className="hockey-card">
+                    <CardContent className="p-8">
+                      <div className="space-y-4">
+                        <Skeleton className="w-full h-12 rounded-lg" />
+                        {[...Array(8)].map((_, i) => (
+                          <Skeleton key={i} className="w-full h-16 rounded-lg" />
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : standings.length > 0 ? (
+                  <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                          <Target className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                            League Standings
+                          </div>
+                          <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                            Current team rankings and playoff race positions
+                          </div>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="mb-6 p-4 bg-gradient-to-r from-assist-green-50 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-800/20 rounded-xl border border-assist-green-200/50 dark:border-assist-green-700/50">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                            <TrendingUp className="h-5 w-5 text-white" />
+                          </div>
+                          <h4 className="font-semibold text-assist-green-800 dark:text-assist-green-200">
+                            Playoff Race Update
+                          </h4>
+                        </div>
+                        <p className="text-sm text-assist-green-700 dark:text-assist-green-300">
+                          Top 8 teams qualify for playoffs. Current standings show {standings.slice(0, 8).length} teams in playoff positions.
+                        </p>
+                      </div>
+                      <TeamStandings teams={standings} />
+                    </CardContent>
+                  </Card>
                 ) : (
-                  <TeamStandings teams={standings} />
+                  <Card className="hockey-card text-center p-12 border-dashed border-2 border-hockey-silver-300/50 dark:border-hockey-silver-600/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                    <CardContent className="pt-6">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                        className="mb-6"
+                      >
+                        <div className="p-4 bg-gradient-to-r from-rink-blue-500/20 to-rink-blue-500/20 rounded-full w-fit mx-auto">
+                          <Target className="h-16 w-16 text-rink-blue-600 dark:text-rink-blue-400" />
+                        </div>
+                      </motion.div>
+                      <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-3">
+                        Standings Not Available
+                      </h3>
+                      <p className="text-hockey-silver-600 dark:text-hockey-silver-400 max-w-md mx-auto">
+                        League standings will appear here once the season begins. Check back soon for current rankings!
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
               </motion.div>
             </TabsContent>
