@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Trophy, Award, Users } from "lucide-react"
+import { Trophy, Award, Users, Search, TrendingUp, DollarSign, Target, Medal, Star, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { TeamLogo } from "@/components/team-logo"
 import { getAllTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
@@ -70,114 +70,279 @@ export default function TeamsPage() {
   // Filter teams based on search query
   const filteredTeams = teams.filter((team) => team.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
+  // Calculate league statistics for the header
+  const totalTeams = teams.length
+  const totalPlayers = teams.reduce((sum, team) => sum + (team.player_count || 0), 0)
+  const totalSalary = teams.reduce((sum, team) => sum + (team.total_salary || 0), 0)
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Teams</h1>
-            <p className="text-muted-foreground">All teams competing in the Secret Chel Society</p>
-          </div>
-
-          <Input
-            placeholder="Search teams..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-sm"
-          />
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Hero Header Section */}
+      <div className="hockey-header relative py-16 px-4">
+        <div className="container mx-auto text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <h1 className="hockey-title mb-6">
+              Secret Chel Society
+            </h1>
+            <p className="hockey-subtitle mb-8">
+              Discover the elite teams competing in the most competitive hockey league
+            </p>
+            
+            {/* League Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="hockey-stat-item"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
+                </div>
+                <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                  {totalTeams}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Active Teams
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="hockey-stat-item"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="h-8 w-8 text-rink-blue-600 dark:text-rink-blue-400" />
+                </div>
+                <div className="text-2xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
+                  {totalPlayers}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Total Players
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="hockey-stat-item"
+              >
+                <div className="flex items-center justify-center mb-2">
+                  <DollarSign className="h-8 w-8 text-assist-green-600 dark:text-assist-green-400" />
+                </div>
+                <div className="text-2xl font-bold text-assist-green-700 dark:text-assist-green-300">
+                  ${(totalSalary / 1000000000).toFixed(1)}B
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Total Salary
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
+      </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="h-64 w-full rounded-lg" />
-            ))}
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          {/* Search and Filter Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+                Team Directory
+              </h2>
+              <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                Explore team rosters, statistics, and achievements
+              </p>
+            </div>
+
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-hockey-silver-400" />
+              <Input
+                placeholder="Search teams by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="hockey-search pl-10"
+              />
+            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTeams.map((team) => (
-              <Link key={team.id} href={`/teams/${team.id}`}>
-                <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
-                  <Card className="overflow-hidden h-full hover:border-primary transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col items-center">
-                        <div className="relative h-32 w-32 mb-4">
-                          {team.logo_url ? (
-                            <Image
-                              src={team.logo_url || "/placeholder.svg"}
-                              alt={team.name}
-                              fill
-                              className="object-contain"
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            />
-                          ) : (
-                            <TeamLogo teamName={team.name} size="xl" />
+
+          {/* Teams Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                >
+                  <Skeleton className="h-80 w-full rounded-2xl" />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {filteredTeams.map((team, index) => (
+                <motion.div
+                  key={team.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="group"
+                >
+                  <Link href={`/teams/${team.id}`}>
+                    <Card className="hockey-card hockey-card-hover h-full overflow-hidden">
+                      <CardContent className="p-0">
+                        {/* Team Logo Section */}
+                        <div className="relative h-48 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 flex items-center justify-center p-6">
+                          <div className="relative h-32 w-32 group-hover:scale-110 transition-transform duration-300">
+                            {team.logo_url ? (
+                              <Image
+                                src={team.logo_url || "/placeholder.svg"}
+                                alt={team.name}
+                                fill
+                                className="object-contain drop-shadow-lg"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                              />
+                            ) : (
+                              <TeamLogo teamName={team.name} size="xl" />
+                            )}
+                          </div>
+                          
+                          {/* Floating Achievement Badge */}
+                          {team.awards && team.awards.length > 0 && (
+                            <div className="absolute top-4 right-4">
+                              <div className="bg-gradient-to-r from-goal-red-500 to-assist-green-500 text-white p-2 rounded-full shadow-lg">
+                                <Medal className="h-4 w-4" />
+                              </div>
+                            </div>
                           )}
                         </div>
-                        <h2 className="text-xl font-bold text-center mb-2">{team.name}</h2>
-                        <div className="text-sm text-muted-foreground text-center mb-4">
-                          Record: {team.wins}-{team.losses}-{team.otl}
-                        </div>
 
-                        {/* Team Awards */}
-                        {team.awards && team.awards.length > 0 && (
-                          <div className="flex flex-wrap justify-center gap-2 mb-4">
-                            {team.awards.slice(0, 3).map((award: any) => (
-                              <Badge
-                                key={award.id}
-                                variant="outline"
-                                className={`flex items-center gap-1 ${
-                                  award.award_type === "SCS Cup"
-                                    ? "border-yellow-500 text-yellow-500"
-                                    : "border-blue-500 text-blue-500"
-                                }`}
-                              >
-                                {award.award_type === "SCS Cup" ? (
-                                  <Trophy className="h-3 w-3" />
-                                ) : (
-                                  <Award className="h-3 w-3" />
-                                )}
-                                {award.award_type === "SCS Cup" ? "Cup" : "Trophy"} {award.year}
-                              </Badge>
-                            ))}
-                            {team.awards.length > 3 && <Badge variant="outline">+{team.awards.length - 3} more</Badge>}
+                        {/* Team Info Section */}
+                        <div className="p-6">
+                          <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 text-center mb-3 group-hover:text-ice-blue-600 dark:group-hover:text-ice-blue-400 transition-colors duration-200">
+                            {team.name}
+                          </h3>
+                          
+                          {/* Record Badge */}
+                          <div className="flex justify-center mb-4">
+                            <Badge className="hockey-badge">
+                              <TrendingUp className="h-3 w-3 mr-1" />
+                              {team.wins}-{team.losses}-{team.otl}
+                            </Badge>
                           </div>
-                        )}
 
-                        <div className="grid grid-cols-3 gap-4 w-full text-center">
-                          <div>
-                            <div className="text-lg font-bold">{team.points}</div>
-                            <div className="text-xs text-muted-foreground">PTS</div>
-                          </div>
-                          <div>
-                            <div className="text-lg font-bold">${(team.total_salary / 1000000).toFixed(1)}M</div>
-                            <div className="text-xs text-muted-foreground">SALARY</div>
-                            <div className="text-xs text-muted-foreground flex items-center justify-center mt-1">
-                              <Users className="h-3 w-3 mr-1" />
-                              <span>
-                                {team.player_count}/{MAX_ROSTER_SIZE} Players
-                              </span>
+                          {/* Team Awards */}
+                          {team.awards && team.awards.length > 0 && (
+                            <div className="flex flex-wrap justify-center gap-2 mb-6">
+                              {team.awards.slice(0, 2).map((award: any) => (
+                                <Badge
+                                  key={award.id}
+                                  className={`flex items-center gap-1 ${
+                                    award.award_type === "SCS Cup"
+                                      ? "bg-gradient-to-r from-goal-red-100 to-goal-red-200 text-goal-red-800 border-goal-red-300 dark:from-goal-red-900/30 dark:to-goal-red-800/30 dark:text-goal-red-200 dark:border-goal-red-600"
+                                      : "bg-gradient-to-r from-assist-green-100 to-assist-green-200 text-assist-green-800 border-assist-green-300 dark:from-assist-green-900/30 dark:to-assist-green-800/30 dark:text-assist-green-200 dark:border-assist-green-600"
+                                  }`}
+                                >
+                                  {award.award_type === "SCS Cup" ? (
+                                    <Trophy className="h-3 w-3" />
+                                  ) : (
+                                    <Award className="h-3 w-3" />
+                                  )}
+                                  {award.award_type === "SCS Cup" ? "Cup" : "Trophy"} {award.year}
+                                </Badge>
+                              ))}
+                              {team.awards.length > 2 && (
+                                <Badge variant="outline" className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  +{team.awards.length - 2} more
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Team Statistics Grid */}
+                          <div className="hockey-stats-grid">
+                            <div className="hockey-stat-item">
+                              <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-1">
+                                {team.points}
+                              </div>
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                                POINTS
+                              </div>
+                            </div>
+                            
+                            <div className="hockey-stat-item">
+                              <div className="text-lg font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-1">
+                                ${(team.total_salary / 1000000).toFixed(1)}M
+                              </div>
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                                SALARY
+                              </div>
+                              <div className="flex items-center justify-center mt-2 text-xs text-hockey-silver-500 dark:text-hockey-silver-500">
+                                <Users className="h-3 w-3 mr-1" />
+                                <span>{team.player_count}/{MAX_ROSTER_SIZE}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="hockey-stat-item">
+                              <div className="text-lg font-bold text-assist-green-700 dark:text-assist-green-300 mb-1">
+                                ${(team.cap_space / 1000000).toFixed(1)}M
+                              </div>
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                                CAP SPACE
+                              </div>
                             </div>
                           </div>
-                          <div>
-                            <div className="text-lg font-bold">${(team.cap_space / 1000000).toFixed(1)}M</div>
-                            <div className="text-xs text-muted-foreground">CAP SPACE</div>
+
+                          {/* View Details Button */}
+                          <div className="mt-6 text-center">
+                            <div className="inline-flex items-center gap-2 text-ice-blue-600 dark:text-ice-blue-400 font-medium group-hover:text-ice-blue-700 dark:group-hover:text-ice-blue-300 transition-colors duration-200">
+                              <span>View Details</span>
+                              <Zap className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </motion.div>
-              </Link>
-            ))}
-            {filteredTeams.length === 0 && (
-              <div className="col-span-full text-center py-12">
-                <p className="text-muted-foreground">No teams found matching your search.</p>
-              </div>
-            )}
-          </div>
-        )}
-      </motion.div>
+              ))}
+              
+              {filteredTeams.length === 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="col-span-full text-center py-16"
+                >
+                  <div className="max-w-md mx-auto">
+                    <Search className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">
+                      No teams found
+                    </h3>
+                    <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
+                      Try adjusting your search terms or browse all available teams.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   )
 }
