@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight } from "lucide-react"
+import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight, Crown, Shield, Target, TrendingUp, Award, Medal, Star, ArrowRight, Lock, Eye, Cog, Wrench, CheckCircle, XCircle, UserPlus, Settings, Database, Activity, Zap, Home, Gavel, Users2, FileText, BarChart3 } from "lucide-react"
 import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-display"
 import { SalaryProgress } from "@/components/management/salary-progress"
 import { RosterProgress } from "@/components/management/roster-progress"
@@ -23,9 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TeamLogos } from "@/components/management/team-logos"
 import { BidPlayerModal } from "@/components/management/bid-player-modal"
 import { Textarea } from "@/components/ui/textarea"
-import { XCircle, CheckCircle2 } from "lucide-react"
+import { CheckCircle2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
-import { Home, Gavel } from "lucide-react"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
 
 interface Player {
@@ -1461,28 +1460,44 @@ const ManagementPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        {/* Update the main title section to be more mobile-friendly: */}
-        <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
-            {teamData && (
-              <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
-                {teamData.logo_url && (
-                  <Image
-                    src={teamData.logo_url || "/placeholder.svg"}
-                    alt={teamData.name}
-                    width={20}
-                    height={20}
-                    className="rounded-full md:w-6 md:h-6"
-                  />
-                )}
-                {teamData.name}
-              </p>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      <div className="container mx-auto px-4 py-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* Hero Header Section */}
+          <div className="relative overflow-hidden py-16 px-4 mb-8">
+            <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+            <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+            <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+            
+            <div className="relative z-10">
+              <div className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-ice-blue-500/25">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="hockey-title text-3xl md:text-4xl mb-2">Team Management</h1>
+                    {teamData && (
+                      <div className="flex items-center gap-3">
+                        {teamData.logo_url && (
+                          <Image
+                            src={teamData.logo_url || "/placeholder.svg"}
+                            alt={teamData.name}
+                            width={24}
+                            height={24}
+                            className="rounded-full md:w-8 md:h-8 shadow-lg"
+                          />
+                        )}
+                        <p className="hockey-subtitle text-lg md:text-xl text-hockey-silver-600 dark:text-hockey-silver-400">
+                          {teamData.name}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
         {loading ? (
           <div className="grid gap-6">
@@ -1491,61 +1506,64 @@ const ManagementPage = () => {
           </div>
         ) : (
           <>
-            {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
-              <Card>
+            {/* Enhanced Stats Cards Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+              <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Users className="h-6 w-6 text-primary" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Users className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Team Size</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Team Size</div>
+                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                       {teamPlayers.length}
                       {projectedRosterSize !== teamPlayers.length && (
-                        <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
+                        <span className="text-sm text-ice-blue-600 dark:text-ice-blue-400 ml-1">→ {projectedRosterSize}</span>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              
+              <Card className="hockey-card hockey-card-hover border-2 border-assist-green-200/50 dark:border-assist-green-700/50">
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Calendar className="h-6 w-6 text-primary" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Calendar className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Upcoming Matches</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Upcoming Matches</div>
+                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                       {teamMatches.filter((m) => m.status === "Scheduled").length}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              
+              <Card className="hockey-card hockey-card-hover border-2 border-goal-red-200/50 dark:border-goal-red-700/50">
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <Trophy className="h-6 w-6 text-primary" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Trophy className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Record</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Record</div>
+                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                       {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card>
+              
+              <Card className="hockey-card hockey-card-hover border-2 border-rink-blue-200/50 dark:border-rink-blue-700/50">
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-primary/10 p-3 rounded-full">
-                    <DollarSign className="h-6 w-6 text-primary" />
+                  <div className="w-12 h-12 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Salary Cap</div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Salary Cap</div>
+                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                       ${(currentTeamSalary / 1000000).toFixed(1)}M
                       {projectedSalary !== currentTeamSalary && (
-                        <span className="text-sm text-muted-foreground ml-1">
+                        <span className="text-sm text-ice-blue-600 dark:text-ice-blue-400 ml-1">
                           → ${(projectedSalary / 1000000).toFixed(1)}M
                         </span>
                       )}
