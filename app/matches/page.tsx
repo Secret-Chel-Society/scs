@@ -254,7 +254,7 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-background">
+      <div className="min-h-screen relative overflow-hidden bg-background pt-4">
         <div className="absolute inset-0 hockey-grid opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
         
@@ -281,7 +281,7 @@ export default function MatchesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-background">
+      <div className="min-h-screen relative overflow-hidden bg-background pt-4">
         <div className="absolute inset-0 hockey-grid opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
         
@@ -301,7 +301,7 @@ export default function MatchesPage() {
   const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
+    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
       {/* Professional Hockey Arena Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 hockey-grid opacity-20" />

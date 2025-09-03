@@ -119,17 +119,17 @@ export default function Home() {
     {
       url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png?height=600&width=1200",
       title: "Welcome to Secret Chel Society",
-      subtitle: "The premier NHL 26 competitive gaming league with advanced stat tracking",
+      subtitle: "The premier NHL 26 competitive gaming league with advanced championship analytics",
     },
     {
       url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png?height=600&width=1200",
-      title: "Season 1 Registration Open",
-      subtitle: "Join the most competitive NHL 26 league and earn rewards through our token system",
+      title: "Championship Season 1 Registration",
+      subtitle: "Join the elite NHL 26 championship league and earn rewards through our professional token system",
     },
     {
       url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png?height=600&width=1200",
-      title: "Live Match Streaming",
-      subtitle: "Watch professional NHL 26 matches with real-time statistics and commentary",
+      title: "Live Championship Arena Streaming",
+      subtitle: "Watch professional NHL 26 championship matches with real-time analytics and expert commentary",
     },
   ])
 
@@ -282,7 +282,7 @@ export default function Home() {
   }, [supabase, toast])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
+    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
       {/* Enhanced Hockey-Themed Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 hockey-grid opacity-20" />

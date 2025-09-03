@@ -211,7 +211,7 @@ export default function AwardsPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
+    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
       {/* Professional Championship Hall Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 hockey-grid opacity-20" />

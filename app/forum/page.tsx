@@ -203,7 +203,7 @@ export default function ForumPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen relative overflow-hidden bg-background pt-4">
         <div className="relative z-10 container mx-auto px-4 py-12">
           <div className="space-y-8">
             <div className="text-center mb-12">
@@ -225,40 +225,65 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
+      {/* Professional Hockey Forum Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        {/* Professional forum floating elements */}
+        <motion.div
+          className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
+          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-12">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-8"
+          transition={{ duration: 0.8 }}
+          className="space-y-12"
         >
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
+          {/* Enhanced Professional Forum Header */}
+          <div className="text-center mb-16">
             <motion.div 
-              className="inline-flex items-center gap-4 mb-6"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.2 }}
+              className="inline-flex items-center gap-6 mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", delay: 0.2, stiffness: 120 }}
+              whileHover={{ scale: 1.05 }}
             >
-              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
-                <MessageSquare className="h-10 w-10 text-white" />
+              <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
+                <MessageSquare className="h-12 w-12 text-white relative z-10" />
+                <div className="absolute -inset-2 bg-gradient-to-br from-primary to-secondary rounded-2xl blur opacity-40" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                SCS Forum
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                Championship Forum
               </h1>
             </motion.div>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Discuss hockey, strategies, and connect with the Secret Chel Society community
-            </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
+            
+            <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
+              <div className="h-3 w-3 bg-primary rounded-full animate-pulse" />
+              <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
+            </div>
+            
+            <motion.p 
+              className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              Discuss <span className="font-bold text-primary">hockey strategies</span> and connect with the Secret Chel Society <span className="font-semibold text-secondary">championship community</span>
+            </motion.p>
           </div>
 
           {/* Enhanced Actions Section */}

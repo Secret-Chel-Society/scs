@@ -32,7 +32,7 @@ export default function Footer() {
     <footer className="border-t bg-gradient-to-br from-muted/50 to-background relative overflow-hidden">
       <div className="absolute inset-0 hockey-grid opacity-30" />
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5" />
-      <div className="container mx-auto px-4 py-12 relative">
+      <div className="container mx-auto px-6 py-12 relative">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-6">
             <div>

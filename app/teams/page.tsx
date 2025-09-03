@@ -81,7 +81,7 @@ export default function TeamsPage() {
   const filteredTeams = teams.filter((team) => team.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
+    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
       {/* Professional Hockey-Themed Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 hockey-grid opacity-20" />

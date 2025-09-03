@@ -65,6 +65,16 @@ body {
       linear-gradient(0deg, transparent 49%, hsl(var(--border)) 50%, transparent 51%);
     background-size: 100px 100px, 150px 150px, 50px 50px, 50px 50px;
   }
+  
+  /* Sidebar layout utilities */
+  .sidebar-layout {
+    overflow-x: hidden;
+  }
+  
+  .main-content {
+    min-height: 100vh;
+    transition: margin-left 0.3s ease-in-out;
+  }
 }
 
 @layer base {

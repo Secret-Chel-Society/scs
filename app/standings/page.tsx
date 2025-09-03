@@ -374,7 +374,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
   const selectedSeasonId = searchParams.season ? Number.parseInt(searchParams.season) : currentSeasonId
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background">
+    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
       {/* Professional Hockey Championship Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 hockey-grid opacity-20" />
