@@ -380,60 +380,77 @@ export default function Navigation() {
   const uniqueRoles = getUniqueRoleBadges()
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo on the left */}
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-lg shadow-lg">
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5" />
+      <div className="container mx-auto px-4 relative">
+        <div className="flex h-18 items-center justify-between py-2">
+          {/* Logo on the left with enhanced styling */}
           <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <Image
-                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
-                alt="SCS Logo"
-                width={120}
-                height={40}
-                className="h-10 w-auto object-contain"
-                priority
-              />
+            <Link href="/" className="group flex items-center space-x-3 transition-all duration-300 hover:scale-105">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-xl opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
+                <Image
+                  src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
+                  alt="SCS Logo"
+                  width={120}
+                  height={40}
+                  className="h-12 w-auto object-contain relative z-10 filter drop-shadow-lg"
+                  priority
+                />
+              </div>
+              <div className="hidden lg:block">
+                <h1 className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Secret Chel Society
+                </h1>
+                <p className="text-xs text-muted-foreground font-medium tracking-wide">NHL 26 COMPETITIVE LEAGUE</p>
+              </div>
             </Link>
           </div>
 
-          {/* Navigation links centered */}
+          {/* Navigation links centered with enhanced styling */}
           <nav className="hidden md:flex items-center justify-center mx-auto">
-            <ul className="flex space-x-6">
+            <ul className="flex space-x-1">
               {navigation.map((item) => (
                 <li key={item.name} className="relative group">
                   {item.submenu ? (
                     <div className="relative">
                       <Link
                         href={item.href}
-                        className={`text-sm font-medium transition-colors hover:text-primary ${
+                        className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-lg group-hover:scale-105 ${
                           pathname === item.href || pathname.startsWith(item.href)
-                            ? "text-primary"
-                            : "text-muted-foreground"
+                            ? "text-white bg-gradient-to-r from-primary to-secondary shadow-lg"
+                            : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                         }`}
                       >
                         {item.name}
+                        <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary to-secondary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                       </Link>
-                      <div className="absolute left-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        {item.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            className="block px-4 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
+                      <div className="absolute left-0 mt-3 w-56 bg-background/95 backdrop-blur-lg border border-primary/20 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50">
+                        <div className="absolute -top-2 left-4 w-4 h-4 bg-background/95 border-l border-t border-primary/20 rotate-45" />
+                        <div className="relative bg-background/95 rounded-xl overflow-hidden">
+                          {item.submenu.map((subItem, index) => (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              className="block px-4 py-3 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 transition-all duration-200 first:rounded-t-xl last:rounded-b-xl"
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <Link
                       href={item.href}
-                      className={`text-sm font-medium transition-colors hover:text-primary ${
-                        pathname === item.href ? "text-primary" : "text-muted-foreground"
+                      className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-lg hover:scale-105 group ${
+                        pathname === item.href 
+                          ? "text-white bg-gradient-to-r from-primary to-secondary shadow-lg" 
+                          : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                       }`}
                     >
                       {item.name}
+                      <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-primary to-secondary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                     </Link>
                   )}
                 </li>
@@ -441,61 +458,80 @@ export default function Navigation() {
               {session && (
                 <Link
                   href="/register/season"
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    pathname === "/register/season" ? "text-primary" : "text-muted-foreground"
+                  className={`relative px-4 py-2 text-sm font-semibold transition-all duration-300 rounded-lg hover:scale-105 group ${
+                    pathname === "/register/season" 
+                      ? "text-white bg-gradient-to-r from-secondary to-primary shadow-lg" 
+                      : "text-muted-foreground hover:text-secondary hover:bg-secondary/10"
                   }`}
                 >
                   Season Registration
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-secondary to-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
                 </Link>
               )}
             </ul>
           </nav>
 
-          {/* User controls on the right */}
-          <div className="flex items-center space-x-2">
-            <ModeToggle />
+          {/* User controls on the right with enhanced styling */}
+          <div className="flex items-center space-x-3">
+            <div className="p-1 rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">
+              <ModeToggle />
+            </div>
 
-            {/* Team Chat Button - show for all authenticated users, component handles team check */}
-            {showFullUI && session && <TeamChatButton />}
+            {/* Team Chat Button with enhanced styling */}
+            {showFullUI && session && (
+              <div className="relative">
+                <TeamChatButton />
+              </div>
+            )}
 
-            {showFullUI && session && !loadingProfile && <NotificationsDropdown userId={session.user.id} />}
+            {/* Notifications with glow effect */}
+            {showFullUI && session && !loadingProfile && (
+              <div className="relative">
+                <NotificationsDropdown userId={session.user.id} />
+              </div>
+            )}
 
             {showFullUI && (
               <>
                 {session ? (
-                  <div className="flex items-center gap-2">
-                    {/* Display team badge if available */}
+                  <div className="flex items-center gap-3">
+                    {/* Enhanced team badge display */}
                     {teamInfo && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Link href={`/teams/${teamInfo.id}`} className="flex items-center">
-                              <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border bg-background">
+                            <Link href={`/teams/${teamInfo.id}`} className="group flex items-center transition-all duration-300 hover:scale-110">
+                              <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/20 to-secondary/20 shadow-lg group-hover:shadow-xl group-hover:border-primary/50 transition-all duration-300">
                                 {teamInfo.logo_url ? (
                                   <Image
                                     src={teamInfo.logo_url || "/placeholder.svg"}
                                     alt={teamInfo.name}
-                                    width={24}
-                                    height={24}
+                                    width={28}
+                                    height={28}
                                     className="h-full w-full object-cover"
                                   />
                                 ) : (
-                                  <span className="text-xs font-bold">{teamInfo.name.substring(0, 2)}</span>
+                                  <span className="text-sm font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                    {teamInfo.name.substring(0, 2)}
+                                  </span>
                                 )}
                               </div>
                             </Link>
                           </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{teamInfo.name}</p>
+                          <TooltipContent className="bg-background/95 backdrop-blur-lg border border-primary/20">
+                            <p className="font-medium">{teamInfo.name}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     )}
 
-                    {/* Display unique role badges */}
-                    <div className="flex gap-1">
+                    {/* Enhanced role badges with hockey-themed styling */}
+                    <div className="flex gap-2">
                       {uniqueRoles.map((role) => (
-                        <Badge key={role} className={`${getRoleBadgeColor(role)} text-white`}>
+                        <Badge 
+                          key={role} 
+                          className={`${getRoleBadgeColor(role)} text-white px-3 py-1 text-xs font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105`}
+                        >
                           {role}
                         </Badge>
                       ))}
@@ -508,18 +544,22 @@ export default function Navigation() {
                     ) : (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                            <Avatar className="h-8 w-8">
+                          <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:scale-110 transition-all duration-300 group">
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <Avatar className="h-9 w-9 border-2 border-primary/30 shadow-lg">
                               <AvatarImage
-                                src={currentAvatarUrl || "/placeholder.svg?height=32&width=32"}
+                                src={currentAvatarUrl || "/placeholder.svg?height=36&width=36"}
                                 alt={userProfile?.gamer_tag_id || "User"}
-                                key={currentAvatarUrl} // Force re-render when avatar changes
+                                key={currentAvatarUrl}
+                                className="object-cover"
                               />
-                              <AvatarFallback>{getInitials()}</AvatarFallback>
+                              <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white font-bold">
+                                {getInitials()}
+                              </AvatarFallback>
                             </Avatar>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <DropdownMenuContent className="w-64 bg-background/95 backdrop-blur-lg border border-primary/20 shadow-2xl" align="end" forceMount>
                           <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
                               <button onClick={navigateToProfile} className="text-left group hover:cursor-pointer">
@@ -590,63 +630,98 @@ export default function Navigation() {
                     )}
                   </div>
                 ) : (
-                  <div className="hidden md:flex items-center space-x-2">
-                    <Button variant="outline" asChild>
-                      <Link href="/login">Log in</Link>
+                  <div className="hidden md:flex items-center space-x-3">
+                    <Button 
+                      variant="outline" 
+                      asChild
+                      className="border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-105 shadow-md"
+                    >
+                      <Link href="/login" className="font-semibold">Log in</Link>
                     </Button>
-                    <Button asChild>
-                      <Link href="/register">Sign up</Link>
+                    <Button 
+                      asChild
+                      className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    >
+                      <Link href="/register" className="font-semibold">Sign up</Link>
                     </Button>
                   </div>
                 )}
               </>
             )}
 
-            {/* Mobile menu button */}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu}>
-              <Menu className="h-5 w-5" />
+            {/* Enhanced mobile menu button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="md:hidden h-10 w-10 rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:scale-110" 
+              onClick={toggleMenu}
+            >
+              <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Enhanced Mobile Navigation */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background md:hidden">
-          <div className="container flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center" onClick={closeMenu}>
-              <Image
-                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
-                alt="SCS Logo"
-                width={120}
-                height={40}
-                className="h-10 w-auto object-contain"
-                priority
-              />
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-lg md:hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/10" />
+          <div className="container flex h-18 items-center justify-between py-2 relative">
+            <Link href="/" className="group flex items-center space-x-3 transition-all duration-300 hover:scale-105" onClick={closeMenu}>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-xl opacity-20 group-hover:opacity-30 transition-opacity duration-300" />
+                <Image
+                  src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
+                  alt="SCS Logo"
+                  width={120}
+                  height={40}
+                  className="h-12 w-auto object-contain relative z-10 filter drop-shadow-lg"
+                  priority
+                />
+              </div>
+              <div className="block">
+                <h1 className="font-bold text-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Secret Chel Society
+                </h1>
+                <p className="text-xs text-muted-foreground font-medium tracking-wide">NHL 26 COMPETITIVE LEAGUE</p>
+              </div>
             </Link>
-            <Button variant="ghost" size="icon" onClick={closeMenu}>
-              <X className="h-5 w-5" />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={closeMenu}
+              className="h-10 w-10 rounded-xl hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 transition-all duration-300 hover:scale-110"
+            >
+              <X className="h-6 w-6" />
               <span className="sr-only">Close menu</span>
             </Button>
           </div>
-          <nav className="container grid gap-6 py-6">
+          <nav className="container grid gap-4 py-8 relative">
             {navigation.map((item) => (
-              <div key={item.name}>
+              <div key={item.name} className="group">
                 <Link
                   href={item.href}
-                  className={`text-lg font-medium ${pathname === item.href || pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground"}`}
+                  className={`block text-xl font-semibold px-4 py-3 rounded-xl transition-all duration-300 hover:scale-105 ${
+                    pathname === item.href || pathname.startsWith(item.href) 
+                      ? "text-white bg-gradient-to-r from-primary to-secondary shadow-lg" 
+                      : "text-muted-foreground hover:text-primary hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10"
+                  }`}
                   onClick={closeMenu}
                 >
                   {item.name}
                 </Link>
                 {item.submenu && (
-                  <div className="ml-4 mt-2 space-y-2">
+                  <div className="ml-6 mt-3 space-y-2">
                     {item.submenu.map((subItem) => (
                       <Link
                         key={subItem.name}
                         href={subItem.href}
-                        className={`block text-base font-medium ${pathname === subItem.href ? "text-primary" : "text-muted-foreground"}`}
+                        className={`block text-lg font-medium px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 ${
+                          pathname === subItem.href 
+                            ? "text-white bg-gradient-to-r from-primary to-secondary shadow-lg" 
+                            : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                        }`}
                         onClick={closeMenu}
                       >
                         {subItem.name}
@@ -660,33 +735,50 @@ export default function Navigation() {
               <>
                 <Link
                   href="/register/season"
-                  className={`text-lg font-medium ${pathname === "/register/season" ? "text-primary" : "text-muted-foreground"}`}
+                  className={`block text-xl font-semibold px-4 py-3 rounded-xl transition-all duration-300 hover:scale-105 ${
+                    pathname === "/register/season" 
+                      ? "text-white bg-gradient-to-r from-secondary to-primary shadow-lg" 
+                      : "text-muted-foreground hover:text-secondary hover:bg-gradient-to-r hover:from-secondary/10 hover:to-primary/10"
+                  }`}
                   onClick={closeMenu}
                 >
                   Season Registration
                 </Link>
                 <button
                   onClick={navigateToProfile}
-                  className={`text-lg font-medium text-left ${pathname.startsWith("/players/") ? "text-primary" : "text-muted-foreground"}`}
+                  className={`block text-xl font-semibold px-4 py-3 rounded-xl transition-all duration-300 hover:scale-105 text-left w-full ${
+                    pathname.startsWith("/players/") 
+                      ? "text-white bg-gradient-to-r from-primary to-secondary shadow-lg" 
+                      : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  }`}
                 >
                   My Profile
                 </button>
-                {/* Team Chat in mobile menu */}
-                <div className="mt-4">
-                  <TeamChatButton />
+                {/* Enhanced team chat in mobile menu */}
+                <div className="mt-6 px-4">
+                  <div className="p-3 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl border border-primary/20">
+                    <TeamChatButton />
+                  </div>
                 </div>
               </>
             )}
             {showFullUI && (
               <>
                 {!session && (
-                  <div className="grid gap-4 mt-4">
-                    <Button variant="outline" asChild>
+                  <div className="grid gap-4 mt-8 px-4">
+                    <Button 
+                      variant="outline" 
+                      asChild
+                      className="border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:scale-105 shadow-md py-3 text-lg font-semibold"
+                    >
                       <Link href="/login" onClick={closeMenu}>
                         Log in
                       </Link>
                     </Button>
-                    <Button asChild>
+                    <Button 
+                      asChild
+                      className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 py-3 text-lg font-semibold"
+                    >
                       <Link href="/register" onClick={closeMenu}>
                         Sign up
                       </Link>

@@ -46,17 +46,26 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
   const bubbleTeams = sortedTeams.slice(8, 12) // Next 4 teams in the hunt
 
   return (
-    <div className="space-y-8">
-      {/* Playoff Teams */}
-      <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 to-green-600/5">
-        <CardHeader className="pb-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-500/20 rounded-xl">
-              <Crown className="h-6 w-6 text-green-500" />
+    <div className="space-y-10">
+      {/* Championship Playoff Teams */}
+      <Card className="border-2 border-green-500/40 bg-gradient-to-br from-background via-green-500/8 to-green-600/8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-green-600" />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/5 opacity-50" />
+        
+        <CardHeader className="pb-8 pt-8 relative">
+          <div className="flex items-center gap-6">
+            <div className="relative p-4 bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 rounded-xl opacity-90" />
+              <Crown className="h-8 w-8 text-white relative z-10" />
+              <div className="absolute -inset-1 bg-gradient-to-br from-green-500 to-green-600 rounded-xl blur opacity-40" />
             </div>
             <div>
-              <CardTitle className="text-2xl text-green-600">Playoff Teams</CardTitle>
-              <CardDescription className="text-green-500/70">Top 8 Teams - Championship Contenders</CardDescription>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
+                Championship Playoff Teams
+              </CardTitle>
+              <CardDescription className="text-lg text-muted-foreground font-medium">
+                Top 8 Teams - Elite Championship Contenders
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -106,17 +115,26 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
         </CardContent>
       </Card>
 
-      {/* Bubble Teams */}
+      {/* Championship Bubble Teams */}
       {bubbleTeams.length > 0 && (
-        <Card className="border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-orange-600/5">
-          <CardHeader className="pb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-orange-500/20 rounded-xl">
-                <Target className="h-6 w-6 text-orange-500" />
+        <Card className="border-2 border-orange-500/40 bg-gradient-to-br from-background via-orange-500/8 to-orange-600/8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-orange-600" />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-orange-600/5 opacity-50" />
+          
+          <CardHeader className="pb-8 pt-8 relative">
+            <div className="flex items-center gap-6">
+              <div className="relative p-4 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl opacity-90" />
+                <Target className="h-8 w-8 text-white relative z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl blur opacity-40" />
               </div>
               <div>
-                <CardTitle className="text-2xl text-orange-600">Bubble Teams</CardTitle>
-                <CardDescription className="text-orange-500/70">Fighting for Final Playoff Spots</CardDescription>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  Championship Bubble Teams
+                </CardTitle>
+                <CardDescription className="text-lg text-muted-foreground font-medium">
+                  Fighting for Final Championship Positions
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -190,37 +208,55 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
   const conference2Name = hasConferenceData ? "Custom Conference" : "Western Conference"
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
-      <Card className="border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-blue-600/5">
-        <CardHeader className="pb-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/20 rounded-xl">
-              <Medal className="h-6 w-6 text-blue-500" />
+    <div className="grid gap-10 lg:grid-cols-2">
+      <Card className="border-2 border-primary/30 bg-gradient-to-br from-background via-primary/5 to-secondary/5 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-30" />
+        
+        <CardHeader className="pb-8 pt-8 relative">
+          <div className="flex items-center gap-6">
+            <div className="relative p-4 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-xl opacity-90" />
+              <Medal className="h-8 w-8 text-white relative z-10" />
+              <div className="absolute -inset-1 bg-gradient-to-br from-primary to-secondary rounded-xl blur opacity-40" />
             </div>
             <div>
-              <CardTitle className="text-2xl text-blue-600">{conference1Name}</CardTitle>
-              <CardDescription className="text-blue-500/70">{conference1Teams.length} teams</CardDescription>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                {conference1Name}
+              </CardTitle>
+              <CardDescription className="text-lg text-muted-foreground font-medium">
+                {conference1Teams.length} championship teams
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative p-8">
           <TeamStandings teams={conference1Teams} />
         </CardContent>
       </Card>
 
-      <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-purple-600/5">
-        <CardHeader className="pb-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-500/20 rounded-xl">
-              <Award className="h-6 w-6 text-purple-500" />
+      <Card className="border-2 border-secondary/30 bg-gradient-to-br from-background via-secondary/5 to-primary/5 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-secondary to-primary" />
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-primary/5 opacity-30" />
+        
+        <CardHeader className="pb-8 pt-8 relative">
+          <div className="flex items-center gap-6">
+            <div className="relative p-4 bg-gradient-to-br from-secondary to-primary rounded-xl shadow-xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary to-primary rounded-xl opacity-90" />
+              <Award className="h-8 w-8 text-white relative z-10" />
+              <div className="absolute -inset-1 bg-gradient-to-br from-secondary to-primary rounded-xl blur opacity-40" />
             </div>
             <div>
-              <CardTitle className="text-2xl text-purple-600">{conference2Name}</CardTitle>
-              <CardDescription className="text-purple-500/70">{conference2Teams.length} teams</CardDescription>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">
+                {conference2Name}
+              </CardTitle>
+              <CardDescription className="text-lg text-muted-foreground font-medium">
+                {conference2Teams.length} championship teams
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative p-8">
           <TeamStandings teams={conference2Teams} />
         </CardContent>
       </Card>
@@ -261,53 +297,62 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
   }
 
   return (
-    <Tabs defaultValue="overall" className="space-y-8">
-      <TabsList className="grid w-full grid-cols-3 p-2 bg-muted/50 backdrop-blur-sm rounded-xl">
-        <TabsTrigger value="overall" className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg">
-          <BarChart3 className="h-5 w-5 mr-2" />
-          Overall Standings
-        </TabsTrigger>
-        <TabsTrigger value="conference" className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg">
-          <Users className="h-5 w-5 mr-2" />
-          Conference
-        </TabsTrigger>
-        <TabsTrigger value="playoffs" className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg">
-          <Trophy className="h-5 w-5 mr-2" />
-          Playoff Picture
-        </TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="overall" className="space-y-12">
+      <div className="bg-background/80 backdrop-blur-lg border-2 border-primary/20 p-4 rounded-2xl shadow-2xl">
+        <TabsList className="grid w-full grid-cols-3 p-3 bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-lg rounded-xl border border-primary/20">
+          <TabsTrigger value="overall" className="py-4 text-lg font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-3">
+            <BarChart3 className="h-6 w-6" />
+            Overall Standings
+          </TabsTrigger>
+          <TabsTrigger value="conference" className="py-4 text-lg font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-secondary data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-3">
+            <Users className="h-6 w-6" />
+            Conference
+          </TabsTrigger>
+          <TabsTrigger value="playoffs" className="py-4 text-lg font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-3">
+            <Trophy className="h-6 w-6" />
+            Playoff Picture
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
-      <TabsContent value="overall" className="space-y-6">
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-          <CardHeader className="pb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-primary/20 rounded-xl">
-                <TrendingUp className="h-6 w-6 text-primary" />
+      <TabsContent value="overall" className="space-y-8">
+        <Card className="border-2 border-primary/30 bg-gradient-to-br from-background via-primary/5 to-secondary/5 shadow-2xl overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-50" />
+          
+          <CardHeader className="pb-8 pt-8 relative">
+            <div className="flex items-center gap-6">
+              <div className="relative p-4 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-xl opacity-90" />
+                <TrendingUp className="h-8 w-8 text-white relative z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-br from-primary to-secondary rounded-xl blur opacity-40" />
               </div>
               <div>
-                <CardTitle className="text-2xl">League Standings</CardTitle>
-                <CardDescription className="text-lg">
-                  Complete standings for all teams in the league
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Championship League Standings
+                </CardTitle>
+                <CardDescription className="text-xl text-muted-foreground mt-2">
+                  Complete standings for all professional franchises in the league
                 </CardDescription>
-                <div className="flex items-center gap-6 mt-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default" className="bg-green-600 text-white text-xs px-2 py-1">
-                      <Trophy className="h-3 w-3 mr-1" />
+                <div className="flex items-center gap-8 mt-6 text-base">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="default" className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg">
+                      <Trophy className="h-4 w-4 mr-2" />
                       CLINCHED
                     </Badge>
-                    <span className="text-muted-foreground">Playoff Spot</span>
+                    <span className="text-muted-foreground font-medium">Playoff Position</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="destructive" className="bg-red-600 text-white text-xs px-2 py-1">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="destructive" className="bg-gradient-to-r from-red-500 to-red-600 text-white text-sm px-4 py-2 rounded-lg shadow-lg">
                       ELIMINATED
                     </Badge>
-                    <span className="text-muted-foreground">From Playoffs</span>
+                    <span className="text-muted-foreground font-medium">From Championship</span>
                   </div>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative p-8">
             <TeamStandings teams={standings} />
           </CardContent>
         </Card>
@@ -329,30 +374,42 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
   const selectedSeasonId = searchParams.season ? Number.parseInt(searchParams.season) : currentSeasonId
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen relative overflow-hidden bg-background">
+      {/* Professional Hockey Championship Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        {/* Championship floating elements */}
+        <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl animate-pulse" />
+        <div className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl animate-pulse" style={{animationDelay: "1s"}} />
+        <div className="absolute top-1/2 right-1/3 w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full shadow-lg animate-pulse" style={{animationDelay: "2s"}} />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div className="space-y-8">
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-4 mb-6">
-              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
-                <Trophy className="h-10 w-10 text-white" />
+      <div className="relative z-10 container mx-auto px-4 py-16">
+        <div className="space-y-12">
+          {/* Enhanced Professional Championship Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-6 mb-8">
+              <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
+                <Trophy className="h-12 w-12 text-white relative z-10" />
+                <div className="absolute -inset-2 bg-gradient-to-br from-primary to-secondary rounded-2xl blur opacity-40" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                League Standings
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                Championship Standings
               </h1>
             </div>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Current team standings, conference rankings, and playoff picture for the Secret Chel Society
+            
+            <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
+              <div className="h-3 w-3 bg-primary rounded-full animate-pulse" />
+              <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
+            </div>
+            
+            <p className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              Current <span className="font-bold text-primary">team standings</span>, conference rankings, and playoff picture for the <span className="font-semibold text-secondary">Secret Chel Society Championship</span>
             </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
           </div>
 
           <Suspense fallback={<StandingsLoadingSkeleton />}>

@@ -2,85 +2,165 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Hockey-themed animations */
+  @keyframes ice-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  @keyframes puck-slide {
+    0% { transform: translateX(-100px) rotate(0deg); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(100px) rotate(360deg); opacity: 0; }
+  }
+  
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 15px hsl(var(--primary)); }
+    50% { box-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary)); }
+  }
+  
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .ice-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background-size: 200% 100%;
+    animation: ice-shimmer 3s infinite;
+  }
+  
+  .puck-slide {
+    animation: puck-slide 4s infinite;
+  }
+  
+  .glow-effect {
+    animation: glow-pulse 2s infinite alternate;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(-45deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)), hsl(var(--primary)));
+    background-size: 400% 400%;
+    animation: gradient-shift 8s ease infinite;
+  }
+  
+  /* Hockey rink grid pattern */
+  .hockey-grid {
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(var(--secondary) / 0.1) 0%, transparent 50%),
+      linear-gradient(90deg, transparent 49%, hsl(var(--border)) 50%, transparent 51%),
+      linear-gradient(0deg, transparent 49%, hsl(var(--border)) 50%, transparent 51%);
+    background-size: 100px 100px, 150px 150px, 50px 50px, 50px 50px;
+  }
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
+    /* Updated color scheme: Blue, Purple, Silver */
+    --background: 220 15% 97%;
+    --foreground: 220 15% 12%;
+    --card: 220 15% 100%;
+    --card-foreground: 220 15% 12%;
+    --popover: 220 15% 100%;
+    --popover-foreground: 220 15% 12%;
+    --primary: 224 76% 48%; /* Professional Blue */
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
+    --secondary: 270 50% 40%; /* Deep Purple */
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 220 15% 85%; /* Light Silver/Gray */
+    --accent-foreground: 220 15% 15%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 220 15% 88%;
+    --input: 220 15% 92%;
+    --ring: 224 76% 48%;
+    --radius: 0.75rem;
+    
+    /* Enhanced chart colors for hockey analytics */
+    --chart-1: 224 76% 48%; /* Primary Blue */
+    --chart-2: 270 50% 40%; /* Deep Purple */
+    --chart-3: 220 15% 60%; /* Silver Gray */
+    --chart-4: 200 85% 45%; /* Ice Blue */
+    --chart-5: 280 65% 55%; /* Royal Purple */
+    
+    /* Sidebar theming */
+    --sidebar-background: 220 15% 98%;
+    --sidebar-foreground: 220 15% 20%;
+    --sidebar-primary: 224 76% 48%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 15% 93%;
+    --sidebar-accent-foreground: 220 15% 15%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 224 76% 48%;
+    
+    /* Custom hockey-themed colors */
+    --ice-blue: 200 85% 45%;
+    --hockey-silver: 220 15% 70%;
+    --rink-blue: 210 100% 35%;
+    --goal-red: 0 75% 55%;
+    --assist-green: 120 60% 45%;
+  }
+  
+  .dark {
+    /* Dark mode with enhanced blue/purple/silver theme */
+    --background: 222 20% 8%;
+    --foreground: 220 15% 95%;
+    --card: 222 20% 10%;
+    --card-foreground: 220 15% 95%;
+    --popover: 222 20% 10%;
+    --popover-foreground: 220 15% 95%;
+    --primary: 224 76% 55%; /* Brighter Blue for dark mode */
+    --primary-foreground: 222 20% 8%;
+    --secondary: 270 50% 50%; /* Vibrant Purple */
+    --secondary-foreground: 222 20% 8%;
+    --muted: 222 20% 15%;
+    --muted-foreground: 220 15% 65%;
+    --accent: 220 15% 25%; /* Dark Silver/Gray */
+    --accent-foreground: 220 15% 90%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 20% 18%;
+    --input: 222 20% 15%;
+    --ring: 224 76% 55%;
+    
+    /* Enhanced dark mode chart colors */
+    --chart-1: 224 76% 55%; /* Bright Blue */
+    --chart-2: 270 50% 60%; /* Bright Purple */
+    --chart-3: 220 15% 70%; /* Light Silver */
+    --chart-4: 200 85% 55%; /* Bright Ice Blue */
+    --chart-5: 280 65% 65%; /* Bright Royal Purple */
+    
+    /* Dark sidebar theming */
+    --sidebar-background: 222 20% 8%;
+    --sidebar-foreground: 220 15% 85%;
+    --sidebar-primary: 224 76% 55%;
+    --sidebar-primary-foreground: 222 20% 8%;
+    --sidebar-accent: 222 20% 15%;
+    --sidebar-accent-foreground: 220 15% 85%;
+    --sidebar-border: 222 20% 18%;
+    --sidebar-ring: 224 76% 55%;
+    
+    /* Enhanced dark mode hockey colors */
+    --ice-blue: 200 85% 55%;
+    --hockey-silver: 220 15% 75%;
+    --rink-blue: 210 100% 45%;
+    --goal-red: 0 75% 60%;
+    --assist-green: 120 60% 55%;
   }
 }
 

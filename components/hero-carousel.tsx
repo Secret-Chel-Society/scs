@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Trophy, Gamepad2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface HeroImage {
@@ -60,77 +60,126 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
   const currentImage = validImages[current] || defaultContent
 
   return (
-    <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-black flex flex-col items-center justify-center">
-      {/* Carousel Images */}
+    <div className="relative h-[600px] md:h-[700px] w-full overflow-hidden bg-gradient-to-br from-background via-primary/10 to-secondary/10 flex flex-col items-center justify-center">
+      {/* Enhanced Professional Hockey Background */}
+      <div className="absolute inset-0 hockey-grid opacity-30" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-secondary/10 to-primary/15" />
+      
+      {/* Professional ice rink elements */}
+      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-secondary to-primary opacity-80" />
+      <div className="absolute bottom-0 left-0 w-full h-2 bg-gradient-to-r from-secondary via-primary to-secondary opacity-80" />
+      
+      {/* Carousel Images with Enhanced Container */}
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.1 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0 flex items-center justify-center"
         >
-          <Image
-            src={currentImage.url || "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png"}
-            alt={currentImage.title || "Carousel image"}
-            width={500}
-            height={500}
-            className="object-contain"
-            priority
-            onError={() => handleImageError(current)}
-          />
+          <div className="relative h-full w-full flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-50" />
+            <Image
+              src={currentImage.url || "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/carousel/2D183079-0CA8-4A08-84F6-A6645094ADD7.png"}
+              alt={currentImage.title || "Championship carousel"}
+              width={600}
+              height={600}
+              className="object-contain relative z-10 filter drop-shadow-2xl"
+              priority
+              onError={() => handleImageError(current)}
+            />
+          </div>
         </motion.div>
       </AnimatePresence>
 
-      {/* Content */}
-      <div className="absolute bottom-16 inset-x-0 flex flex-col items-center text-center p-4">
+      {/* Enhanced Professional Content Overlay */}
+      <div className="absolute bottom-20 inset-x-0 flex flex-col items-center text-center p-6">
         <motion.div
           key={`content-${current}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="max-w-3xl"
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
+          className="max-w-4xl"
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white drop-shadow-md">
-            {currentImage.title}
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-md">{currentImage.subtitle}</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button asChild size="lg" className="font-semibold">
-              <Link href="/register/season">Season 1 Signup</Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="bg-background/30 backdrop-blur-sm border-white/20 text-white hover:bg-background/50"
-            >
-              <Link href="/matches">View Matches</Link>
-            </Button>
+          <div className="relative mb-6">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-primary/90 to-secondary/90 bg-clip-text text-transparent drop-shadow-2xl">
+              {currentImage.title}
+            </h1>
+            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 blur-3xl opacity-50" />
           </div>
+          
+          <p className="text-2xl md:text-3xl mb-12 text-white/95 drop-shadow-xl font-medium leading-relaxed max-w-3xl mx-auto">
+            {currentImage.subtitle}
+          </p>
+          
+          <motion.div 
+            className="flex flex-wrap justify-center gap-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <motion.div whileHover={{ scale: 1.08, y: -3 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                asChild 
+                size="lg" 
+                className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 shadow-2xl hover:shadow-3xl text-xl px-10 py-6 rounded-xl font-bold transition-all duration-300"
+              >
+                <Link href="/register/season" className="flex items-center gap-3">
+                  <Trophy className="h-6 w-6" />
+                  Championship Signup
+                </Link>
+              </Button>
+            </motion.div>
+            
+            <motion.div whileHover={{ scale: 1.08, y: -3 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="bg-background/40 backdrop-blur-lg border-2 border-white/30 text-white hover:bg-background/60 hover:border-white/50 shadow-xl hover:shadow-2xl text-xl px-10 py-6 rounded-xl font-bold transition-all duration-300"
+              >
+                <Link href="/matches" className="flex items-center gap-3">
+                  <Gamepad2 className="h-6 w-6" />
+                  View Arena
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
         </motion.div>
       </div>
 
-      {/* Nav arrows if >1 image */}
+      {/* Enhanced Professional Navigation Arrows */}
       {validImages.length > 1 && (
         <>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/30 backdrop-blur-sm text-white hover:bg-background/50 rounded-full h-10 w-10"
-            onClick={prev}
+          <motion.div
+            whileHover={{ scale: 1.1, x: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/30 backdrop-blur-sm text-white hover:bg-background/50 rounded-full h-10 w-10"
-            onClick={next}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-6 top-1/2 -translate-y-1/2 bg-background/50 backdrop-blur-lg border border-primary/30 text-white hover:bg-gradient-to-r hover:from-primary/60 hover:to-secondary/60 hover:border-primary/50 rounded-full h-14 w-14 shadow-xl hover:shadow-2xl transition-all duration-300"
+              onClick={prev}
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </Button>
+          </motion.div>
+          
+          <motion.div
+            whileHover={{ scale: 1.1, x: 2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ChevronRight className="h-6 w-6" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-6 top-1/2 -translate-y-1/2 bg-background/50 backdrop-blur-lg border border-primary/30 text-white hover:bg-gradient-to-r hover:from-secondary/60 hover:to-primary/60 hover:border-secondary/50 rounded-full h-14 w-14 shadow-xl hover:shadow-2xl transition-all duration-300"
+              onClick={next}
+            >
+              <ChevronRight className="h-8 w-8" />
+            </Button>
+          </motion.div>
         </>
       )}
     </div>
