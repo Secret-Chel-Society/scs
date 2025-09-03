@@ -605,12 +605,12 @@ export default function MatchesPage() {
                                        <Image
                                          src={match.home_team.logo_url || "/placeholder.svg"}
                                          alt={match.home_team.name}
-                                         width={96}
-                                         height={96}
-                                         className="object-contain p-1"
+                                         width={80}
+                                         height={80}
+                                         className="object-contain"
                                        />
                                      ) : (
-                                       <div className="w-full h-full bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                                       <div className="w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300 rounded-lg border border-hockey-silver-200 dark:border-hockey-silver-600">
                                          {match.home_team.name.substring(0, 2)}
                                        </div>
                                      )}
@@ -656,12 +656,12 @@ export default function MatchesPage() {
                                        <Image
                                          src={match.away_team.logo_url || "/placeholder.svg"}
                                          alt={match.away_team.name}
-                                         width={96}
-                                         height={96}
-                                         className="object-contain p-1"
+                                         width={80}
+                                         height={80}
+                                         className="object-contain"
                                        />
                                      ) : (
-                                       <div className="w-full h-full bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                                       <div className="w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300 rounded-lg border border-hockey-silver-200 dark:border-hockey-silver-600">
                                          {match.away_team.name.substring(0, 2)}
                                        </div>
                                      )}
