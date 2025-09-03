@@ -108,127 +108,87 @@ export default function UpdateCurrentSeasonPage() {
     }
   }
 
+  const getCurrentSeasonName = () => {
+    const season = seasons.find((s) => s.id === currentSeason)
+    return season ? `${season.name} (${season.id})` : "Unknown"
+  }
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
-              <p className="text-white/70">Loading season management...</p>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
-        <div className="relative container mx-auto px-4 py-8">
-          <div className="flex items-center gap-2 mb-6">
-            <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
-              Back to Admin Dashboard
-            </Link>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Update Current Season</h1>
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Current Season</CardTitle>
+          <CardDescription>
+            The current season is used for player registrations and other season-specific features.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {success && (
+            <Alert
+              variant="default"
+              className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+            >
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertTitle className="text-green-600 dark:text-green-400">Success</AlertTitle>
+              <AlertDescription className="text-green-600 dark:text-green-400">{success}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Current Season</label>
+            <div className="p-2 border rounded-md bg-muted/50">{getCurrentSeasonName()}</div>
           </div>
 
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
-              <Clock className="h-8 w-8 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Update Current Season
-              </h1>
-              <p className="text-white/70 mt-1">Set the active season for the system</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-8">
-        <div className="max-w-2xl mx-auto">
-          <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Current Season Settings
-              </CardTitle>
-              <CardDescription className="text-white/70">
-                Update the current active season for the league
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {success && (
-                <Alert className="bg-green-500/10 border-green-500/20">
-                  <CheckCircle className="h-4 w-4 text-green-400" />
-                  <AlertTitle className="text-green-400">Season Updated</AlertTitle>
-                  <AlertDescription className="text-green-300">
-                    The current season has been successfully updated to Season {currentSeason}.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-2">
-                <label className="text-white font-medium">Current Season</label>
-                <div className="p-3 border border-white/20 rounded-md bg-slate-800/50 text-white">
-                  Season {currentSeason}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-white font-medium">Select New Season</label>
-                <Select value={selectedSeason || ""} onValueChange={(value) => setSelectedSeason(value)}>
-                  <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                    <SelectValue placeholder="Select a season" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-white/20">
-                    {seasons.map((season) => (
-                      <SelectItem key={season.id} value={season.id.toString()} className="text-white hover:bg-slate-700">
-                        {season.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button 
-                onClick={handleUpdateSeason} 
-                disabled={isUpdating}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
-              >
-                {isUpdating ? "Updating..." : "Update Current Season"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="mt-6 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Available Seasons</CardTitle>
-              <CardDescription className="text-white/70">
-                All seasons configured in the system
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+          <div className="space-y-2">
+            <label htmlFor="season" className="text-sm font-medium">
+              Select New Season
+            </label>
+            <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a season" />
+              </SelectTrigger>
+              <SelectContent>
                 {seasons.map((season) => (
-                  <div key={season.id} className="flex items-center justify-between p-3 border border-white/20 rounded-md bg-slate-800/50">
-                    <span className="text-white">{season.name}</span>
-                    {season.is_active && (
-                      <span className="text-green-400 text-sm">Active</span>
-                    )}
-                  </div>
+                  <SelectItem key={season.id} value={season.id}>
+                    {season.name} ({season.id})
+                  </SelectItem>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleUpdateSeason} disabled={isUpdating || !selectedSeason} className="w-full">
+            {isUpdating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Updating...
+              </>
+            ) : (
+              "Update Current Season"
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
-

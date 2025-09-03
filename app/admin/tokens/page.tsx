@@ -1,5 +1,3 @@
-"use client"
-
 import { TokenManagement } from "@/components/admin/token-management"
 
 export default function AdminTokensPage() {

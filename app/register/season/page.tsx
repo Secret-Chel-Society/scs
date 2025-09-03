@@ -12,7 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/components/ui/use-toast"
 import { motion } from "framer-motion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, Loader2 } from "lucide-react"
+import { AlertCircle, Loader2, Trophy, Calendar, Users, Target, Star, CheckCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export default function SeasonRegistrationPage() {
   const router = useRouter()
@@ -114,82 +115,204 @@ export default function SeasonRegistrationPage() {
         return activeSeason
       }
     } catch (error) {
-      window.console.error("Unexpected error in fetchActiveSeason:", error)
-      setDebugInfo((prev) => prev + `\nUnexpected error: ${error}`)
+      window.console.error("Error in fetchActiveSeason:", error)
+      setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)
       setLoadingActiveSeason(false)
       return null
     }
   }
 
-  const checkRegistrationStatus = async () => {
-    if (!session?.user?.id || !activeSeason) return
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!session?.user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to register for the season.",
+        variant: "destructive",
+      })
+      router.push("/login")
+      return
+    }
 
+    // Fetch active season from system settings
+    const fetchActiveSeasonData = async () => {
+      setLoadingActiveSeason(true)
+      try {
+        const seasonData = await fetchActiveSeason()
+
+        if (!seasonData) {
+          setDebugInfo((prev) => prev + "\nNo active season found")
+          toast({
+            title: "No active season",
+            description: "There is no active season available for registration.",
+            variant: "destructive",
+          })
+          setLoadingActiveSeason(false)
+          return
+        }
+
+        setActiveSeason(seasonData)
+        setDebugInfo((prev) => prev + `\nActive season set to: ${JSON.stringify(seasonData)}`)
+        setLoadingActiveSeason(false)
+
+        // Check if user has already registered for this season
+        checkRegistration(seasonData.id)
+      } catch (error) {
+        window.console.error("Error in fetchActiveSeasonData:", error)
+        setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)
+        setLoadingActiveSeason(false)
+      }
+    }
+
+    fetchActiveSeasonData()
+  }, [session, router, toast, supabase])
+
+  // Check if user has already registered for the current season
+  const checkRegistration = async (seasonId: string) => {
+    if (!session?.user) return
+
+    setIsCheckingRegistration(true)
     try {
       const { data, error } = await supabase
         .from("season_registrations")
-        .select("id")
+        .select("*")
         .eq("user_id", session.user.id)
-        .eq("season_id", activeSeason.id)
+        .eq("season_id", seasonId)
         .single()
 
       if (error && error.code !== "PGRST116") {
-        console.error("Error checking registration:", error)
+        // PGRST116 is the error code for "no rows returned"
+        window.console.error("Error checking registration:", error)
+        setDebugInfo((prev) => prev + `\nRegistration check error: ${error.message}`)
       }
 
       setHasRegistered(!!data)
+      setDebugInfo((prev) => prev + `\nHas registered: ${!!data}`)
     } catch (error) {
-      console.error("Error checking registration:", error)
+      window.console.error("Error checking registration:", error)
+      setDebugInfo((prev) => prev + `\nRegistration check exception: ${JSON.stringify(error)}`)
     } finally {
       setIsCheckingRegistration(false)
     }
   }
 
+  const validateForm = () => {
+    const newErrors: {
+      gamerTag?: string
+      primaryPosition?: string
+      consoleType?: string
+    } = {}
+
+    if (!gamerTag || gamerTag.length < 3) {
+      newErrors.gamerTag = "Gamer Tag must be at least 3 characters."
+    }
+
+    if (!primaryPosition) {
+      newErrors.primaryPosition = "Please select a primary position."
+    }
+
+    if (!consoleType) {
+      newErrors.consoleType = "Please select a console."
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setErrors({})
 
-    // Validation
-    const newErrors: typeof errors = {}
-    if (!gamerTag.trim()) newErrors.gamerTag = "Gamer tag is required"
-    if (!primaryPosition) newErrors.primaryPosition = "Primary position is required"
-    if (!consoleType) newErrors.consoleType = "Console type is required"
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      setIsLoading(false)
+    if (!validateForm()) {
       return
     }
 
+    if (!session?.user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to register for the season.",
+        variant: "destructive",
+      })
+      router.push("/login")
+      return
+    }
+
+    if (!activeSeason) {
+      toast({
+        title: "No active season",
+        description: "There is no active season available for registration.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsLoading(true)
+
     try {
-      if (!activeSeason) {
-        throw new Error("No active season found")
+      // Check again if user has already registered
+      const { data: existingReg } = await supabase
+        .from("season_registrations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .eq("season_id", activeSeason.id)
+        .single()
+
+      if (existingReg) {
+        setHasRegistered(true)
+        toast({
+          title: "Already Registered",
+          description:
+            "Error: User is already signed up for the season. Please contact a League Official if you want to be removed from the season signup or change positions.",
+          variant: "destructive",
+        })
+        setIsLoading(false)
+        return
       }
 
-      const { error } = await supabase.from("season_registrations").insert({
-        user_id: session?.user?.id,
+      // Prepare registration data
+      // Use season_number if it exists, otherwise use derived_season_number or a default
+      const seasonNumber = activeSeason.season_number || activeSeason.derived_season_number || 1
+
+      const registrationData = {
+        user_id: session.user.id,
         season_id: activeSeason.id,
-        gamer_tag: gamerTag.trim(),
+        season_number: seasonNumber,
         primary_position: primaryPosition,
         secondary_position: secondaryPosition === "none" ? null : secondaryPosition,
-        console_type: consoleType,
-        registration_date: new Date().toISOString(),
-      })
+        gamer_tag: gamerTag,
+        console: consoleType,
+        status: "Pending",
+      }
 
-      if (error) throw error
+      setDebugInfo((prev) => prev + `\nSubmitting registration: ${JSON.stringify(registrationData)}`)
+
+      // Insert season registration
+      const { error } = await supabase.from("season_registrations").insert(registrationData)
+
+      if (error) {
+        setDebugInfo((prev) => prev + `\nRegistration error: ${error.message}`)
+
+        // Check if the error is due to the user already being registered
+        if (error.message.includes("duplicate key") || error.message.includes("unique constraint")) {
+          setHasRegistered(true)
+          throw new Error(
+            "User is already signed up for the season. Please contact a League Official if you want to be removed from the season signup or change positions.",
+          )
+        }
+
+        throw error
+      }
 
       toast({
         title: "Registration successful!",
-        description: `You have been registered for ${activeSeason.name}`,
+        description: `Your registration for ${activeSeason.name} has been submitted for review.`,
       })
 
-      setHasRegistered(true)
-      router.push("/dashboard")
+      router.push("/profile")
     } catch (error: any) {
-      console.error("Registration error:", error)
+      setDebugInfo((prev) => prev + `\nRegistration exception: ${JSON.stringify(error)}`)
       toast({
         title: "Registration failed",
-        description: error.message || "An error occurred during registration",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -198,70 +321,70 @@ export default function SeasonRegistrationPage() {
   }
 
   useEffect(() => {
-    if (!session) {
-      router.push("/login")
-      return
-    }
+    if (session?.user) {
+      const checkBanStatus = async () => {
+        const { data: user, error } = await supabase
+          .from("users")
+          .select("is_banned, ban_reason, ban_expires_at")
+          .eq("id", session.user.id)
+          .single()
 
-    const initializePage = async () => {
-      const season = await fetchActiveSeason()
-      if (season) {
-        setActiveSeason(season)
-        await checkRegistrationStatus()
+        if (error) {
+          console.error("Error checking ban status:", error)
+          toast({
+            title: "Error",
+            description: "Failed to check account status. Please try again.",
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (user?.is_banned) {
+          const isTemporaryBan = user.ban_expires_at && new Date(user.ban_expires_at) > new Date()
+
+          toast({
+            title: "Account Suspended",
+            description: `Your account is currently suspended and you cannot register for the season. ${
+              isTemporaryBan
+                ? `Suspension expires: ${new Date(user.ban_expires_at).toLocaleDateString()}`
+                : "This is a permanent suspension."
+            }`,
+            variant: "destructive",
+          })
+          router.push("/") // Redirect to home page where they'll see the ban modal
+          return
+        }
       }
-    }
 
-    initializePage()
-  }, [session, router])
+      checkBanStatus()
+    }
+  }, [session, supabase, toast, router])
 
   if (!session) {
-    return null
-  }
-
-  if (loadingActiveSeason) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="relative z-10 container mx-auto px-4 py-12 max-w-3xl">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+            <CardContent className="pt-6">
+              <p className="text-center text-white">Please sign in to register for the season.</p>
+            </CardContent>
+          </Card>
         </div>
+      </div>
+    )
+  }
 
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-white" />
-              <p className="text-white">Loading season information...</p>
-            </div>
-          </div>
+  if (loadingActiveSeason || isCheckingRegistration) {
+    return (
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="relative z-10 container mx-auto px-4 py-12 max-w-3xl">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+            <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-center text-white">Loading season information...</p>
+            </CardContent>
+          </Card>
         </div>
-
-        <style jsx>{`
-          @keyframes blob {
-            0% {
-              transform: translate(0px, 0px) scale(1);
-            }
-            33% {
-              transform: translate(30px, -50px) scale(1.1);
-            }
-            66% {
-              transform: translate(-20px, 20px) scale(0.9);
-            }
-            100% {
-              transform: translate(0px, 0px) scale(1);
-            }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
-        `}</style>
       </div>
     )
   }
@@ -269,48 +392,29 @@ export default function SeasonRegistrationPage() {
   if (!activeSeason) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
+        <div className="relative z-10 container mx-auto px-4 py-12 max-w-3xl">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <CardTitle className="text-3xl text-white">Season Registration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert variant="destructive" className="bg-red-500/10 border-red-500/30">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle className="text-red-400">No Active Season</AlertTitle>
+                <AlertDescription className="text-red-300">
+                  There is currently no active season available for registration. Please check back later.
+                </AlertDescription>
+              </Alert>
 
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          <Alert variant="destructive" className="bg-red-500/20 border-red-400/30">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>No Active Season</AlertTitle>
-            <AlertDescription>
-              There is currently no active season for registration. Please check back later.
-            </AlertDescription>
-          </Alert>
+              {process.env.NODE_ENV === "development" && (
+                <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono whitespace-pre-wrap">
+                  <p className="font-bold">Debug Information:</p>
+                  {debugInfo || "No debug info available"}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-
-        <style jsx>{`
-          @keyframes blob {
-            0% {
-              transform: translate(0px, 0px) scale(1);
-            }
-            33% {
-              transform: translate(30px, -50px) scale(1.1);
-            }
-            66% {
-              transform: translate(-20px, 20px) scale(0.9);
-            }
-            100% {
-              transform: translate(0px, 0px) scale(1);
-            }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
-        `}</style>
       </div>
     )
   }
@@ -318,195 +422,245 @@ export default function SeasonRegistrationPage() {
   if (hasRegistered) {
     return (
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
+        <div className="relative z-10 container mx-auto px-4 py-12 max-w-3xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <CardTitle className="text-3xl text-white">Season Registration</CardTitle>
+                <CardDescription className="text-white/70">Your registration status for {activeSeason.name}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Alert variant="destructive" className="mb-6 bg-red-500/10 border-red-500/30">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-red-400">Already Registered</AlertTitle>
+                  <AlertDescription className="text-red-300">
+                    Error: User is already signed up for the season. Please contact a League Official if you want to be
+                    removed from the season signup or change positions.
+                  </AlertDescription>
+                </Alert>
 
-        <div className="relative z-10 container mx-auto px-4 py-8">
-          <Card className="bg-white/10 backdrop-blur-sm border-white/20 max-w-md mx-auto">
-            <CardHeader className="text-center">
-              <CardTitle className="text-white">Already Registered</CardTitle>
-              <CardDescription className="text-white/70">
-                You are already registered for {activeSeason.name}
-              </CardDescription>
-            </CardHeader>
-            <CardFooter className="flex justify-center">
-              <Button onClick={() => router.push("/dashboard")} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                Go to Dashboard
-              </Button>
-            </CardFooter>
-          </Card>
+                <div className="flex justify-center mt-4">
+                  <Button onClick={() => router.push("/profile")} variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                    Return to Profile
+                  </Button>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-4 border-t border-white/20 pt-6">
+                <div className="text-sm text-white/70">
+                  Questions? Contact us on{" "}
+                  <a
+                    href="https://discord.gg/PnbwXuDf2A"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Discord
+                  </a>
+                  .
+                </div>
+              </CardFooter>
+            </Card>
+          </motion.div>
         </div>
-
-        <style jsx>{`
-          @keyframes blob {
-            0% {
-              transform: translate(0px, 0px) scale(1);
-            }
-            33% {
-              transform: translate(30px, -50px) scale(1.1);
-            }
-            66% {
-              transform: translate(-20px, 20px) scale(0.9);
-            }
-            100% {
-              transform: translate(0px, 0px) scale(1);
-            }
-          }
-          .animate-blob {
-            animation: blob 7s infinite;
-          }
-          .animation-delay-2000 {
-            animation-delay: 2s;
-          }
-          .animation-delay-4000 {
-            animation-delay: 4s;
-          }
-        `}</style>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-12 max-w-4xl">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2 text-white">Season Registration</h1>
-              <p className="text-white/70">Register for {activeSeason.name}</p>
-            </div>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Registration Form</CardTitle>
-                <CardDescription className="text-white/70">
-                  Please fill out the form below to register for the upcoming season
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="gamerTag" className="text-white">Gamer Tag *</Label>
-                    <Input
-                      id="gamerTag"
-                      value={gamerTag}
-                      onChange={(e) => setGamerTag(e.target.value)}
-                      placeholder="Enter your gamer tag"
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                    />
-                    {errors.gamerTag && (
-                      <p className="text-red-400 text-sm">{errors.gamerTag}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryPosition" className="text-white">Primary Position *</Label>
-                    <Select value={primaryPosition} onValueChange={setPrimaryPosition}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Select primary position" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-white/20">
-                        <SelectItem value="C">Center</SelectItem>
-                        <SelectItem value="LW">Left Wing</SelectItem>
-                        <SelectItem value="RW">Right Wing</SelectItem>
-                        <SelectItem value="LD">Left Defense</SelectItem>
-                        <SelectItem value="RD">Right Defense</SelectItem>
-                        <SelectItem value="G">Goalie</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.primaryPosition && (
-                      <p className="text-red-400 text-sm">{errors.primaryPosition}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryPosition" className="text-white">Secondary Position</Label>
-                    <Select value={secondaryPosition} onValueChange={setSecondaryPosition}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Select secondary position" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-white/20">
-                        <SelectItem value="none">None</SelectItem>
-                        <SelectItem value="C">Center</SelectItem>
-                        <SelectItem value="LW">Left Wing</SelectItem>
-                        <SelectItem value="RW">Right Wing</SelectItem>
-                        <SelectItem value="LD">Left Defense</SelectItem>
-                        <SelectItem value="RD">Right Defense</SelectItem>
-                        <SelectItem value="G">Goalie</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="consoleType" className="text-white">Console Type *</Label>
-                    <Select value={consoleType} onValueChange={setConsoleType}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Select your console" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-white/20">
-                        <SelectItem value="PS5">PlayStation 5</SelectItem>
-                        <SelectItem value="PS4">PlayStation 4</SelectItem>
-                        <SelectItem value="Xbox Series X">Xbox Series X</SelectItem>
-                        <SelectItem value="Xbox One">Xbox One</SelectItem>
-                        <SelectItem value="PC">PC</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.consoleType && (
-                      <p className="text-red-400 text-sm">{errors.consoleType}</p>
-                    )}
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  >
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Register for Season
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+          {/* Enhanced Header Section */}
+          <div className="text-center mb-12">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+            >
+              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
+                <Trophy className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Season Registration
+              </h1>
+            </motion.div>
+            <p className="text-xl text-white/70 max-w-3xl mx-auto">
+              Join the Secret Chel Society and compete in our upcoming season
+            </p>
+            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
           </div>
+
+          <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+            <CardHeader>
+              <CardTitle className="text-3xl text-white">{activeSeason.name} Registration</CardTitle>
+              <CardDescription className="text-white/70">Register to participate in the Secret Chel Society</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Enhanced Season Information */}
+              <div className="mb-8 p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border border-primary/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-primary/20 rounded-lg">
+                    <Calendar className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">{activeSeason.name} Information</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>Registration Deadline: June 12, 2025</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Target className="h-4 w-4 text-primary" />
+                      <span>Bidding: June 13th 8PM Est - June 15th 2PM Est</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Star className="h-4 w-4 text-primary" />
+                      <span>Preseason: June 18th-20th</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Trophy className="h-4 w-4 text-primary" />
+                      <span>Season Start: June 25th, 2025</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span>Format: 60 regular season games</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-white/80">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span>Season Ends: August 8th, 2025</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="gamerTag" className="text-white font-medium">Gamer Tag</Label>
+                  <Input
+                    id="gamerTag"
+                    placeholder="Your PSN or Xbox Gamertag"
+                    value={gamerTag}
+                    onChange={(e) => setGamerTag(e.target.value)}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  />
+                  <p className="text-sm text-white/60">This must match your gamer tag exactly.</p>
+                  {errors.gamerTag && <p className="text-sm text-red-400">{errors.gamerTag}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryPosition" className="text-white font-medium">Primary Position</Label>
+                    <Select onValueChange={setPrimaryPosition} value={primaryPosition}>
+                      <SelectTrigger id="primaryPosition" className="bg-white/10 border-white/20 text-white">
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="C">Center (C)</SelectItem>
+                        <SelectItem value="LW">Left Wing (LW)</SelectItem>
+                        <SelectItem value="RW">Right Wing (RW)</SelectItem>
+                        <SelectItem value="LD">Left Defense (LD)</SelectItem>
+                        <SelectItem value="RD">Right Defense (RD)</SelectItem>
+                        <SelectItem value="G">Goalie (G)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-white/60">Your preferred position to play.</p>
+                    {errors.primaryPosition && <p className="text-sm text-red-400">{errors.primaryPosition}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryPosition" className="text-white font-medium">Secondary Position</Label>
+                    <Select onValueChange={setSecondaryPosition} value={secondaryPosition}>
+                      <SelectTrigger id="secondaryPosition" className="bg-white/10 border-white/20 text-white">
+                        <SelectValue placeholder="Select position (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="C">Center (C)</SelectItem>
+                        <SelectItem value="LW">Left Wing (LW)</SelectItem>
+                        <SelectItem value="RW">Right Wing (RW)</SelectItem>
+                        <SelectItem value="LD">Left Defense (LD)</SelectItem>
+                        <SelectItem value="RD">Right Defense (RD)</SelectItem>
+                        <SelectItem value="G">Goalie (G)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-white/60">Optional backup position.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="consoleType" className="text-white font-medium">Console</Label>
+                  <Select onValueChange={setConsoleType} value={consoleType}>
+                    <SelectTrigger id="consoleType" className="bg-white/10 border-white/20 text-white">
+                      <SelectValue placeholder="Select console" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Xbox">Xbox</SelectItem>
+                      <SelectItem value="PS5">PS5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-white/60">Your gaming platform.</p>
+                  {errors.consoleType && <p className="text-sm text-red-400">{errors.consoleType}</p>}
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full py-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/90 text-white rounded-xl text-lg font-semibold" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Submitting...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5" />
+                      Submit Registration
+                    </div>
+                  )}
+                </Button>
+              </form>
+
+              {process.env.NODE_ENV === "development" && (
+                <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono whitespace-pre-wrap">
+                  <p className="font-bold">Debug Information:</p>
+                  {debugInfo || "No debug info available"}
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4 border-t border-white/20 pt-6">
+              <div className="text-sm text-white/70">
+                By registering, you agree to abide by the league rules and code of conduct. All registrations are subject
+                to review by league management. Key Requirement for the season: -Players must play 3 games a min of 3
+                games a week.
+              </div>
+              <div className="text-sm text-white/70">
+                Questions? Contact us on{" "}
+                <a
+                  href="https://discord.gg/scs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Discord
+                </a>
+                .
+              </div>
+            </CardFooter>
+          </Card>
         </motion.div>
       </div>
-
-      <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
   )
 }

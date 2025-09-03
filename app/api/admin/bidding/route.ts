@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server"
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
-import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
-  
-  // Create service role client for system_settings operations (bypasses RLS)
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  )
 
   try {
     console.log("=== BIDDING API ROUTE START ===")
@@ -91,8 +78,8 @@ export async function POST(request: Request) {
 
       const { enabled } = await request.json()
 
-      // Update the bidding_enabled setting without auth check (using service role)
-      const { error } = await supabaseAdmin
+      // Update the bidding_enabled setting without auth check
+      const { error } = await supabase
         .from("system_settings")
         .upsert({ key: "bidding_enabled", value: enabled }, { onConflict: "key" })
 
@@ -213,8 +200,8 @@ export async function POST(request: Request) {
 
     const { enabled } = await request.json()
 
-    // Update the bidding_enabled setting (using service role for system settings)
-    const { error } = await supabaseAdmin
+    // Update the bidding_enabled setting
+    const { error } = await supabase
       .from("system_settings")
       .upsert({ key: "bidding_enabled", value: enabled }, { onConflict: "key" })
 

@@ -60,7 +60,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
   const currentImage = validImages[current] || defaultContent
 
   return (
-    <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] w-full overflow-hidden bg-black flex flex-col items-center justify-center">
+    <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-black flex flex-col items-center justify-center">
       {/* Carousel Images */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -84,18 +84,31 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="absolute inset-x-0 flex flex-col items-center text-center p-4">
+      <div className="absolute bottom-16 inset-x-0 flex flex-col items-center text-center p-4">
         <motion.div
           key={`content-${current}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="max-w-3xl flex flex-col h-full justify-center"
+          className="max-w-3xl"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 text-white drop-shadow-md">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white drop-shadow-md">
             {currentImage.title}
           </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 lg:mb-8 text-white/90 drop-shadow-md px-4">{currentImage.subtitle}</p>
+          <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-md">{currentImage.subtitle}</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button asChild size="lg" className="font-semibold">
+              <Link href="/register/season">Season 1 Signup</Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="bg-background/30 backdrop-blur-sm border-white/20 text-white hover:bg-background/50"
+            >
+              <Link href="/matches">View Matches</Link>
+            </Button>
+          </div>
         </motion.div>
       </div>
 

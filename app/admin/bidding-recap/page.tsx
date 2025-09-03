@@ -1,5 +1,3 @@
-"use client"
-
 import { BiddingRecap } from "@/components/admin/bidding-recap"
 
 export default function BiddingRecapPage() {

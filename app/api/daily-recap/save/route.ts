@@ -58,7 +58,6 @@ export async function POST(request: NextRequest) {
     const { data: insertData, error: insertError } = await supabase
       .from("daily_recaps")
       .insert({
-        id: crypto.randomUUID(), // Use UUID instead of relying on SERIAL sequence
         date,
         recap_data,
         created_at: new Date().toISOString(),

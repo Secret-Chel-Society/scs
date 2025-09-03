@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server"
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
-import { createClient } from "@supabase/supabase-js"
 
 export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
-  
-  // Create service role client for system_settings operations (bypasses RLS)
-  const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  )
 
   try {
     console.log("=== BID INCREMENT API ROUTE START ===")
@@ -60,7 +47,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Increment must be at least $1,000" }, { status: 400 })
       }
 
-      const { error } = await supabaseAdmin
+      const { error } = await supabase
         .from("system_settings")
         .upsert({ key: "bidding_increment", value: increment }, { onConflict: "key" })
 
@@ -85,7 +72,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Increment must be at least $1,000" }, { status: 400 })
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabase
       .from("system_settings")
       .upsert({ key: "bidding_increment", value: increment }, { onConflict: "key" })
 

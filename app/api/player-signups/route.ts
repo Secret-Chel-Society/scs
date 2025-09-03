@@ -13,7 +13,7 @@ export async function GET() {
   try {
     console.log("Fetching player signups...")
 
-    // Get ALL registrations for the current season (not just approved)
+    // Get approved registrations for the current season
     const { data: registrations, error } = await supabaseAdmin
       .from("season_registrations")
       .select(`
@@ -26,6 +26,7 @@ export async function GET() {
         status,
         season_id
       `)
+      .eq("status", "Approved")
       .order("gamer_tag")
 
     if (error) {
@@ -33,9 +34,9 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log(`Found ${registrations?.length || 0} total registrations`)
+    console.log(`Found ${registrations?.length || 0} approved registrations`)
 
-    // If no registrations, let's check what we have
+    // If no approved registrations, let's check what we have
     if (!registrations || registrations.length === 0) {
       const { data: allRegs, error: allError } = await supabaseAdmin
         .from("season_registrations")
@@ -43,6 +44,28 @@ export async function GET() {
         .group("status")
 
       console.log("Registration status breakdown:", allRegs, allError)
+
+      // For development, also return pending registrations
+      if (process.env.NODE_ENV === "development") {
+        const { data: devRegs, error: devError } = await supabaseAdmin
+          .from("season_registrations")
+          .select(`
+            id,
+            user_id,
+            gamer_tag,
+            primary_position,
+            secondary_position,
+            console,
+            status,
+            season_id
+          `)
+          .order("gamer_tag")
+
+        if (!devError && devRegs) {
+          console.log(`Development mode: returning ${devRegs.length} total registrations`)
+          return NextResponse.json({ players: devRegs })
+        }
+      }
     }
 
     return NextResponse.json({ players: registrations || [] })

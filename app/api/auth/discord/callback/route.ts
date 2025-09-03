@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server"
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
 
-export const dynamic = "force-dynamic"
+// Toggle this when debugging locally
+const isDevelopment = process.env.NODE_ENV === "development"
+
+// ✅ Hardcoded production values
+const DISCORD_CLIENT_ID = "1407947416094900245"
+const DISCORD_CLIENT_SECRET = "d9zvMCTusY97n7yx2rXl8tzCyaFXUCZm"
+const SITE_URL = isDevelopment
+  ? "http://localhost:3000"
+  : "https://www.secretchelsociety.com"
+const DISCORD_REDIRECT_URI = `${SITE_URL}/api/auth/discord/callback`
 
 export async function GET(request: Request) {
   try {
@@ -10,183 +17,145 @@ export async function GET(request: Request) {
     const code = searchParams.get("code")
     const state = searchParams.get("state")
 
+    console.log("Discord callback received:", {
+      code: !!code,
+      state,
+      clientId: DISCORD_CLIENT_ID,
+      isDevelopment,
+      redirectUri: DISCORD_REDIRECT_URI,
+    })
+
     if (!code) {
-      return NextResponse.json({ error: "No authorization code received" }, { status: 400 })
+      console.error("No authorization code received")
+      return NextResponse.redirect(`${SITE_URL}/register?discord_error=no_code`)
     }
 
-    const clientId = process.env.DISCORD_CLIENT_ID
-    const clientSecret = process.env.DISCORD_CLIENT_SECRET
-    
-    if (!clientId || !clientSecret) {
-      return NextResponse.json({ error: "Discord OAuth not configured" }, { status: 500 })
-    }
+    // Handle registration flow
+    if (state === "register") {
+      console.log("Processing Discord connection for registration")
 
-    // Use the same callback URL that was used in the initial request
-    const redirectUri = "https://www.secretchelsociety.com/api/auth/discord/callback"
+      try {
+        // Exchange code for token
+        const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            client_id: DISCORD_CLIENT_ID,
+            client_secret: DISCORD_CLIENT_SECRET,
+            grant_type: "authorization_code",
+            code,
+            redirect_uri: DISCORD_REDIRECT_URI,
+          }),
+        })
 
-    console.log("Discord OAuth callback processing with redirect URI:", redirectUri)
+        if (!tokenResponse.ok) {
+          const errorText = await tokenResponse.text()
+          console.error("Token exchange failed:", {
+            status: tokenResponse.status,
+            statusText: tokenResponse.statusText,
+            error: errorText,
+          })
+          return NextResponse.redirect(`${SITE_URL}/register?discord_error=token_failed`)
+        }
 
-    // Exchange code for access token
-    const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: "authorization_code",
-        code,
-        redirect_uri: redirectUri,
-      }),
-    })
+        const tokenData = await tokenResponse.json()
 
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text()
-      console.error("Token exchange failed:", errorText)
-      return NextResponse.json({ error: "Failed to exchange code for token", details: errorText }, { status: 500 })
-    }
+        // Get Discord user
+        const userResponse = await fetch("https://discord.com/api/users/@me", {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        })
 
-    const tokenData = await tokenResponse.json()
-    const accessToken = tokenData.access_token
+        if (!userResponse.ok) {
+          const errorText = await userResponse.text()
+          console.error("Failed to get Discord user info:", errorText)
+          return NextResponse.redirect(`${SITE_URL}/register?discord_error=user_info_failed`)
+        }
 
-    // Get user info from Discord
-    const userResponse = await fetch("https://discord.com/api/users/@me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
+        const discordUser = await userResponse.json()
+        console.log("Discord user info retrieved:", {
+          id: discordUser.id,
+          username: discordUser.username,
+        })
 
-    if (!userResponse.ok) {
-      console.error("Failed to get Discord user info:", await userResponse.text())
-      return NextResponse.json({ error: "Failed to get Discord user info" }, { status: 500 })
-    }
+        // Store in localStorage + redirect
+        const discordInfo = {
+          id: discordUser.id,
+          username: discordUser.username,
+          discriminator: discordUser.discriminator || "0000",
+          avatar: discordUser.avatar,
+        }
 
-    const discordUser = await userResponse.json()
-
-    // Parse state to get user ID and source
-    let targetUserId: string | null = null
-    let source: string | null = null
-
-    if (state) {
-      const stateParts = state.split(":")
-      if (stateParts.length === 2) {
-        targetUserId = stateParts[0]
-        source = stateParts[1]
-      } else if (state === "register") {
-        // This is a registration flow
-        source = "register"
+        const html = `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <script>
+              localStorage.setItem('discord_connection_info', '${JSON.stringify(discordInfo).replace(/'/g, "\\'")}')
+              window.location.href = '${SITE_URL}/register?discord_connected=true'
+            </script>
+          </body>
+          </html>
+        `
+        return new NextResponse(html, { headers: { "Content-Type": "text/html" } })
+      } catch (error) {
+        console.error("Error in registration flow:", error)
+        return NextResponse.redirect(`${SITE_URL}/register?discord_error=registration_flow_failed`)
       }
     }
 
-    // Create Supabase client
-    const supabase = createRouteHandlerClient({ cookies })
-
-    if (source === "register") {
-      // For registration, store Discord info temporarily
-      // This will be handled by the registration completion
-      const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Discord Connected</title>
-        </head>
-        <body>
-          <script>
-            // Send message to parent window
-            if (window.opener) {
-              window.opener.postMessage({
-                type: 'discord_connected',
-                discord_id: '${discordUser.id}',
-                discord_username: '${discordUser.username}'
-              }, '*');
-            } else {
-              // Fallback for non-popup - use URL parameters for more reliable transfer
-              const redirectUrl = '/register?discord_connected=true&discord_id=${discordUser.id}&discord_username=${encodeURIComponent(discordUser.username)}';
-              window.location.href = redirectUrl;
-            }
-          </script>
-          <p>Discord account connected successfully! Redirecting...</p>
-        </body>
-        </html>
-      `
-      return new NextResponse(html, { headers: { "Content-Type": "text/html" } })
+    // Settings flow
+    let userId: string
+    let source: string
+    try {
+      if (state?.includes(":")) {
+        const [id, src] = state.split(":")
+        userId = id
+        source = src
+      } else throw new Error("Invalid state format")
+    } catch {
+      console.error("Invalid state format:", state)
+      return NextResponse.redirect(`${SITE_URL}/settings?discord_error=invalid_state`)
     }
 
-    if (targetUserId && source === "settings") {
-      // For settings, connect Discord to existing user
-      const { error: discordError } = await supabase.from("discord_users").upsert(
-        {
-          user_id: targetUserId,
-          discord_id: discordUser.id,
-          discord_username: discordUser.username,
-          discord_discriminator: discordUser.discriminator || "0000",
-          discord_avatar: discordUser.avatar,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id",
-        },
-      )
+    try {
+      const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          client_id: DISCORD_CLIENT_ID,
+          client_secret: DISCORD_CLIENT_SECRET,
+          grant_type: "authorization_code",
+          code,
+          redirect_uri: DISCORD_REDIRECT_URI,
+        }),
+      })
 
-      if (discordError) {
-        console.error("Error saving Discord connection:", discordError)
-        return NextResponse.json({ error: "Failed to save Discord connection" }, { status: 500 })
+      if (!tokenResponse.ok) {
+        const errorText = await tokenResponse.text()
+        console.error("Token exchange failed:", errorText)
+        return NextResponse.redirect(`${SITE_URL}/settings?discord_error=token_exchange_failed`)
       }
 
-      // Return success page
-      const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Discord Connected</title>
-        </head>
-        <body>
-          <script>
-            // Send message to parent window
-            if (window.opener) {
-              window.opener.postMessage({
-                type: 'discord_connected',
-                discord_id: '${discordUser.id}',
-                discord_username: '${discordUser.username}'
-              }, '*');
-            } else {
-              // Fallback for non-popup
-              window.location.href = '/settings?discord_connected=true';
-            }
-          </script>
-          <p>Discord account connected successfully! You can close this window.</p>
-        </body>
-        </html>
-      `
-      return new NextResponse(html, { headers: { "Content-Type": "text/html" } })
+      const tokenData = await tokenResponse.json()
+      const userResponse = await fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      })
+
+      if (!userResponse.ok) {
+        console.error("Failed to get Discord user info")
+        return NextResponse.redirect(`${SITE_URL}/settings?discord_error=user_info_failed`)
+      }
+
+      const discordUser = await userResponse.json()
+      console.log("Discord user connected:", { id: discordUser.id, username: discordUser.username })
+
+      return NextResponse.redirect(`${SITE_URL}/settings?discord_connected=true`)
+    } catch (error) {
+      console.error("Error in settings flow:", error)
+      return NextResponse.redirect(`${SITE_URL}/settings?discord_error=settings_flow_failed`)
     }
-
-    // Default fallback
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Discord Connected</title>
-      </head>
-      <body>
-        <script>
-          // Store Discord info and redirect to home
-          localStorage.setItem('discord_temp_info', JSON.stringify({
-            discord_id: '${discordUser.id}',
-            discord_username: '${discordUser.username}'
-          }));
-          window.location.href = '/?discord_connected=true';
-        </script>
-        <p>Discord account connected successfully! Redirecting...</p>
-      </body>
-      </html>
-    `
-    return new NextResponse(html, { headers: { "Content-Type": "text/html" } })
-
   } catch (error: any) {
-    console.error("Error handling OAuth callback:", error)
-    return NextResponse.json({ error: "OAuth callback failed" }, { status: 500 })
+    console.error("Discord callback error:", error)
+    return NextResponse.redirect(`${SITE_URL}/register?discord_error=callback_failed`)
   }
 }

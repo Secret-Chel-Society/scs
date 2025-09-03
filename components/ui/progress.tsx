@@ -1,10 +1,10 @@
 "use client"
 
-import type { HTMLAttributes } from "react"
+import type * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
+interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number
   max?: number
   indicatorClassName?: string

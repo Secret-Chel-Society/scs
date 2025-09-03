@@ -86,8 +86,8 @@ export default function MGHLBotPanel() {
           console.warn("Could not load bot config:", configError)
           // Set default configuration if none exists
           setBotConfig({
-            guild_id: process.env.NEXT_PUBLIC_DISCORD_GUILD_ID || "1345946042281234442",
-            bot_token: process.env.DISCORD_BOT_TOKEN || "",
+            guild_id: "1345946042281234442",
+            bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
             registered_role_id: "1376351990354804848",
           })
         } else if (configs && configs.length > 0) {
@@ -104,16 +104,16 @@ export default function MGHLBotPanel() {
         } else {
           // Set default configuration if none exists
           setBotConfig({
-            guild_id: process.env.NEXT_PUBLIC_DISCORD_GUILD_ID || "1345946042281234442",
-            bot_token: process.env.DISCORD_BOT_TOKEN || "",
+            guild_id: "1345946042281234442",
+            bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
             registered_role_id: "1376351990354804848",
           })
         }
       } catch (configError) {
         console.warn("Could not load bot config:", configError)
         setBotConfig({
-          guild_id: process.env.NEXT_PUBLIC_DISCORD_GUILD_ID || "1345946042281234442",
-          bot_token: process.env.DISCORD_BOT_TOKEN || "",
+          guild_id: "1345946042281234442",
+          bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
           registered_role_id: "1376351990354804848",
         })
       }
@@ -1056,14 +1056,14 @@ export default function MGHLBotPanel() {
                 <div>
                   <Label>Client ID</Label>
                   <div className="flex items-center gap-2">
-                    <Input value={process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || "Not configured"} disabled />
+                    <Input value="1086490070984429638" disabled />
                     <Badge variant="secondary">Configured</Badge>
                   </div>
                 </div>
                 <div>
                   <Label>Client Secret</Label>
                   <div className="flex items-center gap-2">
-                    <Input value="••••••••••••••••••••••••••••••••" type="password" disabled />
+                    <Input value="QmI3KS7RYyvzy6dZLKmFVwgLhmuGJVs_" type="password" disabled />
                     <Badge variant="secondary">Configured</Badge>
                   </div>
                 </div>

@@ -7,10 +7,11 @@ import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ArrowLeftRight } from "lucide-react"
+import { ArrowLeftRight, Search, Newspaper, Clock, Eye, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import Image from "next/image"
+import { Badge } from "@/components/ui/badge"
 
 export default function NewsPage() {
   const { supabase } = useSupabase()
@@ -67,124 +68,175 @@ export default function NewsPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">SCS News</h1>
-              <p className="text-white/70">Stay up to date with the latest SCS news and announcements</p>
-            </div>
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.5 }}
+          className="space-y-8"
+        >
+          {/* Enhanced Header Section */}
+          <div className="text-center mb-12">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+            >
+              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
+                <Newspaper className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                SCS News
+              </h1>
+            </motion.div>
+            <p className="text-xl text-white/70 max-w-3xl mx-auto">
+              Stay up to date with the latest SCS news, announcements, and community updates
+            </p>
+            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          {/* Enhanced Search and Actions Section */}
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-8">
+            <div className="relative max-w-md w-full">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/50" />
               <Input
-                placeholder="Search news..."
+                placeholder="Search news articles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="max-w-sm bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                className="pl-12 py-4 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-sm rounded-xl"
               />
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <Button
                 variant="outline"
                 asChild
-                className="flex items-center gap-2 border-white/20 text-white hover:bg-white/20 bg-white/10"
+                className="flex items-center gap-3 px-6 py-3 border-primary/30 text-primary bg-primary/10 hover:bg-primary/20 hover:border-primary/50 rounded-xl backdrop-blur-sm"
               >
                 <Link href="/news/trades">
-                  <ArrowLeftRight className="h-4 w-4" />
+                  <ArrowLeftRight className="h-5 w-5" />
                   View Trades
                 </Link>
               </Button>
-            </div>
+            </motion.div>
+          </div>
+
+          {/* News Count Display */}
+          <div className="text-center mb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+              className="inline-flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+            >
+              <TrendingUp className="h-5 w-5 text-primary" />
+              <span className="text-white font-semibold">
+                {loading ? "Loading..." : `${filteredNews.length} Articles Found`}
+              </span>
+            </motion.div>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[200px]">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[200px]">
               {[...Array(8)].map((_, i) => (
-                <Skeleton key={i} className={`w-full h-full bg-white/10 rounded-lg`} />
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <Skeleton className={`${getCardSize(i)} rounded-2xl bg-white/10`} />
+                </motion.div>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[200px]">
+          ) : filteredNews.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[200px]">
               {filteredNews.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`${getCardSize(index)} bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg overflow-hidden hover:bg-white/20 transition-all duration-200 cursor-pointer group`}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  className={`${getCardSize(index)} relative overflow-hidden rounded-2xl cursor-pointer group`}
                 >
-                  <Link href={`/news/${item.id}`}>
-                    <div className="h-full flex flex-col">
-                      {item.image_url && (
-                        <div className="relative h-32 overflow-hidden">
-                          <Image
-                            src={item.image_url}
-                            alt={item.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
+                  <Link href={`/news/${item.id}`} className="block h-full">
+                    <div className="relative h-full">
+                      {item.image_url ? (
+                        <Image
+                          src={item.image_url || "/placeholder.svg"}
+                          alt={item.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600" />
                       )}
-                      <div className="p-4 flex-1 flex flex-col">
-                        <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-blue-200 transition-colors">
+
+                      {/* Enhanced Dark Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:from-black/70 group-hover:via-black/30 group-hover:to-black/10 transition-all duration-300" />
+
+                      {/* Enhanced Content Overlay */}
+                      <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                        <div className="mb-3">
+                          <Badge className="px-3 py-1 bg-primary/90 text-white text-xs font-bold uppercase tracking-wider rounded-full border-0">
+                            SCS
+                          </Badge>
+                        </div>
+                        
+                        <h3 className="text-white font-bold text-lg leading-tight mb-3 line-clamp-3 group-hover:text-primary transition-colors duration-300">
                           {item.title}
                         </h3>
-                        {item.excerpt && (
-                          <p className="text-white/70 text-sm mb-3 line-clamp-3">
-                            {item.excerpt}
-                          </p>
-                        )}
-                        <div className="mt-auto text-xs text-white/50">
-                          {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                        
+                        <div className="flex items-center gap-3 text-white/80 text-sm">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Hover Glow Effect */}
+                      <div className="absolute inset-0 bg-primary/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
                     </div>
                   </Link>
                 </motion.div>
               ))}
             </div>
-          )}
-
-          {!loading && filteredNews.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-white/70 text-lg">
-                {searchQuery ? `No news found matching "${searchQuery}"` : "No news articles found"}
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center py-16"
+            >
+              <div className="max-w-md mx-auto">
+                <div className="p-8 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20">
+                  <Search className="h-16 w-16 mx-auto mb-4 text-white/50" />
+                  <h3 className="text-xl font-semibold text-white mb-2">No News Found</h3>
+                  <p className="text-white/70">
+                    {searchQuery
+                      ? "No articles match your search. Try different keywords."
+                      : "There are no news articles available at this time."}
+                  </p>
+                </div>
               </div>
-            </div>
+            </motion.div>
           )}
         </motion.div>
       </div>
-
-      <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
   )
 }

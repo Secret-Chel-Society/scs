@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, UserX, Clock, AlertCircle, Ban, Users, RefreshCw, Shield, Search, X } from "lucide-react"
+import { Loader2, UserX, Clock, AlertCircle, Ban, Users, RefreshCw } from "lucide-react"
+import { motion } from "framer-motion"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
@@ -374,10 +375,11 @@ export default function BannedUsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex justify-center items-center">
-        <div className="flex items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-white" />
-          <span className="text-white">Loading...</span>
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="relative z-10 container mx-auto px-4 py-12">
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
         </div>
       </div>
     )
@@ -388,525 +390,517 @@ export default function BannedUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-3">
-            <Shield className="h-8 w-8 text-red-400" />
-            Banned Users Management
-          </h1>
-          <p className="text-white/70 text-lg">
-            Manage user bans and restrictions across the platform
-          </p>
-        </div>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Enhanced Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
 
-        <Tabs defaultValue="list" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border border-white/20">
-            <TabsTrigger value="list" className="text-white data-[state=active]:bg-red-500/20 data-[state=active]:text-red-400 flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Banned Users ({filteredBannedUsers.length})
-            </TabsTrigger>
-            <TabsTrigger value="ban" className="text-white data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 flex items-center gap-2">
-              <Ban className="h-4 w-4" />
-              Ban User ({filteredUsers.length})
-            </TabsTrigger>
-          </TabsList>
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-8"
+        >
+          {/* Enhanced Header Section */}
+          <div className="text-center mb-12">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", delay: 0.2 }}
+            >
+              <div className="p-4 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl shadow-xl">
+                <UserX className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent">
+                Banned Users Management
+              </h1>
+            </motion.div>
+            <p className="text-xl text-white/70 max-w-3xl mx-auto">
+              Manage user bans, view banned users, and control access to the Secret Chel Society
+            </p>
+            <div className="h-1 w-40 bg-gradient-to-r from-red-500 to-transparent rounded-full mx-auto mt-6" />
+          </div>
 
-          <TabsContent value="list" className="mt-6">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <UserX className="h-5 w-5 text-red-400" />
-                      Banned Users ({filteredBannedUsers.length}
-                      {bannedUsers.length !== filteredBannedUsers.length ? ` of ${bannedUsers.length}` : ""})
-                    </CardTitle>
-                    <CardDescription className="text-white/70">View and manage banned users</CardDescription>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={fetchBannedUsers} 
-                    disabled={loadingBannedUsers}
-                    className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                  >
+          {/* Enhanced Tabs */}
+          <Tabs defaultValue="list" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 mb-8">
+              <TabsTrigger 
+                value="list" 
+                className="flex items-center gap-2 py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
+              >
+                <Users className="h-5 w-5" />
+                Banned Users List ({filteredBannedUsers.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ban" 
+                className="flex items-center gap-2 py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
+              >
+                <Ban className="h-5 w-5" />
+                Ban User ({filteredUsers.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="list" className="mt-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <Card className="bg-white/5 backdrop-blur-sm border-white/20">
+                  <CardHeader className="border-b border-white/20 pb-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div>
+                        <CardTitle className="flex items-center gap-3 text-2xl text-white">
+                          <div className="p-2 bg-red-500/20 rounded-lg">
+                            <UserX className="h-6 w-6 text-red-400" />
+                          </div>
+                          Banned Users ({filteredBannedUsers.length}
+                          {bannedUsers.length !== filteredBannedUsers.length ? ` of ${bannedUsers.length}` : ""})
+                        </CardTitle>
+                        <CardDescription className="text-white/70 mt-2">View and manage banned users</CardDescription>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={fetchBannedUsers} 
+                        disabled={loadingBannedUsers}
+                        className="border-white/30 text-white hover:bg-white/10"
+                      >
+                        {loadingBannedUsers ? (
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                        )}
+                        Refresh
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2 mt-6">
+                      <div className="relative flex-1 max-w-md">
+                        <Input
+                          placeholder="Search by gamer tag ID, discord name, email..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pr-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        />
+                        {searchTerm && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-white/70 hover:text-white"
+                            onClick={() => setSearchTerm("")}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                              <CardContent className="pt-6">
                     {loadingBannedUsers ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <div className="flex justify-center items-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                    ) : filteredBannedUsers.length === 0 ? (
+                      <div className="text-center py-12">
+                        <UserX className="h-16 w-16 mx-auto mb-4 text-white/50" />
+                        {searchTerm ? (
+                          <div>
+                            <p className="text-white/70 mb-4">No banned users found matching "{searchTerm}"</p>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="mt-2 border-white/30 text-white hover:bg-white/10" 
+                              onClick={() => setSearchTerm("")}
+                            >
+                              Clear search
+                            </Button>
+                          </div>
+                        ) : (
+                          <p className="text-white/70">No banned users found</p>
+                        )}
+                      </div>
                     ) : (
-                      <RefreshCw className="h-4 w-4" />
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User Details</TableHead>
+                      <TableHead>Ban Reason</TableHead>
+                      <TableHead>Expiration</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredBannedUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {user.email && <p className="font-medium">{user.email}</p>}
+                            {user.gamer_tag && <p className="text-sm text-muted-foreground">GT: {user.gamer_tag}</p>}
+                            {user.gamer_tag_id && (
+                              <p className="text-sm text-muted-foreground">GT ID: {user.gamer_tag_id}</p>
+                            )}
+                            {user.discord_name && (
+                              <p className="text-sm text-muted-foreground">Discord: {user.discord_name}</p>
+                            )}
+                            {!user.email && !user.gamer_tag && !user.gamer_tag_id && !user.discord_name && (
+                              <p className="text-sm text-muted-foreground">No display name</p>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm max-w-xs break-words">{user.ban_reason}</p>
+                        </TableCell>
+                        <TableCell>
+                          {user.ban_expiration ? (
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              <span className="text-sm">{formatDate(user.ban_expiration)}</span>
+                            </div>
+                          ) : (
+                            <Badge variant="destructive">Permanent</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {user.ban_expiration && isExpired(user.ban_expiration) ? (
+                            <Badge variant="outline" className="text-orange-600">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              Expired
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive">Active</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openUnbanDialog(user)}
+                            disabled={unbanning === user.id}
+                          >
+                            {unbanning === user.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Unbanning...
+                              </>
+                            ) : (
+                              "Unban"
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ban">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Ban className="h-5 w-5" />
+                User Management
+              </CardTitle>
+              <CardDescription>Ban or unban users from the platform</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">
+                    All Users ({filteredUsers.length}
+                    {users.length !== filteredUsers.length ? ` of ${users.length}` : ""})
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => fetchUsers(currentPage)} disabled={loadingUsers}>
+                      {loadingUsers ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                      Refresh
+                    </Button>
+                    {!userSearchTerm.trim() && (
+                      <div className="text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages}
+                      </div>
                     )}
-                    Refresh
-                  </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-4">
+
+                <div className="flex items-center gap-2">
                   <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                     <Input
-                      placeholder="Search by gamer tag ID, discord name, email..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                      placeholder="Search by gamer tag ID or discord name..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="pr-8"
                     />
-                    {searchTerm && (
+                    {userSearchTerm && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-white hover:bg-slate-700/50"
-                        onClick={() => setSearchTerm("")}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                        onClick={() => setUserSearchTerm("")}
                       >
-                        <X className="h-4 w-4" />
+                        ×
                       </Button>
                     )}
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {loadingBannedUsers ? (
-                  <div className="flex justify-center items-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-white" />
+
+                {users.length === 0 && !loadingUsers && (
+                  <div className="text-center py-4">
+                    <Button onClick={() => fetchUsers(1)} variant="outline">
+                      Load Users
+                    </Button>
                   </div>
-                ) : filteredBannedUsers.length === 0 ? (
-                  <div className="text-center py-8 text-white/70">
-                    <UserX className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    {searchTerm ? (
-                      <div>
-                        <p>No banned users found matching "{searchTerm}"</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2 bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50" 
-                          onClick={() => setSearchTerm("")}
-                        >
-                          Clear search
-                        </Button>
-                      </div>
-                    ) : (
-                      <p>No banned users found</p>
-                    )}
+                )}
+
+                {loadingUsers ? (
+                  <div className="flex justify-center items-center h-32">
+                    <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
-                ) : (
-                  <div className="overflow-x-auto">
+                ) : filteredUsers.length > 0 ? (
+                  <>
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-white/20">
-                          <TableHead className="text-white">User Details</TableHead>
-                          <TableHead className="text-white">Ban Reason</TableHead>
-                          <TableHead className="text-white">Expiration</TableHead>
-                          <TableHead className="text-white">Status</TableHead>
-                          <TableHead className="text-white">Actions</TableHead>
+                        <TableRow>
+                          <TableHead>Gamer Tag ID</TableHead>
+                          <TableHead>Discord Name</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredBannedUsers.map((user) => (
-                          <TableRow key={user.id} className="border-white/20 hover:bg-slate-800/30">
+                        {filteredUsers.map((user) => (
+                          <TableRow key={user.id}>
                             <TableCell>
-                              <div className="space-y-1">
-                                {user.email && <p className="font-medium text-white">{user.email}</p>}
-                                {user.gamer_tag && <p className="text-sm text-white/70">GT: {user.gamer_tag}</p>}
-                                {user.gamer_tag_id && (
-                                  <p className="text-sm text-white/70">GT ID: {user.gamer_tag_id}</p>
-                                )}
-                                {user.discord_name && (
-                                  <p className="text-sm text-white/70">Discord: {user.discord_name}</p>
-                                )}
-                                {!user.email && !user.gamer_tag && !user.gamer_tag_id && !user.discord_name && (
-                                  <p className="text-sm text-white/70">No display name</p>
-                                )}
-                              </div>
+                              <p className="font-medium">{user.gamer_tag_id || "Not set"}</p>
                             </TableCell>
                             <TableCell>
-                              <p className="text-sm max-w-xs break-words text-white/80">{user.ban_reason}</p>
+                              <p>{user.discord_name || "Not set"}</p>
                             </TableCell>
                             <TableCell>
-                              {user.ban_expiration ? (
-                                <div className="flex items-center gap-2">
-                                  <Clock className="h-4 w-4 text-white/70" />
-                                  <span className="text-sm text-white/80">{formatDate(user.ban_expiration)}</span>
-                                </div>
+                              {user.is_banned ? (
+                                <Badge variant="destructive">Banned</Badge>
                               ) : (
-                                <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30">Permanent</Badge>
+                                <Badge variant="default">Active</Badge>
                               )}
                             </TableCell>
                             <TableCell>
-                              {user.ban_expiration && isExpired(user.ban_expiration) ? (
-                                <Badge variant="outline" className="text-orange-400 border-orange-500/30 bg-orange-500/10">
-                                  <AlertCircle className="h-3 w-3 mr-1" />
-                                  Expired
-                                </Badge>
+                              {user.is_banned ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (
+                                      confirm(
+                                        `Are you sure you want to unban ${user.gamer_tag_id || user.discord_name || "this user"}?`,
+                                      )
+                                    ) {
+                                      handleUnban(user.id)
+                                    }
+                                  }}
+                                  disabled={unbanning === user.id}
+                                >
+                                  {unbanning === user.id ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      Unbanning...
+                                    </>
+                                  ) : (
+                                    "Unban"
+                                  )}
+                                </Button>
                               ) : (
-                                <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30">Active</Badge>
+                                <Button variant="destructive" size="sm" onClick={() => openBanDialog(user)}>
+                                  Ban
+                                </Button>
                               )}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openUnbanDialog(user)}
-                                disabled={unbanning === user.id}
-                                className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                              >
-                                {unbanning === user.id ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Unbanning...
-                                  </>
-                                ) : (
-                                  "Unban"
-                                )}
-                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="ban" className="mt-6">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Ban className="h-5 w-5 text-amber-400" />
-                  User Management
-                </CardTitle>
-                <CardDescription className="text-white/70">Ban or unban users from the platform</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-white">
-                      All Users ({filteredUsers.length}
-                      {users.length !== filteredUsers.length ? ` of ${users.length}` : ""})
-                    </h4>
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => fetchUsers(currentPage)} 
-                        disabled={loadingUsers}
-                        className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                      >
-                        {loadingUsers ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                        Refresh
-                      </Button>
-                      {!userSearchTerm.trim() && (
-                        <div className="text-sm text-white/70">
-                          Page {currentPage} of {totalPages}
+                    {/* Pagination - only show when not searching */}
+                    {!userSearchTerm.trim() && (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1 || loadingUsers}
+                          >
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages || loadingUsers}
+                          >
+                            Next
+                          </Button>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1 max-w-sm">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
-                      <Input
-                        placeholder="Search by gamer tag ID or discord name..."
-                        value={userSearchTerm}
-                        onChange={(e) => setUserSearchTerm(e.target.value)}
-                        className="pl-10 bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                      />
-                      {userSearchTerm && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0 text-white hover:bg-slate-700/50"
-                          onClick={() => setUserSearchTerm("")}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  {users.length === 0 && !loadingUsers && (
-                    <div className="text-center py-4">
-                      <Button 
-                        onClick={() => fetchUsers(1)} 
-                        variant="outline"
-                        className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                      >
-                        Load Users
-                      </Button>
-                    </div>
-                  )}
-
-                  {loadingUsers ? (
-                    <div className="flex justify-center items-center h-32">
-                      <Loader2 className="h-6 w-6 animate-spin text-white" />
-                    </div>
-                  ) : filteredUsers.length > 0 ? (
-                    <>
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="border-white/20">
-                              <TableHead className="text-white">Gamer Tag ID</TableHead>
-                              <TableHead className="text-white">Discord Name</TableHead>
-                              <TableHead className="text-white">Status</TableHead>
-                              <TableHead className="text-white">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {filteredUsers.map((user) => (
-                              <TableRow key={user.id} className="border-white/20 hover:bg-slate-800/30">
-                                <TableCell>
-                                  <p className="font-medium text-white">{user.gamer_tag_id || "Not set"}</p>
-                                </TableCell>
-                                <TableCell>
-                                  <p className="text-white/80">{user.discord_name || "Not set"}</p>
-                                </TableCell>
-                                <TableCell>
-                                  {user.is_banned ? (
-                                    <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30">Banned</Badge>
-                                  ) : (
-                                    <Badge variant="default" className="bg-green-500/20 text-green-400 border-green-500/30">Active</Badge>
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  {user.is_banned ? (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        if (
-                                          confirm(
-                                            `Are you sure you want to unban ${user.gamer_tag_id || user.discord_name || "this user"}?`,
-                                          )
-                                        ) {
-                                          handleUnban(user.id)
-                                        }
-                                      }}
-                                      disabled={unbanning === user.id}
-                                      className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                                    >
-                                      {unbanning === user.id ? (
-                                        <>
-                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                          Unbanning...
-                                        </>
-                                      ) : (
-                                        "Unban"
-                                      )}
-                                    </Button>
-                                  ) : (
-                                    <Button 
-                                      variant="destructive" 
-                                      size="sm" 
-                                      onClick={() => openBanDialog(user)}
-                                      className="bg-red-500 hover:bg-red-600 text-white"
-                                    >
-                                      Ban
-                                    </Button>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-
-                      {/* Pagination - only show when not searching */}
-                      {!userSearchTerm.trim() && (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePageChange(currentPage - 1)}
-                              disabled={currentPage === 1 || loadingUsers}
-                              className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                            >
-                              Previous
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePageChange(currentPage + 1)}
-                              disabled={currentPage === totalPages || loadingUsers}
-                              className="bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                            >
-                              Next
-                            </Button>
-                          </div>
-                          <div className="text-sm text-white/70">
-                            Showing {(currentPage - 1) * usersPerPage + 1} to{" "}
-                            {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers} users
-                          </div>
+                        <div className="text-sm text-muted-foreground">
+                          Showing {(currentPage - 1) * usersPerPage + 1} to{" "}
+                          {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers} users
                         </div>
-                      )}
-                    </>
-                  ) : users.length > 0 ? (
-                    <div className="text-center py-8 text-white/70">
-                      <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <div>
-                        <p>No users found matching "{userSearchTerm}"</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="mt-2 bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50" 
-                          onClick={() => setUserSearchTerm("")}
-                        >
-                          Clear search
-                        </Button>
                       </div>
-                    </div>
-                  ) : null}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Unban Confirmation Dialog */}
-        <Dialog open={unbanDialogOpen} onOpenChange={setUnbanDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-slate-800 border border-white/20">
-            <DialogHeader>
-              <DialogTitle className="text-white">Unban User</DialogTitle>
-              <DialogDescription className="text-white/70">
-                Are you sure you want to unban this user? This will immediately restore their access to the platform.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedUserForUnban && (
-              <div className="space-y-2 text-white/80">
-                <p>
-                  <strong className="text-white">User:</strong>{" "}
-                  {selectedUserForUnban.gamer_tag_id ||
-                    selectedUserForUnban.discord_name ||
-                    selectedUserForUnban.email ||
-                    "Unknown"}
-                </p>
-                <p>
-                  <strong className="text-white">Ban Reason:</strong> {selectedUserForUnban.ban_reason}
-                </p>
-                {selectedUserForUnban.ban_expiration && (
-                  <p>
-                    <strong className="text-white">Ban Expiration:</strong> {formatDate(selectedUserForUnban.ban_expiration)}
-                  </p>
-                )}
-              </div>
-            )}
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setUnbanDialogOpen(false)}
-                className="bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="button" 
-                onClick={confirmUnban} 
-                disabled={unbanning !== null}
-                className="bg-green-500 hover:bg-green-600 text-white"
-              >
-                {unbanning !== null ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Unbanning...
+                    )}
                   </>
-                ) : (
-                  "Unban User"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Ban User Dialog */}
-        <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-slate-800 border border-white/20">
-            <DialogHeader>
-              <DialogTitle className="text-white">Ban User</DialogTitle>
-              <DialogDescription className="text-white/70">
-                {selectedUserForBan && (
-                  <>Ban user: {selectedUserForBan.gamer_tag_id || selectedUserForBan.discord_name || "Unknown"}</>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="banReason" className="text-white">Ban Reason</Label>
-                <Textarea
-                  id="banReason"
-                  placeholder="Enter the reason for banning this user..."
-                  value={banReason}
-                  onChange={(e) => setBanReason(e.target.value)}
-                  required
-                  className="bg-slate-700/50 border-white/20 text-white placeholder:text-white/50"
-                />
+                ) : users.length > 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <div>
+                      <p>No users found matching "{userSearchTerm}"</p>
+                      <Button variant="outline" size="sm" className="mt-2" onClick={() => setUserSearchTerm("")}>
+                        Clear search
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
+            </CardContent>
+          </Card>
+                </motion.div>
+              </TabsContent>
+      </Tabs>
 
-              <div className="space-y-2">
-                <Label htmlFor="banDuration" className="text-white">Ban Duration</Label>
-                <Select value={banDuration} onValueChange={setBanDuration} required>
-                  <SelectTrigger className="bg-slate-700/50 border-white/20 text-white">
-                    <SelectValue placeholder="Select ban duration" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-700 border-white/20">
-                    <SelectItem value="1 day" className="text-white hover:bg-slate-600">1 Day</SelectItem>
-                    <SelectItem value="3 days" className="text-white hover:bg-slate-600">3 Days</SelectItem>
-                    <SelectItem value="1 week" className="text-white hover:bg-slate-600">1 Week</SelectItem>
-                    <SelectItem value="2 weeks" className="text-white hover:bg-slate-600">2 Weeks</SelectItem>
-                    <SelectItem value="1 month" className="text-white hover:bg-slate-600">1 Month</SelectItem>
-                    <SelectItem value="3 months" className="text-white hover:bg-slate-600">3 Months</SelectItem>
-                    <SelectItem value="6 months" className="text-white hover:bg-slate-600">6 Months</SelectItem>
-                    <SelectItem value="1 year" className="text-white hover:bg-slate-600">1 Year</SelectItem>
-                    <SelectItem value="permanent" className="text-white hover:bg-slate-600">Permanent</SelectItem>
-                    <SelectItem value="custom" className="text-white hover:bg-slate-600">Custom Duration</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {banDuration === "custom" && (
-                <div className="space-y-2">
-                  <Label htmlFor="customDuration" className="text-white">Custom Duration</Label>
-                  <Input
-                    id="customDuration"
-                    placeholder="e.g., 45 days, 2 months, 1.5 years"
-                    value={customDuration}
-                    onChange={(e) => setCustomDuration(e.target.value)}
-                    required
-                    className="bg-slate-700/50 border-white/20 text-white placeholder:text-white/50"
-                  />
-                  <p className="text-xs text-white/50">Examples: "45 days", "2 months", "1.5 years"</p>
-                </div>
+      {/* Unban Confirmation Dialog */}
+      <Dialog open={unbanDialogOpen} onOpenChange={setUnbanDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Unban User</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to unban this user? This will immediately restore their access to the platform.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUserForUnban && (
+            <div className="space-y-2">
+              <p>
+                <strong>User:</strong>{" "}
+                {selectedUserForUnban.gamer_tag_id ||
+                  selectedUserForUnban.discord_name ||
+                  selectedUserForUnban.email ||
+                  "Unknown"}
+              </p>
+              <p>
+                <strong>Ban Reason:</strong> {selectedUserForUnban.ban_reason}
+              </p>
+              {selectedUserForUnban.ban_expiration && (
+                <p>
+                  <strong>Ban Expiration:</strong> {formatDate(selectedUserForUnban.ban_expiration)}
+                </p>
               )}
             </div>
+          )}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setUnbanDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={confirmUnban} disabled={unbanning !== null}>
+              {unbanning !== null ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Unbanning...
+                </>
+              ) : (
+                "Unban User"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setBanDialogOpen(false)}
-                className="bg-slate-700/50 border-white/20 text-white hover:bg-slate-600/50"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleBanUser}
-                disabled={banning || !banReason.trim() || !banDuration}
-                variant="destructive"
-                className="bg-red-500 hover:bg-red-600 text-white"
-              >
-                {banning ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Banning...
-                  </>
-                ) : (
-                  "Ban User"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      {/* Ban User Dialog */}
+      <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Ban User</DialogTitle>
+            <DialogDescription>
+              {selectedUserForBan && (
+                <>Ban user: {selectedUserForBan.gamer_tag_id || selectedUserForBan.discord_name || "Unknown"}</>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="banReason">Ban Reason</Label>
+              <Textarea
+                id="banReason"
+                placeholder="Enter the reason for banning this user..."
+                value={banReason}
+                onChange={(e) => setBanReason(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="banDuration">Ban Duration</Label>
+              <Select value={banDuration} onValueChange={setBanDuration} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select ban duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1 day">1 Day</SelectItem>
+                  <SelectItem value="3 days">3 Days</SelectItem>
+                  <SelectItem value="1 week">1 Week</SelectItem>
+                  <SelectItem value="2 weeks">2 Weeks</SelectItem>
+                  <SelectItem value="1 month">1 Month</SelectItem>
+                  <SelectItem value="3 months">3 Months</SelectItem>
+                  <SelectItem value="6 months">6 Months</SelectItem>
+                  <SelectItem value="1 year">1 Year</SelectItem>
+                  <SelectItem value="permanent">Permanent</SelectItem>
+                  <SelectItem value="custom">Custom Duration</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {banDuration === "custom" && (
+              <div className="space-y-2">
+                <Label htmlFor="customDuration">Custom Duration</Label>
+                <Input
+                  id="customDuration"
+                  placeholder="e.g., 45 days, 2 months, 1.5 years"
+                  value={customDuration}
+                  onChange={(e) => setCustomDuration(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">Examples: "45 days", "2 months", "1.5 years"</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setBanDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleBanUser}
+              disabled={banning || !banReason.trim() || !banDuration}
+              variant="destructive"
+            >
+              {banning ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Banning...
+                </>
+              ) : (
+                "Ban User"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+        </motion.div>
       </div>
     </div>
   )

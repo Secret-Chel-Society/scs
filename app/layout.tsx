@@ -7,7 +7,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
-// import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
+import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 
@@ -18,7 +18,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Secret Chel Society",
+  title: "Secret Chel Society (SCS)",
   description: "Official website for the NHL 26 Secret Chel Society",
   viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
@@ -42,30 +42,23 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.ico" />
         <script
           async
-          src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3668249624265877"
           crossOrigin="anonymous"
         />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen w-full overflow-x-hidden">
+            <div className="flex min-h-screen flex-col">
               <Navigation />
-              {/* Main content area */}
-              <div className="flex-1 flex flex-col lg:ml-56 w-full min-w-0">
-                <div className="pt-16 lg:pt-16">
-                  <Suspense>
-                    <main className="flex-1 p-2 lg:p-6">
-                      {children}
-                    </main>
-                  </Suspense>
-                </div>
-                <Footer />
-              </div>
+              <Suspense>
+                <main className="flex-1">{children}</main>
+              </Suspense>
+              <Footer />
             </div>
             <Toaster />
             <BannedUserModal />
-            {/* <Analytics /> */}
+            <Analytics />
           </SupabaseProvider>
         </ThemeProvider>
       </body>

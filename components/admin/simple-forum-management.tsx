@@ -33,7 +33,6 @@ import {
   RefreshCw,
   AlertTriangle,
 } from "lucide-react"
-import { useSupabase } from "@/lib/supabase/client"
 
 interface ForumCategory {
   id: string
@@ -83,7 +82,6 @@ let dataCache: {
 } | null = null
 
 export function SimpleForumManagement() {
-  const { supabase } = useSupabase()
   const [categories, setCategories] = useState<ForumCategory[]>([])
   const [posts, setPosts] = useState<ForumPost[]>([])
   const [stats, setStats] = useState<ForumStats>({

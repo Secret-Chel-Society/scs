@@ -1,118 +1,264 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
-import { 
-  Menu, 
-  X, 
-  Home, 
-  Users, 
-  Trophy, 
-  BarChart3, 
-  Calendar, 
-  Award, 
-  DollarSign, 
-  Newspaper, 
-  MessageSquare,
-  UserPlus,
-  Settings,
-  LogOut,
-  ChevronDown,
-  ChevronRight,
-  User,
-  Target
-} from "lucide-react"
+import Image from "next/image"
+import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ModeToggle } from "@/components/mode-toggle"
+import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown"
+import { TeamChatButton } from "@/components/team-chat/team-chat-button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useToast } from "@/components/ui/use-toast"
+import { useMobile } from "@/hooks/use-mobile"
 import { useSupabase } from "@/lib/supabase/client"
-import { cn } from "@/lib/utils"
+import { avatarSync } from "@/lib/avatar-sync"
 
 export default function Navigation() {
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [userProfile, setUserProfile] = useState<any>(null)
   const [playerRole, setPlayerRole] = useState<string | null>(null)
   const [userRoles, setUserRoles] = useState<string[]>([])
   const [teamInfo, setTeamInfo] = useState<{ id: string; name: string; logo_url: string | null } | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isTeamManager, setIsTeamManager] = useState(false)
+  const [loadingProfile, setLoadingProfile] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [playerId, setPlayerId] = useState<string | null>(null)
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
-  
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null)
   const pathname = usePathname()
   const router = useRouter()
+  const isMobile = useMobile()
   const { supabase, session, isLoading } = useSupabase()
   const { toast } = useToast()
 
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileOpen(false)
-  }, [pathname])
+  const fetchUserData = async () => {
+    // Don't fetch if no session or supabase client
+    if (!session?.user?.id || !supabase) {
+      setLoadingProfile(false)
+      setUserProfile(null)
+      return
+    }
 
-  // Fetch user data
+    try {
+      // Set loading but don't block UI rendering
+      setLoadingProfile(true)
+      setFetchError(null)
+
+      // Fetch basic user data first
+      const { data: user } = await supabase.from("users").select("*").eq("id", session.user.id).single()
+
+      if (user) {
+        setUserProfile(user)
+        setCurrentAvatarUrl(user.avatar_url)
+      }
+
+      // Then fetch additional data in parallel
+      const [playerResponse, rolesResponse] = await Promise.allSettled([
+        supabase.from("players").select("id, role, team_id").eq("user_id", session.user.id).single(),
+        supabase.from("user_roles").select("role").eq("user_id", session.user.id),
+      ])
+
+      // Handle player data
+      if (playerResponse.status === "fulfilled" && playerResponse.value.data) {
+        const player = playerResponse.value.data
+        setPlayerRole(player.role)
+        setPlayerId(player.id)
+        setIsTeamManager(["GM", "AGM", "Owner"].includes(player.role))
+
+        // Fetch team data if available
+        if (player.team_id) {
+          const { data: team } = await supabase
+            .from("teams")
+            .select("id, name, logo_url")
+            .eq("id", player.team_id)
+            .single()
+
+          if (team) {
+            setTeamInfo(team)
+          }
+        }
+      }
+
+      // Handle roles data
+      if (rolesResponse.status === "fulfilled" && rolesResponse.value.data) {
+        const roles = rolesResponse.value.data
+        if (roles.length > 0) {
+          const roleNames = roles.map((r) => r.role)
+          setUserRoles(roleNames)
+          setIsAdmin(roleNames.includes("Admin"))
+        }
+      }
+    } catch (error) {
+      console.error("Error in profile fetch:", error)
+      setFetchError("Failed to load profile data. Please try again.")
+    } finally {
+      setLoadingProfile(false)
+    }
+  }
+
+  // Improved user profile fetching with better error handling
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!session?.user?.id || !supabase) return
+    let isMounted = true
+
+    const fetchData = async () => {
+      // Don't fetch if no session or supabase client
+      if (!session?.user?.id || !supabase) {
+        if (isMounted) {
+          setLoadingProfile(false)
+          setUserProfile(null)
+        }
+        return
+      }
 
       try {
-        const { data: user } = await supabase.from("users").select("*").eq("id", session.user.id).single()
-        if (user) setUserProfile(user)
-
-        const [playerResponse, rolesResponse] = await Promise.allSettled([
-          supabase.from("players").select("id, role, team_id").eq("user_id", session.user.id).single(),
-          supabase.from("user_roles").select("role").eq("user_id", session.user.id),
-        ])
-
-        if (playerResponse.status === "fulfilled" && playerResponse.value.data) {
-          const player = playerResponse.value.data
-          setPlayerRole(player.role)
-          setPlayerId(player.id)
-          setIsTeamManager(["GM", "AGM", "Owner"].includes(player.role))
-
-          if (player.team_id) {
-            const { data: team } = await supabase
-              .from("teams")
-              .select("id, name, logo_url")
-              .eq("id", player.team_id)
-              .single()
-            if (team) setTeamInfo(team)
-          }
+        // Set loading but don't block UI rendering
+        if (isMounted) {
+          setLoadingProfile(true)
+          setFetchError(null)
         }
 
-        if (rolesResponse.status === "fulfilled" && rolesResponse.value.data) {
-          const roles = rolesResponse.value.data
-          if (roles.length > 0) {
-            const roleNames = roles.map((r) => r.role)
-            setUserRoles(roleNames)
-            setIsAdmin(roleNames.includes("Admin"))
-          }
-        }
+        await fetchUserData()
       } catch (error) {
-        console.error("Error fetching user data:", error)
+        console.error("Error in profile fetch:", error)
+        if (isMounted) {
+          setFetchError("Failed to load profile data. Please try again.")
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingProfile(false)
+        }
       }
     }
 
-    fetchUserData()
+    // Start fetching data but don't block UI rendering
+    fetchData()
+
+    return () => {
+      isMounted = false
+    }
   }, [session, supabase])
 
+  // Subscribe to avatar updates
+  useEffect(() => {
+    if (!session?.user?.id) return
+
+    const unsubscribe = avatarSync.subscribe((newAvatarUrl) => {
+      setCurrentAvatarUrl(newAvatarUrl)
+      // Also update the userProfile state
+      setUserProfile((prev: any) => (prev ? { ...prev, avatar_url: newAvatarUrl } : prev))
+    })
+
+    return unsubscribe
+  }, [session?.user?.id])
+
+  useEffect(() => {
+    // Refresh user data when returning to the page (e.g., from settings)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session?.user?.id) {
+        // Re-fetch user data when page becomes visible
+        fetchUserData()
+      }
+    }
+
+    // Listen for storage events (when avatar is updated in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "avatar_updated" && session?.user?.id) {
+        fetchUserData()
+      }
+    }
+
+    // Listen for custom avatar update events
+    const handleAvatarUpdate = (e: CustomEvent) => {
+      if (e.detail?.userId === session?.user?.id && e.detail?.avatarUrl) {
+        setCurrentAvatarUrl(e.detail.avatarUrl)
+        setUserProfile((prev: any) => (prev ? { ...prev, avatar_url: e.detail.avatarUrl } : prev))
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener("avatarUpdated", handleAvatarUpdate as EventListener)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("avatarUpdated", handleAvatarUpdate as EventListener)
+    }
+  }, [session])
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const closeMenu = () => {
+    setIsMenuOpen(false)
+  }
+
   const handleSignOut = async () => {
-    if (!supabase) return
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Unable to sign out. Please try again later.",
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      })
-      
+      // Check if we have a session before attempting to sign out
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession()
+
+      if (currentSession) {
+        // We have a valid session, proceed with normal sign out
+        const { error } = await supabase.auth.signOut()
+        if (error) throw error
+
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        })
+      } else {
+        // No session found, but we'll still redirect to clear the UI state
+        console.log("No active session found, but proceeding with UI sign out")
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        })
+      }
+
+      // Force a hard navigation to ensure complete page refresh with new auth state
       window.location.href = "/"
     } catch (error) {
       console.error("Error signing out:", error)
+
+      // Special handling for "Auth session missing!" error
+      if (error instanceof Error && error.message.includes("Auth session missing")) {
+        console.log("Auth session missing, forcing sign out anyway")
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        })
+
+        // Force navigation even if there was an error
+        window.location.href = "/"
+        return
+      }
+
       toast({
         title: "Sign out failed",
         description: "There was a problem signing you out. Please try again.",
@@ -121,24 +267,91 @@ export default function Navigation() {
     }
   }
 
-  const toggleSubmenu = (menuKey: string) => {
-    setExpandedMenus(prev => ({
-      ...prev,
-      [menuKey]: !prev[menuKey]
-    }))
+  const getInitials = () => {
+    if (userProfile?.gamer_tag_id) {
+      return userProfile.gamer_tag_id.substring(0, 2).toUpperCase()
+    }
+    return session?.user?.email?.substring(0, 2).toUpperCase() || "U"
   }
 
-  const navigation = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "Teams", href: "/teams", icon: Users },
-    { name: "Standings", href: "/standings", icon: Trophy },
-    { name: "Stats", href: "/stats", icon: BarChart3 },
-    { name: "Matches", href: "/matches", icon: Calendar },
-    { name: "Awards", href: "/awards", icon: Award },
+  // Get role badge color based on role
+  const getRoleBadgeColor = (role: string | null) => {
+    switch (role) {
+      case "Owner":
+        return "bg-purple-500 hover:bg-purple-600"
+      case "GM":
+        return "bg-red-500 hover:bg-red-600"
+      case "AGM":
+        return "bg-blue-500 hover:bg-blue-600"
+      case "Player":
+        return "bg-green-500 hover:bg-green-600"
+      case "Admin":
+        return "bg-amber-500 hover:bg-amber-600"
+      default:
+        return "bg-gray-500 hover:bg-gray-600"
+    }
+  }
+
+  // Prepare unique roles for display
+  const getUniqueRoleBadges = () => {
+    const allRoles = new Set<string>()
+
+    // Add player role if it exists
+    if (playerRole) {
+      allRoles.add(playerRole)
+    }
+
+    // Add other roles that aren't already included
+    userRoles.forEach((role) => {
+      if (role !== playerRole) {
+        allRoles.add(role)
+      }
+    })
+
+    return Array.from(allRoles)
+  }
+
+  // Get the profile URL
+  const getProfileUrl = () => {
+    // If we have a player ID, use it
+    if (playerId) {
+      return `/players/${playerId}`
+    }
+
+    // If we have a user ID, use that for the player page
+    if (session?.user?.id) {
+      return `/players/${session.user.id}`
+    }
+
+    // Last resort fallback
+    return "/profile"
+  }
+
+  // Navigate to profile
+  const navigateToProfile = () => {
+    const profileUrl = getProfileUrl()
+    console.log("Navigating to profile:", profileUrl)
+    router.push(profileUrl)
+    closeMenu()
+  }
+
+  // Check if user has management role
+  const hasManagementRole = () => {
+    const managementRoles = ["Owner", "GM", "AGM", "General Manager", "Assistant General Manager"]
+    return playerRole && managementRoles.includes(playerRole)
+  }
+
+  // Base navigation items
+  const baseNavigation = [
+    { name: "Home", href: "/" },
+    { name: "Teams", href: "/teams" },
+    { name: "Standings", href: "/standings" },
+    { name: "Stats", href: "/stats" },
+    { name: "Matches", href: "/matches" },
+    { name: "Awards", href: "/awards" },
     {
       name: "Free Agency",
       href: "/free-agency",
-      icon: DollarSign,
       submenu: [
         { name: "Free Agency", href: "/free-agency" },
         { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
@@ -147,750 +360,344 @@ export default function Navigation() {
     {
       name: "News",
       href: "/news",
-      icon: Newspaper,
       submenu: [
         { name: "News", href: "/news" },
         { name: "Daily Recap", href: "/news/daily-recap" },
       ],
     },
-    { name: "Forum", href: "/forum", icon: MessageSquare },
+    { name: "Forum", href: "/forum" },
   ]
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case "Owner": return "bg-gradient-to-r from-purple-500 to-pink-500"
-      case "GM": return "bg-gradient-to-r from-red-500 to-orange-500"
-      case "AGM": return "bg-gradient-to-r from-blue-500 to-cyan-500"
-      case "Player": return "bg-gradient-to-r from-green-500 to-emerald-500"
-      case "Admin": return "bg-gradient-to-r from-amber-500 to-yellow-500"
-      default: return "bg-gradient-to-r from-gray-500 to-slate-500"
-    }
-  }
+  // Don't add profile link to main navigation when user is logged in
+  const navigation = baseNavigation
 
-  const getUniqueRoleBadges = () => {
-    const allRoles = new Set<string>()
-    if (playerRole) allRoles.add(playerRole)
-    userRoles.forEach((role) => {
-      if (role !== playerRole) allRoles.add(role)
-    })
-    return Array.from(allRoles)
-  }
+  // Determine if we should show the full UI or a loading state
+  const showFullUI = !isLoading
+
+  const showErrorFallback = !isLoading && session && loadingProfile && fetchError
+
+  // Get unique roles for display
+  const uniqueRoles = getUniqueRoleBadges()
 
   return (
-    <>
-      {/* Mobile menu button */}
-      <button
-        className="fixed top-2 left-2 z-50 lg:hidden h-10 w-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-sm border border-white/20 hover:from-blue-500/30 hover:to-purple-500/30 rounded-md flex items-center justify-center"
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-      >
-        {isMobileOpen ? <X className="h-5 w-5 text-white" /> : <Menu className="h-5 w-5 text-white" />}
-      </button>
-
-      {/* Mobile overlay */}
-      {isMobileOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm" 
-          onClick={() => setIsMobileOpen(false)}
-        />
-      )}
-
-      {/* Mobile Navigation Drawer */}
-      <div className={cn(
-        "fixed inset-0 z-50 lg:hidden",
-        isMobileOpen ? "block" : "hidden"
-      )}>
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-          {/* Animated background elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-            <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-          </div>
-
-          {/* Mobile Header */}
-          <div className="relative z-10 flex items-center justify-between p-4 border-b border-white/20 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm">
-            <Link href="/" onClick={() => setIsMobileOpen(false)}>
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo on the left */}
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center">
               <Image
-                src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
+                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
                 alt="SCS Logo"
                 width={120}
                 height={40}
-                className="h-6 w-auto object-contain"
+                className="h-10 w-auto object-contain"
                 priority
               />
             </Link>
-            <button
-              className="h-8 w-8 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
-              onClick={() => setIsMobileOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
 
-          {/* Mobile Navigation */}
-          <div className="relative z-10 flex-1 overflow-y-auto p-4">
-            <div className="space-y-6">
-              {/* Main Navigation */}
-              <div className="animate-slide-in">
-                <div className="mb-3">
-                  <h3 className="text-lg font-bold text-white mb-1">Navigation</h3>
-                  <p className="text-sm text-white/60">Main sections</p>
-                </div>
-                
-                <div className="space-y-2">
-                  {navigation.map((item, index) => {
-                    const Icon = item.icon
-                    const isActive = item.href === "/" 
-                      ? pathname === "/" 
-                      : pathname === item.href || pathname.startsWith(item.href + "/")
-                    const hasSubmenu = item.submenu && item.submenu.length > 0
-                    const isExpanded = expandedMenus[item.name]
-
-                    return (
-                      <div key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 50}ms` }}>
-                        <div className="flex items-center">
+          {/* Navigation links centered */}
+          <nav className="hidden md:flex items-center justify-center mx-auto">
+            <ul className="flex space-x-6">
+              {navigation.map((item) => (
+                <li key={item.name} className="relative group">
+                  {item.submenu ? (
+                    <div className="relative">
+                      <Link
+                        href={item.href}
+                        className={`text-sm font-medium transition-colors hover:text-primary ${
+                          pathname === item.href || pathname.startsWith(item.href)
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                      <div className="absolute left-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        {item.submenu.map((subItem) => (
                           <Link
-                            href={item.href}
-                            onClick={() => setIsMobileOpen(false)}
-                            className={cn(
-                              "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
-                              isActive 
-                                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg" 
-                                : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                            )}
+                            key={subItem.name}
+                            href={subItem.href}
+                            className="block px-4 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
                           >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
-                            <span>{item.name}</span>
+                            {subItem.name}
                           </Link>
-                          {hasSubmenu && (
-                            <button
-                              className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
-                              onClick={() => toggleSubmenu(item.name)}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-4 w-4" />
-                              ) : (
-                                <ChevronRight className="h-4 w-4" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-
-                        {hasSubmenu && isExpanded && (
-                          <div className="mt-1 ml-8 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                            {item.submenu.map((subItem) => (
-                              <Link
-                                key={subItem.name}
-                                href={subItem.href}
-                                onClick={() => setIsMobileOpen(false)}
-                                className={cn(
-                                  "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                                  pathname === subItem.href
-                                    ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                    : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                                )}
-                              >
-                                {subItem.name}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
+                        ))}
                       </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Registration */}
-              <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
-                <div className="mb-3">
-                  <h3 className="text-lg font-bold text-white mb-1">Registration</h3>
-                  <p className="text-sm text-white/60">Join the league</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Link
-                    href="/register"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/register"
-                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    Sign Up
-                  </Link>
-                  
-                  <Link
-                    href="/register/season"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/register/season"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    Season Registration
-                  </Link>
-                </div>
-              </div>
-
-              {/* ELO System */}
-              <div className="animate-slide-in" style={{ animationDelay: "500ms" }}>
-                <div className="mb-3">
-                  <h3 className="text-lg font-bold text-white mb-1">ELO System</h3>
-                  <p className="text-sm text-white/60">Player rankings</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Link
-                    href="/elo/rankings"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/elo/rankings"
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <Target className="h-5 w-5" />
-                    ELO Rankings
-                  </Link>
-                  
-                  <Link
-                    href="/elo/statistics"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/elo/statistics"
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <BarChart3 className="h-5 w-5" />
-                    ELO Statistics
-                  </Link>
-                  
-                  <Link
-                    href="/elo/matches"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/elo/matches"
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <Calendar className="h-5 w-5" />
-                    ELO Matches
-                  </Link>
-                  
-                  <Link
-                    href="/elo/leaderboard"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/elo/leaderboard"
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <Trophy className="h-5 w-5" />
-                    ELO Leaderboard
-                  </Link>
-                  
-                  <Link
-                    href="/elo/history"
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
-                      pathname === "/elo/history"
-                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                    )}
-                  >
-                    <BarChart3 className="h-5 w-5" />
-                    ELO History
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile User Section */}
-            <div className="mt-8 pt-6 border-t border-white/20 animate-slide-in" style={{ animationDelay: "1000ms" }}>
-              {session ? (
-                <div className="space-y-4">
-                  {/* Team Info */}
-                  {teamInfo && (
-                    <Link 
-                      href={`/teams/${teamInfo.id}`} 
-                      onClick={() => setIsMobileOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 backdrop-blur-sm transition-colors border border-white/20"
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={`text-sm font-medium transition-colors hover:text-primary ${
+                        pathname === item.href ? "text-primary" : "text-muted-foreground"
+                      }`}
                     >
-                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
-                        {teamInfo.logo_url ? (
-                          <Image
-                            src={teamInfo.logo_url}
-                            alt={teamInfo.name}
-                            width={40}
-                            height={40}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-sm font-bold text-white">{teamInfo.name.substring(0, 2)}</span>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-white">{teamInfo.name}</p>
-                        <p className="text-sm text-white/70">Your Team</p>
-                      </div>
+                      {item.name}
                     </Link>
                   )}
+                </li>
+              ))}
+              {session && (
+                <Link
+                  href="/register/season"
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === "/register/season" ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  Season Registration
+                </Link>
+              )}
+            </ul>
+          </nav>
 
-                  {/* Role Badges */}
-                  {getUniqueRoleBadges().length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {getUniqueRoleBadges().map((role) => (
-                        <Badge key={role} className={`${getRoleBadgeColor(role)} text-white border-0`}>
+          {/* User controls on the right */}
+          <div className="flex items-center space-x-2">
+            <ModeToggle />
+
+            {/* Team Chat Button - show for all authenticated users, component handles team check */}
+            {showFullUI && session && <TeamChatButton />}
+
+            {showFullUI && session && !loadingProfile && <NotificationsDropdown userId={session.user.id} />}
+
+            {showFullUI && (
+              <>
+                {session ? (
+                  <div className="flex items-center gap-2">
+                    {/* Display team badge if available */}
+                    {teamInfo && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link href={`/teams/${teamInfo.id}`} className="flex items-center">
+                              <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border bg-background">
+                                {teamInfo.logo_url ? (
+                                  <Image
+                                    src={teamInfo.logo_url || "/placeholder.svg"}
+                                    alt={teamInfo.name}
+                                    width={24}
+                                    height={24}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-xs font-bold">{teamInfo.name.substring(0, 2)}</span>
+                                )}
+                              </div>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{teamInfo.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+
+                    {/* Display unique role badges */}
+                    <div className="flex gap-1">
+                      {uniqueRoles.map((role) => (
+                        <Badge key={role} className={`${getRoleBadgeColor(role)} text-white`}>
                           {role}
                         </Badge>
                       ))}
                     </div>
-                  )}
 
-                  {/* User Info */}
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                    <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-white/20">
-                      <AvatarImage
-                        src={userProfile?.avatar_url || "/placeholder.svg?height=48&width=48"}
-                        alt={userProfile?.gamer_tag_id || "User"}
-                      />
-                      <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                        {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-white">
-                        {userProfile?.gamer_tag_id || "User"}
-                      </p>
-                      <p className="text-sm text-white/70">
-                        {session?.user?.email}
-                      </p>
-                    </div>
+                    {showErrorFallback ? (
+                      <Button variant="ghost" onClick={() => window.location.reload()}>
+                        Retry
+                      </Button>
+                    ) : (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={currentAvatarUrl || "/placeholder.svg?height=32&width=32"}
+                                alt={userProfile?.gamer_tag_id || "User"}
+                                key={currentAvatarUrl} // Force re-render when avatar changes
+                              />
+                              <AvatarFallback>{getInitials()}</AvatarFallback>
+                            </Avatar>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56" align="end" forceMount>
+                          <DropdownMenuLabel className="font-normal">
+                            <div className="flex flex-col space-y-1">
+                              <button onClick={navigateToProfile} className="text-left group hover:cursor-pointer">
+                                <p className="text-sm font-medium leading-none group-hover:text-primary transition-colors">
+                                  {userProfile?.gamer_tag_id || "User"}
+                                </p>
+                              </button>
+                              <p className="text-xs leading-none text-muted-foreground">{session?.user?.email}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-1">
+                                {playerRole && (
+                                  <Badge variant="outline" className="w-fit">
+                                    {playerRole}
+                                  </Badge>
+                                )}
+                                {userRoles.map((role) => (
+                                  <Badge key={role} variant="outline" className="w-fit">
+                                    {role}
+                                  </Badge>
+                                ))}
+                                {teamInfo && (
+                                  <Badge variant="secondary" className="w-fit">
+                                    {teamInfo.name}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem asChild>
+                              <button onClick={navigateToProfile} className="flex items-center w-full text-left">
+                                <span className="mr-2">👤</span>
+                                View My Profile
+                              </button>
+                            </DropdownMenuItem>
+                            {hasManagementRole() && (
+                              <DropdownMenuItem asChild>
+                                <Link href="/management" className="flex items-center">
+                                  <span className="mr-2">🏢</span>
+                                  Management Panel
+                                </Link>
+                              </DropdownMenuItem>
+                            )}
+                            {isAdmin && (
+                              <>
+                                <DropdownMenuItem asChild>
+                                  <Link href="/admin">Admin Dashboard</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link href="/admin/settings">League Settings</Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                  <Link href="/admin/player-mappings">Player Mappings</Link>
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            <DropdownMenuItem asChild>
+                              <Link href="/settings">Account Settings</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href="/register/season">Season Registration</Link>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={handleSignOut}>Log out</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
+                ) : (
+                  <div className="hidden md:flex items-center space-x-2">
+                    <Button variant="outline" asChild>
+                      <Link href="/login">Log in</Link>
+                    </Button>
+                    <Button asChild>
+                      <Link href="/register">Sign up</Link>
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
 
-                  {/* Sign Out Button */}
-                  <Button
-                    onClick={handleSignOut}
-                    className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <Link href="/login" onClick={() => setIsMobileOpen(false)} className="w-full h-12 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-md flex items-center justify-center">
-                    Log in
-                  </Link>
-                  <Link href="/register" onClick={() => setIsMobileOpen(false)} className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
-                    Sign up
-                  </Link>
-                </div>
-              )}
-            </div>
+            {/* Mobile menu button */}
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:block fixed left-0 top-0 z-50 h-screen w-56 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-r border-white/20 flex flex-col">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-40 left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-        </div>
-
-        {/* Header */}
-        <div className="relative z-10 flex items-center justify-center p-4 border-b border-white/20 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm flex-shrink-0">
-          <Link href="/">
-            <Image
-              src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
-              alt="SCS Logo"
-              width={120}
-              height={40}
-              className="h-8 w-auto object-contain"
-              priority
-            />
-          </Link>
-        </div>
-
-        {/* Scrollable Navigation Container */}
-        <div className="relative z-10 flex-1 overflow-hidden flex flex-col">
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/5 hover:scrollbar-thumb-white/40 transition-all duration-200">
-            <div className="space-y-6">
-              {/* Main Navigation */}
-              <div className="animate-slide-in">
-                <div className="mb-3">
-                  <h3 className="text-sm font-bold text-white mb-1">Navigation</h3>
-                  <p className="text-xs text-white/60">Main sections</p>
-                </div>
-                
-                <ul className="space-y-1">
-                  {navigation.map((item, index) => {
-                    const Icon = item.icon
-                    const isActive = item.href === "/" 
-                      ? pathname === "/" 
-                      : pathname === item.href || pathname.startsWith(item.href + "/")
-                    const hasSubmenu = item.submenu && item.submenu.length > 0
-                    const isExpanded = expandedMenus[item.name]
-
-                    return (
-                      <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 50}ms` }}>
-                        <div className="flex items-center">
-                          <Link
-                            href={item.href}
-                            className={cn(
-                              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
-                              isActive 
-                                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg" 
-                                : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                            )}
-                          >
-                            <Icon className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">{item.name}</span>
-                          </Link>
-                          {hasSubmenu && (
-                            <button
-                              className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
-                              onClick={() => toggleSubmenu(item.name)}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-3 w-3" />
-                              ) : (
-                                <ChevronRight className="h-3 w-3" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-
-                        {hasSubmenu && isExpanded && (
-                          <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                            {item.submenu.map((subItem) => (
-                              <li key={subItem.name}>
-                                <Link
-                                  href={subItem.href}
-                                  className={cn(
-                                    "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                                    pathname === subItem.href
-                                      ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                      : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                                  )}
-                                >
-                                  {subItem.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-
-              {/* Registration */}
-              <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
-                <div className="mb-3">
-                  <h3 className="text-sm font-bold text-white mb-1">Registration</h3>
-                  <p className="text-xs text-white/60">Join the league</p>
-                </div>
-                
-                <ul className="space-y-1">
-                  <li>
-                    <Link
-                      href="/register"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/register"
-                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      <span className="truncate">Sign Up</span>
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/register/season"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/register/season"
-                          ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      <span className="truncate">Season Registration</span>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* ELO System */}
-              <div className="animate-slide-in" style={{ animationDelay: "500ms" }}>
-                <div className="mb-3">
-                  <h3 className="text-sm font-bold text-white mb-1">ELO System</h3>
-                  <p className="text-xs text-white/60">Player rankings</p>
-                </div>
-                
-                <ul className="space-y-1">
-                  <li>
-                    <Link
-                      href="/elo/rankings"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/elo/rankings"
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <Target className="h-4 w-4" />
-                      <span className="truncate">ELO Rankings</span>
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/elo/statistics"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/elo/statistics"
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <BarChart3 className="h-4 w-4" />
-                      <span className="truncate">ELO Statistics</span>
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/elo/matches"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/elo/matches"
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <Calendar className="h-4 w-4" />
-                      <span className="truncate">ELO Matches</span>
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/elo/leaderboard"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/elo/leaderboard"
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <Trophy className="h-4 w-4" />
-                      <span className="truncate">ELO Leaderboard</span>
-                    </Link>
-                  </li>
-                  
-                  <li>
-                    <Link
-                      href="/elo/history"
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                        pathname === "/elo/history"
-                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
-                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                      )}
-                    >
-                      <BarChart3 className="h-4 w-4" />
-                      <span className="truncate">ELO History</span>
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </nav>
-
-          {/* User Section - Fixed at bottom */}
-          <div className="relative z-10 border-t border-white/20 p-4 space-y-4 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm flex-shrink-0">
-            {session ? (
-              <>
-                {/* Team Info */}
-                {teamInfo && (
-                  <Link 
-                    href={`/teams/${teamInfo.id}`} 
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 backdrop-blur-sm transition-colors border border-white/20"
-                  >
-                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white/10 backdrop-blur-sm flex-shrink-0">
-                      {teamInfo.logo_url ? (
-                        <Image
-                          src={teamInfo.logo_url}
-                          alt={teamInfo.name}
-                          width={32}
-                          height={32}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-xs font-bold text-white">{teamInfo.name.substring(0, 2)}</span>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate text-white">{teamInfo.name}</p>
-                      <p className="text-xs text-white/70">Your Team</p>
-                    </div>
-                  </Link>
-                )}
-
-                {/* Role Badges */}
-                {getUniqueRoleBadges().length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {getUniqueRoleBadges().map((role) => (
-                      <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs border-0`}>
-                        {role}
-                      </Badge>
+      {/* Mobile Navigation */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-background md:hidden">
+          <div className="container flex h-16 items-center justify-between">
+            <Link href="/" className="flex items-center" onClick={closeMenu}>
+              <Image
+                src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
+                alt="SCS Logo"
+                width={120}
+                height={40}
+                className="h-10 w-auto object-contain"
+                priority
+              />
+            </Link>
+            <Button variant="ghost" size="icon" onClick={closeMenu}>
+              <X className="h-5 w-5" />
+              <span className="sr-only">Close menu</span>
+            </Button>
+          </div>
+          <nav className="container grid gap-6 py-6">
+            {navigation.map((item) => (
+              <div key={item.name}>
+                <Link
+                  href={item.href}
+                  className={`text-lg font-medium ${pathname === item.href || pathname.startsWith(item.href) ? "text-primary" : "text-muted-foreground"}`}
+                  onClick={closeMenu}
+                >
+                  {item.name}
+                </Link>
+                {item.submenu && (
+                  <div className="ml-4 mt-2 space-y-2">
+                    {item.submenu.map((subItem) => (
+                      <Link
+                        key={subItem.name}
+                        href={subItem.href}
+                        className={`block text-base font-medium ${pathname === subItem.href ? "text-primary" : "text-muted-foreground"}`}
+                        onClick={closeMenu}
+                      >
+                        {subItem.name}
+                      </Link>
                     ))}
                   </div>
                 )}
-
-                {/* User Info */}
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                  <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-white/20">
-                    <AvatarImage
-                      src={userProfile?.avatar_url || "/placeholder.svg?height=40&width=40"}
-                      alt={userProfile?.gamer_tag_id || "User"}
-                    />
-                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                      {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-none truncate text-white">
-                      {userProfile?.gamer_tag_id || "User"}
-                    </p>
-                    <p className="text-xs leading-none text-white/70 truncate mt-1">
-                      {session?.user?.email}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Sign Out Button */}
-                <Button
-                  onClick={handleSignOut}
-                  className="w-full bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
-                </Button>
-              </>
-            ) : (
-              <div className="space-y-3">
-                <Link href="/login" className="w-full h-10 bg-white/10 border border-white/20 text-white hover:bg-white/20 rounded-md flex items-center justify-center">
-                  Log in
-                </Link>
-                <Link href="/register" className="w-full h-10 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-md flex items-center justify-center">
-                  Sign up
-                </Link>
               </div>
+            ))}
+            {session && (
+              <>
+                <Link
+                  href="/register/season"
+                  className={`text-lg font-medium ${pathname === "/register/season" ? "text-primary" : "text-muted-foreground"}`}
+                  onClick={closeMenu}
+                >
+                  Season Registration
+                </Link>
+                <button
+                  onClick={navigateToProfile}
+                  className={`text-lg font-medium text-left ${pathname.startsWith("/players/") ? "text-primary" : "text-muted-foreground"}`}
+                >
+                  My Profile
+                </button>
+                {/* Team Chat in mobile menu */}
+                <div className="mt-4">
+                  <TeamChatButton />
+                </div>
+              </>
             )}
-          </div>
+            {showFullUI && (
+              <>
+                {!session && (
+                  <div className="grid gap-4 mt-4">
+                    <Button variant="outline" asChild>
+                      <Link href="/login" onClick={closeMenu}>
+                        Log in
+                      </Link>
+                    </Button>
+                    <Button asChild>
+                      <Link href="/register" onClick={closeMenu}>
+                        Sign up
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </nav>
         </div>
-      </aside>
-
-      <style jsx>{`
-        @keyframes slide-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out forwards;
-        }
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        
-        /* Custom scrollbar styles */
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 8px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 4px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.3);
-          border-radius: 4px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.4);
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:active {
-          background: rgba(255, 255, 255, 0.5);
-        }
-        .scrollbar-track-white\/5::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-        }
-        .scrollbar-thumb-white\/30::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.3);
-          background: rgba(255, 255, 255, 0.3);
-        }
-        .scrollbar-thumb-white\/40::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.4);
-        }
-        
-        /* Firefox scrollbar styles */
-        .scrollbar-thin {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
-        }
-      `}</style>
-    </>
+      )}
+    </header>
   )
 }

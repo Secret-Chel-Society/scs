@@ -38,11 +38,6 @@ const nextConfig = {
     }
     return config;
   },
-  transpilePackages: ['framer-motion'],
-  experimental: {
-    // Additional settings for better compatibility
-    optimizePackageImports: ['framer-motion'],
-  },
 };
 
 export default nextConfig;

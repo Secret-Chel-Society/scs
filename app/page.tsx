@@ -281,32 +281,20 @@ export default function Home() {
     fetchData()
   }, [supabase, toast])
 
-
-
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
-
-      <BannedUserModal />
-      <FloatingParticles />
-
-      {/* Enhanced Hockey-Themed Hero Section */}
-      <div className="relative">
-        <HeroCarousel images={heroImages} />
-
-        {/* Hockey-themed animated overlay elements */}
+        
+        {/* Enhanced floating elements */}
         <motion.div
-          className="absolute top-20 right-10 w-20 h-20 border-2 border-primary/30 rounded-full flex items-center justify-center"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-        >
-          <Gamepad2 className="h-8 w-8 text-primary/50" />
-        </motion.div>
+          className="absolute top-20 right-20 w-20 h-20 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full"
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
+        />
         <motion.div
           className="absolute bottom-20 left-10 w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center"
           animate={{ y: [-10, 10, -10] }}
@@ -321,86 +309,79 @@ export default function Home() {
         />
       </div>
 
-      {/* Action Buttons Section */}
-      <motion.section
-        className="relative mt-8 z-10 mx-4"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button asChild size="lg" className="font-semibold text-base sm:text-lg px-8 py-3">
-              <Link href="/register/season">Season 1 Signup</Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="bg-background/30 backdrop-blur-sm border-primary/20 text-foreground hover:bg-background/50 font-semibold text-base sm:text-lg px-8 py-3"
-            >
-              <Link href="/matches">View Matches</Link>
-            </Button>
-          </div>
-        </div>
-      </motion.section>
+      <BannedUserModal />
+      <FloatingParticles />
 
-      {/* Enhanced Stats Section with Hockey Theme */}
+      {/* Enhanced Hero Section */}
+      <div className="relative">
+        <HeroCarousel images={heroImages} />
+      </div>
+
+      {/* Enhanced Stats Section with Modern Design */}
       <motion.section
-        className="relative mt-8 z-10 mx-4"
+        className="relative -mt-20 z-10 mx-4 mb-20"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
-          <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-pink-500/10" />
-            <CardContent className="relative p-4 lg:p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">SCS League Statistics</h2>
-                <p className="text-purple-200">Real-time data from our advanced tracking system</p>
+        <div className="container mx-auto">
+          <Card className="backdrop-blur-md bg-background/95 border-primary/20 shadow-2xl overflow-hidden relative">
+            {/* Enhanced background effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-red-500/5" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-primary to-red-500" />
+            
+            <CardContent className="relative p-8">
+              <div className="text-center mb-10">
+                <motion.div
+                  className="inline-flex items-center gap-3 mb-4"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-lg">
+                    <BarChart3 className="h-8 w-8 text-white" />
+                  </div>
+                </motion.div>
+                <h2 className="text-3xl font-bold text-foreground mb-3">SCS League Statistics</h2>
+                <p className="text-muted-foreground text-lg">Real-time data from our advanced tracking system</p>
+                <div className="h-1 w-32 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-4" />
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {[
                   {
                     icon: Users,
                     label: "Active Players",
                     value: stats.totalPlayers,
-                    gradient: "from-blue-500 to-cyan-500",
-                    bgGradient: "from-blue-500/20 to-cyan-500/20",
-                    borderColor: "border-blue-500/30",
+                    color: "text-blue-500",
                     desc: "Registered competitors",
-                    link: "/players",
+                    bgGradient: "from-blue-500/10 to-blue-600/10",
+                    borderColor: "border-blue-500/30",
                   },
                   {
                     icon: Trophy,
                     label: "Teams",
                     value: stats.totalTeams,
-                    gradient: "from-green-500 to-emerald-500",
-                    bgGradient: "from-green-500/20 to-emerald-500/20",
-                    borderColor: "border-green-500/30",
+                    color: "text-green-500",
                     desc: "Active franchises",
-                    link: "/teams",
+                    bgGradient: "from-green-500/10 to-green-600/10",
+                    borderColor: "border-green-500/30",
                   },
                   {
                     icon: Calendar,
                     label: "Matches Played",
                     value: stats.totalMatches,
-                    gradient: "from-purple-500 to-violet-500",
-                    bgGradient: "from-purple-500/20 to-violet-500/20",
-                    borderColor: "border-purple-500/30",
+                    color: "text-purple-500",
                     desc: "Total games tracked",
-                    link: "/matches",
+                    bgGradient: "from-purple-500/10 to-purple-600/10",
+                    borderColor: "border-purple-500/30",
                   },
                   {
                     icon: TrendingUp,
                     label: "Completed Trades",
                     value: stats.completedTrades,
-                    gradient: "from-orange-500 to-red-500",
-                    bgGradient: "from-orange-500/20 to-red-500/20",
-                    borderColor: "border-orange-500/30",
+                    color: "text-orange-500",
                     desc: "Completed transactions",
-                    link: "/trades",
+                    bgGradient: "from-orange-500/10 to-orange-600/10",
+                    borderColor: "border-orange-500/30",
                   },
                 ].map((stat, index) => (
                   <motion.div
@@ -411,23 +392,18 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     whileHover={{ scale: 1.05, y: -5 }}
                   >
-                    <Link href={stat.link}>
-                      <motion.div
-                        className={`bg-gradient-to-r ${stat.bgGradient} border ${stat.borderColor} rounded-full p-4 mb-4 backdrop-blur-sm cursor-pointer w-20 h-20 mx-auto flex items-center justify-center`}
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ 
-                          duration: 0.5,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <stat.icon className={`h-8 w-8 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`} />
-                      </motion.div>
-                    </Link>
-                    <div className={`text-4xl font-bold mb-2 bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}>
+                    <motion.div
+                      className={`${stat.color} mb-4 mx-auto w-fit p-4 rounded-2xl bg-gradient-to-br ${stat.bgGradient} border ${stat.borderColor} shadow-lg`}
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <stat.icon className="h-8 w-8" />
+                    </motion.div>
+                    <div className="text-4xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
                       <AnimatedCounter end={stat.value} />
                     </div>
-                    <div className="text-lg font-semibold mb-2 text-white">{stat.label}</div>
-                    <div className="text-sm text-purple-200">{stat.desc}</div>
+                    <div className="text-lg font-semibold mb-2 text-foreground">{stat.label}</div>
+                    <div className="text-sm text-muted-foreground">{stat.desc}</div>
                   </motion.div>
                 ))}
               </div>
@@ -436,45 +412,51 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* New: About SCS Section */}
+      {/* Enhanced About SCS Section */}
       <motion.section
-        className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16"
+        className="container mx-auto px-4 py-20"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="text-center mb-12">
-          <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl">
-              <Crown className="h-8 w-8 text-white" />
+        <div className="text-center mb-16">
+          <motion.div className="inline-flex items-center gap-4 mb-6" whileHover={{ scale: 1.05 }}>
+            <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
+              <Crown className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <h2 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               About SCS
             </h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-transparent rounded-full mx-auto mb-6" />
+          <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mb-8" />
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            The Secret Chel Society is the premier NHL 26 competitive gaming league with advanced stat tracking, 
+            professional management systems, and a thriving community of dedicated players.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 lg:gap-8 mb-8 lg:mb-12">
+        <div className="grid md:grid-cols-2 gap-10 mb-16">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-white/20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm">
-              <CardContent className="p-4 lg:p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-white">
-                  <GamepadIcon className="h-6 w-6 text-purple-400" />
-                  Premier NHL 26 League
-                </h3>
-                <p className="text-purple-200 leading-relaxed mb-4">
+            <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg">
+                    <GamepadIcon className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-foreground">Premier NHL 26 League</h3>
+                </div>
+                <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
                   The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 26
                   gaming league available today. We provide a complete hockey simulation experience with structured
                   seasons, playoffs, and championship tournaments that mirror real NHL operations.
                 </p>
-                <p className="text-purple-200 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed text-lg">
                   We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
                   Players can engage in a full range of league activities, 
                   from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
@@ -489,18 +471,20 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-white/20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm">
-              <CardContent className="p-4 lg:p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-white">
-                  <Users className="h-6 w-6 text-purple-400" />
-                  Professional Community
-                </h3>
-                <p className="text-purple-200 leading-relaxed mb-4">
+            <Card className="h-full border-primary/20 bg-gradient-to-br from-background to-muted/20 shadow-xl hover:shadow-2xl transition-all duration-300">
+              <CardContent className="p-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-4 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl shadow-lg">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold text-foreground">Professional Community</h3>
+                </div>
+                <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
                   Connect with hundreds of dedicated NHL 26 players in a top-tier competitive environment. 
                   Our community consists of seasoned gamers and 
                   hockey enthusiasts who are passionate about strategic play and sportsmanship.
                 </p>
-                <p className="text-purple-200 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed text-lg">
                   Competitive integrity is at the heart of our community. 
                   Our dedicated team of moderators enforces a robust rule set, 
                   fostering an environment where every match is played with sportsmanship and professionalism.
@@ -511,58 +495,58 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* New: Advanced Features Section */}
+      {/* Enhanced Advanced Features Section */}
       <motion.section
-        className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16"
+        className="container mx-auto px-4 py-20"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="text-center mb-12">
-          <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl">
-              <Database className="h-8 w-8 text-white" />
+        <div className="text-center mb-16">
+          <motion.div className="inline-flex items-center gap-4 mb-6" whileHover={{ scale: 1.05 }}>
+            <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl shadow-xl">
+              <Database className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+            <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
               Advanced League Features
             </h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-blue-500 to-transparent rounded-full mx-auto mb-6" />
+          <div className="h-1 w-40 bg-gradient-to-r from-blue-500 to-transparent rounded-full mx-auto mb-8" />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 lg:gap-8">
+        <div className="grid md:grid-cols-3 gap-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-blue-500/20 bg-gradient-to-br from-background to-blue-500/5 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-blue-500" />
+            <Card className="h-full border-blue-500/20 bg-gradient-to-br from-background to-blue-500/5 hover:shadow-2xl transition-all duration-300 group">
+              <CardHeader className="pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <BarChart3 className="h-8 w-8 text-blue-500" />
                   </div>
-                  <CardTitle className="text-xl">Custom API Statistics</CardTitle>
+                  <CardTitle className="text-2xl text-foreground">Custom API Statistics</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed mb-4">
+                <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
                  Our proprietary API system provides detailed statistical tracking and analysis for every aspect of NHL 26 gameplay. 
                  It automatically records all key metrics, from goals and assists to advanced analytics like Corsi and Fenwick ratings.
                 </p>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li className="flex items-center gap-2">
-                    <ChartBar className="h-4 w-4 text-blue-500" />
+                <ul className="text-sm text-muted-foreground space-y-3">
+                  <li className="flex items-center gap-3">
+                    <ChartBar className="h-5 w-5 text-blue-500" />
                     Real-time match statistics
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-blue-500" />
+                  <li className="flex items-center gap-3">
+                    <Activity className="h-5 w-5 text-blue-500" />
                     Advanced player analytics
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-blue-500" />
+                  <li className="flex items-center gap-3">
+                    <Database className="h-5 w-5 text-blue-500" />
                     Historical performance data
                   </li>
                 </ul>
@@ -576,31 +560,31 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-green-500/20 bg-gradient-to-br from-background to-green-500/5 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-500/20 rounded-lg">
-                    <Coins className="h-6 w-6 text-green-500" />
+            <Card className="h-full border-green-500/20 bg-gradient-to-br from-background to-green-500/5 hover:shadow-2xl transition-all duration-300 group">
+              <CardHeader className="pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-green-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Coins className="h-8 w-8 text-green-500" />
                   </div>
-                  <CardTitle className="text-xl">Token Reward System</CardTitle>
+                  <CardTitle className="text-2xl text-foreground">Token Reward System</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed mb-4">
+                <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
                   Earn SCS tokens completely free by participating in matches, achieving milestones, and contributing
                   to the community. Redeem tokens for exclusive prizes, merchandise, and special league privileges.
                 </p>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li className="flex items-center gap-2">
-                    <Gift className="h-4 w-4 text-green-500" />
+                <ul className="text-sm text-muted-foreground space-y-3">
+                  <li className="flex items-center gap-3">
+                    <Gift className="h-5 w-5 text-green-500" />
                     Free prize redemption
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Medal className="h-4 w-4 text-green-500" />
+                  <li className="flex items-center gap-3">
+                    <Medal className="h-5 w-5 text-green-500" />
                     Achievement rewards
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-green-500" />
+                  <li className="flex items-center gap-3">
+                    <Star className="h-5 w-5 text-green-500" />
                     Exclusive league perks
                   </li>
                 </ul>
@@ -614,31 +598,31 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full border-purple-500/20 bg-gradient-to-br from-background to-purple-500/5 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-500/20 rounded-lg">
-                    <Shield className="h-6 w-6 text-purple-500" />
+            <Card className="h-full border-purple-500/20 bg-gradient-to-br from-background to-purple-500/5 hover:shadow-2xl transition-all duration-300 group">
+              <CardHeader className="pb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                    <Shield className="h-8 w-8 text-purple-500" />
                   </div>
-                  <CardTitle className="text-xl">Professional Management</CardTitle>
+                  <CardTitle className="text-2xl text-foreground">Professional Management</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed mb-4">
+                <p className="text-muted-foreground leading-relaxed mb-6 text-lg">
                   Complete team management system with salary caps, contract negotiations, trade deadlines, waiver
                   claims, and draft systems that create an authentic NHL franchise experience.
                 </p>
-                <ul className="text-sm text-muted-foreground space-y-2">
-                  <li className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-purple-500" />
+                <ul className="text-sm text-muted-foreground space-y-3">
+                  <li className="flex items-center gap-3">
+                    <TrendingUp className="h-5 w-5 text-purple-500" />
                     Trade & waiver system
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-purple-500" />
+                  <li className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 text-purple-500" />
                     Scheduled seasons
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-purple-500" />
+                  <li className="flex items-center gap-3">
+                    <Award className="h-5 w-5 text-purple-500" />
                     Championship playoffs
                   </li>
                 </ul>
@@ -649,7 +633,7 @@ export default function Home() {
       </motion.section>
 
       {/* Main Content with Enhanced Animations */}
-              <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-6 lg:py-16 space-y-12 lg:space-y-32">
+      <div className="container mx-auto px-4 py-20 space-y-32">
         {/* Enhanced Upcoming Games Section */}
         <motion.section
           className="relative z-40"
@@ -659,45 +643,45 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-6 mb-10">
             <motion.div
-              className="p-3 bg-gradient-to-r from-primary to-primary/60 rounded-xl"
+              className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl"
               whileHover={{ scale: 1.1, rotate: 5 }}
             >
-              <GamepadIcon className="h-6 w-6 text-white" />
+              <GamepadIcon className="h-8 w-8 text-white" />
             </motion.div>
             <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 Upcoming NHL 26 Matches
               </h2>
-              <p className="text-muted-foreground mt-1">Live-streamed competitive games with real-time statistics</p>
-              <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent rounded-full mt-2" />
+              <p className="text-muted-foreground mt-2 text-lg">Live-streamed competitive games with real-time statistics</p>
+              <div className="h-1 w-24 bg-gradient-to-r from-primary to-transparent rounded-full mt-3" />
             </div>
           </div>
 
           <motion.div
-            className="relative z-40 bg-background/95 backdrop-blur-sm rounded-lg"
+            className="relative z-40 bg-background/95 backdrop-blur-sm rounded-2xl shadow-xl"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.3 }}
           >
             {loading.games ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="w-full h-40 rounded-lg" />
+                  <Skeleton key={i} className="w-full h-48 rounded-xl" />
                 ))}
               </div>
             ) : upcomingGames.length > 0 ? (
               <UpcomingGames games={upcomingGames} />
             ) : (
-              <Card className="text-center p-4 lg:p-8 border-dashed border-2 border-muted-foreground/20">
-                <CardContent className="pt-4 lg:pt-6">
+              <Card className="text-center p-12 border-dashed border-2 border-muted-foreground/20">
+                <CardContent className="pt-6">
                   <motion.div
                     animate={{ y: [-5, 5, -5] }}
                     transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                   >
-                    <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <Calendar className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
                   </motion.div>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-lg">
                     No upcoming matches scheduled. Check back soon for the next round of competitive NHL 26 games!
                   </p>
                 </CardContent>
@@ -715,27 +699,27 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-6 mb-10">
             <motion.div
-              className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl"
+              className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl"
               whileHover={{ scale: 1.1, rotate: -5 }}
             >
-              <TrendingUp className="h-6 w-6 text-white" />
+              <TrendingUp className="h-8 w-8 text-white" />
             </motion.div>
             <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
                 Recent Player Trades
               </h2>
-              <p className="text-muted-foreground mt-1">Live transaction feed from our professional trade system</p>
-              <div className="h-1 w-20 bg-gradient-to-r from-green-500 to-transparent rounded-full mt-2" />
+              <p className="text-muted-foreground mt-2 text-lg">Live transaction feed from our professional trade system</p>
+              <div className="h-1 w-24 bg-gradient-to-r from-green-500 to-transparent rounded-full mt-3" />
             </div>
           </div>
-          <div className="relative z-30 bg-background/95 backdrop-blur-sm rounded-lg">
+          <div className="relative z-30 bg-background/95 backdrop-blur-sm rounded-2xl shadow-xl">
             <RecentTrades />
           </div>
         </motion.section>
 
-        {/* Enhanced Tabs Section - Now only 2 tabs */}
+        {/* Enhanced Tabs Section */}
         <motion.section
           className="relative z-20"
           initial={{ opacity: 0, y: 50 }}
@@ -744,19 +728,19 @@ export default function Home() {
           viewport={{ once: true }}
         >
           <Tabs defaultValue="completed" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 backdrop-blur-sm">
+            <TabsList className="grid w-full grid-cols-2 mb-10 bg-muted/50 backdrop-blur-sm p-2 rounded-xl">
               <TabsTrigger
                 value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg py-3 text-lg font-semibold"
               >
-                <Trophy className="h-4 w-4 mr-2" />
+                <Trophy className="h-5 w-5 mr-3" />
                 Recent Match Results
               </TabsTrigger>
               <TabsTrigger
                 value="standings"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg py-3 text-lg font-semibold"
               >
-                <Target className="h-4 w-4 mr-2" />
+                <Target className="h-5 w-5 mr-3" />
                 League Standings
               </TabsTrigger>
             </TabsList>
@@ -768,9 +752,9 @@ export default function Home() {
                 transition={{ duration: 0.5 }}
               >
                 {loading.games ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(3)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-40 rounded-lg" />
+                      <Skeleton key={i} className="w-full h-48 rounded-xl" />
                     ))}
                   </div>
                 ) : (
@@ -786,7 +770,7 @@ export default function Home() {
                 transition={{ duration: 0.5 }}
               >
                 {loading.standings ? (
-                  <Skeleton className="w-full h-96 rounded-lg" />
+                  <Skeleton className="w-full h-96 rounded-xl" />
                 ) : (
                   <TeamStandings teams={standings} />
                 )}
@@ -803,124 +787,37 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <Card className="relative bg-gradient-to-br from-slate-900/80 via-purple-900/40 to-slate-900/80 border border-purple-500/30 overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-blue-500/5" />
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full -translate-y-20 translate-x-20 blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full translate-y-16 -translate-x-16 blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full -translate-x-12 -translate-y-12 blur-2xl" />
+          <Card className="relative bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border-primary/30 overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full -translate-y-20 translate-x-20" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full translate-y-16 -translate-x-16" />
 
-            <CardContent className="relative p-8 md:p-12">
-              {/* Header Section */}
-              <div className="text-center mb-8">
-                <motion.div
-                  className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full mb-6 shadow-2xl"
-                  animate={{ 
-                    rotate: [0, 5, -5, 0],
-                    scale: [1, 1.05, 1]
-                  }}
-                  transition={{ 
-                    rotate: { duration: 4, repeat: Number.POSITIVE_INFINITY },
-                    scale: { duration: 2, repeat: Number.POSITIVE_INFINITY }
-                  }}
-                >
-                  <Crown className="h-10 w-10 text-white" />
-                </motion.div>
-
-                <motion.h2 
-                  className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Join the Premier NHL 26 League
-                </motion.h2>
-                
-                <motion.p 
-                  className="text-lg md:text-xl mb-6 max-w-4xl mx-auto text-white/80 leading-relaxed"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking, 
-                  free token rewards, and authentic hockey league management.
-                </motion.p>
-
-                <motion.div 
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-full text-green-300 text-sm font-medium"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Shield className="h-4 w-4" />
-                  No entry fees, no pay-to-win mechanics - just pure competitive hockey gaming with real rewards!
-                </motion.div>
-              </div>
-
-              {/* Feature Grid */}
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+            <CardContent className="relative p-16 text-center">
+              <motion.div
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
+                className="mb-8"
               >
-                <motion.div 
-                  className="text-center p-4 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20 hover:border-blue-400/40 transition-all duration-300 hover:scale-105"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <Trophy className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Free to Play</h3>
-                  <p className="text-sm text-blue-200/80">Zero entry fees, pure competition</p>
-                </motion.div>
-
-                <motion.div 
-                  className="text-center p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300 hover:scale-105"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <BarChart3 className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Pro Stats</h3>
-                  <p className="text-sm text-purple-200/80">Professional-grade tracking</p>
-                </motion.div>
-
-                <motion.div 
-                  className="text-center p-4 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20 hover:border-green-400/40 transition-all duration-300 hover:scale-105"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <Coins className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Token Rewards</h3>
-                  <p className="text-sm text-green-200/80">Earn real rewards</p>
-                </motion.div>
-
-                <motion.div 
-                  className="text-center p-4 rounded-xl bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/20 hover:border-orange-400/40 transition-all duration-300 hover:scale-105"
-                  whileHover={{ y: -5 }}
-                >
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <Users className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Community</h3>
-                  <p className="text-sm text-orange-200/80">Active Discord community</p>
-                </motion.div>
+                <Crown className="h-20 w-20 mx-auto text-primary" />
               </motion.div>
 
-              {/* Action Buttons */}
-              <motion.div 
-                className="flex flex-col sm:flex-row justify-center gap-4 mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
+              <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Join the Premier NHL 26 League
+              </h2>
+              <p className="text-2xl mb-6 max-w-4xl mx-auto text-muted-foreground">
+                Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking,
+                free token rewards, and authentic hockey league management.
+              </p>
+              <p className="text-xl mb-10 max-w-3xl mx-auto text-muted-foreground">
+                No entry fees, no pay-to-win mechanics - just pure competitive hockey gaming with real rewards!
+              </p>
+
+              <div className="flex flex-wrap justify-center gap-8 mb-12">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     asChild
                     size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-2xl text-white font-semibold px-8 py-4 text-lg"
+                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl text-lg px-8 py-6"
                   >
                     <Link href="/register" className="flex items-center gap-3">
                       <Zap className="h-6 w-6" />
@@ -934,7 +831,7 @@ export default function Home() {
                     variant="outline"
                     size="lg"
                     asChild
-                    className="border-purple-400/50 hover:bg-purple-500/10 backdrop-blur-sm bg-transparent text-white font-semibold px-8 py-4 text-lg"
+                    className="border-primary/30 hover:bg-primary/10 backdrop-blur-sm bg-transparent text-lg px-8 py-6"
                   >
                     <Link
                       href="https://discord.gg/secretchelsociety"
@@ -951,34 +848,22 @@ export default function Home() {
                     </Link>
                   </Button>
                 </motion.div>
-              </motion.div>
+              </div>
 
-              {/* Stats Row */}
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-              >
-                <div className="text-center p-4 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20">
-                  <div className="text-3xl font-bold text-blue-300 mb-1">
-                    <AnimatedCounter end={100} suffix="%" />
-                  </div>
-                  <div className="text-sm text-blue-200/80 font-medium">Free to Play</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">100%</div>
+                  <div className="text-lg text-muted-foreground">Free to Play</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20">
-                  <div className="text-3xl font-bold text-purple-300 mb-1">
-                    <AnimatedCounter end={24} suffix="/7" />
-                  </div>
-                  <div className="text-sm text-purple-200/80 font-medium">Stat Tracking</div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">24/7</div>
+                  <div className="text-lg text-muted-foreground">Stat Tracking</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/20">
-                  <div className="text-3xl font-bold text-green-300 mb-1">
-                    <AnimatedCounter end={100} suffix="%" />
-                  </div>
-                  <div className="text-sm text-green-200/80 font-medium">Real Rewards</div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">Real</div>
+                  <div className="text-lg text-muted-foreground">Prize Rewards</div>
                 </div>
-              </motion.div>
+              </div>
             </CardContent>
           </Card>
         </motion.section>
@@ -991,38 +876,38 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
+          <div className="flex justify-between items-center mb-10">
+            <div className="flex items-center gap-6">
               <motion.div
-                className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl"
+                className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-xl"
                 whileHover={{ scale: 1.1, rotate: 5 }}
               >
-                <Star className="h-6 w-6 text-white" />
+                <Star className="h-8 w-8 text-white" />
               </motion.div>
               <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
                   Latest SCS News
                 </h2>
-                <p className="text-muted-foreground mt-1">Stay updated with league announcements and highlights</p>
-                <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-transparent rounded-full mt-2" />
+                <p className="text-muted-foreground mt-2 text-lg">Stay updated with league announcements and highlights</p>
+                <div className="h-1 w-24 bg-gradient-to-r from-purple-500 to-transparent rounded-full mt-3" />
               </div>
             </div>
 
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Button variant="ghost" asChild className="hover:bg-primary/10">
+              <Button variant="ghost" asChild className="hover:bg-primary/10 text-lg px-6 py-3">
                 <Link href="/news">View All News</Link>
               </Button>
             </motion.div>
           </div>
 
           {loading.news ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="w-full h-64 rounded-lg" />
+                <Skeleton key={i} className="w-full h-80 rounded-xl" />
               ))}
             </div>
           ) : news.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {news.map((item, index) => (
                 <motion.div
                   key={item.id}
@@ -1036,15 +921,15 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <Card className="text-center p-4 lg:p-8 border-dashed border-2 border-muted-foreground/20">
-              <CardContent className="pt-4 lg:pt-6">
+            <Card className="text-center p-12 border-dashed border-2 border-muted-foreground/20">
+              <CardContent className="pt-6">
                 <motion.div
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
                 >
-                  <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <Star className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
                 </motion.div>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground text-lg">
                   No news articles available yet. Check back soon for league updates!
                 </p>
               </CardContent>
@@ -1052,32 +937,6 @@ export default function Home() {
           )}
         </motion.section>
       </div>
-
-      <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
   )
 }

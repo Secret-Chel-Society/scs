@@ -22,7 +22,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import Link from "next/link"
 
 // Define the Season interface
 interface Season {
@@ -628,14 +627,13 @@ export default function AdminAwardsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
-              <p className="text-white/70">Loading awards management...</p>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-12 w-1/3 mb-6" />
+        <Skeleton className="h-8 w-1/4 mb-4" />
+        <div className="grid gap-6">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
         </div>
       </div>
     )
@@ -646,181 +644,89 @@ export default function AdminAwardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Header */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
-        <div className="relative container mx-auto px-4 py-8">
-          <div className="flex items-center gap-2 mb-6">
-            <Link href="/admin" className="text-white/70 hover:text-white transition-colors">
-              Back to Admin Dashboard
-            </Link>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Manage Awards</h1>
 
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl">
-              <Trophy className="h-8 w-8 text-blue-400" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Awards Management
-              </h1>
-              <p className="text-white/70 mt-1">Manage team and player awards for the league</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Tabs defaultValue="team-awards">
+        <TabsList className="mb-4">
+          <TabsTrigger value="team-awards">Team Awards</TabsTrigger>
+          <TabsTrigger value="player-awards">Player Awards</TabsTrigger>
+        </TabsList>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-8">
-        <Tabs defaultValue="team-awards">
-          <TabsList className="mb-6 bg-slate-800/50 border border-white/20">
-            <TabsTrigger value="team-awards" className="text-white data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">Team Awards</TabsTrigger>
-            <TabsTrigger value="player-awards" className="text-white data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">Player Awards</TabsTrigger>
-          </TabsList>
+        <TabsContent value="team-awards">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Team Awards</CardTitle>
+                  <CardDescription>Manage team awards like President Trophy and SCS Cup</CardDescription>
+                </div>
+                <Dialog open={isTeamDialogOpen} onOpenChange={setIsTeamDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Team Award
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Team Award</DialogTitle>
+                      <DialogDescription>Create a new team award for a specific season</DialogDescription>
+                    </DialogHeader>
 
-          <TabsContent value="team-awards">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-white">Team Awards</CardTitle>
-                    <CardDescription className="text-white/70">Manage team awards like President Trophy and SCS Cup</CardDescription>
-                  </div>
-                  <Dialog open={isTeamDialogOpen} onOpenChange={setIsTeamDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Team Award
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">Add Team Award</DialogTitle>
-                        <DialogDescription className="text-white/70">Create a new team award for a specific season</DialogDescription>
-                      </DialogHeader>
-
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="team" className="text-white">Team</Label>
-                          <Select
-                            value={newTeamAward.team_id}
-                            onValueChange={(value) => setNewTeamAward({ ...newTeamAward, team_id: value })}
-                          >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select team" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {teams.map((team) => (
-                                <SelectItem key={team.id} value={team.id} className="text-white hover:bg-slate-700">
-                                  {team.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="award-type" className="text-white">Award Type</Label>
-                          <Select
-                            value={newTeamAward.award_type}
-                            onValueChange={(value) => setNewTeamAward({ ...newTeamAward, award_type: value })}
-                          >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select award type" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {teamAwardTypes.map((type) => (
-                                <SelectItem key={type} value={type} className="text-white hover:bg-slate-700">
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="season" className="text-white">Season</Label>
-                            <Select
-                              value={String(newTeamAward.season_number)}
-                              onValueChange={(value) => setNewTeamAward({ ...newTeamAward, season_number: value })}
-                            >
-                              <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                                <SelectValue placeholder="Select season" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-white/20">
-                                {seasons.map((season) => (
-                                  <SelectItem key={season.id} value={String(season.id)} className="text-white hover:bg-slate-700">
-                                    {season.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="grid gap-2">
-                            <Label htmlFor="year" className="text-white">Year</Label>
-                            <Input
-                              type="number"
-                              value={newTeamAward.year}
-                              onChange={(e) =>
-                                setNewTeamAward({
-                                  ...newTeamAward,
-                                  year: Number.parseInt(e.target.value, 10) || new Date().getFullYear(),
-                                })
-                              }
-                              min={2000}
-                              max={2100}
-                              className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="description" className="text-white">Description (Optional)</Label>
-                          <Input
-                            value={newTeamAward.description}
-                            onChange={(e) => setNewTeamAward({ ...newTeamAward, description: e.target.value })}
-                            placeholder="Add details about this award"
-                            className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                          />
-                        </div>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="team">Team</Label>
+                        <Select
+                          value={newTeamAward.team_id}
+                          onValueChange={(value) => setNewTeamAward({ ...newTeamAward, team_id: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select team" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teams.map((team) => (
+                              <SelectItem key={team.id} value={team.id}>
+                                {team.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsTeamDialogOpen(false)} className="border-white/20 text-white hover:bg-white/10">
-                          Cancel
-                        </Button>
-                        <Button onClick={handleCreateTeamAward} className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                          Create Award
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  <Dialog open={isEditTeamDialogOpen} onOpenChange={setIsEditTeamDialogOpen}>
-                    <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">Edit Team Award</DialogTitle>
-                        <DialogDescription className="text-white/70">Update the team award details</DialogDescription>
-                      </DialogHeader>
+                      <div className="grid gap-2">
+                        <Label htmlFor="award-type">Award Type</Label>
+                        <Select
+                          value={newTeamAward.award_type}
+                          onValueChange={(value) => setNewTeamAward({ ...newTeamAward, award_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select award type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teamAwardTypes.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                      <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="team" className="text-white">Team</Label>
+                          <Label htmlFor="season">Season</Label>
                           <Select
-                            value={editingTeamAward?.team_id || ""}
-                            onValueChange={(value) =>
-                              setEditingTeamAward((prev) => (prev ? { ...prev, team_id: value } : null))
-                            }
+                            value={String(newTeamAward.season_number)}
+                            onValueChange={(value) => setNewTeamAward({ ...newTeamAward, season_number: value })}
                           >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select team" />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select season" />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {teams.map((team) => (
-                                <SelectItem key={team.id} value={team.id} className="text-white hover:bg-slate-700">
-                                  {team.name}
+                            <SelectContent>
+                              {seasons.map((season) => (
+                                <SelectItem key={season.id} value={String(season.id)}>
+                                  {season.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -828,480 +734,515 @@ export default function AdminAwardsPage() {
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor="award-type" className="text-white">Award Type</Label>
-                          <Select
-                            value={editingTeamAward?.award_type || ""}
-                            onValueChange={(value) =>
-                              setEditingTeamAward((prev) => (prev ? { ...prev, award_type: value } : null))
-                            }
-                          >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select award type" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {teamAwardTypes.map((type) => (
-                                <SelectItem key={type} value={type} className="text-white hover:bg-slate-700">
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="season" className="text-white">Season</Label>
-                          <div className="relative">
-                            <Select
-                              value={selectedTeamSeason}
-                              onValueChange={(value) => {
-                                console.log("Selected season value:", value)
-                                setSelectedTeamSeason(value)
-                              }}
-                            >
-                              <SelectTrigger className="w-full bg-slate-800/50 border-white/20 text-white">
-                                <SelectValue placeholder="Select season">{getSeasonName(selectedTeamSeason)}</SelectValue>
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-white/20">
-                                {seasons.map((season) => (
-                                  <SelectItem key={`season-${season.id}`} value={String(season.id)} className="text-white hover:bg-slate-700">
-                                    {season.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="year" className="text-white">Year</Label>
+                          <Label htmlFor="year">Year</Label>
                           <Input
                             type="number"
-                            value={editingTeamAward?.year || ""}
+                            value={newTeamAward.year}
                             onChange={(e) =>
-                              setEditingTeamAward((prev) =>
-                                prev
-                                  ? { ...prev, year: Number.parseInt(e.target.value, 10) || new Date().getFullYear() }
-                                  : null,
-                              )
+                              setNewTeamAward({
+                                ...newTeamAward,
+                                year: Number.parseInt(e.target.value, 10) || new Date().getFullYear(),
+                              })
                             }
                             min={2000}
                             max={2100}
-                            className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                          />
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="description" className="text-white">Description (Optional)</Label>
-                          <Input
-                            value={editingTeamAward?.description || ""}
-                            onChange={(e) =>
-                              setEditingTeamAward((prev) => (prev ? { ...prev, description: e.target.value } : null))
-                            }
-                            placeholder="Add details about this award"
-                            className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                           />
                         </div>
                       </div>
 
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditTeamDialogOpen(false)} className="border-white/20 text-white hover:bg-white/10">
-                          Cancel
-                        </Button>
-                        <Button onClick={handleEditTeamAward} className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                          Update Award
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border border-white/20 overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-white/20">
-                        <TableHead className="text-white">Award</TableHead>
-                        <TableHead className="text-white">Team</TableHead>
-                        <TableHead className="text-white">Season</TableHead>
-                        <TableHead className="text-white">Year</TableHead>
-                        <TableHead className="text-white">Description</TableHead>
-                        <TableHead className="text-right text-white">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {teamAwards.length > 0 ? (
-                        teamAwards.map((award) => (
-                          <TableRow key={award.id} className="border-white/20 hover:bg-white/5">
-                            <TableCell className="font-medium text-white">
-                              <div className="flex items-center gap-2">
-                                {award.award_type === "SCS Cup" ? (
-                                  <Trophy className="h-5 w-5 text-yellow-500" />
-                                ) : (
-                                  <Medal className="h-5 w-5 text-blue-500" />
-                                )}
-                                {award.award_type}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-white">{award.team_name}</TableCell>
-                            <TableCell className="text-white">{getSeasonName(award.season_number)}</TableCell>
-                            <TableCell className="text-white">{award.year}</TableCell>
-                            <TableCell className="text-white">{award.description || "-"}</TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setEditingTeamAward(award)
-                                  // Find the season ID that corresponds to this season number
-                                  const season = seasons.find((s) => s.number === award.season_number)
-                                  if (season) {
-                                    setSelectedTeamSeason(String(season.id))
-                                  } else {
-                                    // Default to first season if not found
-                                    setSelectedTeamSeason(String(seasons[0]?.id || "1"))
-                                  }
-                                  setIsEditTeamDialogOpen(true)
-                                }}
-                                className="text-white/70 hover:text-white hover:bg-white/10"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleDeleteTeamAward(award.id)}
-                                className="text-white/70 hover:text-white hover:bg-white/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow className="border-white/20">
-                          <TableCell colSpan={6} className="text-center py-4 text-white/50">
-                            No team awards found. Create one to get started.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Description (Optional)</Label>
+                        <Input
+                          value={newTeamAward.description}
+                          onChange={(e) => setNewTeamAward({ ...newTeamAward, description: e.target.value })}
+                          placeholder="Add details about this award"
+                        />
+                      </div>
+                    </div>
 
-          <TabsContent value="player-awards">
-            <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-white">Player Awards</CardTitle>
-                    <CardDescription className="text-white/70">Manage player awards like MVP and Rookie of the Year</CardDescription>
-                  </div>
-                  <Dialog open={isPlayerDialogOpen} onOpenChange={setIsPlayerDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Player Award
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsTeamDialogOpen(false)}>
+                        Cancel
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">Add Player Award</DialogTitle>
-                        <DialogDescription className="text-white/70">Create a new player award for a specific season</DialogDescription>
-                      </DialogHeader>
+                      <Button onClick={handleCreateTeamAward}>Create Award</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={isEditTeamDialogOpen} onOpenChange={setIsEditTeamDialogOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Team Award</DialogTitle>
+                      <DialogDescription>Update the team award details</DialogDescription>
+                    </DialogHeader>
 
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="player" className="text-white">Player</Label>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="team">Team</Label>
+                        <Select
+                          value={editingTeamAward?.team_id || ""}
+                          onValueChange={(value) =>
+                            setEditingTeamAward((prev) => (prev ? { ...prev, team_id: value } : null))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select team" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teams.map((team) => (
+                              <SelectItem key={team.id} value={team.id}>
+                                {team.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="award-type">Award Type</Label>
+                        <Select
+                          value={editingTeamAward?.award_type || ""}
+                          onValueChange={(value) =>
+                            setEditingTeamAward((prev) => (prev ? { ...prev, award_type: value } : null))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select award type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teamAwardTypes.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="season">Season</Label>
+                        <div className="relative">
                           <Select
-                            value={newPlayerAward.player_id}
-                            onValueChange={(value) => setNewPlayerAward({ ...newPlayerAward, player_id: value })}
+                            value={selectedTeamSeason}
+                            onValueChange={(value) => {
+                              console.log("Selected season value:", value)
+                              setSelectedTeamSeason(value)
+                            }}
                           >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select player" />
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select season">{getSeasonName(selectedTeamSeason)}</SelectValue>
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {players.map((player) => (
-                                <SelectItem key={player.id} value={player.id} className="text-white hover:bg-slate-700">
-                                  {player.gamer_tag_id} {player.team_name ? `(${player.team_name})` : ""}
+                            <SelectContent>
+                              {seasons.map((season) => (
+                                <SelectItem key={`season-${season.id}`} value={String(season.id)}>
+                                  {season.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="award-type" className="text-white">Award Type</Label>
-                          <Select
-                            value={newPlayerAward.award_type}
-                            onValueChange={(value) => setNewPlayerAward({ ...newPlayerAward, award_type: value })}
-                          >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select award type" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {playerAwardTypes.map((type) => (
-                                <SelectItem key={type} value={type} className="text-white hover:bg-slate-700">
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="season" className="text-white">Season</Label>
-                            <Select
-                              value={String(newPlayerAward.season_number)}
-                              onValueChange={(value) => setNewPlayerAward({ ...newPlayerAward, season_number: value })}
-                            >
-                              <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                                <SelectValue placeholder="Select season" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-white/20">
-                                {seasons.map((season) => (
-                                  <SelectItem key={season.id} value={String(season.id)} className="text-white hover:bg-slate-700">
-                                    {season.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="grid gap-2">
-                            <Label htmlFor="year" className="text-white">Year</Label>
-                            <Input
-                              type="number"
-                              value={newPlayerAward.year}
-                              onChange={(e) =>
-                                setNewPlayerAward({
-                                  ...newPlayerAward,
-                                  year: Number.parseInt(e.target.value, 10) || new Date().getFullYear(),
-                                })
-                              }
-                              min={2000}
-                              max={2100}
-                              className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="description" className="text-white">Description (Optional)</Label>
-                          <Input
-                            value={newPlayerAward.description}
-                            onChange={(e) => setNewPlayerAward({ ...newPlayerAward, description: e.target.value })}
-                            placeholder="Add details about this award"
-                            className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                          />
                         </div>
                       </div>
 
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsPlayerDialogOpen(false)} className="border-white/20 text-white hover:bg-white/10">
-                          Cancel
-                        </Button>
-                        <Button onClick={handleCreatePlayerAward} className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                          Create Award
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  <Dialog open={isEditPlayerDialogOpen} onOpenChange={setIsEditPlayerDialogOpen}>
-                    <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
-                      <DialogHeader>
-                        <DialogTitle className="text-white">Edit Player Award</DialogTitle>
-                        <DialogDescription className="text-white/70">Update the player award details</DialogDescription>
-                      </DialogHeader>
+                      <div className="grid gap-2">
+                        <Label htmlFor="year">Year</Label>
+                        <Input
+                          type="number"
+                          value={editingTeamAward?.year || ""}
+                          onChange={(e) =>
+                            setEditingTeamAward((prev) =>
+                              prev
+                                ? { ...prev, year: Number.parseInt(e.target.value, 10) || new Date().getFullYear() }
+                                : null,
+                            )
+                          }
+                          min={2000}
+                          max={2100}
+                        />
+                      </div>
 
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="player" className="text-white">Player</Label>
-                          <Select
-                            value={editingPlayerAward?.player_id || ""}
-                            onValueChange={(value) =>
-                              setEditingPlayerAward((prev) => (prev ? { ...prev, player_id: value } : null))
-                            }
-                          >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select player" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {players.map((player) => (
-                                <SelectItem key={player.id} value={player.id} className="text-white hover:bg-slate-700">
-                                  {player.gamer_tag_id} {player.team_name ? `(${player.team_name})` : ""}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Description (Optional)</Label>
+                        <Input
+                          value={editingTeamAward?.description || ""}
+                          onChange={(e) =>
+                            setEditingTeamAward((prev) => (prev ? { ...prev, description: e.target.value } : null))
+                          }
+                          placeholder="Add details about this award"
+                        />
+                      </div>
+                    </div>
 
-                        <div className="grid gap-2">
-                          <Label htmlFor="award-type" className="text-white">Award Type</Label>
-                          <Select
-                            value={editingPlayerAward?.award_type || ""}
-                            onValueChange={(value) =>
-                              setEditingPlayerAward((prev) => (prev ? { ...prev, award_type: value } : null))
-                            }
-                          >
-                            <SelectTrigger className="bg-slate-800/50 border-white/20 text-white">
-                              <SelectValue placeholder="Select award type" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/20">
-                              {playerAwardTypes.map((type) => (
-                                <SelectItem key={type} value={type} className="text-white hover:bg-slate-700">
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="season" className="text-white">Season</Label>
-                          <div className="relative">
-                            <Select
-                              value={selectedPlayerSeason}
-                              onValueChange={(value) => {
-                                console.log("Selected player season value:", value)
-                                setSelectedPlayerSeason(value)
-                              }}
-                            >
-                              <SelectTrigger className="w-full bg-slate-800/50 border-white/20 text-white">
-                                <SelectValue placeholder="Select season">
-                                  {getSeasonName(selectedPlayerSeason)}
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-white/20">
-                                {seasons.map((season) => (
-                                  <SelectItem key={`player-season-${season.id}`} value={String(season.id)} className="text-white hover:bg-slate-700">
-                                    {season.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsEditTeamDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleEditTeamAward}>Update Award</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Award</TableHead>
+                    <TableHead>Team</TableHead>
+                    <TableHead>Season</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamAwards.length > 0 ? (
+                    teamAwards.map((award) => (
+                      <TableRow key={award.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            {award.award_type === "SCS Cup" ? (
+                              <Trophy className="h-5 w-5 text-yellow-500" />
+                            ) : (
+                              <Medal className="h-5 w-5 text-blue-500" />
+                            )}
+                            {award.award_type}
                           </div>
+                        </TableCell>
+                        <TableCell>{award.team_name}</TableCell>
+                        <TableCell>{getSeasonName(award.season_number)}</TableCell>
+                        <TableCell>{award.year}</TableCell>
+                        <TableCell>{award.description || "-"}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setEditingTeamAward(award)
+                              // Find the season ID that corresponds to this season number
+                              const season = seasons.find((s) => s.number === award.season_number)
+                              if (season) {
+                                setSelectedTeamSeason(String(season.id))
+                              } else {
+                                // Default to first season if not found
+                                setSelectedTeamSeason(String(seasons[0]?.id || "1"))
+                              }
+                              setIsEditTeamDialogOpen(true)
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteTeamAward(award.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                        No team awards found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="player-awards">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Player Awards</CardTitle>
+                  <CardDescription>Manage player awards like MVP and Rookie of the Year</CardDescription>
+                </div>
+                <Dialog open={isPlayerDialogOpen} onOpenChange={setIsPlayerDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Player Award
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Player Award</DialogTitle>
+                      <DialogDescription>Create a new player award for a specific season</DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="player">Player</Label>
+                        <Select
+                          value={newPlayerAward.player_id}
+                          onValueChange={(value) => setNewPlayerAward({ ...newPlayerAward, player_id: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select player" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {players.map((player) => (
+                              <SelectItem key={player.id} value={player.id}>
+                                {player.gamer_tag_id} {player.team_name ? `(${player.team_name})` : ""}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="award-type">Award Type</Label>
+                        <Select
+                          value={newPlayerAward.award_type}
+                          onValueChange={(value) => setNewPlayerAward({ ...newPlayerAward, award_type: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select award type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {playerAwardTypes.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="season">Season</Label>
+                          <Select
+                            value={String(newPlayerAward.season_number)}
+                            onValueChange={(value) => setNewPlayerAward({ ...newPlayerAward, season_number: value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select season" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {seasons.map((season) => (
+                                <SelectItem key={season.id} value={String(season.id)}>
+                                  {season.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
 
                         <div className="grid gap-2">
-                          <Label htmlFor="year" className="text-white">Year</Label>
+                          <Label htmlFor="year">Year</Label>
                           <Input
                             type="number"
-                            value={editingPlayerAward?.year || ""}
+                            value={newPlayerAward.year}
                             onChange={(e) =>
-                              setEditingPlayerAward((prev) =>
-                                prev
-                                  ? { ...prev, year: Number.parseInt(e.target.value, 10) || new Date().getFullYear() }
-                                  : null,
-                              )
+                              setNewPlayerAward({
+                                ...newPlayerAward,
+                                year: Number.parseInt(e.target.value, 10) || new Date().getFullYear(),
+                              })
                             }
                             min={2000}
                             max={2100}
-                            className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                          />
-                        </div>
-
-                        <div className="grid gap-2">
-                          <Label htmlFor="description" className="text-white">Description (Optional)</Label>
-                          <Input
-                            value={editingPlayerAward?.description || ""}
-                            onChange={(e) =>
-                              setEditingPlayerAward((prev) => (prev ? { ...prev, description: e.target.value } : null))
-                            }
-                            placeholder="Add details about this award"
-                            className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
                           />
                         </div>
                       </div>
 
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsEditPlayerDialogOpen(false)} className="border-white/20 text-white hover:bg-white/10">
-                          Cancel
-                        </Button>
-                        <Button onClick={handleEditPlayerAward} className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
-                          Update Award
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border border-white/20 overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-white/20">
-                        <TableHead className="text-white">Award</TableHead>
-                        <TableHead className="text-white">Player</TableHead>
-                        <TableHead className="text-white">Season</TableHead>
-                        <TableHead className="text-white">Year</TableHead>
-                        <TableHead className="text-white">Description</TableHead>
-                        <TableHead className="text-right text-white">Actions</TableHead>
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Description (Optional)</Label>
+                        <Input
+                          value={newPlayerAward.description}
+                          onChange={(e) => setNewPlayerAward({ ...newPlayerAward, description: e.target.value })}
+                          placeholder="Add details about this award"
+                        />
+                      </div>
+                    </div>
+
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsPlayerDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreatePlayerAward}>Create Award</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={isEditPlayerDialogOpen} onOpenChange={setIsEditPlayerDialogOpen}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Player Award</DialogTitle>
+                      <DialogDescription>Update the player award details</DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="player">Player</Label>
+                        <Select
+                          value={editingPlayerAward?.player_id || ""}
+                          onValueChange={(value) =>
+                            setEditingPlayerAward((prev) => (prev ? { ...prev, player_id: value } : null))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select player" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {players.map((player) => (
+                              <SelectItem key={player.id} value={player.id}>
+                                {player.gamer_tag_id} {player.team_name ? `(${player.team_name})` : ""}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="award-type">Award Type</Label>
+                        <Select
+                          value={editingPlayerAward?.award_type || ""}
+                          onValueChange={(value) =>
+                            setEditingPlayerAward((prev) => (prev ? { ...prev, award_type: value } : null))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select award type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {playerAwardTypes.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="season">Season</Label>
+                        <div className="relative">
+                          <Select
+                            value={selectedPlayerSeason}
+                            onValueChange={(value) => {
+                              console.log("Selected player season value:", value)
+                              setSelectedPlayerSeason(value)
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select season">
+                                {getSeasonName(selectedPlayerSeason)}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {seasons.map((season) => (
+                                <SelectItem key={`player-season-${season.id}`} value={String(season.id)}>
+                                  {season.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="year">Year</Label>
+                        <Input
+                          type="number"
+                          value={editingPlayerAward?.year || ""}
+                          onChange={(e) =>
+                            setEditingPlayerAward((prev) =>
+                              prev
+                                ? { ...prev, year: Number.parseInt(e.target.value, 10) || new Date().getFullYear() }
+                                : null,
+                            )
+                          }
+                          min={2000}
+                          max={2100}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Description (Optional)</Label>
+                        <Input
+                          value={editingPlayerAward?.description || ""}
+                          onChange={(e) =>
+                            setEditingPlayerAward((prev) => (prev ? { ...prev, description: e.target.value } : null))
+                          }
+                          placeholder="Add details about this award"
+                        />
+                      </div>
+                    </div>
+
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsEditPlayerDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleEditPlayerAward}>Update Award</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Award</TableHead>
+                    <TableHead>Player</TableHead>
+                    <TableHead>Season</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {playerAwards.length > 0 ? (
+                    playerAwards.map((award) => (
+                      <TableRow key={award.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <Medal className="h-5 w-5 text-yellow-500" />
+                            {award.award_type}
+                          </div>
+                        </TableCell>
+                        <TableCell>{award.gamer_tag_id}</TableCell>
+                        <TableCell>{getSeasonName(award.season_number)}</TableCell>
+                        <TableCell>{award.year}</TableCell>
+                        <TableCell>{award.description || "-"}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setEditingPlayerAward(award)
+                              // Find the season ID that corresponds to this season number
+                              const season = seasons.find((s) => s.number === award.season_number)
+                              if (season) {
+                                setSelectedPlayerSeason(String(season.id))
+                              } else {
+                                // Default to first season if not found
+                                setSelectedPlayerSeason(String(seasons[0]?.id || "1"))
+                              }
+                              setIsEditPlayerDialogOpen(true)
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeletePlayerAward(award.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {playerAwards.length > 0 ? (
-                        playerAwards.map((award) => (
-                          <TableRow key={award.id} className="border-white/20 hover:bg-white/5">
-                            <TableCell className="font-medium text-white">
-                              <div className="flex items-center gap-2">
-                                <Medal className="h-5 w-5 text-yellow-500" />
-                                {award.award_type}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-white">{award.gamer_tag_id}</TableCell>
-                            <TableCell className="text-white">{getSeasonName(award.season_number)}</TableCell>
-                            <TableCell className="text-white">{award.year}</TableCell>
-                            <TableCell className="text-white">{award.description || "-"}</TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setEditingPlayerAward(award)
-                                  // Find the season ID that corresponds to this season number
-                                  const season = seasons.find((s) => s.number === award.season_number)
-                                  if (season) {
-                                    setSelectedPlayerSeason(String(season.id))
-                                  } else {
-                                    // Default to first season if not found
-                                    setSelectedPlayerSeason(String(seasons[0]?.id || "1"))
-                                  }
-                                  setIsEditPlayerDialogOpen(true)
-                                }}
-                                className="text-white/70 hover:text-white hover:bg-white/10"
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => handleDeletePlayerAward(award.id)}
-                                className="text-white/70 hover:text-white hover:bg-white/10"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow className="border-white/20">
-                          <TableCell colSpan={6} className="text-center py-4 text-white/50">
-                            No player awards found. Create one to get started.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                        No player awards found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
