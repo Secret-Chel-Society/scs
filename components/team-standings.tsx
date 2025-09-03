@@ -1,3 +1,5 @@
+"use client"
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { TeamLogo } from "@/components/team-logo"
 import { Badge } from "@/components/ui/badge"
