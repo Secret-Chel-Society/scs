@@ -26,16 +26,38 @@ export default function TeamsPage() {
     async function fetchTeams() {
       try {
         setLoading(true)
+        console.log("Starting to fetch teams...")
 
         // Get current season ID
         const seasonId = await getCurrentSeasonId()
+        console.log("Current season ID:", seasonId)
 
         // Get team stats
+        console.log("Fetching team stats...")
         const teamStats = await getAllTeamStats(seasonId)
+        console.log("Team stats received:", teamStats)
+
+        // If no teams returned, try direct database query as fallback
+        if (!teamStats || teamStats.length === 0) {
+          console.log("No teams from utility functions, trying direct database query...")
+          
+          // Direct fallback query
+          const response = await fetch("/api/teams/direct")
+          if (response.ok) {
+            const directTeams = await response.json()
+            console.log("Direct teams query result:", directTeams)
+            if (directTeams.teams && directTeams.teams.length > 0) {
+              setTeams(directTeams.teams)
+              return
+            }
+          }
+        }
 
         // Get team awards
+        console.log("Fetching team awards...")
         const response = await fetch("/api/teams/awards")
         const { awards } = await response.json()
+        console.log("Team awards received:", awards)
 
         // Group awards by team
         const awardsByTeam: Record<string, any[]> = {}
@@ -52,8 +74,27 @@ export default function TeamsPage() {
           awards: awardsByTeam[team.id] || [],
         }))
 
+        console.log("Final teams data:", teamsWithAwards)
         setTeams(teamsWithAwards)
       } catch (error: any) {
+        console.error("Error loading teams:", error)
+        
+        // Try direct database query as last resort
+        try {
+          console.log("Trying direct database query as fallback...")
+          const response = await fetch("/api/teams/direct")
+          if (response.ok) {
+            const directTeams = await response.json()
+            console.log("Direct teams query result:", directTeams)
+            if (directTeams.teams && directTeams.teams.length > 0) {
+              setTeams(directTeams.teams)
+              return
+            }
+          }
+        } catch (fallbackError) {
+          console.error("Fallback query also failed:", fallbackError)
+        }
+        
         toast({
           title: "Error loading teams",
           description: error.message || "Failed to load teams data.",
