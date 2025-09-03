@@ -1,11 +1,16 @@
-import { Suspense } from "react"
+"use client"
+
+import { Suspense, useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import TeamStandings from "@/components/team-standings"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
+import { motion } from "framer-motion"
+import { Trophy, Target, TrendingUp, Award, Medal, Star, Zap, Users, TrendingDown, ArrowUp, ArrowDown, Minus } from "lucide-react"
 
 interface StandingsPageProps {
   searchParams: { season?: string }
@@ -45,106 +50,159 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
   const bubbleTeams = sortedTeams.slice(8, 12) // Next 4 teams in the hunt
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Badge variant="default" className="bg-green-600">
-              Playoff Teams
-            </Badge>
-            <span className="text-sm font-normal text-muted-foreground">Top 8 Teams</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-2">
-            {playoffTeams.map((team, index) => (
-              <div
-                key={team.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800"
-              >
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant="outline"
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                  >
-                    {index + 1}
-                  </Badge>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{team.name}</span>
-                    {team.playoff_status === "clinched" && (
-                      <Badge
-                        variant="default"
-                        className="bg-green-600 text-white text-xs"
-                        title="Clinched Playoff Spot"
-                      >
-                        X
-                      </Badge>
-                    )}
-                  </div>
+    <div className="space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="hockey-card hockey-card-hover">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  Playoff Teams
                 </div>
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="font-semibold">{team.points} PTS</span>
-                  <span className="text-muted-foreground">
-                    {team.wins}-{team.losses}-{team.otl}
-                  </span>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Top 8 Teams - Clinched Spots
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {bubbleTeams.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-orange-600">
-                Bubble Teams
-              </Badge>
-              <span className="text-sm font-normal text-muted-foreground">Fighting for Playoff Spots</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-2">
-              {bubbleTeams.map((team, index) => (
-                <div
+            <div className="grid gap-3">
+              {playoffTeams.map((team, index) => (
+                <motion.div
                   key={team.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-assist-green-50 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-800/20 border border-assist-green-200 dark:border-assist-green-700 hover:shadow-lg hover:shadow-assist-green-500/20 transition-all duration-200"
                 >
-                  <div className="flex items-center gap-3">
-                    <Badge
-                      variant="outline"
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    >
-                      {playoffTeams.length + index + 1}
+                  <div className="flex items-center gap-4">
+                    <Badge className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg">
+                      {index + 1}
                     </Badge>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{team.name}</span>
-                      {team.playoff_status === "eliminated" && (
-                        <Badge
-                          variant="destructive"
-                          className="bg-red-600 text-white text-xs"
-                          title="Eliminated from Playoffs"
-                        >
-                          E
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-lg text-hockey-silver-800 dark:text-hockey-silver-200">
+                        {team.name}
+                      </span>
+                      {team.playoff_status === "clinched" && (
+                        <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                          <Medal className="h-3 w-3 mr-1" />
+                          CLINCHED
                         </Badge>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="font-semibold">{team.points} PTS</span>
-                    <span className="text-muted-foreground">
-                      {team.wins}-{team.losses}-{team.otl}
-                    </span>
-                    <span className="text-xs text-orange-600 font-medium">
-                      {playoffTeams[playoffTeams.length - 1].points - team.points} pts back
-                    </span>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-assist-green-700 dark:text-assist-green-300">
+                        {team.points}
+                      </div>
+                      <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 uppercase tracking-wide">
+                        Points
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300">
+                        {team.wins}-{team.losses}-{team.otl}
+                      </div>
+                      <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 uppercase tracking-wide">
+                        Record
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {bubbleTeams.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Card className="hockey-card hockey-card-hover">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                  <Target className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    Bubble Teams
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                    Fighting for Playoff Spots
+                  </div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3">
+                {bubbleTeams.map((team, index) => (
+                  <motion.div
+                    key={team.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/20 dark:to-goal-red-800/20 border border-goal-red-200 dark:border-goal-red-700 hover:shadow-lg hover:shadow-goal-red-500/20 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Badge className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg">
+                        {playoffTeams.length + index + 1}
+                      </Badge>
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-lg text-hockey-silver-800 dark:text-hockey-silver-200">
+                          {team.name}
+                        </span>
+                        {team.playoff_status === "eliminated" && (
+                          <Badge className="bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white text-xs px-2 py-1 rounded-full shadow-md">
+                            <TrendingDown className="h-3 w-3 mr-1" />
+                            ELIMINATED
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-goal-red-700 dark:text-goal-red-300">
+                          {team.points}
+                        </div>
+                        <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 uppercase tracking-wide">
+                          Points
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300">
+                          {team.wins}-{team.losses}-{team.otl}
+                        </div>
+                        <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 uppercase tracking-wide">
+                          Record
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-goal-red-600 dark:text-goal-red-400">
+                          {playoffTeams[playoffTeams.length - 1].points - team.points}
+                        </div>
+                        <div className="text-xs text-goal-red-600 dark:text-goal-red-400 uppercase tracking-wide">
+                          Pts Back
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
     </div>
   )
@@ -165,40 +223,74 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
   const conference2Name = hasConferenceData ? "Custom Conference" : "Western Conference"
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>{conference1Name}</CardTitle>
-          <CardDescription>{conference1Teams.length} teams</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TeamStandings teams={conference1Teams} />
-        </CardContent>
-      </Card>
+    <div className="grid gap-8 lg:grid-cols-2">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="hockey-card hockey-card-hover h-full">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg">
+                <Star className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  {conference1Name}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  {conference1Teams.length} teams
+                </div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TeamStandings teams={conference1Teams} />
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{conference2Name}</CardTitle>
-          <CardDescription>{conference2Teams.length} teams</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TeamStandings teams={conference2Teams} />
-        </CardContent>
-      </Card>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <Card className="hockey-card hockey-card-hover h-full">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                <Award className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  {conference2Name}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  {conference2Teams.length} teams
+                </div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TeamStandings teams={conference2Teams} />
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   )
 }
 
 function StandingsLoadingSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-8">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />
       </div>
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-6">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-80 w-full rounded-xl" />
       </div>
     </div>
   )
@@ -209,11 +301,16 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
 
   if (!standings || standings.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-12">
+      <Card className="hockey-card">
+        <CardContent className="flex items-center justify-center py-16">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">No Standings Available</h3>
-            <p className="text-sm text-muted-foreground mt-2">No team data found for this season.</p>
+            <Target className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">
+              No Standings Available
+            </h3>
+            <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
+              No team data found for this season.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -221,46 +318,79 @@ async function StandingsContent({ seasonId }: { seasonId: number }) {
   }
 
   return (
-    <Tabs defaultValue="overall" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="overall">Overall Standings</TabsTrigger>
-        <TabsTrigger value="conference">Conference</TabsTrigger>
-        <TabsTrigger value="playoffs">Playoff Picture</TabsTrigger>
+    <Tabs defaultValue="overall" className="space-y-8">
+      <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+        <TabsTrigger 
+          value="overall" 
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+        >
+          <TrendingUp className="h-4 w-4 mr-2" />
+          Overall Standings
+        </TabsTrigger>
+        <TabsTrigger 
+          value="conference" 
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+        >
+          <Users className="h-4 w-4 mr-2" />
+          Conference
+        </TabsTrigger>
+        <TabsTrigger 
+          value="playoffs" 
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+        >
+          <Trophy className="h-4 w-4 mr-2" />
+          Playoff Picture
+        </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overall" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>League Standings</CardTitle>
-            <CardDescription>
-              Complete standings for all teams in the league
-              <div className="flex items-center gap-4 mt-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <Badge variant="default" className="bg-green-600 text-white text-xs">
+      <TabsContent value="overall" className="space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Card className="hockey-card hockey-card-hover">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <Zap className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    League Standings
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                    Complete standings for all teams in the league
+                  </div>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 flex items-center gap-6 text-xs">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white text-xs px-2 py-1 rounded-full">
                     X
                   </Badge>
-                  <span>Clinched Playoff Spot</span>
+                  <span className="text-hockey-silver-600 dark:text-hockey-silver-400">Clinched Playoff Spot</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Badge variant="destructive" className="bg-red-600 text-white text-xs">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white text-xs px-2 py-1 rounded-full">
                     E
                   </Badge>
-                  <span>Eliminated from Playoffs</span>
+                  <span className="text-hockey-silver-600 dark:text-hockey-silver-400">Eliminated from Playoffs</span>
                 </div>
               </div>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamStandings teams={standings} />
-          </CardContent>
-        </Card>
+              <TeamStandings teams={standings} />
+            </CardContent>
+          </Card>
+        </motion.div>
       </TabsContent>
 
-      <TabsContent value="conference" className="space-y-6">
+      <TabsContent value="conference" className="space-y-8">
         <ConferenceStandings standings={standings} />
       </TabsContent>
 
-      <TabsContent value="playoffs" className="space-y-6">
+      <TabsContent value="playoffs" className="space-y-8">
         <PlayoffPicture standings={standings} />
       </TabsContent>
     </Tabs>
@@ -272,16 +402,52 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
   const selectedSeasonId = searchParams.season ? Number.parseInt(searchParams.season) : currentSeasonId
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">League Standings</h1>
-          <p className="text-muted-foreground">Current team standings, conference rankings, and playoff picture</p>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Hero Header Section */}
+      <div className="hockey-header relative py-16 px-4">
+        <div className="container mx-auto text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <h1 className="hockey-title mb-6">
+              League Standings
+            </h1>
+            <p className="hockey-subtitle mb-8">
+              Track team performance, conference rankings, and playoff races
+            </p>
+            
+            {/* Season Selector */}
+            <div className="max-w-md mx-auto">
+              <Select value={selectedSeasonId.toString()} onValueChange={(value) => window.location.href = `/standings?season=${value}`}>
+                <SelectTrigger className="hockey-search">
+                  <SelectValue placeholder="Select Season" />
+                </SelectTrigger>
+                <SelectContent>
+                  {seasons.map((season) => (
+                    <SelectItem key={season.id} value={season.id.toString()}>
+                      {season.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </motion.div>
         </div>
+      </div>
 
-        <Suspense fallback={<StandingsLoadingSkeleton />}>
-          <StandingsContent seasonId={selectedSeasonId} />
-        </Suspense>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
+          <Suspense fallback={<StandingsLoadingSkeleton />}>
+            <StandingsContent seasonId={selectedSeasonId} />
+          </Suspense>
+        </motion.div>
       </div>
     </div>
   )

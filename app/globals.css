@@ -259,6 +259,40 @@
   .hockey-match-action {
     @apply bg-gradient-to-r from-hockey-silver-50 to-ice-blue-50/30 dark:from-hockey-silver-800/30 dark:to-rink-blue-900/20 p-4 flex justify-center;
   }
+  
+  .hockey-standings-table {
+    @apply w-full;
+  }
+  
+  .hockey-standings-table th {
+    @apply bg-gradient-to-r from-hockey-silver-50 to-ice-blue-50/30 dark:from-hockey-silver-900/30 dark:to-ice-blue-900/20;
+    @apply border-hockey-silver-200 dark:border-hockey-silver-700;
+    @apply text-hockey-silver-700 dark:text-hockey-silver-300;
+    @apply font-bold;
+    @apply px-4 py-3;
+  }
+  
+  .hockey-standings-table td {
+    @apply border-hockey-silver-200 dark:border-hockey-silver-700;
+    @apply px-4 py-3;
+    @apply transition-all duration-200;
+  }
+  
+  .hockey-standings-table tbody tr:hover {
+    @apply bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20;
+    @apply shadow-md shadow-ice-blue-500/10;
+  }
+  
+  .hockey-tabs-list {
+    @apply bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
+    @apply p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50;
+  }
+  
+  .hockey-tab-trigger {
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600;
+    @apply data-[state=active]:text-white data-[state=active]:shadow-lg;
+    @apply transition-all duration-200;
+  }
 }
 
 /* Custom container class to ensure proper centering */
