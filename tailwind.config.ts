@@ -61,6 +61,12 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom hockey-themed colors
+        "ice-blue": "hsl(var(--ice-blue))",
+        "hockey-silver": "hsl(var(--hockey-silver))",
+        "rink-blue": "hsl(var(--rink-blue))",
+        "goal-red": "hsl(var(--goal-red))",
+        "assist-green": "hsl(var(--assist-green))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -84,10 +90,26 @@ const config: Config = {
             height: "0",
           },
         },
+        "hockey-slide": {
+          "0%": { transform: "translateX(-100px) rotate(0deg)", opacity: "0" },
+          "50%": { opacity: "1" },
+          "100%": { transform: "translateX(100px) rotate(360deg)", opacity: "0" },
+        },
+        "championship-glow": {
+          "0%, 100%": { boxShadow: "0 0 5px hsl(var(--primary)), 0 0 10px hsl(var(--primary))" },
+          "50%": { boxShadow: "0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--secondary))" },
+        },
+        "trophy-float": {
+          "0%, 100%": { transform: "translateY(0px) rotate(0deg)" },
+          "50%": { transform: "translateY(-10px) rotate(5deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "hockey-slide": "hockey-slide 4s infinite",
+        "championship-glow": "championship-glow 2s infinite alternate",
+        "trophy-float": "trophy-float 3s ease-in-out infinite",
       },
     },
   },

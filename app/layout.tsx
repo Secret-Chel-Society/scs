@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import Navigation from "@/components/navigation"
+import Sidebar from "@/components/sidebar"
+import MainContent from "@/components/layout/main-content"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
@@ -46,16 +47,22 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} sidebar-layout`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navigation />
-              <Suspense>
-                <main className="flex-1">{children}</main>
-              </Suspense>
-              <Footer />
+            <div className="flex min-h-screen">
+              {/* Enhanced Professional Championship Sidebar */}
+              <Sidebar />
+              
+              {/* Main Content Area with Dynamic Sidebar Layout */}
+              <MainContent>
+                <Suspense>
+                  {children}
+                </Suspense>
+                <Footer />
+              </MainContent>
             </div>
+            
             <Toaster />
             <BannedUserModal />
             <Analytics />
