@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { motion } from "framer-motion"
+
 import { 
   Users, 
   Crown, 
@@ -303,11 +303,8 @@ export default function FreeAgencyPage() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-blue/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
+          <div 
             className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-xl">
@@ -320,18 +317,15 @@ export default function FreeAgencyPage() {
               Scout, negotiate, and sign the players who will lead your team to victory.
             </p>
             <div className="h-1 w-32 bg-gradient-to-r from-hockey-green to-transparent rounded-full mx-auto" />
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Free Agency Overview */}
-        <motion.div
+        <div
           className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
         >
           <Card className="enhanced-card">
             <CardHeader className="enhanced-card-header">
@@ -371,14 +365,11 @@ export default function FreeAgencyPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Filters and Search */}
-        <motion.div
+        <div
           className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
         >
           <Card className="enhanced-card">
             <CardContent className="p-6">
@@ -449,23 +440,15 @@ export default function FreeAgencyPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Free Agents Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedAgents.map((agent, index) => (
-              <motion.div
+              <div
                 key={agent.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8 }}
-                className="group"
+                className="group hover:-translate-y-2 transition-transform duration-300"
               >
                 <Card className="enhanced-card h-full overflow-hidden group-hover:shadow-hockey-xl transition-all duration-300">
                   <CardHeader className="enhanced-card-header">
@@ -577,18 +560,15 @@ export default function FreeAgencyPage() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* No Results */}
         {sortedAgents.length === 0 && (
-          <motion.div
+          <div
             className="mt-8"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
           >
             <Card className="enhanced-card text-center p-12">
               <Users className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
@@ -612,11 +592,8 @@ export default function FreeAgencyPage() {
         )}
 
         {/* Call to Action */}
-        <motion.div
+        <div
           className="mt-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
         >
           <Card className="enhanced-card bg-gradient-to-br from-hockey-green/20 via-hockey-blue/10 to-transparent">
             <CardContent className="p-8 text-center">
@@ -642,7 +619,7 @@ export default function FreeAgencyPage() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

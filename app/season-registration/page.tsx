@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { motion } from "framer-motion"
+
 import { 
   Calendar, 
   Crown, 
@@ -235,11 +235,7 @@ export default function SeasonRegistrationPage() {
   if (showSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div>
           <Card className="enhanced-card text-center p-12 max-w-md">
             <div className="w-20 h-20 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-10 w-10 text-white" />
@@ -253,7 +249,7 @@ export default function SeasonRegistrationPage() {
               Continue
             </Button>
           </Card>
-        </motion.div>
+        </div>
       </div>
     )
   }
@@ -267,11 +263,8 @@ export default function SeasonRegistrationPage() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-orange/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
+          <div 
             className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-gold to-hockey-orange rounded-xl">
@@ -284,7 +277,7 @@ export default function SeasonRegistrationPage() {
               and compete for glory in the Secret Chel Society.
             </p>
             <div className="h-1 w-32 bg-gradient-to-r from-hockey-gold to-transparent rounded-full mx-auto" />
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -293,11 +286,7 @@ export default function SeasonRegistrationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Registration Form */}
           <div className="lg:col-span-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
+            <div>
               <Card className="enhanced-card">
                 <CardHeader className="enhanced-card-header">
                   <CardTitle className="flex items-center gap-3">
@@ -485,7 +474,7 @@ export default function SeasonRegistrationPage() {
                   </form>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
 
           {/* Season Information Sidebar */}

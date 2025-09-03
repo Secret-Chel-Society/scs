@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import TeamStandings from "@/components/team-standings"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { motion } from "framer-motion"
+
 import { Trophy, Crown, Medal, Star, Target, TrendingUp, Users, Award, Zap, Shield, BarChart3 } from "lucide-react"
 
 interface StandingsPageProps {
@@ -63,11 +63,8 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
         <CardContent>
           <div className="grid gap-3">
             {playoffTeams.map((team, index) => (
-              <motion.div
+              <div
                 key={team.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-hockey-green/10 to-hockey-blue/10 border border-hockey-green/20 hover:border-hockey-green/40 transition-all duration-200"
               >
                 <div className="flex items-center gap-4">
@@ -97,7 +94,7 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                     <div className="text-xs text-muted-foreground">Record</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </CardContent>
@@ -119,11 +116,8 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
           <CardContent>
             <div className="grid gap-3">
               {bubbleTeams.map((team, index) => (
-                <motion.div
+                <div
                   key={team.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
                   className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-hockey-orange/10 to-hockey-gold/10 border border-hockey-orange/20 hover:border-hockey-orange/40 transition-all duration-200"
                 >
                   <div className="flex items-center gap-4">
@@ -151,7 +145,7 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
                       <div className="text-xs text-muted-foreground">Record</div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </CardContent>
@@ -218,11 +212,8 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-blue/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
+          <div 
             className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-gold to-hockey-blue rounded-xl">
@@ -235,7 +226,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
               Secret Chel Society league.
             </p>
             <div className="h-1 w-32 bg-gradient-to-r from-hockey-gold to-transparent rounded-full mx-auto" />
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -271,11 +262,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
             </TabsList>
 
             <TabsContent value="standings">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
+              <div>
                 <Card className="enhanced-card">
                   <CardHeader className="enhanced-card-header">
                     <CardTitle className="flex items-center gap-3">
@@ -292,26 +279,19 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                     <TeamStandings teams={standings} />
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             </TabsContent>
 
             <TabsContent value="playoffs">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
+              <div>
                 <PlayoffPicture standings={standings} />
-              </motion.div>
+              </div>
             </TabsContent>
           </Tabs>
 
           {/* Season Stats Summary */}
-          <motion.div
+          <div
             className="mt-12"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <Card className="enhanced-card">
               <CardHeader className="enhanced-card-header">
@@ -349,7 +329,7 @@ export default async function StandingsPage({ searchParams }: StandingsPageProps
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         </Suspense>
       </div>
     </div>

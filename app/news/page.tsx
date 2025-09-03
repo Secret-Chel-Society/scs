@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { motion } from "framer-motion"
+
 import { 
   Newspaper, 
   Crown, 
@@ -270,11 +270,8 @@ export default function NewsPage() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-pink/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
+          <div 
             className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-purple to-hockey-pink rounded-xl">
@@ -287,7 +284,7 @@ export default function NewsPage() {
               From game results to league announcements, get all the information you need.
             </p>
             <div className="h-1 w-32 bg-gradient-to-r from-hockey-purple to-transparent rounded-full mx-auto" />
-          </motion.div>
+          </div>
         </div>
       </div>
 

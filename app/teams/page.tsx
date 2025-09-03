@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import Image from "next/image"
-import { motion } from "framer-motion"
+
 import { Trophy, Award, Users, Search, Crown, Medal, Star, Target, TrendingUp } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { TeamLogo } from "@/components/team-logo"
@@ -92,11 +92,8 @@ export default function TeamsPage() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-purple/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
+          <div 
             className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl">
@@ -109,18 +106,15 @@ export default function TeamsPage() {
               strategy, and determination to the ice.
             </p>
             <div className="h-1 w-32 bg-gradient-to-r from-hockey-blue to-transparent rounded-full mx-auto" />
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Search and Stats */}
-        <motion.div 
+                <div
           className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
         >
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
             <div className="flex-1">
@@ -178,26 +172,19 @@ export default function TeamsPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(12)].map((_, i) => (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
               >
                 <Skeleton className="h-80 w-full rounded-2xl" />
-              </motion.div>
+              </div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTeams.map((team, index) => (
-              <motion.div
+              <div
                 key={team.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8 }}
-                className="group"
+                className="group hover:-translate-y-2 transition-transform duration-300"
               >
                 <Link href={`/teams/${team.id}`}>
                   <Card className="enhanced-card h-full overflow-hidden group-hover:shadow-hockey-xl transition-all duration-300">
@@ -313,17 +300,14 @@ export default function TeamsPage() {
                     </CardContent>
                   </Card>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
 
         {/* No Results */}
         {!loading && filteredTeams.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+          <div
             className="text-center py-16"
           >
             <Card className="enhanced-card max-w-md mx-auto">
@@ -342,7 +326,7 @@ export default function TeamsPage() {
                 </Button>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

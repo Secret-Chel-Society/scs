@@ -278,33 +278,24 @@ export default function Home() {
         <HeroCarousel images={heroImages} />
 
         {/* Hockey-themed animated overlay elements */}
-        <motion.div
+        <div
           className="absolute top-20 right-10 w-20 h-20 border-2 border-hockey-blue/30 rounded-full flex items-center justify-center"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
         >
           <Gamepad2 className="h-8 w-8 text-hockey-blue/50" />
-        </motion.div>
-        <motion.div
+        </div>
+        <div
           className="absolute bottom-20 left-10 w-16 h-16 bg-hockey-gold/20 rounded-lg flex items-center justify-center"
-          animate={{ y: [-10, 10, -10] }}
-          transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >
           <Trophy className="h-8 w-8 text-hockey-gold/50" />
-        </motion.div>
-        <motion.div
+        </div>
+        <div
           className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-hockey-blue/20 to-hockey-purple/20 rounded-full"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
         />
       </div>
 
       {/* Action Buttons Section */}
-      <motion.section
+      <section
         className="relative mt-8 z-10 mx-4"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
       >
         <div className="w-full max-w-7xl mx-auto px-2 sm:px-4">
           <div className="flex flex-col sm:flex-row justify-center gap-4">
@@ -321,7 +312,7 @@ export default function Home() {
             </Button>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Enhanced Stats Section with Hockey Theme */}
       <motion.section
