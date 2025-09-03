@@ -254,20 +254,23 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="relative z-10 container mx-auto px-4 py-12">
-          <div className="space-y-8">
-            <div className="text-center mb-12">
-              <Skeleton className="h-16 w-80 mx-auto mb-6" />
-              <Skeleton className="h-6 w-96 mx-auto" />
+      <div className="min-h-screen relative overflow-hidden bg-background">
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        <div className="relative z-10 container mx-auto px-4 py-16">
+          <div className="space-y-12">
+            <div className="text-center mb-16">
+              <Skeleton className="h-20 w-96 mx-auto mb-8 rounded-2xl bg-gradient-to-r from-primary/20 to-secondary/20" />
+              <Skeleton className="h-8 w-[600px] mx-auto rounded-xl bg-gradient-to-r from-secondary/20 to-primary/20" />
             </div>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Skeleton className="h-12 w-48" />
-              <Skeleton className="h-12 w-48" />
+            <div className="flex flex-col sm:flex-row gap-8 justify-center">
+              <Skeleton className="h-16 w-64 rounded-xl bg-gradient-to-r from-primary/15 to-secondary/15" />
+              <Skeleton className="h-16 w-64 rounded-xl bg-gradient-to-r from-secondary/15 to-primary/15" />
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-8 md:grid-cols-2">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-48 w-full rounded-2xl" />
+                <Skeleton key={i} className="h-64 w-full rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10" />
               ))}
             </div>
           </div>
@@ -278,13 +281,16 @@ export default function MatchesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="relative z-10 container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <Alert variant="destructive" className="border-red-500/20 bg-red-500/5">
-              <AlertCircle className="h-6 w-6" />
-              <AlertTitle className="text-lg">Error Loading Matches</AlertTitle>
-              <AlertDescription className="text-base">{error}</AlertDescription>
+      <div className="min-h-screen relative overflow-hidden bg-background">
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        <div className="relative z-10 container mx-auto px-4 py-16">
+          <div className="max-w-3xl mx-auto">
+            <Alert variant="destructive" className="border-2 border-red-500/40 bg-gradient-to-br from-red-500/10 to-red-600/10 shadow-2xl p-8">
+              <AlertCircle className="h-8 w-8" />
+              <AlertTitle className="text-2xl font-bold">Championship Arena Unavailable</AlertTitle>
+              <AlertDescription className="text-lg mt-2">{error}</AlertDescription>
             </Alert>
           </div>
         </div>
@@ -295,55 +301,86 @@ export default function MatchesPage() {
   const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen relative overflow-hidden bg-background">
+      {/* Professional Hockey Arena Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        {/* Championship arena floating elements */}
+        <motion.div
+          className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
+          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div className="space-y-8">
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
+      <div className="relative z-10 container mx-auto px-4 py-16">
+        <div className="space-y-12">
+          {/* Enhanced Professional Championship Header */}
+          <div className="text-center mb-16">
             <motion.div 
-              className="inline-flex items-center gap-4 mb-6"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.2 }}
+              className="inline-flex items-center gap-6 mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", delay: 0.2, stiffness: 120 }}
+              whileHover={{ scale: 1.05 }}
             >
-              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
-                <Gamepad2 className="h-10 w-10 text-white" />
+              <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
+                <Gamepad2 className="h-12 w-12 text-white relative z-10" />
+                <div className="absolute -inset-2 bg-gradient-to-br from-primary to-secondary rounded-2xl blur opacity-40" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                SCS Matches
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                Championship Arena
               </h1>
             </motion.div>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              View all scheduled and completed matches from the Secret Chel Society
-            </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
+            
+            <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
+              <div className="h-3 w-3 bg-primary rounded-full animate-pulse" />
+              <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
+            </div>
+            
+            <motion.p 
+              className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              View all <span className="font-bold text-primary">scheduled and completed matches</span> from the Secret Chel Society Championship League
+            </motion.p>
           </div>
 
-          {/* Enhanced Filters Section */}
-          <Card className="border-primary/20 bg-white/5 backdrop-blur-sm">
-            <CardHeader className="pb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/20 rounded-xl">
-                  <Filter className="h-6 w-6 text-primary" />
+          {/* Enhanced Professional Filters Section */}
+          <Card className="border-2 border-primary/30 bg-background/90 backdrop-blur-lg shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-40" />
+            
+            <CardHeader className="pb-8 pt-8 relative">
+              <div className="flex items-center gap-6">
+                <div className="relative p-4 bg-gradient-to-br from-primary to-secondary rounded-xl shadow-xl">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-xl opacity-90" />
+                  <Filter className="h-8 w-8 text-white relative z-10" />
+                  <div className="absolute -inset-1 bg-gradient-to-br from-primary to-secondary rounded-xl blur opacity-40" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl text-white">Match Filters</CardTitle>
-                  <CardDescription className="text-white/70">Customize your match view</CardDescription>
+                  <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Championship Filters</CardTitle>
+                  <CardDescription className="text-lg text-muted-foreground font-medium">Customize your match viewing experience</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-6">
+            <CardContent className="relative p-8">
+              <div className="flex flex-col sm:flex-row gap-8">
                 <div className="flex-1">
+                  <label className="block text-sm font-bold text-foreground mb-3">Filter by Team</label>
                   <Select value={selectedTeam} onValueChange={handleTeamFilter}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectTrigger className="bg-background border-2 border-primary/30 hover:border-primary/50 text-foreground py-4 text-lg rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                       <SelectValue placeholder="Select team" />
                     </SelectTrigger>
                     <SelectContent>

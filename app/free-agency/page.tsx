@@ -18,60 +18,87 @@ export default function FreeAgencyPage({
   searchParams?: { [key: string]: string | string[] | undefined }
 }) {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen relative overflow-hidden bg-background">
+      {/* Professional Free Agent Market Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        {/* Professional market floating elements */}
+        <motion.div
+          className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
+          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-8"
+          transition={{ duration: 0.8 }}
+          className="space-y-12"
         >
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
+          {/* Enhanced Professional Free Agent Market Header */}
+          <div className="text-center mb-16">
             <motion.div 
-              className="inline-flex items-center gap-4 mb-6"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.2 }}
+              className="inline-flex items-center gap-6 mb-8"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", delay: 0.2, stiffness: 120 }}
+              whileHover={{ scale: 1.05 }}
             >
-              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
-                <Users className="h-10 w-10 text-white" />
+              <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
+                <Users className="h-12 w-12 text-white relative z-10" />
+                <div className="absolute -inset-2 bg-gradient-to-br from-primary to-secondary rounded-2xl blur opacity-40" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Free Agency
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                Free Agent Market
               </h1>
             </motion.div>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Browse and bid on available players in the Secret Chel Society
-            </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
+            
+            <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
+              <div className="h-3 w-3 bg-primary rounded-full animate-pulse" />
+              <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
+            </div>
+            
+            <motion.p 
+              className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              Browse and bid on <span className="font-bold text-primary">available professional players</span> in the Secret Chel Society Championship League
+            </motion.p>
           </div>
 
-          {/* Enhanced Tabs Section */}
+          {/* Enhanced Professional Market Tabs */}
           <Tabs defaultValue="free-agents" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 mb-8">
-              <TabsTrigger 
-                value="free-agents" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Target className="h-5 w-5 mr-2" />
-                Free Agents
-              </TabsTrigger>
-              <TabsTrigger 
-                value="player-signups" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Star className="h-5 w-5 mr-2" />
-                Player Signups
-              </TabsTrigger>
-            </TabsList>
+            <div className="bg-background/80 backdrop-blur-lg border-2 border-primary/20 p-4 rounded-2xl shadow-2xl mb-12">
+              <TabsList className="grid w-full grid-cols-2 p-3 bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-lg rounded-xl border border-primary/20">
+                <TabsTrigger 
+                  value="free-agents" 
+                  className="py-4 text-lg font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-3"
+                >
+                  <Target className="h-6 w-6" />
+                  Free Agents
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="player-signups" 
+                  className="py-4 text-lg font-bold data-[state=active]:bg-gradient-to-r data-[state=active]:from-secondary data-[state=active]:to-primary data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg transition-all duration-300 hover:scale-105 flex items-center gap-3"
+                >
+                  <Star className="h-6 w-6" />
+                  Player Signups
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="free-agents" className="space-y-8">
               {/* Position Counts Section */}

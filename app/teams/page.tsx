@@ -81,196 +81,262 @@ export default function TeamsPage() {
   const filteredTeams = teams.filter((team) => team.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Animated Background */}
+    <div className="min-h-screen relative overflow-hidden bg-background">
+      {/* Professional Hockey-Themed Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute inset-0 hockey-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-secondary/5 to-primary/8" />
+        
+        {/* Professional floating elements */}
+        <motion.div
+          className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-primary/25 to-secondary/25 rounded-full shadow-xl"
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 15, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-32 left-20 w-20 h-20 bg-gradient-to-br from-secondary/25 to-primary/25 rounded-xl shadow-xl"
+          animate={{ y: [-20, 20, -20], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
+      <div className="relative z-10 container mx-auto px-4 py-16">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
+          initial={{ opacity: 0, y: 30 }} 
           animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.5 }}
-          className="mb-12"
+          transition={{ duration: 0.8 }}
+          className="mb-16"
         >
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
+          {/* Enhanced Professional Header Section */}
+          <div className="text-center mb-16">
             <motion.div 
-              className="inline-flex items-center gap-4 mb-6"
+              className="inline-flex items-center gap-6 mb-8"
               whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
-                <Target className="h-10 w-10 text-white" />
+              <div className="relative p-6 bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl opacity-90" />
+                <Target className="h-12 w-12 text-white relative z-10" />
+                <div className="absolute -inset-2 bg-gradient-to-br from-primary to-secondary rounded-2xl blur opacity-40" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                SCS Teams
+              <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                SCS Team Roster
               </h1>
             </motion.div>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              Discover all teams competing in the Secret Chel Society. Each team brings unique talent, 
-              strategy, and determination to the ice.
-            </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
+            
+            <div className="flex items-center justify-center gap-6 mb-8">
+              <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary to-secondary rounded-full" />
+              <div className="h-3 w-3 bg-primary rounded-full animate-pulse" />
+              <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
+            </div>
+            
+            <motion.p 
+              className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              Discover all <span className="font-bold text-primary">professional franchises</span> competing in the Secret Chel Society. 
+              Each team brings <span className="font-semibold text-secondary">unique talent, strategy, and championship determination</span> to the ice.
+            </motion.p>
           </div>
 
-          {/* Enhanced Search Section */}
-          <div className="max-w-md mx-auto mb-8">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          {/* Enhanced Professional Search Section */}
+          <motion.div 
+            className="max-w-lg mx-auto mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-primary group-focus-within:text-secondary transition-colors duration-300" />
               <Input
-                placeholder="Search teams by name..."
+                placeholder="Search teams by franchise name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 py-4 text-lg bg-white/10 border-white/20 text-white placeholder:text-white/50 backdrop-blur-sm rounded-xl"
+                className="pl-14 pr-6 py-5 text-lg bg-background/90 border-2 border-primary/30 focus:border-secondary/50 text-foreground placeholder:text-muted-foreground backdrop-blur-lg rounded-xl shadow-lg focus:shadow-xl transition-all duration-300 hover:border-primary/40"
               />
             </div>
-          </div>
+          </motion.div>
 
-          {/* Teams Count Display */}
-          <div className="text-center mb-8">
+          {/* Professional Teams Count Display */}
+          <div className="text-center mb-12">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3, type: "spring" }}
-              className="inline-flex items-center gap-3 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6, type: "spring", stiffness: 150 }}
+              className="inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-r from-primary/15 to-secondary/15 backdrop-blur-lg rounded-2xl border border-primary/30 shadow-xl"
             >
-              <Users className="h-5 w-5 text-primary" />
-              <span className="text-white font-semibold">
-                {loading ? "Loading..." : `${filteredTeams.length} Teams Found`}
+              <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-lg">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-foreground font-bold text-xl">
+                {loading ? "Loading franchises..." : `${filteredTeams.length} Professional Teams`}
               </span>
             </motion.div>
           </div>
         </motion.div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
             {[...Array(12)].map((_, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: i * 0.08, type: "spring", stiffness: 100 }}
               >
-                <Skeleton className="h-80 w-full rounded-2xl" />
+                <Skeleton className="h-96 w-full rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10" />
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
             {filteredTeams.map((team, index) => (
               <motion.div
                 key={team.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.08, type: "spring", stiffness: 100 }}
+                whileHover={{ y: -10, scale: 1.03 }}
                 className="group"
               >
                 <Link href={`/teams/${team.id}`}>
-                  <Card className="overflow-hidden h-full hover:border-primary/50 transition-all duration-300 bg-white/5 backdrop-blur-sm border-white/20 hover:bg-white/10 group-hover:shadow-2xl group-hover:shadow-primary/20">
-                    <CardContent className="p-6">
+                  <Card className="overflow-hidden h-full border-2 border-primary/30 bg-gradient-to-br from-background via-primary/5 to-secondary/5 hover:border-primary/50 hover:shadow-3xl transition-all duration-500 group-hover:bg-gradient-to-br group-hover:from-primary/10 group-hover:via-secondary/5 group-hover:to-primary/10 relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    
+                    <CardContent className="p-8 relative">
                       <div className="flex flex-col items-center text-center">
-                        {/* Enhanced Team Logo Section */}
-                        <div className="relative mb-6">
-                          <div className="relative h-36 w-36 mb-4 group-hover:scale-110 transition-transform duration-300">
+                        {/* Enhanced Professional Team Logo Section */}
+                        <div className="relative mb-8">
+                          <motion.div 
+                            className="relative h-40 w-40 mb-4 group-hover:scale-115 transition-all duration-500"
+                            whileHover={{ rotate: [0, -5, 5, 0] }}
+                            transition={{ duration: 0.6 }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
                             {team.logo_url ? (
                               <Image
                                 src={team.logo_url || "/placeholder.svg"}
                                 alt={team.name}
                                 fill
-                                className="object-contain"
+                                className="object-contain filter drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-300"
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               />
                             ) : (
                               <TeamLogo teamName={team.name} size="xl" />
                             )}
-                          </div>
-                          {/* Glow effect on hover */}
-                          <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+                          </motion.div>
+                          {/* Professional glow effects */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-500 -z-20" />
                         </div>
 
-                        {/* Enhanced Team Name */}
-                        <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-primary transition-colors duration-300">
+                        {/* Enhanced Professional Team Name */}
+                        <motion.h2 
+                          className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300"
+                          whileHover={{ scale: 1.05 }}
+                        >
                           {team.name}
-                        </h2>
+                        </motion.h2>
 
-                        {/* Enhanced Record Display */}
-                        <div className="mb-6">
+                        {/* Enhanced Professional Record Display */}
+                        <div className="mb-8">
                           <Badge 
                             variant="outline" 
-                            className="border-primary/30 text-primary bg-primary/10 px-4 py-2 text-sm font-semibold"
+                            className="border-2 border-primary/40 text-primary bg-gradient-to-r from-primary/15 to-secondary/15 px-6 py-3 text-base font-bold rounded-xl shadow-lg group-hover:shadow-xl group-hover:border-primary/60 transition-all duration-300"
                           >
                             Record: {team.wins}-{team.losses}-{team.otl}
                           </Badge>
                         </div>
 
-                        {/* Enhanced Team Awards */}
+                        {/* Enhanced Championship Awards Section */}
                         {team.awards && team.awards.length > 0 && (
-                          <div className="flex flex-wrap justify-center gap-2 mb-6">
+                          <motion.div 
+                            className="flex flex-wrap justify-center gap-3 mb-8"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: 0.2 }}
+                          >
                             {team.awards.slice(0, 3).map((award: any) => (
                               <Badge
                                 key={award.id}
                                 variant="outline"
-                                className={`flex items-center gap-1 px-3 py-1 ${
+                                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 ${
                                   award.award_type === "SCS Cup"
-                                    ? "border-yellow-500/50 text-yellow-400 bg-yellow-500/10"
-                                    : "border-blue-500/50 text-blue-400 bg-blue-500/10"
+                                    ? "border-2 border-yellow-500/60 text-yellow-600 bg-gradient-to-r from-yellow-500/15 to-yellow-600/15"
+                                    : "border-2 border-primary/60 text-primary bg-gradient-to-r from-primary/15 to-secondary/15"
                                 }`}
                               >
                                 {award.award_type === "SCS Cup" ? (
-                                  <Trophy className="h-3 w-3" />
+                                  <Trophy className="h-4 w-4" />
                                 ) : (
-                                  <Award className="h-3 w-3" />
+                                  <Award className="h-4 w-4" />
                                 )}
-                                {award.award_type === "SCS Cup" ? "Cup" : "Trophy"} {award.year}
+                                {award.award_type === "SCS Cup" ? "Championship" : "Trophy"} {award.year}
                               </Badge>
                             ))}
                             {team.awards.length > 3 && (
-                              <Badge variant="outline" className="border-white/30 text-white/70 bg-white/10">
+                              <Badge variant="outline" className="border-2 border-secondary/40 text-secondary bg-gradient-to-r from-secondary/15 to-primary/15 px-4 py-2 rounded-lg">
                                 +{team.awards.length - 3} more
                               </Badge>
                             )}
-                          </div>
+                          </motion.div>
                         )}
 
-                        {/* Enhanced Stats Grid */}
-                        <div className="grid grid-cols-3 gap-4 w-full">
+                        {/* Enhanced Professional Stats Grid */}
+                        <div className="grid grid-cols-3 gap-6 w-full mb-6">
                           {/* Points */}
-                          <div className="text-center p-3 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20">
-                            <div className="text-2xl font-bold text-blue-400 mb-1">{team.points}</div>
-                            <div className="text-xs text-blue-300/70 font-medium">POINTS</div>
-                          </div>
+                          <motion.div 
+                            className="text-center p-4 rounded-xl bg-gradient-to-br from-primary/15 to-primary/25 border-2 border-primary/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group/stat"
+                            whileHover={{ y: -2 }}
+                          >
+                            <div className="text-3xl font-bold text-primary mb-2 group-hover/stat:scale-110 transition-transform duration-300">
+                              {team.points}
+                            </div>
+                            <div className="text-xs text-primary/80 font-bold tracking-wider">POINTS</div>
+                          </motion.div>
 
                           {/* Salary & Roster */}
-                          <div className="text-center p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20">
-                            <div className="text-lg font-bold text-green-400 mb-1">
+                          <motion.div 
+                            className="text-center p-4 rounded-xl bg-gradient-to-br from-secondary/15 to-secondary/25 border-2 border-secondary/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group/stat"
+                            whileHover={{ y: -2 }}
+                          >
+                            <div className="text-xl font-bold text-secondary mb-1 group-hover/stat:scale-110 transition-transform duration-300">
                               ${(team.total_salary / 1000000).toFixed(1)}M
                             </div>
-                            <div className="text-xs text-green-300/70 font-medium mb-2">SALARY</div>
-                            <div className="flex items-center justify-center gap-1 text-xs text-green-300/70">
+                            <div className="text-xs text-secondary/80 font-bold tracking-wider mb-2">SALARY</div>
+                            <div className="flex items-center justify-center gap-1 text-xs text-secondary/80 font-medium">
                               <Users className="h-3 w-3" />
                               <span>{team.player_count}/{MAX_ROSTER_SIZE}</span>
                             </div>
-                          </div>
+                          </motion.div>
 
                           {/* Cap Space */}
-                          <div className="text-center p-3 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20">
-                            <div className="text-lg font-bold text-purple-400 mb-1">
+                          <motion.div 
+                            className="text-center p-4 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 border-2 border-primary/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group/stat"
+                            whileHover={{ y: -2 }}
+                          >
+                            <div className="text-xl font-bold text-primary mb-2 group-hover/stat:scale-110 transition-transform duration-300">
                               ${(team.cap_space / 1000000).toFixed(1)}M
                             </div>
-                            <div className="text-xs text-purple-300/70 font-medium">CAP SPACE</div>
-                          </div>
+                            <div className="text-xs text-primary/80 font-bold tracking-wider">CAP SPACE</div>
+                          </motion.div>
                         </div>
 
-                        {/* Hover Indicator */}
-                        <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <Badge className="bg-primary/20 text-primary border-primary/30">
-                            Click to view details →
+                        {/* Enhanced Professional Hover Indicator */}
+                        <motion.div 
+                          className="mt-6 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                          initial={{ y: 10 }}
+                          whileInView={{ y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <Badge className="bg-gradient-to-r from-primary/25 to-secondary/25 text-primary border-2 border-primary/40 px-6 py-2 text-sm font-bold rounded-lg shadow-lg hover:shadow-xl">
+                            View Team Details →
                           </Badge>
-                        </div>
+                        </motion.div>
                       </div>
                     </CardContent>
                   </Card>
@@ -278,22 +344,30 @@ export default function TeamsPage() {
               </motion.div>
             ))}
 
-            {/* No Results Message */}
+            {/* Enhanced No Results Message */}
             {filteredTeams.length === 0 && !loading && (
               <motion.div 
-                className="col-span-full text-center py-16"
-                initial={{ opacity: 0, scale: 0.8 }}
+                className="col-span-full text-center py-24"
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.6 }}
               >
-                <div className="max-w-md mx-auto">
-                  <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/20 mb-6">
-                    <Search className="h-16 w-16 mx-auto mb-4 text-white/50" />
-                    <h3 className="text-xl font-semibold text-white mb-2">No Teams Found</h3>
-                    <p className="text-white/70">
-                      No teams match your search criteria. Try adjusting your search terms.
-                    </p>
-                  </div>
+                <div className="max-w-lg mx-auto">
+                  <Card className="p-12 bg-gradient-to-br from-secondary/10 to-primary/10 border-2 border-dashed border-secondary/30 shadow-xl">
+                    <CardContent className="text-center">
+                      <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
+                        className="mb-8"
+                      >
+                        <Search className="h-20 w-20 mx-auto text-secondary" />
+                      </motion.div>
+                      <h3 className="text-3xl font-bold text-foreground mb-4">No Teams Found</h3>
+                      <p className="text-muted-foreground text-lg">
+                        No teams match your search criteria. Try adjusting your search terms to find the franchise you're looking for.
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
               </motion.div>
             )}
