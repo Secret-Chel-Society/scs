@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown, BarChart3, Target, Shield, Trophy, Users } from "lucide-react"
+import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PlayerClickableLinkFlexible } from "@/components/matches/player-clickable-link-flexible"
 import { useMobile } from "@/hooks/use-mobile"
@@ -1724,20 +1724,15 @@ export default function StatisticsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="relative z-10 container mx-auto px-4 py-12">
-          <div className="space-y-8">
-            <div className="text-center mb-12">
-              <Skeleton className="h-16 w-80 mx-auto mb-6" />
-              <Skeleton className="h-6 w-96 mx-auto" />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Skeleton className="h-12 w-48" />
-              <Skeleton className="h-12 w-48" />
-              <Skeleton className="h-12 w-48" />
-            </div>
-            <Skeleton className="h-96 w-full rounded-2xl" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="flex space-x-4">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
           </div>
+          <Skeleton className="h-64 w-full" />
         </div>
       </div>
     )
@@ -1745,221 +1740,122 @@ export default function StatisticsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="relative z-10 container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <Alert variant="destructive" className="border-red-500/20 bg-red-500/5">
-              <AlertCircle className="h-6 w-6" />
-              <AlertTitle className="text-lg">Error Loading Statistics</AlertTitle>
-              <AlertDescription className="text-base">{error}</AlertDescription>
-            </Alert>
-          </div>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Enhanced Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Player Statistics</h1>
+          <p className="text-muted-foreground">View comprehensive player statistics across all seasons</p>
+        </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div className="space-y-8">
-          {/* Enhanced Header Section */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-4 mb-6">
-              <div className="p-4 bg-gradient-to-r from-primary to-primary/80 rounded-2xl shadow-xl">
-                <BarChart3 className="h-10 w-10 text-white" />
-              </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Player Statistics
-              </h1>
-            </div>
-            <p className="text-xl text-white/70 max-w-3xl mx-auto">
-              View comprehensive player statistics across all seasons with advanced filtering and analysis
-            </p>
-            <div className="h-1 w-40 bg-gradient-to-r from-primary to-transparent rounded-full mx-auto mt-6" />
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select season" />
+              </SelectTrigger>
+              <SelectContent>
+                {seasons.map((season) => (
+                  <SelectItem key={season.id} value={season.id.toString()}>
+                    {season.name || `Season ${season.number || season.id}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Enhanced Filters Section */}
-          <Card className="border-primary/20 bg-white/5 backdrop-blur-sm">
-            <CardHeader className="pb-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/20 rounded-xl">
-                  <Target className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl text-white">Statistics Filters</CardTitle>
-                  <CardDescription className="text-white/70">Customize your statistics view</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-6">
-                <div className="flex-1">
-                  <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Select season" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {seasons.map((season) => (
-                        <SelectItem key={season.id} value={season.id.toString()}>
-                          {season.name || `Season ${season.number || season.id}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          <div className="flex-1">
+            <Select value={selectedWeek} onValueChange={handleWeekChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select week" />
+              </SelectTrigger>
+              <SelectContent>
+                {SEASON_1_WEEKS.map((week) => (
+                  <SelectItem key={week.id} value={week.id}>
+                    {week.displayName || week.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-                <div className="flex-1">
-                  <Select value={selectedWeek} onValueChange={handleWeekChange}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Select week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SEASON_1_WEEKS.map((week) => (
-                        <SelectItem key={week.id} value={week.id}>
-                          {week.displayName || week.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex-1">
-                  <Select value={selectedTeam} onValueChange={handleTeamChange}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Select team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Teams</SelectItem>
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Enhanced Statistics Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 p-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-              <TabsTrigger 
-                value="total" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <BarChart3 className="h-5 w-5 mr-2" />
-                Total
-              </TabsTrigger>
-              <TabsTrigger 
-                value="offense" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Target className="h-5 w-5 mr-2" />
-                Offense
-              </TabsTrigger>
-              <TabsTrigger 
-                value="defense" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Shield className="h-5 w-5 mr-2" />
-                Defense
-              </TabsTrigger>
-              <TabsTrigger 
-                value="goalies" 
-                className="py-3 text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-white rounded-lg text-white/70 hover:text-white"
-              >
-                <Trophy className="h-5 w-5 mr-2" />
-                Goalies
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="total" className="space-y-6 mt-8">
-              <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
-                <CardHeader className="pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/20 rounded-xl">
-                      <Users className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-white">All Players</CardTitle>
-                      <CardDescription className="text-white/70 text-lg">
-                        Combined statistics for all skaters (excludes goalies)
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="offense" className="space-y-6 mt-8">
-              <Card className="border-green-500/20 bg-gradient-to-br from-green-500/5 to-green-600/10">
-                <CardHeader className="pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-green-500/20 rounded-xl">
-                      <Target className="h-6 w-6 text-green-500" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-white">Forwards</CardTitle>
-                      <CardDescription className="text-white/70 text-lg">
-                        Statistics for centers, left wings, and right wings
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="defense" className="space-y-6 mt-8">
-              <Card className="border-blue-500/20 bg-gradient-to-br from-blue-500/5 to-blue-600/10">
-                <CardHeader className="pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-500/20 rounded-xl">
-                      <Shield className="h-6 w-6 text-blue-500" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-white">Defensemen</CardTitle>
-                      <CardDescription className="text-white/70 text-lg">
-                        Statistics for left and right defensemen
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="goalies" className="space-y-6 mt-8">
-              <Card className="border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-purple-600/10">
-                <CardHeader className="pb-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-purple-500/20 rounded-xl">
-                      <Trophy className="h-6 w-6 text-purple-500" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl text-white">Goalies</CardTitle>
-                      <CardDescription className="text-white/70 text-lg">
-                        Statistics for goaltenders
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <div className="flex-1">
+            <Select value={selectedTeam} onValueChange={handleTeamChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select team" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Teams</SelectItem>
+                {teams.map((team) => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
+        {/* Statistics Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="total">Total</TabsTrigger>
+            <TabsTrigger value="offense">Offense</TabsTrigger>
+            <TabsTrigger value="defense">Defense</TabsTrigger>
+            <TabsTrigger value="goalies">Goalies</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="total" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Players</CardTitle>
+                <CardDescription>Combined statistics for all skaters (excludes goalies)</CardDescription>
+              </CardHeader>
+              <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="offense" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Forwards</CardTitle>
+                <CardDescription>Statistics for centers, left wings, and right wings</CardDescription>
+              </CardHeader>
+              <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="defense" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Defensemen</CardTitle>
+                <CardDescription>Statistics for left and right defensemen</CardDescription>
+              </CardHeader>
+              <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="goalies" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Goalies</CardTitle>
+                <CardDescription>Statistics for goaltenders</CardDescription>
+              </CardHeader>
+              <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
