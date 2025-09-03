@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
 import { 
   Calendar, 
   Clock, 
@@ -24,7 +23,8 @@ import {
   Crown,
   Medal,
   Shield,
-  Gamepad2
+  Gamepad2,
+  Share2
 } from "lucide-react"
 import DailyRecapDisplay from "@/components/shared/daily-recap-display"
 import { createClient } from "@supabase/supabase-js"
@@ -151,11 +151,8 @@ export default function DailyRecapPage() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-blue/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
+          <div 
             className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-xl">
@@ -174,12 +171,7 @@ export default function DailyRecapPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="mb-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
               <h2 className="text-3xl font-bold mb-2">Today's Highlights</h2>

@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import HeroCarousel from "@/components/hero-carousel"
-import { motion, useScroll, useTransform, useInView } from "framer-motion"
+import { useScroll, useTransform, useInView } from "framer-motion"
 import { RecentTrades } from "@/components/recent-trades"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -71,21 +71,12 @@ function FloatingParticles() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(30)].map((_, i) => (
-        <motion.div
+        <div
           key={i}
           className="absolute w-1 h-1 bg-hockey-blue/30 rounded-full"
-          initial={{
+          style={{
             x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
             y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
-          }}
-          animate={{
-            x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
-            y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
-          }}
-          transition={{
-            duration: Math.random() * 25 + 15,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
           }}
         />
       ))}

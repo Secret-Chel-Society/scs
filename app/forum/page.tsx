@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { motion } from "framer-motion"
 import { 
   MessageSquare, 
   ThumbsUp, 
@@ -196,96 +195,49 @@ export default function ForumPage() {
     setError(null)
 
     try {
-      const params = new URLSearchParams({
-        category: categoryId,
-        limit: "15",
-      })
-
-      const response = await fetch(`/api/forum/posts?${params}`)
-
+      const response = await fetch(`/api/forum/posts?category=${categoryId}`)
       if (response.ok) {
         const data = await response.json()
-        console.log("Forum posts API response:", data) // Debug log
         if (data.posts && Array.isArray(data.posts)) {
-          // Debug each post's author data
-          data.posts.forEach((post: any, index: number) => {
-            console.log(`Post ${index + 1} author:`, post.author)
-          })
           setPosts(data.posts)
         } else {
           setPosts([])
         }
       } else {
-        throw new Error(`HTTP ${response.status}`)
+        setError("Failed to fetch posts")
+        setPosts([])
       }
     } catch (error) {
       console.error("Error fetching posts:", error)
-      setError("Failed to load posts. Please try again.")
+      setError("Failed to fetch posts")
       setPosts([])
     } finally {
       setIsLoadingPosts(false)
     }
   }, [])
 
-  // Initial load
-  useEffect(() => {
-    const initializeData = async () => {
-      setIsLoading(true)
-      await fetchCategories()
-      await fetchPosts("all")
-      setIsLoading(false)
-    }
+  // Handle category change
+  const handleCategoryChange = useCallback((categoryId: string) => {
+    setSelectedCategory(categoryId)
+    fetchPosts(categoryId)
+  }, [fetchPosts])
 
-    initializeData()
-  }, [fetchCategories, fetchPosts])
-
-  // Handle category change with debouncing
-  useEffect(() => {
-    if (!isLoading) {
-      const timeoutId = setTimeout(() => {
-        fetchPosts(selectedCategory)
-      }, 100) // Small debounce to prevent rapid API calls
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [selectedCategory, isLoading, fetchPosts])
-
+  // Handle create post
   const handleCreatePost = useCallback(() => {
-    if (!session) {
-      router.push("/login")
-      return
-    }
     router.push("/forum/create")
-  }, [session, router])
+  }, [router])
 
-  const handleCategoryChange = useCallback(
-    (categoryId: string) => {
-      if (categoryId !== selectedCategory) {
-        setSelectedCategory(categoryId)
-      }
-    },
-    [selectedCategory],
-  )
+  // Fetch data on mount
+  useEffect(() => {
+    fetchCategories()
+    fetchPosts(selectedCategory)
+    setIsLoading(false)
+  }, [fetchCategories, fetchPosts, selectedCategory])
 
   // Helper function to get display name
   const getDisplayName = (author: any) => {
-    console.log("Getting display name for author:", author) // Debug log
-
-    if (!author) {
-      return "Unknown User"
-    }
-
-    // Try gamer_tag first, then email, then fallback
-    if (author.gamer_tag && author.gamer_tag.trim() !== "") {
-      return author.gamer_tag
-    }
-
-    if (author.email) {
-      // Extract username from email
-      return author.email.split("@")[0]
-    }
-
-    return "Unknown User"
+    if (!author) return "Unknown User"
+    return author.gamer_tag || author.email?.split("@")[0] || "Unknown User"
   }
 
   // Helper function to get avatar fallback
@@ -296,14 +248,16 @@ export default function ForumPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-muted rounded w-1/2 mb-8"></div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded"></div>
-            ))}
+      <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10">
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-muted rounded w-1/2 mb-8"></div>
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-32 bg-muted rounded"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -319,12 +273,7 @@ export default function ForumPage() {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-purple/10 rounded-full translate-y-12 -translate-x-12" />
         
         <div className="relative container mx-auto px-4 py-16">
-          <motion.div 
-            className="text-center"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <div className="text-center">
             <div className="inline-flex items-center gap-3 mb-6">
               <div className="p-3 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl">
                 <MessageSquare className="h-8 w-8 text-white" />
@@ -336,19 +285,14 @@ export default function ForumPage() {
               Share strategies, discuss matches, and build lasting friendships.
             </p>
             <div className="h-1 w-32 bg-gradient-to-r from-hockey-blue to-transparent rounded-full mx-auto" />
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <motion.div
-          className="flex justify-between items-center mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl font-bold mb-2">Community Discussions</h2>
             <p className="text-muted-foreground">Join the conversation with fellow SCS members</p>
@@ -357,119 +301,167 @@ export default function ForumPage() {
             <Plus className="w-4 h-4 mr-2" />
             New Post
           </Button>
-        </motion.div>
+        </div>
 
-      {/* Error Display */}
-      {error && (
-        <Card className="border-destructive mb-6">
-          <CardContent className="p-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-destructive" />
-            <span className="text-destructive">{error}</span>
-            <Button variant="outline" size="sm" onClick={() => fetchPosts(selectedCategory)} className="ml-auto">
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Categories */}
-      <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="mb-8">
-        <TabsList>
-          <TabsTrigger value="all">All Posts</TabsTrigger>
-          {categories.map((category) => (
-            <TabsTrigger key={category.id} value={category.id}>
-              <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }} />
-              {category.name}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value={selectedCategory} className="mt-6">
-          {isLoadingPosts ? (
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                      <div className="h-3 bg-muted rounded w-1/2"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+        {/* Search and Filter Bar */}
+        <div className="mb-6 p-4 bg-card/50 backdrop-blur-sm rounded-lg border border-border/50">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search posts, authors, or content..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-background/80 border-border/50"
+                />
+              </div>
             </div>
-          ) : posts.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-                <p className="text-muted-foreground mb-4">Be the first to start a discussion!</p>
-                <Button onClick={handleCreatePost}>Create First Post</Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <Card key={post.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          {post.pinned && <Pin className="w-4 h-4 text-yellow-500" />}
-                          <Badge
-                            variant="secondary"
-                            style={{ backgroundColor: post.category?.color + "20", color: post.category?.color }}
-                          >
-                            {post.category?.name}
-                          </Badge>
-                        </div>
+            <div className="flex gap-2">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40 bg-background/80 border-border/50">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="created_at">Date</SelectItem>
+                  <SelectItem value="views">Views</SelectItem>
+                  <SelectItem value="like_count">Likes</SelectItem>
+                  <SelectItem value="comment_count">Comments</SelectItem>
+                  <SelectItem value="title">Title</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="bg-background/80 border-border/50"
+              >
+                {sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+        </div>
 
-                        <Link href={`/forum/posts/${post.id}`}>
-                          <h3 className="text-xl font-semibold mb-2 hover:text-primary transition-colors cursor-pointer">
-                            {post.title}
-                          </h3>
-                        </Link>
+        {/* Error Display */}
+        {error && (
+          <Card className="border-destructive mb-6">
+            <CardContent className="p-4 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-destructive" />
+              <span className="text-destructive">{error}</span>
+              <Button variant="outline" size="sm" onClick={() => fetchPosts(selectedCategory)} className="ml-auto">
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="w-6 h-6">
-                              <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
-                              <AvatarFallback>{getAvatarFallback(post.author)}</AvatarFallback>
-                            </Avatar>
-                            <span>{getDisplayName(post.author)}</span>
-                          </div>
-                          <span>•</span>
-                          <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-                        </div>
+        {/* Categories */}
+        <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="mb-8">
+          <TabsList className="bg-card/50 backdrop-blur-sm border border-border/50">
+            <TabsTrigger value="all" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-blue data-[state=active]:to-hockey-purple">
+              All Posts
+            </TabsTrigger>
+            {categories.map((category) => (
+              <TabsTrigger key={category.id} value={category.id} className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-blue data-[state=active]:to-hockey-purple">
+                <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: category.color }} />
+                {category.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-                        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Eye className="w-4 h-4" />
-                            <span>{post.views || 0}</span>
+          <TabsContent value={selectedCategory} className="mt-6">
+            {isLoadingPosts ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i} className="enhanced-card">
+                    <CardContent className="p-6">
+                      <div className="animate-pulse">
+                        <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredAndSortedPosts.length === 0 ? (
+              <Card className="enhanced-card">
+                <CardContent className="p-8 text-center">
+                  <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No posts found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm ? "Try adjusting your search terms or filters." : "Be the first to start a discussion!"}
+                  </p>
+                  {searchTerm && (
+                    <Button variant="outline" onClick={() => setSearchTerm("")} className="mr-2">
+                      Clear Search
+                    </Button>
+                  )}
+                  <Button onClick={handleCreatePost}>Create First Post</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {filteredAndSortedPosts.map((post) => (
+                  <Card key={post.id} className="enhanced-card hover:scale-[1.02] transition-transform duration-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {post.pinned && <Pin className="w-4 h-4 text-hockey-gold" />}
+                            <Badge
+                              variant="secondary"
+                              style={{ backgroundColor: post.category?.color + "20", color: post.category?.color }}
+                              className="border border-current/20"
+                            >
+                              {post.category?.name}
+                            </Badge>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <MessageSquare className="w-4 h-4" />
-                            <span>{post.comment_count || 0}</span>
+
+                          <Link href={`/forum/posts/${post.id}`}>
+                            <h3 className="text-xl font-semibold mb-2 hover:text-hockey-blue transition-colors cursor-pointer">
+                              {post.title}
+                            </h3>
+                          </Link>
+
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="w-6 h-6">
+                                <AvatarImage src={post.author?.avatar_url || "/placeholder.svg"} />
+                                <AvatarFallback>{getAvatarFallback(post.author)}</AvatarFallback>
+                              </Avatar>
+                              <span>{getDisplayName(post.author)}</span>
+                            </div>
+                            <span>•</span>
+                            <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <ThumbsUp className="w-4 h-4" />
-                            <span>{post.like_count || 0}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ThumbsDown className="w-4 h-4" />
-                            <span>{post.dislike_count || 0}</span>
+
+                          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-4 h-4" />
+                              <span>{post.views || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MessageSquare className="w-4 h-4" />
+                              <span>{post.comment_count || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <ThumbsUp className="w-4 h-4" />
+                              <span>{post.like_count || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <ThumbsDown className="w-4 h-4" />
+                              <span>{post.dislike_count || 0}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-        </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
