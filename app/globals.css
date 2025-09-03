@@ -164,6 +164,99 @@
     @apply text-lg md:text-xl font-medium;
     @apply max-w-2xl;
   }
+  
+  .hockey-match-card {
+    @apply bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20;
+    @apply border border-ice-blue-200/50 dark:border-rink-blue-800/50;
+    @apply shadow-lg shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
+    @apply backdrop-blur-sm;
+    @apply transition-all duration-300 ease-out;
+    @apply min-h-[320px];
+  }
+  
+  .hockey-match-card-hover {
+    @apply hover:shadow-xl hover:shadow-ice-blue-500/20 dark:hover:shadow-rink-blue-500/30;
+    @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-700;
+    @apply hover:scale-105;
+  }
+  
+  .hockey-week-nav {
+    @apply bg-gradient-to-br from-white to-ice-blue-50/30 dark:from-hockey-silver-900/50 dark:to-rink-blue-900/20;
+    @apply border border-ice-blue-200/50 dark:border-rink-blue-800/50;
+    @apply rounded-xl p-6 shadow-lg shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
+  }
+  
+  .hockey-date-header {
+    @apply flex items-center gap-3 mb-10;
+  }
+  
+  .hockey-date-indicator {
+    @apply w-2 h-8 bg-gradient-to-b from-ice-blue-500 to-rink-blue-600 rounded-full;
+  }
+  
+  .hockey-score-display {
+    @apply text-center;
+  }
+  
+  .hockey-score-number {
+    @apply text-4xl font-bold tabular-nums text-hockey-silver-800 dark:text-hockey-silver-200;
+  }
+  
+  .hockey-score-separator {
+    @apply text-xl text-hockey-silver-500 dark:text-hockey-silver-500 font-medium;
+  }
+  
+  .hockey-vs-text {
+    @apply text-3xl font-bold text-hockey-silver-500 dark:text-hockey-silver-500;
+  }
+  
+  .hockey-match-grid {
+    @apply grid gap-10 md:grid-cols-2;
+  }
+  
+  .hockey-match-content {
+    @apply p-8;
+  }
+  
+  .hockey-match-header {
+    @apply flex justify-between items-center mb-8;
+  }
+  
+  .hockey-match-teams {
+    @apply flex items-center justify-between mb-8;
+  }
+  
+  .hockey-team-section {
+    @apply flex flex-col items-center gap-5 w-2/5;
+  }
+  
+  .hockey-team-logo {
+    @apply relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-rink-blue-700 shadow-lg;
+  }
+  
+  .hockey-team-name {
+    @apply font-bold text-center text-hockey-silver-800 dark:text-hockey-silver-200 group-hover:text-ice-blue-600 dark:group-hover:text-rink-blue-400 transition-colors duration-200 text-lg;
+  }
+  
+  .hockey-team-badge {
+    @apply mt-4 text-sm flex items-center gap-1 px-4 py-2 rounded-full font-medium;
+  }
+  
+  .hockey-home-badge {
+    @apply bg-gradient-to-r from-ice-blue-100 to-ice-blue-200 text-ice-blue-800 border border-ice-blue-300 dark:from-ice-blue-900/30 dark:to-ice-blue-800/30 dark:text-ice-blue-200 dark:border-ice-blue-600;
+  }
+  
+  .hockey-away-badge {
+    @apply bg-gradient-to-r from-rink-blue-100 to-rink-blue-200 text-rink-blue-800 border border-rink-blue-300 dark:from-rink-blue-900/30 dark:to-rink-blue-800/30 dark:text-rink-blue-200 dark:border-rink-blue-600;
+  }
+  
+  .hockey-score-section {
+    @apply flex items-center justify-center w-1/5;
+  }
+  
+  .hockey-match-action {
+    @apply bg-gradient-to-r from-hockey-silver-50 to-ice-blue-50/30 dark:from-hockey-silver-800/30 dark:to-rink-blue-900/20 p-6 flex justify-center;
+  }
 }
 
 /* Custom container class to ensure proper centering */
