@@ -1,8 +1,6 @@
 "use client"
 
-import React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import NewsCard from "@/components/news-card"
@@ -282,7 +280,8 @@ export default function Home() {
   }, [supabase, toast])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-background pt-4">
+    <>
+      <div className="min-h-screen relative overflow-hidden bg-background pt-4">
       {/* Enhanced Hockey-Themed Animated Background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 hockey-grid opacity-20" />
@@ -1209,5 +1208,6 @@ export default function Home() {
         </motion.section>
       </div>
     </div>
+    </>
   )
 }
