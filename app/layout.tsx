@@ -18,22 +18,14 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Secret Chel Society - NHL 26 Championship League",
-  description: "The premier NHL 26 competitive gaming league with advanced stat tracking, free token rewards, and professional league management",
+  title: "Secret Chel Society",
+  description: "Official website for the NHL 26 Secret Chel Society",
   viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
-  },
-  keywords: "NHL 26, hockey, gaming, league, competitive, Secret Chel Society, SCS, esports",
-  authors: [{ name: "Secret Chel Society" }],
-  openGraph: {
-    title: "Secret Chel Society - NHL 26 Championship League",
-    description: "The premier NHL 26 competitive gaming league with advanced stat tracking, free token rewards, and professional league management",
-    type: "website",
-    locale: "en_US",
   },
 }
 
@@ -57,12 +49,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen w-full overflow-x-hidden">
+            <div className="flex min-h-screen">
               <Navigation />
-              {/* Main content area - responsive to sidebar state */}
-              <div className="flex-1 flex flex-col lg:ml-80 w-full min-w-0 transition-all duration-300">
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col lg:ml-64">
                 <Suspense>
-                  <main className="flex-1 p-4 lg:p-8">
+                  <main className="flex-1 p-6">
                     {children}
                   </main>
                 </Suspense>

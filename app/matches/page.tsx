@@ -1,681 +1,507 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-
-import { 
-  Calendar, 
-  Clock, 
-  Trophy, 
-  Users, 
-  Target, 
-  TrendingUp, 
-  Star, 
-  Medal, 
-  Crown, 
-  Zap,
-  Activity,
-  Gamepad2,
-  Shield,
-  Coins,
-  Award,
-  BarChart3,
-  Play,
-  Pause,
-  CheckCircle,
-  XCircle
-} from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import Link from "next/link"
-
-interface Match {
-  id: string
-  match_date: string
-  status: string
-  home_team: {
-    id: string
-    name: string
-    logo_url: string | null
-  }
-  away_team: {
-    id: string
-    name: string
-    logo_url: string | null
-  }
-  home_score?: number
-  away_score?: number
-  venue?: string
-  stream_url?: string
-}
+import { useSupabase } from "@/lib/supabase/client"
+import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter } from "lucide-react"
+import Image from "next/image"
 
 export default function MatchesPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { supabase } = useSupabase()
   const { toast } = useToast()
-  const [matches, setMatches] = useState<Match[]>([])
+
+  const [matches, setMatches] = useState<any[]>([])
+  const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("upcoming")
+  const [error, setError] = useState<string | null>(null)
 
+  // Pagination and filtering state
+  const [currentWeek, setCurrentWeek] = useState(1)
+  const [totalWeeks, setTotalWeeks] = useState(1)
+  const [selectedTeam, setSelectedTeam] = useState<string>("all")
+  const [weekMatches, setWeekMatches] = useState<any[]>([])
+
+  // Get initial filters from URL params
   useEffect(() => {
-    fetchMatches()
-  }, [])
+    const week = searchParams.get("week")
+    const team = searchParams.get("team")
 
-  const fetchMatches = async () => {
-    try {
-      setLoading(true)
-      
-      const response = await fetch("/api/matches")
-      if (response.ok) {
-        const data = await response.json()
-        setMatches(data.matches || [])
-      } else {
-        throw new Error("Failed to fetch matches")
+    if (week) setCurrentWeek(Number.parseInt(week))
+    if (team) setSelectedTeam(team)
+  }, [searchParams])
+
+  // Fetch teams for filter
+  useEffect(() => {
+    async function fetchTeams() {
+      try {
+        const { data, error } = await supabase.from("teams").select("id, name").eq("is_active", true).order("name")
+
+        if (error) throw error
+        setTeams(data || [])
+      } catch (error) {
+        console.error("Error fetching teams:", error)
       }
-    } catch (error) {
-      toast({
-        title: "Error loading matches",
-        description: "Failed to load matches data. Please try again.",
-        variant: "destructive",
+    }
+
+    fetchTeams()
+  }, [supabase])
+
+  // Fetch all matches
+  useEffect(() => {
+    async function fetchMatches() {
+      try {
+        setLoading(true)
+        setError(null)
+
+        let query = supabase
+          .from("matches")
+          .select(
+            `
+            id,
+            match_date,
+            status,
+            home_team_id,
+            away_team_id,
+            home_score,
+            away_score,
+            season_id,
+            season_name,
+            home_team:teams!home_team_id(id, name, logo_url),
+            away_team:teams!away_team_id(id, name, logo_url)
+          `,
+          )
+          .eq("season_name", "Season 1")
+
+        // Apply team filter if selected
+        if (selectedTeam !== "all") {
+          query = query.or(`home_team_id.eq.${selectedTeam},away_team_id.eq.${selectedTeam}`)
+        }
+
+        const { data, error } = await query.order("match_date", { ascending: true })
+
+        if (error) throw error
+
+        console.log(`Found ${data?.length || 0} matches for Season 1`)
+        setMatches(data || [])
+
+        // Calculate weeks based on matches
+        if (data && data.length > 0) {
+          const weeks = calculateWeeks(data)
+          setTotalWeeks(weeks)
+        }
+      } catch (error: any) {
+        console.error("Error fetching matches:", error)
+        setError(`Error: ${error.message}`)
+        toast({
+          title: "Error",
+          description: "Failed to load matches. Please try again.",
+          variant: "destructive",
+        })
+        setMatches([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMatches()
+  }, [supabase, toast, selectedTeam])
+
+  // Calculate weeks from matches
+  const calculateWeeks = (matchesData: any[]) => {
+    if (!matchesData.length) return 1
+
+    // Group matches by week (7-day periods starting from first match)
+    const firstMatchDate = new Date(matchesData[0].match_date)
+    const lastMatchDate = new Date(matchesData[matchesData.length - 1].match_date)
+
+    // Calculate the difference in weeks
+    const timeDiff = lastMatchDate.getTime() - firstMatchDate.getTime()
+    const weeksDiff = Math.ceil(timeDiff / (7 * 24 * 60 * 60 * 1000))
+
+    return Math.max(1, weeksDiff + 1)
+  }
+
+  // Get matches for current week
+  useEffect(() => {
+    if (matches.length === 0) {
+      setWeekMatches([])
+      return
+    }
+
+    const firstMatchDate = new Date(matches[0].match_date)
+    const weekStartDate = new Date(firstMatchDate)
+    weekStartDate.setDate(firstMatchDate.getDate() + (currentWeek - 1) * 7)
+
+    const weekEndDate = new Date(weekStartDate)
+    weekEndDate.setDate(weekStartDate.getDate() + 6)
+    weekEndDate.setHours(23, 59, 59, 999)
+
+    const filteredMatches = matches.filter((match) => {
+      const matchDate = new Date(match.match_date)
+      return matchDate >= weekStartDate && matchDate <= weekEndDate
+    })
+
+    setWeekMatches(filteredMatches)
+  }, [matches, currentWeek])
+
+  // Update URL when filters change
+  const updateURL = (week: number, team: string) => {
+    const params = new URLSearchParams()
+    if (week > 1) params.set("week", week.toString())
+    if (team !== "all") params.set("team", team)
+
+    const newURL = params.toString() ? `/matches?${params.toString()}` : "/matches"
+    router.replace(newURL, { scroll: false })
+  }
+
+  // Handle week navigation
+  const goToWeek = (week: number) => {
+    setCurrentWeek(week)
+    updateURL(week, selectedTeam)
+  }
+
+  // Handle team filter change
+  const handleTeamFilter = (team: string) => {
+    setSelectedTeam(team)
+    setCurrentWeek(1) // Reset to first week when changing team filter
+    updateURL(1, team)
+  }
+
+  // Group matches by date
+  const groupMatchesByDate = (matches: any[]) => {
+    const groups: Record<string, any[]> = {}
+
+    matches.forEach((match) => {
+      const date = new Date(match.match_date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
-    } finally {
-      setLoading(false)
+
+      if (!groups[date]) {
+        groups[date] = []
+      }
+
+      groups[date].push(match)
+    })
+
+    return groups
+  }
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return {
+      date: date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+      time: date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     }
   }
 
-  const upcomingMatches = matches.filter(match => match.status === "Scheduled")
-  const completedMatches = matches.filter(match => match.status === "Completed")
-  const liveMatches = matches.filter(match => match.status === "Live")
-
-  const getStatusBadge = (status: string) => {
+  // Get status badge variant
+  const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "Scheduled":
-        return <Badge className="badge-regular"><Clock className="h-3 w-3 mr-1" />Scheduled</Badge>
-      case "Live":
-        return <Badge className="badge-playoff"><Play className="h-3 w-3 mr-1" />Live</Badge>
+        return "outline"
+      case "In Progress":
+        return "secondary"
       case "Completed":
-        return <Badge className="badge-champion"><CheckCircle className="h-3 w-3 mr-1" />Final</Badge>
-      case "Cancelled":
-        return <Badge className="bg-red-500 text-white"><XCircle className="h-3 w-3 mr-1" />Cancelled</Badge>
+        return "success"
       default:
-        return <Badge className="badge-regular">{status}</Badge>
+        return "default"
     }
   }
 
-  const getMatchResult = (match: Match) => {
-    if (match.status !== "Completed" || match.home_score === undefined || match.away_score === undefined) {
-      return null;
+  // Render team logo
+  const renderTeamLogo = (team: any) => {
+    if (!team) return null
+
+    if (team.logo_url) {
+      return (
+        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-background border">
+          <Image
+            src={team.logo_url || "/placeholder.svg"}
+            alt={team.name}
+            width={40}
+            height={40}
+            className="object-contain"
+          />
+        </div>
+      )
     }
-    
-    if (match.home_score > match.away_score) {
-      return { winner: "home", score: `${match.home_score}-${match.away_score}` };
-    } else if (match.away_score > match.home_score) {
-      return { winner: "away", score: `${match.away_score}-${match.home_score}` };
-    } else {
-      return { winner: "tie", score: `${match.home_score}-${match.away_score}` };
-    }
+
+    // Fallback if no logo
+    return (
+      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
+        {team.name.substring(0, 2)}
+      </div>
+    )
   }
 
-  const formatMatchDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
+  // Get week date range for display
+  const getWeekDateRange = () => {
+    if (matches.length === 0) return ""
+
+    const firstMatchDate = new Date(matches[0].match_date)
+    const weekStartDate = new Date(firstMatchDate)
+    weekStartDate.setDate(firstMatchDate.getDate() + (currentWeek - 1) * 7)
+
+    const weekEndDate = new Date(weekStartDate)
+    weekEndDate.setDate(weekStartDate.getDate() + 6)
+
+    return `${weekStartDate.toLocaleDateString("en-US", {
+      month: "short",
       day: "numeric",
-    })
+    })} - ${weekEndDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })}`
   }
 
-  const formatMatchTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      timeZoneName: "short",
-    })
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Matches</h1>
+        <div className="mb-6 flex gap-4">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+      </div>
+    )
   }
+
+  // Add a fallback UI for connection errors
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Matches</h1>
+
+        <div className="bg-muted p-8 rounded-lg text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Error Loading Matches</h2>
+          <p className="text-muted-foreground mb-2">{error}</p>
+          <p className="text-muted-foreground mb-6">
+            There was a problem connecting to the database. This could be due to a type mismatch or server issue.
+          </p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Page
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-hockey-green/20 via-hockey-blue/20 to-hockey-green/20 border-b border-hockey-green/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-hockey-green/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-32 h-32 bg-hockey-green/10 rounded-full -translate-y-16 translate-x-16" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-blue/10 rounded-full translate-y-12 -translate-x-12" />
-        
-        <div className="relative container mx-auto px-4 py-16">
-          <div 
-            className="text-center"
-          >
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-xl">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-              <h1 className="text-5xl font-bold hockey-gradient-text">Match Schedule</h1>
-            </div>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Follow all the action from the Secret Chel Society. View upcoming matches, 
-              live scores, and completed game results.
-            </p>
-            <div className="h-1 w-32 bg-gradient-to-r from-hockey-green to-transparent rounded-full mx-auto" />
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Matches</h1>
+
+      {/* Filters */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4" />
+          <Select value={selectedTeam} onValueChange={handleTeamFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by team" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Teams</SelectItem>
+              {teams.map((team) => (
+                <SelectItem key={team.id} value={team.id}>
+                  {team.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-base py-1 px-3">
+            Season 1
+          </Badge>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Live Matches Banner */}
-        {liveMatches.length > 0 && (
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="enhanced-card bg-gradient-to-r from-hockey-green/20 to-hockey-blue/20 border-hockey-green/30">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-lg">
-                      <Play className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-foreground">Live Matches</h3>
-                      <p className="text-muted-foreground">Games currently in progress</p>
-                    </div>
-                  </div>
-                  <Badge className="badge-playoff text-lg px-4 py-2">
-                    {liveMatches.length} Live
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+      {/* Week Navigation */}
+      {totalWeeks > 1 && (
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => goToWeek(currentWeek - 1)} disabled={currentWeek === 1}>
+              <ChevronLeft className="h-4 w-4" />
+              Previous Week
+            </Button>
 
-        {/* Matches Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 backdrop-blur-sm">
-              <TabsTrigger
-                value="upcoming"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-blue data-[state=active]:to-hockey-purple data-[state=active]:text-white"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                Upcoming ({upcomingMatches.length})
-              </TabsTrigger>
-              <TabsTrigger
-                value="live"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-green data-[state=active]:to-hockey-blue data-[state=active]:text-white"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Live ({liveMatches.length})
-              </TabsTrigger>
-              <TabsTrigger
-                value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-gold data-[state=active]:to-hockey-orange data-[state=active]:text-white"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Completed ({completedMatches.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="upcoming">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-48 rounded-2xl" />
-                    ))}
-                  </div>
-                ) : upcomingMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {upcomingMatches.map((match, index) => (
-                      <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        whileHover={{ y: -8 }}
-                        className="group"
-                      >
-                        <Card className="enhanced-card h-full overflow-hidden group-hover:shadow-hockey-xl transition-all duration-300">
-                          <CardHeader className="enhanced-card-header">
-                            <div className="flex items-center justify-between mb-4">
-                              {getStatusBadge(match.status)}
-                              <div className="text-right">
-                                <div className="text-sm text-muted-foreground">Match Date</div>
-                                <div className="font-semibold">{formatMatchDate(match.match_date)}</div>
-                                <div className="text-sm text-hockey-blue">{formatMatchTime(match.match_date)}</div>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="p-6">
-                            {/* Teams */}
-                            <div className="space-y-4 mb-6">
-                              {/* Away Team */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                    {match.away_team.logo_url ? (
-                                      <img
-                                        src={match.away_team.logo_url}
-                                        alt={match.away_team.name}
-                                        className="w-8 h-8 object-contain"
-                                      />
-                                    ) : (
-                                      <span className="text-lg font-bold text-hockey-blue">
-                                        {match.away_team.name.substring(0, 2)}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="font-semibold">{match.away_team.name}</span>
-                                </div>
-                                <span className="text-2xl font-bold text-muted-foreground">@</span>
-                              </div>
-
-                              {/* VS Divider */}
-                              <div className="flex items-center justify-center">
-                                <div className="h-px bg-hockey-blue/30 flex-1" />
-                                <span className="px-4 text-sm font-bold text-hockey-blue">VS</span>
-                                <div className="h-px bg-hockey-blue/30 flex-1" />
-                              </div>
-
-                              {/* Home Team */}
-                              <div className="flex items-center justify-between">
-                                <span className="text-2xl font-bold text-muted-foreground">@</span>
-                                <div className="flex items-center gap-3">
-                                  <span className="font-semibold">{match.home_team.name}</span>
-                                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                    {match.home_team.logo_url ? (
-                                      <img
-                                        src={match.home_team.logo_url}
-                                        alt={match.home_team.name}
-                                        className="w-8 h-8 object-contain"
-                                      />
-                                    ) : (
-                                      <span className="text-lg font-bold text-hockey-blue">
-                                        {match.home_team.name.substring(0, 2)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Match Details */}
-                            <div className="space-y-3 text-sm">
-                              {match.venue && (
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                  <Target className="h-4 w-4" />
-                                  <span>{match.venue}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="mt-6 pt-4 border-t border-hockey-blue/10">
-                              <div className="flex gap-2">
-                                <Button className="flex-1 btn-ice" size="sm">
-                                  <Calendar className="h-4 w-4 mr-2" />
-                                  Add to Calendar
-                                </Button>
-                                {match.stream_url && (
-                                  <Button className="btn-championship" size="sm">
-                                    <Play className="h-4 w-4 mr-2" />
-                                    Watch
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <Card className="enhanced-card text-center p-12">
-                    <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-semibold mb-2">No Upcoming Matches</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Check back soon for the next round of competitive NHL 26 games!
-                    </p>
-                  </Card>
-                )}
-              </motion.div>
-            </TabsContent>
-
-            <TabsContent value="live">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-48 rounded-2xl" />
-                    ))}
-                  </div>
-                ) : liveMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {liveMatches.map((match, index) => (
-                      <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                        whileHover={{ y: -8 }}
-                        className="group"
-                      >
-                        <Card className="enhanced-card h-full overflow-hidden group-hover:shadow-hockey-xl transition-all duration-300 border-hockey-green/30">
-                          <CardHeader className="enhanced-card-header bg-gradient-to-r from-hockey-green/10 to-transparent">
-                            <div className="flex items-center justify-between mb-4">
-                              {getStatusBadge(match.status)}
-                              <div className="text-right">
-                                <div className="text-sm text-muted-foreground">Live Now</div>
-                                <div className="font-semibold text-hockey-green">In Progress</div>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="p-6">
-                            {/* Live Score */}
-                            <div className="text-center mb-6">
-                              <div className="text-4xl font-bold text-hockey-green mb-2">
-                                {match.home_score || 0} - {match.away_score || 0}
-                              </div>
-                              <div className="text-sm text-muted-foreground">Current Score</div>
-                            </div>
-
-                            {/* Teams */}
-                            <div className="space-y-4 mb-6">
-                              {/* Away Team */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                    {match.away_team.logo_url ? (
-                                      <img
-                                        src={match.away_team.logo_url}
-                                        alt={match.away_team.name}
-                                        className="w-8 h-8 object-contain"
-                                      />
-                                    ) : (
-                                      <span className="text-lg font-bold text-hockey-blue">
-                                        {match.away_team.name.substring(0, 2)}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="font-semibold">{match.away_team.name}</span>
-                                </div>
-                                <span className="text-2xl font-bold text-muted-foreground">@</span>
-                              </div>
-
-                              {/* VS Divider */}
-                              <div className="flex items-center justify-center">
-                                <div className="h-px bg-hockey-green/30 flex-1" />
-                                <span className="px-4 text-sm font-bold text-hockey-green">VS</span>
-                                <div className="h-px bg-hockey-green/30 flex-1" />
-                              </div>
-
-                              {/* Home Team */}
-                              <div className="flex items-center justify-between">
-                                <span className="text-2xl font-bold text-muted-foreground">@</span>
-                                <div className="flex items-center gap-3">
-                                  <span className="font-semibold">{match.home_team.name}</span>
-                                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                    {match.home_team.logo_url ? (
-                                      <img
-                                        src={match.home_team.logo_url}
-                                        alt={match.home_team.name}
-                                        className="w-8 h-8 object-contain"
-                                      />
-                                    ) : (
-                                      <span className="text-lg font-bold text-hockey-blue">
-                                        {match.home_team.name.substring(0, 2)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="mt-6 pt-4 border-t border-hockey-green/10">
-                              <div className="flex gap-2">
-                                <Button className="flex-1 btn-championship" size="sm">
-                                  <BarChart3 className="h-4 w-4 mr-2" />
-                                  Live Stats
-                                </Button>
-                                {match.stream_url && (
-                                  <Button className="btn-ice" size="sm">
-                                    <Play className="h-4 w-4 mr-2" />
-                                    Watch Live
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <Card className="enhanced-card text-center p-12">
-                    <Play className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-semibold mb-2">No Live Matches</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Check the upcoming matches tab to see when the next games start!
-                    </p>
-                  </Card>
-                )}
-              </motion.div>
-            </TabsContent>
-
-            <TabsContent value="completed">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-48 rounded-2xl" />
-                    ))}
-                  </div>
-                ) : completedMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {completedMatches.map((match, index) => {
-                      const result = getMatchResult(match)
-                      return (
-                        <motion.div
-                          key={match.id}
-                          initial={{ opacity: 0, y: 30 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: index * 0.1 }}
-                          whileHover={{ y: -8 }}
-                          className="group"
-                        >
-                          <Card className="enhanced-card h-full overflow-hidden group-hover:shadow-hockey-xl transition-all duration-300">
-                            <CardHeader className="enhanced-card-header">
-                              <div className="flex items-center justify-between mb-4">
-                                {getStatusBadge(match.status)}
-                                <div className="text-right">
-                                  <div className="text-sm text-muted-foreground">Final Score</div>
-                                  <div className="font-bold text-lg">{result?.score}</div>
-                                </div>
-                              </div>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                              {/* Final Score */}
-                              <div className="text-center mb-6">
-                                <div className="text-4xl font-bold text-hockey-gold mb-2">
-                                  {match.home_score} - {match.away_score}
-                                </div>
-                                <div className="text-sm text-muted-foreground">Final Score</div>
-                              </div>
-
-                              {/* Teams with Results */}
-                              <div className="space-y-4 mb-6">
-                                {/* Away Team */}
-                                <div className={`flex items-center justify-between p-3 rounded-lg ${
-                                  result?.winner === "away" ? "bg-hockey-green/10 border border-hockey-green/20" : ""
-                                }`}>
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                      {match.away_team.logo_url ? (
-                                        <img
-                                          src={match.away_team.logo_url}
-                                          alt={match.away_team.name}
-                                          className="w-8 h-8 object-contain"
-                                        />
-                                      ) : (
-                                        <span className="text-lg font-bold text-hockey-blue">
-                                          {match.away_team.name.substring(0, 2)}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <span className="font-semibold">{match.away_team.name}</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="text-2xl font-bold">{match.away_score}</div>
-                                    {result?.winner === "away" && (
-                                      <Badge className="badge-champion text-xs">W</Badge>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* VS Divider */}
-                                <div className="flex items-center justify-center">
-                                  <div className="h-px bg-hockey-gold/30 flex-1" />
-                                  <span className="px-4 text-sm font-bold text-hockey-gold">VS</span>
-                                  <div className="h-px bg-hockey-gold/30 flex-1" />
-                                </div>
-
-                                {/* Home Team */}
-                                <div className={`flex items-center justify-between p-3 rounded-lg ${
-                                  result?.winner === "home" ? "bg-hockey-green/10 border border-hockey-green/20" : ""
-                                }`}>
-                                  <div className="text-left">
-                                    <div className="text-2xl font-bold">{match.home_score}</div>
-                                    {result?.winner === "home" && (
-                                      <Badge className="badge-champion text-xs">W</Badge>
-                                    )}
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <span className="font-semibold">{match.home_team.name}</span>
-                                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                      {match.home_team.logo_url ? (
-                                        <img
-                                          src={match.home_team.logo_url}
-                                          alt={match.home_team.name}
-                                          className="w-8 h-8 object-contain"
-                                        />
-                                      ) : (
-                                        <span className="text-lg font-bold text-hockey-blue">
-                                          {match.home_team.name.substring(0, 2)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Match Details */}
-                              <div className="space-y-3 text-sm mb-6">
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>{formatMatchDate(match.match_date)}</span>
-                                </div>
-                                {match.venue && (
-                                  <div className="flex items-center gap-2 text-muted-foreground">
-                                    <Target className="h-4 w-4" />
-                                    <span>{match.venue}</span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="mt-6 pt-4 border-t border-hockey-blue/10">
-                                <div className="flex gap-2">
-                                  <Button className="flex-1 btn-ice" size="sm">
-                                    <BarChart3 className="h-4 w-4 mr-2" />
-                                    View Stats
-                                  </Button>
-                                  <Button className="btn-championship" size="sm">
-                                    <Trophy className="h-4 w-4 mr-2" />
-                                    Highlights
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <Card className="enhanced-card text-center p-12">
-                    <CheckCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                    <h3 className="text-xl font-semibold mb-2">No Completed Matches</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Match results will appear here once games are completed.
-                    </p>
-                  </Card>
-                )}
-              </motion.div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-
-        {/* Season Summary */}
-        <motion.div
-          className="mt-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Card className="enhanced-card">
-            <CardHeader className="enhanced-card-header">
-              <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-hockey-purple to-hockey-blue rounded-lg">
-                  <BarChart3 className="h-5 w-5 text-white" />
-                </div>
-                <span>Season Summary</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-hockey-blue mb-2">{matches.length}</div>
-                  <div className="text-sm text-muted-foreground">Total Matches</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-hockey-green mb-2">{upcomingMatches.length}</div>
-                  <div className="text-sm text-muted-foreground">Upcoming</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-hockey-gold mb-2">{completedMatches.length}</div>
-                  <div className="text-sm text-muted-foreground">Completed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-hockey-purple mb-2">{liveMatches.length}</div>
-                  <div className="text-sm text-muted-foreground">Live Now</div>
-                </div>
+            <div className="text-center">
+              <div className="font-semibold">
+                Week {currentWeek} of {totalWeeks}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <div className="text-sm text-muted-foreground">{getWeekDateRange()}</div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goToWeek(currentWeek + 1)}
+              disabled={currentWeek === totalWeeks}
+            >
+              Next Week
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Week selector for quick navigation */}
+          <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
+                <SelectItem key={week} value={week.toString()}>
+                  Week {week}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* No matches message */}
+      {weekMatches.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            {selectedTeam === "all"
+              ? `No matches found for Week ${currentWeek}.`
+              : `No matches found for the selected team in Week ${currentWeek}.`}
+          </p>
+        </div>
+      )}
+
+      {/* Matches by date */}
+      <div className="space-y-8">
+        {Object.entries(matchesByDate).map(([date, dateMatches]) => (
+          <div key={date}>
+            <h2 className="text-xl font-semibold mb-4">{date}</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {dateMatches.map((match) => {
+                const formattedDate = formatDate(match.match_date)
+                const isCompleted = match.status === "Completed"
+
+                return (
+                  <Card
+                    key={match.id}
+                    className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/matches/${match.id}`)}
+                  >
+                    <CardContent className="p-0">
+                      <div className="p-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>{formattedDate.time}</span>
+                          </div>
+                          <Badge variant={getStatusBadgeVariant(match.status)}>{match.status}</Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          {/* Home Team */}
+                          <div className="flex flex-col items-center gap-2 w-1/3">
+                            {renderTeamLogo(match.home_team)}
+                            <div className="flex flex-col items-center">
+                              <span className="font-medium text-center">{match.home_team.name}</span>
+                              <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1">
+                                <Home className="h-3 w-3" />
+                                Home
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Score */}
+                          <div className="flex items-center justify-center w-1/3">
+                            {isCompleted ? (
+                              <div className="text-2xl font-bold tabular-nums">
+                                {match.home_score} - {match.away_score}
+                              </div>
+                            ) : (
+                              <div className="text-xl font-medium text-muted-foreground">vs</div>
+                            )}
+                          </div>
+
+                          {/* Away Team */}
+                          <div className="flex flex-col items-center gap-2 w-1/3">
+                            {renderTeamLogo(match.away_team)}
+                            <div className="flex flex-col items-center">
+                              <span className="font-medium text-center">{match.away_team.name}</span>
+                              <Badge variant="outline" className="mt-1 text-xs flex items-center gap-1">
+                                <ExternalLink className="h-3 w-3" />
+                                Away
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-muted-foreground/5 p-2 flex justify-center">
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          View Details
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </div>
+
+      {/* Bottom pagination for convenience */}
+      {totalWeeks > 1 && (
+        <div className="mt-8 flex justify-center">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => goToWeek(currentWeek - 1)} disabled={currentWeek === 1}>
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+
+            <span className="px-4 py-2 text-sm">
+              Week {currentWeek} of {totalWeeks}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goToWeek(currentWeek + 1)}
+              disabled={currentWeek === totalWeeks}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

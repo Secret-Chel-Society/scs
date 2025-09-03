@@ -20,21 +20,7 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  ChevronRight,
-  User,
-  Crown,
-  Star,
-  Zap,
-  Target,
-  Gamepad2,
-  Medal,
-  Shield,
-  TrendingUp,
-  Activity,
-  Database,
-  Coins,
-  Gift,
-  ChevronLeft
+  ChevronRight
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -52,7 +38,6 @@ import {
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
 
 export default function Navigation() {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
@@ -64,17 +49,11 @@ export default function Navigation() {
   const [isTeamManager, setIsTeamManager] = useState(false)
   const [playerId, setPlayerId] = useState<string | null>(null)
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({})
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   
   const pathname = usePathname()
   const router = useRouter()
   const { supabase, session, isLoading } = useSupabase()
   const { toast } = useToast()
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setIsMobileOpen(false)
-  }, [pathname])
 
   // Fetch user data
   useEffect(() => {
@@ -152,83 +131,42 @@ export default function Navigation() {
     }))
   }
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed)
-  }
-
   const navigation = [
-    { 
-      name: "Home", 
-      href: "/", 
-      icon: Home,
-      description: "League overview and latest updates"
-    },
-    { 
-      name: "Teams", 
-      href: "/teams", 
-      icon: Users,
-      description: "View all competing franchises"
-    },
-    { 
-      name: "Standings", 
-      href: "/standings", 
-      icon: Trophy,
-      description: "Current league standings and playoff picture"
-    },
-    { 
-      name: "Stats", 
-      href: "/stats", 
-      icon: BarChart3,
-      description: "Advanced player and team statistics"
-    },
-    { 
-      name: "Matches", 
-      href: "/matches", 
-      icon: Calendar,
-      description: "Schedule and match results"
-    },
-    { 
-      name: "Awards", 
-      href: "/awards", 
-      icon: Award,
-      description: "Season awards and achievements"
-    },
+    { name: "Home", href: "/", icon: Home },
+    { name: "Teams", href: "/teams", icon: Users },
+    { name: "Standings", href: "/standings", icon: Trophy },
+    { name: "Stats", href: "/stats", icon: BarChart3 },
+    { name: "Matches", href: "/matches", icon: Calendar },
+    { name: "Awards", href: "/awards", icon: Award },
     {
       name: "Free Agency",
       href: "/free-agency",
       icon: DollarSign,
-      description: "Player bidding and free agency",
       submenu: [
-        { name: "Free Agency", href: "/free-agency", icon: DollarSign },
-        { name: "Bidding Recap", href: "/free-agency/bidding-recap", icon: TrendingUp },
+        { name: "Free Agency", href: "/free-agency" },
+        { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
       ],
     },
     {
       name: "News",
       href: "/news",
       icon: Newspaper,
-      description: "League announcements and highlights",
       submenu: [
-        { name: "News", href: "/news", icon: Newspaper },
-        { name: "Daily Recap", href: "/news/daily-recap", icon: Activity },
+        { name: "News", href: "/news" },
+        { name: "Daily Recap", href: "/news/daily-recap" },
       ],
     },
-    { 
-      name: "Forum", 
-      href: "/forum", 
-      icon: MessageSquare,
-      description: "Community discussions and chat"
-    },
+    { name: "Forum", href: "/forum", icon: MessageSquare },
   ]
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "Owner": return "badge-champion"
-      case "GM": return "badge-playoff"
-      case "AGM": return "badge-playoff"
-      case "Player": return "badge-regular"
-      case "Admin": return "badge-champion"
-      default: return "badge-regular"
+      case "Owner": return "bg-purple-500"
+      case "GM": return "bg-red-500"
+      case "AGM": return "bg-blue-500"
+      case "Player": return "bg-green-500"
+      case "Admin": return "bg-amber-500"
+      default: return "bg-gray-500"
     }
   }
 
@@ -241,345 +179,52 @@ export default function Navigation() {
     return Array.from(allRoles)
   }
 
-  const getIconForSubmenu = (name: string) => {
-    switch (name) {
-      case "Free Agency": return DollarSign
-      case "Bidding Recap": return TrendingUp
-      case "News": return Newspaper
-      case "Daily Recap": return Activity
-      default: return Newspaper
-    }
-  }
-
   return (
     <>
       {/* Mobile menu button */}
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden h-12 w-12 bg-background/80 backdrop-blur-md border border-hockey-blue/20 shadow-hockey"
+        className="fixed top-4 left-4 z-50 lg:hidden"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
 
       {/* Mobile overlay */}
-      <AnimatePresence>
-        {isMobileOpen && (
-          <motion.div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" 
-            onClick={() => setIsMobileOpen(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
-        )}
-      </AnimatePresence>
+      {isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
 
-      {/* Mobile Navigation Drawer */}
-      <AnimatePresence>
-        {isMobileOpen && (
-          <motion.div 
-            className="fixed inset-0 z-50 lg:hidden"
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          >
-            <div className="absolute inset-0 bg-background/95 backdrop-blur-md border-r border-hockey-blue/20">
-              {/* Mobile Header */}
-              <div className="flex items-center justify-between p-6 border-b border-hockey-blue/20">
-                <Link href="/" onClick={() => setIsMobileOpen(false)}>
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl">
-                      <Crown className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold hockey-gradient-text">SCS</h1>
-                      <p className="text-xs text-muted-foreground">Secret Chel Society</p>
-                    </div>
-                  </div>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 hover:bg-hockey-blue/10"
-                  onClick={() => setIsMobileOpen(false)}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Mobile Navigation */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <div className="space-y-3">
-                  {navigation.map((item) => {
-                    const Icon = item.icon
-                    const isActive = item.href === "/" 
-                      ? pathname === "/" 
-                      : pathname === item.href || pathname.startsWith(item.href + "/")
-                    const hasSubmenu = item.submenu && item.submenu.length > 0
-                    const isExpanded = expandedMenus[item.name]
-
-                    return (
-                      <div key={item.name}>
-                        <div className="flex items-center">
-                          <Link
-                            href={item.href}
-                            onClick={() => setIsMobileOpen(false)}
-                            className={cn(
-                              "flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium transition-all duration-200 flex-1 group",
-                              isActive 
-                                ? "bg-gradient-to-r from-hockey-blue to-hockey-purple text-white shadow-hockey-lg" 
-                                : "text-foreground hover:bg-hockey-blue/10 hover:scale-105"
-                            )}
-                          >
-                            <div className={cn(
-                              "p-2 rounded-lg transition-all duration-200",
-                              isActive 
-                                ? "bg-white/20" 
-                                : "bg-hockey-blue/10 group-hover:bg-hockey-blue/20"
-                            )}>
-                              <Icon className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1">
-                              <span className="font-semibold">{item.name}</span>
-                              <p className="text-xs text-muted-foreground mt-1">{item.description}</p>
-                            </div>
-                          </Link>
-                          {hasSubmenu && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-12 w-12 hover:bg-hockey-blue/10"
-                              onClick={() => toggleSubmenu(item.name)}
-                            >
-                              {isExpanded ? (
-                                <ChevronDown className="h-5 w-5" />
-                              ) : (
-                                <ChevronRight className="h-5 w-5" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-
-                        {hasSubmenu && isExpanded && (
-                          <motion.div 
-                            className="mt-2 ml-8 space-y-2"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            {item.submenu.map((subItem) => {
-                              const SubIcon = getIconForSubmenu(subItem.name)
-                              return (
-                                <Link
-                                  key={subItem.name}
-                                  href={subItem.href}
-                                  onClick={() => setIsMobileOpen(false)}
-                                  className={cn(
-                                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all duration-200",
-                                    pathname === subItem.href
-                                      ? "bg-hockey-blue/20 text-hockey-blue font-semibold"
-                                      : "text-muted-foreground hover:text-foreground hover:bg-hockey-blue/10"
-                                  )}
-                                >
-                                  <SubIcon className="h-4 w-4" />
-                                  {subItem.name}
-                                </Link>
-                              )
-                            })}
-                          </motion.div>
-                        )}
-                      </div>
-                    )
-                  })}
-
-                  {session && (
-                    <Link
-                      href="/register/season"
-                      onClick={() => setIsMobileOpen(false)}
-                      className={cn(
-                        "flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium transition-all duration-200 group",
-                        pathname === "/register/season"
-                          ? "bg-gradient-to-r from-hockey-green to-hockey-blue text-white shadow-hockey-lg"
-                          : "text-foreground hover:bg-hockey-green/10 hover:scale-105"
-                      )}
-                    >
-                      <div className={cn(
-                        "p-2 rounded-lg transition-all duration-200",
-                        pathname === "/register/season"
-                          ? "bg-white/20"
-                          : "bg-hockey-green/10 group-hover:bg-hockey-green/20"
-                      )}>
-                        <UserPlus className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="font-semibold">Season Registration</span>
-                        <p className="text-xs text-muted-foreground mt-1">Join the upcoming season</p>
-                      </div>
-                    </Link>
-                  )}
-                </div>
-
-                {/* Mobile User Section */}
-                <div className="mt-8 pt-6 border-t border-hockey-blue/20">
-                  {session ? (
-                    <div className="space-y-4">
-                      {/* Team Info */}
-                      {teamInfo && (
-                        <Link 
-                          href={`/teams/${teamInfo.id}`} 
-                          onClick={() => setIsMobileOpen(false)}
-                          className="flex items-center gap-4 p-4 rounded-xl hover:bg-hockey-blue/10 transition-colors border border-hockey-blue/20"
-                        >
-                          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-hockey-blue/30 bg-background flex-shrink-0">
-                            {teamInfo.logo_url ? (
-                              <Image
-                                src={teamInfo.logo_url}
-                                alt={teamInfo.name}
-                                width={48}
-                                height={48}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-sm font-bold text-hockey-blue">{teamInfo.name.substring(0, 2)}</span>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold">{teamInfo.name}</p>
-                            <p className="text-sm text-muted-foreground">Your Team</p>
-                          </div>
-                        </Link>
-                      )}
-
-                      {/* Role Badges */}
-                      {getUniqueRoleBadges().length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {getUniqueRoleBadges().map((role) => (
-                            <Badge key={role} className={getRoleBadgeColor(role)}>
-                              {role}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* User Info */}
-                      <div className="flex items-center gap-4 p-4 rounded-xl bg-hockey-blue/5 border border-hockey-blue/20">
-                        <Avatar className="h-14 w-14 flex-shrink-0 border-2 border-hockey-blue/30">
-                          <AvatarImage
-                            src={userProfile?.avatar_url || "/placeholder.svg?height=56&width=56"}
-                            alt={userProfile?.gamer_tag_id || "User"}
-                          />
-                          <AvatarFallback className="bg-hockey-blue/10 text-hockey-blue font-bold">
-                            {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-semibold text-lg">
-                            {userProfile?.gamer_tag_id || "User"}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {session?.user?.email}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-3">
-                        <ModeToggle />
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-12 w-12 hover:bg-hockey-blue/10">
-                              <Settings className="h-6 w-6" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-64">
-                            <DropdownMenuLabel className="text-hockey-blue font-semibold">Account</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/players/${playerId || session.user.id}`}>
-                                  <User className="mr-2 h-4 w-4" />
-                                  View Profile
-                                </Link>
-                              </DropdownMenuItem>
-                              {isTeamManager && (
-                                <DropdownMenuItem asChild>
-                                  <Link href="/management">Management</Link>
-                                </DropdownMenuItem>
-                              )}
-                              {isAdmin && (
-                                <DropdownMenuItem asChild>
-                                  <Link href="/admin">Admin Dashboard</Link>
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem asChild>
-                                <Link href="/settings">Settings</Link>
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleSignOut} className="text-red-500">
-                              <LogOut className="mr-2 h-4 w-4" />
-                              Log out
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Button variant="outline" asChild className="w-full h-14 border-hockey-blue/30 hover:bg-hockey-blue/10">
-                        <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
-                      </Button>
-                      <Button asChild className="w-full h-14 btn-championship">
-                        <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
-                      </Button>
-                      <div className="flex justify-center">
-                        <ModeToggle />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Desktop Sidebar */}
+      {/* Sidebar */}
       <aside className={cn(
-        "hidden lg:block fixed left-0 top-0 z-50 h-screen bg-background/95 backdrop-blur-md border-r border-hockey-blue/20 flex flex-col transition-all duration-300",
-        sidebarCollapsed ? "w-20" : "w-80"
+        "fixed left-0 top-0 z-50 h-screen w-64 bg-background border-r flex flex-col transition-transform duration-300 ease-in-out",
+        "lg:translate-x-0",
+        isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-hockey-blue/20">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-xl">
-              <Crown className="h-6 w-6 text-white" />
-            </div>
-            {!sidebarCollapsed && (
-              <div>
-                <h1 className="text-xl font-bold hockey-gradient-text">SCS</h1>
-                <p className="text-xs text-muted-foreground">Secret Chel Society</p>
-              </div>
-            )}
+        <div className="flex items-center justify-center p-4 border-b">
+          <Link href="/" onClick={() => setIsMobileOpen(false)}>
+            <Image
+              src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
+              alt="MGHL Logo"
+              width={120}
+              height={40}
+              className="h-8 w-auto object-contain"
+              priority
+            />
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-hockey-blue/10"
-            onClick={toggleSidebar}
-          >
-            {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-6">
+        <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon
+              // Special handling for home page to prevent it from always being active
               const isActive = item.href === "/" 
                 ? pathname === "/" 
                 : pathname === item.href || pathname.startsWith(item.href + "/")
@@ -591,65 +236,51 @@ export default function Navigation() {
                   <div className="flex items-center">
                     <Link
                       href={item.href}
+                      onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex-1 group",
+                        "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors flex-1",
                         isActive 
-                          ? "bg-gradient-to-r from-hockey-blue to-hockey-purple text-white shadow-hockey-lg" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-hockey-blue/10"
+                          ? "bg-primary text-primary-foreground" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       )}
                     >
-                      <div className={cn(
-                        "p-2 rounded-lg transition-all duration-200 flex-shrink-0",
-                        isActive 
-                          ? "bg-white/20" 
-                          : "bg-hockey-blue/10 group-hover:bg-hockey-blue/20"
-                      )}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      {!sidebarCollapsed && (
-                        <div className="flex-1 min-w-0">
-                          <span className="font-semibold truncate">{item.name}</span>
-                          <p className="text-xs text-muted-foreground mt-1 truncate">{item.description}</p>
-                        </div>
-                      )}
+                      <Icon className="h-4 w-4" />
+                      {item.name}
                     </Link>
-                    {hasSubmenu && !sidebarCollapsed && (
+                    {hasSubmenu && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 flex-shrink-0 hover:bg-hockey-blue/10"
+                        className="h-8 w-8"
                         onClick={() => toggleSubmenu(item.name)}
                       >
                         {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className="h-3 w-3" />
                         ) : (
-                          <ChevronRight className="h-4 w-4" />
+                          <ChevronRight className="h-3 w-3" />
                         )}
                       </Button>
                     )}
                   </div>
 
-                  {hasSubmenu && isExpanded && !sidebarCollapsed && (
-                    <ul className="mt-2 ml-8 space-y-1">
-                      {item.submenu.map((subItem) => {
-                        const SubIcon = getIconForSubmenu(subItem.name)
-                        return (
-                          <li key={subItem.name}>
-                            <Link
-                              href={subItem.href}
-                              className={cn(
-                                "flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all duration-200",
-                                pathname === subItem.href
-                                  ? "bg-hockey-blue/20 text-hockey-blue font-semibold"
-                                  : "text-muted-foreground hover:text-foreground hover:bg-hockey-blue/10"
-                              )}
-                            >
-                              <SubIcon className="h-4 w-4" />
-                              {subItem.name}
-                            </Link>
-                          </li>
-                        )
-                      })}
+                  {hasSubmenu && isExpanded && (
+                    <ul className="mt-1 ml-6 space-y-1">
+                      {item.submenu.map((subItem) => (
+                        <li key={subItem.name}>
+                          <Link
+                            href={subItem.href}
+                            onClick={() => setIsMobileOpen(false)}
+                            className={cn(
+                              "block px-3 py-2 rounded-md text-sm transition-colors",
+                              pathname === subItem.href
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            )}
+                          >
+                            {subItem.name}
+                          </Link>
+                        </li>
+                      ))}
                     </ul>
                   )}
                 </li>
@@ -660,27 +291,16 @@ export default function Navigation() {
               <li>
                 <Link
                   href="/register/season"
+                  onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group",
+                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                     pathname === "/register/season"
-                      ? "bg-gradient-to-r from-hockey-green to-hockey-blue text-white shadow-hockey-lg"
-                      : "text-muted-foreground hover:text-foreground hover:bg-hockey-green/10"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
-                  <div className={cn(
-                    "p-2 rounded-lg transition-all duration-200 flex-shrink-0",
-                    pathname === "/register/season"
-                      ? "bg-white/20"
-                      : "bg-hockey-green/10 group-hover:bg-hockey-green/20"
-                  )}>
-                    <UserPlus className="h-4 w-4" />
-                  </div>
-                  {!sidebarCollapsed && (
-                    <div className="flex-1 min-w-0">
-                      <span className="font-semibold truncate">Season Registration</span>
-                      <p className="text-xs text-muted-foreground mt-1 truncate">Join the upcoming season</p>
-                    </div>
-                  )}
+                  <UserPlus className="h-4 w-4" />
+                  Season Registration
                 </Link>
               </li>
             )}
@@ -688,120 +308,109 @@ export default function Navigation() {
         </nav>
 
         {/* User Section */}
-        <div className="border-t border-hockey-blue/20 p-6 space-y-4">
+        <div className="border-t p-4">
           {session ? (
-            <>
+            <div className="space-y-3">
               {/* Team Info */}
               {teamInfo && (
-                <Link 
-                  href={`/teams/${teamInfo.id}`} 
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-hockey-blue/10 transition-colors border border-hockey-blue/20"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-hockey-blue/30 bg-background flex-shrink-0">
+                <Link href={`/teams/${teamInfo.id}`} className="flex items-center gap-2 p-2 rounded-md hover:bg-muted">
+                  <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border bg-background">
                     {teamInfo.logo_url ? (
                       <Image
                         src={teamInfo.logo_url}
                         alt={teamInfo.name}
-                        width={40}
-                        height={40}
+                        width={24}
+                        height={24}
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="text-xs font-bold text-hockey-blue">{teamInfo.name.substring(0, 2)}</span>
+                      <span className="text-xs font-bold">{teamInfo.name.substring(0, 2)}</span>
                     )}
                   </div>
-                  {!sidebarCollapsed && (
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{teamInfo.name}</p>
-                      <p className="text-xs text-muted-foreground">Your Team</p>
-                    </div>
-                  )}
+                  <span className="text-sm font-medium truncate">{teamInfo.name}</span>
                 </Link>
               )}
 
               {/* Role Badges */}
-              {getUniqueRoleBadges().length > 0 && !sidebarCollapsed && (
-                <div className="flex flex-wrap gap-1">
-                  {getUniqueRoleBadges().map((role) => (
-                    <Badge key={role} className={getRoleBadgeColor(role)}>
-                      {role}
-                    </Badge>
-                  ))}
-                </div>
-              )}
+              <div className="flex flex-wrap gap-1">
+                {getUniqueRoleBadges().map((role) => (
+                  <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs`}>
+                    {role}
+                  </Badge>
+                ))}
+              </div>
 
               {/* User Info */}
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-hockey-blue/5 border border-hockey-blue/20">
-                <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-hockey-blue/30">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src={userProfile?.avatar_url || "/placeholder.svg?height=48&width=48"}
+                    src={userProfile?.avatar_url || "/placeholder.svg?height=32&width=32"}
                     alt={userProfile?.gamer_tag_id || "User"}
                   />
-                  <AvatarFallback className="bg-hockey-blue/10 text-hockey-blue font-bold">
+                  <AvatarFallback>
                     {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
-                {!sidebarCollapsed && (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium leading-none truncate">
-                      {userProfile?.gamer_tag_id || "User"}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground truncate mt-1">
-                      {session?.user?.email}
-                    </p>
-                  </div>
-                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium leading-none truncate">
+                    {userProfile?.gamer_tag_id || "User"}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground truncate">
+                    {session?.user?.email}
+                  </p>
+                </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                <ModeToggle />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-hockey-blue/10">
-                      <Settings className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64">
-                    <DropdownMenuLabel className="text-hockey-blue font-semibold">Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/players/${playerId || session.user.id}`}>
-                          <User className="mr-2 h-4 w-4" />
-                          View Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      {isTeamManager && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ModeToggle />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
                         <DropdownMenuItem asChild>
-                          <Link href="/management">Management</Link>
+                          <Link href={`/players/${playerId || session.user.id}`}>
+                            View Profile
+                          </Link>
                         </DropdownMenuItem>
-                      )}
-                      {isAdmin && (
+                        {isTeamManager && (
+                          <DropdownMenuItem asChild>
+                            <Link href="/management">Management</Link>
+                          </DropdownMenuItem>
+                        )}
+                        {isAdmin && (
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin">Admin Dashboard</Link>
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem asChild>
-                          <Link href="/admin">Admin Dashboard</Link>
+                          <Link href="/settings">Settings</Link>
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem asChild>
-                        <Link href="/settings">Settings</Link>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Log out
                       </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-500">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
-            </>
+            </div>
           ) : (
-            <div className="space-y-3">
-              <Button variant="outline" asChild className="w-full h-11 border-hockey-blue/30 hover:bg-hockey-blue/10">
-                <Link href="/login">Log in</Link>
+            <div className="space-y-2">
+              <Button variant="outline" asChild className="w-full">
+                <Link href="/login" onClick={() => setIsMobileOpen(false)}>Log in</Link>
               </Button>
-              <Button asChild className="w-full h-11 btn-championship">
-                <Link href="/register">Sign up</Link>
+              <Button asChild className="w-full">
+                <Link href="/register" onClick={() => setIsMobileOpen(false)}>Sign up</Link>
               </Button>
               <div className="flex justify-center">
                 <ModeToggle />
