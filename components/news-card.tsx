@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 import Image from "next/image"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion" // Commented out to fix build issues
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import DOMPurify from "dompurify"
 
@@ -48,7 +48,7 @@ export default function NewsCard({ news }: NewsCardProps) {
 
   return (
     <>
-      <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+      <divdiv whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
         <Card className="relative overflow-hidden h-80 cursor-pointer group" onClick={() => setIsOpen(true)}>
           {/* Background Image */}
           <div className="absolute inset-0">
@@ -86,7 +86,7 @@ export default function NewsCard({ news }: NewsCardProps) {
             </div>
           </div>
         </Card>
-      </motion.div>
+      </divdiv>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto bg-gray-900 border-gray-700 text-white">

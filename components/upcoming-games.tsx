@@ -6,7 +6,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { format } from "date-fns"
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion" // Commented out to fix build issues
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock } from "lucide-react"
 
@@ -50,7 +50,7 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
           return (
             <CarouselItem key={game.id} className="md:basis-1/2 lg:basis-1/3 h-full">
               <Link href={`/matches/${game.id}`}>
-                <motion.div whileHover={{ y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
+                <div className="hover:translate-y-[-5px] transition-transform duration-300">
                   <Card
                     className="h-full overflow-hidden border-2 transition-all duration-300"
                     style={{
@@ -113,7 +113,7 @@ export default function UpcomingGames({ games }: UpcomingGamesProps) {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               </Link>
             </CarouselItem>
           )

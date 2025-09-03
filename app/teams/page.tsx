@@ -117,12 +117,10 @@ export default function TeamsPage() {
               <div className="h-1 w-32 bg-gradient-to-r from-secondary via-primary to-transparent rounded-full" />
             </div>
             
-            <motion.p 
-              className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
-            >
+            <p className="text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
               Discover all <span className="font-bold text-primary">professional franchises</span> competing in the Secret Chel Society. 
               Each team brings <span className="font-semibold text-secondary">unique talent, strategy, and championship determination</span> to the ice.
-            </motion.p>
+            </p>
           </div>
 
           {/* Enhanced Professional Search Section */}
@@ -202,11 +200,9 @@ export default function TeamsPage() {
                         </div>
 
                         {/* Enhanced Professional Team Name */}
-                        <motion.h2 
-                          className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300"
-                        >
+                        <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
                           {team.name}
-                        </motion.h2>
+                        </h2>
 
                         {/* Enhanced Professional Record Display */}
                         <div className="mb-8">
