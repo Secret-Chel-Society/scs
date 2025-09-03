@@ -1573,83 +1573,123 @@ const ManagementPage = () => {
               </Card>
             </div>
 
-            {/* Update the tabs to be more mobile-friendly: */}
+            {/* Enhanced Hockey-Themed Tabs */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
-                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Roster</span>
-                  <span className="md:hidden">Roster</span>
-                </TabsTrigger>
-                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Avail</span>
-                  <span className="md:hidden">Avail</span>
-                </TabsTrigger>
-                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Schedule</span>
-                  <span className="md:hidden">Schedule</span>
-                </TabsTrigger>
-                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Free Agents</span>
-                  <span className="md:hidden">Free Agents</span>
-                </TabsTrigger>
-                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">My Bids</span>
-                  <span className="md:hidden">Bids</span>
-                </TabsTrigger>
-                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Waivers</span>
-                  <span className="md:hidden">Waivers</span>
-                </TabsTrigger>
-                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
-                  <span className="hidden md:inline">Trades</span>
-                  <span className="md:hidden">Trades</span>
-                  {incomingTradeProposals.length > 0 && (
-                    <span className="ml-1 md:ml-2 bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
-                      {incomingTradeProposals.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-              </TabsList>
+              <Card className="hockey-card mb-8 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <CardContent className="p-2">
+                  <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 h-auto bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20">
+                    <TabsTrigger 
+                      value="roster" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <Users className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Team Roster</span>
+                      <span className="md:hidden">Roster</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="availability" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <Calendar className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Team Avail</span>
+                      <span className="md:hidden">Avail</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="schedule" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <Clock className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Team Schedule</span>
+                      <span className="md:hidden">Schedule</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="free-agents" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <Target className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Free Agents</span>
+                      <span className="md:hidden">Free Agents</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="my-bids" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-silver-500 data-[state=active]:to-hockey-silver-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <Gavel className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">My Bids</span>
+                      <span className="md:hidden">Bids</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="waivers" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+                    >
+                      <ArrowLeftRight className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Waivers</span>
+                      <span className="md:hidden">Waivers</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="trades" 
+                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 relative"
+                    >
+                      <Users2 className="h-4 w-4 mr-1 md:mr-2" />
+                      <span className="hidden md:inline">Trades</span>
+                      <span className="md:hidden">Trades</span>
+                      {incomingTradeProposals.length > 0 && (
+                        <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs shadow-lg">
+                          {incomingTradeProposals.length}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
+                </CardContent>
+              </Card>
 
               {/* Roster Tab Content */}
               <TabsContent value="roster">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
-                    <CardDescription className="text-sm md:text-base">
-                      Manage your team's players and roles
-                    </CardDescription>
+                <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                  <CardHeader className="relative">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200">Team Roster</CardTitle>
+                        <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                          Manage your team's players and roles
+                        </CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="relative z-10">
                     {teamPlayers.length > 0 ? (
                       <>
                         {/* Desktop Table */}
-                        <div className="hidden md:block rounded-md border overflow-x-auto">
+                        <div className="hidden md:block rounded-xl border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 overflow-hidden shadow-lg">
                           <Table>
                             <TableHeader>
-                              <TableRow>
-                                <TableHead>Player</TableHead>
-                                <TableHead className="text-center">Position</TableHead>
-                                <TableHead className="text-center">Role</TableHead>
-                                <TableHead className="text-center">Console</TableHead>
-                                <TableHead className="text-center">Salary</TableHead>
+                              <TableRow className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 hover:from-ice-blue-100 dark:hover:from-ice-blue-800/30 hover:to-rink-blue-100 dark:hover:to-rink-blue-800/30 transition-all duration-300">
+                                <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Player</TableHead>
+                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
+                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Role</TableHead>
+                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Console</TableHead>
+                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Salary</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {teamPlayers.map((player) => (
-                                <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
+                                <TableRow key={player.id} className="hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-100/50 dark:border-rink-blue-800/50">
                                   <TableCell>
-                                    <div className="font-medium">{player.users?.gamer_tag_id || "Unknown Player"}</div>
+                                    <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.users?.gamer_tag_id || "Unknown Player"}</div>
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-1">
-                                      <span className={getPositionColor(player.users?.primary_position)}>
+                                      <span className={`${getPositionColor(player.users?.primary_position)} text-lg font-bold`}>
                                         {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
                                       </span>
                                       {player.users?.secondary_position && (
                                         <>
                                           {" / "}
-                                          <span className={getPositionColor(player.users?.secondary_position)}>
+                                          <span className={`${getPositionColor(player.users?.secondary_position)} text-sm opacity-80`}>
                                             {getPositionAbbreviation(player.users?.secondary_position)}
                                           </span>
                                         </>
@@ -1657,13 +1697,26 @@ const ManagementPage = () => {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    <Badge variant={player.role === "Owner" ? "default" : "outline"}>
+                                    <Badge 
+                                      variant={player.role === "Owner" ? "default" : "outline"}
+                                      className={`transition-all duration-200 hover:scale-105 ${
+                                        player.role === "Owner" ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg" :
+                                        player.role === "GM" ? "bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 text-white shadow-lg" :
+                                        player.role === "AGM" ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg" :
+                                        "border-ice-blue-300 text-ice-blue-700 dark:text-ice-blue-300"
+                                      }`}
+                                    >
+                                      {player.role === "Owner" && <Crown className="h-3 w-3 mr-1" />}
+                                      {player.role === "GM" && <Shield className="h-3 w-3 mr-1" />}
+                                      {player.role === "AGM" && <Star className="h-3 w-3 mr-1" />}
                                       {player.role}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
-                                  <TableCell className="text-center font-mono">
-                                    ${(player.salary / 1000000).toFixed(2)}M
+                                  <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300">{player.users?.console || "Unknown"}</TableCell>
+                                  <TableCell className="text-center">
+                                    <span className="font-mono font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                                      ${(player.salary / 1000000).toFixed(2)}M
+                                    </span>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -1672,41 +1725,56 @@ const ManagementPage = () => {
                         </div>
 
                         {/* Mobile Cards */}
-                        <div className="md:hidden space-y-3">
+                        <div className="md:hidden space-y-4">
                           {teamPlayers.map((player) => (
-                            <div key={player.id} className="border rounded-lg p-4 bg-card">
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex-1">
-                                  <h3 className="font-medium text-base">
-                                    {player.users?.gamer_tag_id || "Unknown Player"}
-                                  </h3>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span
-                                      className={`${getPositionColor(player.users?.primary_position)} text-sm font-medium`}
-                                    >
-                                      {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
-                                    </span>
-                                    {player.users?.secondary_position && (
-                                      <>
-                                        <span className="text-muted-foreground text-sm">/</span>
-                                        <span
-                                          className={`${getPositionColor(player.users?.secondary_position)} text-sm font-medium`}
-                                        >
-                                          {getPositionAbbreviation(player.users?.secondary_position)}
-                                        </span>
-                                      </>
-                                    )}
+                            <Card key={player.id} className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                              <CardContent className="p-4">
+                                <div className="flex justify-between items-start mb-3">
+                                  <div className="flex-1">
+                                    <h3 className="font-medium text-base text-hockey-silver-800 dark:text-hockey-silver-200">
+                                      {player.users?.gamer_tag_id || "Unknown Player"}
+                                    </h3>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <span
+                                        className={`${getPositionColor(player.users?.primary_position)} text-sm font-bold`}
+                                      >
+                                        {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                      </span>
+                                      {player.users?.secondary_position && (
+                                        <>
+                                          <span className="text-hockey-silver-400 dark:text-hockey-silver-500 text-sm">/</span>
+                                          <span
+                                            className={`${getPositionColor(player.users?.secondary_position)} text-sm opacity-80`}
+                                          >
+                                            {getPositionAbbreviation(player.users?.secondary_position)}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
                                   </div>
+                                  <Badge 
+                                    variant={player.role === "Owner" ? "default" : "outline"} 
+                                    className={`text-xs transition-all duration-200 hover:scale-105 ${
+                                      player.role === "Owner" ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg" :
+                                      player.role === "GM" ? "bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 text-white shadow-lg" :
+                                      player.role === "AGM" ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg" :
+                                      "border-ice-blue-300 text-ice-blue-700 dark:text-ice-blue-300"
+                                    }`}
+                                  >
+                                    {player.role === "Owner" && <Crown className="h-3 w-3 mr-1" />}
+                                    {player.role === "GM" && <Shield className="h-3 w-3 mr-1" />}
+                                    {player.role === "AGM" && <Star className="h-3 w-3 mr-1" />}
+                                    {player.role}
+                                  </Badge>
                                 </div>
-                                <Badge variant={player.role === "Owner" ? "default" : "outline"} className="text-xs">
-                                  {player.role}
-                                </Badge>
-                              </div>
-                              <div className="flex justify-between items-center text-sm text-muted-foreground">
-                                <span>{player.users?.console || "Unknown"}</span>
-                                <span className="font-mono font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
-                              </div>
-                            </div>
+                                <div className="flex justify-between items-center text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  <span>{player.users?.console || "Unknown"}</span>
+                                  <span className="font-mono font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                                    ${(player.salary / 1000000).toFixed(2)}M
+                                  </span>
+                                </div>
+                              </CardContent>
+                            </Card>
                           ))}
                         </div>
                       </>
