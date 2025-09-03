@@ -277,33 +277,33 @@ export default function TeamsPage() {
                           {/* Team Statistics Grid */}
                           <div className="hockey-stats-grid">
                             <div className="hockey-stat-item">
-                              <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-1">
+                              <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
                                 {team.points}
                               </div>
-                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                                POINTS
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium uppercase tracking-wide">
+                                Points
                               </div>
                             </div>
                             
                             <div className="hockey-stat-item">
-                              <div className="text-lg font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-1">
+                              <div className="text-lg font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
                                 ${(team.total_salary / 1000000).toFixed(1)}M
                               </div>
-                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                                SALARY
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium uppercase tracking-wide mb-3">
+                                Salary
                               </div>
-                              <div className="flex items-center justify-center mt-2 text-xs text-hockey-silver-500 dark:text-hockey-silver-500">
+                              <div className="flex items-center justify-center text-xs text-hockey-silver-500 dark:text-hockey-silver-500 bg-hockey-silver-100 dark:bg-hockey-silver-800/50 rounded-lg px-2 py-1">
                                 <Users className="h-3 w-3 mr-1" />
                                 <span>{team.player_count}/{MAX_ROSTER_SIZE}</span>
                               </div>
                             </div>
                             
                             <div className="hockey-stat-item">
-                              <div className="text-lg font-bold text-assist-green-700 dark:text-assist-green-300 mb-1">
+                              <div className="text-lg font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
                                 ${(team.cap_space / 1000000).toFixed(1)}M
                               </div>
-                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                                CAP SPACE
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium uppercase tracking-wide">
+                                Cap Space
                               </div>
                             </div>
                           </div>

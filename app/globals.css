@@ -114,21 +114,22 @@
   }
   
   .hockey-stats-grid {
-    @apply grid grid-cols-3 gap-4 w-full;
+    @apply grid grid-cols-3 gap-6 w-full;
     @apply bg-gradient-to-br from-hockey-silver-50 to-ice-blue-50/30;
     @apply dark:from-hockey-silver-900/50 dark:to-rink-blue-900/20;
-    @apply rounded-xl p-4 border border-hockey-silver-200/50;
+    @apply rounded-xl p-6 border border-hockey-silver-200/50;
     @apply dark:border-hockey-silver-700/50;
   }
   
   .hockey-stat-item {
-    @apply text-center p-3 rounded-lg;
+    @apply text-center p-4 rounded-lg;
     @apply bg-white/70 dark:bg-hockey-silver-800/70;
     @apply backdrop-blur-sm border border-hockey-silver-200/50;
     @apply dark:border-hockey-silver-600/50;
     @apply transition-all duration-200 ease-out;
     @apply hover:scale-105 hover:bg-white dark:hover:bg-hockey-silver-800;
     @apply hover:shadow-md hover:shadow-ice-blue-500/20;
+    @apply min-h-[80px] flex flex-col justify-center;
   }
   
   .hockey-search {
