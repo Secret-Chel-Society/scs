@@ -22,13 +22,7 @@ import {
   ChevronDown,
   ChevronRight,
   User,
-  Gamepad2,
-  Target,
-  Crown,
-  Shield,
-  Star,
-  Database,
-  Bot
+  Target
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -135,73 +129,32 @@ export default function Navigation() {
   }
 
   const navigation = [
+    { name: "Home", href: "/", icon: Home },
+    { name: "Teams", href: "/teams", icon: Users },
+    { name: "Standings", href: "/standings", icon: Trophy },
+    { name: "Stats", href: "/stats", icon: BarChart3 },
+    { name: "Matches", href: "/matches", icon: Calendar },
+    { name: "Awards", href: "/awards", icon: Award },
     {
-      name: "SCS",
-      subtitle: "Secret Chel Society",
-      items: [
-        { name: "Home", href: "/", icon: Home, color: "from-blue-500 to-cyan-500" },
-        { name: "Teams", href: "/teams", icon: Users, color: "from-green-500 to-emerald-500" },
-        { name: "Standings", href: "/standings", icon: Trophy, color: "from-yellow-500 to-amber-500" },
-        { name: "Stats", href: "/statistics", icon: BarChart3, color: "from-purple-500 to-pink-500" },
-        { name: "Matches", href: "/matches", icon: Calendar, color: "from-indigo-500 to-blue-500" },
-        { name: "Awards", href: "/awards", icon: Award, color: "from-orange-500 to-red-500" },
-        {
-          name: "Free Agency",
-          href: "/free-agency",
-          icon: DollarSign,
-          color: "from-emerald-500 to-teal-500",
-          submenu: [
-            { name: "Free Agency", href: "/free-agency" },
-            { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
-          ],
-        },
-        {
-          name: "News",
-          href: "/news",
-          icon: Newspaper,
-          color: "from-rose-500 to-pink-500",
-          submenu: [
-            { name: "News", href: "/news" },
-            { name: "Daily Recap", href: "/news/daily-recap" },
-          ],
-        },
-        { name: "Forum", href: "/forum", icon: MessageSquare, color: "from-violet-500 to-purple-500" },
-        { name: "Season Registration", href: "/register/season", icon: UserPlus, color: "from-green-500 to-emerald-500" },
-        {
-          name: "ELO System",
-          href: "/elo/rankings",
-          icon: Target,
-          color: "from-red-500 to-pink-500",
-          submenu: [
-            { name: "ELO Rankings", href: "/elo/rankings" },
-            { name: "ELO Statistics", href: "/elo/statistics" },
-            { name: "ELO Matches", href: "/elo/matches" },
-            { name: "ELO Leaderboard", href: "/elo/leaderboard" },
-            { name: "ELO History", href: "/elo/history" },
-          ],
-        },
-      ]
-    }
+      name: "Free Agency",
+      href: "/free-agency",
+      icon: DollarSign,
+      submenu: [
+        { name: "Free Agency", href: "/free-agency" },
+        { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
+      ],
+    },
+    {
+      name: "News",
+      href: "/news",
+      icon: Newspaper,
+      submenu: [
+        { name: "News", href: "/news" },
+        { name: "Daily Recap", href: "/news/daily-recap" },
+      ],
+    },
+    { name: "Forum", href: "/forum", icon: MessageSquare },
   ]
-
-  // Add admin navigation section for admin users
-  if (isAdmin) {
-    navigation.push({
-      name: "Admin",
-      subtitle: "Administration Panel",
-      items: [
-        { name: "User Management", href: "/admin/users", icon: Users, color: "from-red-500 to-pink-500" },
-        { name: "Team Management", href: "/admin/teams", icon: Shield, color: "from-blue-500 to-cyan-500" },
-        { name: "Settings", href: "/admin/settings", icon: Settings, color: "from-purple-500 to-indigo-500" },
-        { name: "Statistics", href: "/admin/statistics", icon: BarChart3, color: "from-green-500 to-emerald-500" },
-        { name: "Schedule", href: "/admin/schedule", icon: Calendar, color: "from-orange-500 to-red-500" },
-        { name: "Photos", href: "/admin/photos", icon: Star, color: "from-yellow-500 to-amber-500" },
-        { name: "Tokens", href: "/admin/tokens", icon: Crown, color: "from-violet-500 to-purple-500" },
-        { name: "Waiver Management", href: "/admin/waiver-management", icon: Database, color: "from-teal-500 to-cyan-500" },
-        { name: "SCS Bot", href: "/admin/scs-bot", icon: Bot, color: "from-indigo-500 to-blue-500" },
-      ]
-    })
-  }
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -277,81 +230,180 @@ export default function Navigation() {
           {/* Mobile Navigation */}
           <div className="relative z-10 flex-1 overflow-y-auto p-4">
             <div className="space-y-6">
-              {navigation.map((section, sectionIndex) => (
-                <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
-                  {/* Section Header */}
-                  <div className="mb-3">
-                    <h3 className="text-lg font-bold text-white mb-1">{section.name}</h3>
-                    <p className="text-sm text-white/60">{section.subtitle}</p>
-                  </div>
-                  
-                  {/* Section Items */}
-                  <div className="space-y-2">
-                    {section.items.map((item, index) => {
-                      const Icon = item.icon
-                      const isActive = item.href === "/" 
-                        ? pathname === "/" 
-                        : pathname === item.href || pathname.startsWith(item.href + "/")
-                      const hasSubmenu = item.submenu && item.submenu.length > 0
-                      const isExpanded = expandedMenus[item.name]
+              {/* Main Navigation */}
+              <div className="animate-slide-in">
+                <div className="mb-3">
+                  <h3 className="text-lg font-bold text-white mb-1">Navigation</h3>
+                  <p className="text-sm text-white/60">Main sections</p>
+                </div>
+                
+                <div className="space-y-2">
+                  {navigation.map((item, index) => {
+                    const Icon = item.icon
+                    const isActive = item.href === "/" 
+                      ? pathname === "/" 
+                      : pathname === item.href || pathname.startsWith(item.href + "/")
+                    const hasSubmenu = item.submenu && item.submenu.length > 0
+                    const isExpanded = expandedMenus[item.name]
 
-                      return (
-                        <div key={item.name} className="animate-slide-in" style={{ animationDelay: `${(sectionIndex * 100) + (index * 50)}ms` }}>
-                          <div className="flex items-center">
-                            <Link
-                              href={item.href}
-                              onClick={() => setIsMobileOpen(false)}
-                              className={cn(
-                                "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
-                                isActive 
-                                  ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
-                                  : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                              )}
-                            >
-                              <Icon className="h-5 w-5 flex-shrink-0" />
-                              <span>{item.name}</span>
-                            </Link>
-                            {hasSubmenu && (
-                              <button
-                                className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
-                                onClick={() => toggleSubmenu(item.name)}
-                              >
-                                {isExpanded ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </button>
+                    return (
+                      <div key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 50}ms` }}>
+                        <div className="flex items-center">
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsMobileOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 flex-1",
+                              isActive 
+                                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg" 
+                                : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
                             )}
-                          </div>
-
-                          {hasSubmenu && isExpanded && (
-                            <div className="mt-1 ml-8 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                              {item.submenu.map((subItem) => (
-                                <Link
-                                  key={subItem.name}
-                                  href={subItem.href}
-                                  onClick={() => setIsMobileOpen(false)}
-                                  className={cn(
-                                    "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                                    pathname === subItem.href
-                                      ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                      : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                                  )}
-                                >
-                                  {subItem.name}
-                                </Link>
-                              ))}
-                            </div>
+                          >
+                            <Icon className="h-5 w-5 flex-shrink-0" />
+                            <span>{item.name}</span>
+                          </Link>
+                          {hasSubmenu && (
+                            <button
+                              className="h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
+                              onClick={() => toggleSubmenu(item.name)}
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </button>
                           )}
                         </div>
-                      )
-                    })}
-                  </div>
+
+                        {hasSubmenu && isExpanded && (
+                          <div className="mt-1 ml-8 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
+                            {item.submenu.map((subItem) => (
+                              <Link
+                                key={subItem.name}
+                                href={subItem.href}
+                                onClick={() => setIsMobileOpen(false)}
+                                className={cn(
+                                  "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                                  pathname === subItem.href
+                                    ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                    : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                                )}
+                              >
+                                {subItem.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
+              </div>
 
+              {/* Season Registration */}
+              {session && (
+                <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
+                  <div className="mb-3">
+                    <h3 className="text-lg font-bold text-white mb-1">Registration</h3>
+                    <p className="text-sm text-white/60">Join the season</p>
+                  </div>
+                  
+                  <Link
+                    href="/register/season"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/register/season"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    Season Registration
+                  </Link>
+                </div>
+              )}
 
+              {/* ELO System */}
+              <div className="animate-slide-in" style={{ animationDelay: "500ms" }}>
+                <div className="mb-3">
+                  <h3 className="text-lg font-bold text-white mb-1">ELO System</h3>
+                  <p className="text-sm text-white/60">Player rankings</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Link
+                    href="/elo/rankings"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/elo/rankings"
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <Target className="h-5 w-5" />
+                    ELO Rankings
+                  </Link>
+                  
+                  <Link
+                    href="/elo/statistics"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/elo/statistics"
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <BarChart3 className="h-5 w-5" />
+                    ELO Statistics
+                  </Link>
+                  
+                  <Link
+                    href="/elo/matches"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/elo/matches"
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <Calendar className="h-5 w-5" />
+                    ELO Matches
+                  </Link>
+                  
+                  <Link
+                    href="/elo/leaderboard"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/elo/leaderboard"
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <Trophy className="h-5 w-5" />
+                    ELO Leaderboard
+                  </Link>
+                  
+                  <Link
+                    href="/elo/history"
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                      pathname === "/elo/history"
+                        ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <BarChart3 className="h-5 w-5" />
+                    ELO History
+                  </Link>
+                </div>
+              </div>
             </div>
 
             {/* Mobile User Section */}
@@ -469,78 +521,183 @@ export default function Navigation() {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/5 hover:scrollbar-thumb-white/40 transition-all duration-200">
             <div className="space-y-6">
-              {navigation.map((section, sectionIndex) => (
-                <div key={section.name} className="animate-slide-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
-                  {/* Section Header */}
+              {/* Main Navigation */}
+              <div className="animate-slide-in">
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-white mb-1">Navigation</h3>
+                  <p className="text-xs text-white/60">Main sections</p>
+                </div>
+                
+                <ul className="space-y-1">
+                  {navigation.map((item, index) => {
+                    const Icon = item.icon
+                    const isActive = item.href === "/" 
+                      ? pathname === "/" 
+                      : pathname === item.href || pathname.startsWith(item.href + "/")
+                    const hasSubmenu = item.submenu && item.submenu.length > 0
+                    const isExpanded = expandedMenus[item.name]
+
+                    return (
+                      <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${index * 50}ms` }}>
+                        <div className="flex items-center">
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
+                              isActive 
+                                ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg" 
+                                : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                            )}
+                          >
+                            <Icon className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">{item.name}</span>
+                          </Link>
+                          {hasSubmenu && (
+                            <button
+                              className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
+                              onClick={() => toggleSubmenu(item.name)}
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="h-3 w-3" />
+                              ) : (
+                                <ChevronRight className="h-3 w-3" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+
+                        {hasSubmenu && isExpanded && (
+                          <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
+                            {item.submenu.map((subItem) => (
+                              <li key={subItem.name}>
+                                <Link
+                                  href={subItem.href}
+                                  className={cn(
+                                    "block px-3 py-2 rounded-md text-sm transition-all duration-200",
+                                    pathname === subItem.href
+                                      ? "bg-white/20 text-white font-medium backdrop-blur-sm"
+                                      : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                                  )}
+                                >
+                                  {subItem.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+
+              {/* Season Registration */}
+              {session && (
+                <div className="animate-slide-in" style={{ animationDelay: "400ms" }}>
                   <div className="mb-3">
-                    <h3 className="text-sm font-bold text-white mb-1">{section.name}</h3>
-                    <p className="text-xs text-white/60">{section.subtitle}</p>
+                    <h3 className="text-sm font-bold text-white mb-1">Registration</h3>
+                    <p className="text-xs text-white/60">Join the season</p>
                   </div>
                   
-                  {/* Section Items */}
-                  <ul className="space-y-1">
-                    {section.items.map((item, index) => {
-                      const Icon = item.icon
-                      const isActive = item.href === "/" 
-                        ? pathname === "/" 
-                        : pathname === item.href || pathname.startsWith(item.href + "/")
-                      const hasSubmenu = item.submenu && item.submenu.length > 0
-                      const isExpanded = expandedMenus[item.name]
-
-                      return (
-                        <li key={item.name} className="animate-slide-in" style={{ animationDelay: `${(sectionIndex * 100) + (index * 50)}ms` }}>
-                          <div className="flex items-center">
-                            <Link
-                              href={item.href}
-                              className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1",
-                                isActive 
-                                  ? `bg-gradient-to-r ${item.color} text-white shadow-lg` 
-                                  : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                              )}
-                            >
-                              <Icon className="h-4 w-4 flex-shrink-0" />
-                              <span className="truncate">{item.name}</span>
-                            </Link>
-                            {hasSubmenu && (
-                              <button
-                                className="h-8 w-8 flex-shrink-0 bg-white/10 hover:bg-white/20 text-white rounded-md flex items-center justify-center"
-                                onClick={() => toggleSubmenu(item.name)}
-                              >
-                                {isExpanded ? (
-                                  <ChevronDown className="h-3 w-3" />
-                                ) : (
-                                  <ChevronRight className="h-3 w-3" />
-                                )}
-                              </button>
-                            )}
-                          </div>
-
-                          {hasSubmenu && isExpanded && (
-                            <ul className="mt-1 ml-6 space-y-1 animate-slide-in" style={{ animationDelay: "200ms" }}>
-                              {item.submenu.map((subItem) => (
-                                <li key={subItem.name}>
-                                  <Link
-                                    href={subItem.href}
-                                    className={cn(
-                                      "block px-3 py-2 rounded-md text-sm transition-all duration-200",
-                                      pathname === subItem.href
-                                        ? "bg-white/20 text-white font-medium backdrop-blur-sm"
-                                        : "text-white/70 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-                                    )}
-                                  >
-                                    {subItem.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      )
-                    })}
-                  </ul>
+                  <Link
+                    href="/register/season"
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                      pathname === "/register/season"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                        : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                    )}
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span className="truncate">Season Registration</span>
+                  </Link>
                 </div>
-              ))}
+              )}
+
+              {/* ELO System */}
+              <div className="animate-slide-in" style={{ animationDelay: "500ms" }}>
+                <div className="mb-3">
+                  <h3 className="text-sm font-bold text-white mb-1">ELO System</h3>
+                  <p className="text-xs text-white/60">Player rankings</p>
+                </div>
+                
+                <ul className="space-y-1">
+                  <li>
+                    <Link
+                      href="/elo/rankings"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/elo/rankings"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <Target className="h-4 w-4" />
+                      <span className="truncate">ELO Rankings</span>
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/elo/statistics"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/elo/statistics"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span className="truncate">ELO Statistics</span>
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/elo/matches"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/elo/matches"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <Calendar className="h-4 w-4" />
+                      <span className="truncate">ELO Matches</span>
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/elo/leaderboard"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/elo/leaderboard"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <Trophy className="h-4 w-4" />
+                      <span className="truncate">ELO Leaderboard</span>
+                    </Link>
+                  </li>
+                  
+                  <li>
+                    <Link
+                      href="/elo/history"
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                        pathname === "/elo/history"
+                          ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg"
+                          : "text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+                      )}
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span className="truncate">ELO History</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             </div>
           </nav>
 
@@ -690,6 +847,7 @@ export default function Navigation() {
           background: rgba(255, 255, 255, 0.05);
         }
         .scrollbar-thumb-white\/30::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
           background: rgba(255, 255, 255, 0.3);
         }
         .scrollbar-thumb-white\/40::-webkit-scrollbar-thumb {
