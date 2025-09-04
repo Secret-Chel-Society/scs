@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/components/ui/use-toast"
 import { motion } from "framer-motion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, Loader2 } from "lucide-react"
+import { AlertCircle, Loader2, Trophy, Calendar, Users, Star, Shield, Gamepad2, Clock, Target, Zap, CheckCircle2 } from "lucide-react"
 
 export default function SeasonRegistrationPage() {
   const router = useRouter()
@@ -361,143 +361,204 @@ export default function SeasonRegistrationPage() {
 
   if (!session) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center">Please sign in to register for the season.</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardContent className="pt-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Please sign in to register for the season.</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     )
   }
 
   if (loadingActiveSeason || isCheckingRegistration) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <Card>
-          <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-            <p className="text-center">Loading season information...</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-ice-blue-500 mb-4" />
+                <p className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">Loading season information...</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     )
   }
 
   if (!activeSeason) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">Season Registration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>No Active Season</AlertTitle>
-              <AlertDescription>
-                There is currently no active season available for registration. Please check back later.
-              </AlertDescription>
-            </Alert>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardHeader>
+                <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  Season Registration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Alert variant="destructive" className="hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">No Active Season</AlertTitle>
+                  <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
+                    There is currently no active season available for registration. Please check back later.
+                  </AlertDescription>
+                </Alert>
 
-            {process.env.NODE_ENV === "development" && (
-              <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono whitespace-pre-wrap">
-                <p className="font-bold">Debug Information:</p>
-                {debugInfo || "No debug info available"}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                {process.env.NODE_ENV === "development" && (
+                  <div className="mt-4 p-4 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded text-xs font-mono whitespace-pre-wrap">
+                    <p className="font-bold text-hockey-silver-900 dark:text-hockey-silver-100">Debug Information:</p>
+                    <p className="text-hockey-silver-700 dark:text-hockey-silver-300">{debugInfo || "No debug info available"}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     )
   }
 
   if (hasRegistered) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl">Season Registration</CardTitle>
-              <CardDescription>Your registration status for {activeSeason.name}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert variant="destructive" className="mb-6">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Already Registered</AlertTitle>
-                <AlertDescription>
-                  Error: User is already signed up for the season. Please contact a League Official if you want to be
-                  removed from the season signup or change positions.
-                </AlertDescription>
-              </Alert>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <Card className="hockey-enhanced-card">
+              <CardHeader>
+                <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  Season Registration
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Your registration status for {activeSeason.name}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Alert variant="destructive" className="mb-6 hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Already Registered</AlertTitle>
+                  <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
+                    Error: User is already signed up for the season. Please contact a League Official if you want to be
+                    removed from the season signup or change positions.
+                  </AlertDescription>
+                </Alert>
 
-              <div className="flex justify-center mt-4">
-                <Button onClick={() => router.push("/profile")} variant="outline">
-                  Return to Profile
-                </Button>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4 border-t pt-6">
-              <div className="text-sm">
-                Questions? Contact us on{" "}
-                <a
-                  href="https://discord.gg/PnbwXuDf2A"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  Discord
-                </a>
-                .
-              </div>
-            </CardFooter>
-          </Card>
-        </motion.div>
+                <div className="flex justify-center mt-4">
+                  <Button onClick={() => router.push("/profile")} variant="outline" className="hockey-button-enhanced">
+                    Return to Profile
+                  </Button>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-4 border-t pt-6">
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Questions? Contact us on{" "}
+                  <a
+                    href="https://discord.gg/PnbwXuDf2A"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-ice-blue-500 hover:text-ice-blue-600 hover:underline"
+                  >
+                    Discord
+                  </a>
+                  .
+                </div>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-3xl">{activeSeason.name} Registration</CardTitle>
-            <CardDescription>Register to participate for Season 1 of the Major Gaming Hockey League</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6 p-4 bg-muted/30 rounded-lg">
-              <h3 className="font-semibold mb-2">{activeSeason.name} Information</h3>
-              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>Registration Deadline: June 12, 2025</li>
-                <li>Bidding: June 13th 8PM Est - June 15th 2PM Est.</li>
-                <li>Preseason: June 18th-20th</li>
-                <li>Season Start Date: June 25th, 2025</li>
-                <li>Format: 60 regular season games</li>
-                <li>Games: Wednesday, Thursday, and Friday at 8:30, 9:10, 9:50 PM EST</li>
-                <li>Season Ends: August 8th, 2025</li>
-                <li>Playoffs: August 13th-Aug 29th 2025</li>
-              </ul>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <Card className="hockey-enhanced-card">
+            <CardHeader>
+              <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                {activeSeason.name} Registration
+              </CardTitle>
+              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                Register to participate for Season 1 of the Major Gaming Hockey League
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 p-4 bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 rounded-lg border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <h3 className="font-semibold mb-2 text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-ice-blue-500" />
+                  {activeSeason.name} Information
+                </h3>
+                <ul className="list-disc list-inside space-y-1 text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  <li>Registration Deadline: June 12, 2025</li>
+                  <li>Bidding: June 13th 8PM Est - June 15th 2PM Est.</li>
+                  <li>Preseason: June 18th-20th</li>
+                  <li>Season Start Date: June 25th, 2025</li>
+                  <li>Format: 60 regular season games</li>
+                  <li>Games: Wednesday, Thursday, and Friday at 8:30, 9:10, 9:50 PM EST</li>
+                  <li>Season Ends: August 8th, 2025</li>
+                  <li>Playoffs: August 13th-Aug 29th 2025</li>
+                </ul>
+              </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="gamerTag">Gamer Tag</Label>
+              <div className="space-y-3">
+                <Label htmlFor="gamerTag" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                  <Gamepad2 className="h-4 w-4 text-assist-green-500" />
+                  Gamer Tag
+                </Label>
                 <Input
                   id="gamerTag"
                   placeholder="Your PSN or Xbox Gamertag"
                   value={gamerTag}
                   onChange={(e) => setGamerTag(e.target.value)}
+                  className="hockey-search"
                 />
-                <p className="text-sm text-muted-foreground">This must match your gamer tag exactly.</p>
-                {errors.gamerTag && <p className="text-sm text-destructive">{errors.gamerTag}</p>}
+                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">This must match your gamer tag exactly.</p>
+                {errors.gamerTag && <p className="text-sm text-goal-red-500">{errors.gamerTag}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="primaryPosition">Primary Position</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="primaryPosition" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                    <Star className="h-4 w-4 text-ice-blue-500" />
+                    Primary Position
+                  </Label>
                   <Select onValueChange={setPrimaryPosition} value={primaryPosition}>
-                    <SelectTrigger id="primaryPosition">
+                    <SelectTrigger id="primaryPosition" className="hockey-search">
                       <SelectValue placeholder="Select position" />
                     </SelectTrigger>
                     <SelectContent>
@@ -509,14 +570,17 @@ export default function SeasonRegistrationPage() {
                       <SelectItem value="G">Goalie (G)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground">Your preferred position to play.</p>
-                  {errors.primaryPosition && <p className="text-sm text-destructive">{errors.primaryPosition}</p>}
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your preferred position to play.</p>
+                  {errors.primaryPosition && <p className="text-sm text-goal-red-500">{errors.primaryPosition}</p>}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="secondaryPosition">Secondary Position</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="secondaryPosition" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                    <Target className="h-4 w-4 text-rink-blue-500" />
+                    Secondary Position
+                  </Label>
                   <Select onValueChange={setSecondaryPosition} value={secondaryPosition}>
-                    <SelectTrigger id="secondaryPosition">
+                    <SelectTrigger id="secondaryPosition" className="hockey-search">
                       <SelectValue placeholder="Select position (optional)" />
                     </SelectTrigger>
                     <SelectContent>
@@ -529,14 +593,17 @@ export default function SeasonRegistrationPage() {
                       <SelectItem value="G">Goalie (G)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground">Optional backup position.</p>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Optional backup position.</p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="consoleType">Console</Label>
+              <div className="space-y-3">
+                <Label htmlFor="consoleType" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                  <Gamepad2 className="h-4 w-4 text-assist-green-500" />
+                  Console
+                </Label>
                 <Select onValueChange={setConsoleType} value={consoleType}>
-                  <SelectTrigger id="consoleType">
+                  <SelectTrigger id="consoleType" className="hockey-search">
                     <SelectValue placeholder="Select console" />
                   </SelectTrigger>
                   <SelectContent>
@@ -544,24 +611,34 @@ export default function SeasonRegistrationPage() {
                     <SelectItem value="PS5">PS5</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-sm text-muted-foreground">Your gaming platform.</p>
-                {errors.consoleType && <p className="text-sm text-destructive">{errors.consoleType}</p>}
+                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your gaming platform.</p>
+                {errors.consoleType && <p className="text-sm text-goal-red-500">{errors.consoleType}</p>}
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Submitting..." : "Submit Registration"}
+              <Button type="submit" className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="mr-2 h-4 w-4" />
+                    Submit Registration
+                  </>
+                )}
               </Button>
             </form>
 
             {process.env.NODE_ENV === "development" && (
-              <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono whitespace-pre-wrap">
-                <p className="font-bold">Debug Information:</p>
-                {debugInfo || "No debug info available"}
+              <div className="mt-6 p-4 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded text-xs font-mono whitespace-pre-wrap">
+                <p className="font-bold text-hockey-silver-900 dark:text-hockey-silver-100">Debug Information:</p>
+                <p className="text-hockey-silver-700 dark:text-hockey-silver-300">{debugInfo || "No debug info available"}</p>
               </div>
             )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 border-t pt-6">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
               By registering, you agree to abide by the league rules and code of conduct. All registrations are subject
               to review by league management. Key Requirement for the season: -Players must play 3 games a min of 3
               games a week.
@@ -572,7 +649,7 @@ export default function SeasonRegistrationPage() {
                 href="https://discord.gg/mghl"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="text-ice-blue-500 hover:text-ice-blue-600 hover:underline"
               >
                 Discord
               </a>
@@ -582,5 +659,6 @@ export default function SeasonRegistrationPage() {
         </Card>
       </motion.div>
     </div>
+  </div>
   )
 }
