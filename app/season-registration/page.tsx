@@ -1,235 +1,317 @@
 "use client"
 
+import type React from "react"
+import { useSupabase } from "@/lib/supabase/client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
-import { useSupabase } from "@/lib/supabase/client"
+import { motion } from "framer-motion"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import DiscordConnectButton from "@/components/auth/discord-connect-button"
-import Link from "next/link"
-import { 
-  Loader2, 
-  AlertCircle, 
-  CheckCircle2, 
-  Info, 
-  Settings,
-  Trophy,
-  Calendar,
-  Users,
-  Star,
-  Shield,
-  Gamepad2,
-  Clock,
-  Target,
-  Zap
-} from "lucide-react"
-
-// Define the form schema with Zod - Updated to match database values
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
-  gamerTag: z
-    .string()
-    .min(2, { message: "Gamer tag must be at least 2 characters" })
-    .max(50, { message: "Gamer tag must be less than 50 characters" }),
-  primaryPosition: z.string().min(1, { message: "Please select a primary position" }),
-  secondaryPosition: z.string().optional(),
-  console: z.string().refine((value) => ["PS5", "Xbox"].includes(value), {
-    message: "Please select a valid console",
-  }),
-})
-
-type FormValues = z.infer<typeof formSchema>
+import { AlertCircle, Loader2, Trophy, Calendar, Users, Star, Shield, Gamepad2, Clock, Target, Zap, CheckCircle2 } from "lucide-react"
 
 export default function SeasonRegistrationPage() {
   const router = useRouter()
-  const { supabase } = useSupabase()
   const { toast } = useToast()
+  const { supabase, session } = useSupabase()
   const [isLoading, setIsLoading] = useState(false)
-  const [discordConnected, setDiscordConnected] = useState(false)
-  const [discordUserId, setDiscordUserId] = useState<string | null>(null)
-  const [discordUsername, setDiscordUsername] = useState<string | null>(null)
-  const [registrationError, setRegistrationError] = useState<string | null>(null)
-  const [registrationDetails, setRegistrationDetails] = useState<any>(null)
-  const [discordConfigError, setDiscordConfigError] = useState(false)
+  const [hasRegistered, setHasRegistered] = useState(false)
+  const [isCheckingRegistration, setIsCheckingRegistration] = useState(true)
+  const [activeSeason, setActiveSeason] = useState<{ id: string; name: string; season_number?: number } | null>(null)
+  const [loadingActiveSeason, setLoadingActiveSeason] = useState(true)
+  const [debugInfo, setDebugInfo] = useState<string>("")
 
-  // Check for discord_connected query parameter
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+  // Form state
+  const [gamerTag, setGamerTag] = useState("")
+  const [primaryPosition, setPrimaryPosition] = useState("")
+  const [secondaryPosition, setSecondaryPosition] = useState("none")
+  const [consoleType, setConsoleType] = useState("")
 
-    // Handle Discord connection success
-    if (params.get("discord_connected") === "true") {
-      // Try to get Discord info from localStorage
-      const storedDiscordInfo = localStorage.getItem("discord_connection_info")
-      if (storedDiscordInfo) {
-        try {
-          const discordInfo = JSON.parse(storedDiscordInfo)
-          setDiscordConnected(true)
-          setDiscordUserId(discordInfo.id)
-          setDiscordUsername(discordInfo.username)
-          toast({
-            title: "Discord Connected",
-            description: `Successfully connected as ${discordInfo.username}`,
-          })
-        } catch (e) {
-          console.error("Failed to parse Discord info:", e)
-          setRegistrationError("Failed to process Discord connection. Please try again.")
+  // Form validation
+  const [errors, setErrors] = useState<{
+    gamerTag?: string
+    primaryPosition?: string
+    consoleType?: string
+  }>({})
+
+  const fetchActiveSeason = async () => {
+    try {
+      setLoadingActiveSeason(true)
+
+      // Get current active season ID from system settings
+      const { data: settingsData, error: settingsError } = await supabase
+        .from("system_settings")
+        .select("value")
+        .eq("key", "current_season")
+        .single()
+
+      if (settingsError) {
+        window.console.error("Error fetching current season setting:", settingsError)
+        setDebugInfo((prev) => prev + `\nError fetching settings: ${settingsError.message}`)
+        setLoadingActiveSeason(false)
+        return null
+      }
+
+      // If we have a current_season setting, use that exact ID
+      if (settingsData?.value) {
+        const seasonId = settingsData.value
+        setDebugInfo((prev) => prev + `\nActive season ID from settings: ${seasonId}`)
+
+        // Get season details with exact match
+        const { data: seasonData, error: seasonError } = await supabase
+          .from("seasons")
+          .select("id, name, season_number")
+          .eq("id", seasonId)
+          .single()
+
+        if (seasonError) {
+          window.console.error("Error fetching season:", seasonError)
+          setDebugInfo((prev) => prev + `\nError fetching season: ${seasonError.message}`)
+
+          // As a fallback, try to get any active season
+          const { data: fallbackSeason, error: fallbackError } = await supabase
+            .from("seasons")
+            .select("id, name, season_number")
+            .eq("is_active", true)
+            .single()
+
+          if (fallbackError) {
+            window.console.error("Error fetching fallback season:", fallbackError)
+            setDebugInfo((prev) => prev + `\nError fetching fallback season: ${fallbackError.message}`)
+            setLoadingActiveSeason(false)
+            return null
+          }
+
+          setDebugInfo((prev) => prev + `\nUsing fallback active season: ${JSON.stringify(fallbackSeason)}`)
+          setLoadingActiveSeason(false)
+          return fallbackSeason
         }
+
+        setDebugInfo((prev) => prev + `\nFound season by ID: ${JSON.stringify(seasonData)}`)
+        setLoadingActiveSeason(false)
+        return seasonData
       } else {
-        setRegistrationError("Discord connection data not found. Please try connecting again.")
+        // If no current_season setting, try to find an active season
+        const { data: activeSeason, error: activeSeasonError } = await supabase
+          .from("seasons")
+          .select("id, name, season_number")
+          .eq("is_active", true)
+          .single()
+
+        if (activeSeasonError) {
+          window.console.error("Error fetching active season:", activeSeasonError)
+          setDebugInfo((prev) => prev + `\nError fetching active season: ${activeSeasonError.message}`)
+          setLoadingActiveSeason(false)
+          return null
+        }
+
+        setDebugInfo((prev) => prev + `\nFound active season: ${JSON.stringify(activeSeason)}`)
+        setLoadingActiveSeason(false)
+        return activeSeason
       }
+    } catch (error) {
+      window.console.error("Error in fetchActiveSeason:", error)
+      setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)
+      setLoadingActiveSeason(false)
+      return null
     }
+  }
 
-    // Handle Discord connection errors
-    const discordError = params.get("discord_error")
-    if (discordError) {
-      let errorMessage = "Failed to connect Discord account."
-      let isConfigError = false
-
-      switch (discordError) {
-        case "oauth_failed":
-          errorMessage = "Discord OAuth failed. Please try again."
-          break
-        case "storage_failed":
-          errorMessage = "Failed to store Discord connection. Please try again."
-          break
-        case "missing_params":
-          errorMessage = "Invalid Discord response. Please try again."
-          break
-        case "config_error":
-        case "missing_client_secret":
-          errorMessage = "Discord OAuth is not properly configured. Please contact an administrator."
-          isConfigError = true
-          break
-        case "token_failed":
-          errorMessage = "Failed to exchange Discord authorization code. Please try again."
-          break
-        case "user_info_failed":
-          errorMessage = "Failed to retrieve Discord user information. Please try again."
-          break
-        case "no_code":
-          errorMessage = "No authorization code received from Discord. Please try again."
-          break
-        default:
-          errorMessage = `Discord connection error: ${discordError}`
-      }
-
-      setDiscordConfigError(isConfigError)
-      setRegistrationError(errorMessage)
+  useEffect(() => {
+    // Check if user is authenticated
+    if (!session?.user) {
       toast({
-        title: "Discord Connection Failed",
-        description: errorMessage,
+        title: "Authentication required",
+        description: "Please sign in to register for the season.",
         variant: "destructive",
       })
-    }
-  }, [toast])
-
-  // Initialize form with react-hook-form
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      gamerTag: "",
-      primaryPosition: "",
-      secondaryPosition: "",
-      console: "",
-    },
-  })
-
-  // Handle form submission
-  const onSubmit = async (data: FormValues) => {
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Unable to connect to authentication service",
-        variant: "destructive",
-      })
+      router.push("/login")
       return
     }
 
-    if (!discordConnected || !discordUserId || !discordUsername) {
+    // Fetch active season from system settings
+    const fetchActiveSeasonData = async () => {
+      setLoadingActiveSeason(true)
+      try {
+        const seasonData = await fetchActiveSeason()
+
+        if (!seasonData) {
+          setDebugInfo((prev) => prev + "\nNo active season found")
+          toast({
+            title: "No active season",
+            description: "There is no active season available for registration.",
+            variant: "destructive",
+          })
+          setLoadingActiveSeason(false)
+          return
+        }
+
+        setActiveSeason(seasonData)
+        setDebugInfo((prev) => prev + `\nActive season set to: ${JSON.stringify(seasonData)}`)
+        setLoadingActiveSeason(false)
+
+        // Check if user has already registered for this season
+        checkRegistration(seasonData.id)
+      } catch (error) {
+        window.console.error("Error in fetchActiveSeasonData:", error)
+        setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)
+        setLoadingActiveSeason(false)
+      }
+    }
+
+    fetchActiveSeasonData()
+  }, [session, router, toast, supabase])
+
+  // Check if user has already registered for the current season
+  const checkRegistration = async (seasonId: string) => {
+    if (!session?.user) return
+
+    setIsCheckingRegistration(true)
+    try {
+      const { data, error } = await supabase
+        .from("season_registrations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .eq("season_id", seasonId)
+        .single()
+
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 is the error code for "no rows returned"
+        window.console.error("Error checking registration:", error)
+        setDebugInfo((prev) => prev + `\nRegistration check error: ${error.message}`)
+      }
+
+      setHasRegistered(!!data)
+      setDebugInfo((prev) => prev + `\nHas registered: ${!!data}`)
+    } catch (error) {
+      window.console.error("Error checking registration:", error)
+      setDebugInfo((prev) => prev + `\nRegistration check exception: ${JSON.stringify(error)}`)
+    } finally {
+      setIsCheckingRegistration(false)
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors: {
+      gamerTag?: string
+      primaryPosition?: string
+      consoleType?: string
+    } = {}
+
+    if (!gamerTag || gamerTag.length < 3) {
+      newErrors.gamerTag = "Gamer Tag must be at least 3 characters."
+    }
+
+    if (!primaryPosition) {
+      newErrors.primaryPosition = "Please select a primary position."
+    }
+
+    if (!consoleType) {
+      newErrors.consoleType = "Please select a console."
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
+
+    if (!session?.user) {
       toast({
-        title: "Discord Required",
-        description: "Please connect your Discord account before registering",
+        title: "Authentication required",
+        description: "Please sign in to register for the season.",
+        variant: "destructive",
+      })
+      router.push("/login")
+      return
+    }
+
+    if (!activeSeason) {
+      toast({
+        title: "No active season",
+        description: "There is no active season available for registration.",
         variant: "destructive",
       })
       return
     }
 
     setIsLoading(true)
-    setRegistrationError(null)
-    setRegistrationDetails(null)
 
     try {
-      console.log("Starting registration for:", data.email)
+      // Check again if user has already registered
+      const { data: existingReg } = await supabase
+        .from("season_registrations")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .eq("season_id", activeSeason.id)
+        .single()
 
-      // Use the standard registration API endpoint with Discord info
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          metadata: {
-            gamer_tag_id: data.gamerTag,
-            primary_position: data.primaryPosition,
-            secondary_position: data.secondaryPosition || null,
-            console: data.console,
-            is_active: true,
-            discord_id: discordUserId,
-            discord_username: discordUsername,
-          },
-          // Include Discord info for saving to database
-          discordInfo: {
-            id: discordUserId,
-            username: discordUsername,
-            discriminator: "0000",
-            avatar: null,
-          },
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        // Store details for debugging if available
-        if (result.details) {
-          setRegistrationDetails(result.details)
-        }
-        throw new Error(result.error || "Registration failed")
+      if (existingReg) {
+        setHasRegistered(true)
+        toast({
+          title: "Already Registered",
+          description:
+            "Error: User is already signed up for the season. Please contact a League Official if you want to be removed from the season signup or change positions.",
+          variant: "destructive",
+        })
+        setIsLoading(false)
+        return
       }
 
-      // Success - clear Discord info from localStorage
-      localStorage.removeItem("discord_connection_info")
+      // Prepare registration data
+      // Use season_number if it exists, otherwise use derived_season_number or a default
+      const seasonNumber = activeSeason.season_number || activeSeason.derived_season_number || 1
+
+      const registrationData = {
+        user_id: session.user.id,
+        season_id: activeSeason.id,
+        season_number: seasonNumber,
+        primary_position: primaryPosition,
+        secondary_position: secondaryPosition === "none" ? null : secondaryPosition,
+        gamer_tag: gamerTag,
+        console: consoleType,
+        status: "Pending",
+      }
+
+      setDebugInfo((prev) => prev + `\nSubmitting registration: ${JSON.stringify(registrationData)}`)
+
+      // Insert season registration
+      const { error } = await supabase.from("season_registrations").insert(registrationData)
+
+      if (error) {
+        setDebugInfo((prev) => prev + `\nRegistration error: ${error.message}`)
+
+        // Check if the error is due to the user already being registered
+        if (error.message.includes("duplicate key") || error.message.includes("unique constraint")) {
+          setHasRegistered(true)
+          throw new Error(
+            "User is already signed up for the season. Please contact a League Official if you want to be removed from the season signup or change positions.",
+          )
+        }
+
+        throw error
+      }
 
       toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully!",
+        title: "Registration successful!",
+        description: `Your registration for ${activeSeason.name} has been submitted for review.`,
       })
 
-      // Redirect to login page or dashboard
-      router.push("/login?registered=true")
+      router.push("/profile")
     } catch (error: any) {
-      console.error("Registration error:", error)
-      setRegistrationError(error.message || "An error occurred during registration")
+      setDebugInfo((prev) => prev + `\nRegistration exception: ${JSON.stringify(error)}`)
       toast({
         title: "Registration failed",
-        description: error.message || "An error occurred during registration",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -237,325 +319,345 @@ export default function SeasonRegistrationPage() {
     }
   }
 
-  // Function to reset Discord connection
-  const resetDiscordConnection = () => {
-    setDiscordConnected(false)
-    setDiscordUserId(null)
-    setDiscordUsername(null)
-    setDiscordConfigError(false)
-    localStorage.removeItem("discord_connection_info")
-    setRegistrationError(null)
-    setRegistrationDetails(null)
+  useEffect(() => {
+    if (session?.user) {
+      const checkBanStatus = async () => {
+        const { data: user, error } = await supabase
+          .from("users")
+          .select("is_banned, ban_reason, ban_expires_at")
+          .eq("id", session.user.id)
+          .single()
 
-    // Clear URL parameters
-    const url = new URL(window.location.href)
-    url.searchParams.delete("discord_connected")
-    url.searchParams.delete("discord_error")
-    window.history.replaceState({}, "", url.toString())
+        if (error) {
+          console.error("Error checking ban status:", error)
+          toast({
+            title: "Error",
+            description: "Failed to check account status. Please try again.",
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (user?.is_banned) {
+          const isTemporaryBan = user.ban_expires_at && new Date(user.ban_expires_at) > new Date()
+
+          toast({
+            title: "Account Suspended",
+            description: `Your account is currently suspended and you cannot register for the season. ${
+              isTemporaryBan
+                ? `Suspension expires: ${new Date(user.ban_expires_at).toLocaleDateString()}`
+                : "This is a permanent suspension."
+            }`,
+            variant: "destructive",
+          })
+          router.push("/") // Redirect to home page where they'll see the ban modal
+          return
+        }
+      }
+
+      checkBanStatus()
+    }
+  }, [session, supabase, toast, router])
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardContent className="pt-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Please sign in to register for the season.</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    )
   }
 
-  // Function to handle Discord connection
-  const handleDiscordConnect = (userId: string, username: string) => {
-    setDiscordConnected(true)
-    setDiscordUserId(userId)
-    setDiscordUsername(username)
-    setRegistrationError(null)
-    setRegistrationDetails(null)
-    setDiscordConfigError(false)
+  if (loadingActiveSeason || isCheckingRegistration) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-ice-blue-500 mb-4" />
+                <p className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">Loading season information...</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
 
-    // Store Discord info in localStorage for persistence
-    localStorage.setItem(
-      "discord_connection_info",
-      JSON.stringify({
-        id: userId,
-        username: username,
-      }),
+  if (!activeSeason) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardHeader>
+                <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  Season Registration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Alert variant="destructive" className="hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">No Active Season</AlertTitle>
+                  <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
+                    There is currently no active season available for registration. Please check back later.
+                  </AlertDescription>
+                </Alert>
+
+                {process.env.NODE_ENV === "development" && (
+                  <div className="mt-4 p-4 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded text-xs font-mono whitespace-pre-wrap">
+                    <p className="font-bold text-hockey-silver-900 dark:text-hockey-silver-100">Debug Information:</p>
+                    <p className="text-hockey-silver-700 dark:text-hockey-silver-300">{debugInfo || "No debug info available"}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
+
+  if (hasRegistered) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <Card className="hockey-enhanced-card">
+              <CardHeader>
+                <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  Season Registration
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Your registration status for {activeSeason.name}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Alert variant="destructive" className="mb-6 hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Already Registered</AlertTitle>
+                  <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
+                    Error: User is already signed up for the season. Please contact a League Official if you want to be
+                    removed from the season signup or change positions.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex justify-center mt-4">
+                  <Button onClick={() => router.push("/profile")} variant="outline" className="hockey-button-enhanced">
+                    Return to Profile
+                  </Button>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-4 border-t pt-6">
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Questions? Contact us on{" "}
+                  <a
+                    href="https://discord.gg/PnbwXuDf2A"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-ice-blue-500 hover:text-ice-blue-600 hover:underline"
+                  >
+                    Discord
+                  </a>
+                  .
+                </div>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-ice-blue-500/20 via-rink-blue-500/20 to-ice-blue-500/20 border-b border-ice-blue-200/50 dark:border-rink-blue-700/50">
-        <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-ice-blue-400/10 to-rink-blue-400/10 rounded-full -translate-y-16 translate-x-16 blur-xl" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-rink-blue-400/10 to-ice-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl" />
-        
-        <div className="relative container mx-auto px-4 py-12">
-          <motion.div 
-            className="text-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="inline-flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
-                <Trophy className="h-8 w-8 text-white" />
-              </div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-500 bg-clip-text text-transparent">
-                Season Registration
-              </h1>
-            </div>
-            <p className="text-lg md:text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-2xl mx-auto mb-8">
-              Join the ultimate NHL 26 competitive experience. Register your account and compete for glory in the Secret Chel Society.
-            </p>
-            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-transparent rounded-full mx-auto" />
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <motion.div
-            className="w-full max-w-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <Card className="hockey-enhanced-card">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
-                    <Star className="h-6 w-6 text-white" />
-                  </div>
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <Card className="hockey-enhanced-card">
+            <CardHeader>
+              <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <Trophy className="h-6 w-6 text-white" />
                 </div>
-                <CardTitle className="text-xl font-bold text-hockey-silver-900 dark:text-hockey-silver-100">
-                  Create an Account
-                </CardTitle>
-                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-                  Join the SCS community today
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <CardContent className="space-y-6">
-                  {registrationError && (
-                    <Alert variant="destructive" className="hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Error</AlertTitle>
-                      <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
-                        {registrationError}
-                        {discordConfigError && (
-                          <div className="mt-2 text-sm">
-                            <p>
-                              This appears to be a configuration issue. The Discord OAuth integration needs to be set up by
-                              an administrator.
-                            </p>
-                          </div>
-                        )}
-                        {registrationDetails && (
-                          <details className="mt-2 text-xs">
-                            <summary>Technical Details</summary>
-                            <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(registrationDetails, null, 2)}</pre>
-                          </details>
-                        )}
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                {activeSeason.name} Registration
+              </CardTitle>
+              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                Register to participate for Season 1 of the Major Gaming Hockey League
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 p-4 bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 rounded-lg border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <h3 className="font-semibold mb-2 text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-ice-blue-500" />
+                  {activeSeason.name} Information
+                </h3>
+                <ul className="list-disc list-inside space-y-1 text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  <li>Registration Deadline: June 12, 2025</li>
+                  <li>Bidding: June 13th 8PM Est - June 15th 2PM Est.</li>
+                  <li>Preseason: June 18th-20th</li>
+                  <li>Season Start Date: June 25th, 2025</li>
+                  <li>Format: 60 regular season games</li>
+                  <li>Games: Wednesday, Thursday, and Friday at 8:30, 9:10, 9:50 PM EST</li>
+                  <li>Season Ends: August 8th, 2025</li>
+                  <li>Playoffs: August 13th-Aug 29th 2025</li>
+                </ul>
+              </div>
 
-                  <Alert className="hockey-enhanced-card border-ice-blue-200 dark:border-rink-blue-700">
-                    <Info className="h-4 w-4 text-ice-blue-500" />
-                    <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Important</AlertTitle>
-                    <AlertDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                      You must connect your Discord account to register. This is required for league communications.
-                    </AlertDescription>
-                  </Alert>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="gamerTag" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                    <Gamepad2 className="h-4 w-4 text-assist-green-500" />
+                    Gamer Tag
+                  </Label>
+                  <Input
+                    id="gamerTag"
+                    placeholder="Your PSN or Xbox Gamertag"
+                    value={gamerTag}
+                    onChange={(e) => setGamerTag(e.target.value)}
+                    className="hockey-search"
+                  />
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">This must match your gamer tag exactly.</p>
+                  {errors.gamerTag && <p className="text-sm text-goal-red-500">{errors.gamerTag}</p>}
+                </div>
 
-                  {/* Discord Connection Section */}
-                  <div className="space-y-4 p-4 bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                    <h3 className="text-base font-semibold text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-ice-blue-500" />
-                      Step 1: Connect Discord
-                    </h3>
-                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                      Discord connection is required for SCS communication
-                    </p>
-                    {discordConnected ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2 text-assist-green-600 dark:text-assist-green-400">
-                          <CheckCircle2 className="h-5 w-5" />
-                          <span>Discord Connected: {discordUsername || "User"}</span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={resetDiscordConnection}
-                          className="w-full hockey-button-enhanced"
-                        >
-                          Disconnect & Try Again
-                        </Button>
-                      </div>
-                    ) : discordConfigError ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2 text-goal-red-600 dark:text-goal-red-400">
-                          <Settings className="h-5 w-5" />
-                          <span>Discord OAuth Not Configured</span>
-                        </div>
-                        <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">
-                          The Discord integration needs to be configured by an administrator before registration can
-                          proceed.
-                        </p>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={resetDiscordConnection}
-                          className="w-full hockey-button-enhanced"
-                        >
-                          Try Again
-                        </Button>
-                      </div>
-                    ) : (
-                      <DiscordConnectButton
-                        userId="registration"
-                        source="register"
-                        className="w-full"
-                        onSuccess={handleDiscordConnect}
-                      />
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <h3 className="text-base font-semibold text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
-                      <Users className="h-4 w-4 text-rink-blue-500" />
-                      Step 2: Account Information
-                    </h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="email" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-                      <Target className="h-4 w-4 text-ice-blue-500" />
-                      Email
-                    </Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="your.email@example.com" 
-                      {...register("email")} 
-                      className="hockey-search"
-                    />
-                    {errors.email && <p className="text-sm text-goal-red-500">{errors.email.message}</p>}
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="password" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-rink-blue-500" />
-                      Password
-                    </Label>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="••••••••" 
-                      {...register("password")} 
-                      className="hockey-search"
-                    />
-                    {errors.password && <p className="text-sm text-goal-red-500">{errors.password.message}</p>}
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="gamerTag" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-                      <Gamepad2 className="h-4 w-4 text-assist-green-500" />
-                      Gamer Tag
-                    </Label>
-                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your Xbox or PSN name (2-50 characters)</p>
-                    <Input 
-                      id="gamerTag" 
-                      placeholder="Your in-game name" 
-                      {...register("gamerTag")} 
-                      className="hockey-search"
-                    />
-                    {errors.gamerTag && <p className="text-sm text-goal-red-500">{errors.gamerTag.message}</p>}
-                  </div>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
                     <Label htmlFor="primaryPosition" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
                       <Star className="h-4 w-4 text-ice-blue-500" />
                       Primary Position
                     </Label>
-                    <select
-                      id="primaryPosition"
-                      className="hockey-search"
-                      {...register("primaryPosition")}
-                    >
-                      <option value="">Select position</option>
-                      <option value="Center">Center (C)</option>
-                      <option value="Left Wing">Left Wing (LW)</option>
-                      <option value="Right Wing">Right Wing (RW)</option>
-                      <option value="Left Defense">Left Defense (LD)</option>
-                      <option value="Right Defense">Right Defense (RD)</option>
-                      <option value="Goalie">Goalie (G)</option>
-                    </select>
-                    {errors.primaryPosition && <p className="text-sm text-goal-red-500">{errors.primaryPosition.message}</p>}
+                    <Select onValueChange={setPrimaryPosition} value={primaryPosition}>
+                      <SelectTrigger id="primaryPosition" className="hockey-search">
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="C">Center (C)</SelectItem>
+                        <SelectItem value="LW">Left Wing (LW)</SelectItem>
+                        <SelectItem value="RW">Right Wing (RW)</SelectItem>
+                        <SelectItem value="LD">Left Defense (LD)</SelectItem>
+                        <SelectItem value="RD">Right Defense (RD)</SelectItem>
+                        <SelectItem value="G">Goalie (G)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your preferred position to play.</p>
+                    {errors.primaryPosition && <p className="text-sm text-goal-red-500">{errors.primaryPosition}</p>}
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor="secondaryPosition" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
                       <Target className="h-4 w-4 text-rink-blue-500" />
-                      Secondary Position (Optional)
+                      Secondary Position
                     </Label>
-                    <select
-                      id="secondaryPosition"
-                      className="hockey-search"
-                      {...register("secondaryPosition")}
-                    >
-                      <option value="">None</option>
-                      <option value="Center">Center (C)</option>
-                      <option value="Left Wing">Left Wing (LW)</option>
-                      <option value="Right Wing">Right Wing (RW)</option>
-                      <option value="Left Defense">Left Defense (LD)</option>
-                      <option value="Right Defense">Right Defense (RD)</option>
-                      <option value="Goalie">Goalie (G)</option>
-                    </select>
-                    {errors.secondaryPosition && <p className="text-sm text-goal-red-500">{errors.secondaryPosition.message}</p>}
+                    <Select onValueChange={setSecondaryPosition} value={secondaryPosition}>
+                      <SelectTrigger id="secondaryPosition" className="hockey-search">
+                        <SelectValue placeholder="Select position (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="C">Center (C)</SelectItem>
+                        <SelectItem value="LW">Left Wing (LW)</SelectItem>
+                        <SelectItem value="RW">Right Wing (RW)</SelectItem>
+                        <SelectItem value="LD">Left Defense (LD)</SelectItem>
+                        <SelectItem value="RD">Right Defense (RD)</SelectItem>
+                        <SelectItem value="G">Goalie (G)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Optional backup position.</p>
                   </div>
+                </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="console" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-                      <Gamepad2 className="h-4 w-4 text-assist-green-500" />
-                      Console
-                    </Label>
-                    <select
-                      id="console"
-                      className="hockey-search"
-                      {...register("console")}
-                    >
-                      <option value="">Select console</option>
-                      <option value="PS5">PlayStation 5</option>
-                      <option value="Xbox">Xbox Series X</option>
-                    </select>
-                    {errors.console && <p className="text-sm text-goal-red-500">{errors.console.message}</p>}
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-4">
-                  <Button 
-                    type="submit" 
-                    className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white" 
-                    disabled={isLoading || !discordConnected || discordConfigError}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="mr-2 h-4 w-4" />
-                        Create Account
-                      </>
-                    )}
-                  </Button>
-                  <p className="text-sm text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-ice-blue-500 hover:text-ice-blue-600 hover:underline">
-                      Log in
-                    </Link>
-                  </p>
-                </CardFooter>
+                <div className="space-y-3">
+                  <Label htmlFor="consoleType" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                    <Gamepad2 className="h-4 w-4 text-assist-green-500" />
+                    Console
+                  </Label>
+                  <Select onValueChange={setConsoleType} value={consoleType}>
+                    <SelectTrigger id="consoleType" className="hockey-search">
+                      <SelectValue placeholder="Select console" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Xbox">Xbox</SelectItem>
+                      <SelectItem value="PS5">PS5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your gaming platform.</p>
+                  {errors.consoleType && <p className="text-sm text-goal-red-500">{errors.consoleType}</p>}
+                </div>
+
+                <Button type="submit" className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="mr-2 h-4 w-4" />
+                      Submit Registration
+                    </>
+                  )}
+                </Button>
               </form>
-            </Card>
-          </motion.div>
-        </div>
+
+              {process.env.NODE_ENV === "development" && (
+                <div className="mt-6 p-4 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded text-xs font-mono whitespace-pre-wrap">
+                  <p className="font-bold text-hockey-silver-900 dark:text-hockey-silver-100">Debug Information:</p>
+                  <p className="text-hockey-silver-700 dark:text-hockey-silver-300">{debugInfo || "No debug info available"}</p>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4 border-t pt-6">
+              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                By registering, you agree to abide by the league rules and code of conduct. All registrations are subject
+                to review by league management. Key Requirement for the season: -Players must play 3 games a min of 3
+                games a week.
+              </div>
+              <div className="text-sm">
+                Questions? Contact us on{" "}
+                <a
+                  href="https://discord.gg/mghl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-ice-blue-500 hover:text-ice-blue-600 hover:underline"
+                >
+                  Discord
+                </a>
+                .
+              </div>
+            </CardFooter>
+          </Card>
+        </motion.div>
       </div>
     </div>
   )
