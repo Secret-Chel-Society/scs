@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit, Trophy, Calendar, Users, Star, Shield, Target, Zap, CheckCircle2 } from "lucide-react"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion" - replaced with CSS animations
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -435,11 +435,7 @@ export default function RegistrationsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       <div className="container mx-auto py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="animate-fade-in-up">
           <Card className="hockey-enhanced-card">
             <CardHeader>
               <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
@@ -657,7 +653,7 @@ export default function RegistrationsPage() {
                           )}
                         </div>
                       </TableCell>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </TableBody>
               </Table>
@@ -677,7 +673,7 @@ export default function RegistrationsPage() {
           )}
         </CardContent>
       </Card>
-        </motion.div>
+        </div>
 
         {/* Registration Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

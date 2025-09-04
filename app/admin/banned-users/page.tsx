@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, UserX, Clock, AlertCircle, Ban, Users, RefreshCw, Shield, Gavel, UserCheck, UserMinus } from "lucide-react"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion" - disabled due to Next.js 15.2.4 compatibility
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Dialog,
@@ -391,19 +391,14 @@ export default function BannedUsersPage() {
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
     <div className="container mx-auto px-4 py-8">
         {/* Enhanced Hockey-Themed Header */}
-        <motion.div 
-          className="relative mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="relative mb-8 animate-fade-in-up">
           <div className="hockey-enhanced-card p-8 text-center relative overflow-hidden">
             {/* Background Elements */}
             <div className="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-ice-blue-500/20 to-rink-blue-500/20 rounded-full blur-xl"></div>
             <div className="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-goal-red-500/20 to-assist-green-500/20 rounded-full blur-lg"></div>
             
             <div className="relative z-10">
-              <motion.div 
+              <div 
                 className="flex items-center justify-center gap-4 mb-4"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
@@ -415,16 +410,16 @@ export default function BannedUsersPage() {
                 <div className="p-3 bg-gradient-to-br from-goal-red-500 to-assist-green-500 rounded-full shadow-lg">
                   <Gavel className="h-8 w-8 text-white" />
                 </div>
-              </motion.div>
+              </div>
               
-              <motion.h1 
+              <h1 
                 className="hockey-title-enhanced mb-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
                 Banned Users Management
-              </motion.h1>
+              </h1>
               
               <motion.p 
                 className="hockey-subtitle-enhanced text-hockey-silver-600 dark:text-hockey-silver-300 max-w-2xl mx-auto"
@@ -436,7 +431,7 @@ export default function BannedUsersPage() {
               </motion.p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
       <Tabs defaultValue="list" className="w-full">
           <TabsList className="grid w-full grid-cols-2 gap-2 p-2 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded-xl">
@@ -463,7 +458,7 @@ export default function BannedUsersPage() {
         </TabsList>
 
           <TabsContent value="list" className="mt-8">
-            <motion.div
+            <div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -574,7 +569,7 @@ export default function BannedUsersPage() {
                   </TableHeader>
                   <TableBody>
                         {filteredBannedUsers.map((user, index) => (
-                          <motion.tr 
+                          <tr 
                             key={user.id}
                             className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors"
                             initial={{ opacity: 0, y: 20 }}
@@ -655,18 +650,18 @@ export default function BannedUsersPage() {
                             )}
                           </Button>
                         </TableCell>
-                          </motion.tr>
+                          </tr>
                     ))}
                   </TableBody>
                 </Table>
                   </div>
               )}
               </div>
-            </motion.div>
+            </div>
         </TabsContent>
 
           <TabsContent value="ban" className="mt-8">
-            <motion.div
+            <div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -772,7 +767,7 @@ export default function BannedUsersPage() {
                       </TableHeader>
                       <TableBody>
                             {filteredUsers.map((user, index) => (
-                              <motion.tr 
+                              <tr 
                                 key={user.id}
                                 className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors"
                                 initial={{ opacity: 0, y: 20 }}
@@ -841,7 +836,7 @@ export default function BannedUsersPage() {
                                 </Button>
                               )}
                             </TableCell>
-                              </motion.tr>
+                              </tr>
                         ))}
                       </TableBody>
                     </Table>
@@ -900,7 +895,7 @@ export default function BannedUsersPage() {
                 ) : null}
               </div>
               </div>
-            </motion.div>
+            </div>
         </TabsContent>
       </Tabs>
 

@@ -151,6 +151,8 @@ export function AdminSettingsPageClient() {
           <AdminDiagnostics />
         </TabsContent>
       </Tabs>
+        </div>
+      </div>
     </div>
   )
 }
