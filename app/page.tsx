@@ -310,78 +310,112 @@ export default function Home() {
         />
       </div>
 
-      {/* Enhanced Stats Section with Hockey Theme */}
+      {/* Enhanced SCS League Statistics Section */}
       <motion.section
-        className="relative -mt-20 z-10 mx-4"
+        className="container mx-auto px-4 py-20 -mt-20 z-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="container mx-auto">
-          <Card className="hockey-card backdrop-blur-md bg-white/95 dark:bg-hockey-silver-900/95 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/5 via-transparent to-goal-red-500/5" />
-            <CardContent className="relative p-8">
-              <div className="text-center mb-8">
-                <h2 className="hockey-title text-2xl mb-2">SCS League Statistics</h2>
-                <p className="hockey-subtitle">Real-time data from our advanced tracking system</p>
+        <div className="text-center mb-16">
+          <motion.div 
+            className="inline-flex items-center gap-4 mb-6" 
+            whileHover={{ scale: 1.05 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-xl blur-lg scale-150" />
+              <div className="relative p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                <BarChart3 className="h-10 w-10 text-white" />
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {[
-                  {
-                    icon: Users,
-                    label: "Active Players",
-                    value: stats.totalPlayers,
-                    color: "text-ice-blue-600 dark:text-ice-blue-400",
-                    desc: "Registered competitors",
-                  },
-                  {
-                    icon: Trophy,
-                    label: "Teams",
-                    value: stats.totalTeams,
-                    color: "text-assist-green-600 dark:text-assist-green-400",
-                    desc: "Active franchises",
-                  },
-                  {
-                    icon: Calendar,
-                    label: "Matches Played",
-                    value: stats.totalMatches,
-                    color: "text-rink-blue-600 dark:text-rink-blue-400",
-                    desc: "Total games tracked",
-                  },
-                  {
-                    icon: TrendingUp,
-                    label: "Completed Trades",
-                    value: stats.completedTrades,
-                    color: "text-goal-red-600 dark:text-goal-red-400",
-                    desc: "Completed transactions",
-                  },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={stat.label}
-                    className="hockey-stat-item text-center group cursor-pointer"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <motion.div
-                      className={`${stat.color} mb-2 mx-auto w-fit`}
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
-                    >
-                      <stat.icon className="h-8 w-8" />
-                    </motion.div>
-                    <div className="text-3xl font-bold mb-1 text-hockey-silver-800 dark:text-hockey-silver-200">
-                      <AnimatedCounter end={stat.value} />
-                    </div>
-                    <div className="text-sm font-medium mb-1 text-hockey-silver-700 dark:text-hockey-silver-300">{stat.label}</div>
-                    <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">{stat.desc}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+            <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent">
+              SCS League Statistics
+            </h2>
+          </motion.div>
+          <motion.div 
+            className="h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent rounded-full mx-auto mb-8"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            viewport={{ once: true }}
+          />
+          <motion.p 
+            className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            Real-time data from our advanced tracking system with comprehensive analytics
+          </motion.p>
         </div>
+
+        <Card className="hockey-enhanced-card backdrop-blur-md bg-white/95 dark:bg-hockey-silver-900/95 border-ice-blue-200/60 dark:border-rink-blue-700/60 shadow-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/8 via-transparent to-goal-red-500/8" />
+          <CardContent className="relative p-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[
+                {
+                  icon: Users,
+                  label: "Active Players",
+                  value: stats.totalPlayers,
+                  color: "from-ice-blue-500 to-ice-blue-600",
+                  desc: "Registered competitors",
+                },
+                {
+                  icon: Trophy,
+                  label: "Teams",
+                  value: stats.totalTeams,
+                  color: "from-assist-green-500 to-assist-green-600",
+                  desc: "Active franchises",
+                },
+                {
+                  icon: Calendar,
+                  label: "Matches Played",
+                  value: stats.totalMatches,
+                  color: "from-rink-blue-500 to-rink-blue-600",
+                  desc: "Total games tracked",
+                },
+                {
+                  icon: TrendingUp,
+                  label: "Completed Trades",
+                  value: stats.completedTrades,
+                  color: "from-goal-red-500 to-goal-red-600",
+                  desc: "Completed transactions",
+                },
+              ].map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  className="hockey-stats-enhanced"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <motion.div
+                    className="relative mb-4"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-full blur-lg opacity-30 scale-150`} />
+                    <div className={`relative p-4 bg-gradient-to-r ${stat.color} rounded-full shadow-lg mx-auto w-fit`}>
+                      <stat.icon className="h-8 w-8 text-white" />
+                    </div>
+                  </motion.div>
+                  <div className="text-4xl font-bold mb-2 text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <AnimatedCounter end={stat.value} />
+                  </div>
+                  <div className="text-lg font-semibold mb-2 text-hockey-silver-700 dark:text-hockey-silver-300">{stat.label}</div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{stat.desc}</div>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </motion.section>
 
       {/* Enhanced About SCS Section */}
@@ -766,135 +800,244 @@ export default function Home() {
 
       {/* Main Content with Enhanced Animations */}
       <div className="container mx-auto px-4 py-16 space-y-32">
-        {/* Enhanced Upcoming Games Section */}
+        {/* Enhanced Upcoming NHL 26 Matches Section */}
         <motion.section
-          className="relative z-40"
-          style={{ y: y1 }}
-          initial={{ opacity: 0, x: -100 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <div className="flex items-center gap-4 mb-8">
-            <motion.div
-              className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-xl"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-            >
-              <GamepadIcon className="h-6 w-6 text-white" />
-            </motion.div>
-            <div>
-              <h2 className="hockey-title text-3xl font-bold bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 bg-clip-text text-transparent">
-                Upcoming NHL 26 Matches
-              </h2>
-              <p className="hockey-subtitle mt-1">Live-streamed competitive games with real-time statistics</p>
-              <div className="h-1 w-20 bg-gradient-to-r from-ice-blue-500 to-transparent rounded-full mt-2" />
-            </div>
-          </div>
-
-          <motion.div
-            className="relative z-40 bg-white/95 dark:bg-hockey-silver-900/95 backdrop-blur-sm rounded-lg"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-          >
-            {loading.games ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="w-full h-40 rounded-lg" />
-                ))}
-              </div>
-            ) : upcomingGames.length > 0 ? (
-              <UpcomingGames games={upcomingGames} />
-            ) : (
-              <Card className="hockey-card text-center p-8 border-dashed border-2 border-hockey-silver-300/50 dark:border-hockey-silver-600/50">
-                <CardContent className="pt-6">
-                  <motion.div
-                    animate={{ y: [-5, 5, -5] }}
-                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                  >
-                    <Calendar className="h-12 w-12 mx-auto mb-4 text-hockey-silver-400 dark:text-hockey-silver-500" />
-                  </motion.div>
-                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                    No upcoming matches scheduled. Check back soon for the next round of competitive NHL 26 games!
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </motion.div>
-        </motion.section>
-
-        {/* Enhanced Recent Trades Section */}
-        <motion.section
-          className="relative z-30"
-          style={{ y: y2 }}
-          initial={{ opacity: 0, x: 100 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <div className="flex items-center gap-4 mb-8">
-            <motion.div
-              className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-xl"
-              whileHover={{ scale: 1.1, rotate: -5 }}
-            >
-              <TrendingUp className="h-6 w-6 text-white" />
-            </motion.div>
-            <div>
-              <h2 className="hockey-title text-3xl font-bold bg-gradient-to-r from-assist-green-500 to-assist-green-600 bg-clip-text text-transparent">
-                Recent Player Trades
-              </h2>
-              <p className="hockey-subtitle mt-1">Live transaction feed from our professional trade system</p>
-              <div className="h-1 w-20 bg-gradient-to-r from-assist-green-500 to-transparent rounded-full mt-2" />
-            </div>
-          </div>
-          <div className="relative z-30 bg-white/95 dark:bg-hockey-silver-900/95 backdrop-blur-sm rounded-lg">
-            <RecentTrades />
-          </div>
-        </motion.section>
-
-        {/* Enhanced Tabs Section - Now only 2 tabs */}
-        <motion.section
-          className="relative z-20"
+          className="container mx-auto px-4 py-20"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="text-center mb-12">
-            <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl">
-                <Trophy className="h-8 w-8 text-white" />
+          <div className="text-center mb-16">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6" 
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-xl blur-lg scale-150" />
+                <div className="relative p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                  <GamepadIcon className="h-10 w-10 text-white" />
+                </div>
               </div>
-              <h2 className="hockey-title text-4xl font-bold bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 bg-clip-text text-transparent">
+              <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent">
+                Upcoming NHL 26 Matches
+              </h2>
+            </motion.div>
+            <motion.div 
+              className="h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent rounded-full mx-auto mb-8"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              viewport={{ once: true }}
+            />
+            <motion.p 
+              className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              Live-streamed competitive games with real-time statistics and professional commentary
+            </motion.p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            whileHover={{ scale: 1.01 }}
+          >
+            <Card className="hockey-enhanced-card border-ice-blue-200/60 dark:border-rink-blue-700/60 bg-gradient-to-br from-white to-ice-blue-50/60 dark:from-hockey-silver-900 dark:to-rink-blue-900/30">
+              <CardContent className="p-8">
+                {loading.games ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        viewport={{ once: true }}
+                      >
+                        <Skeleton className="w-full h-48 rounded-xl" />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : upcomingGames.length > 0 ? (
+                  <UpcomingGames games={upcomingGames} />
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                  >
+                    <Card className="hockey-card text-center p-16 border-dashed border-2 border-hockey-silver-300/50 dark:border-hockey-silver-600/50 bg-gradient-to-br from-white to-ice-blue-50/30 dark:from-hockey-silver-900 dark:to-ice-blue-900/20">
+                      <CardContent className="pt-6">
+                        <motion.div
+                          animate={{ y: [-5, 5, -5] }}
+                          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+                          className="mb-8"
+                        >
+                          <div className="relative inline-block">
+                            <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-full blur-xl scale-150" />
+                            <div className="relative p-6 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+                              <Calendar className="h-16 w-16 text-white" />
+                            </div>
+                          </div>
+                        </motion.div>
+                        <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
+                          No Upcoming Matches
+                        </h3>
+                        <p className="text-hockey-silver-600 dark:text-hockey-silver-400 text-lg max-w-md mx-auto">
+                          Check back soon for the next round of competitive NHL 26 games with live streaming and real-time statistics!
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.section>
+
+        {/* Enhanced Recent Player Trades Section */}
+        <motion.section
+          className="container mx-auto px-4 py-20"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <div className="text-center mb-16">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6" 
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-assist-green-500/30 to-assist-green-600/30 rounded-xl blur-lg scale-150" />
+                <div className="relative p-4 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-xl shadow-lg">
+                  <TrendingUp className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-assist-green-600 via-assist-green-500 to-assist-green-700 dark:from-assist-green-400 dark:via-assist-green-300 dark:to-assist-green-500 bg-clip-text text-transparent">
+                Recent Player Trades
+              </h2>
+            </motion.div>
+            <motion.div 
+              className="h-1 w-40 bg-gradient-to-r from-assist-green-500 via-assist-green-400 to-transparent rounded-full mx-auto mb-8"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              viewport={{ once: true }}
+            />
+            <motion.p 
+              className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              Live transaction feed from our professional trade system with real-time updates
+            </motion.p>
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <Card className="hockey-enhanced-card border-assist-green-200/60 dark:border-assist-green-700/60 bg-gradient-to-br from-white to-assist-green-50/60 dark:from-hockey-silver-900 dark:to-assist-green-900/30">
+              <CardContent className="p-8">
+                <RecentTrades />
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.section>
+
+        {/* Enhanced Match Results & Standings Section */}
+        <motion.section
+          className="container mx-auto px-4 py-20"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <div className="text-center mb-16">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6" 
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-xl blur-lg scale-150" />
+                <div className="relative p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                  <Trophy className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent">
                 Match Results & Standings
               </h2>
             </motion.div>
-            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-transparent rounded-full mx-auto mb-6" />
-            <p className="hockey-subtitle text-lg max-w-2xl mx-auto">
-              Track recent match outcomes and current league standings in real-time
-            </p>
+            <motion.div 
+              className="h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent rounded-full mx-auto mb-8"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              viewport={{ once: true }}
+            />
+            <motion.p 
+              className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              Track recent match outcomes and current league standings in real-time with comprehensive statistics
+            </motion.p>
           </div>
 
           <Tabs defaultValue="completed" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg">
-              <TabsTrigger
-                value="completed"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center gap-2"
-              >
-                <div className="p-1 bg-white/20 rounded-lg">
-                  <Trophy className="h-4 w-4" />
-                </div>
-                Recent Match Results
-              </TabsTrigger>
-              <TabsTrigger
-                value="standings"
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center gap-2"
-              >
-                <div className="p-1 bg-white/20 rounded-lg">
-                  <Target className="h-4 w-4" />
-                </div>
-                League Standings
-              </TabsTrigger>
-            </TabsList>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-12 bg-gradient-to-r from-ice-blue-100/80 to-rink-blue-100/80 dark:from-ice-blue-900/40 dark:to-rink-blue-900/40 p-2 rounded-2xl border-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 shadow-xl backdrop-blur-sm">
+                <TabsTrigger
+                  value="completed"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 flex items-center gap-3 py-4 px-6 rounded-xl font-semibold text-lg hover:scale-105"
+                >
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Trophy className="h-5 w-5" />
+                  </div>
+                  Recent Match Results
+                </TabsTrigger>
+                <TabsTrigger
+                  value="standings"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 flex items-center gap-3 py-4 px-6 rounded-xl font-semibold text-lg hover:scale-105"
+                >
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <Target className="h-5 w-5" />
+                  </div>
+                  League Standings
+                </TabsTrigger>
+              </TabsList>
+            </motion.div>
 
             <TabsContent value="completed" className="space-y-6">
               <motion.div
@@ -1040,7 +1183,7 @@ export default function Home() {
 
         {/* Enhanced Join the Premier NHL 26 League Card */}
         <motion.section
-          className="relative overflow-hidden z-20"
+          className="relative overflow-hidden z-20 container mx-auto px-4"
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
@@ -1185,46 +1328,86 @@ export default function Home() {
           </Card>
         </motion.section>
 
-        {/* Enhanced Latest News */}
+        {/* Enhanced Latest SCS News */}
         <motion.section
-          className="relative z-20"
+          className="container mx-auto px-4 py-20"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-4">
-              <motion.div
-                className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-xl"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-              >
-                <Star className="h-6 w-6 text-white" />
-              </motion.div>
-              <div>
-                <h2 className="hockey-title text-3xl font-bold bg-gradient-to-r from-goal-red-500 to-goal-red-600 bg-clip-text text-transparent">
-                  Latest SCS News
-                </h2>
-                <p className="hockey-subtitle mt-1">Stay updated with league announcements and highlights</p>
-                <div className="h-1 w-20 bg-gradient-to-r from-goal-red-500 to-transparent rounded-full mt-2" />
+          <div className="text-center mb-16">
+            <motion.div 
+              className="inline-flex items-center gap-4 mb-6" 
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-goal-red-500/30 to-goal-red-600/30 rounded-xl blur-lg scale-150" />
+                <div className="relative p-4 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-xl shadow-lg">
+                  <Star className="h-10 w-10 text-white" />
+                </div>
               </div>
-            </div>
-
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Button variant="ghost" asChild className="hover:bg-goal-red-500/10">
-                <Link href="/news">View All News</Link>
+              <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-goal-red-600 via-goal-red-500 to-goal-red-700 dark:from-goal-red-400 dark:via-goal-red-300 dark:to-goal-red-500 bg-clip-text text-transparent">
+                Latest SCS News
+              </h2>
+            </motion.div>
+            <motion.div 
+              className="h-1 w-40 bg-gradient-to-r from-goal-red-500 via-goal-red-400 to-transparent rounded-full mx-auto mb-8"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              transition={{ duration: 1, delay: 0.3 }}
+              viewport={{ once: true }}
+            />
+            <motion.p 
+              className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed mb-8"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              Stay updated with the latest league announcements, player highlights, and community updates
+            </motion.p>
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Button 
+                variant="outline" 
+                size="lg"
+                asChild 
+                className="border-2 border-goal-red-300/60 dark:border-goal-red-600/60 hover:bg-goal-red-500/15 backdrop-blur-sm bg-white/80 dark:bg-hockey-silver-800/80 text-lg px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:border-goal-red-500 dark:hover:border-goal-red-400"
+              >
+                <Link href="/news" className="flex items-center gap-3">
+                  <Star className="h-5 w-5" />
+                  View All News
+                </Link>
               </Button>
             </motion.div>
           </div>
 
           {loading.news ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="w-full h-64 rounded-lg" />
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Skeleton className="w-full h-80 rounded-xl" />
+                </motion.div>
               ))}
             </div>
           ) : news.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {news.map((item, index) => (
                 <motion.div
                   key={item.id}
@@ -1232,25 +1415,44 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  whileHover={{ scale: 1.02 }}
                 >
-                  <NewsCard news={item} />
+                  <div className="hockey-enhanced-card">
+                    <NewsCard news={item} />
+                  </div>
                 </motion.div>
               ))}
             </div>
           ) : (
-            <Card className="hockey-card text-center p-8 border-dashed border-2 border-hockey-silver-300/50 dark:border-hockey-silver-600/50">
-              <CardContent className="pt-6">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-                >
-                  <Star className="h-12 w-12 mx-auto mb-4 text-hockey-silver-400 dark:text-hockey-silver-500" />
-                </motion.div>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                  No news articles available yet. Check back soon for league updates!
-                </p>
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="hockey-card text-center p-16 border-dashed border-2 border-hockey-silver-300/50 dark:border-hockey-silver-600/50 bg-gradient-to-br from-white to-goal-red-50/30 dark:from-hockey-silver-900 dark:to-goal-red-900/20">
+                <CardContent className="pt-6">
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
+                    className="mb-8"
+                  >
+                    <div className="relative inline-block">
+                      <div className="absolute inset-0 bg-gradient-to-r from-goal-red-500/30 to-goal-red-600/30 rounded-full blur-xl scale-150" />
+                      <div className="relative p-6 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-full shadow-lg">
+                        <Star className="h-16 w-16 text-white" />
+                      </div>
+                    </div>
+                  </motion.div>
+                  <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
+                    No News Articles Yet
+                  </h3>
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 text-lg max-w-md mx-auto">
+                    Check back soon for the latest league updates, player highlights, and community announcements!
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
         </motion.section>
       </div>
