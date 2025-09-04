@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -552,11 +552,8 @@ export default function RegistrationsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredRegistrations.map((registration, index) => (
-                    <motion.tr
+                    <tr
                       key={registration.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
                       className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors"
                     >
                       <TableCell className="font-semibold text-hockey-silver-900 dark:text-hockey-silver-100">

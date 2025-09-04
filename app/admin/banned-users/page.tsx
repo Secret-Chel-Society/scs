@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -400,9 +400,6 @@ export default function BannedUsersPage() {
             <div className="relative z-10">
               <div 
                 className="flex items-center justify-center gap-4 mb-4"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <div className="p-3 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
                   <Shield className="h-8 w-8 text-white" />
@@ -414,21 +411,15 @@ export default function BannedUsersPage() {
               
               <h1 
                 className="hockey-title-enhanced mb-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
               >
                 Banned Users Management
               </h1>
               
-              <motion.p 
+              <p 
                 className="hockey-subtitle-enhanced text-hockey-silver-600 dark:text-hockey-silver-300 max-w-2xl mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
               >
                 Manage user access and maintain community standards with our comprehensive ban management system
-              </motion.p>
+              </p>
             </div>
           </div>
         </div>
@@ -459,9 +450,7 @@ export default function BannedUsersPage() {
 
           <TabsContent value="list" className="mt-8">
             <div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              className="animate-fade-in-up"
             >
               <div className="hockey-enhanced-card p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -571,10 +560,7 @@ export default function BannedUsersPage() {
                         {filteredBannedUsers.map((user, index) => (
                           <tr 
                             key={user.id}
-                            className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors animate-fade-in-up"
                           >
                             <TableCell className="py-4">
                               <div className="space-y-2">
@@ -662,9 +648,7 @@ export default function BannedUsersPage() {
 
           <TabsContent value="ban" className="mt-8">
             <div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              className="animate-fade-in-up"
             >
               <div className="hockey-enhanced-card p-6">
                 <div className="flex items-center gap-4 mb-6">
@@ -769,10 +753,7 @@ export default function BannedUsersPage() {
                             {filteredUsers.map((user, index) => (
                               <tr 
                                 key={user.id}
-                                className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors animate-fade-in-up"
                               >
                                 <TableCell className="py-4">
                                   <p className="font-semibold text-hockey-silver-900 dark:text-hockey-silver-100">

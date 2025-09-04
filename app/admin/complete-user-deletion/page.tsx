@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, AlertCircle, CheckCircle, Trash2, Shield, UserX, Database, Key, AlertTriangle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion" - disabled due to Next.js 15.2.4 compatibility
 
 export default function CompleteUserDeletionPage() {
   const [email, setEmail] = useState("")
@@ -68,12 +68,7 @@ export default function CompleteUserDeletionPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       <div className="container mx-auto px-4 py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto"
-        >
+        <div className="animate-fade-in-up max-w-2xl mx-auto">
           {/* Hero Header Section */}
           <div className="relative overflow-hidden py-16 px-4 mb-8 text-center">
             <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
@@ -96,12 +91,7 @@ export default function CompleteUserDeletionPage() {
           </div>
 
           {/* Warning Banner */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mb-8"
-          >
+          <div className="animate-fade-in-up mb-8">
             <Card className="hockey-card hockey-card-hover border-2 border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-r from-goal-red-50/30 to-goal-red-100/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
@@ -121,14 +111,10 @@ export default function CompleteUserDeletionPage() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Main Deletion Form */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
+          <div className="animate-fade-in-up">
             <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
               <CardHeader className="relative">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
@@ -148,25 +134,19 @@ export default function CompleteUserDeletionPage() {
               <CardContent className="relative z-10 space-y-6">
                 {/* Error Alert */}
                 {error && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
+                  <div
                   >
                     <Alert variant="destructive" className="border-2 border-goal-red-300 dark:border-goal-red-600 bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/20 dark:to-goal-red-800/20">
                       <AlertCircle className="h-5 w-5" />
                       <AlertTitle className="text-goal-red-800 dark:text-goal-red-200 font-bold">Error</AlertTitle>
                       <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">{error}</AlertDescription>
                     </Alert>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Success Alert */}
                 {result && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
+                  <div
                   >
                     <Alert className="border-2 border-assist-green-300 dark:border-assist-green-600 bg-gradient-to-r from-assist-green-50 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-800/20">
                       <CheckCircle className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
@@ -187,7 +167,7 @@ export default function CompleteUserDeletionPage() {
                         </div>
                       </AlertDescription>
                     </Alert>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Email Input */}
@@ -250,15 +230,10 @@ export default function CompleteUserDeletionPage() {
                 </Button>
               </CardFooter>
             </Card>
-          </motion.div>
+          </div>
 
           {/* Additional Information */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-8"
-          >
+          <div className="mt-8 animate-fade-in-up">
             <Card className="hockey-card hockey-card-hover border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-r from-hockey-silver-50/30 to-hockey-silver-100/30 dark:from-hockey-silver-900/10 dark:to-hockey-silver-800/10">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
@@ -281,8 +256,8 @@ export default function CompleteUserDeletionPage() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   )
