@@ -376,20 +376,24 @@ export default function AwardsPage() {
 
         <Tabs defaultValue="team-awards">
           <div className="flex justify-center mb-8">
-            <TabsList className="grid grid-cols-2 w-full max-w-md gap-3 p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl">
+            <TabsList className="grid grid-cols-2 w-full max-w-lg gap-3 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl">
               <TabsTrigger 
                 value="team-awards" 
-                className="px-6 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold"
+                className="px-8 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold min-h-[60px]"
               >
-                <Trophy className="h-5 w-5 flex-shrink-0" />
-                <span className="flex-1 text-center">Team Awards</span>
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Team Awards</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="player-awards" 
-                className="px-6 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold"
+                className="px-8 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold min-h-[60px]"
               >
-                <Award className="h-5 w-5 flex-shrink-0" />
-                <span className="flex-1 text-center">Player Awards</span>
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Award className="h-5 w-5" />
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Player Awards</span>
               </TabsTrigger>
             </TabsList>
           </div>

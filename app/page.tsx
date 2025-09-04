@@ -886,24 +886,24 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <TabsList className="grid w-full grid-cols-2 mb-12 bg-slate-100/80 dark:bg-slate-800/80 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg backdrop-blur-sm">
+              <TabsList className="grid w-full grid-cols-2 mb-12 bg-slate-100/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg backdrop-blur-sm gap-3">
                 <TabsTrigger
                   value="completed"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 flex items-center gap-3 py-4 px-6 rounded-xl font-semibold text-lg hover:scale-105"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 flex items-center gap-3 py-4 px-8 rounded-xl font-semibold text-lg hover:scale-105 min-h-[60px]"
                 >
-                  <div className="p-2 bg-white/20 rounded-lg">
+                  <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
                     <Trophy className="h-5 w-5" />
                   </div>
-                  Recent Match Results
+                  <span className="flex-1 text-center font-medium text-sm">Recent Match Results</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="standings"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 flex items-center gap-3 py-4 px-6 rounded-xl font-semibold text-lg hover:scale-105"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 flex items-center gap-3 py-4 px-8 rounded-xl font-semibold text-lg hover:scale-105 min-h-[60px]"
                 >
-                  <div className="p-2 bg-white/20 rounded-lg">
+                  <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
                     <Target className="h-5 w-5" />
                   </div>
-                  League Standings
+                  <span className="flex-1 text-center font-medium text-sm">League Standings</span>
                 </TabsTrigger>
               </TabsList>
             </motion.div>

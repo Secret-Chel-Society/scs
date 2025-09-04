@@ -338,26 +338,26 @@ export default function ForumPage() {
           <Card className="clean-card">
             <CardContent className="p-6">
               <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg gap-2">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 bg-slate-100 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg gap-3">
                   <TabsTrigger 
                     value="all" 
-                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"
+                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
                   >
-                    <div className="p-1.5 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
-                      <Target className="h-4 w-4" />
+                    <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                      <Target className="h-5 w-5" />
                     </div>
-                    <span className="flex-1 text-center">All Posts</span>
+                    <span className="flex-1 text-center font-medium text-sm">All Posts</span>
                   </TabsTrigger>
                   {categories.map((category) => (
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id}
-                      className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"
+                      className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
                     >
-                      <div className="p-1.5 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+                      <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color }} />
                       </div>
-                      <span className="flex-1 text-center">{category.name}</span>
+                      <span className="flex-1 text-center font-medium text-sm">{category.name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>

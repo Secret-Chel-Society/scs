@@ -89,24 +89,24 @@ export default function FreeAgencyPage({
         <div className="space-y-8">
           {/* Enhanced Tabs Section */}
           <Tabs defaultValue="free-agents" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-100 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg gap-3">
               <TabsTrigger 
                 value="free-agents" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center gap-2"
+                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
               >
-                <div className="p-1 bg-white/20 rounded-lg">
-                  <Users className="h-4 w-4" />
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Users className="h-5 w-5" />
                 </div>
-                Free Agents
+                <span className="flex-1 text-center font-medium text-sm">Free Agents</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="player-signups" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center gap-2"
+                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
               >
-                <div className="p-1 bg-white/20 rounded-lg">
-                  <FileText className="h-4 w-4" />
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <FileText className="h-5 w-5" />
                 </div>
-                Player Signups
+                <span className="flex-1 text-center font-medium text-sm">Player Signups</span>
               </TabsTrigger>
             </TabsList>
 
