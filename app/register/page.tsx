@@ -262,22 +262,23 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
         {/* Enhanced Hero Header Section */}
         <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div>
-            <h1 className="hockey-title mb-6">
-              Join the Secret Chel Society
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-12 max-w-2xl">
-              Create your account and become part of the premier hockey gaming community. 
-              Connect with players, join teams, and compete in the most exciting league experience.
-            </p>
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+          
+          {/* Floating Elements */}
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          
+          <div className="container mx-auto text-center relative z-10">
+            <div>
+              <h1 className="hockey-title mb-6">
+                Join the Secret Chel Society
+              </h1>
+              <p className="hockey-subtitle mx-auto mb-12 max-w-2xl">
+                Create your account and become part of the premier hockey gaming community. 
+                Connect with players, join teams, and compete in the most exciting league experience.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -568,6 +569,7 @@ export default function RegisterPage() {
             </CardFooter>
           </form>
         </Card>
+        </div>
       </div>
     </>
   )
