@@ -384,49 +384,84 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* New: About SCS Section */}
+      {/* Enhanced About SCS Section */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4 py-20"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="text-center mb-12">
-          <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-xl">
-              <Crown className="h-8 w-8 text-white" />
+        <div className="text-center mb-16">
+          <motion.div 
+            className="inline-flex items-center gap-4 mb-6" 
+            whileHover={{ scale: 1.05 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-goal-red-500/30 to-goal-red-600/30 rounded-xl blur-lg scale-150" />
+              <div className="relative p-4 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-xl shadow-lg">
+                <Crown className="h-10 w-10 text-white" />
+              </div>
             </div>
-            <h2 className="hockey-title text-4xl font-bold bg-gradient-to-r from-goal-red-500 to-goal-red-600 bg-clip-text text-transparent">
+            <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-goal-red-600 via-goal-red-500 to-goal-red-700 dark:from-goal-red-400 dark:via-goal-red-300 dark:to-goal-red-500 bg-clip-text text-transparent">
               About SCS
             </h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-goal-red-500 to-transparent rounded-full mx-auto mb-6" />
+          <motion.div 
+            className="h-1 w-40 bg-gradient-to-r from-goal-red-500 via-goal-red-400 to-transparent rounded-full mx-auto mb-8"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            viewport={{ once: true }}
+          />
+          <motion.p 
+            className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            Discover what makes the Secret Chel Society the premier destination for competitive NHL 26 gaming
+          </motion.p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-10 mb-16">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="hockey-card h-full border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-hockey-silver-800 dark:text-hockey-silver-200">
-                  <GamepadIcon className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" />
-                  Premier NHL 26 League
-                </h3>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-4">
-                  The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 26
-                  gaming league available today. We provide a complete hockey simulation experience with structured
-                  seasons, playoffs, and championship tournaments that mirror real NHL operations.
-                </p>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed">
-                  We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
-                  Players can engage in a full range of league activities, 
-                  from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
-                </p>
+            <Card className="hockey-card h-full border-ice-blue-200/60 dark:border-rink-blue-700/60 bg-gradient-to-br from-white to-ice-blue-50/60 dark:from-hockey-silver-900 dark:to-rink-blue-900/30 hover:shadow-xl hover:shadow-ice-blue-500/20 transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-ice-blue-500/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardContent className="relative p-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-lg blur-md scale-150" />
+                    <div className="relative p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg shadow-lg">
+                      <GamepadIcon className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    Premier NHL 26 League
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-lg">
+                    The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 26
+                    gaming league available today. We provide a complete hockey simulation experience with structured
+                    seasons, playoffs, and championship tournaments that mirror real NHL operations.
+                  </p>
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-lg">
+                    We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
+                    Players can engage in a full range of league activities, 
+                    from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -437,46 +472,143 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <Card className="hockey-card h-full border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold mb-4 flex items-center gap-3 text-hockey-silver-800 dark:text-hockey-silver-200">
-                  <Users className="h-6 w-6 text-assist-green-600 dark:text-assist-green-400" />
-                  Professional Community
-                </h3>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-4">
-                  Connect with hundreds of dedicated NHL 26 players in a top-tier competitive environment. 
-                  Our community consists of seasoned gamers and 
-                  hockey enthusiasts who are passionate about strategic play and sportsmanship.
-                </p>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed">
-                  Competitive integrity is at the heart of our community. 
-                  Our dedicated team of moderators enforces a robust rule set, 
-                  fostering an environment where every match is played with sportsmanship and professionalism.
-                </p>
+            <Card className="hockey-card h-full border-assist-green-200/60 dark:border-assist-green-700/60 bg-gradient-to-br from-white to-assist-green-50/60 dark:from-hockey-silver-900 dark:to-assist-green-900/30 hover:shadow-xl hover:shadow-assist-green-500/20 transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-assist-green-500/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardContent className="relative p-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-assist-green-500/30 to-assist-green-600/30 rounded-lg blur-md scale-150" />
+                    <div className="relative p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg shadow-lg">
+                      <Users className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    Professional Community
+                  </h3>
+                </div>
+                <div className="space-y-4">
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-lg">
+                    Connect with hundreds of dedicated NHL 26 players in a top-tier competitive environment. 
+                    Our community consists of seasoned gamers and 
+                    hockey enthusiasts who are passionate about strategic play and sportsmanship.
+                  </p>
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-lg">
+                    Competitive integrity is at the heart of our community. 
+                    Our dedicated team of moderators enforces a robust rule set, 
+                    fostering an environment where every match is played with sportsmanship and professionalism.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
         </div>
+
+        {/* Additional About SCS Content */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          viewport={{ once: true }}
+        >
+          <Card className="hockey-card border-goal-red-200/60 dark:border-goal-red-700/60 bg-gradient-to-br from-white to-goal-red-50/30 dark:from-hockey-silver-900 dark:to-goal-red-900/20">
+            <CardContent className="p-12">
+              <div className="max-w-4xl mx-auto">
+                <motion.div
+                  className="mb-8"
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
+                >
+                  <div className="relative inline-block">
+                    <div className="absolute inset-0 bg-gradient-to-r from-goal-red-500/30 to-goal-red-600/30 rounded-full blur-xl scale-150" />
+                    <div className="relative p-4 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-full shadow-lg">
+                      <Trophy className="h-12 w-12 text-white" />
+                    </div>
+                  </div>
+                </motion.div>
+                <h3 className="text-3xl font-bold mb-6 text-hockey-silver-800 dark:text-hockey-silver-200">
+                  Why Choose SCS?
+                </h3>
+                <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-8">
+                  Join thousands of players who have made SCS their home for competitive NHL 26 gaming. 
+                  Experience the perfect blend of professional league management, cutting-edge technology, 
+                  and a passionate community that shares your love for hockey.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { icon: Shield, label: "Fair Play", desc: "Strict anti-cheat measures" },
+                    { icon: Clock, label: "24/7 Support", desc: "Always here to help" },
+                    { icon: Star, label: "Excellence", desc: "Premium gaming experience" }
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.label}
+                      className="text-center"
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                      viewport={{ once: true }}
+                    >
+                      <div className="p-3 bg-gradient-to-r from-goal-red-500/20 to-goal-red-600/20 rounded-lg w-fit mx-auto mb-3">
+                        <item.icon className="h-6 w-6 text-goal-red-600 dark:text-goal-red-400" />
+                      </div>
+                      <h4 className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 mb-1">
+                        {item.label}
+                      </h4>
+                      <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        {item.desc}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </motion.section>
 
-      {/* New: Advanced Features Section */}
+      {/* Enhanced Advanced League Features Section */}
       <motion.section
-        className="container mx-auto px-4 py-16"
+        className="container mx-auto px-4 py-20"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="text-center mb-12">
-          <motion.div className="inline-flex items-center gap-3 mb-4" whileHover={{ scale: 1.05 }}>
-            <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl">
-              <Database className="h-8 w-8 text-white" />
+        <div className="text-center mb-16">
+          <motion.div 
+            className="inline-flex items-center gap-4 mb-6" 
+            whileHover={{ scale: 1.05 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-xl blur-lg scale-150" />
+              <div className="relative p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                <Database className="h-10 w-10 text-white" />
+              </div>
             </div>
-            <h2 className="hockey-title text-4xl font-bold bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 bg-clip-text text-transparent">
+            <h2 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent">
               Advanced League Features
             </h2>
           </motion.div>
-          <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-transparent rounded-full mx-auto mb-6" />
+          <motion.div 
+            className="h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent rounded-full mx-auto mb-8"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            viewport={{ once: true }}
+          />
+          <motion.p 
+            className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            Discover the cutting-edge features that make SCS the most advanced NHL 26 league platform
+          </motion.p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -486,31 +618,43 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
-            <Card className="hockey-card h-full border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-ice-blue-500/20 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" />
+            <Card className="hockey-card h-full border-ice-blue-200/60 dark:border-rink-blue-700/60 bg-gradient-to-br from-white to-ice-blue-50/60 dark:from-hockey-silver-900 dark:to-rink-blue-900/30 hover:shadow-xl hover:shadow-ice-blue-500/20 transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-ice-blue-500/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardHeader className="relative">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-lg blur-md scale-150" />
+                    <div className="relative p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg shadow-lg">
+                      <BarChart3 className="h-8 w-8 text-white" />
+                    </div>
                   </div>
-                  <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">Custom API Statistics</CardTitle>
+                  <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">
+                    Custom API Statistics
+                  </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-4">
-                 Our proprietary API system provides detailed statistical tracking and analysis for every aspect of NHL 26 gameplay. 
-                 It automatically records all key metrics, from goals and assists to advanced analytics like Corsi and Fenwick ratings.
+              <CardContent className="relative">
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-6 text-lg">
+                  Our proprietary API system provides detailed statistical tracking and analysis for every aspect of NHL 26 gameplay. 
+                  It automatically records all key metrics, from goals and assists to advanced analytics like Corsi and Fenwick ratings.
                 </p>
-                <ul className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 space-y-2">
-                  <li className="flex items-center gap-2">
-                    <ChartBar className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                <ul className="text-hockey-silver-600 dark:text-hockey-silver-400 space-y-3">
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-ice-blue-500/20 rounded-md">
+                      <ChartBar className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
+                    </div>
                     Real-time match statistics
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-ice-blue-500/20 rounded-md">
+                      <Activity className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
+                    </div>
                     Advanced player analytics
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Database className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-ice-blue-500/20 rounded-md">
+                      <Database className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
+                    </div>
                     Historical performance data
                   </li>
                 </ul>
@@ -524,31 +668,43 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Card className="hockey-card h-full border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-assist-green-500/20 rounded-lg">
-                    <Coins className="h-6 w-6 text-assist-green-600 dark:text-assist-green-400" />
+            <Card className="hockey-card h-full border-assist-green-200/60 dark:border-assist-green-700/60 bg-gradient-to-br from-white to-assist-green-50/60 dark:from-hockey-silver-900 dark:to-assist-green-900/30 hover:shadow-xl hover:shadow-assist-green-500/20 transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-assist-green-500/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardHeader className="relative">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-assist-green-500/30 to-assist-green-600/30 rounded-lg blur-md scale-150" />
+                    <div className="relative p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg shadow-lg">
+                      <Coins className="h-8 w-8 text-white" />
+                    </div>
                   </div>
-                  <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">Token Reward System</CardTitle>
+                  <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">
+                    Token Reward System
+                  </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-4">
+              <CardContent className="relative">
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-6 text-lg">
                   Earn SCS tokens completely free by participating in matches, achieving milestones, and contributing
                   to the community. Redeem tokens for exclusive prizes, merchandise, and special league privileges.
                 </p>
-                <ul className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 space-y-2">
-                  <li className="flex items-center gap-2">
-                    <Gift className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                <ul className="text-hockey-silver-600 dark:text-hockey-silver-400 space-y-3">
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-assist-green-500/20 rounded-md">
+                      <Gift className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
+                    </div>
                     Free prize redemption
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Medal className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-assist-green-500/20 rounded-md">
+                      <Medal className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
+                    </div>
                     Achievement rewards
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Star className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-assist-green-500/20 rounded-md">
+                      <Star className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
+                    </div>
                     Exclusive league perks
                   </li>
                 </ul>
@@ -562,31 +718,43 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="hockey-card h-full border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-rink-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-rink-blue-500/20 rounded-lg">
-                    <Shield className="h-6 w-6 text-rink-blue-600 dark:text-rink-blue-400" />
+            <Card className="hockey-card h-full border-rink-blue-200/60 dark:border-rink-blue-700/60 bg-gradient-to-br from-white to-rink-blue-50/60 dark:from-hockey-silver-900 dark:to-rink-blue-900/30 hover:shadow-xl hover:shadow-rink-blue-500/20 transition-all duration-300 group">
+              <div className="absolute inset-0 bg-gradient-to-br from-rink-blue-500/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CardHeader className="relative">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-rink-blue-500/30 to-rink-blue-600/30 rounded-lg blur-md scale-150" />
+                    <div className="relative p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg shadow-lg">
+                      <Shield className="h-8 w-8 text-white" />
+                    </div>
                   </div>
-                  <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">Professional Management</CardTitle>
+                  <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">
+                    Professional Management
+                  </CardTitle>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-4">
+              <CardContent className="relative">
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed mb-6 text-lg">
                   Complete team management system with salary caps, contract negotiations, trade deadlines, waiver
                   claims, and draft systems that create an authentic NHL franchise experience.
                 </p>
-                <ul className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 space-y-2">
-                  <li className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                <ul className="text-hockey-silver-600 dark:text-hockey-silver-400 space-y-3">
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-rink-blue-500/20 rounded-md">
+                      <TrendingUp className="h-5 w-5 text-rink-blue-600 dark:text-rink-blue-400" />
+                    </div>
                     Trade & waiver system
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-rink-blue-500/20 rounded-md">
+                      <Clock className="h-5 w-5 text-rink-blue-600 dark:text-rink-blue-400" />
+                    </div>
                     Scheduled seasons
                   </li>
-                  <li className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                  <li className="flex items-center gap-3 text-base">
+                    <div className="p-1 bg-rink-blue-500/20 rounded-md">
+                      <Award className="h-5 w-5 text-rink-blue-600 dark:text-rink-blue-400" />
+                    </div>
                     Championship playoffs
                   </li>
                 </ul>
@@ -870,7 +1038,7 @@ export default function Home() {
           </Tabs>
         </motion.section>
 
-        {/* Enhanced Call to Action */}
+        {/* Enhanced Join the Premier NHL 26 League Card */}
         <motion.section
           className="relative overflow-hidden z-20"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -878,40 +1046,75 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <Card className="hockey-card relative bg-gradient-to-br from-ice-blue-500/20 via-ice-blue-300/10 to-transparent border-ice-blue-300/50 dark:border-ice-blue-600/50 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/5 to-transparent" />
-            <div className="absolute top-0 right-0 w-32 h-32 bg-ice-blue-500/10 rounded-full -translate-y-16 translate-x-16" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-ice-blue-500/10 rounded-full translate-y-12 -translate-x-12" />
+          <Card className="hockey-card relative bg-gradient-to-br from-ice-blue-500/15 via-ice-blue-300/8 to-rink-blue-500/10 border-ice-blue-300/60 dark:border-ice-blue-600/60 overflow-hidden shadow-2xl shadow-ice-blue-500/20 dark:shadow-ice-blue-500/30">
+            {/* Enhanced Background Elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/8 via-transparent to-goal-red-500/8" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-ice-blue-500/15 to-rink-blue-500/15 rounded-full -translate-y-20 translate-x-20 blur-xl" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-goal-red-500/15 to-assist-green-500/15 rounded-full translate-y-16 -translate-x-16 blur-xl" />
+            <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-gradient-to-r from-ice-blue-500/10 to-rink-blue-500/10 rounded-full -translate-x-12 -translate-y-12 blur-lg" />
 
-            <CardContent className="relative p-12 text-center">
+            <CardContent className="relative p-16 text-center">
+              {/* Enhanced Crown Icon with Glow Effect */}
               <motion.div
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
-                className="mb-6"
+                animate={{ 
+                  rotate: [0, 5, -5, 0],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY }}
+                className="mb-8"
               >
-                <Crown className="h-16 w-16 mx-auto text-ice-blue-600 dark:text-ice-blue-400" />
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-full blur-xl scale-150" />
+                  <div className="relative p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+                    <Crown className="h-16 w-16 text-white drop-shadow-lg" />
+                  </div>
+                </div>
               </motion.div>
 
-              <h2 className="hockey-title text-4xl font-bold mb-4 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 bg-clip-text text-transparent">
+              {/* Enhanced Title with Gradient Animation */}
+              <motion.h2 
+                className="hockey-title text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+              >
                 Join the Premier NHL 26 League
-              </h2>
-              <p className="hockey-subtitle text-xl mb-4 max-w-3xl mx-auto">
-                Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking,
-                free token rewards, and authentic hockey league management.
-              </p>
-              <p className="hockey-subtitle text-lg mb-8 max-w-2xl mx-auto">
-                No entry fees, no pay-to-win mechanics - just pure competitive hockey gaming with real rewards!
-              </p>
+              </motion.h2>
 
-              <div className="flex flex-wrap justify-center gap-6">
+              {/* Enhanced Subtitle with Better Typography */}
+              <motion.div
+                className="mb-8 max-w-4xl mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                viewport={{ once: true }}
+              >
+                <p className="hockey-subtitle text-xl md:text-2xl mb-4 leading-relaxed">
+                  Experience the most competitive NHL 26 gaming environment with professional-grade statistics tracking,
+                  free token rewards, and authentic hockey league management.
+                </p>
+                <p className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                  No entry fees, no pay-to-win mechanics - just pure competitive hockey gaming with real rewards!
+                </p>
+              </motion.div>
+
+              {/* Enhanced Action Buttons */}
+              <motion.div 
+                className="flex flex-wrap justify-center gap-6 mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                viewport={{ once: true }}
+              >
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     asChild
                     size="lg"
-                    className="bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 hover:from-ice-blue-600 hover:to-ice-blue-700 shadow-lg"
+                    className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 shadow-xl shadow-ice-blue-500/25 hover:shadow-2xl hover:shadow-ice-blue-500/40 text-lg px-8 py-4 rounded-xl font-semibold transition-all duration-300"
                   >
-                    <Link href="/register" className="flex items-center gap-2">
-                      <Zap className="h-5 w-5" />
+                    <Link href="/register" className="flex items-center gap-3">
+                      <Zap className="h-6 w-6" />
                       Register for Season 1
                     </Link>
                   </Button>
@@ -922,39 +1125,62 @@ export default function Home() {
                     variant="outline"
                     size="lg"
                     asChild
-                    className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-500/10 backdrop-blur-sm bg-transparent"
+                    className="border-2 border-ice-blue-300/60 dark:border-ice-blue-600/60 hover:bg-ice-blue-500/15 backdrop-blur-sm bg-white/80 dark:bg-hockey-silver-800/80 text-lg px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:border-ice-blue-500 dark:hover:border-ice-blue-400"
                   >
                     <Link
                       href="https://discord.gg/secretchelsociety"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-3"
                     >
                       <img
                         src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/photos/general/Discord-removebg-preview.png"
                         alt="Discord"
-                        className="h-5 w-5"
+                        className="h-6 w-6"
                       />
                       Join Discord Community
                     </Link>
                   </Button>
                 </motion.div>
-              </div>
+              </motion.div>
 
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">100%</div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Free to Play</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">24/7</div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Stat Tracking</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">Real</div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Prize Rewards</div>
-                </div>
-              </div>
+              {/* Enhanced Stats Grid */}
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+                viewport={{ once: true }}
+              >
+                {[
+                  { value: "100%", label: "Free to Play", icon: Gift, color: "from-assist-green-500 to-assist-green-600" },
+                  { value: "24/7", label: "Stat Tracking", icon: Activity, color: "from-ice-blue-500 to-rink-blue-600" },
+                  { value: "Real", label: "Prize Rewards", icon: Trophy, color: "from-goal-red-500 to-goal-red-600" }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={stat.label}
+                    className="text-center group cursor-pointer"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.9 + index * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <div className="relative mb-4">
+                      <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-full blur-lg opacity-30 scale-150`} />
+                      <div className={`relative p-4 bg-gradient-to-r ${stat.color} rounded-full shadow-lg mx-auto w-fit`}>
+                        <stat.icon className="h-8 w-8 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold mb-2 text-hockey-silver-800 dark:text-hockey-silver-200">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm font-medium text-hockey-silver-600 dark:text-hockey-silver-400">
+                      {stat.label}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
             </CardContent>
           </Card>
         </motion.section>

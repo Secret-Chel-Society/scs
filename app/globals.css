@@ -350,6 +350,128 @@
     @apply data-[state=active]:text-white data-[state=active]:shadow-lg;
     @apply transition-all duration-200;
   }
+  
+  /* Enhanced Hockey-Themed Components */
+  .hockey-glow-effect {
+    @apply relative;
+  }
+  
+  .hockey-glow-effect::before {
+    content: '';
+    @apply absolute inset-0 rounded-lg blur-xl opacity-30 scale-150;
+    @apply bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30;
+    @apply transition-opacity duration-300;
+  }
+  
+  .hockey-glow-effect:hover::before {
+    @apply opacity-50;
+  }
+  
+  .hockey-enhanced-card {
+    @apply hockey-card;
+    @apply hover:shadow-2xl hover:shadow-ice-blue-500/25 dark:hover:shadow-rink-blue-500/30;
+    @apply hover:scale-105 hover:border-ice-blue-300/70 dark:hover:border-rink-blue-600/70;
+    @apply transition-all duration-300 ease-out;
+    @apply group;
+  }
+  
+  .hockey-enhanced-card::before {
+    content: '';
+    @apply absolute inset-0 rounded-lg opacity-0;
+    @apply bg-gradient-to-br from-ice-blue-500/5 to-transparent;
+    @apply transition-opacity duration-300;
+  }
+  
+  .hockey-enhanced-card:hover::before {
+    @apply opacity-100;
+  }
+  
+  .hockey-feature-icon {
+    @apply relative p-3 rounded-lg shadow-lg;
+    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+    @apply transition-all duration-300;
+  }
+  
+  .hockey-feature-icon::before {
+    content: '';
+    @apply absolute inset-0 rounded-lg blur-md scale-150 opacity-30;
+    @apply bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30;
+    @apply transition-opacity duration-300;
+  }
+  
+  .hockey-feature-icon:hover::before {
+    @apply opacity-50;
+  }
+  
+  .hockey-stats-enhanced {
+    @apply text-center p-4 rounded-xl;
+    @apply bg-gradient-to-br from-white/80 to-ice-blue-50/50;
+    @apply dark:from-hockey-silver-800/80 dark:to-rink-blue-900/30;
+    @apply backdrop-blur-sm border border-ice-blue-200/50;
+    @apply dark:border-rink-blue-700/50;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/20;
+    @apply group cursor-pointer;
+  }
+  
+  .hockey-stats-enhanced:hover {
+    @apply bg-white dark:bg-hockey-silver-800;
+    @apply border-ice-blue-300 dark:border-rink-blue-600;
+  }
+  
+  .hockey-button-enhanced {
+    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+    @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
+    @apply text-white font-semibold py-3 px-6 rounded-xl;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-105 hover:shadow-xl hover:shadow-ice-blue-500/30;
+    @apply focus:outline-none focus:ring-2 focus:ring-ice-blue-500 focus:ring-offset-2;
+    @apply relative overflow-hidden;
+  }
+  
+  .hockey-button-enhanced::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/20 to-transparent;
+    @apply transform -skew-x-12 -translate-x-full;
+    @apply transition-transform duration-500;
+  }
+  
+  .hockey-button-enhanced:hover::before {
+    @apply translate-x-full;
+  }
+  
+  .hockey-title-enhanced {
+    @apply hockey-title;
+    @apply text-5xl md:text-6xl;
+    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
+    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+    @apply bg-clip-text text-transparent;
+    @apply animate-gradient-x;
+    @apply relative;
+  }
+  
+  .hockey-subtitle-enhanced {
+    @apply hockey-subtitle;
+    @apply text-xl md:text-2xl;
+    @apply leading-relaxed;
+    @apply max-w-4xl mx-auto;
+  }
+  
+  .hockey-section-divider {
+    @apply h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent;
+    @apply rounded-full mx-auto;
+    @apply transition-all duration-1000;
+  }
+  
+  .hockey-floating-element {
+    @apply absolute pointer-events-none;
+    @apply animate-float;
+  }
+  
+  .hockey-background-pattern {
+    @apply absolute inset-0 opacity-5;
+    @apply bg-hockey-pattern;
+  }
 }
 
 /* Custom container class to ensure proper centering */
