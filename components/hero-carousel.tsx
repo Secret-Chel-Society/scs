@@ -60,7 +60,11 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
   const currentImage = validImages[current] || defaultContent
 
   return (
-    <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-black flex flex-col items-center justify-center">
+    <div className="relative h-[500px] md:h-[600px] w-full overflow-hidden bg-gradient-to-br from-hockey-silver-900 via-hockey-silver-800 to-rink-blue-900 flex flex-col items-center justify-center">
+      {/* Hockey-themed background elements */}
+      <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-ice-blue-500/20 to-rink-blue-500/20 rounded-full blur-xl"></div>
+      <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-assist-green-500/20 to-goal-red-500/20 rounded-full blur-2xl"></div>
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-gradient-to-br from-hockey-silver-500/30 to-ice-blue-500/30 rounded-full blur-lg"></div>
       {/* Carousel Images */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -92,19 +96,19 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="max-w-3xl"
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-white drop-shadow-md">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-ice-blue-400 via-rink-blue-400 to-ice-blue-300 bg-clip-text text-transparent drop-shadow-md">
             {currentImage.title}
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-md">{currentImage.subtitle}</p>
+          <p className="text-xl md:text-2xl mb-8 text-hockey-silver-200 drop-shadow-md">{currentImage.subtitle}</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button asChild size="lg" className="font-semibold">
+            <Button asChild size="lg" className="font-semibold bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200">
               <Link href="/register/season">Season 1 Signup</Link>
             </Button>
             <Button
               variant="outline"
               size="lg"
               asChild
-              className="bg-background/30 backdrop-blur-sm border-white/20 text-white hover:bg-background/50"
+              className="bg-hockey-silver-800/30 backdrop-blur-sm border-ice-blue-400/50 text-hockey-silver-200 hover:bg-hockey-silver-700/50 hover:border-ice-blue-300/70 transition-all duration-200"
             >
               <Link href="/matches">View Matches</Link>
             </Button>
@@ -118,7 +122,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/30 backdrop-blur-sm text-white hover:bg-background/50 rounded-full h-10 w-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-hockey-silver-800/30 backdrop-blur-sm text-hockey-silver-200 hover:bg-hockey-silver-700/50 hover:text-ice-blue-300 rounded-full h-10 w-10 transition-all duration-200"
             onClick={prev}
           >
             <ChevronLeft className="h-6 w-6" />
@@ -126,7 +130,7 @@ export default function HeroCarousel({ images = [] }: HeroCarouselProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/30 backdrop-blur-sm text-white hover:bg-background/50 rounded-full h-10 w-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-hockey-silver-800/30 backdrop-blur-sm text-hockey-silver-200 hover:bg-hockey-silver-700/50 hover:text-ice-blue-300 rounded-full h-10 w-10 transition-all duration-200"
             onClick={next}
           >
             <ChevronRight className="h-6 w-6" />
