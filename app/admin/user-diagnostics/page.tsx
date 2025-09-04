@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { motion } from "framer-motion"
 import { Shield, Search, UserCheck, AlertTriangle, Database, Wrench } from "lucide-react"
 import UserDiagnostics from "@/components/admin/user-diagnostics"
 
@@ -21,11 +20,7 @@ export default function UserDiagnosticsPage() {
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
         
         <div className="container mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             <div className="w-20 h-20 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-ice-blue-500/25">
               <Shield className="h-10 w-10 text-white" />
             </div>
@@ -55,19 +50,15 @@ export default function UserDiagnosticsPage() {
                 <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Data Analysis</span>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 pb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <div>
           <UserDiagnostics />
-        </motion.div>
+        </div>
       </div>
     </div>
   )
