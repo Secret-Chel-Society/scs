@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trophy, Medal, Trash2, Plus, Pencil } from "lucide-react"
+import { Trophy, Medal, Trash2, Plus, Pencil, Award, Crown, Star, Target, Zap, Shield, Database, Activity, TrendingUp, Users, Settings, BarChart3, Clock, Calendar, FileText, BookOpen, Globe, Publish, AlertTriangle, CheckCircle, Edit, Save, X, Search, Filter, Download, Upload } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -644,44 +644,171 @@ export default function AdminAwardsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Manage Awards</h1>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Enhanced Hero Header Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
+          <div>
+            <h1 className="hockey-title mb-6">
+              Awards Management Center
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-12">
+              Comprehensive awards management system for the league. 
+              Manage team awards, player achievements, and recognize outstanding performance across all seasons.
+            </p>
+            
+            {/* Enhanced Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto mb-16">
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
+                    {teamAwards.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Team Awards
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
+                    <Medal className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
+                    {playerAwards.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Player Awards
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
+                    <Award className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
+                    {seasons.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Active Seasons
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
+                    <Crown className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
+                    {teams.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Teams
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Tabs defaultValue="team-awards">
-        <TabsList className="mb-4">
-          <TabsTrigger value="team-awards">Team Awards</TabsTrigger>
-          <TabsTrigger value="player-awards">Player Awards</TabsTrigger>
-        </TabsList>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-16">
+        {/* Enhanced Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
+            Awards Management System
+          </h2>
+          <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto">
+            Manage team awards, player achievements, and recognize outstanding performance. 
+            Create, edit, and track awards across all seasons and categories.
+          </p>
+        </div>
+
+        <Tabs defaultValue="team-awards" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-2 bg-hockey-silver-100 dark:bg-hockey-silver-800 p-1 rounded-xl">
+            <TabsTrigger 
+              value="team-awards" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white rounded-lg transition-all duration-300 hover:scale-105"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              Team Awards
+            </TabsTrigger>
+            <TabsTrigger 
+              value="player-awards"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white rounded-lg transition-all duration-300 hover:scale-105"
+            >
+              <Medal className="h-4 w-4 mr-2" />
+              Player Awards
+            </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="team-awards">
-          <Card>
-            <CardHeader>
+          <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white">
               <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Team Awards</CardTitle>
-                  <CardDescription>Manage team awards like President Trophy and SCS Cup</CardDescription>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-white text-xl">Team Awards</CardTitle>
+                    <CardDescription className="text-ice-blue-100">
+                      Manage team awards like President Trophy and SCS Cup
+                    </CardDescription>
+                  </div>
                 </div>
                 <Dialog open={isTeamDialogOpen} onOpenChange={setIsTeamDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button className="btn-championship hover:scale-105 transition-all duration-200">
                       <Plus className="mr-2 h-4 w-4" />
                       Add Team Award
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Team Award</DialogTitle>
-                      <DialogDescription>Create a new team award for a specific season</DialogDescription>
+                  <DialogContent className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700">
+                    <DialogHeader className="pb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center">
+                          <Trophy className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <DialogTitle className="text-hockey-silver-800 dark:text-hockey-silver-200">Add Team Award</DialogTitle>
+                          <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                            Create a new team award for a specific season
+                          </DialogDescription>
+                        </div>
+                      </div>
                     </DialogHeader>
 
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="team">Team</Label>
+                    <div className="grid gap-6 py-4">
+                      <div className="grid gap-3">
+                        <Label htmlFor="team" className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
+                          <Users className="h-4 w-4 text-ice-blue-600" />
+                          Team
+                        </Label>
                         <Select
                           value={newTeamAward.team_id}
                           onValueChange={(value) => setNewTeamAward({ ...newTeamAward, team_id: value })}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                             <SelectValue placeholder="Select team" />
                           </SelectTrigger>
                           <SelectContent>
@@ -694,13 +821,16 @@ export default function AdminAwardsPage() {
                         </Select>
                       </div>
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="award-type">Award Type</Label>
+                      <div className="grid gap-3">
+                        <Label htmlFor="award-type" className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
+                          <Award className="h-4 w-4 text-rink-blue-600" />
+                          Award Type
+                        </Label>
                         <Select
                           value={newTeamAward.award_type}
                           onValueChange={(value) => setNewTeamAward({ ...newTeamAward, award_type: value })}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                             <SelectValue placeholder="Select award type" />
                           </SelectTrigger>
                           <SelectContent>
@@ -714,13 +844,16 @@ export default function AdminAwardsPage() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="season">Season</Label>
+                        <div className="grid gap-3">
+                          <Label htmlFor="season" className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-assist-green-600" />
+                            Season
+                          </Label>
                           <Select
                             value={String(newTeamAward.season_number)}
                             onValueChange={(value) => setNewTeamAward({ ...newTeamAward, season_number: value })}
                           >
-                            <SelectTrigger>
+                            <SelectTrigger className="hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                               <SelectValue placeholder="Select season" />
                             </SelectTrigger>
                             <SelectContent>
@@ -733,8 +866,11 @@ export default function AdminAwardsPage() {
                           </Select>
                         </div>
 
-                        <div className="grid gap-2">
-                          <Label htmlFor="year">Year</Label>
+                        <div className="grid gap-3">
+                          <Label htmlFor="year" className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-goal-red-600" />
+                            Year
+                          </Label>
                           <Input
                             type="number"
                             value={newTeamAward.year}
@@ -746,25 +882,41 @@ export default function AdminAwardsPage() {
                             }
                             min={2000}
                             max={2100}
+                            className="hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                           />
                         </div>
                       </div>
 
-                      <div className="grid gap-2">
-                        <Label htmlFor="description">Description (Optional)</Label>
+                      <div className="grid gap-3">
+                        <Label htmlFor="description" className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-hockey-silver-600" />
+                          Description (Optional)
+                        </Label>
                         <Input
                           value={newTeamAward.description}
                           onChange={(e) => setNewTeamAward({ ...newTeamAward, description: e.target.value })}
                           placeholder="Add details about this award"
+                          className="hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                         />
                       </div>
                     </div>
 
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsTeamDialogOpen(false)}>
+                    <DialogFooter className="pt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setIsTeamDialogOpen(false)}
+                        className="border-2 border-hockey-silver-300 dark:border-hockey-silver-600 hover:border-hockey-silver-400 dark:hover:border-hockey-silver-500 transition-all duration-300"
+                      >
+                        <X className="h-4 w-4 mr-2" />
                         Cancel
                       </Button>
-                      <Button onClick={handleCreateTeamAward}>Create Award</Button>
+                      <Button 
+                        onClick={handleCreateTeamAward}
+                        className="btn-championship hover:scale-105 transition-all duration-200"
+                      >
+                        <Trophy className="h-4 w-4 mr-2" />
+                        Create Award
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -1243,6 +1395,7 @@ export default function AdminAwardsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }

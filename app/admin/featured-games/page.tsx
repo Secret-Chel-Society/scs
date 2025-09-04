@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { Check, X, Star, StarOff, AlertCircle, RefreshCw } from "lucide-react"
+import { Check, X, Star, StarOff, AlertCircle, RefreshCw, Trophy, Medal, Target, Zap, Shield, Database, Activity, TrendingUp, Users, Settings, BarChart3, Clock, Calendar, FileText, BookOpen, Globe, Publish, AlertTriangle, CheckCircle, Edit, Save, Award, Crown, Gamepad2, Play, Pause, Stop, Eye, EyeOff, Filter, Search, Download, Upload, Info } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -236,11 +236,22 @@ export default function AdminFeaturedGamesPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/3 mb-6" />
-        <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-64 w-full" />
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-20">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-200 to-rink-blue-200 dark:from-ice-blue-800 dark:to-rink-blue-800 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Gamepad2 className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+              Loading Featured Games
+            </h3>
+            <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
+              Initializing featured games management interface...
+            </p>
+            <div className="mt-6">
+              <div className="animate-spin h-8 w-8 border-4 border-ice-blue-500 border-t-transparent rounded-full mx-auto"></div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -252,83 +263,238 @@ export default function AdminFeaturedGamesPage() {
 
   if (migrationStatus === "error") {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Featured Games Management</h1>
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Database Error</AlertTitle>
-          <AlertDescription>
-            {migrationError || "Failed to create or access the 'featured' column in the matches table."}
-            <div className="mt-2">
-              <Button onClick={retryMigration} variant="outline" size="sm">
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-20">
+          <div className="text-center mb-12">
+            <h1 className="hockey-title mb-6">Featured Games Management</h1>
+          </div>
+          
+          <div className="hockey-card border-2 border-goal-red-200 dark:border-goal-red-700 overflow-hidden max-w-2xl mx-auto">
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-goal-red-200 to-assist-green-200 dark:from-goal-red-800 dark:to-assist-green-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="h-8 w-8 text-goal-red-600 dark:text-goal-red-400" />
+              </div>
+              <h3 className="text-xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
+                Database Error
+              </h3>
+              <p className="text-hockey-silver-600 dark:text-hockey-silver-400 mb-6">
+                {migrationError || "Failed to create or access the 'featured' column in the matches table."}
+              </p>
+              <Button 
+                onClick={retryMigration} 
+                className="btn-championship hover:scale-105 transition-all duration-200"
+              >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry Migration
               </Button>
             </div>
-          </AlertDescription>
-        </Alert>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Featured Games Management</h1>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Enhanced Hero Header Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
+          <div>
+            <h1 className="hockey-title mb-6">
+              Featured Games Management
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-12">
+              Manage featured games and highlight important matches for the league. 
+              Control which games are prominently displayed on the home page to showcase key matchups.
+            </p>
+            
+            {/* Enhanced Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto mb-16">
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
+                    <Gamepad2 className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
+                    {matches.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Total Games
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
+                    <Star className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
+                    {matches.filter(m => m.featured).length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Featured Games
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
+                    <Play className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
+                    Live
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Management
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
+                    <Eye className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
+                    Homepage
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Visibility
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Alert className="mb-6">
-        <AlertTitle>About Featured Games</AlertTitle>
-        <AlertDescription>
-          Featured games will be displayed prominently on the home page. You can feature multiple games, and they will
-          be shown in order of their scheduled date.
-        </AlertDescription>
-      </Alert>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-16">
+        {/* Enhanced Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
+            Featured Games Control Center
+          </h2>
+          <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto">
+            Manage which games are featured on the home page. Featured games will be displayed prominently 
+            and shown in order of their scheduled date to highlight key matchups.
+          </p>
+        </div>
+
+        {/* Enhanced Alert */}
+        <div className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden mb-8">
+          <div className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <Info className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">About Featured Games</h3>
+                <p className="text-ice-blue-100">
+                  Featured games will be displayed prominently on the home page. You can feature multiple games, and they will
+                  be shown in order of their scheduled date.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
       {matches.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No matches found</p>
+        <div className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-200 to-rink-blue-200 dark:from-ice-blue-800 dark:to-rink-blue-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Gamepad2 className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+              No Matches Found
+            </h3>
+            <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
+              There are currently no matches available to feature.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="border rounded-md">
+        <div className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+          <div className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <Gamepad2 className="h-4 w-4 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-white">Featured Games Management</h3>
+            </div>
+          </div>
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Home Team</TableHead>
-                <TableHead>Away Team</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="bg-hockey-silver-50 dark:bg-hockey-silver-800">
+                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Date</TableHead>
+                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Home Team</TableHead>
+                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Away Team</TableHead>
+                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Score</TableHead>
+                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Status</TableHead>
+                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Featured</TableHead>
+                <TableHead className="text-right text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {matches.map((match) => (
-                <TableRow key={match.id} className={match.featured ? "bg-primary/5" : ""}>
-                  <TableCell>
+              {matches.map((match, index) => (
+                <TableRow 
+                  key={match.id} 
+                  className={`${match.featured ? "bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20" : ""} ${index % 2 === 0 ? "bg-white dark:bg-hockey-silver-900" : "bg-hockey-silver-50 dark:bg-hockey-silver-800"} hover:bg-hockey-silver-100 dark:hover:bg-hockey-silver-700 transition-colors duration-200`}
+                >
+                  <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">
                     <div className="flex flex-col">
-                      <span>{format(new Date(match[dateColumnName]), "MMM d, yyyy")}</span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="font-medium">{format(new Date(match[dateColumnName]), "MMM d, yyyy")}</span>
+                      <span className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                         {format(new Date(match[dateColumnName]), "h:mm a")}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{match.home_team?.name || "Unknown Team"}</TableCell>
-                  <TableCell>{match.away_team?.name || "Unknown Team"}</TableCell>
-                  <TableCell>
+                  <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200 font-medium">
+                    {match.home_team?.name || "Unknown Team"}
+                  </TableCell>
+                  <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200 font-medium">
+                    {match.away_team?.name || "Unknown Team"}
+                  </TableCell>
+                  <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">
                     {match.home_score !== null && match.away_score !== null
                       ? `${match.home_score} - ${match.away_score}`
                       : "TBD"}
                   </TableCell>
                   <TableCell>
-                    <div className="capitalize">{match.status}</div>
+                    <div className={`capitalize px-2 py-1 rounded-full text-xs font-medium ${
+                      match.status === 'completed' 
+                        ? 'bg-assist-green-100 text-assist-green-800 dark:bg-assist-green-900 dark:text-assist-green-200'
+                        : match.status === 'live'
+                        ? 'bg-goal-red-100 text-goal-red-800 dark:bg-goal-red-900 dark:text-goal-red-200'
+                        : 'bg-hockey-silver-100 text-hockey-silver-800 dark:bg-hockey-silver-700 dark:text-hockey-silver-200'
+                    }`}>
+                      {match.status}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {match.featured ? (
-                      <Check className="h-5 w-5 text-green-500" />
+                      <div className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-assist-green-600" />
+                        <span className="text-sm text-assist-green-600 font-medium">Featured</span>
+                      </div>
                     ) : (
-                      <X className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex items-center gap-2">
+                        <X className="h-5 w-5 text-hockey-silver-400" />
+                        <span className="text-sm text-hockey-silver-400">Not Featured</span>
+                      </div>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -337,9 +503,17 @@ export default function AdminFeaturedGamesPage() {
                       size="sm"
                       onClick={() => toggleFeatured(match.id, !!match.featured)}
                       disabled={updatingId === match.id}
+                      className={`${
+                        match.featured 
+                          ? "border-2 border-hockey-silver-300 dark:border-hockey-silver-600 hover:border-hockey-silver-400 dark:hover:border-hockey-silver-500 text-hockey-silver-700 dark:text-hockey-silver-300" 
+                          : "btn-championship"
+                      } hover:scale-105 transition-all duration-200`}
                     >
                       {updatingId === match.id ? (
-                        "Updating..."
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Updating...
+                        </>
                       ) : match.featured ? (
                         <>
                           <StarOff className="h-4 w-4 mr-2" />
@@ -359,6 +533,7 @@ export default function AdminFeaturedGamesPage() {
           </Table>
         </div>
       )}
+      </div>
     </div>
   )
 }
