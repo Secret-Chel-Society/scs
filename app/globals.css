@@ -143,7 +143,7 @@
   }
   
   .clean-stat-item {
-    @apply text-center group;
+    @apply text-center;
   }
   
   .clean-stat-icon {
@@ -163,7 +163,7 @@
   }
   
   .clean-feature-card {
-    @apply h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 group;
+    @apply h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300;
   }
   
   .clean-feature-header {
@@ -235,7 +235,7 @@
   }
   
   .clean-quick-action-link {
-    @apply inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group;
+    @apply inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1;
   }
   
   .clean-quick-action-icon {
