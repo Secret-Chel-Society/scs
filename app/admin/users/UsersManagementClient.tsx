@@ -1952,7 +1952,7 @@ export default function UsersManagementClient() {
         <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
           <CardContent className="p-6">
             <div className="relative">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
                 <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                   <Search className="h-5 w-5 text-white" />
                 </div>
@@ -1967,7 +1967,7 @@ export default function UsersManagementClient() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 hover:bg-ice-blue-100 dark:hover:bg-rink-blue-900/30 rounded-xl transition-all duration-200"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 hover:bg-ice-blue-100 dark:hover:bg-rink-blue-900/30 rounded-xl transition-all duration-200 z-10"
                   onClick={() => setSearchQuery("")}
                 >
                   <X className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
@@ -2437,31 +2437,32 @@ export default function UsersManagementClient() {
 
       {/* Edit Roles Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Manage User Roles</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Manage User Roles</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               {selectedUser && `Assign roles to ${selectedUser.gamer_tag_id || selectedUser.email}`}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
               <div>
-                <div className="text-sm font-medium mb-2">Roles</div>
-                <div className="text-sm text-muted-foreground mb-4">
+                <div className="text-lg font-semibold mb-3 text-hockey-silver-800 dark:text-hockey-silver-200">Roles</div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-4 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                   Select one or more roles for this user. The first role will be the primary player role.
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {validRoles.map((role) => (
-                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0">
+                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0 p-3 rounded-lg hover:bg-gradient-to-r hover:from-ice-blue-100/30 hover:to-rink-blue-100/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border border-transparent hover:border-ice-blue-200/30 dark:hover:border-rink-blue-700/30">
                       <Checkbox
                         id={`role-${role.value}`}
                         checked={selectedRoles.includes(role.value)}
                         onCheckedChange={(checked) => handleRoleToggle(role.value, checked === true)}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
                       />
                       <label
                         htmlFor={`role-${role.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hockey-silver-800 dark:text-hockey-silver-200 cursor-pointer"
                       >
                         {role.label}
                       </label>
@@ -2469,11 +2470,13 @@ export default function UsersManagementClient() {
                   ))}
                 </div>
                 {selectedRoles.length === 0 && (
-                  <p className="text-sm font-medium text-destructive mt-2">Select at least one role</p>
+                  <p className="text-sm font-medium text-goal-red-600 dark:text-goal-red-400 mt-3 p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-200/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
+                    Select at least one role
+                  </p>
                 )}
               </div>
-              <DialogFooter>
-                <Button type="submit" disabled={submitting || selectedRoles.length === 0}>
+              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <Button type="submit" disabled={submitting || selectedRoles.length === 0} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   {submitting ? "Saving..." : "Save changes"}
                 </Button>
               </DialogFooter>
@@ -2492,21 +2495,21 @@ export default function UsersManagementClient() {
 
       {/* Set Salary Dialog */}
       <Dialog open={salaryDialogOpen} onOpenChange={setSalaryDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Set Player Salary</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Set Player Salary</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               {selectedUser && `Set salary for ${selectedUser.gamer_tag_id || selectedUser.email}`}
             </DialogDescription>
           </DialogHeader>
           <Form {...salaryForm}>
-            <form onSubmit={salaryForm.handleSubmit(onUpdateSalary)} className="space-y-6">
+            <form onSubmit={salaryForm.handleSubmit(onUpdateSalary)} className="space-y-6 pt-4">
               <FormField
                 control={salaryForm.control}
                 name="salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="salary-amount">Salary Amount ($)</FormLabel>
+                    <FormLabel htmlFor="salary-amount" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Salary Amount ($)</FormLabel>
                     <FormControl>
                       <Input
                         id="salary-amount"
@@ -2516,18 +2519,21 @@ export default function UsersManagementClient() {
                         step="100000"
                         placeholder="Enter salary amount"
                         disabled={submitting}
+                        className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value) || 0)}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">Enter the player's salary amount (max $15,000,000)</p>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 p-2 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
+                      Enter the player's salary amount (max $15,000,000)
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <DialogFooter>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? "Saving..." : "Update Salary"}
+              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <Button type="submit" disabled={submitting} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                  {submitting ? "Setting..." : "Set Salary"}
                 </Button>
               </DialogFooter>
             </form>
@@ -2537,16 +2543,16 @@ export default function UsersManagementClient() {
 
       {/* Team Assignment Dialog */}
       <Dialog open={teamAssignDialogOpen} onOpenChange={handleTeamAssignDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Assign Team</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Assign Team</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               {selectedUser && `Assign ${selectedUser.gamer_tag_id || selectedUser.email} to a team`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="team-select" className="text-sm font-medium">
+          <div className="space-y-6 pt-4">
+            <div className="space-y-3">
+              <label htmlFor="team-select" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                 Team
               </label>
               <Select
@@ -2557,7 +2563,7 @@ export default function UsersManagementClient() {
                 }}
                 disabled={submitting}
               >
-                <SelectTrigger id="team-select">
+                <SelectTrigger id="team-select" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                   <SelectValue placeholder="Select a team" />
                 </SelectTrigger>
                 <SelectContent>
@@ -2569,13 +2575,13 @@ export default function UsersManagementClient() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                 Select a team for this player or choose "Free Agent" to remove them from any team and prevent automatic
                 re-assignment.
               </p>
             </div>
-            <DialogFooter>
-              <Button onClick={() => teamAssignmentForm.handleSubmit(onAssignTeam)()} disabled={submitting}>
+            <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+              <Button onClick={() => teamAssignmentForm.handleSubmit(onAssignTeam)()} disabled={submitting} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 {submitting ? "Saving..." : "Assign Team"}
               </Button>
             </DialogFooter>
@@ -2585,21 +2591,21 @@ export default function UsersManagementClient() {
 
       {/* Add New User Dialog */}
       <Dialog open={newUserDialogOpen} onOpenChange={handleNewUserDialogClose}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>Create a new user account and assign roles</DialogDescription>
+        <DialogContent className="sm:max-w-[500px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Add New User</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Create a new user account and assign roles</DialogDescription>
           </DialogHeader>
           <Form {...newUserForm}>
-            <form onSubmit={newUserForm.handleSubmit(onCreateUser)} className="space-y-4">
+            <form onSubmit={newUserForm.handleSubmit(onCreateUser)} className="space-y-6 pt-4">
               <FormField
                 control={newUserForm.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="user@example.com" {...field} />
+                      <Input placeholder="user@example.com" {...field} className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -2611,9 +2617,9 @@ export default function UsersManagementClient() {
                 name="gamer_tag_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gamer Tag</FormLabel>
+                    <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Gamer Tag</FormLabel>
                     <FormControl>
-                      <Input placeholder="GamerTag123" {...field} />
+                      <Input placeholder="GamerTag123" {...field} className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -2626,7 +2632,7 @@ export default function UsersManagementClient() {
                   name="primary_position"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary Position</FormLabel>
+                      <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Primary Position</FormLabel>
                       <Select
                         defaultValue={field.value}
                         onValueChange={(value) => {
@@ -2634,7 +2640,7 @@ export default function UsersManagementClient() {
                         }}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                             <SelectValue placeholder="Select position" />
                           </SelectTrigger>
                         </FormControl>
@@ -2656,7 +2662,7 @@ export default function UsersManagementClient() {
                   name="secondary_position"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Secondary Position (Optional)</FormLabel>
+                      <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Secondary Position (Optional)</FormLabel>
                       <Select
                         defaultValue={field.value || "none"}
                         onValueChange={(value) => {
@@ -2664,7 +2670,7 @@ export default function UsersManagementClient() {
                         }}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                             <SelectValue placeholder="Select position" />
                           </SelectTrigger>
                         </FormControl>
@@ -2714,21 +2720,22 @@ export default function UsersManagementClient() {
               />
 
               <div>
-                <div className="text-sm font-medium mb-2">Roles</div>
-                <div className="text-sm text-muted-foreground mb-4">
+                <div className="text-lg font-semibold mb-3 text-hockey-silver-800 dark:text-hockey-silver-200">Roles</div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-4 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                   Select one or more roles for this user. The first role will be the primary player role.
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {validRoles.map((role) => (
-                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0">
+                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0 p-3 rounded-lg hover:bg-gradient-to-r hover:from-ice-blue-100/30 hover:to-rink-blue-100/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border border-transparent hover:border-ice-blue-200/30 dark:hover:border-rink-blue-700/30">
                       <Checkbox
                         id={`new-role-${role.value}`}
                         checked={newUserSelectedRoles.includes(role.value)}
                         onCheckedChange={(checked) => handleNewUserRoleToggle(role.value, checked === true)}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
                       />
                       <label
                         htmlFor={`new-role-${role.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hockey-silver-800 dark:text-hockey-silver-200 cursor-pointer"
                       >
                         {role.label}
                       </label>
@@ -2736,12 +2743,14 @@ export default function UsersManagementClient() {
                   ))}
                 </div>
                 {newUserSelectedRoles.length === 0 && (
-                  <p className="text-sm font-medium text-destructive mt-2">Select at least one role</p>
+                  <p className="text-sm font-medium text-goal-red-600 dark:text-goal-red-400 mt-3 p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-200/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
+                    Select at least one role
+                  </p>
                 )}
               </div>
 
-              <DialogFooter>
-                <Button type="submit" disabled={submitting || newUserSelectedRoles.length === 0}>
+              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <Button type="submit" disabled={submitting || newUserSelectedRoles.length === 0} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   {submitting ? "Creating..." : "Create User"}
                 </Button>
               </DialogFooter>
@@ -2752,16 +2761,16 @@ export default function UsersManagementClient() {
 
       {/* Admin Key Dialog */}
       <Dialog open={adminKeyDialogOpen} onOpenChange={setAdminKeyDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Admin Verification Required</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Admin Verification Required</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               Please enter your admin verification key to continue with this operation.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <label htmlFor="admin-key" className="text-sm font-medium">
+          <div className="space-y-6 py-2 pt-4">
+            <div className="space-y-3">
+              <label htmlFor="admin-key" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                 Admin Key
               </label>
               <Input
@@ -2770,30 +2779,32 @@ export default function UsersManagementClient() {
                 placeholder="Enter admin key"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
+                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
               />
-              {adminKeyError && <p className="text-sm text-destructive">{adminKeyError}</p>}
+              {adminKeyError && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-200/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">{adminKeyError}</p>}
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
               <Checkbox
                 id="save-key"
                 checked={saveAdminKey}
                 onCheckedChange={(checked) => setSaveAdminKey(checked === true)}
+                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
               />
               <div className="grid gap-1.5">
                 <label
                   htmlFor="save-key"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hockey-silver-800 dark:text-hockey-silver-200 cursor-pointer"
                 >
                   Save key for future operations
                 </label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                   This will store the key in your browser for this session.
                 </p>
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={handleAdminKeySubmit} disabled={!adminKey}>
+          <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+            <Button onClick={handleAdminKeySubmit} disabled={!adminKey} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
               <Key className="mr-2 h-4 w-4" />
               Verify
             </Button>
