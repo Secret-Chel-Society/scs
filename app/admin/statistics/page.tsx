@@ -1083,7 +1083,8 @@ export default function AdminStatisticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       {/* Enhanced Hero Header Section */}
       <div className="relative overflow-hidden py-20 px-4">
         {/* Background Pattern */}
@@ -1557,10 +1558,9 @@ export default function AdminStatisticsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
 
-    {/* Edit Player Stats Dialog */}
-    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      {/* Edit Player Stats Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Player Statistics</DialogTitle>
@@ -2127,6 +2127,7 @@ export default function AdminStatisticsPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
