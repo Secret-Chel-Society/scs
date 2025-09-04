@@ -1560,7 +1560,7 @@ export default function AdminStatisticsPage() {
     </div>
 
     {/* Edit Player Stats Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Player Statistics</DialogTitle>

@@ -739,6 +739,5 @@ export default function SeasonRegistrationPage() {
         </Card>
       </motion.div>
     </div>
-  </div>
   )
 }
