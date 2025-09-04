@@ -213,11 +213,11 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Mobile menu button */}
+      {/* Enhanced Mobile menu button */}
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden hockey-button-enhanced shadow-hockey-glow"
+        className="fixed top-4 left-4 z-50 lg:hidden hockey-button-enhanced shadow-hockey-glow bg-white/90 dark:bg-hockey-silver-800/90 backdrop-blur-md border border-ice-blue-200/50 dark:border-rink-blue-700/50"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -278,7 +278,7 @@ export default function Navigation() {
                         "hockey-nav-item flex-1",
                         isActive 
                           ? `active bg-gradient-to-r ${getColorClasses(item.name)} text-white shadow-xl shadow-ice-blue-500/30 scale-102` 
-                          : ""
+                          : "hover:bg-gradient-to-r hover:from-ice-blue-100/50 hover:to-rink-blue-100/50 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20"
                       )}
                     >
                       <div className={cn(

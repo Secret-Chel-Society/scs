@@ -24,7 +24,7 @@ export default function PlayerMappingsPage() {
         <div className="container mx-auto text-center relative z-10">
           <div>
             <h1 className="hockey-title mb-6">
-              Player Mapping Center
+              DarkWolf Mapping Center
             </h1>
             <p className="hockey-subtitle mx-auto mb-12">
               Manage the critical connections between EA Sports players and SCS player profiles. 

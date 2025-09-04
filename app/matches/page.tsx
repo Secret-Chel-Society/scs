@@ -430,14 +430,14 @@ export default function MatchesPage() {
           animate={{ opacity: 1, y: 0 }} 
           transition={{ duration: 0.6, delay: 1.0 }}
         >
-          {/* Filters and Controls */}
+          {/* Enhanced Filters and Controls */}
           <div className="mb-8 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
                 Match Schedule
               </h2>
               <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                Filter and navigate through the season schedule
+                Filter and navigate through the season schedule with advanced viewing options
               </p>
             </div>
 
@@ -446,7 +446,7 @@ export default function MatchesPage() {
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-hockey-silver-500" />
                 <Select value={selectedTeam} onValueChange={handleTeamFilter}>
-                  <SelectTrigger className="hockey-search w-48">
+                  <SelectTrigger className="hockey-input w-48">
                     <SelectValue placeholder="Filter by team" />
                   </SelectTrigger>
                   <SelectContent>
@@ -460,12 +460,63 @@ export default function MatchesPage() {
                 </Select>
               </div>
 
+              {/* View Options */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hockey-button"
+                  onClick={() => {/* Add compact view toggle */}}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Compact View
+                </Button>
+              </div>
+
               {/* Season Badge */}
               <div className="flex items-center gap-2">
                 <Badge className="hockey-badge text-base py-2 px-4">
                   <Trophy className="h-4 w-4 mr-2" />
                   Season 1
                 </Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Match Statistics Bar */}
+          <div className="mb-8 hockey-card p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-ice-blue-600 dark:text-ice-blue-400 mb-1">
+                  {matchStats.totalMatches}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Total Matches
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-assist-green-600 dark:text-assist-green-400 mb-1">
+                  {matchStats.completedMatches}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Completed
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-rink-blue-600 dark:text-rink-blue-400 mb-1">
+                  {matchStats.scheduledMatches}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Scheduled
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-goal-red-600 dark:text-goal-red-400 mb-1">
+                  {matchStats.inProgressMatches}
+                </div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  In Progress
+                </div>
               </div>
             </div>
           </div>

@@ -209,54 +209,86 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Admin Section */}
+            {/* User & Admin Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
                   <Settings className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-bold text-xl text-white">Admin</h3>
+                <h3 className="font-bold text-xl text-white">Account & Admin</h3>
               </div>
               
               <ul className="space-y-3">
-                <li>
-                  <Link 
-                    href="/admin" 
-                    className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                  >
-                    <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                    Admin Panel
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/management" 
-                    className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                  >
-                    <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                    Management Panel
-                  </Link>
-                </li>
-                {user && (
-                  <li>
-                    <Link 
-                      href="/dashboard" 
-                      className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                    >
-                      <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                      User Panel
-                    </Link>
-                  </li>
+                {user ? (
+                  <>
+                    <li>
+                      <Link 
+                        href="/profile" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <User className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
+                        View Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/settings" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <Settings className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
+                        Settings
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/dashboard" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/management" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                        Management
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/admin" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                        Admin Panel
+                      </Link>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link 
+                        href="/login" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <LogIn className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
+                        Sign In
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        href="/register" 
+                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                      >
+                        <User className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
+                        Register
+                      </Link>
+                    </li>
+                  </>
                 )}
-                <li>
-                  <Link 
-                    href="/login" 
-                    className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                  >
-                    <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                    Sign In
-                  </Link>
-                </li>
               </ul>
             </div>
           </div>

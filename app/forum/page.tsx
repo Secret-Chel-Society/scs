@@ -338,7 +338,7 @@ export default function ForumPage() {
           <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
             <CardContent className="p-6">
               <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-auto bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-2 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg gap-2">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-2 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg gap-2">
                   <TabsTrigger 
                     value="all" 
                     className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-white/10 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"

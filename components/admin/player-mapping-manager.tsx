@@ -203,7 +203,7 @@ export default function PlayerMappingManager() {
                 ) : (
                   <Plus className="h-4 w-4 mr-2" />
                 )}
-                {hasLispDogeMapping ? "LispDoge Mapped" : "Add LispDoge Mapping"}
+                {hasLispDogeMapping ? "DarkWolf Mapped" : "Add DarkWolf Mapping"}
               </Button>
             </div>
           </div>

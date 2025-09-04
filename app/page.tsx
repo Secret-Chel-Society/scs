@@ -292,26 +292,9 @@ export default function Home() {
       <div className="relative">
         <HeroCarousel images={heroImages} />
 
-        {/* Hockey-themed animated overlay elements */}
-        <motion.div
-          className="absolute top-20 right-10 w-20 h-20 border-2 border-ice-blue-500/30 rounded-full flex items-center justify-center"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-        >
-          <Gamepad2 className="h-8 w-8 text-ice-blue-500/50" />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-20 left-10 w-16 h-16 bg-goal-red-500/20 rounded-lg flex items-center justify-center"
-          animate={{ y: [-10, 10, -10] }}
-          transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-        >
-          <Trophy className="h-8 w-8 text-goal-red-500/50" />
-        </motion.div>
-        <motion.div
-          className="absolute top-1/2 left-20 w-12 h-12 bg-gradient-to-r from-ice-blue-500/20 to-goal-red-500/20 rounded-full"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-        />
+        {/* Subtle background elements - removed prominent icon lights */}
+        <div className="absolute top-20 right-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/20 to-rink-blue-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/20 to-goal-red-200/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* Enhanced SCS League Statistics Section */}
