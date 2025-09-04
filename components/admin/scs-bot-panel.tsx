@@ -24,6 +24,15 @@ import {
   MessageSquare,
   AlertTriangle,
   UserX,
+  Shield,
+  Zap,
+  Target,
+  Database,
+  Activity,
+  TrendingUp,
+  Globe,
+  Wifi,
+  WifiOff,
 } from "lucide-react"
 
 export default function SCSBotPanel() {
@@ -609,629 +618,888 @@ export default function SCSBotPanel() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <RefreshCw className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="flex flex-col justify-center items-center h-64 space-y-4">
+          <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+            <RefreshCw className="h-8 w-8 text-white animate-spin" />
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Loading SCS Bot Management</h3>
+            <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Connecting to Discord and gathering data...</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <Bot className="h-8 w-8" />
-        <h1 className="text-3xl font-bold">SCS Bot Management</h1>
-        {botStatus && botStatus.connected && (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            <CheckCircle className="mr-1 h-3 w-3" />
-            Bot Online
-          </Badge>
-        )}
-        {botStatus && botStatus.config?.configCount > 1 && (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-            <AlertTriangle className="mr-1 h-3 w-3" />
-            {botStatus.config.configCount} Configs
-          </Badge>
-        )}
-      </div>
-
-      {/* Connection Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Total Users</p>
-                <p className="text-2xl font-bold">{connectionStats.total_users}</p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Enhanced Hero Header Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded-full animate-float"></div>
+        <div className="absolute top-20 right-20 w-16 h-16 bg-gradient-to-r from-assist-green-500/20 to-goal-red-500/20 rounded-full animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-10 left-1/4 w-12 h-12 bg-gradient-to-r from-hockey-silver-500/20 to-ice-blue-500/20 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto text-center">
+          <div className="flex justify-center mb-6">
+            <div className="p-6 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full shadow-2xl shadow-ice-blue-500/30">
+              <Bot className="h-16 w-16 text-white" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Discord Connected</p>
-                <p className="text-2xl font-bold">{connectionStats.connected_users}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <UserX className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Not Connected</p>
-                <p className="text-2xl font-bold">{connectionStats.unconnected_users}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Recent (7 days)</p>
-                <p className="text-2xl font-bold">{connectionStats.recent_connections}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Connection Rate</p>
-                <p className="text-2xl font-bold">
-                  {connectionStats.total_users > 0
-                    ? Math.round((connectionStats.connected_users / connectionStats.total_users) * 100)
-                    : 0}
-                  %
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Sync Results */}
-      {syncResults && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <RefreshCw className="h-5 w-5" />
-              Last Sync Results
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-green-600">{syncResults.successful}</p>
-                <p className="text-sm text-muted-foreground">Successful</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-red-600">{syncResults.failed}</p>
-                <p className="text-sm text-muted-foreground">Failed</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-600">{syncResults.processed}</p>
-                <p className="text-sm text-muted-foreground">Total Processed</p>
-              </div>
-            </div>
-
-            {syncResults.successfulUsers && syncResults.successfulUsers.length > 0 && (
-              <div className="mb-4">
-                <h4 className="font-medium text-green-700 mb-2">Successfully Synced Users:</h4>
-                <div className="flex flex-wrap gap-1">
-                  {syncResults.successfulUsers.map((user: string) => (
-                    <Badge key={user} variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      {user}
-                    </Badge>
-                  ))}
-                </div>
+          </div>
+          
+          <h1 className="hockey-title mb-4">
+            SCS Bot Management
+          </h1>
+          <p className="hockey-subtitle mb-8">
+            Manage Discord bot integration, user connections, and role synchronization
+          </p>
+          
+          {/* Bot Status Indicators */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {botStatus && botStatus.connected && (
+              <div className="flex items-center gap-2 bg-gradient-to-r from-assist-green-100/50 to-assist-green-100/50 dark:from-assist-green-900/20 dark:to-assist-green-900/20 px-4 py-2 rounded-full border border-assist-green-200/50 dark:border-assist-green-700/50">
+                <Wifi className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                <span className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Bot Online</span>
               </div>
             )}
-
-            {syncResults.errors && syncResults.errors.length > 0 && (
-              <div>
-                <h4 className="font-medium text-red-700 mb-2">Errors:</h4>
-                <div className="space-y-2">
-                  {syncResults.errors.slice(0, 5).map((error: any, index: number) => (
-                    <div key={index} className="bg-red-50 border border-red-200 rounded p-2">
-                      <p className="font-medium text-red-800">{error.user}</p>
-                      <p className="text-sm text-red-600">{error.error}</p>
-                    </div>
-                  ))}
-                  {syncResults.errors.length > 5 && (
-                    <p className="text-sm text-muted-foreground">... and {syncResults.errors.length - 5} more errors</p>
-                  )}
-                </div>
+            {botStatus && botStatus.config?.configCount > 1 && (
+              <div className="flex items-center gap-2 bg-gradient-to-r from-goal-red-100/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 px-4 py-2 rounded-full border border-goal-red-200/50 dark:border-goal-red-700/50">
+                <AlertTriangle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
+                <span className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{botStatus.config.configCount} Configs</span>
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center gap-2 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-4 py-2 rounded-full border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+              <Users className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+              <span className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{connectionStats.connected_users} Connected</span>
+            </div>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-hockey-silver-100/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 px-4 py-2 rounded-full border border-hockey-silver-200/50 dark:border-hockey-silver-700/50">
+              <Activity className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
+              <span className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Real-time Sync</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Tabs defaultValue="discord" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="discord">Discord Users</TabsTrigger>
-          <TabsTrigger value="unconnected">Unconnected Users</TabsTrigger>
-          <TabsTrigger value="config">Bot Config</TabsTrigger>
-          <TabsTrigger value="roles">Role Mapping</TabsTrigger>
-          <TabsTrigger value="twitch">Twitch Integration</TabsTrigger>
-        </TabsList>
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pb-12">
 
-        <TabsContent value="discord" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Discord Connections ({discordConnections.length})
-                  </CardTitle>
-                  <CardDescription>Users who have connected their Discord accounts to SCS Bot</CardDescription>
+        {/* Enhanced Connection Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded-xl">
+                  <Users className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" />
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={loadData}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={syncAllRoles} disabled={syncing}>
-                    <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
-                    {syncing ? "Syncing..." : "Sync All Roles (15s delays)"}
-                  </Button>
+                <div>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Total Users</p>
+                  <p className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{connectionStats.total_users}</p>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>SCS User</TableHead>
-                    <TableHead>Discord User</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Console</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Connected Via</TableHead>
-                    <TableHead>Connected</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {discordConnections.map((connection) => {
-                    const sourceInfo = getConnectionSource(connection)
-                    const team = connection.users?.current_team?.name || "Free Agent"
-                    return (
-                      <TableRow key={connection.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{connection.users?.gamer_tag_id || "Unknown"}</div>
-                            <div className="text-sm text-muted-foreground">{connection.users?.email}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">
-                              {connection.discord_username}#{connection.discord_discriminator}
-                            </div>
-                            <div className="text-xs text-muted-foreground font-mono">{connection.discord_id}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            {connection.users?.primary_position && (
-                              <Badge variant="outline" className="text-xs">
-                                {connection.users.primary_position}
-                              </Badge>
-                            )}
-                            {connection.users?.secondary_position && (
-                              <Badge variant="secondary" className="text-xs">
-                                {connection.users.secondary_position}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {connection.users?.console && <Badge variant="outline">{connection.users.console}</Badge>}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={team === "Free Agent" ? "text-muted-foreground" : ""}>
-                            {team}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={sourceInfo.color}>
-                            {sourceInfo.source}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">{new Date(connection.created_at).toLocaleDateString()}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(connection.created_at).toLocaleTimeString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            <CheckCircle className="mr-1 h-3 w-3" />
-                            Connected
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removeDiscordConnection(connection.user_id, connection.discord_username)}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-              {discordConnections.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No Discord connections found</p>
-                  <p className="text-sm">Users can connect their Discord accounts during registration or in settings</p>
-                </div>
-              )}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="unconnected" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserX className="h-5 w-5" />
-                    Unconnected Users ({unconnectedUsers.length})
-                  </CardTitle>
-                  <CardDescription>Active users who have not connected their Discord accounts</CardDescription>
+          <Card className="hockey-card hockey-card-hover border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-assist-green-500/20 to-assist-green-500/20 rounded-xl">
+                  <MessageSquare className="h-6 w-6 text-assist-green-600 dark:text-assist-green-400" />
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={loadData}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
+                <div>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Discord Connected</p>
+                  <p className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{connectionStats.connected_users}</p>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>SCS User</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Console</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Registered</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {unconnectedUsers.map((user) => {
-                    const team = user.current_team?.name || "Free Agent"
-                    return (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{user.gamer_tag_id || "Unknown"}</div>
-                            <div className="text-xs text-muted-foreground">ID: {user.id}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">{user.email}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            {user.primary_position && (
-                              <Badge variant="outline" className="text-xs">
-                                {user.primary_position}
-                              </Badge>
-                            )}
-                            {user.secondary_position && (
-                              <Badge variant="secondary" className="text-xs">
-                                {user.secondary_position}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{user.console && <Badge variant="outline">{user.console}</Badge>}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={team === "Free Agent" ? "text-muted-foreground" : ""}>
-                            {team}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">{new Date(user.created_at).toLocaleDateString()}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(user.created_at).toLocaleTimeString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                            <UserX className="mr-1 h-3 w-3" />
-                            Not Connected
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-              {unconnectedUsers.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <CheckCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>All active users have Discord connections!</p>
-                  <p className="text-sm">Great job on Discord adoption</p>
-                </div>
-              )}
             </CardContent>
           </Card>
-        </TabsContent>
+          <Card className="hockey-card hockey-card-hover border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-goal-red-500/20 to-goal-red-500/20 rounded-xl">
+                  <UserX className="h-6 w-6 text-goal-red-600 dark:text-goal-red-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Not Connected</p>
+                  <p className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{connectionStats.unconnected_users}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hockey-card hockey-card-hover border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-rink-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-rink-blue-500/20 to-rink-blue-500/20 rounded-xl">
+                  <UserPlus className="h-6 w-6 text-rink-blue-600 dark:text-rink-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Recent (7 days)</p>
+                  <p className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{connectionStats.recent_connections}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="hockey-card hockey-card-hover border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-gradient-to-r from-hockey-silver-500/20 to-hockey-silver-500/20 rounded-xl">
+                  <TrendingUp className="h-6 w-6 text-hockey-silver-600 dark:text-hockey-silver-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Connection Rate</p>
+                  <p className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    {connectionStats.total_users > 0
+                      ? Math.round((connectionStats.connected_users / connectionStats.total_users) * 100)
+                      : 0}
+                    %
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-        <TabsContent value="config" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Bot Configuration
+        {/* Enhanced Sync Results */}
+        {syncResults && (
+          <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300 mb-8">
+            <CardHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <RefreshCw className="h-6 w-6 text-white" />
+                </div>
+                Last Sync Results
               </CardTitle>
-              <CardDescription>Configure the Discord bot settings and authentication.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="guild_id">Discord Server ID</Label>
-                  <Input
-                    id="guild_id"
-                    value={botConfig.guild_id}
-                    onChange={(e) => setBotConfig({ ...botConfig, guild_id: e.target.value })}
-                    placeholder="Enter Discord server ID"
-                  />
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="text-center p-4 bg-gradient-to-r from-assist-green-100/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-900/10 rounded-xl border border-assist-green-200/30 dark:border-assist-green-700/30">
+                  <p className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300">{syncResults.successful}</p>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Successful</p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="registered_role_id">Registered Role ID</Label>
-                  <Input
-                    id="registered_role_id"
-                    value={botConfig.registered_role_id}
-                    onChange={(e) => setBotConfig({ ...botConfig, registered_role_id: e.target.value })}
-                    placeholder="Enter registered role ID"
-                  />
+                <div className="text-center p-4 bg-gradient-to-r from-goal-red-100/30 to-goal-red-100/30 dark:from-goal-red-900/10 dark:to-goal-red-900/10 rounded-xl border border-goal-red-200/30 dark:border-goal-red-700/30">
+                  <p className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300">{syncResults.failed}</p>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Failed</p>
+                </div>
+                <div className="text-center p-4 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-xl border border-ice-blue-200/30 dark:border-rink-blue-700/30">
+                  <p className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300">{syncResults.processed}</p>
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Total Processed</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="bot_token">Bot Token</Label>
-                <Input
-                  id="bot_token"
-                  type="password"
-                  value={botConfig.bot_token}
-                  onChange={(e) => setBotConfig({ ...botConfig, bot_token: e.target.value })}
-                  placeholder="Enter bot token"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={saveBotConfig} disabled={saving}>
-                  {saving ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                  Save Configuration
-                </Button>
-                <Button variant="outline" onClick={testConnection} disabled={testing}>
-                  {testing ? (
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                  )}
-                  Test Connection
-                </Button>
-                <Button variant="outline" onClick={syncAllRoles} disabled={syncing}>
-                  <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-                  {syncing ? "Syncing..." : "Sync All Roles"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>OAuth Configuration</CardTitle>
-              <CardDescription>Discord OAuth settings for user authentication.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Client ID</Label>
-                  <div className="flex items-center gap-2">
-                    <Input value="1365888660171653150" disabled />
-                    <Badge variant="secondary">Configured</Badge>
-                  </div>
-                </div>
-                <div>
-                  <Label>Client Secret</Label>
-                  <div className="flex items-center gap-2">
-                    <Input value="mu3IdoBiG7zo4NDHYmGArCfMHoP4atbX" type="password" disabled />
-                    <Badge variant="secondary">Configured</Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {botStatus && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Bot Status</CardTitle>
-                <CardDescription>Current status of the SCS Discord bot.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label>Server Name</Label>
-                    <Input value={botStatus.guild?.name || "Unknown"} disabled />
-                  </div>
-                  <div>
-                    <Label>Member Count</Label>
-                    <Input value={botStatus.guild?.memberCount || "Unknown"} disabled />
-                  </div>
-                  <div>
-                    <Label>Bot Status</Label>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle className="mr-1 h-3 w-3" />
-                        Online
+              {syncResults.successfulUsers && syncResults.successfulUsers.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-semibold text-assist-green-700 dark:text-assist-green-300 mb-3 flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Successfully Synced Users:
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {syncResults.successfulUsers.map((user: string) => (
+                      <Badge key={user} variant="outline" className="bg-gradient-to-r from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 border-assist-green-200 dark:border-assist-green-700">
+                        {user}
                       </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {syncResults.errors && syncResults.errors.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-goal-red-700 dark:text-goal-red-300 mb-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Errors:
+                  </h4>
+                  <div className="space-y-3">
+                    {syncResults.errors.slice(0, 5).map((error: any, index: number) => (
+                      <div key={index} className="bg-gradient-to-r from-goal-red-100/30 to-goal-red-100/30 dark:from-goal-red-900/10 dark:to-goal-red-900/10 border border-goal-red-200/30 dark:border-goal-red-700/30 rounded-lg p-3">
+                        <p className="font-medium text-goal-red-800 dark:text-goal-red-200">{error.user}</p>
+                        <p className="text-sm text-goal-red-600 dark:text-goal-red-400">{error.error}</p>
+                      </div>
+                    ))}
+                    {syncResults.errors.length > 5 && (
+                      <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">... and {syncResults.errors.length - 5} more errors</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        <Tabs defaultValue="discord" className="w-full">
+          <div className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg rounded-xl p-2">
+            <TabsList className="grid w-full grid-cols-5 bg-transparent">
+              <TabsTrigger 
+                value="discord" 
+                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Discord Users
+              </TabsTrigger>
+              <TabsTrigger 
+                value="unconnected" 
+                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                <UserX className="h-4 w-4 mr-2" />
+                Unconnected Users
+              </TabsTrigger>
+              <TabsTrigger 
+                value="config" 
+                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Bot Config
+              </TabsTrigger>
+              <TabsTrigger 
+                value="roles" 
+                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Role Mapping
+              </TabsTrigger>
+              <TabsTrigger 
+                value="twitch" 
+                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-silver-500 data-[state=active]:to-hockey-silver-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                <Twitch className="h-4 w-4 mr-2" />
+                Twitch Integration
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="discord" className="space-y-6">
+            <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                        <Users className="h-6 w-6 text-white" />
+                      </div>
+                      Discord Connections ({discordConnections.length})
+                    </CardTitle>
+                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Users who have connected their Discord accounts to SCS Bot</CardDescription>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={loadData}
+                      className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={syncAllRoles} 
+                      disabled={syncing}
+                      className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+                      {syncing ? "Syncing..." : "Sync All Roles (15s delays)"}
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 rounded-xl overflow-hidden shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">SCS User</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Discord User</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Console</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Connected Via</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Connected</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Status</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {discordConnections.map((connection) => {
+                        const sourceInfo = getConnectionSource(connection)
+                        const team = connection.users?.current_team?.name || "Free Agent"
+                        return (
+                          <TableRow 
+                            key={connection.id}
+                            className="hover:bg-gradient-to-r hover:from-ice-blue-50/30 hover:to-rink-blue-50/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-200/30 dark:border-rink-blue-700/30"
+                          >
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{connection.users?.gamer_tag_id || "Unknown"}</div>
+                                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{connection.users?.email}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">
+                                  {connection.discord_username}#{connection.discord_discriminator}
+                                </div>
+                                <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-mono">{connection.discord_id}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                {connection.users?.primary_position && (
+                                  <Badge variant="outline" className="text-xs border-ice-blue-300 dark:border-rink-blue-600 text-ice-blue-700 dark:text-rink-blue-300">
+                                    {connection.users.primary_position}
+                                  </Badge>
+                                )}
+                                {connection.users?.secondary_position && (
+                                  <Badge variant="secondary" className="text-xs bg-gradient-to-r from-hockey-silver-100 to-hockey-silver-100 dark:from-hockey-silver-800 dark:to-hockey-silver-800 text-hockey-silver-700 dark:text-hockey-silver-300">
+                                    {connection.users.secondary_position}
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {connection.users?.console && (
+                                <Badge variant="outline" className="border-rink-blue-300 dark:border-rink-blue-600 text-rink-blue-700 dark:text-rink-blue-300">
+                                  {connection.users.console}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline" 
+                                className={team === "Free Agent" ? "text-hockey-silver-600 dark:text-hockey-silver-400 border-hockey-silver-300 dark:border-hockey-silver-600" : "border-assist-green-300 dark:border-assist-green-600 text-assist-green-700 dark:text-assist-green-300"}
+                              >
+                                {team}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline" 
+                                className={sourceInfo.source === "Registration" ? "bg-gradient-to-r from-ice-blue-100 to-ice-blue-100 dark:from-ice-blue-900/20 dark:to-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 border-ice-blue-200 dark:border-ice-blue-700" : "bg-gradient-to-r from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 border-assist-green-200 dark:border-assist-green-700"}
+                              >
+                                {sourceInfo.source}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-hockey-silver-800 dark:text-hockey-silver-200">{new Date(connection.created_at).toLocaleDateString()}</div>
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">
+                                {new Date(connection.created_at).toLocaleTimeString()}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-gradient-to-r from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 border-assist-green-200 dark:border-assist-green-700">
+                                <CheckCircle className="mr-1 h-3 w-3" />
+                                Connected
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => removeDiscordConnection(connection.user_id, connection.discord_username)}
+                                  className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+                {discordConnections.length === 0 && (
+                  <div className="text-center py-12 text-hockey-silver-600 dark:text-hockey-silver-400">
+                    <div className="p-4 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                      <MessageSquare className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
+                    </div>
+                    <p className="text-lg font-medium text-hockey-silver-800 dark:text-hockey-silver-200">No Discord connections found</p>
+                    <p className="text-sm">Users can connect their Discord accounts during registration or in settings</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="unconnected" className="space-y-6">
+            <Card className="hockey-card hockey-card-hover border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-goal-red-200/50 dark:border-goal-red-700/50 pb-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                        <UserX className="h-6 w-6 text-white" />
+                      </div>
+                      Unconnected Users ({unconnectedUsers.length})
+                    </CardTitle>
+                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Active users who have not connected their Discord accounts</CardDescription>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={loadData}
+                      className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="hockey-card border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20 rounded-xl overflow-hidden shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-goal-red-50/50 to-goal-red-50/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 border-b-2 border-goal-red-200/50 dark:border-goal-red-700/50">
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">SCS User</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Email</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Console</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Registered</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {unconnectedUsers.map((user) => {
+                        const team = user.current_team?.name || "Free Agent"
+                        return (
+                          <TableRow 
+                            key={user.id}
+                            className="hover:bg-gradient-to-r hover:from-goal-red-50/30 hover:to-goal-red-50/30 dark:hover:from-goal-red-900/10 dark:hover:to-goal-red-900/10 transition-all duration-300 border-b border-goal-red-200/30 dark:border-goal-red-700/30"
+                          >
+                            <TableCell>
+                              <div>
+                                <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{user.gamer_tag_id || "Unknown"}</div>
+                                <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">ID: {user.id}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-hockey-silver-800 dark:text-hockey-silver-200">{user.email}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                {user.primary_position && (
+                                  <Badge variant="outline" className="text-xs border-ice-blue-300 dark:border-rink-blue-600 text-ice-blue-700 dark:text-rink-blue-300">
+                                    {user.primary_position}
+                                  </Badge>
+                                )}
+                                {user.secondary_position && (
+                                  <Badge variant="secondary" className="text-xs bg-gradient-to-r from-hockey-silver-100 to-hockey-silver-100 dark:from-hockey-silver-800 dark:to-hockey-silver-800 text-hockey-silver-700 dark:text-hockey-silver-300">
+                                    {user.secondary_position}
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {user.console && (
+                                <Badge variant="outline" className="border-rink-blue-300 dark:border-rink-blue-600 text-rink-blue-700 dark:text-rink-blue-300">
+                                  {user.console}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant="outline" 
+                                className={team === "Free Agent" ? "text-hockey-silver-600 dark:text-hockey-silver-400 border-hockey-silver-300 dark:border-hockey-silver-600" : "border-assist-green-300 dark:border-assist-green-600 text-assist-green-700 dark:text-assist-green-300"}
+                              >
+                                {team}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm text-hockey-silver-800 dark:text-hockey-silver-200">{new Date(user.created_at).toLocaleDateString()}</div>
+                              <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">
+                                {new Date(user.created_at).toLocaleTimeString()}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-gradient-to-r from-goal-red-100 to-goal-red-100 dark:from-goal-red-900/20 dark:to-goal-red-900/20 text-goal-red-700 dark:text-goal-red-300 border-goal-red-200 dark:border-goal-red-700">
+                                <UserX className="mr-1 h-3 w-3" />
+                                Not Connected
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+                {unconnectedUsers.length === 0 && (
+                  <div className="text-center py-12 text-hockey-silver-600 dark:text-hockey-silver-400">
+                    <div className="p-4 bg-gradient-to-r from-assist-green-500/20 to-assist-green-500/20 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                      <CheckCircle className="h-8 w-8 text-assist-green-600 dark:text-assist-green-400" />
+                    </div>
+                    <p className="text-lg font-medium text-hockey-silver-800 dark:text-hockey-silver-200">All active users have Discord connections!</p>
+                    <p className="text-sm">Great job on Discord adoption</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="config" className="space-y-6">
+            <Card className="hockey-card hockey-card-hover border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-assist-green-200/50 dark:border-assist-green-700/50 pb-4">
+                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                    <Settings className="h-6 w-6 text-white" />
+                  </div>
+                  Bot Configuration
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Configure the Discord bot settings and authentication.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="guild_id" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                      Discord Server ID
+                    </Label>
+                    <Input
+                      id="guild_id"
+                      value={botConfig.guild_id}
+                      onChange={(e) => setBotConfig({ ...botConfig, guild_id: e.target.value })}
+                      placeholder="Enter Discord server ID"
+                      className="hockey-search border-2 border-assist-green-200/50 dark:border-assist-green-700/50 focus:border-assist-green-500 dark:focus:border-assist-green-500 focus:ring-4 focus:ring-assist-green-500/20 dark:focus:ring-assist-green-500/20 transition-all duration-300"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Label htmlFor="registered_role_id" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                      Registered Role ID
+                    </Label>
+                    <Input
+                      id="registered_role_id"
+                      value={botConfig.registered_role_id}
+                      onChange={(e) => setBotConfig({ ...botConfig, registered_role_id: e.target.value })}
+                      placeholder="Enter registered role ID"
+                      className="hockey-search border-2 border-assist-green-200/50 dark:border-assist-green-700/50 focus:border-assist-green-500 dark:focus:border-assist-green-500 focus:ring-4 focus:ring-assist-green-500/20 dark:focus:ring-assist-green-500/20 transition-all duration-300"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor="bot_token" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                    Bot Token
+                  </Label>
+                  <Input
+                    id="bot_token"
+                    type="password"
+                    value={botConfig.bot_token}
+                    onChange={(e) => setBotConfig({ ...botConfig, bot_token: e.target.value })}
+                    placeholder="Enter bot token"
+                    className="hockey-search border-2 border-assist-green-200/50 dark:border-assist-green-700/50 focus:border-assist-green-500 dark:focus:border-assist-green-500 focus:ring-4 focus:ring-assist-green-500/20 dark:focus:ring-assist-green-500/20 transition-all duration-300"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={saveBotConfig} 
+                    disabled={saving}
+                    className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    Save Configuration
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={testConnection} 
+                    disabled={testing}
+                    className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {testing ? (
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                    )}
+                    Test Connection
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={syncAllRoles} 
+                    disabled={syncing}
+                    className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+                    {syncing ? "Syncing..." : "Sync All Roles"}
+                  </Button>
+                </div>
+              </CardContent>
+          </Card>
+
+            <Card className="hockey-card hockey-card-hover border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-rink-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-rink-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                    <Database className="h-6 w-6 text-white" />
+                  </div>
+                  OAuth Configuration
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Discord OAuth settings for user authentication.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2 mb-3">
+                      <Target className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                      Client ID
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <Input 
+                        value="1365888660171653150" 
+                        disabled 
+                        className="hockey-search border-2 border-rink-blue-200/50 dark:border-rink-blue-700/50"
+                      />
+                      <Badge variant="secondary" className="bg-gradient-to-r from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 border-assist-green-200 dark:border-assist-green-700">Configured</Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2 mb-3">
+                      <Shield className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                      Client Secret
+                    </Label>
+                    <div className="flex items-center gap-3">
+                      <Input 
+                        value="mu3IdoBiG7zo4NDHYmGArCfMHoP4atbX" 
+                        type="password" 
+                        disabled 
+                        className="hockey-search border-2 border-rink-blue-200/50 dark:border-rink-blue-700/50"
+                      />
+                      <Badge variant="secondary" className="bg-gradient-to-r from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 border-assist-green-200 dark:border-assist-green-700">Configured</Badge>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )}
-        </TabsContent>
 
-        <TabsContent value="roles" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Role Mapping</CardTitle>
-              <CardDescription>Map Discord roles to SCS teams.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Discord Role</TableHead>
-                    <TableHead>Role ID</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {teamRoles.map((role) => (
-                    <TableRow key={role.id}>
-                      <TableCell>{role.teams?.name}</TableCell>
-                      <TableCell>{role.role_name}</TableCell>
-                      <TableCell className="font-mono text-sm">{role.discord_role_id}</TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm" onClick={() => removeTeamRole(role.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+            {botStatus && (
+              <Card className="hockey-card hockey-card-hover border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="border-b-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 pb-4">
+                  <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg">
+                      <Activity className="h-6 w-6 text-white" />
+                    </div>
+                    Bot Status
+                  </CardTitle>
+                  <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Current status of the SCS Discord bot.</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <Label className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2 mb-3">
+                        <Globe className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
+                        Server Name
+                      </Label>
+                      <Input 
+                        value={botStatus.guild?.name || "Unknown"} 
+                        disabled 
+                        className="hockey-search border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2 mb-3">
+                        <Users className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
+                        Member Count
+                      </Label>
+                      <Input 
+                        value={botStatus.guild?.memberCount || "Unknown"} 
+                        disabled 
+                        className="hockey-search border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2 mb-3">
+                        <Wifi className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
+                        Bot Status
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="bg-gradient-to-r from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/20 dark:to-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 border-assist-green-200 dark:border-assist-green-700">
+                          <CheckCircle className="mr-1 h-3 w-3" />
+                          Online
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Management Role Mapping</CardTitle>
-              <CardDescription>Map Discord roles to management positions.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Discord Role</TableHead>
-                    <TableHead>Role ID</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {managementRoles.map((role) => (
-                    <TableRow key={role.id}>
-                      <TableCell>
-                        <Badge variant="outline">{role.role_type}</Badge>
-                      </TableCell>
-                      <TableCell>{role.role_name}</TableCell>
-                      <TableCell className="font-mono text-sm">{role.discord_role_id}</TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
+          <TabsContent value="roles" className="space-y-6">
+            <Card className="hockey-card hockey-card-hover border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-rink-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-rink-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                    <Shield className="h-6 w-6 text-white" />
+                  </div>
+                  Team Role Mapping
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Map Discord roles to SCS teams.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="hockey-card border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-rink-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 rounded-xl overflow-hidden shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-rink-blue-50/50 to-rink-blue-50/50 dark:from-rink-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-rink-blue-200/50 dark:border-rink-blue-700/50">
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Discord Role</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Role ID</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {teamRoles.map((role) => (
+                        <TableRow 
+                          key={role.id}
+                          className="hover:bg-gradient-to-r hover:from-rink-blue-50/30 hover:to-rink-blue-50/30 dark:hover:from-rink-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-rink-blue-200/30 dark:border-rink-blue-700/30"
+                        >
+                          <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">{role.teams?.name}</TableCell>
+                          <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">{role.role_name}</TableCell>
+                          <TableCell className="font-mono text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{role.discord_role_id}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => removeTeamRole(role.id)}
+                              className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
 
-        <TabsContent value="twitch" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Twitch className="h-5 w-5" />
-                Twitch Connections ({twitchConnections.length})
-              </CardTitle>
-              <CardDescription>Users who have connected their Twitch accounts for streaming.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>SCS User</TableHead>
-                    <TableHead>Twitch Username</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Checked</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {twitchConnections.map((connection) => (
-                    <TableRow key={connection.id}>
-                      <TableCell>{connection.discord_users?.users?.gamer_tag_id}</TableCell>
-                      <TableCell className="flex items-center gap-2">
-                        {connection.twitch_username}
-                        <Button variant="ghost" size="sm" asChild>
-                          <a
-                            href={`https://twitch.tv/${connection.twitch_username}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        {connection.is_live ? (
-                          <Badge variant="destructive">
-                            <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
-                            Live
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">Offline</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{new Date(connection.last_checked).toLocaleString()}</TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm">
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <Card className="hockey-card hockey-card-hover border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 pb-4">
+                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
+                  Management Role Mapping
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Map Discord roles to management positions.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="hockey-card border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 rounded-xl overflow-hidden shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-hockey-silver-50/50 to-hockey-silver-50/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 border-b-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50">
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Discord Role</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Role ID</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {managementRoles.map((role) => (
+                        <TableRow 
+                          key={role.id}
+                          className="hover:bg-gradient-to-r hover:from-hockey-silver-50/30 hover:to-hockey-silver-50/30 dark:hover:from-hockey-silver-900/10 dark:hover:to-hockey-silver-900/10 transition-all duration-300 border-b border-hockey-silver-200/30 dark:border-hockey-silver-700/30"
+                        >
+                          <TableCell>
+                            <Badge variant="outline" className="border-ice-blue-300 dark:border-rink-blue-600 text-ice-blue-700 dark:text-rink-blue-300">{role.role_type}</Badge>
+                          </TableCell>
+                          <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">{role.role_name}</TableCell>
+                          <TableCell className="font-mono text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{role.discord_role_id}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="twitch" className="space-y-6">
+            <Card className="hockey-card hockey-card-hover border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardHeader className="border-b-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 pb-4">
+                <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg">
+                    <Twitch className="h-6 w-6 text-white" />
+                  </div>
+                  Twitch Connections ({twitchConnections.length})
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Users who have connected their Twitch accounts for streaming.</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="hockey-card border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 rounded-xl overflow-hidden shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-hockey-silver-50/50 to-hockey-silver-50/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 border-b-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50">
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">SCS User</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Twitch Username</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Status</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Last Checked</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {twitchConnections.map((connection) => (
+                        <TableRow 
+                          key={connection.id}
+                          className="hover:bg-gradient-to-r hover:from-hockey-silver-50/30 hover:to-hockey-silver-50/30 dark:hover:from-hockey-silver-900/10 dark:hover:to-hockey-silver-900/10 transition-all duration-300 border-b border-hockey-silver-200/30 dark:border-hockey-silver-700/30"
+                        >
+                          <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">{connection.discord_users?.users?.gamer_tag_id}</TableCell>
+                          <TableCell className="flex items-center gap-2">
+                            <span className="text-hockey-silver-800 dark:text-hockey-silver-200">{connection.twitch_username}</span>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              asChild
+                              className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                              <a
+                                href={`https://twitch.tv/${connection.twitch_username}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </Button>
+                          </TableCell>
+                          <TableCell>
+                            {connection.is_live ? (
+                              <Badge variant="destructive" className="bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white border-0">
+                                <div className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
+                                Live
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="bg-gradient-to-r from-hockey-silver-100 to-hockey-silver-100 dark:from-hockey-silver-800 dark:to-hockey-silver-800 text-hockey-silver-700 dark:text-hockey-silver-300">Offline</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">{new Date(connection.last_checked).toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   )
 }
