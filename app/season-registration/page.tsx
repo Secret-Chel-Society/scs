@@ -1,680 +1,561 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { motion } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
+import { useSupabase } from "@/lib/supabase/client"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import DiscordConnectButton from "@/components/auth/discord-connect-button"
+import Link from "next/link"
 import { 
-  Calendar, 
-  Crown, 
-  Medal, 
-  Star, 
-  Target, 
-  TrendingUp, 
-  Zap, 
+  Loader2, 
+  AlertCircle, 
+  CheckCircle2, 
+  Info, 
+  Settings,
+  Trophy,
+  Calendar,
+  Users,
+  Star,
   Shield,
   Gamepad2,
-  Activity,
-  BarChart3,
   Clock,
-  Coins,
-  Gift,
-  Heart,
-  Flame,
-  Lightning,
-  UserPlus,
-  UserCheck,
-  UserX,
-  ExternalLink,
-  Share2,
-  Bookmark,
-  MessageCircle,
-  ThumbsUp,
-  Trophy,
-  Users,
-  Award,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  FileText,
-  Download,
-  Upload,
-  Send,
-  Save,
-  XCircle
+  Target,
+  Zap
 } from "lucide-react"
-import Link from "next/link"
 
-interface SeasonInfo {
-  id: string
-  name: string
-  start_date: string
-  end_date: string
-  registration_deadline: string
-  max_teams: number
-  current_registrations: number
-  status: "open" | "closing-soon" | "closed" | "full"
-  entry_fee: number
-  prize_pool: number
-  requirements: string[]
-  rules: string[]
-}
+// Define the form schema with Zod - Updated to match database values
+const formSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" }),
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  gamerTag: z
+    .string()
+    .min(2, { message: "Gamer tag must be at least 2 characters" })
+    .max(50, { message: "Gamer tag must be less than 50 characters" }),
+  primaryPosition: z.string().min(1, { message: "Please select a primary position" }),
+  secondaryPosition: z.string().optional(),
+  console: z.string().refine((value) => ["PS5", "Xbox"].includes(value), {
+    message: "Please select a valid console",
+  }),
+})
 
-interface RegistrationForm {
-  team_name: string
-  captain_name: string
-  captain_email: string
-  captain_discord: string
-  team_size: number
-  experience_level: string
-  preferred_schedule: string
-  team_description: string
-  agree_to_rules: boolean
-  agree_to_terms: boolean
-}
-
-const mockSeasonInfo: SeasonInfo = {
-  id: "2",
-  name: "Season 2",
-  start_date: "2024-02-01",
-  end_date: "2024-05-31",
-  registration_deadline: "2024-01-25",
-  max_teams: 32,
-  current_registrations: 28,
-  status: "closing-soon",
-  entry_fee: 50,
-  prize_pool: 5000,
-  requirements: [
-    "Team must have minimum 12 players",
-    "All players must be 18+ years old",
-    "Captain must have Discord account",
-    "Team must commit to full season schedule",
-    "Entry fee must be paid before deadline"
-  ],
-  rules: [
-    "NHL 26 gameplay rules apply",
-    "Matches scheduled weekly on designated days",
-    "Teams must field minimum 6 players per match",
-    "Substitutions allowed between periods",
-    "Disputes resolved by league officials",
-    "Code of conduct must be followed"
-  ]
-}
-
-const experienceLevels = [
-  "Beginner (0-1 years)",
-  "Intermediate (1-3 years)",
-  "Advanced (3-5 years)",
-  "Expert (5+ years)"
-]
-
-const schedulePreferences = [
-  "Weekday evenings (Mon-Thu)",
-  "Weekend afternoons (Sat-Sun)",
-  "Weekend evenings (Fri-Sat)",
-  "Flexible - any time",
-  "Specific days only"
-]
+type FormValues = z.infer<typeof formSchema>
 
 export default function SeasonRegistrationPage() {
-  const [formData, setFormData] = useState<RegistrationForm>({
-    team_name: "",
-    captain_name: "",
-    captain_email: "",
-    captain_discord: "",
-    team_size: 12,
-    experience_level: "",
-    preferred_schedule: "",
-    team_description: "",
-    agree_to_rules: false,
-    agree_to_terms: false
+  const router = useRouter()
+  const { supabase } = useSupabase()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
+  const [discordConnected, setDiscordConnected] = useState(false)
+  const [discordUserId, setDiscordUserId] = useState<string | null>(null)
+  const [discordUsername, setDiscordUsername] = useState<string | null>(null)
+  const [registrationError, setRegistrationError] = useState<string | null>(null)
+  const [registrationDetails, setRegistrationDetails] = useState<any>(null)
+  const [discordConfigError, setDiscordConfigError] = useState(false)
+
+  // Check for discord_connected query parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+
+    // Handle Discord connection success
+    if (params.get("discord_connected") === "true") {
+      // Try to get Discord info from localStorage
+      const storedDiscordInfo = localStorage.getItem("discord_connection_info")
+      if (storedDiscordInfo) {
+        try {
+          const discordInfo = JSON.parse(storedDiscordInfo)
+          setDiscordConnected(true)
+          setDiscordUserId(discordInfo.id)
+          setDiscordUsername(discordInfo.username)
+          toast({
+            title: "Discord Connected",
+            description: `Successfully connected as ${discordInfo.username}`,
+          })
+        } catch (e) {
+          console.error("Failed to parse Discord info:", e)
+          setRegistrationError("Failed to process Discord connection. Please try again.")
+        }
+      } else {
+        setRegistrationError("Discord connection data not found. Please try connecting again.")
+      }
+    }
+
+    // Handle Discord connection errors
+    const discordError = params.get("discord_error")
+    if (discordError) {
+      let errorMessage = "Failed to connect Discord account."
+      let isConfigError = false
+
+      switch (discordError) {
+        case "oauth_failed":
+          errorMessage = "Discord OAuth failed. Please try again."
+          break
+        case "storage_failed":
+          errorMessage = "Failed to store Discord connection. Please try again."
+          break
+        case "missing_params":
+          errorMessage = "Invalid Discord response. Please try again."
+          break
+        case "config_error":
+        case "missing_client_secret":
+          errorMessage = "Discord OAuth is not properly configured. Please contact an administrator."
+          isConfigError = true
+          break
+        case "token_failed":
+          errorMessage = "Failed to exchange Discord authorization code. Please try again."
+          break
+        case "user_info_failed":
+          errorMessage = "Failed to retrieve Discord user information. Please try again."
+          break
+        case "no_code":
+          errorMessage = "No authorization code received from Discord. Please try again."
+          break
+        default:
+          errorMessage = `Discord connection error: ${discordError}`
+      }
+
+      setDiscordConfigError(isConfigError)
+      setRegistrationError(errorMessage)
+      toast({
+        title: "Discord Connection Failed",
+        description: errorMessage,
+        variant: "destructive",
+      })
+    }
+  }, [toast])
+
+  // Initialize form with react-hook-form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      gamerTag: "",
+      primaryPosition: "",
+      secondaryPosition: "",
+      console: "",
+    },
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
-
-  const daysUntilDeadline = Math.ceil(
-    (new Date(mockSeasonInfo.registration_deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-  )
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "open":
-        return <Badge variant="default"><CheckCircle className="h-3 w-3 mr-1" />Open</Badge>
-      case "closing-soon":
-        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Closing Soon</Badge>
-      case "closed":
-        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Closed</Badge>
-      case "full":
-        return <Badge variant="outline"><Users className="h-3 w-3 mr-1" />Full</Badge>
-      default:
-        return <Badge variant="default">{status}</Badge>
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open": return "hockey-green"
-      case "closing-soon": return "hockey-orange"
-      case "closed": return "hockey-red"
-      case "full": return "hockey-gold"
-      default: return "hockey-silver"
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    })
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
-
-  const handleInputChange = (field: keyof RegistrationForm, value: string | boolean | number) => {
-    setFormData((prev: RegistrationForm) => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    setIsSubmitting(false)
-    setShowSuccess(true)
-    
-    // Reset form after success
-    setTimeout(() => {
-      setShowSuccess(false)
-      setFormData({
-        team_name: "",
-        captain_name: "",
-        captain_email: "",
-        captain_discord: "",
-        team_size: 12,
-        experience_level: "",
-        preferred_schedule: "",
-        team_description: "",
-        agree_to_rules: false,
-        agree_to_terms: false
+  // Handle form submission
+  const onSubmit = async (data: FormValues) => {
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Unable to connect to authentication service",
+        variant: "destructive",
       })
-    }, 5000)
+      return
+    }
+
+    if (!discordConnected || !discordUserId || !discordUsername) {
+      toast({
+        title: "Discord Required",
+        description: "Please connect your Discord account before registering",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsLoading(true)
+    setRegistrationError(null)
+    setRegistrationDetails(null)
+
+    try {
+      console.log("Starting registration for:", data.email)
+
+      // Use the standard registration API endpoint with Discord info
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          metadata: {
+            gamer_tag_id: data.gamerTag,
+            primary_position: data.primaryPosition,
+            secondary_position: data.secondaryPosition || null,
+            console: data.console,
+            is_active: true,
+            discord_id: discordUserId,
+            discord_username: discordUsername,
+          },
+          // Include Discord info for saving to database
+          discordInfo: {
+            id: discordUserId,
+            username: discordUsername,
+            discriminator: "0000",
+            avatar: null,
+          },
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        // Store details for debugging if available
+        if (result.details) {
+          setRegistrationDetails(result.details)
+        }
+        throw new Error(result.error || "Registration failed")
+      }
+
+      // Success - clear Discord info from localStorage
+      localStorage.removeItem("discord_connection_info")
+
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created successfully!",
+      })
+
+      // Redirect to login page or dashboard
+      router.push("/login?registered=true")
+    } catch (error: any) {
+      console.error("Registration error:", error)
+      setRegistrationError(error.message || "An error occurred during registration")
+      toast({
+        title: "Registration failed",
+        description: error.message || "An error occurred during registration",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const isFormValid = () => {
-    return (
-      formData.team_name.trim() !== "" &&
-      formData.captain_name.trim() !== "" &&
-      formData.captain_email.trim() !== "" &&
-      formData.captain_discord.trim() !== "" &&
-      formData.experience_level !== "" &&
-      formData.preferred_schedule !== "" &&
-      formData.agree_to_rules &&
-      formData.agree_to_terms
-    )
+  // Function to reset Discord connection
+  const resetDiscordConnection = () => {
+    setDiscordConnected(false)
+    setDiscordUserId(null)
+    setDiscordUsername(null)
+    setDiscordConfigError(false)
+    localStorage.removeItem("discord_connection_info")
+    setRegistrationError(null)
+    setRegistrationDetails(null)
+
+    // Clear URL parameters
+    const url = new URL(window.location.href)
+    url.searchParams.delete("discord_connected")
+    url.searchParams.delete("discord_error")
+    window.history.replaceState({}, "", url.toString())
   }
 
-  if (showSuccess) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10 flex items-center justify-center">
-        <div>
-          <Card className="enhanced-card text-center p-12 max-w-md">
-            <div className="w-20 h-20 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-10 w-10 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold mb-4">Registration Successful!</h2>
-            <p className="text-muted-foreground mb-6">
-              Your team has been successfully registered for {mockSeasonInfo.name}. 
-              You will receive a confirmation email shortly.
-            </p>
-            <Button className="btn-championship" onClick={() => setShowSuccess(false)}>
-              Continue
-            </Button>
-          </Card>
-        </div>
-      </div>
+  // Function to handle Discord connection
+  const handleDiscordConnect = (userId: string, username: string) => {
+    setDiscordConnected(true)
+    setDiscordUserId(userId)
+    setDiscordUsername(username)
+    setRegistrationError(null)
+    setRegistrationDetails(null)
+    setDiscordConfigError(false)
+
+    // Store Discord info in localStorage for persistence
+    localStorage.setItem(
+      "discord_connection_info",
+      JSON.stringify({
+        id: userId,
+        username: username,
+      }),
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-hockey-ice/5 to-hockey-ice/10">
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-hockey-gold/20 via-hockey-orange/20 to-hockey-gold/20 border-b border-hockey-gold/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-hockey-gold/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-32 h-32 bg-hockey-gold/10 rounded-full -translate-y-16 translate-x-16" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-hockey-orange/10 rounded-full translate-y-12 -translate-x-12" />
+      <div className="relative overflow-hidden bg-gradient-to-br from-ice-blue-500/20 via-rink-blue-500/20 to-ice-blue-500/20 border-b border-ice-blue-200/50 dark:border-rink-blue-700/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/5 to-transparent" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-ice-blue-400/10 to-rink-blue-400/10 rounded-full -translate-y-16 translate-x-16 blur-xl" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-rink-blue-400/10 to-ice-blue-400/10 rounded-full translate-y-12 -translate-x-12 blur-xl" />
         
-        <div className="relative container mx-auto px-4 py-16">
-          <div 
+        <div className="relative container mx-auto px-4 py-12">
+          <motion.div 
             className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
             <div className="inline-flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-r from-hockey-gold to-hockey-orange rounded-xl">
+              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
                 <Trophy className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-5xl font-bold hockey-gradient-text">Season Registration</h1>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-500 bg-clip-text text-transparent">
+                Season Registration
+              </h1>
             </div>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Join the ultimate NHL 26 competitive experience. Register your team for {mockSeasonInfo.name} 
-              and compete for glory in the Secret Chel Society.
+            <p className="text-lg md:text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-2xl mx-auto mb-8">
+              Join the ultimate NHL 26 competitive experience. Register your account and compete for glory in the Secret Chel Society.
             </p>
-            <div className="h-1 w-32 bg-gradient-to-r from-hockey-gold to-transparent rounded-full mx-auto" />
-          </div>
+            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-transparent rounded-full mx-auto" />
+          </motion.div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Registration Form */}
-          <div className="lg:col-span-2">
-            <div>
-              <Card className="enhanced-card">
-                <CardHeader className="enhanced-card-header">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-hockey-gold to-hockey-orange rounded-lg">
-                      <UserPlus className="h-5 w-5 text-white" />
-                    </div>
-                    <span>Team Registration Form</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Team Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-hockey-blue">Team Information</h3>
-                      
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Team Name *</label>
-                        <Input
-                          placeholder="Enter your team name"
-                          value={formData.team_name}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("team_name", e.target.value)}
-                          required
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Team Size *</label>
-                          <Select 
-                            value={formData.team_size.toString()} 
-                            onValueChange={(value: string) => handleInputChange("team_size", parseInt(value))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {[12, 13, 14, 15, 16, 17, 18, 19, 20].map(size => (
-                                <SelectItem key={size} value={size.toString()}>
-                                  {size} Players
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Experience Level *</label>
-                          <Select 
-                            value={formData.experience_level} 
-                            onValueChange={(value: string) => handleInputChange("experience_level", value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select experience level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {experienceLevels.map(level => (
-                                <SelectItem key={level} value={level}>
-                                  {level}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Preferred Schedule *</label>
-                        <Select 
-                          value={formData.preferred_schedule} 
-                                                      onValueChange={(value: string) => handleInputChange("preferred_schedule", value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select schedule preference" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {schedulePreferences.map(schedule => (
-                              <SelectItem key={schedule} value={schedule}>
-                                {schedule}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Team Description</label>
-                        <Textarea
-                          placeholder="Tell us about your team, playing style, goals, etc."
-                          value={formData.team_description}
-                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange("team_description", e.target.value)}
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Captain Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-hockey-green">Captain Information</h3>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Captain Name *</label>
-                          <Input
-                            placeholder="Enter captain's full name"
-                            value={formData.captain_name}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("captain_name", e.target.value)}
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Email Address *</label>
-                          <Input
-                            type="email"
-                            placeholder="Enter captain's email"
-                            value={formData.captain_email}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("captain_email", e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Discord Username *</label>
-                        <Input
-                          placeholder="Enter Discord username (e.g., username#1234)"
-                          value={formData.captain_discord}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("captain_discord", e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Agreements */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-hockey-purple">Agreements</h3>
-                      
-                      <div className="space-y-3">
-                        <div className="flex items-start space-x-3">
-                          <Checkbox
-                            id="rules"
-                            checked={formData.agree_to_rules}
-                            onCheckedChange={(checked: boolean) => handleInputChange("agree_to_rules", checked)}
-                            required
-                          />
-                          <label htmlFor="rules" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            I have read and agree to follow all league rules and regulations *
-                          </label>
-                        </div>
-
-                        <div className="flex items-start space-x-3">
-                          <Checkbox
-                            id="terms"
-                            checked={formData.agree_to_terms}
-                            onCheckedChange={(checked: boolean) => handleInputChange("agree_to_terms", checked)}
-                            required
-                          />
-                          <label htmlFor="terms" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            I agree to the terms and conditions and code of conduct *
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="pt-4">
-                      <Button
-                        type="submit"
-                        className="w-full btn-championship"
-                        disabled={!isFormValid() || isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="h-4 w-4 mr-2" />
-                            Submit Registration
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Season Information Sidebar */}
-          <div className="space-y-6">
-            {/* Season Status */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <Card className="enhanced-card">
-                <CardHeader className="enhanced-card-header">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className={`p-2 bg-gradient-to-r from-${getStatusColor(mockSeasonInfo.status)} to-hockey-orange rounded-lg`}>
-                      <Info className="h-5 w-5 text-white" />
-                    </div>
-                    <span>Season Status</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Status</span>
-                      {getStatusBadge(mockSeasonInfo.status)}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Registration Deadline</span>
-                      <span className="font-semibold">{formatDate(mockSeasonInfo.registration_deadline)}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Days Remaining</span>
-                      <span className={`font-bold ${daysUntilDeadline <= 7 ? "text-hockey-red" : "text-hockey-green"}`}>
-                        {daysUntilDeadline} days
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Teams Registered</span>
-                      <span className="font-semibold">
-                        {mockSeasonInfo.current_registrations}/{mockSeasonInfo.max_teams}
-                      </span>
-                    </div>
-
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-hockey-green to-hockey-blue h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(mockSeasonInfo.current_registrations / mockSeasonInfo.max_teams) * 100}%` }}
-                      />
-                    </div>
+        <div className="flex justify-center">
+          <motion.div
+            className="w-full max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Card className="hockey-enhanced-card">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+                    <Star className="h-6 w-6 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Season Details */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Card className="enhanced-card">
-                <CardHeader className="enhanced-card-header">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-hockey-blue to-hockey-purple rounded-lg">
-                      <Calendar className="h-5 w-5 text-white" />
-                    </div>
-                    <span>Season Details</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Season</span>
-                      <span className="font-semibold">{mockSeasonInfo.name}</span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Start Date</span>
-                      <span className="font-semibold">{formatDate(mockSeasonInfo.start_date)}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">End Date</span>
-                      <span className="font-semibold">{formatDate(mockSeasonInfo.end_date)}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Entry Fee</span>
-                      <span className="font-bold text-hockey-gold">{formatCurrency(mockSeasonInfo.entry_fee)}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Prize Pool</span>
-                      <span className="font-bold text-hockey-gold">{formatCurrency(mockSeasonInfo.prize_pool)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Requirements */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Card className="enhanced-card">
-                <CardHeader className="enhanced-card-header">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-hockey-green to-hockey-blue rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </div>
-                    <span>Requirements</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <ul className="space-y-2">
-                    {mockSeasonInfo.requirements.map((requirement, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-hockey-green mt-0.5 flex-shrink-0" />
-                        <span>{requirement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Card className="enhanced-card">
-                <CardHeader className="enhanced-card-header">
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-hockey-purple to-hockey-pink rounded-lg">
-                      <Zap className="h-5 w-5 text-white" />
-                    </div>
-                    <span>Quick Actions</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    <Button className="w-full btn-ice" variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Rules
-                    </Button>
-                    <Button className="w-full btn-ice" variant="outline" size="sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      View FAQ
-                    </Button>
-                    <Button className="w-full btn-ice" variant="outline" size="sm">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Contact Support
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <motion.div
-          className="mt-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Card className="enhanced-card bg-gradient-to-br from-hockey-gold/20 via-hockey-orange/10 to-transparent">
-            <CardContent className="p-8 text-center">
-              <div className="inline-flex items-center gap-3 mb-4">
-                <div className="p-3 bg-gradient-to-r from-hockey-gold to-hockey-orange rounded-xl">
-                  <Trophy className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold">Ready to Compete?</h2>
-              </div>
-              <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Don't miss your chance to join the most competitive NHL 26 league. 
-                Register now and start your journey to the championship.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="btn-championship">
-                  <UserPlus className="h-5 w-5 mr-2" />
-                  Register Your Team
-                </Button>
-                <Button className="btn-ice" variant="outline">
-                  <Info className="h-5 w-5 mr-2" />
-                  Learn More
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                <CardTitle className="text-xl font-bold text-hockey-silver-900 dark:text-hockey-silver-100">
+                  Create an Account
+                </CardTitle>
+                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
+                  Join the SCS community today
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <CardContent className="space-y-6">
+                  {registrationError && (
+                    <Alert variant="destructive" className="hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Error</AlertTitle>
+                      <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
+                        {registrationError}
+                        {discordConfigError && (
+                          <div className="mt-2 text-sm">
+                            <p>
+                              This appears to be a configuration issue. The Discord OAuth integration needs to be set up by
+                              an administrator.
+                            </p>
+                          </div>
+                        )}
+                        {registrationDetails && (
+                          <details className="mt-2 text-xs">
+                            <summary>Technical Details</summary>
+                            <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(registrationDetails, null, 2)}</pre>
+                          </details>
+                        )}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <Alert className="hockey-enhanced-card border-ice-blue-200 dark:border-rink-blue-700">
+                    <Info className="h-4 w-4 text-ice-blue-500" />
+                    <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Important</AlertTitle>
+                    <AlertDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                      You must connect your Discord account to register. This is required for league communications.
+                    </AlertDescription>
+                  </Alert>
+
+                  {/* Discord Connection Section */}
+                  <div className="space-y-4 p-4 bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                    <h3 className="text-base font-semibold text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-ice-blue-500" />
+                      Step 1: Connect Discord
+                    </h3>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                      Discord connection is required for SCS communication
+                    </p>
+                    {discordConnected ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2 text-assist-green-600 dark:text-assist-green-400">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span>Discord Connected: {discordUsername || "User"}</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetDiscordConnection}
+                          className="w-full hockey-button-enhanced"
+                        >
+                          Disconnect & Try Again
+                        </Button>
+                      </div>
+                    ) : discordConfigError ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2 text-goal-red-600 dark:text-goal-red-400">
+                          <Settings className="h-5 w-5" />
+                          <span>Discord OAuth Not Configured</span>
+                        </div>
+                        <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">
+                          The Discord integration needs to be configured by an administrator before registration can
+                          proceed.
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetDiscordConnection}
+                          className="w-full hockey-button-enhanced"
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : (
+                      <DiscordConnectButton
+                        userId="registration"
+                        source="register"
+                        className="w-full"
+                        onSuccess={handleDiscordConnect}
+                      />
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="text-base font-semibold text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
+                      <Users className="h-4 w-4 text-rink-blue-500" />
+                      Step 2: Account Information
+                    </h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="email" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                      <Target className="h-4 w-4 text-ice-blue-500" />
+                      Email
+                    </Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="your.email@example.com" 
+                      {...register("email")} 
+                      className="hockey-search"
+                    />
+                    {errors.email && <p className="text-sm text-goal-red-500">{errors.email.message}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="password" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-rink-blue-500" />
+                      Password
+                    </Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      {...register("password")} 
+                      className="hockey-search"
+                    />
+                    {errors.password && <p className="text-sm text-goal-red-500">{errors.password.message}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="gamerTag" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                      <Gamepad2 className="h-4 w-4 text-assist-green-500" />
+                      Gamer Tag
+                    </Label>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your Xbox or PSN name (2-50 characters)</p>
+                    <Input 
+                      id="gamerTag" 
+                      placeholder="Your in-game name" 
+                      {...register("gamerTag")} 
+                      className="hockey-search"
+                    />
+                    {errors.gamerTag && <p className="text-sm text-goal-red-500">{errors.gamerTag.message}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="primaryPosition" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                      <Star className="h-4 w-4 text-ice-blue-500" />
+                      Primary Position
+                    </Label>
+                    <select
+                      id="primaryPosition"
+                      className="hockey-search"
+                      {...register("primaryPosition")}
+                    >
+                      <option value="">Select position</option>
+                      <option value="Center">Center (C)</option>
+                      <option value="Left Wing">Left Wing (LW)</option>
+                      <option value="Right Wing">Right Wing (RW)</option>
+                      <option value="Left Defense">Left Defense (LD)</option>
+                      <option value="Right Defense">Right Defense (RD)</option>
+                      <option value="Goalie">Goalie (G)</option>
+                    </select>
+                    {errors.primaryPosition && <p className="text-sm text-goal-red-500">{errors.primaryPosition.message}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="secondaryPosition" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                      <Target className="h-4 w-4 text-rink-blue-500" />
+                      Secondary Position (Optional)
+                    </Label>
+                    <select
+                      id="secondaryPosition"
+                      className="hockey-search"
+                      {...register("secondaryPosition")}
+                    >
+                      <option value="">None</option>
+                      <option value="Center">Center (C)</option>
+                      <option value="Left Wing">Left Wing (LW)</option>
+                      <option value="Right Wing">Right Wing (RW)</option>
+                      <option value="Left Defense">Left Defense (LD)</option>
+                      <option value="Right Defense">Right Defense (RD)</option>
+                      <option value="Goalie">Goalie (G)</option>
+                    </select>
+                    {errors.secondaryPosition && <p className="text-sm text-goal-red-500">{errors.secondaryPosition.message}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="console" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                      <Gamepad2 className="h-4 w-4 text-assist-green-500" />
+                      Console
+                    </Label>
+                    <select
+                      id="console"
+                      className="hockey-search"
+                      {...register("console")}
+                    >
+                      <option value="">Select console</option>
+                      <option value="PS5">PlayStation 5</option>
+                      <option value="Xbox">Xbox Series X</option>
+                    </select>
+                    {errors.console && <p className="text-sm text-goal-red-500">{errors.console.message}</p>}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-4">
+                  <Button 
+                    type="submit" 
+                    className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white" 
+                    disabled={isLoading || !discordConnected || discordConfigError}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="mr-2 h-4 w-4" />
+                        Create Account
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-sm text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-ice-blue-500 hover:text-ice-blue-600 hover:underline">
+                      Log in
+                    </Link>
+                  </p>
+                </CardFooter>
+              </form>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     </div>
   )
