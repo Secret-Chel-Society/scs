@@ -11,7 +11,7 @@ import { RemoveUserBids } from "@/components/admin/remove-user-bids"
 import { IpTracking } from "@/components/admin/ip-tracking"
 import { SeasonsManager } from "@/components/admin/seasons-manager"
 import { Settings, Shield, Users, Database, Trophy, Activity } from "lucide-react"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion"
 
 export function AdminSettingsPageClient() {
   const router = useRouter()
@@ -84,11 +84,7 @@ export function AdminSettingsPageClient() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="animate-fade-in-up">
           <h1 className="text-3xl font-bold mb-8 text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
               <Settings className="h-6 w-6 text-white" />

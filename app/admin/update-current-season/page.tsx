@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, AlertCircle, CheckCircle, Trophy, Calendar, Settings, Zap } from "lucide-react"
-import { motion } from "framer-motion"
+// import { motion } from "framer-motion" - replaced with CSS animations
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useSupabase } from "@/lib/supabase/client"
 
@@ -129,11 +129,7 @@ export default function UpdateCurrentSeasonPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="animate-fade-in-up">
           <h1 className="text-3xl font-bold mb-6 text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
               <Trophy className="h-6 w-6 text-white" />
@@ -214,7 +210,7 @@ export default function UpdateCurrentSeasonPage() {
           </Button>
         </CardFooter>
       </Card>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

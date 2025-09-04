@@ -678,10 +678,8 @@ export default function RegistrationsPage() {
         </CardContent>
       </Card>
         </motion.div>
-      </div>
-    </div>
 
-      {/* Registration Details Dialog */}
+        {/* Registration Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -947,6 +945,7 @@ export default function RegistrationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }
