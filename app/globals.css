@@ -96,32 +96,32 @@
   
   .hockey-card-hover {
     @apply hover:shadow-xl hover:shadow-blue-500/20 dark:hover:shadow-blue-600/30;
-    @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-700;
+    @apply hover:border-blue-300 dark:hover:border-blue-700;
     @apply transition-all duration-300 ease-out;
     @apply hover:scale-105;
   }
   
   .hockey-gradient-text {
-    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+    @apply bg-gradient-to-r from-blue-600 via-blue-600 to-blue-800;
+    @apply dark:from-blue-400 dark:via-blue-400 dark:to-blue-600;
     @apply bg-clip-text text-transparent;
     @apply animate-gradient-x;
   }
   
   .hockey-button {
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
-    @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
+    @apply bg-gradient-to-r from-blue-500 to-blue-600;
+    @apply hover:from-blue-600 hover:to-blue-700;
     @apply text-white font-semibold py-2 px-4 rounded-lg;
     @apply transition-all duration-200 ease-out;
     @apply hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25;
-    @apply focus:outline-none focus:ring-2 focus:ring-ice-blue-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
   }
   
   .hockey-badge {
-    @apply bg-gradient-to-r from-ice-blue-100 to-rink-blue-100;
+    @apply bg-gradient-to-r from-blue-100 to-blue-100;
     @apply dark:from-blue-900/30 dark:to-blue-900/30;
-    @apply text-ice-blue-800 dark:text-ice-blue-200;
-    @apply border border-ice-blue-200 dark:border-ice-blue-700;
+    @apply text-blue-800 dark:text-blue-200;
+    @apply border border-blue-200 dark:border-blue-700;
     @apply px-3 py-1 rounded-full text-sm font-medium;
     @apply transition-all duration-200 ease-out;
     @apply hover:scale-105 hover:shadow-md;
@@ -141,46 +141,46 @@
     @apply backdrop-blur-sm border border-slate-200/50;
     @apply dark:border-slate-600/50;
     @apply transition-all duration-200 ease-out;
-    @apply hover:scale-105 hover:bg-white dark:hover:bg-hockey-silver-800;
+    @apply hover:scale-105 hover:bg-white dark:hover:bg-slate-800;
     @apply hover:shadow-md hover:shadow-blue-500/20;
     @apply min-h-[70px] flex flex-col justify-center;
   }
   
   .hockey-search {
     @apply bg-white/80 dark:bg-slate-800/80;
-    @apply border-2 border-ice-blue-200 dark:border-rink-blue-700;
-    @apply focus:border-ice-blue-500 dark:focus:border-rink-blue-500;
+    @apply border-2 border-blue-200 dark:border-blue-700;
+    @apply focus:border-blue-500 dark:focus:border-blue-600;
     @apply focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-600/20;
     @apply rounded-lg px-3 py-2 text-sm;
     @apply transition-all duration-200 ease-out;
-    @apply placeholder:text-slate-500 dark:placeholder:text-hockey-silver-400;
+    @apply placeholder:text-slate-500 dark:placeholder:text-slate-400;
     @apply backdrop-blur-sm;
   }
   
   .hockey-header {
     @apply relative overflow-hidden;
-    @apply bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50;
-    @apply dark:from-slate-900/50 dark:via-hockey-silver-800 dark:to-blue-900/30;
+    @apply bg-gradient-to-br from-blue-50 via-white to-blue-100;
+    @apply dark:from-slate-900/50 dark:via-slate-800 dark:to-blue-900/30;
     @apply before:absolute before:inset-0 before:bg-hockey-pattern before:opacity-5;
   }
   
   .hockey-title {
     @apply relative z-10;
-    @apply bg-gradient-to-r from-ice-blue-700 via-rink-blue-700 to-ice-blue-800;
-    @apply dark:from-ice-blue-300 dark:via-rink-blue-300 dark:to-ice-blue-400;
+    @apply bg-gradient-to-r from-blue-700 via-blue-700 to-blue-800;
+    @apply dark:from-blue-300 dark:via-blue-300 dark:to-blue-400;
     @apply bg-clip-text text-transparent;
     @apply text-2xl md:text-3xl font-bold;
     @apply animate-gradient-x;
   }
   
   .hockey-subtitle {
-    @apply relative z-10 text-hockey-silver-600 dark:text-hockey-silver-400;
+    @apply relative z-10 text-slate-600 dark:text-slate-400;
     @apply text-base md:text-lg font-medium;
     @apply max-w-2xl;
   }
   
   .hockey-match-card {
-    @apply bg-gradient-to-br from-white to-blue-50/50 dark:from-hockey-silver-900 dark:to-blue-900/20;
+    @apply bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-900 dark:to-blue-900/20;
     @apply border border-blue-200/50 dark:border-blue-800/50;
     @apply shadow-lg shadow-blue-500/10 dark:shadow-blue-600/20;
     @apply backdrop-blur-sm;
@@ -190,7 +190,7 @@
   
   .hockey-match-card-hover {
     @apply hover:shadow-xl hover:shadow-blue-500/20 dark:hover:shadow-blue-600/30;
-    @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-700;
+    @apply hover:border-blue-300 dark:hover:border-blue-700;
     @apply hover:scale-105;
   }
   
@@ -205,7 +205,7 @@
   }
   
   .hockey-date-indicator {
-    @apply w-2 h-8 bg-gradient-to-b from-ice-blue-500 to-rink-blue-600 rounded-full;
+    @apply w-2 h-8 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full;
   }
   
   .hockey-score-display {
@@ -270,7 +270,7 @@
   }
   
   .hockey-score-number {
-    @apply text-3xl font-bold tabular-nums text-hockey-silver-800 dark:text-hockey-silver-200;
+    @apply text-3xl font-bold tabular-nums text-slate-800 dark:text-slate-200;
   }
   
   .hockey-score-separator {
@@ -306,7 +306,7 @@
   }
   
   .hockey-team-name {
-    @apply font-bold text-center text-hockey-silver-800 dark:text-hockey-silver-200 group-hover:text-ice-blue-600 dark:group-hover:text-rink-blue-400 transition-colors duration-200 text-base;
+    @apply font-bold text-center text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 text-base;
   }
   
   .hockey-team-badge {
@@ -314,11 +314,11 @@
   }
   
   .hockey-home-badge {
-    @apply bg-gradient-to-r from-ice-blue-100 to-ice-blue-200 text-ice-blue-800 border border-ice-blue-300 dark:from-blue-900/30 dark:to-blue-800/30 dark:text-ice-blue-200 dark:border-ice-blue-600;
+    @apply bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 dark:from-blue-900/30 dark:to-blue-800/30 dark:text-blue-200 dark:border-blue-600;
   }
   
   .hockey-away-badge {
-    @apply bg-gradient-to-r from-rink-blue-100 to-rink-blue-200 text-rink-blue-800 border border-rink-blue-300 dark:from-blue-900/30 dark:to-blue-800/30 dark:text-rink-blue-200 dark:border-rink-blue-600;
+    @apply bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300 dark:from-blue-900/30 dark:to-blue-800/30 dark:text-blue-200 dark:border-blue-600;
   }
   
   .hockey-score-section {
@@ -335,14 +335,14 @@
   
   .hockey-standings-table th {
     @apply bg-gradient-to-r from-slate-50 to-blue-50/30 dark:from-slate-900/30 dark:to-blue-900/20;
-    @apply border-hockey-silver-200 dark:border-hockey-silver-700;
-    @apply text-hockey-silver-700 dark:text-hockey-silver-300;
+    @apply border-slate-200 dark:border-slate-700;
+    @apply text-slate-700 dark:text-slate-300;
     @apply font-bold;
     @apply px-4 py-3;
   }
   
   .hockey-standings-table td {
-    @apply border-hockey-silver-200 dark:border-hockey-silver-700;
+    @apply border-slate-200 dark:border-slate-700;
     @apply px-4 py-3;
     @apply transition-all duration-200;
   }
@@ -353,12 +353,12 @@
   }
   
   .hockey-tabs-list {
-    @apply bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-blue-900/30 dark:to-blue-900/30;
+    @apply bg-gradient-to-r from-blue-100 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/30;
     @apply p-1 rounded-xl border border-blue-200/50 dark:border-blue-700/50;
   }
   
   .hockey-tab-trigger {
-    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600;
+    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600;
     @apply data-[state=active]:text-white data-[state=active]:shadow-lg;
     @apply transition-all duration-200;
   }
@@ -399,7 +399,7 @@
   
   .hockey-feature-icon {
     @apply relative p-3 rounded-lg shadow-lg;
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+    @apply bg-gradient-to-r from-blue-500 to-blue-600;
     @apply transition-all duration-300;
   }
   
@@ -426,17 +426,17 @@
   }
   
   .hockey-stats-enhanced:hover {
-    @apply bg-white dark:bg-hockey-silver-800;
-    @apply border-ice-blue-300 dark:border-rink-blue-600;
+    @apply bg-white dark:bg-slate-800;
+    @apply border-blue-300 dark:border-blue-600;
   }
   
   .hockey-button-enhanced {
-    @apply bg-gradient-to-r from-ice-blue-500 via-ice-blue-600 to-rink-blue-600;
-    @apply hover:from-ice-blue-600 hover:via-rink-blue-600 hover:to-rink-blue-700;
+    @apply bg-gradient-to-r from-blue-500 via-blue-600 to-blue-600;
+    @apply hover:from-blue-600 hover:via-blue-600 hover:to-blue-700;
     @apply text-white font-semibold py-3 px-6 rounded-xl;
     @apply transition-all duration-300 ease-out;
     @apply hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/40;
-    @apply focus:outline-none focus:ring-2 focus:ring-ice-blue-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
     @apply relative overflow-hidden;
     @apply border border-blue-400/30 hover:border-blue-300/50;
   }
@@ -465,8 +465,8 @@
   .hockey-title-enhanced {
     @apply hockey-title;
     @apply text-3xl md:text-4xl;
-    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+    @apply bg-gradient-to-r from-blue-600 via-blue-600 to-blue-800;
+    @apply dark:from-blue-400 dark:via-blue-400 dark:to-blue-600;
     @apply bg-clip-text text-transparent;
     @apply animate-gradient-x;
     @apply relative;
@@ -480,7 +480,7 @@
   }
   
   .hockey-section-divider {
-    @apply h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent;
+    @apply h-1 w-40 bg-gradient-to-r from-blue-500 via-blue-600 to-transparent;
     @apply rounded-full mx-auto;
     @apply transition-all duration-1000;
   }
@@ -497,16 +497,16 @@
   
   /* Enhanced Link Animations with Gradient Underlines */
   .hockey-link-enhanced {
-    @apply relative text-ice-blue-600 dark:text-ice-blue-400;
+    @apply relative text-blue-600 dark:text-blue-400;
     @apply transition-all duration-300 ease-out;
-    @apply hover:text-rink-blue-700 dark:hover:text-rink-blue-300;
+    @apply hover:text-blue-700 dark:hover:text-blue-300;
     @apply font-medium;
   }
   
   .hockey-link-enhanced::after {
     content: '';
     @apply absolute bottom-0 left-0 w-0 h-0.5;
-    @apply bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-ice-blue-600;
+    @apply bg-gradient-to-r from-blue-500 via-blue-600 to-blue-600;
     @apply transition-all duration-500 ease-out;
   }
   
@@ -516,13 +516,13 @@
   
   .hockey-link-enhanced:focus::after {
     @apply w-full;
-    @apply bg-gradient-to-r from-rink-blue-500 via-ice-blue-500 to-rink-blue-600;
+    @apply bg-gradient-to-r from-blue-600 via-blue-500 to-blue-600;
   }
   
   /* Premium Card Enhancements */
   .hockey-premium-card {
-    @apply relative bg-gradient-to-br from-white via-ice-blue-25 to-rink-blue-25;
-    @apply dark:from-slate-950 dark:via-hockey-silver-900 dark:to-blue-950/50;
+    @apply relative bg-gradient-to-br from-white via-blue-25 to-blue-50;
+    @apply dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/50;
     @apply border-2 border-blue-200/60 dark:border-blue-700/60;
     @apply shadow-2xl shadow-blue-500/20 dark:shadow-blue-600/30;
     @apply backdrop-blur-lg rounded-2xl overflow-hidden;
@@ -556,11 +556,11 @@
   .hockey-form-enhanced {
     @apply bg-white/90 dark:bg-slate-800/90;
     @apply border-2 border-blue-200/60 dark:border-blue-700/60;
-    @apply focus:border-ice-blue-500 dark:focus:border-rink-blue-500;
+    @apply focus:border-blue-500 dark:focus:border-blue-600;
     @apply focus:ring-4 focus:ring-blue-500/25 dark:focus:ring-blue-600/25;
     @apply rounded-xl px-4 py-3 text-base;
     @apply transition-all duration-300 ease-out;
-    @apply placeholder:text-slate-500 dark:placeholder:text-hockey-silver-400;
+    @apply placeholder:text-slate-500 dark:placeholder:text-slate-400;
     @apply backdrop-blur-sm shadow-lg shadow-blue-500/10;
     @apply hover:shadow-xl hover:shadow-blue-500/15;
     @apply focus:scale-102;
@@ -569,19 +569,18 @@
   /* Navigation Enhancements */
   .hockey-nav-item {
     @apply relative flex items-center gap-3 px-4 py-3 rounded-xl;
-    @apply text-hockey-silver-700 dark:text-hockey-silver-300;
+    @apply text-slate-700 dark:text-slate-300;
     @apply transition-all duration-300 ease-out;
     @apply hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-blue-100/50;
     @apply dark:hover:from-blue-900/30 dark:hover:to-blue-900/20;
-    @apply hover:text-ice-blue-700 dark:hover:text-ice-blue-300;
+    @apply hover:text-blue-700 dark:hover:text-blue-300;
     @apply hover:scale-102 hover:shadow-lg hover:shadow-blue-500/15;
-    @apply group;
   }
   
   .hockey-nav-item::before {
     content: '';
     @apply absolute left-0 top-1/2 -translate-y-1/2 w-0 h-8;
-    @apply bg-gradient-to-b from-ice-blue-500 to-rink-blue-600;
+    @apply bg-gradient-to-b from-blue-500 to-blue-600;
     @apply rounded-r-full transition-all duration-300 ease-out;
   }
   
@@ -592,7 +591,7 @@
   .hockey-nav-item.active {
     @apply bg-gradient-to-r from-blue-100/90 to-blue-100/60;
     @apply dark:from-blue-900/40 dark:to-blue-900/30;
-    @apply text-ice-blue-800 dark:text-ice-blue-200;
+    @apply text-blue-800 dark:text-blue-200;
     @apply shadow-lg shadow-blue-500/20;
     @apply scale-102;
   }
