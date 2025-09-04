@@ -445,7 +445,7 @@
     content: '';
     @apply absolute inset-0 bg-gradient-to-r from-white/25 via-white/10 to-transparent;
     @apply transform -skew-x-12 -translate-x-full;
-    @apply transition-transform duration-600 ease-out;
+    @apply transition-transform duration-500 ease-out;
   }
   
   .hockey-button-enhanced:hover::before {
