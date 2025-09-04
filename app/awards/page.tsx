@@ -235,17 +235,45 @@ export default function AwardsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Enhanced Hero Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-amber-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
           <div>
-            <h1 className="text-3xl font-bold mb-2">League Awards</h1>
-            <p className="text-muted-foreground">Celebrating excellence in the Secret Chel Society</p>
+            <h1 className="hockey-title mb-6">
+              League Awards
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-8">
+              Celebrating excellence and outstanding achievements in the Secret Chel Society
+            </p>
+            
+            {/* Awards Status Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-full shadow-lg shadow-amber-500/25 border-2 border-white dark:border-hockey-silver-800">
+              <Trophy className="h-5 w-5" />
+              <span className="font-semibold">Honoring Champions</span>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-20">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+              <h2 className="text-2xl font-bold mb-2 text-hockey-silver-800 dark:text-hockey-silver-200">Award Categories</h2>
+              <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Filter and explore all league achievements</p>
+            </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Select value={selectedSeason} onValueChange={setSelectedSeason}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="hockey-input w-[180px]">
                 <SelectValue placeholder="Filter by season" />
               </SelectTrigger>
               <SelectContent>
@@ -265,7 +293,7 @@ export default function AwardsPage() {
             </Select>
 
             <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="hockey-input w-[180px]">
                 <SelectValue placeholder="Filter by year" />
               </SelectTrigger>
               <SelectContent>
@@ -281,10 +309,24 @@ export default function AwardsPage() {
         </div>
 
         <Tabs defaultValue="team-awards">
-          <TabsList className="mb-6">
-            <TabsTrigger value="team-awards">Team Awards</TabsTrigger>
-            <TabsTrigger value="player-awards">Player Awards</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center mb-8">
+            <TabsList className="grid grid-cols-2 w-full max-w-md gap-3 p-2 bg-gradient-to-r from-ice-blue-100/80 to-rink-blue-100/80 dark:from-ice-blue-900/40 dark:to-rink-blue-900/40 rounded-2xl border-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 shadow-xl backdrop-blur-sm">
+              <TabsTrigger 
+                value="team-awards" 
+                className="px-6 py-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-3 font-semibold text-lg"
+              >
+                <Trophy className="h-5 w-5" />
+                Team Awards
+              </TabsTrigger>
+              <TabsTrigger 
+                value="player-awards" 
+                className="px-6 py-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-3 font-semibold text-lg"
+              >
+                <Star className="h-5 w-5" />
+                Player Awards
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="team-awards">
             {loading ? (
@@ -316,31 +358,31 @@ export default function AwardsPage() {
                           >
                             <Link href={`/teams/${award.team_id}`}>
                               <Card
-                                className={`overflow-hidden h-full hover:border-primary transition-colors ${
-                                  awardType === "SCS Cup" ? "border-yellow-200 dark:border-yellow-900" : ""
+                                className={`hockey-card hockey-card-hover h-full group ${
+                                  awardType === "SCS Cup" ? "border-amber-200/60 dark:border-amber-700/60 bg-gradient-to-br from-amber-50/50 to-yellow-50/50 dark:from-amber-900/20 dark:to-yellow-900/20" : ""
                                 }`}
                               >
-                                <CardContent className="p-6">
+                                <CardContent className="p-8">
                                   <div className="flex flex-col items-center">
-                                    <div className="relative h-24 w-24 mb-4">
+                                    <div className="relative h-28 w-28 mb-6 group-hover:scale-110 transition-transform duration-300">
                                       {award.team_logo ? (
                                         <Image
                                           src={award.team_logo || "/placeholder.svg"}
                                           alt={award.team_name}
                                           fill
-                                          className="object-contain"
+                                          className="object-contain drop-shadow-lg"
                                         />
                                       ) : (
-                                        <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center text-3xl font-bold">
+                                        <div className="h-28 w-28 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-2xl flex items-center justify-center text-4xl font-bold text-ice-blue-700 dark:text-ice-blue-300 shadow-lg">
                                           {award.team_name.substring(0, 2)}
                                         </div>
                                       )}
                                     </div>
-                                    <h3 className="text-xl font-bold text-center mb-2">{award.team_name}</h3>
-                                    <div className="text-sm text-muted-foreground text-center mb-4">
+                                    <h3 className="text-2xl font-bold text-center mb-3 text-hockey-silver-800 dark:text-hockey-silver-200 group-hover:text-ice-blue-600 dark:group-hover:text-ice-blue-400 transition-colors duration-300">{award.team_name}</h3>
+                                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 text-center mb-4 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-4 py-2 rounded-full">
                                       {getSeasonName(award.season_number)} • {award.year}
                                     </div>
-                                    {award.description && <p className="text-sm text-center">{award.description}</p>}
+                                    {award.description && <p className="text-sm text-center text-hockey-silver-600 dark:text-hockey-silver-400 italic">{award.description}</p>}
                                   </div>
                                 </CardContent>
                               </Card>
@@ -384,29 +426,29 @@ export default function AwardsPage() {
                             transition={{ type: "spring", stiffness: 300 }}
                           >
                             <Link href={`/players/${award.player_id}`}>
-                              <Card className="overflow-hidden h-full hover:border-primary transition-colors">
-                                <CardContent className="p-6">
+                              <Card className="hockey-card hockey-card-hover h-full group">
+                                <CardContent className="p-8">
                                   <div className="flex flex-col items-center">
-                                    <div className="flex items-center gap-3 mb-4">
-                                      <div className="text-2xl font-bold">{award.gamer_tag_id}</div>
+                                    <div className="flex items-center gap-4 mb-6 group-hover:scale-105 transition-transform duration-300">
+                                      <div className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 group-hover:text-ice-blue-600 dark:group-hover:text-ice-blue-400 transition-colors duration-300">{award.gamer_tag_id}</div>
                                       {award.team_logo && (
-                                        <div className="relative h-6 w-6">
+                                        <div className="relative h-8 w-8">
                                           <Image
                                             src={award.team_logo || "/placeholder.svg"}
                                             alt={award.team_name || ""}
                                             fill
-                                            className="object-contain"
+                                            className="object-contain drop-shadow-md"
                                           />
                                         </div>
                                       )}
                                     </div>
-                                    <div className="text-sm text-muted-foreground text-center mb-4">
+                                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 text-center mb-4 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-4 py-2 rounded-full">
                                       {getSeasonName(award.season_number)} • {award.year}
                                     </div>
                                     {award.team_name && (
-                                      <div className="text-sm text-center mb-2">Team: {award.team_name}</div>
+                                      <div className="text-sm text-center mb-3 text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Team: {award.team_name}</div>
                                     )}
-                                    {award.description && <p className="text-sm text-center">{award.description}</p>}
+                                    {award.description && <p className="text-sm text-center text-hockey-silver-600 dark:text-hockey-silver-400 italic">{award.description}</p>}
                                   </div>
                                 </CardContent>
                               </Card>

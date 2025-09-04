@@ -283,6 +283,10 @@ export default function Home() {
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       <BannedUserModal />
       <FloatingParticles />
+      
+      {/* Enhanced Background Elements */}
+      <div className="absolute inset-0 bg-hockey-pattern opacity-3"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-ice-blue-500/5 via-transparent to-rink-blue-500/5"></div>
 
       {/* Enhanced Hockey-Themed Hero Section */}
       <div className="relative">

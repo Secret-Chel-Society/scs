@@ -231,24 +231,24 @@ export default function Navigation() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Enhanced Sidebar */}
       <aside className={cn(
-        "fixed left-0 top-0 z-50 h-screen w-64 bg-gradient-to-b from-ice-blue-50/80 via-white to-rink-blue-50/80 dark:from-hockey-silver-900/90 dark:via-hockey-silver-800 dark:to-rink-blue-900/90 backdrop-blur-md border-r-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 transform transition-all duration-300 ease-in-out shadow-2xl shadow-ice-blue-500/20",
+        "fixed left-0 top-0 z-50 h-screen w-64 bg-gradient-to-b from-ice-blue-50/90 via-white to-rink-blue-50/90 dark:from-hockey-silver-900/95 dark:via-hockey-silver-800 dark:to-rink-blue-900/95 backdrop-blur-lg border-r-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 transform transition-all duration-300 ease-in-out shadow-2xl shadow-ice-blue-500/25",
         "lg:translate-x-0",
         isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        {/* Header */}
-        <div className="relative p-6 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20">
-          <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        {/* Enhanced Header */}
+        <div className="relative p-6 border-b-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 bg-gradient-to-r from-ice-blue-100/60 to-rink-blue-100/60 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30">
+          <div className="absolute inset-0 bg-hockey-pattern opacity-8"></div>
           <div className="relative z-10 flex items-center justify-center">
             <Link href="/" onClick={() => setIsMobileOpen(false)} className="group">
-              <div className="p-2 rounded-xl bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 group-hover:from-ice-blue-500/30 group-hover:to-rink-blue-500/30 transition-all duration-300">
+              <div className="p-3 rounded-2xl bg-gradient-to-r from-ice-blue-500/25 to-rink-blue-500/25 group-hover:from-ice-blue-500/35 group-hover:to-rink-blue-500/35 transition-all duration-300 shadow-lg group-hover:shadow-xl">
                 <Image
                   src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png"
                   alt="Secret Chel Society Logo"
                   width={120}
                   height={40}
-                  className="h-8 w-auto object-contain filter drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-300"
+                  className="h-10 w-auto object-contain filter drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-300"
                   priority
                 />
               </div>

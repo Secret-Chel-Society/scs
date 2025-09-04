@@ -249,7 +249,34 @@ export default function AdminNewsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
+      {/* Enhanced Hero Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
+          <div>
+            <h1 className="hockey-title mb-6">
+              Content Management Hub
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-8">
+              Create, edit, and manage news articles and announcements for the Secret Chel Society
+            </p>
+            
+            {/* Admin Status Badge */}
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-6 py-3 rounded-full shadow-lg shadow-assist-green-500/25 border-2 border-white dark:border-hockey-silver-800">
+              <Newspaper className="h-5 w-5" />
+              <span className="font-semibold">Content Administrator</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-20">
         {/* Enhanced Navigation */}
         <div className="flex items-center gap-2 mb-8">
           <ArrowLeft className="h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
@@ -262,14 +289,14 @@ export default function AdminNewsPage() {
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-3">
-              Content Management Hub
+              News Management
             </h2>
             <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400">
-              Create, edit, and manage news articles and announcements
+              Manage all news articles, announcements, and content
             </p>
           </div>
 
-          <Button asChild className="btn-championship hover:scale-105 transition-all duration-200">
+          <Button asChild className="hockey-button hover:scale-105 transition-all duration-200">
             <Link href="/admin/news/create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create New Article
