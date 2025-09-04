@@ -33,7 +33,7 @@ import {
   Zap
 } from "lucide-react"
 
-export default function UserDiagnostics() {
+export function UserDiagnostics() {
   const { toast } = useToast()
   const [email, setEmail] = useState("")
   const [adminKey, setAdminKey] = useState("")
