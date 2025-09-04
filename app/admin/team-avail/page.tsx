@@ -323,6 +323,7 @@ export default function TeamAvailabilityPage() {
                 Injury Reserves
               </TabsTrigger>
             </TabsList>
+          </Card>
 
           <TabsContent value="availability" className="p-6">
             {/* Enhanced Controls Section */}
