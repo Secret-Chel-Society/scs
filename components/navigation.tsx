@@ -244,8 +244,8 @@ export default function Navigation() {
             <Link href="/" onClick={() => setIsMobileOpen(false)} className="group">
               <div className="p-2 rounded-xl bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 group-hover:from-ice-blue-500/30 group-hover:to-rink-blue-500/30 transition-all duration-300">
                 <Image
-                  src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//MGHL.png"
-                  alt="MGHL Logo"
+                  src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png"
+                  alt="Secret Chel Society Logo"
                   width={120}
                   height={40}
                   className="h-8 w-auto object-contain filter drop-shadow-lg group-hover:drop-shadow-xl transition-all duration-300"
