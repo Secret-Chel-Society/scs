@@ -372,7 +372,6 @@
     @apply hover:shadow-2xl hover:shadow-ice-blue-500/25 dark:hover:shadow-rink-blue-500/30;
     @apply hover:scale-105 hover:border-ice-blue-300/70 dark:hover:border-rink-blue-600/70;
     @apply transition-all duration-300 ease-out;
-    @apply group;
   }
   
   .hockey-enhanced-card::before {
@@ -411,7 +410,7 @@
     @apply dark:border-rink-blue-700/50;
     @apply transition-all duration-300 ease-out;
     @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/20;
-    @apply group cursor-pointer;
+    @apply cursor-pointer;
   }
   
   .hockey-stats-enhanced:hover {
