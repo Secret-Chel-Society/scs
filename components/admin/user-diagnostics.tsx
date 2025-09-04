@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { 
   AlertCircle, 
@@ -19,7 +18,6 @@ import {
   Send, 
   UserPlus, 
   RefreshCw, 
-  ShieldAlert,
   Shield,
   Database,
   UserCheck,
@@ -29,8 +27,7 @@ import {
   Wrench,
   Eye,
   FileText,
-  Clock,
-  Zap
+  Clock
 } from "lucide-react"
 
 export function UserDiagnostics() {
@@ -271,23 +268,23 @@ export function UserDiagnostics() {
               </CardDescription>
             </div>
           </div>
-        </CardHeader>
+      </CardHeader>
         <CardContent className="space-y-6 relative z-10">
-          <div className="space-y-4">
+        <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                 <Mail className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
                 User Email
               </Label>
-              <Input
-                id="email"
+                <Input
+                  id="email"
                 type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                  placeholder="user@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 className="hockey-search h-12 text-base border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-              />
-            </div>
+                />
+              </div>
             <div className="space-y-2">
               <Label htmlFor="adminKey" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                 <Key className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
@@ -323,7 +320,7 @@ export function UserDiagnostics() {
 
           {lookupResults && (
             <div>
-              <Tabs defaultValue="status" className="mt-6">
+            <Tabs defaultValue="status" className="mt-6">
                 <Card className="hockey-card border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg shadow-ice-blue-500/10">
                   <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
                     <TabsTrigger 
@@ -354,7 +351,7 @@ export function UserDiagnostics() {
                       <Database className="h-4 w-4" />
                       Details
                     </TabsTrigger>
-                  </TabsList>
+              </TabsList>
 
                   <TabsContent value="status" className="p-6">
                     <div className="space-y-6">
@@ -364,7 +361,7 @@ export function UserDiagnostics() {
                             <Database className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
                             <h3 className="text-lg font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Database Status</h3>
                           </div>
-                          <div className="space-y-2">
+                  <div className="space-y-2">
                             <div className="flex justify-between items-center">
                               <span className="text-hockey-silver-700 dark:text-hockey-silver-300">In Database:</span>
                               <Badge className={`px-3 py-1 text-sm font-medium ${
@@ -373,8 +370,8 @@ export function UserDiagnostics() {
                                   : "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white"
                               }`}>
                                 {lookupResults.status.inDatabase ? "Yes" : "No"}
-                              </Badge>
-                            </div>
+                      </Badge>
+                    </div>
                             <div className="flex justify-between items-center">
                               <span className="text-hockey-silver-700 dark:text-hockey-silver-300">In Auth System:</span>
                               <Badge className={`px-3 py-1 text-sm font-medium ${
@@ -383,10 +380,10 @@ export function UserDiagnostics() {
                                   : "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white"
                               }`}>
                                 {lookupResults.status.inAuthSystem ? "Yes" : "No"}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
 
                         {lookupResults.status.inAuthSystem && (
                           <div className="p-4 bg-gradient-to-r from-assist-green-50/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-800/10 rounded-lg border border-assist-green-200/30 dark:border-assist-green-700/30">
@@ -394,7 +391,7 @@ export function UserDiagnostics() {
                               <Shield className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
                               <h3 className="text-lg font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Auth System Status</h3>
                             </div>
-                            <div className="space-y-2">
+                  <div className="space-y-2">
                               <div className="flex justify-between items-center">
                                 <span className="text-hockey-silver-700 dark:text-hockey-silver-300">Email Confirmed:</span>
                                 <Badge className={`px-3 py-1 text-sm font-medium ${
@@ -403,20 +400,20 @@ export function UserDiagnostics() {
                                     : "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white"
                                 }`}>
                                   {lookupResults.status.emailConfirmed ? "Yes" : "No"}
-                                </Badge>
-                              </div>
+                      </Badge>
+                    </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-hockey-silver-700 dark:text-hockey-silver-300">Last Sign In:</span>
                                 <span className="text-hockey-silver-700 dark:text-hockey-silver-300">
                                   {lookupResults.status.lastSignIn ? new Date(lookupResults.status.lastSignIn).toLocaleString() : "Never"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      </span>
                     </div>
-                  </TabsContent>
+                  </div>
+                          </div>
+                      )}
+                  </div>
+                </div>
+              </TabsContent>
 
                   <TabsContent value="verification" className="p-6">
                     <div className="space-y-6">
@@ -477,35 +474,35 @@ export function UserDiagnostics() {
                                 )}
                               </Button>
                             </div>
-                          </div>
-                        </div>
-                      )}
+                    </div>
+                  </div>
+                )}
 
                       {lookupResults.status.inAuthSystem && lookupResults.status.emailConfirmed && (
                         <div className="p-4 bg-gradient-to-r from-assist-green-50/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-800/10 rounded-lg border border-assist-green-200/30 dark:border-assist-green-700/30">
                           <div className="flex items-center gap-3 mb-3">
                             <CheckCircle className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
                             <h3 className="text-lg font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Email Verified</h3>
-                          </div>
+                    </div>
                           <p className="text-hockey-silver-700 dark:text-hockey-silver-300">
                             This user's email is already verified and they can access the platform.
                           </p>
-                        </div>
-                      )}
+                  </div>
+                )}
 
                       {!lookupResults.status.inAuthSystem && (
                         <div className="p-4 bg-gradient-to-r from-goal-red-50/30 to-goal-red-100/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
                           <div className="flex items-center gap-3 mb-3">
                             <AlertCircle className="h-5 w-5 text-goal-red-600 dark:text-goal-red-400" />
                             <h3 className="text-lg font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Not in Auth System</h3>
-                          </div>
+                    </div>
                           <p className="text-hockey-silver-700 dark:text-hockey-silver-300">
                             This user is not in the authentication system. They need to register first.
                           </p>
-                        </div>
+                  </div>
                       )}
-                    </div>
-                  </TabsContent>
+                  </div>
+              </TabsContent>
 
                   <TabsContent value="create" className="p-6">
                     <div className="space-y-6">
@@ -514,84 +511,84 @@ export function UserDiagnostics() {
                           <div className="flex items-center gap-3 mb-3">
                             <UserPlus className="h-5 w-5 text-goal-red-600 dark:text-goal-red-400" />
                             <h3 className="text-lg font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Create Database User</h3>
-                          </div>
+                    </div>
                           <p className="text-hockey-silver-700 dark:text-hockey-silver-300 mb-4">
                             This user exists in the auth system but not in the database. Create their database record.
                           </p>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
                                 <Label htmlFor="gamerTagId" className="text-hockey-silver-700 dark:text-hockey-silver-300">Gamer Tag ID</Label>
-                                <Input
+                        <Input
                                   id="gamerTagId"
-                                  value={userData.gamer_tag_id}
-                                  onChange={(e) => setUserData({ ...userData, gamer_tag_id: e.target.value })}
+                          value={userData.gamer_tag_id}
+                          onChange={(e) => setUserData({ ...userData, gamer_tag_id: e.target.value })}
                                   placeholder="Enter gamer tag ID"
                                   className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                                />
-                              </div>
-                              <div className="space-y-2">
+                        />
+                      </div>
+                      <div className="space-y-2">
                                 <Label htmlFor="console" className="text-hockey-silver-700 dark:text-hockey-silver-300">Console</Label>
                                 <Select value={userData.console} onValueChange={(value) => setUserData({ ...userData, console: value })}>
                                   <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                                     <SelectValue />
-                                  </SelectTrigger>
+                          </SelectTrigger>
                                   <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                                    <SelectItem value="Xbox">Xbox</SelectItem>
+                            <SelectItem value="Xbox">Xbox</SelectItem>
                                     <SelectItem value="PlayStation">PlayStation</SelectItem>
                                     <SelectItem value="PC">PC</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
+                          </SelectContent>
+                        </Select>
+                      </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
+                      <div className="space-y-2">
                                 <Label htmlFor="primaryPosition" className="text-hockey-silver-700 dark:text-hockey-silver-300">Primary Position</Label>
                                 <Select value={userData.primary_position} onValueChange={(value) => setUserData({ ...userData, primary_position: value })}>
                                   <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                                     <SelectValue />
-                                  </SelectTrigger>
+                          </SelectTrigger>
                                   <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                                    <SelectItem value="Center">Center</SelectItem>
-                                    <SelectItem value="Left Wing">Left Wing</SelectItem>
-                                    <SelectItem value="Right Wing">Right Wing</SelectItem>
+                            <SelectItem value="Center">Center</SelectItem>
+                            <SelectItem value="Left Wing">Left Wing</SelectItem>
+                            <SelectItem value="Right Wing">Right Wing</SelectItem>
                                     <SelectItem value="Defense">Defense</SelectItem>
-                                    <SelectItem value="Goalie">Goalie</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-2">
+                            <SelectItem value="Goalie">Goalie</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
                                 <Label htmlFor="secondaryPosition" className="text-hockey-silver-700 dark:text-hockey-silver-300">Secondary Position (Optional)</Label>
                                 <Select value={userData.secondary_position} onValueChange={(value) => setUserData({ ...userData, secondary_position: value })}>
                                   <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                                     <SelectValue placeholder="Select secondary position" />
-                                  </SelectTrigger>
+                          </SelectTrigger>
                                   <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
                                     <SelectItem value="">None</SelectItem>
-                                    <SelectItem value="Center">Center</SelectItem>
-                                    <SelectItem value="Left Wing">Left Wing</SelectItem>
-                                    <SelectItem value="Right Wing">Right Wing</SelectItem>
+                            <SelectItem value="Center">Center</SelectItem>
+                            <SelectItem value="Left Wing">Left Wing</SelectItem>
+                            <SelectItem value="Right Wing">Right Wing</SelectItem>
                                     <SelectItem value="Defense">Defense</SelectItem>
-                                    <SelectItem value="Goalie">Goalie</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
+                            <SelectItem value="Goalie">Goalie</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
 
-                            <Button
-                              onClick={handleCreateUser}
-                              disabled={
-                                createLoading || !userData.gamer_tag_id || !userData.primary_position || !userData.console
-                              }
+                    <Button
+                      onClick={handleCreateUser}
+                      disabled={
+                        createLoading || !userData.gamer_tag_id || !userData.primary_position || !userData.console
+                      }
                               className="w-full h-12 hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                            >
-                              {createLoading ? (
-                                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <UserPlus className="h-4 w-4 mr-2" />
-                              )}
+                    >
+                      {createLoading ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <UserPlus className="h-4 w-4 mr-2" />
+                      )}
                               Create User
-                            </Button>
+                    </Button>
                           </div>
                         </div>
                       )}
@@ -605,18 +602,18 @@ export function UserDiagnostics() {
                           <p className="text-hockey-silver-700 dark:text-hockey-silver-300">
                             This user already exists in the database.
                           </p>
-                        </div>
-                      )}
+                  </div>
+                )}
 
-                      {!lookupResults.status.inAuthSystem && (
+                {!lookupResults.status.inAuthSystem && (
                         <Alert className="border-2 border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-r from-goal-red-50/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-800/20">
                           <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
                           <AlertTitle className="text-goal-red-800 dark:text-goal-red-200">Cannot Create User</AlertTitle>
                           <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">
-                            User does not exist in the auth system. They need to register before any actions can be taken.
-                          </AlertDescription>
-                        </Alert>
-                      )}
+                      User does not exist in the auth system. They need to register before any actions can be taken.
+                    </AlertDescription>
+                  </Alert>
+                )}
                     </div>
                   </TabsContent>
 
@@ -688,8 +685,8 @@ export function UserDiagnostics() {
                         )}
                       </div>
                     </div>
-                  </TabsContent>
-                </Tabs>
+              </TabsContent>
+            </Tabs>
               </Card>
             </div>
           )}
