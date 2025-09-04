@@ -97,67 +97,86 @@ export default function AuthDatabaseSync() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-lg mx-auto hockey-premium-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Database className="h-5 w-5" />
+        <CardTitle className="hockey-title text-2xl flex items-center justify-center gap-3">
+          <div className="hockey-feature-icon">
+            <Database className="h-5 w-5 text-white" />
+          </div>
           Auth to Database Sync
         </CardTitle>
-        <CardDescription>Sync a user from Supabase Auth to database tables</CardDescription>
+        <CardDescription className="hockey-subtitle text-center">
+          Sync a user from Supabase Auth to database tables with enhanced security validation
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSync} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">User Email</Label>
+          <div className="space-y-3">
+            <Label htmlFor="email" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+              <Database className="h-4 w-4 text-ice-blue-500" />
+              User Email
+            </Label>
             <Input
               id="email"
               type="email"
               placeholder="user@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="hockey-form-enhanced"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="admin-key">Admin Key</Label>
+          <div className="space-y-3">
+            <Label htmlFor="admin-key" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-rink-blue-500" />
+              Admin Key
+            </Label>
             <Input
               id="admin-key"
               type="password"
               placeholder="Enter admin key"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
+              className="hockey-form-enhanced"
               required
             />
           </div>
 
           {result && (
-            <Alert variant={result.success ? "default" : "destructive"}>
-              {result.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-              <AlertTitle>{result.success ? "Success" : "Error"}</AlertTitle>
-              <AlertDescription>
+            <Alert 
+              variant={result.success ? "default" : "destructive"}
+              className={result.success ? "hockey-premium-card border-assist-green-200 dark:border-assist-green-800 bg-assist-green-50 dark:bg-assist-green-900/20" : "hockey-premium-card border-goal-red-200 dark:border-goal-red-800"}
+            >
+              {result.success ? <CheckCircle className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" /> : <AlertCircle className="h-4 w-4" />}
+              <AlertTitle className={result.success ? "text-assist-green-800 dark:text-assist-green-200" : ""}>{result.success ? "Success" : "Error"}</AlertTitle>
+              <AlertDescription className={result.success ? "text-assist-green-700 dark:text-assist-green-300" : ""}>
                 {result.message}
                 {result.details && (
-                  <div className="mt-2 text-sm">
-                    <p>
-                      <strong>Auth User ID:</strong> {result.details.authUserId}
-                    </p>
-                    <p>
-                      <strong>Public User ID:</strong> {result.details.publicUserId}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {result.details.email}
-                    </p>
-                    <p>
-                      <strong>Verified:</strong> {result.details.verified ? "Yes" : "No"}
-                    </p>
+                  <div className="mt-3 space-y-2 text-sm font-medium">
+                    <div className="hockey-stats-grid">
+                      <div className="hockey-stat-item">
+                        <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Auth User ID</div>
+                        <div className="font-mono text-xs">{result.details.authUserId}</div>
+                      </div>
+                      <div className="hockey-stat-item">
+                        <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Public User ID</div>
+                        <div className="font-mono text-xs">{result.details.publicUserId}</div>
+                      </div>
+                      <div className="hockey-stat-item">
+                        <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Verified</div>
+                        <div className={`text-xs font-semibold ${result.details.verified ? 'text-assist-green-600' : 'text-goal-red-600'}`}>
+                          {result.details.verified ? "Yes" : "No"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </AlertDescription>
             </Alert>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full hockey-button-enhanced" disabled={loading}>
             {loading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -172,14 +191,32 @@ export default function AuthDatabaseSync() {
           </Button>
         </form>
 
-        <div className="mt-4 p-3 bg-blue-50 rounded-md">
-          <h4 className="font-medium text-blue-900 mb-2">What this tool does:</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Finds user in Supabase Auth system</li>
-            <li>• Creates missing record in public.users table</li>
-            <li>• Creates missing record in players table</li>
-            <li>• Creates missing record in user_roles table</li>
-            <li>• Ensures all data is properly synced</li>
+        <div className="mt-6 p-4 hockey-premium-card bg-gradient-to-br from-ice-blue-25 to-rink-blue-25 dark:from-ice-blue-950/30 dark:to-rink-blue-950/30">
+          <h4 className="hockey-title text-lg mb-3 flex items-center gap-2">
+            <CheckCircle className="h-4 w-4 text-ice-blue-500" />
+            What this tool does:
+          </h4>
+          <ul className="hockey-subtitle text-sm space-y-2">
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-ice-blue-500 rounded-full"></div>
+              Finds user in Supabase Auth system
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-rink-blue-500 rounded-full"></div>
+              Creates missing record in public.users table
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-assist-green-500 rounded-full"></div>
+              Creates missing record in players table
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-goal-red-500 rounded-full"></div>
+              Creates missing record in user_roles table
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-hockey-silver-500 rounded-full"></div>
+              Ensures all data is properly synced
+            </li>
           </ul>
         </div>
       </CardContent>

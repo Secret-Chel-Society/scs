@@ -217,7 +217,7 @@ export default function Navigation() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+        className="fixed top-4 left-4 z-50 lg:hidden hockey-button-enhanced shadow-hockey-glow"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -275,10 +275,10 @@ export default function Navigation() {
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group-hover:scale-105 flex-1",
+                        "hockey-nav-item flex-1",
                         isActive 
-                          ? `bg-gradient-to-r ${getColorClasses(item.name)} text-white shadow-lg` 
-                          : "text-hockey-silver-700 dark:text-hockey-silver-300 hover:text-hockey-silver-900 dark:hover:text-hockey-silver-100 hover:bg-gradient-to-r hover:from-ice-blue-100/50 hover:to-rink-blue-100/50 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20"
+                          ? `active bg-gradient-to-r ${getColorClasses(item.name)} text-white shadow-xl shadow-ice-blue-500/30 scale-102` 
+                          : ""
                       )}
                     >
                       <div className={cn(
@@ -315,10 +315,10 @@ export default function Navigation() {
                             href={subItem.href}
                             onClick={() => setIsMobileOpen(false)}
                             className={cn(
-                              "block px-4 py-2 rounded-lg text-sm transition-all duration-300 hover:scale-105",
+                              "block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-102",
                               pathname === subItem.href
-                                ? "bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 text-ice-blue-700 dark:text-ice-blue-300 font-medium"
-                                : "text-hockey-silver-600 dark:text-hockey-silver-400 hover:text-hockey-silver-800 dark:hover:text-hockey-silver-200 hover:bg-gradient-to-r hover:from-ice-blue-100/30 hover:to-rink-blue-100/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10"
+                                ? "bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 text-ice-blue-800 dark:text-ice-blue-200 shadow-lg shadow-ice-blue-500/20"
+                                : "text-hockey-silver-600 dark:text-hockey-silver-400 hover:text-hockey-silver-800 dark:hover:text-hockey-silver-200 hover:bg-gradient-to-r hover:from-ice-blue-100/40 hover:to-rink-blue-100/40 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20 hover:shadow-md hover:shadow-ice-blue-500/10"
                             )}
                           >
                             {subItem.name}
@@ -337,10 +337,10 @@ export default function Navigation() {
                   href="/register/season"
                   onClick={() => setIsMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group-hover:scale-105",
+                    "hockey-nav-item",
                     pathname === "/register/season"
-                      ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg"
-                      : "text-hockey-silver-700 dark:text-hockey-silver-300 hover:text-hockey-silver-900 dark:hover:text-hockey-silver-100 hover:bg-gradient-to-r hover:from-assist-green-100/50 hover:to-assist-green-200/50 dark:hover:from-assist-green-900/20 dark:hover:to-assist-green-800/20"
+                      ? "active bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-xl shadow-assist-green-500/30 scale-102"
+                      : ""
                   )}
                 >
                   <div className={cn(
@@ -364,7 +364,7 @@ export default function Navigation() {
             <div className="space-y-4">
               {/* Team Info */}
               {teamInfo && (
-                <Link href={`/teams/${teamInfo.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-ice-blue-100/50 hover:to-rink-blue-100/50 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20 transition-all duration-300 group">
+                <Link href={`/teams/${teamInfo.id}`} className="hockey-nav-item group">
                   <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 shadow-lg group-hover:shadow-xl transition-all duration-300">
                     {teamInfo.logo_url ? (
                       <Image
@@ -471,13 +471,13 @@ export default function Navigation() {
             </div>
           ) : (
             <div className="space-y-3">
-              <Button variant="outline" asChild className="w-full hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white border-ice-blue-300 dark:border-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <Button variant="outline" asChild className="w-full hockey-button-enhanced border-ice-blue-300 dark:border-rink-blue-600">
                 <Link href="/login" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-2">
                   <Lock className="h-4 w-4" />
                   Log in
                 </Link>
               </Button>
-              <Button asChild className="w-full hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <Button asChild className="w-full hockey-button-enhanced bg-gradient-to-r from-assist-green-500 via-assist-green-600 to-assist-green-700 hover:from-assist-green-600 hover:via-assist-green-700 hover:to-assist-green-800">
                 <Link href="/register" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
                   Sign up

@@ -10,6 +10,8 @@ import { AdminDiagnostics } from "@/components/admin/admin-diagnostics"
 import { RemoveUserBids } from "@/components/admin/remove-user-bids"
 import { IpTracking } from "@/components/admin/ip-tracking"
 import { SeasonsManager } from "@/components/admin/seasons-manager"
+import { Settings, Shield, Users, Database, Trophy, Activity } from "lucide-react"
+import { motion } from "framer-motion"
 
 export function AdminSettingsPageClient() {
   const router = useRouter()
@@ -65,9 +67,11 @@ export function AdminSettingsPageClient() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ice-blue-500"></div>
+          </div>
         </div>
       </div>
     )
@@ -78,17 +82,58 @@ export function AdminSettingsPageClient() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Admin Settings</h1>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold mb-8 text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+              <Settings className="h-6 w-6 text-white" />
+            </div>
+            Admin Settings
+          </h1>
 
-      <Tabs defaultValue="bidding" className="space-y-6">
-        <TabsList className="grid grid-cols-5 w-full max-w-3xl">
-          <TabsTrigger value="bidding">Bidding</TabsTrigger>
-          <TabsTrigger value="ip-tracking">IP Tracking</TabsTrigger>
-          <TabsTrigger value="user-bids">User Bids</TabsTrigger>
-          <TabsTrigger value="seasons">Seasons</TabsTrigger>
-          <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
-        </TabsList>
+          <Tabs defaultValue="bidding" className="space-y-6">
+            <TabsList className="grid grid-cols-5 w-full max-w-3xl gap-2 p-2 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded-xl">
+              <TabsTrigger 
+                value="bidding" 
+                className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+              >
+                <Trophy className="mr-2 h-4 w-4" />
+                Bidding
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ip-tracking" 
+                className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+              >
+                <Activity className="mr-2 h-4 w-4" />
+                IP Tracking
+              </TabsTrigger>
+              <TabsTrigger 
+                value="user-bids" 
+                className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+              >
+                <Users className="mr-2 h-4 w-4" />
+                User Bids
+              </TabsTrigger>
+              <TabsTrigger 
+                value="seasons" 
+                className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+              >
+                <Trophy className="mr-2 h-4 w-4" />
+                Seasons
+              </TabsTrigger>
+              <TabsTrigger 
+                value="diagnostics" 
+                className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+              >
+                <Database className="mr-2 h-4 w-4" />
+                Diagnostics
+              </TabsTrigger>
+            </TabsList>
 
         <TabsContent value="bidding">
           <BiddingSettings />
