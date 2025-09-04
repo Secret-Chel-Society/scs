@@ -215,7 +215,7 @@ export function EaPlayerMappings() {
                     value={newMapping.ea_name}
                     onChange={(e) => setNewMapping({ ...newMapping, ea_name: e.target.value })}
                     className="col-span-3"
-                    placeholder="e.g. LispDoge"
+                    placeholder="e.g. DarkWolf"
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">

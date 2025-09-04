@@ -226,64 +226,64 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
       {/* Hero Header Section */}
-      <div className="hockey-header relative py-16 px-4">
+      <div className="clean-header relative py-16 px-4">
         <div className="container mx-auto text-center">
           <div>
-            <h1 className="hockey-title mb-6">
+            <h1 className="clean-title mb-6">
               SCS Forum
             </h1>
-            <p className="hockey-subtitle mb-8">
+            <p className="clean-subtitle mb-8">
               Discuss hockey strategies, connect with the community, and share your insights
             </p>
             
             {/* Forum Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
-              <div className="hockey-stat-item bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/20">
-                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg mb-3 mx-auto w-fit">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container mb-3">
                   <MessageSquare className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                   {posts.length}
                 </div>
-                <div className="text-xs text-ice-blue-600 dark:text-ice-blue-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">
                   Posts
                 </div>
               </div>
               
-              <div className="hockey-stat-item bg-gradient-to-br from-assist-green-100 to-assist-green-200 dark:from-assist-green-900/30 dark:to-assist-green-800/20">
-                <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg mb-3 mx-auto w-fit">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-emerald mb-3">
                   <Users className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-assist-green-700 dark:text-assist-green-300">
+                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                   Active
                 </div>
-                <div className="text-xs text-assist-green-600 dark:text-assist-green-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wide">
                   Community
                 </div>
               </div>
               
-              <div className="hockey-stat-item bg-gradient-to-br from-rink-blue-100 to-rink-blue-200 dark:from-rink-blue-900/30 dark:to-rink-blue-800/20">
-                <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg mb-3 mx-auto w-fit">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-indigo mb-3">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
+                <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
                   Growing
                 </div>
-                <div className="text-xs text-rink-blue-600 dark:text-rink-blue-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
                   Discussions
                 </div>
               </div>
               
-              <div className="hockey-stat-item bg-gradient-to-br from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/20">
-                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg mb-3 mx-auto w-fit">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-red mb-3">
                   <Star className="h-6 w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-goal-red-700 dark:text-goal-red-300">
+                <div className="text-2xl font-bold text-red-700 dark:text-red-300">
                   Featured
                 </div>
-                <div className="text-xs text-goal-red-600 dark:text-goal-red-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-red-600 dark:text-red-400 font-medium uppercase tracking-wide">
                   Content
                 </div>
               </div>
@@ -296,16 +296,16 @@ export default function ForumPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="space-y-8">
           {/* Header Actions */}
-          <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+          <Card className="clean-card">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">Community Discussions</h2>
-                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Join the conversation and share your thoughts</p>
+                  <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Community Discussions</h2>
+                  <p className="text-slate-600 dark:text-slate-400">Join the conversation and share your thoughts</p>
                 </div>
                 <Button 
                   onClick={handleCreatePost}
-                  className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white border-0 hover:from-ice-blue-600 hover:to-rink-blue-700 transition-all duration-200 flex items-center gap-2"
+                  className="clean-button flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   New Post
@@ -316,17 +316,17 @@ export default function ForumPage() {
 
           {/* Error Display */}
           {error && (
-            <Card className="hockey-card border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/20 dark:to-goal-red-800/20">
+            <Card className="clean-card border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20">
               <CardContent className="p-4 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                <div className="clean-icon-container-red">
                   <AlertCircle className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-goal-red-800 dark:text-goal-red-200">{error}</span>
+                <span className="text-red-800 dark:text-red-200">{error}</span>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={() => fetchPosts(selectedCategory)} 
-                  className="ml-auto hockey-button border-goal-red-300 dark:border-goal-red-600 text-goal-red-700 dark:text-goal-red-300 hover:bg-goal-red-50 dark:hover:bg-goal-red-900/20 hover:border-goal-red-400 dark:hover:border-goal-red-500 transition-all duration-200"
+                  className="ml-auto clean-button-outline"
                 >
                   Retry
                 </Button>
@@ -335,29 +335,29 @@ export default function ForumPage() {
           )}
 
           {/* Categories and Posts */}
-          <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+          <Card className="clean-card">
             <CardContent className="p-6">
               <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-2 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg gap-2">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg gap-2">
                   <TabsTrigger 
                     value="all" 
-                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-white/10 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"
+                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"
                   >
-                    <div className="p-1.5 bg-white/20 rounded-lg">
+                    <div className="p-1.5 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
                       <Target className="h-4 w-4" />
                     </div>
-                    All Posts
+                    <span className="flex-1 text-center">All Posts</span>
                   </TabsTrigger>
                   {categories.map((category) => (
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id}
-                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-white/10 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"
+                      className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-2 px-4 py-2 rounded-lg"
                     >
-                      <div className="p-1.5 bg-white/20 rounded-lg">
+                      <div className="p-1.5 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
                       </div>
-                      {category.name}
+                      <span className="flex-1 text-center">{category.name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>

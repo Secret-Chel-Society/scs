@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { PlayerClickableLinkFlexible } from "@/components/matches/player-clickable-link-flexible"
 
 export function PlayerLinkTester() {
-  const [playerName, setPlayerName] = useState("LispDoge")
+  const [playerName, setPlayerName] = useState("DarkWolf")
   const [mappingTable, setMappingTable] = useState("ea_player_mappings")
   const [nameColumn, setNameColumn] = useState("persona_name")
   const [testValues, setTestValues] = useState<{
@@ -16,7 +16,7 @@ export function PlayerLinkTester() {
     mappingTable: string
     nameColumn: string
   }>({
-    playerName: "LispDoge",
+    playerName: "DarkWolf",
     mappingTable: "ea_player_mappings",
     nameColumn: "persona_name",
   })

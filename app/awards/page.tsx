@@ -235,26 +235,19 @@ export default function AwardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
       {/* Enhanced Hero Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-amber-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
+      <div className="clean-header relative py-20 px-4">
         <div className="container mx-auto text-center relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 30 }} 
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <h1 className="hockey-title mb-6">
+            <h1 className="clean-title mb-6">
               League Awards & Recognition
             </h1>
-            <p className="hockey-subtitle mb-8">
+            <p className="clean-subtitle mb-8">
               Celebrating excellence, achievements, and outstanding performances in the Secret Chel Society
             </p>
 
@@ -266,17 +259,17 @@ export default function AwardsPage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="group"
               >
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/20">
-                  <div className="w-16 h-16 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-amber-500/25 transition-all duration-300">
+                <div className="clean-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="clean-icon-container-emerald mb-4 group-hover:shadow-xl group-hover:shadow-emerald-500/25 transition-all duration-300">
                     <Trophy className="h-8 w-8 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-amber-700 dark:text-amber-300 mb-2">
+                  <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
                     {teamAwards.length}
                   </div>
-                  <div className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+                  <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
                     Team Awards
                   </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
                 </div>
               </motion.div>
               
@@ -286,17 +279,17 @@ export default function AwardsPage() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="group"
               >
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/20">
-                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
+                <div className="clean-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="clean-icon-container mb-4 group-hover:shadow-xl group-hover:shadow-blue-500/25 transition-all duration-300">
                     <Award className="h-8 w-8 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
+                  <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-2">
                     {playerAwards.length}
                   </div>
-                  <div className="text-sm text-ice-blue-600 dark:text-ice-blue-400 font-medium">
+                  <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
                     Player Awards
                   </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
                 </div>
               </motion.div>
               
@@ -306,17 +299,17 @@ export default function AwardsPage() {
                 transition={{ duration: 0.6, delay: 0.6 }}
                 className="group"
               >
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer bg-gradient-to-br from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/20">
-                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
+                <div className="clean-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="clean-icon-container-red mb-4 group-hover:shadow-xl group-hover:shadow-red-500/25 transition-all duration-300">
                     <Star className="h-8 w-8 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
+                  <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
                     {availableYears.length}
                   </div>
-                  <div className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">
+                  <div className="text-sm text-red-600 dark:text-red-400 font-medium">
                     Award Years
                   </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
                 </div>
               </motion.div>
             </div>
@@ -332,17 +325,17 @@ export default function AwardsPage() {
         transition={{ duration: 0.6, delay: 0.8 }}
       >
         {/* Enhanced Filters Section */}
-        <div className="mb-8 hockey-card p-6">
+        <div className="mb-8 clean-card p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">Awards Gallery</h2>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Filter awards by season and year</p>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Awards Gallery</h2>
+              <p className="text-slate-600 dark:text-slate-400">Filter awards by season and year</p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
               <div className="flex items-center gap-2">
                 <Select value={selectedSeason} onValueChange={setSelectedSeason}>
-                  <SelectTrigger className="hockey-input w-48">
+                  <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by season" />
                   </SelectTrigger>
                   <SelectContent>
@@ -364,7 +357,7 @@ export default function AwardsPage() {
 
               <div className="flex items-center gap-2">
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
-                  <SelectTrigger className="hockey-input w-32">
+                  <SelectTrigger className="w-32">
                     <SelectValue placeholder="Year" />
                   </SelectTrigger>
                   <SelectContent>
@@ -383,20 +376,20 @@ export default function AwardsPage() {
 
         <Tabs defaultValue="team-awards">
           <div className="flex justify-center mb-8">
-            <TabsList className="grid grid-cols-2 w-full max-w-md gap-3 p-2 bg-gradient-to-r from-ice-blue-100/80 to-rink-blue-100/80 dark:from-ice-blue-900/40 dark:to-rink-blue-900/40 rounded-2xl border-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 shadow-xl backdrop-blur-sm">
+            <TabsList className="grid grid-cols-2 w-full max-w-md gap-3 p-2 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl">
               <TabsTrigger 
                 value="team-awards" 
-                className="px-6 py-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-ice-blue-500/30 hover:bg-white/20 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold"
+                className="px-6 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold"
               >
-                <Trophy className="h-5 w-5" />
-                Team Awards
+                <Trophy className="h-5 w-5 flex-shrink-0" />
+                <span className="flex-1 text-center">Team Awards</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="player-awards" 
-                className="px-6 py-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl data-[state=active]:shadow-ice-blue-500/30 hover:bg-white/20 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold"
+                className="px-6 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold"
               >
-                <Award className="h-5 w-5" />
-                Player Awards
+                <Award className="h-5 w-5 flex-shrink-0" />
+                <span className="flex-1 text-center">Player Awards</span>
               </TabsTrigger>
             </TabsList>
           </div>

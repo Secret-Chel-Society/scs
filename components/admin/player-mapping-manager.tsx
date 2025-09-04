@@ -21,7 +21,7 @@ export default function PlayerMappingManager() {
   const [playerName, setPlayerName] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [addingLispDoge, setAddingLispDoge] = useState(false)
+  const [addingDarkWolf, setAddingDarkWolf] = useState(false)
 
   useEffect(() => {
     fetchMappings()
@@ -103,9 +103,9 @@ export default function PlayerMappingManager() {
     }
   }
 
-  async function addLispDogeMapping() {
+  async function addDarkWolfMapping() {
     try {
-      setAddingLispDoge(true)
+      setAddingDarkWolf(true)
 
       const response = await fetch("/api/admin/player-mappings/add-lispdoge", {
         method: "POST",
@@ -117,24 +117,24 @@ export default function PlayerMappingManager() {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to add LispDoge mapping")
+        throw new Error(result.error || "Failed to add DarkWolf mapping")
       }
 
       toast({
-        title: "LispDoge Mapping Added",
-        description: "Successfully added mapping for LispDoge",
+        title: "DarkWolf Mapping Added",
+        description: "Successfully added mapping for DarkWolf",
       })
 
       fetchMappings()
     } catch (error: any) {
-      console.error("Error adding LispDoge mapping:", error)
+      console.error("Error adding DarkWolf mapping:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to add LispDoge mapping",
+        description: error.message || "Failed to add DarkWolf mapping",
         variant: "destructive",
       })
     } finally {
-      setAddingLispDoge(false)
+      setAddingDarkWolf(false)
     }
   }
 
@@ -145,7 +145,7 @@ export default function PlayerMappingManager() {
       mapping.player_id?.includes(searchQuery),
   )
 
-  const hasLispDogeMapping = mappings.some(
+  const hasDarkWolfMapping = mappings.some(
     (mapping) =>
       mapping.ea_player_id === "1005699228134" && mapping.player_id === "657dbb12-0db5-4a8b-94da-7dea7eba7409",
   )
@@ -190,20 +190,20 @@ export default function PlayerMappingManager() {
 
             <div className="ml-auto">
               <Button
-                variant={hasLispDogeMapping ? "outline" : "default"}
+                variant={hasDarkWolfMapping ? "outline" : "default"}
                 size="sm"
-                onClick={addLispDogeMapping}
-                disabled={addingLispDoge || hasLispDogeMapping}
-                className={`${hasLispDogeMapping ? 'btn-ice' : 'btn-championship'} hover:scale-105 transition-all duration-200`}
+                onClick={addDarkWolfMapping}
+                disabled={addingDarkWolf || hasDarkWolfMapping}
+                className={`${hasDarkWolfMapping ? 'btn-ice' : 'btn-championship'} hover:scale-105 transition-all duration-200`}
               >
-                {addingLispDoge ? (
+                {addingDarkWolf ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : hasLispDogeMapping ? (
+                ) : hasDarkWolfMapping ? (
                   <CheckCircle className="h-4 w-4 mr-2 text-assist-green-500" />
                 ) : (
                   <Plus className="h-4 w-4 mr-2" />
                 )}
-                {hasLispDogeMapping ? "DarkWolf Mapped" : "Add DarkWolf Mapping"}
+                {hasDarkWolfMapping ? "DarkWolf Mapped" : "Add DarkWolf Mapping"}
               </Button>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function PlayerMappingManager() {
                 </label>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="e.g., LispDoge"
+                    placeholder="e.g., DarkWolf"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     className="hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
@@ -396,37 +396,37 @@ export default function PlayerMappingManager() {
           <div className="space-y-6">
             <div
               className={`p-6 rounded-xl border-2 transition-all duration-300 ${
-                hasLispDogeMapping 
+                hasDarkWolfMapping 
                   ? "bg-gradient-to-br from-assist-green-50 to-assist-green-100/50 dark:from-assist-green-900/20 dark:to-assist-green-800/10 border-assist-green-200 dark:border-assist-green-700 shadow-lg shadow-assist-green-500/10" 
                   : "bg-gradient-to-br from-goal-red-50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-800/10 border-goal-red-200 dark:border-goal-red-700 shadow-lg shadow-goal-red-500/10"
               }`}
             >
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-full ${
-                  hasLispDogeMapping 
+                  hasDarkWolfMapping 
                     ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg shadow-assist-green-500/25" 
                     : "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg shadow-goal-red-500/25"
                 }`}>
-                  {hasLispDogeMapping ? <CheckCircle className="h-6 w-6" /> : <RefreshCw className="h-6 w-6" />}
+                  {hasDarkWolfMapping ? <CheckCircle className="h-6 w-6" /> : <RefreshCw className="h-6 w-6" />}
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
-                    LispDoge Mapping
+                    DarkWolf Mapping
                   </h3>
                   <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-4">
-                    {hasLispDogeMapping ? (
+                    {hasDarkWolfMapping ? (
                       <p className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-assist-green-600" />
-                        LispDoge mapping is correctly configured and active.
+                        DarkWolf mapping is correctly configured and active.
                       </p>
                     ) : (
                       <p className="flex items-center gap-2">
                         <Target className="h-4 w-4 text-goal-red-600" />
-                        Click the "Add LispDoge Mapping" button above to create the essential mapping.
+                        Click the "Add DarkWolf Mapping" button above to create the essential mapping.
                       </p>
                     )}
                   </div>
-                  {hasLispDogeMapping && (
+                  {hasDarkWolfMapping && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
                         <Database className="h-4 w-4 text-ice-blue-600" />

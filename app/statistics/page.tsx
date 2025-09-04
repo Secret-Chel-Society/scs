@@ -660,13 +660,13 @@ export default function StatisticsPage() {
             }
           })
 
-          // Specifically ensure the LispDoge mapping exists
+          // Specifically ensure the DarkWolf mapping exists
           if (!mappings["1005699228134"]) {
             mappings["1005699228134"] = "657dbb12-0db5-4a8b-94da-7dea7eba7409"
           }
 
-          // Add LispDoge to name mapping
-          nameToIdMap["lispdoge"] = "657dbb12-0db5-4a8b-94da-7dea7eba7409"
+          // Add DarkWolf to name mapping
+          nameToIdMap["darkwolf"] = "657dbb12-0db5-4a8b-94da-7dea7eba7409"
 
           setPlayerMappings(mappings)
 
@@ -702,7 +702,7 @@ export default function StatisticsPage() {
         }
       } catch (error) {
         console.error("Error fetching player mappings:", error)
-        // Even if there's an error, ensure the LispDoge mapping exists
+        // Even if there's an error, ensure the DarkWolf mapping exists
         setPlayerMappings({
           "1005699228134": "657dbb12-0db5-4a8b-94da-7dea7eba7409",
         })
@@ -749,7 +749,7 @@ export default function StatisticsPage() {
             }
           })
 
-          // Ensure LispDoge is mapped to St Louis Skyhawks
+          // Ensure DarkWolf is mapped to St Louis Skyhawks
           const lispDogeId = "657dbb12-0db5-4a8b-94da-7dea7eba7409"
 
           // Find St Louis Skyhawks team ID
@@ -1751,64 +1751,64 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
       {/* Hero Header Section */}
-      <div className="hockey-header relative py-16 px-4">
+      <div className="clean-header relative py-16 px-4">
         <div className="container mx-auto text-center">
           <div>
-            <h1 className="hockey-title mb-6">
+            <h1 className="clean-title mb-6">
               Player Statistics
             </h1>
-            <p className="hockey-subtitle mb-8">
+            <p className="clean-subtitle mb-8">
               Comprehensive player performance data across all seasons and positions
             </p>
             
             {/* Stats Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-8">
-              <div className="hockey-stat-item bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/20">
-                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg mb-3 mx-auto w-fit">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container mb-3">
                   <div className="h-6 w-6 text-white">📊</div>
                 </div>
-                <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                   {totalPlayers.length + goalieStats.length}
                 </div>
-                <div className="text-xs text-ice-blue-600 dark:text-ice-blue-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">
                   Total Players
                 </div>
               </div>
               
-              <div className="hockey-stat-item bg-gradient-to-br from-assist-green-100 to-assist-green-200 dark:from-assist-green-900/30 dark:to-assist-green-800/20">
-                <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg mb-3 mx-auto w-fit">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-emerald mb-3">
                   <div className="h-6 w-6 text-white">🎯</div>
                 </div>
-                <div className="text-2xl font-bold text-assist-green-700 dark:text-assist-green-300">
+                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                   {forwards.length}
                 </div>
-                <div className="text-xs text-assist-green-600 dark:text-assist-green-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wide">
                   Forwards
                 </div>
               </div>
               
-              <div className="hockey-stat-item bg-gradient-to-br from-rink-blue-100 to-rink-blue-200 dark:from-rink-blue-900/30 dark:to-rink-blue-800/20">
-                <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg mb-3 mx-auto w-fit">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-indigo mb-3">
                   <div className="h-6 w-6 text-white">🛡️</div>
                 </div>
-                <div className="text-2xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
+                <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
                   {defensemen.length}
                 </div>
-                <div className="text-xs text-rink-blue-600 dark:text-rink-blue-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
                   Defensemen
                 </div>
               </div>
               
-              <div className="hockey-stat-item bg-gradient-to-br from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/20">
-                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg mb-3 mx-auto w-fit">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-red mb-3">
                   <div className="h-6 w-6 text-white">🥅</div>
                 </div>
-                <div className="text-2xl font-bold text-goal-red-700 dark:text-goal-red-300">
+                <div className="text-2xl font-bold text-red-700 dark:text-red-300">
                   {goalieStats.length}
                 </div>
-                <div className="text-xs text-goal-red-600 dark:text-goal-red-400 font-medium uppercase tracking-wide">
+                <div className="text-xs text-red-600 dark:text-red-400 font-medium uppercase tracking-wide">
                   Goalies
                 </div>
               </div>
@@ -1821,17 +1821,17 @@ export default function StatisticsPage() {
       <div className="container mx-auto px-4 py-12">
         <div className="space-y-8">
           {/* Filters */}
-          <Card className="hockey-card">
+          <Card className="clean-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg">
+                <div className="clean-icon-container">
                   <div className="h-6 w-6 text-white">⚙️</div>
                 </div>
                 <div>
-                  <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
                     Filters & Settings
                   </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
                     Customize your statistics view
                   </div>
                 </div>
@@ -1840,11 +1840,11 @@ export default function StatisticsPage() {
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 mb-2 block">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     Season
                   </label>
                   <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
-                    <SelectTrigger className="hockey-search">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select season" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1858,11 +1858,11 @@ export default function StatisticsPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 mb-2 block">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     Week
                   </label>
                   <Select value={selectedWeek} onValueChange={handleWeekChange}>
-                    <SelectTrigger className="hockey-search">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select week" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1876,11 +1876,11 @@ export default function StatisticsPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300 mb-2 block">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     Team
                   </label>
                   <Select value={selectedTeam} onValueChange={handleTeamChange}>
-                    <SelectTrigger className="hockey-search">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select team" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1899,45 +1899,45 @@ export default function StatisticsPage() {
 
           {/* Statistics Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
               <TabsTrigger 
                 value="total" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
                 📊 Total
               </TabsTrigger>
               <TabsTrigger 
                 value="offense" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
                 🎯 Offense
               </TabsTrigger>
               <TabsTrigger 
                 value="defense" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
                 🛡️ Defense
               </TabsTrigger>
               <TabsTrigger 
                 value="goalies" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
               >
                 🥅 Goalies
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="total" className="space-y-4 mt-6">
-              <Card className="hockey-card hockey-card-hover">
+              <Card className="clean-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                    <div className="clean-icon-container">
                       <div className="h-6 w-6 text-white">📊</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
                         All Players
                       </div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                      <div className="text-sm text-slate-600 dark:text-slate-400">
                         Combined statistics for all skaters (excludes goalies)
                       </div>
                     </div>
@@ -1948,17 +1948,17 @@ export default function StatisticsPage() {
             </TabsContent>
 
             <TabsContent value="offense" className="space-y-4 mt-6">
-              <Card className="hockey-card hockey-card-hover">
+              <Card className="clean-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                    <div className="clean-icon-container-emerald">
                       <div className="h-6 w-6 text-white">🎯</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
                         Forwards
                       </div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                      <div className="text-sm text-slate-600 dark:text-slate-400">
                         Statistics for centers, left wings, and right wings
                       </div>
                     </div>
@@ -1969,17 +1969,17 @@ export default function StatisticsPage() {
             </TabsContent>
 
             <TabsContent value="defense" className="space-y-4 mt-6">
-              <Card className="hockey-card hockey-card-hover">
+              <Card className="clean-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                    <div className="clean-icon-container-indigo">
                       <div className="h-6 w-6 text-white">🛡️</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
                         Defensemen
                       </div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                      <div className="text-sm text-slate-600 dark:text-slate-400">
                         Statistics for left and right defensemen
                       </div>
                     </div>
@@ -1990,17 +1990,17 @@ export default function StatisticsPage() {
             </TabsContent>
 
             <TabsContent value="goalies" className="space-y-4 mt-6">
-              <Card className="hockey-card hockey-card-hover">
+              <Card className="clean-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                    <div className="clean-icon-container-red">
                       <div className="h-6 w-6 text-white">🥅</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
                         Goalies
                       </div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                      <div className="text-sm text-slate-600 dark:text-slate-400">
                         Statistics for goaltenders
                       </div>
                     </div>

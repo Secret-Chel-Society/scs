@@ -47,7 +47,7 @@ export function EaPlayerMappingsMigration() {
       <CardContent>
         <p className="mb-4">
           This migration will create a new table called <code>ea_player_mappings</code> that allows you to manually map
-          EA player personas (like &quot;LispDoge&quot;) to SCS player IDs.
+          EA player personas (like &quot;DarkWolf&quot;) to SCS player IDs.
         </p>
         <Button onClick={runMigration} disabled={isLoading || isComplete}>
           {isLoading ? "Running Migration..." : isComplete ? "Migration Complete" : "Run Migration"}

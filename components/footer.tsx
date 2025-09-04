@@ -209,87 +209,120 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* User & Admin Section */}
+            {/* Enhanced User Panel Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
-                  <Settings className="h-5 w-5 text-white" />
+                <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+                  <User className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="font-bold text-xl text-white">Account & Admin</h3>
+                <h3 className="font-bold text-xl text-white">User Panel</h3>
               </div>
               
-              <ul className="space-y-3">
-                {user ? (
-                  <>
-                    <li>
-                      <Link 
-                        href="/profile" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                      >
-                        <User className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
-                        View Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/settings" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                      >
-                        <Settings className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
-                        Settings
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/dashboard" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                      >
-                        <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                        Dashboard
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/management" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                      >
-                        <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                        Management
-                      </Link>
-                    </li>
-                    <li>
-                      <Link 
-                        href="/admin" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                      >
-                        <div className="w-1 h-1 bg-goal-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                        Admin Panel
-                      </Link>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li>
+              {user ? (
+                <div className="space-y-4">
+                  {/* User Info Card */}
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">
+                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-white font-medium text-sm">
+                          {user.email?.split('@')[0] || 'User'}
+                        </p>
+                        <p className="text-blue-200 text-xs">Active Member</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-300">Status</span>
+                        <span className="text-green-400 font-medium">Online</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-300">Member Since</span>
+                        <span className="text-slate-300">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-semibold text-slate-300 mb-3">Quick Actions</h4>
+                    <ul className="space-y-2">
+                      <li>
+                        <Link 
+                          href="/profile" 
+                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        >
+                          <User className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors duration-200" />
+                          View Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link 
+                          href="/dashboard" 
+                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        >
+                          <div className="w-1 h-1 bg-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                          Dashboard
+                        </Link>
+                      </li>
+                      <li>
+                        <Link 
+                          href="/settings" 
+                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        >
+                          <Settings className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors duration-200" />
+                          Settings
+                        </Link>
+                      </li>
+                      <li>
+                        <Link 
+                          href="/management" 
+                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        >
+                          <div className="w-1 h-1 bg-emerald-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                          Management
+                        </Link>
+                      </li>
+                      <li>
+                        <Link 
+                          href="/admin" 
+                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        >
+                          <div className="w-1 h-1 bg-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                          Admin Panel
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 text-center">
+                    <User className="h-8 w-8 text-slate-400 mx-auto mb-3" />
+                    <p className="text-slate-300 text-sm mb-4">Join the community to access all features</p>
+                    <div className="space-y-2">
                       <Link 
                         href="/login" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        className="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-center py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
                       >
-                        <LogIn className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
                         Sign In
                       </Link>
-                    </li>
-                    <li>
                       <Link 
                         href="/register" 
-                        className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
+                        className="block w-full border border-white/30 hover:border-white/50 text-white text-center py-2 px-4 rounded-lg transition-all duration-200 hover:bg-white/10"
                       >
-                        <User className="h-4 w-4 text-ice-blue-400 group-hover:text-white transition-colors duration-200" />
                         Register
                       </Link>
-                    </li>
-                  </>
-                )}
-              </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

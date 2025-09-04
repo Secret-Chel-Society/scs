@@ -168,7 +168,7 @@ export function EaPlayerMappingsManager() {
                 id="persona"
                 value={newPersona}
                 onChange={(e) => setNewPersona(e.target.value)}
-                placeholder="Enter EA persona (e.g., LispDoge)"
+                placeholder="Enter EA persona (e.g., DarkWolf)"
               />
             </div>
             <div className="flex-1">
