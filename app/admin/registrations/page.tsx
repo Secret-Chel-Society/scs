@@ -778,8 +778,6 @@ export default function RegistrationsPage() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
-    </div>
 
       {/* Registration Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -1184,6 +1182,7 @@ export default function RegistrationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }
