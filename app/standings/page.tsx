@@ -9,10 +9,90 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import TeamStandings from "@/components/team-standings"
 import { calculateStandings, getCurrentSeasonId, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { Trophy, Target, TrendingUp, Award, Medal, Star, Zap, Users, TrendingDown, ArrowUp, ArrowDown, Minus, Crown, Flame, Shield, Rocket, Calendar, BarChart3, TrendingUp2 } from "lucide-react"
+import { Trophy, Target, TrendingUp, Award, Medal, Star, Zap, Users, TrendingDown, ArrowUp, ArrowDown, Minus, Crown, Flame, Shield, Rocket, Calendar, BarChart3, TrendingUp2, AlertCircle, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface StandingsPageProps {
   searchParams: { season?: string }
+}
+
+// Enhanced loading skeleton component
+function StandingsLoadingSkeleton() {
+  return (
+    <div className="space-y-8">
+      {/* Enhanced Tabs Skeleton */}
+      <div className="grid w-full grid-cols-3 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        ))}
+      </div>
+
+      {/* Enhanced Content Skeleton */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-12 w-12 rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="grid gap-6">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-96 w-full rounded-xl" />
+      </div>
+    </div>
+  )
+}
+
+// Enhanced error component
+function StandingsError({ error, onRetry }: { error: string; onRetry: () => void }) {
+  return (
+    <Card className="hockey-card border-2 border-goal-red-200/50 dark:border-goal-red-700/50">
+      <CardContent className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="w-20 h-20 bg-gradient-to-r from-goal-red-200 to-goal-red-300 dark:from-goal-red-700 dark:to-goal-red-800 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-10 w-10 text-goal-red-500 dark:text-goal-red-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-3">
+            Error Loading Standings
+          </h3>
+          <p className="text-goal-red-500 dark:text-goal-red-400 text-lg mb-6">
+            {error}
+          </p>
+          <Button 
+            onClick={onRetry}
+            className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+          >
+            <RefreshCw className="h-4 w-4 mr-2 group-hover:rotate-180 transition-transform duration-300" />
+            Try Again
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Enhanced no data component
+function StandingsNoData() {
+  return (
+    <Card className="hockey-card border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50">
+      <CardContent className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="w-20 h-20 bg-gradient-to-r from-hockey-silver-200 to-ice-blue-200 dark:from-hockey-silver-700 dark:to-ice-blue-800 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Target className="h-10 w-10 text-hockey-silver-500 dark:text-hockey-silver-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-hockey-silver-700 dark:text-hockey-silver-300 mb-3">
+            No Standings Available
+          </h3>
+          <p className="text-hockey-silver-500 dark:text-hockey-silver-500 text-lg">
+            No team data found for this season. Please check back later or contact an administrator.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 async function getStandingsData(seasonId: number) {
@@ -273,47 +353,54 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
   )
 }
 
-function StandingsLoadingSkeleton() {
-  return (
-    <div className="space-y-8">
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-xl" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-        </div>
-      </div>
-      <div className="grid gap-6">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-96 w-full rounded-xl" />
-      </div>
-    </div>
-  )
-}
+function StandingsContent({ seasonId }: { seasonId: number }) {
+  const [standings, setStandings] = useState<TeamStanding[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-async function StandingsContent({ seasonId }: { seasonId: number }) {
-  const standings = await getStandingsData(seasonId)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await getStandingsData(seasonId)
+        setStandings(data)
+      } catch (err) {
+        setError("Failed to fetch standings data.")
+        console.error("Error fetching standings:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  if (!standings || standings.length === 0) {
-    return (
-      <Card className="hockey-card">
-        <CardContent className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <div className="w-20 h-20 bg-gradient-to-r from-hockey-silver-200 to-ice-blue-200 dark:from-hockey-silver-700 dark:to-ice-blue-800 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Target className="h-10 w-10 text-hockey-silver-500 dark:text-hockey-silver-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-hockey-silver-700 dark:text-hockey-silver-300 mb-3">
-              No Standings Available
-            </h3>
-            <p className="text-hockey-silver-500 dark:text-hockey-silver-500 text-lg">
-              No team data found for this season.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    )
+    fetchData()
+  }, [seasonId])
+
+  if (loading && standings.length === 0) {
+    return <StandingsLoadingSkeleton />
+  }
+
+  if (error) {
+    return <StandingsError error={error} onRetry={() => {
+      const fetchData = async () => {
+        try {
+          setLoading(true)
+          setError(null)
+          const data = await getStandingsData(seasonId)
+          setStandings(data)
+        } catch (err) {
+          setError("Failed to fetch standings data.")
+          console.error("Error fetching standings:", err)
+        } finally {
+          setLoading(false)
+        }
+      }
+      fetchData()
+    }} />
+  }
+
+  if (standings.length === 0) {
+    return <StandingsNoData />
   }
 
   return (
@@ -398,17 +485,20 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
   const [currentSeasonId, setCurrentSeasonId] = useState<number>(1)
   const [selectedSeasonId, setSelectedSeasonId] = useState<number>(1)
   const [loading, setLoading] = useState(true)
+  const [seasonsError, setSeasonsError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true)
+        setSeasonsError(null)
         const { seasons: seasonsData, currentSeasonId: currentId } = await getSeasonsData()
         setSeasons(seasonsData)
         setCurrentSeasonId(currentId)
         setSelectedSeasonId(searchParams.season ? Number.parseInt(searchParams.season) : currentId)
       } catch (error) {
         console.error("Error fetching seasons:", error)
+        setSeasonsError("Failed to load seasons. Please refresh the page.")
       } finally {
         setLoading(false)
       }
@@ -448,28 +538,44 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
             
             {/* Enhanced Season Selector */}
             <div className="max-w-md mx-auto">
-              <div className="relative">
-                <Select value={selectedSeasonId.toString()} onValueChange={handleSeasonChange} disabled={loading}>
-                  <SelectTrigger className="hockey-search h-14 text-lg border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                    <SelectValue placeholder="Select Season" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {seasons.map((season) => (
-                      <SelectItem key={season.id} value={season.id.toString()}>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                          {season.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center">
-                    <BarChart3 className="h-4 w-4 text-white" />
+              {seasonsError ? (
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/30 border border-goal-red-300 dark:border-goal-red-600 rounded-xl text-goal-red-700 dark:text-goal-red-300">
+                    <AlertCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">{seasonsError}</span>
+                  </div>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    className="mt-3 hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Page
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <Select value={selectedSeasonId.toString()} onValueChange={handleSeasonChange} disabled={loading}>
+                    <SelectTrigger className="hockey-search h-14 text-lg border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
+                      <SelectValue placeholder={loading ? "Loading Seasons..." : "Select Season"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons.map((season) => (
+                        <SelectItem key={season.id} value={season.id.toString()}>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                            {season.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center">
+                      <BarChart3 className="h-4 w-4 text-white" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
