@@ -262,7 +262,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
       {/* Enhanced Hero Header Section */}
       <motion.div 
-        className="relative overflow-hidden py-24 px-4"
+        className="relative overflow-hidden py-12 px-4"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -309,11 +309,11 @@ export default function RegisterPage() {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 rounded-xl blur-lg scale-150" />
-                <div className="relative p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
-                  <UserPlus className="h-12 w-12 text-white" />
+                <div className="relative p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                  <UserPlus className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <h1 className="hockey-title text-5xl md:text-6xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent">
+              <h1 className="hockey-title text-3xl md:text-4xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent">
                 Join the Secret Chel Society
               </h1>
             </motion.div>
@@ -324,7 +324,7 @@ export default function RegisterPage() {
               transition={{ duration: 1, delay: 0.5 }}
             />
             <motion.p 
-              className="hockey-subtitle text-xl md:text-2xl mx-auto mb-12 max-w-3xl leading-relaxed"
+              className="hockey-subtitle text-lg md:text-xl mx-auto mb-8 max-w-2xl leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
@@ -337,7 +337,7 @@ export default function RegisterPage() {
       </motion.div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex justify-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -349,12 +349,12 @@ export default function RegisterPage() {
               <CardHeader className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20" />
                 <div className="relative flex items-center gap-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <UserPlus className="h-8 w-8 text-white" />
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <UserPlus className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-white text-2xl font-bold">Create Your Account</CardTitle>
-                    <CardDescription className="text-ice-blue-100 text-lg">
+                    <CardTitle className="text-white text-xl font-bold">Create Your Account</CardTitle>
+                    <CardDescription className="text-ice-blue-100 text-base">
                       Join the SCS community and start your hockey journey
                     </CardDescription>
                   </div>
@@ -362,7 +362,7 @@ export default function RegisterPage() {
               </CardHeader>
               
               <form onSubmit={handleSubmit(onSubmit)}>
-                <CardContent className="space-y-8 p-8">
+                <CardContent className="space-y-6 p-6">
                   {registrationError && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -495,14 +495,14 @@ export default function RegisterPage() {
                       <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
                         <User className="h-5 w-5 text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                      <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                         Step 2: Account Information
                       </h3>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <Label htmlFor="email" className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-3">
+                        <Label htmlFor="email" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
                           <Mail className="h-5 w-5 text-ice-blue-600" />
                           Email Address
                         </Label>
@@ -511,7 +511,7 @@ export default function RegisterPage() {
                           type="email" 
                           placeholder="your.email@example.com" 
                           {...register("email")} 
-                          className="hockey-search text-lg py-3"
+                          className="hockey-search"
                         />
                         {errors.email && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 flex items-center gap-2">
                           <AlertCircle className="h-4 w-4" />
@@ -520,7 +520,7 @@ export default function RegisterPage() {
                       </div>
 
                       <div className="space-y-4">
-                        <Label htmlFor="password" className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-3">
+                        <Label htmlFor="password" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
                           <Lock className="h-5 w-5 text-rink-blue-600" />
                           Password
                         </Label>
@@ -529,7 +529,7 @@ export default function RegisterPage() {
                           type="password" 
                           placeholder="••••••••" 
                           {...register("password")} 
-                          className="hockey-search text-lg py-3"
+                          className="hockey-search"
                         />
                         {errors.password && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 flex items-center gap-2">
                           <AlertCircle className="h-4 w-4" />
@@ -539,7 +539,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <Label htmlFor="gamerTag" className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-3">
+                      <Label htmlFor="gamerTag" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
                         <Gamepad2 className="h-5 w-5 text-assist-green-600" />
                         Gamer Tag
                       </Label>
@@ -548,7 +548,7 @@ export default function RegisterPage() {
                         id="gamerTag" 
                         placeholder="Your in-game name" 
                         {...register("gamerTag")} 
-                        className="hockey-search text-lg py-3"
+                        className="hockey-search"
                       />
                       {errors.gamerTag && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 flex items-center gap-2">
                         <AlertCircle className="h-4 w-4" />
@@ -558,13 +558,13 @@ export default function RegisterPage() {
 
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <Label htmlFor="primaryPosition" className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-3">
+                        <Label htmlFor="primaryPosition" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
                           <Target className="h-5 w-5 text-goal-red-600" />
                           Primary Position
                         </Label>
                         <select
                           id="primaryPosition"
-                          className="hockey-search text-lg py-3"
+                          className="hockey-search"
                           {...register("primaryPosition")}
                         >
                           <option value="">Select position</option>
@@ -582,13 +582,13 @@ export default function RegisterPage() {
                       </div>
 
                       <div className="space-y-4">
-                        <Label htmlFor="secondaryPosition" className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-3">
+                        <Label htmlFor="secondaryPosition" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
                           <Target className="h-5 w-5 text-hockey-silver-600" />
                           Secondary Position (Optional)
                         </Label>
                         <select
                           id="secondaryPosition"
-                          className="hockey-search text-lg py-3"
+                          className="hockey-search"
                           {...register("secondaryPosition")}
                         >
                           <option value="">None</option>
@@ -607,13 +607,13 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-4">
-                      <Label htmlFor="console" className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-3">
+                      <Label htmlFor="console" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
                         <Gamepad2 className="h-5 w-5 text-rink-blue-600" />
                         Console
                       </Label>
                       <select
                         id="console"
-                        className="hockey-search text-lg py-3"
+                        className="hockey-search"
                         {...register("console")}
                       >
                         <option value="">Select console</option>
@@ -628,7 +628,7 @@ export default function RegisterPage() {
                   </motion.div>
                 </CardContent>
                 
-                <CardFooter className="flex flex-col space-y-6 p-8 pt-0">
+                <CardFooter className="flex flex-col space-y-4 p-6 pt-0">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -636,7 +636,7 @@ export default function RegisterPage() {
                   >
                     <Button 
                       type="submit" 
-                      className="w-full hockey-button-enhanced text-xl py-4" 
+                      className="w-full hockey-button-enhanced text-lg py-3" 
                       disabled={isLoading || !discordConnected || discordConfigError}
                     >
                       {isLoading ? (

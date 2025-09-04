@@ -3,16 +3,28 @@ import { NextResponse } from "next/server"
 // Toggle this when debugging locally
 const isDevelopment = process.env.NODE_ENV === "development"
 
-// ✅ Hardcoded production values
-const DISCORD_CLIENT_ID = "1407947416094900245"
-const DISCORD_CLIENT_SECRET = "d9zvMCTusY97n7yx2rXl8tzCyaFXUCZm"
-const SITE_URL = isDevelopment
-  ? "http://localhost:3000"
-  : "https://www.secretchelsociety.com"
+// Use environment variables for consistency
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
+// Trim environment variable to prevent leading/trailing spaces
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+  (isDevelopment ? "http://localhost:3000" : "https://www.secretchelsociety.com")
 const DISCORD_REDIRECT_URI = `${SITE_URL}/api/auth/discord/callback`
 
 export async function GET(request: Request) {
   try {
+    // Check if Discord is properly configured
+    if (!DISCORD_CLIENT_ID) {
+      console.error("Discord client ID not configured in callback")
+      return NextResponse.redirect(`${SITE_URL}/register?discord_error=config_error`)
+    }
+
+    if (!DISCORD_CLIENT_SECRET) {
+      console.error("Discord client secret not configured in callback")
+      return NextResponse.redirect(`${SITE_URL}/register?discord_error=config_error`)
+    }
+
     const { searchParams } = new URL(request.url)
     const code = searchParams.get("code")
     const state = searchParams.get("state")
@@ -54,6 +66,8 @@ export async function GET(request: Request) {
             status: tokenResponse.status,
             statusText: tokenResponse.statusText,
             error: errorText,
+            redirectUri: DISCORD_REDIRECT_URI,
+            clientId: DISCORD_CLIENT_ID,
           })
           return NextResponse.redirect(`${SITE_URL}/register?discord_error=token_failed`)
         }
@@ -132,7 +146,13 @@ export async function GET(request: Request) {
 
       if (!tokenResponse.ok) {
         const errorText = await tokenResponse.text()
-        console.error("Token exchange failed:", errorText)
+        console.error("Token exchange failed:", {
+          status: tokenResponse.status,
+          statusText: tokenResponse.statusText,
+          error: errorText,
+          redirectUri: DISCORD_REDIRECT_URI,
+          clientId: DISCORD_CLIENT_ID,
+        })
         return NextResponse.redirect(`${SITE_URL}/settings?discord_error=token_exchange_failed`)
       }
 

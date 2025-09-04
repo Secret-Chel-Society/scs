@@ -139,7 +139,7 @@
     @apply border-2 border-ice-blue-200 dark:border-rink-blue-700;
     @apply focus:border-ice-blue-500 dark:focus:border-rink-blue-500;
     @apply focus:ring-2 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20;
-    @apply rounded-xl px-4 py-3 text-base;
+    @apply rounded-lg px-3 py-2 text-sm;
     @apply transition-all duration-200 ease-out;
     @apply placeholder:text-hockey-silver-500 dark:placeholder:text-hockey-silver-400;
     @apply backdrop-blur-sm;
@@ -157,13 +157,13 @@
     @apply bg-gradient-to-r from-ice-blue-700 via-rink-blue-700 to-ice-blue-800;
     @apply dark:from-ice-blue-300 dark:via-rink-blue-300 dark:to-ice-blue-400;
     @apply bg-clip-text text-transparent;
-    @apply text-4xl md:text-5xl font-bold;
+    @apply text-2xl md:text-3xl font-bold;
     @apply animate-gradient-x;
   }
   
   .hockey-subtitle {
     @apply relative z-10 text-hockey-silver-600 dark:text-hockey-silver-400;
-    @apply text-lg md:text-xl font-medium;
+    @apply text-base md:text-lg font-medium;
     @apply max-w-2xl;
   }
   
@@ -421,9 +421,9 @@
   .hockey-button-enhanced {
     @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
     @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
-    @apply text-white font-semibold py-3 px-6 rounded-xl;
+    @apply text-white font-semibold py-2 px-4 rounded-lg;
     @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105 hover:shadow-xl hover:shadow-ice-blue-500/30;
+    @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/30;
     @apply focus:outline-none focus:ring-2 focus:ring-ice-blue-500 focus:ring-offset-2;
     @apply relative overflow-hidden;
   }
@@ -441,7 +441,7 @@
   
   .hockey-title-enhanced {
     @apply hockey-title;
-    @apply text-5xl md:text-6xl;
+    @apply text-3xl md:text-4xl;
     @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
     @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
     @apply bg-clip-text text-transparent;
@@ -451,9 +451,9 @@
   
   .hockey-subtitle-enhanced {
     @apply hockey-subtitle;
-    @apply text-xl md:text-2xl;
+    @apply text-lg md:text-xl;
     @apply leading-relaxed;
-    @apply max-w-4xl mx-auto;
+    @apply max-w-3xl mx-auto;
   }
   
   .hockey-section-divider {
