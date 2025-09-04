@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -45,7 +46,8 @@ import {
   Download,
   Upload,
   Send,
-  Save
+  Save,
+  XCircle
 } from "lucide-react"
 import Link from "next/link"
 
@@ -144,15 +146,15 @@ export default function SeasonRegistrationPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "open":
-        return <Badge className="badge-regular"><CheckCircle className="h-3 w-3 mr-1" />Open</Badge>
+        return <Badge variant="default"><CheckCircle className="h-3 w-3 mr-1" />Open</Badge>
       case "closing-soon":
-        return <Badge className="badge-playoff"><Clock className="h-3 w-3 mr-1" />Closing Soon</Badge>
+        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" />Closing Soon</Badge>
       case "closed":
-        return <Badge className="bg-red-500 text-white"><XCircle className="h-3 w-3 mr-1" />Closed</Badge>
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" />Closed</Badge>
       case "full":
-        return <Badge className="badge-champion"><Users className="h-3 w-3 mr-1" />Full</Badge>
+        return <Badge variant="outline"><Users className="h-3 w-3 mr-1" />Full</Badge>
       default:
-        return <Badge className="badge-regular">{status}</Badge>
+        return <Badge variant="default">{status}</Badge>
     }
   }
 
@@ -184,8 +186,8 @@ export default function SeasonRegistrationPage() {
     }).format(amount)
   }
 
-  const handleInputChange = (field: keyof RegistrationForm, value: any) => {
-    setFormData(prev => ({
+  const handleInputChange = (field: keyof RegistrationForm, value: string | boolean | number) => {
+    setFormData((prev: RegistrationForm) => ({
       ...prev,
       [field]: value
     }))
@@ -307,7 +309,7 @@ export default function SeasonRegistrationPage() {
                         <Input
                           placeholder="Enter your team name"
                           value={formData.team_name}
-                          onChange={(e) => handleInputChange("team_name", e.target.value)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("team_name", e.target.value)}
                           required
                         />
                       </div>
@@ -317,7 +319,7 @@ export default function SeasonRegistrationPage() {
                           <label className="block text-sm font-medium mb-2">Team Size *</label>
                           <Select 
                             value={formData.team_size.toString()} 
-                            onValueChange={(value) => handleInputChange("team_size", parseInt(value))}
+                            onValueChange={(value: string) => handleInputChange("team_size", parseInt(value))}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -336,7 +338,7 @@ export default function SeasonRegistrationPage() {
                           <label className="block text-sm font-medium mb-2">Experience Level *</label>
                           <Select 
                             value={formData.experience_level} 
-                            onValueChange={(value) => handleInputChange("experience_level", value)}
+                            onValueChange={(value: string) => handleInputChange("experience_level", value)}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select experience level" />
@@ -356,7 +358,7 @@ export default function SeasonRegistrationPage() {
                         <label className="block text-sm font-medium mb-2">Preferred Schedule *</label>
                         <Select 
                           value={formData.preferred_schedule} 
-                          onValueChange={(value) => handleInputChange("preferred_schedule", value)}
+                                                      onValueChange={(value: string) => handleInputChange("preferred_schedule", value)}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select schedule preference" />
@@ -376,7 +378,7 @@ export default function SeasonRegistrationPage() {
                         <Textarea
                           placeholder="Tell us about your team, playing style, goals, etc."
                           value={formData.team_description}
-                          onChange={(e) => handleInputChange("team_description", e.target.value)}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange("team_description", e.target.value)}
                           rows={3}
                         />
                       </div>
@@ -392,7 +394,7 @@ export default function SeasonRegistrationPage() {
                           <Input
                             placeholder="Enter captain's full name"
                             value={formData.captain_name}
-                            onChange={(e) => handleInputChange("captain_name", e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("captain_name", e.target.value)}
                             required
                           />
                         </div>
@@ -403,7 +405,7 @@ export default function SeasonRegistrationPage() {
                             type="email"
                             placeholder="Enter captain's email"
                             value={formData.captain_email}
-                            onChange={(e) => handleInputChange("captain_email", e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("captain_email", e.target.value)}
                             required
                           />
                         </div>
@@ -414,7 +416,7 @@ export default function SeasonRegistrationPage() {
                         <Input
                           placeholder="Enter Discord username (e.g., username#1234)"
                           value={formData.captain_discord}
-                          onChange={(e) => handleInputChange("captain_discord", e.target.value)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("captain_discord", e.target.value)}
                           required
                         />
                       </div>
@@ -429,7 +431,7 @@ export default function SeasonRegistrationPage() {
                           <Checkbox
                             id="rules"
                             checked={formData.agree_to_rules}
-                            onCheckedChange={(checked) => handleInputChange("agree_to_rules", checked)}
+                            onCheckedChange={(checked: boolean) => handleInputChange("agree_to_rules", checked)}
                             required
                           />
                           <label htmlFor="rules" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -441,7 +443,7 @@ export default function SeasonRegistrationPage() {
                           <Checkbox
                             id="terms"
                             checked={formData.agree_to_terms}
-                            onCheckedChange={(checked) => handleInputChange("agree_to_terms", checked)}
+                            onCheckedChange={(checked: boolean) => handleInputChange("agree_to_terms", checked)}
                             required
                           />
                           <label htmlFor="terms" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Trophy, TrendingDown, AlertTriangle, Shield, MessageSquare, Users, Zap, ArrowUp, Clock, Star, Target, TrendingUp, Activity, BarChart3, GamepadIcon, GoalieMask, Award } from "lucide-react"
+import { Trophy, TrendingDown, AlertTriangle, Shield, MessageSquare, Users, Zap, ArrowUp, Clock, Star, Target, TrendingUp, Activity, BarChart3, GamepadIcon, Shield as GoalieMask, Award } from "lucide-react"
 import Image from "next/image"
 
 interface PlayerStats {

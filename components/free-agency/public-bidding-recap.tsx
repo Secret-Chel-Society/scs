@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { DollarSign, Users, Trophy, UserCheck, Target, TrendingUp, Award, Star, Zap, Clock, TrendingDown, BarChart3, Activity, Shield, GoalieMask, GamepadIcon } from "lucide-react"
+import { DollarSign, Users, Trophy, UserCheck, Target, TrendingUp, Award, Star, Zap, Clock, TrendingDown, BarChart3, Activity, Shield, Shield as GoalieMask, GamepadIcon } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { Skeleton } from "@/components/ui/skeleton"
 

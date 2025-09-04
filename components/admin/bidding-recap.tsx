@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Loader2, RefreshCw, DollarSign, Users, Trophy, Download, UserCheck, Target, Award, Medal, Star, Shield, Database, Settings, Zap, TrendingUp, Activity, BarChart3, CheckCircle, XCircle, AlertTriangle, Clock, GamepadIcon, GoalieMask } from "lucide-react"
+import { Loader2, RefreshCw, DollarSign, Users, Trophy, Download, UserCheck, Target, Award, Medal, Star, Shield, Database, Settings, Zap, TrendingUp, Activity, BarChart3, CheckCircle, XCircle, AlertTriangle, Clock, GamepadIcon, Shield as GoalieMask } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { useToast } from "@/hooks/use-toast"
 
