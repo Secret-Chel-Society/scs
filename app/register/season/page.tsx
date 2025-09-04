@@ -536,8 +536,8 @@ export default function SeasonRegistrationPage() {
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
+        {/* Enhanced Hero Header Section */}
+        <div className="relative overflow-hidden py-20 px-4">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
         
@@ -739,7 +739,6 @@ export default function SeasonRegistrationPage() {
           </CardFooter>
         </Card>
       </motion.div>
-      </div>
     </>
   )
 }
