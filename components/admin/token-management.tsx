@@ -35,6 +35,15 @@ import {
   Gift,
   Users,
   Settings,
+  Trophy,
+  Award,
+  Medal,
+  Star,
+  Shield,
+  Database,
+  Zap,
+  Target,
+  AlertTriangle,
 } from "lucide-react"
 
 interface User {
@@ -497,48 +506,82 @@ export function TokenManagement() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin" />
+      <div className="flex flex-col justify-center items-center h-64 space-y-4">
+        <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full shadow-lg">
+          <RefreshCw className="h-8 w-8 text-white animate-spin" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Loading Token Management</h3>
+          <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Gathering player and token data...</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
+      {/* Enhanced Header Section */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Token Management</h2>
-          <Button
-            onClick={() => {
-              console.log("Test button clicked")
-              setAdjustTokensOpen(true)
-              setSelectedUser(users[0] || null)
-            }}
-          >
-            Test Modal
-          </Button>
-          <p className="text-muted-foreground">Manage player tokens, redeemables, and redemptions</p>
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+            <Coins className="h-8 w-8 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Token Management</h2>
+            <p className="text-hockey-silver-600 dark:text-hockey-silver-400 text-lg">Manage player tokens, redeemables, and redemptions</p>
+          </div>
         </div>
-        <Button onClick={loadData} variant="outline">
+        <Button 
+          onClick={loadData} 
+          className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+        >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
         </Button>
       </div>
 
       <Tabs defaultValue="players" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="players">Players</TabsTrigger>
-          <TabsTrigger value="redeemables">Redeemables</TabsTrigger>
-          <TabsTrigger value="redemptions">Redemptions</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
+        <div className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg rounded-xl p-2">
+          <TabsList className="grid w-full grid-cols-4 bg-transparent">
+            <TabsTrigger 
+              value="players" 
+              className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Players
+            </TabsTrigger>
+            <TabsTrigger 
+              value="redeemables" 
+              className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <Gift className="h-4 w-4 mr-2" />
+              Redeemables
+            </TabsTrigger>
+            <TabsTrigger 
+              value="redemptions" 
+              className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Redemptions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-silver-500 data-[state=active]:to-hockey-silver-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="players" className="space-y-4">
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
+          {/* Enhanced Filters */}
+          <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
                 Player Token Management
               </CardTitle>
             </CardHeader>
@@ -546,17 +589,17 @@ export function TokenManagement() {
               <div className="flex flex-col md:flex-row gap-4 mb-4">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
                     <Input
                       placeholder="Search players..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8"
+                      className="hockey-search pl-10 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                     />
                   </div>
                 </div>
                 <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="hockey-search w-48 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                     <SelectValue placeholder="Filter by team" />
                   </SelectTrigger>
                   <SelectContent>
@@ -569,7 +612,7 @@ export function TokenManagement() {
                   </SelectContent>
                 </Select>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="hockey-search w-48 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -581,122 +624,166 @@ export function TokenManagement() {
                 </Select>
               </div>
 
-              {/* Players Table */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Player</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Token Balance</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{user.gamer_tag_id}</div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {user.team_logo && (
-                            <img
-                              src={user.team_logo || "/placeholder.svg"}
-                              alt={user.team_name}
-                              className="w-6 h-6 rounded"
-                            />
-                          )}
-                          <span>{user.team_name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{user.primary_position}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Coins className="h-4 w-4 text-yellow-500" />
-                          <span className="font-bold">{user.token_balance}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openAdjustTokensModal(user)}>
-                            <Plus className="h-4 w-4 mr-1" />
-                            Adjust
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => openHistoryModal(user)}>
-                            <History className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+              {/* Enhanced Players Table */}
+              <div className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 rounded-xl overflow-hidden shadow-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Player</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Token Balance</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow 
+                        key={user.id} 
+                        className="hover:bg-gradient-to-r hover:from-ice-blue-50/30 hover:to-rink-blue-50/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-200/30 dark:border-rink-blue-700/30"
+                      >
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{user.gamer_tag_id}</div>
+                            <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{user.email}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {user.team_logo && (
+                              <img
+                                src={user.team_logo || "/placeholder.svg"}
+                                alt={user.team_name}
+                                className="w-6 h-6 rounded border border-ice-blue-200/50 dark:border-rink-blue-700/50"
+                              />
+                            )}
+                            <span className="text-hockey-silver-800 dark:text-hockey-silver-200">{user.team_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="border-ice-blue-300 dark:border-rink-blue-600 text-ice-blue-700 dark:text-rink-blue-300">
+                            {user.primary_position}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded">
+                              <Coins className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                            </div>
+                            <span className="font-bold text-ice-blue-700 dark:text-ice-blue-300">{user.token_balance}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => openAdjustTokensModal(user)}
+                              className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Adjust
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => openHistoryModal(user)}
+                              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                            >
+                              <History className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="redeemables" className="space-y-4">
-          <Card>
-            <CardHeader>
+          <Card className="hockey-card hockey-card-hover border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="border-b-2 border-assist-green-200/50 dark:border-assist-green-700/50 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Gift className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                      <Gift className="h-6 w-6 text-white" />
+                    </div>
                     Redeemable Items
                   </CardTitle>
-                  <CardDescription>Manage items that players can redeem with tokens</CardDescription>
+                  <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Manage items that players can redeem with tokens</CardDescription>
                 </div>
-                <Button onClick={openAddRedeemableModal}>
+                <Button 
+                  onClick={openAddRedeemableModal}
+                  className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Item
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {redeemables.map((redeemable) => (
-                  <Card key={redeemable.id} className={!redeemable.is_active ? "opacity-50" : ""}>
-                    <CardHeader>
+                  <Card 
+                    key={redeemable.id} 
+                    className={`hockey-card hockey-card-hover border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20 shadow-lg hover:shadow-xl transition-all duration-300 ${!redeemable.is_active ? "opacity-50" : ""}`}
+                  >
+                    <CardHeader className="border-b border-assist-green-200/50 dark:border-assist-green-700/50">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{redeemable.name}</CardTitle>
+                        <CardTitle className="text-lg text-hockey-silver-800 dark:text-hockey-silver-200">{redeemable.name}</CardTitle>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => openEditRedeemableModal(redeemable)}>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => openEditRedeemableModal(redeemable)}
+                            className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteRedeemable(redeemable.id)}>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleDeleteRedeemable(redeemable.id)}
+                            className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
-                      <CardDescription>{redeemable.description}</CardDescription>
+                      <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">{redeemable.description}</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span>Cost:</span>
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-2 bg-gradient-to-r from-assist-green-100/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-900/10 rounded-lg border border-assist-green-200/30 dark:border-assist-green-700/30">
+                          <span className="text-hockey-silver-800 dark:text-hockey-silver-200 font-medium">Cost:</span>
                           <div className="flex items-center gap-1">
-                            <Coins className="h-4 w-4 text-yellow-500" />
-                            <span className="font-bold">{redeemable.cost}</span>
+                            <div className="p-1 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded">
+                              <Coins className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                            </div>
+                            <span className="font-bold text-ice-blue-700 dark:text-ice-blue-300">{redeemable.cost}</span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span>Category:</span>
-                          <Badge variant="outline">{redeemable.category}</Badge>
+                        <div className="flex items-center justify-between p-2 bg-gradient-to-r from-rink-blue-100/30 to-rink-blue-100/30 dark:from-rink-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-rink-blue-200/30 dark:border-rink-blue-700/30">
+                          <span className="text-hockey-silver-800 dark:text-hockey-silver-200 font-medium">Category:</span>
+                          <Badge variant="outline" className="border-rink-blue-300 dark:border-rink-blue-600 text-rink-blue-700 dark:text-rink-blue-300">{redeemable.category}</Badge>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span>Approval:</span>
-                          <Badge variant={redeemable.requires_approval ? "destructive" : "secondary"}>
+                        <div className="flex items-center justify-between p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-100/30 dark:from-goal-red-900/10 dark:to-goal-red-900/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
+                          <span className="text-hockey-silver-800 dark:text-hockey-silver-200 font-medium">Approval:</span>
+                          <Badge 
+                            variant={redeemable.requires_approval ? "destructive" : "secondary"}
+                            className={redeemable.requires_approval ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white border-0" : "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white border-0"}
+                          >
                             {redeemable.requires_approval ? "Required" : "Auto"}
                           </Badge>
                         </div>
                         {redeemable.max_per_season && (
-                          <div className="flex items-center justify-between">
-                            <span>Max/Season:</span>
-                            <span>{redeemable.max_per_season}</span>
+                          <div className="flex items-center justify-between p-2 bg-gradient-to-r from-hockey-silver-100/30 to-hockey-silver-100/30 dark:from-hockey-silver-900/10 dark:to-hockey-silver-900/10 rounded-lg border border-hockey-silver-200/30 dark:border-hockey-silver-700/30">
+                            <span className="text-hockey-silver-800 dark:text-hockey-silver-200 font-medium">Max/Season:</span>
+                            <span className="text-hockey-silver-800 dark:text-hockey-silver-200 font-semibold">{redeemable.max_per_season}</span>
                           </div>
                         )}
                       </div>
@@ -709,112 +796,128 @@ export function TokenManagement() {
         </TabsContent>
 
         <TabsContent value="redemptions" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
+          <Card className="hockey-card hockey-card-hover border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="border-b-2 border-goal-red-200/50 dark:border-goal-red-700/50 pb-4">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                  <CheckCircle className="h-6 w-6 text-white" />
+                </div>
                 Redemption Requests
               </CardTitle>
-              <CardDescription>Review and manage player redemption requests</CardDescription>
+              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Review and manage player redemption requests</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Player</TableHead>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Cost</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {redemptions.map((redemption) => (
-                    <TableRow key={redemption.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{redemption.users.gamer_tag_id}</div>
-                          <div className="text-sm text-muted-foreground">{redemption.users.email}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{redemption.token_redeemables.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {redemption.token_redeemables.description}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Coins className="h-4 w-4 text-yellow-500" />
-                          <span>{redemption.tokens_spent}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(redemption.status)}</TableCell>
-                      <TableCell>{new Date(redemption.created_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        {redemption.status === "pending" && (
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUpdateRedemption(redemption.id, "approved")}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUpdateRedemption(redemption.id, "denied")}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Deny
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
+              <div className="hockey-card border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20 rounded-xl overflow-hidden shadow-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gradient-to-r from-goal-red-50/50 to-goal-red-50/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 border-b-2 border-goal-red-200/50 dark:border-goal-red-700/50">
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Player</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Item</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Cost</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Status</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Date</TableHead>
+                      <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {redemptions.map((redemption) => (
+                      <TableRow 
+                        key={redemption.id}
+                        className="hover:bg-gradient-to-r hover:from-goal-red-50/30 hover:to-goal-red-50/30 dark:hover:from-goal-red-900/10 dark:hover:to-goal-red-900/10 transition-all duration-300 border-b border-goal-red-200/30 dark:border-goal-red-700/30"
+                      >
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{redemption.users.gamer_tag_id}</div>
+                            <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{redemption.users.email}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{redemption.token_redeemables.name}</div>
+                            <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {redemption.token_redeemables.description}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <div className="p-1 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded">
+                              <Coins className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                            </div>
+                            <span className="font-bold text-ice-blue-700 dark:text-ice-blue-300">{redemption.tokens_spent}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(redemption.status)}</TableCell>
+                        <TableCell className="text-hockey-silver-800 dark:text-hockey-silver-200">{new Date(redemption.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {redemption.status === "pending" && (
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleUpdateRedemption(redemption.id, "approved")}
+                                className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleUpdateRedemption(redemption.id, "denied")}
+                                className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Deny
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+          <Card className="hockey-card hockey-card-hover border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-br from-white to-hockey-silver-50/50 dark:from-hockey-silver-900 dark:to-hockey-silver-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="border-b-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 pb-4">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
                 Token System Settings
               </CardTitle>
-              <CardDescription>Configure global token system settings</CardDescription>
+              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Configure global token system settings</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                   <div>
-                    <h4 className="font-medium">Enable Token System</h4>
-                    <p className="text-sm text-muted-foreground">Allow players to earn and spend tokens</p>
+                    <h4 className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Enable Token System</h4>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Allow players to earn and spend tokens</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch defaultChecked className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600" />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-assist-green-100/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-900/10 rounded-lg border border-assist-green-200/30 dark:border-assist-green-700/30">
                   <div>
-                    <h4 className="font-medium">Enable Cashout</h4>
-                    <p className="text-sm text-muted-foreground">Allow players to convert tokens to cash</p>
+                    <h4 className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Enable Cashout</h4>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Allow players to convert tokens to cash</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch defaultChecked className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-assist-green-500 data-[state=checked]:to-assist-green-600" />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-goal-red-100/30 to-goal-red-100/30 dark:from-goal-red-900/10 dark:to-goal-red-900/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
                   <div>
-                    <h4 className="font-medium">Cashout Rate</h4>
-                    <p className="text-sm text-muted-foreground">Tokens required for $25 CAD</p>
+                    <h4 className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Cashout Rate</h4>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Tokens required for $25 CAD</p>
                   </div>
-                  <Input className="w-24" defaultValue="50" />
+                  <Input 
+                    className="hockey-search w-24 border-2 border-goal-red-200/50 dark:border-goal-red-700/50 focus:border-goal-red-500 dark:focus:border-goal-red-500 focus:ring-4 focus:ring-goal-red-500/20 dark:focus:ring-goal-red-500/20 transition-all duration-300" 
+                    defaultValue="50" 
+                  />
                 </div>
               </div>
             </CardContent>
@@ -822,7 +925,7 @@ export function TokenManagement() {
         </TabsContent>
       </Tabs>
 
-      {/* Token Adjustment Dialog */}
+      {/* Enhanced Token Adjustment Dialog */}
       <Dialog
         open={adjustTokensOpen}
         onOpenChange={(open) => {
@@ -834,17 +937,24 @@ export function TokenManagement() {
         }}
         key={selectedUser?.id || "no-user"}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adjust Tokens for {selectedUser?.gamer_tag_id}</DialogTitle>
-            <DialogDescription>Current balance: {selectedUser?.token_balance} tokens</DialogDescription>
+        <DialogContent className="sm:max-w-md bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                <Coins className="h-6 w-6 text-white" />
+              </div>
+              Adjust Tokens for {selectedUser?.gamer_tag_id}
+            </DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
+              Current balance: <span className="font-semibold text-ice-blue-700 dark:text-ice-blue-300">{selectedUser?.token_balance} tokens</span>
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="flex gap-4">
               <Button
                 variant={adjustmentType === "add" ? "default" : "outline"}
                 onClick={() => setAdjustmentType("add")}
-                className="flex-1"
+                className={`flex-1 hockey-button ${adjustmentType === "add" ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" : "border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 hover:bg-gradient-to-r hover:from-assist-green-500 hover:to-assist-green-600 hover:text-white hover:border-0 hover:shadow-lg hover:scale-105 transition-all duration-300"}`}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Tokens
@@ -852,37 +962,54 @@ export function TokenManagement() {
               <Button
                 variant={adjustmentType === "subtract" ? "default" : "outline"}
                 onClick={() => setAdjustmentType("subtract")}
-                className="flex-1"
+                className={`flex-1 hockey-button ${adjustmentType === "subtract" ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" : "border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 hover:bg-gradient-to-r hover:from-goal-red-500 hover:to-goal-red-600 hover:text-white hover:border-0 hover:shadow-lg hover:scale-105 transition-all duration-300"}`}
               >
                 <Minus className="h-4 w-4 mr-2" />
                 Subtract Tokens
               </Button>
             </div>
             <div>
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
+                <Coins className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                Amount
+              </Label>
               <Input
                 id="amount"
                 type="number"
                 placeholder="Enter token amount"
                 value={tokenAmount}
                 onChange={(e) => setTokenAmount(e.target.value)}
+                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
               />
             </div>
             <div>
-              <Label htmlFor="reason">Reason</Label>
+              <Label htmlFor="reason" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
+                <Settings className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                Reason
+              </Label>
               <Textarea
                 id="reason"
                 placeholder="Reason for adjustment (e.g., Won Player of the Week)"
                 value={tokenReason}
                 onChange={(e) => setTokenReason(e.target.value)}
+                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeAdjustTokensModal}>
+          <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+            <Button 
+              variant="outline" 
+              onClick={closeAdjustTokensModal}
+              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
               Cancel
             </Button>
-            <Button onClick={handleTokenAdjustment}>{adjustmentType === "add" ? "Add" : "Subtract"} Tokens</Button>
+            <Button 
+              onClick={handleTokenAdjustment}
+              className={`hockey-button ${adjustmentType === "add" ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700" : "bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700"} text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300`}
+            >
+              {adjustmentType === "add" ? "Add" : "Subtract"} Tokens
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
