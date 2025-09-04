@@ -1498,6 +1498,7 @@ const ManagementPage = () => {
               </div>
             </div>
           </div>
+        </motion.div>
 
         {loading ? (
           <div className="grid gap-6">
@@ -3108,8 +3109,9 @@ const ManagementPage = () => {
           </>
         )}
       </motion.div>
+    </div>
 
-      {/* Bid Modal */}
+    {/* Bid Modal */}
       {selectedPlayer && (
         <BidPlayerModal
           player={selectedPlayer}

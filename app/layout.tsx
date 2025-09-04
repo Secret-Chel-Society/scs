@@ -46,7 +46,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} hockey-scrollbar`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
             <div className="flex min-h-screen">
@@ -54,7 +54,7 @@ export default function RootLayout({
               {/* Main content area */}
               <div className="flex-1 flex flex-col lg:ml-64">
                 <Suspense>
-                  <main className="flex-1 p-6">
+                  <main className="flex-1 p-6 hockey-scrollbar">
                     {children}
                   </main>
                 </Suspense>
