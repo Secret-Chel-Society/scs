@@ -526,18 +526,26 @@ export default function RegistrationsPage() {
                       Search
                     </Label>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center shadow-md">
-                          <Search className="h-4 w-4 text-white" />
-                        </div>
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+                        <Search className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
                       </div>
                       <Input
                         id="search"
                         placeholder="Search by name or email"
-                        className="hockey-search h-12 text-base pl-12 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
+                        className="hockey-search h-12 text-base pl-12 pr-12 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
+                      {searchTerm && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 hover:bg-ice-blue-100 dark:hover:bg-rink-blue-900/30 rounded-xl transition-all duration-200 z-10"
+                          onClick={() => setSearchTerm("")}
+                        >
+                          <XCircle className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                        </Button>
+                      )}
                     </div>
                   </div>
 
