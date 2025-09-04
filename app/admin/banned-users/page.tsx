@@ -813,9 +813,6 @@ export default function BannedUsersPage() {
           </Card>
         </TabsContent>
       </Tabs>
-        </motion.div>
-      </div>
-    </div>
 
       {/* Unban Confirmation Dialog */}
       <Dialog open={unbanDialogOpen} onOpenChange={setUnbanDialogOpen}>
@@ -1009,6 +1006,8 @@ export default function BannedUsersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </motion.div>
+      </div>
     </div>
   )
 }
