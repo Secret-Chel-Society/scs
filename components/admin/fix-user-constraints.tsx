@@ -60,6 +60,7 @@ export default function FixUserConstraints() {
   }
 
   return (
+    <>
     <div className="max-w-4xl mx-auto space-y-6">
       <Card className="hockey-premium-card">
         <CardHeader>
@@ -221,7 +222,7 @@ export default function FixUserConstraints() {
           </CardContent>
         </Card>
       )}
-      </div>
     </div>
+    </>
   )
 }
