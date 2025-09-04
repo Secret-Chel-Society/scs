@@ -480,17 +480,17 @@ export default function Home() {
                       <GamepadIcon className="h-8 w-8 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                     Premier NHL 26 League
                   </h3>
                 </div>
                 <div className="space-y-4">
-                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-lg">
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-base">
                     The Secret Chel Society (SCS) is the most competitive and professionally organized NHL 26
                     gaming league available today. We provide a complete hockey simulation experience with structured
                     seasons, playoffs, and championship tournaments that mirror real NHL operations.
                   </p>
-                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-lg">
+                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 leading-relaxed text-base">
                     We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
                     Players can engage in a full range of league activities, 
                     from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.

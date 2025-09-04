@@ -492,8 +492,8 @@ export default function RegisterPage() {
                     className="space-y-6"
                   >
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                        <User className="h-5 w-5 text-white" />
+                      <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+                        <User className="h-4 w-4 text-white" />
                       </div>
                       <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                         Step 2: Account Information
@@ -503,7 +503,7 @@ export default function RegisterPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <Label htmlFor="email" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
-                          <Mail className="h-5 w-5 text-ice-blue-600" />
+                          <Mail className="h-4 w-4 text-ice-blue-600" />
                           Email Address
                         </Label>
                         <Input 
@@ -521,7 +521,7 @@ export default function RegisterPage() {
 
                       <div className="space-y-4">
                         <Label htmlFor="password" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
-                          <Lock className="h-5 w-5 text-rink-blue-600" />
+                          <Lock className="h-4 w-4 text-rink-blue-600" />
                           Password
                         </Label>
                         <Input 
@@ -540,7 +540,7 @@ export default function RegisterPage() {
 
                     <div className="space-y-4">
                       <Label htmlFor="gamerTag" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
-                        <Gamepad2 className="h-5 w-5 text-assist-green-600" />
+                        <Gamepad2 className="h-4 w-4 text-assist-green-600" />
                         Gamer Tag
                       </Label>
                       <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Your Xbox or PSN name (2-50 characters)</p>
@@ -559,7 +559,7 @@ export default function RegisterPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <Label htmlFor="primaryPosition" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
-                          <Target className="h-5 w-5 text-goal-red-600" />
+                          <Target className="h-4 w-4 text-goal-red-600" />
                           Primary Position
                         </Label>
                         <select
@@ -583,7 +583,7 @@ export default function RegisterPage() {
 
                       <div className="space-y-4">
                         <Label htmlFor="secondaryPosition" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
-                          <Target className="h-5 w-5 text-hockey-silver-600" />
+                          <Target className="h-4 w-4 text-hockey-silver-600" />
                           Secondary Position (Optional)
                         </Label>
                         <select
@@ -608,7 +608,7 @@ export default function RegisterPage() {
 
                     <div className="space-y-4">
                       <Label htmlFor="console" className="text-base font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 flex items-center gap-2">
-                        <Gamepad2 className="h-5 w-5 text-rink-blue-600" />
+                        <Gamepad2 className="h-4 w-4 text-rink-blue-600" />
                         Console
                       </Label>
                       <select
