@@ -3112,7 +3112,7 @@ const ManagementPage = () => {
     </div>
 
     {/* Bid Modal */}
-      {selectedPlayer && (
+    {selectedPlayer && (
         <BidPlayerModal
           player={selectedPlayer}
           isOpen={isModalOpen}
@@ -3132,7 +3132,7 @@ const ManagementPage = () => {
           projectedRosterSize={projectedRosterSize}
         />
       )}
-    </div>
+  </div>
   )
 }
 
