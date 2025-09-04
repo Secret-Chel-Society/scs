@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight, Crown, Shield, Target, TrendingUp, Award, Medal, Star, ArrowRight, Lock, Eye, Cog, Wrench, CheckCircle, XCircle, UserPlus, Settings, Database, Activity, Zap, Home, Gavel, Users2, FileText, BarChart3 } from "lucide-react"
+import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight } from "lucide-react"
 import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-display"
 import { SalaryProgress } from "@/components/management/salary-progress"
 import { RosterProgress } from "@/components/management/roster-progress"
@@ -23,8 +23,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TeamLogos } from "@/components/management/team-logos"
 import { BidPlayerModal } from "@/components/management/bid-player-modal"
 import { Textarea } from "@/components/ui/textarea"
-import { CheckCircle2 } from "lucide-react"
+import { XCircle, CheckCircle2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
+import { Home, Gavel } from "lucide-react"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
 
 interface Player {
@@ -1460,45 +1461,28 @@ const ManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* Hero Header Section */}
-          <div className="relative overflow-hidden py-16 px-4 mb-8">
-            <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-            <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-            <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-            
-            <div className="relative z-10">
-              <div className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-ice-blue-500/25">
-                    <Shield className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="hockey-title text-3xl md:text-4xl mb-2">Team Management</h1>
-                    {teamData && (
-                      <div className="flex items-center gap-3">
-                        {teamData.logo_url && (
-                          <Image
-                            src={teamData.logo_url || "/placeholder.svg"}
-                            alt={teamData.name}
-                            width={24}
-                            height={24}
-                            className="rounded-full md:w-8 md:h-8 shadow-lg"
-                          />
-                        )}
-                        <p className="hockey-subtitle text-lg md:text-xl text-hockey-silver-600 dark:text-hockey-silver-400">
-                          {teamData.name}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className="container mx-auto px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        {/* Update the main title section to be more mobile-friendly: */}
+        <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
+            {teamData && (
+              <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
+                {teamData.logo_url && (
+                  <Image
+                    src={teamData.logo_url || "/placeholder.svg"}
+                    alt={teamData.name}
+                    width={20}
+                    height={20}
+                    className="rounded-full md:w-6 md:h-6"
+                  />
+                )}
+                {teamData.name}
+              </p>
+            )}
           </div>
-        </motion.div>
+        </div>
 
         {loading ? (
           <div className="grid gap-6">
@@ -1507,64 +1491,61 @@ const ManagementPage = () => {
           </div>
         ) : (
           <>
-            {/* Enhanced Stats Cards Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-              <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+            {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Users className="h-6 w-6 text-white" />
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Users className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Team Size</div>
-                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <div className="text-sm text-muted-foreground">Team Size</div>
+                    <div className="text-2xl font-bold">
                       {teamPlayers.length}
                       {projectedRosterSize !== teamPlayers.length && (
-                        <span className="text-sm text-ice-blue-600 dark:text-ice-blue-400 ml-1">→ {projectedRosterSize}</span>
+                        <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              
-              <Card className="hockey-card hockey-card-hover border-2 border-assist-green-200/50 dark:border-assist-green-700/50">
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Calendar className="h-6 w-6 text-white" />
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Calendar className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Upcoming Matches</div>
-                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <div className="text-sm text-muted-foreground">Upcoming Matches</div>
+                    <div className="text-2xl font-bold">
                       {teamMatches.filter((m) => m.status === "Scheduled").length}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              
-              <Card className="hockey-card hockey-card-hover border-2 border-goal-red-200/50 dark:border-goal-red-700/50">
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Trophy className="h-6 w-6 text-white" />
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Trophy className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Record</div>
-                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <div className="text-sm text-muted-foreground">Record</div>
+                    <div className="text-2xl font-bold">
                       {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              
-              <Card className="hockey-card hockey-card-hover border-2 border-rink-blue-200/50 dark:border-rink-blue-700/50">
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <DollarSign className="h-6 w-6 text-white" />
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <DollarSign className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Salary Cap</div>
-                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <div className="text-sm text-muted-foreground">Salary Cap</div>
+                    <div className="text-2xl font-bold">
                       ${(currentTeamSalary / 1000000).toFixed(1)}M
                       {projectedSalary !== currentTeamSalary && (
-                        <span className="text-sm text-ice-blue-600 dark:text-ice-blue-400 ml-1">
+                        <span className="text-sm text-muted-foreground ml-1">
                           → ${(projectedSalary / 1000000).toFixed(1)}M
                         </span>
                       )}
@@ -1574,123 +1555,83 @@ const ManagementPage = () => {
               </Card>
             </div>
 
-            {/* Enhanced Hockey-Themed Tabs */}
+            {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <Card className="hockey-card mb-8 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                <CardContent className="p-2">
-                  <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 h-auto bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20">
-                    <TabsTrigger 
-                      value="roster" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <Users className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">Team Roster</span>
-                      <span className="md:hidden">Roster</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="availability" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <Calendar className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">Team Avail</span>
-                      <span className="md:hidden">Avail</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="schedule" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <Clock className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">Team Schedule</span>
-                      <span className="md:hidden">Schedule</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="free-agents" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <Target className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">Free Agents</span>
-                      <span className="md:hidden">Free Agents</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="my-bids" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-silver-500 data-[state=active]:to-hockey-silver-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <Gavel className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">My Bids</span>
-                      <span className="md:hidden">Bids</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="waivers" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
-                    >
-                      <ArrowLeftRight className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">Waivers</span>
-                      <span className="md:hidden">Waivers</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="trades" 
-                      className="text-xs md:text-sm px-2 md:px-4 py-3 hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 relative"
-                    >
-                      <Users2 className="h-4 w-4 mr-1 md:mr-2" />
-                      <span className="hidden md:inline">Trades</span>
-                      <span className="md:hidden">Trades</span>
-                      {incomingTradeProposals.length > 0 && (
-                        <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs shadow-lg">
-                          {incomingTradeProposals.length}
-                        </span>
-                      )}
-                    </TabsTrigger>
-                  </TabsList>
-                </CardContent>
-              </Card>
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
+                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Team Roster</span>
+                  <span className="md:hidden">Roster</span>
+                </TabsTrigger>
+                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Team Avail</span>
+                  <span className="md:hidden">Avail</span>
+                </TabsTrigger>
+                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Team Schedule</span>
+                  <span className="md:hidden">Schedule</span>
+                </TabsTrigger>
+                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Free Agents</span>
+                  <span className="md:hidden">Free Agents</span>
+                </TabsTrigger>
+                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">My Bids</span>
+                  <span className="md:hidden">Bids</span>
+                </TabsTrigger>
+                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Waivers</span>
+                  <span className="md:hidden">Waivers</span>
+                </TabsTrigger>
+                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
+                  <span className="hidden md:inline">Trades</span>
+                  <span className="md:hidden">Trades</span>
+                  {incomingTradeProposals.length > 0 && (
+                    <span className="ml-1 md:ml-2 bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
+                      {incomingTradeProposals.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
 
               {/* Roster Tab Content */}
               <TabsContent value="roster">
-                <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                  <CardHeader className="relative">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-                    <div className="flex items-center gap-3 relative z-10">
-                      <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <Users className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200">Team Roster</CardTitle>
-                        <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                          Manage your team's players and roles
-                        </CardDescription>
-                      </div>
-                    </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
+                      Manage your team's players and roles
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="relative z-10">
+                  <CardContent>
                     {teamPlayers.length > 0 ? (
                       <>
                         {/* Desktop Table */}
-                        <div className="hidden md:block rounded-xl border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 overflow-hidden shadow-lg">
+                        <div className="hidden md:block rounded-md border overflow-x-auto">
                           <Table>
                             <TableHeader>
-                              <TableRow className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 hover:from-ice-blue-100 dark:hover:from-ice-blue-800/30 hover:to-rink-blue-100 dark:hover:to-rink-blue-800/30 transition-all duration-300">
-                                <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Player</TableHead>
-                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
-                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Role</TableHead>
-                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Console</TableHead>
-                                <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Salary</TableHead>
+                              <TableRow>
+                                <TableHead>Player</TableHead>
+                                <TableHead className="text-center">Position</TableHead>
+                                <TableHead className="text-center">Role</TableHead>
+                                <TableHead className="text-center">Console</TableHead>
+                                <TableHead className="text-center">Salary</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {teamPlayers.map((player) => (
-                                <TableRow key={player.id} className="hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-100/50 dark:border-rink-blue-800/50">
+                                <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
                                   <TableCell>
-                                    <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.users?.gamer_tag_id || "Unknown Player"}</div>
+                                    <div className="font-medium">{player.users?.gamer_tag_id || "Unknown Player"}</div>
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-1">
-                                      <span className={`${getPositionColor(player.users?.primary_position)} text-lg font-bold`}>
+                                      <span className={getPositionColor(player.users?.primary_position)}>
                                         {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
                                       </span>
                                       {player.users?.secondary_position && (
                                         <>
                                           {" / "}
-                                          <span className={`${getPositionColor(player.users?.secondary_position)} text-sm opacity-80`}>
+                                          <span className={getPositionColor(player.users?.secondary_position)}>
                                             {getPositionAbbreviation(player.users?.secondary_position)}
                                           </span>
                                         </>
@@ -1698,26 +1639,13 @@ const ManagementPage = () => {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    <Badge 
-                                      variant={player.role === "Owner" ? "default" : "outline"}
-                                      className={`transition-all duration-200 hover:scale-105 ${
-                                        player.role === "Owner" ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg" :
-                                        player.role === "GM" ? "bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 text-white shadow-lg" :
-                                        player.role === "AGM" ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg" :
-                                        "border-ice-blue-300 text-ice-blue-700 dark:text-ice-blue-300"
-                                      }`}
-                                    >
-                                      {player.role === "Owner" && <Crown className="h-3 w-3 mr-1" />}
-                                      {player.role === "GM" && <Shield className="h-3 w-3 mr-1" />}
-                                      {player.role === "AGM" && <Star className="h-3 w-3 mr-1" />}
+                                    <Badge variant={player.role === "Owner" ? "default" : "outline"}>
                                       {player.role}
                                     </Badge>
                                   </TableCell>
-                                  <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300">{player.users?.console || "Unknown"}</TableCell>
-                                  <TableCell className="text-center">
-                                    <span className="font-mono font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                                      ${(player.salary / 1000000).toFixed(2)}M
-                                    </span>
+                                  <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
+                                  <TableCell className="text-center font-mono">
+                                    ${(player.salary / 1000000).toFixed(2)}M
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -1726,56 +1654,41 @@ const ManagementPage = () => {
                         </div>
 
                         {/* Mobile Cards */}
-                        <div className="md:hidden space-y-4">
+                        <div className="md:hidden space-y-3">
                           {teamPlayers.map((player) => (
-                            <Card key={player.id} className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                              <CardContent className="p-4">
-                                <div className="flex justify-between items-start mb-3">
-                                  <div className="flex-1">
-                                    <h3 className="font-medium text-base text-hockey-silver-800 dark:text-hockey-silver-200">
-                                      {player.users?.gamer_tag_id || "Unknown Player"}
-                                    </h3>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <span
-                                        className={`${getPositionColor(player.users?.primary_position)} text-sm font-bold`}
-                                      >
-                                        {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
-                                      </span>
-                                      {player.users?.secondary_position && (
-                                        <>
-                                          <span className="text-hockey-silver-400 dark:text-hockey-silver-500 text-sm">/</span>
-                                          <span
-                                            className={`${getPositionColor(player.users?.secondary_position)} text-sm opacity-80`}
-                                          >
-                                            {getPositionAbbreviation(player.users?.secondary_position)}
-                                          </span>
-                                        </>
-                                      )}
-                                    </div>
+                            <div key={player.id} className="border rounded-lg p-4 bg-card">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-base">
+                                    {player.users?.gamer_tag_id || "Unknown Player"}
+                                  </h3>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span
+                                      className={`${getPositionColor(player.users?.primary_position)} text-sm font-medium`}
+                                    >
+                                      {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                    </span>
+                                    {player.users?.secondary_position && (
+                                      <>
+                                        <span className="text-muted-foreground text-sm">/</span>
+                                        <span
+                                          className={`${getPositionColor(player.users?.secondary_position)} text-sm font-medium`}
+                                        >
+                                          {getPositionAbbreviation(player.users?.secondary_position)}
+                                        </span>
+                                      </>
+                                    )}
                                   </div>
-                                  <Badge 
-                                    variant={player.role === "Owner" ? "default" : "outline"} 
-                                    className={`text-xs transition-all duration-200 hover:scale-105 ${
-                                      player.role === "Owner" ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg" :
-                                      player.role === "GM" ? "bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 text-white shadow-lg" :
-                                      player.role === "AGM" ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg" :
-                                      "border-ice-blue-300 text-ice-blue-700 dark:text-ice-blue-300"
-                                    }`}
-                                  >
-                                    {player.role === "Owner" && <Crown className="h-3 w-3 mr-1" />}
-                                    {player.role === "GM" && <Shield className="h-3 w-3 mr-1" />}
-                                    {player.role === "AGM" && <Star className="h-3 w-3 mr-1" />}
-                                    {player.role}
-                                  </Badge>
                                 </div>
-                                <div className="flex justify-between items-center text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  <span>{player.users?.console || "Unknown"}</span>
-                                  <span className="font-mono font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                                    ${(player.salary / 1000000).toFixed(2)}M
-                                  </span>
-                                </div>
-                              </CardContent>
-                            </Card>
+                                <Badge variant={player.role === "Owner" ? "default" : "outline"} className="text-xs">
+                                  {player.role}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                                <span>{player.users?.console || "Unknown"}</span>
+                                <span className="font-mono font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       </>
@@ -3109,10 +3022,9 @@ const ManagementPage = () => {
           </>
         )}
       </motion.div>
-    </div>
 
-    {/* Bid Modal */}
-    {selectedPlayer && (
+      {/* Bid Modal */}
+      {selectedPlayer && (
         <BidPlayerModal
           player={selectedPlayer}
           isOpen={isModalOpen}
@@ -3132,7 +3044,7 @@ const ManagementPage = () => {
           projectedRosterSize={projectedRosterSize}
         />
       )}
-  </div>
+    </div>
   )
 }
 
