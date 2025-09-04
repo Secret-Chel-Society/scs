@@ -836,7 +836,6 @@ export default function BannedUsersPage() {
           </Tabs>
         </motion.div>
       </div>
-    </div>
 
       {/* Unban Confirmation Dialog */}
       <Dialog open={unbanDialogOpen} onOpenChange={setUnbanDialogOpen}>
