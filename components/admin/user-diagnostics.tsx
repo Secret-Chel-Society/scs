@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
-import { AlertCircle, CheckCircle, Search, Send, UserPlus, RefreshCw, ShieldAlert } from "lucide-react"
+import { AlertCircle, CheckCircle, Search, Send, UserPlus, RefreshCw, ShieldAlert, Shield, Users, Database, Key, AlertTriangle, CheckCircle2, Zap } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function UserDiagnostics() {
   const { toast } = useToast()
@@ -296,50 +297,88 @@ export default function UserDiagnostics() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>User Diagnostics</CardTitle>
-        <CardDescription>Look up and fix issues with user accounts</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      <Card className="w-full hockey-enhanced-card">
+        <CardHeader>
+          <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            User Diagnostics
+          </CardTitle>
+          <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+            Look up and fix issues with user accounts
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
         <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                <Users className="h-4 w-4 text-assist-green-500" />
+                Email Address
+              </Label>
               <div className="flex mt-1">
                 <Input
                   id="email"
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1"
+                  className="flex-1 hockey-search"
                 />
-                <Button onClick={handleLookup} disabled={loading || !email.trim()} className="ml-2">
+                <Button onClick={handleLookup} disabled={loading || !email.trim()} className="ml-2 hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white">
                   {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
                   {loading ? "Searching..." : "Lookup"}
                 </Button>
               </div>
             </div>
             <div className="md:w-1/3">
-              <Label htmlFor="admin-key">Admin Key</Label>
+              <Label htmlFor="admin-key" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                <Key className="h-4 w-4 text-ice-blue-500" />
+                Admin Key
+              </Label>
               <Input
                 id="admin-key"
                 type="password"
                 placeholder="Enter admin key"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
-                className="mt-1"
+                className="mt-1 hockey-search"
               />
             </div>
           </div>
 
           {lookupResults && (
             <Tabs defaultValue="status" className="mt-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="status">Status</TabsTrigger>
-                <TabsTrigger value="details">User Details</TabsTrigger>
-                <TabsTrigger value="verification">Verification</TabsTrigger>
-                <TabsTrigger value="actions">Actions</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4 gap-2 p-2 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded-xl">
+                <TabsTrigger 
+                  value="status" 
+                  className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Status
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="details" 
+                  className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+                >
+                  <Database className="mr-2 h-4 w-4" />
+                  User Details
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="verification" 
+                  className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Verification
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="actions" 
+                  className="px-4 py-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
+                >
+                  <Zap className="mr-2 h-4 w-4" />
+                  Actions
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="status" className="space-y-4">
@@ -720,5 +759,6 @@ export default function UserDiagnostics() {
         </div>
       </CardContent>
     </Card>
+    </div>
   )
 }
