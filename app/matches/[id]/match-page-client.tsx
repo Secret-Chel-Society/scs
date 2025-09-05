@@ -158,6 +158,7 @@ export default function MatchDetailPage() {
   useEffect(() => {
     if (session && match) {
       // Use direct permission checking
+      // This effect can be used for additional permission checks if needed
     }
   }, [session, match])
 
@@ -310,9 +311,9 @@ export default function MatchDetailPage() {
             )}
           </div>
 
-      <div className="space-y-3 sm:space-y-6">
-        {/* Match Details */}
-        <MatchDetails match={match} onMatchUpdated={fetchMatchData} isAdmin={canManageMatch} />
+        <div className="space-y-3 sm:space-y-6">
+          {/* Match Details */}
+          <MatchDetails match={match} onMatchUpdated={fetchMatchData} isAdmin={canManageMatch} />
 
           {/* Enhanced Tabs Section */}
           <Tabs defaultValue="lineups" className="w-full">
