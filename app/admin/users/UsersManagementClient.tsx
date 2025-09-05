@@ -60,6 +60,18 @@ import {
   Database,
   Activity,
   Zap,
+  Calendar,
+  Clock,
+  Globe,
+  FileText,
+  BarChart3,
+  Trophy,
+  Camera,
+  Image,
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
 } from "lucide-react"
 
 // Define valid player roles - these must match the database constraint
@@ -1944,7 +1956,92 @@ export default function UsersManagementClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      <div className="container mx-auto px-4 py-8">
+      {/* Enhanced Hero Header Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
+          <div>
+            <h1 className="hockey-title mb-6">
+              User Management Center
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-12">
+              Comprehensive user management for the league. 
+              Manage player accounts, roles, team assignments, and league administration.
+            </p>
+            
+            {/* Enhanced Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto mb-16">
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
+                    {users.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Total Users
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
+                    {users.filter(u => u.roles?.includes('Admin')).length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Administrators
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
+                    {users.filter(u => u.roles?.includes('Player')).length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Players
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
+                    <Crown className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
+                    {teams.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Teams
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-20">
         {renderButtonsSection()}
 
       {/* Search Bar */}
