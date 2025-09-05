@@ -59,8 +59,8 @@ export default function AdminFeaturedGamesPage() {
       // Determine the date column name
       await checkMatchesTableStructure()
 
-      // Run the migration to ensure the featured column exists
-      await runMigration()
+      // Check if the featured column exists
+      await checkFeaturedColumn()
 
       // Fetch matches
       await fetchMatches()
@@ -105,39 +105,37 @@ export default function AdminFeaturedGamesPage() {
     checkAuthorization()
   }, [supabase, session, toast, router])
 
-  // Run migration to ensure featured column exists
-  const runMigration = async () => {
+  // Check if featured column exists (it should already exist)
+  const checkFeaturedColumn = async () => {
     setMigrationStatus("pending")
     setMigrationError(null)
     try {
-      // Run SQL to add featured column if it doesn't exist
-      const { error } = await supabase.rpc("run_sql", {
-        sql: "ALTER TABLE matches ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;",
-      })
+      // Test if we can query the featured column
+      const { data, error } = await supabase
+        .from("matches")
+        .select("id, featured")
+        .limit(1)
 
       if (error) {
-        console.error("Migration error:", error)
+        console.error("Column check error:", error)
         setMigrationStatus("error")
-        setMigrationError(error.message)
+        setMigrationError(`The 'featured' column doesn't exist: ${error.message}`)
         return false
       }
-
-      // Refresh the schema cache by forcing a query
-      await supabase.from("matches").select("id").limit(1)
 
       setMigrationStatus("success")
       return true
     } catch (error: any) {
-      console.error("Error running migration:", error)
+      console.error("Column check failed:", error)
       setMigrationStatus("error")
       setMigrationError(error.message)
       return false
     }
   }
 
-  // Retry migration and reload
+  // Retry column check and reload
   const retryMigration = async () => {
-    const success = await runMigration()
+    const success = await checkFeaturedColumn()
     if (success) {
       await fetchMatches()
     }
@@ -186,28 +184,11 @@ export default function AdminFeaturedGamesPage() {
   const toggleFeatured = async (matchId: string, currentStatus: boolean) => {
     setUpdatingId(matchId)
     try {
-      // First manually verify if the column exists
-      const { data: columnCheck, error: columnError } = await supabase.rpc("run_sql", {
-        sql: "SELECT column_name FROM information_schema.columns WHERE table_name = 'matches' AND column_name = 'featured'",
-      })
-
-      if (columnError || !columnCheck || columnCheck.length === 0) {
-        // Column doesn't exist, try to add it
-        const { error: alterError } = await supabase.rpc("run_sql", {
-          sql: "ALTER TABLE matches ADD COLUMN featured BOOLEAN DEFAULT FALSE;",
-        })
-
-        if (alterError) {
-          throw new Error(`Could not add 'featured' column: ${alterError.message}`)
-        }
-
-        // Give the database a moment to update
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-      }
-
-      // Use raw SQL update to avoid schema cache issues
-      const updateSql = `UPDATE matches SET featured = ${!currentStatus} WHERE id = '${matchId}'`
-      const { error: updateError } = await supabase.rpc("run_sql", { sql: updateSql })
+      // Update the featured status using standard Supabase update
+      const { error: updateError } = await supabase
+        .from("matches")
+        .update({ featured: !currentStatus })
+        .eq("id", matchId)
 
       if (updateError) {
         throw new Error(`Failed to update: ${updateError.message}`)

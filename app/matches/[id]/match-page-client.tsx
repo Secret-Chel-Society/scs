@@ -8,12 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MatchDetails } from "@/components/matches/match-details"
-import { AlertCircle, Upload, Edit, RefreshCw, Trophy, Star, Medal, Crown, Target, Zap, Shield, Users, Clock, Calendar, Activity, TrendingUp, BarChart3, Award, BookOpen, FileText, Globe, Camera, Image, Play, Pause, SkipForward, SkipBack } from "lucide-react"
+import { AlertCircle, Upload, Edit, RefreshCw, Trophy, Star, Medal, Crown, Target, Zap, Shield, Users, Clock, Calendar, Activity, TrendingUp, Award, BookOpen, FileText, Globe, Camera, Image, Play, Pause, SkipForward, SkipBack } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { EaMatchImportModal } from "@/components/matches/ea-match-import-modal"
 import { EditScoreModal } from "@/components/matches/edit-score-modal"
-import { EaMatchStatistics } from "@/components/matches/ea-match-statistics"
 import { MatchLineups } from "@/components/matches/match-lineups"
 import { MatchHighlightsWrapper } from "@/components/matches/match-highlights-wrapper"
 import { Badge } from "@/components/ui/badge"
@@ -38,6 +37,9 @@ export default function MatchDetailPage() {
   const [playerStats, setPlayerStats] = useState<any[]>([])
   const [goalieStats, setGoalieStats] = useState<any[]>([])
   const [threeStars, setThreeStars] = useState<any[]>([])
+  const [eaPlayerStats, setEaPlayerStats] = useState<any[]>([])
+  const [eaTeamStats, setEaTeamStats] = useState<any>(null)
+  const [periodScores, setPeriodScores] = useState<any[]>([])
 
   const fetchTeamEaClubId = async (teamId: string) => {
     try {
@@ -51,6 +53,127 @@ export default function MatchDetailPage() {
       setTeamEaClubId(data?.ea_club_id || null)
     } catch (error) {
       console.error("Error fetching team EA club ID:", error)
+    }
+  }
+
+  const fetchEaStatistics = async () => {
+    if (!match?.ea_match_id) return
+
+    try {
+      // Fetch EA player statistics
+      const { data: playerStatsData, error: statsError } = await supabase
+        .from("ea_player_stats")
+        .select("*")
+        .eq("match_id", matchId)
+
+      if (statsError) {
+        console.error("Error fetching EA player stats:", statsError)
+        return
+      }
+
+      setEaPlayerStats(playerStatsData || [])
+
+      // Calculate team statistics from player stats
+      if (playerStatsData && playerStatsData.length > 0) {
+        const homeStats = {
+          team_id: match.home_team_id,
+          team_name: match.home_team.name,
+          goals: 0,
+          shots: 0,
+          hits: 0,
+          pim: 0,
+          blocks: 0,
+          pp_goals: 0,
+          pp_opportunities: 0,
+          pp_pct: 0,
+          shot_attempts: 0,
+          shot_pct: 0,
+          pass_attempts: 0,
+          pass_complete: 0,
+          passing_pct: 0,
+          time_in_offensive_zone: 0,
+          time_in_defensive_zone: 0,
+          time_in_neutral_zone: 0,
+          takeaways: 0,
+          giveaways: 0,
+          faceoffs_won: 0,
+          faceoffs_taken: 0,
+          faceoff_pct: 0,
+        }
+
+        const awayStats = {
+          team_id: match.away_team_id,
+          team_name: match.away_team.name,
+          goals: 0,
+          shots: 0,
+          hits: 0,
+          pim: 0,
+          blocks: 0,
+          pp_goals: 0,
+          pp_opportunities: 0,
+          pp_pct: 0,
+          shot_attempts: 0,
+          shot_pct: 0,
+          pass_attempts: 0,
+          pass_complete: 0,
+          passing_pct: 0,
+          time_in_offensive_zone: 0,
+          time_in_defensive_zone: 0,
+          time_in_neutral_zone: 0,
+          takeaways: 0,
+          giveaways: 0,
+          faceoffs_won: 0,
+          faceoffs_taken: 0,
+          faceoff_pct: 0,
+        }
+
+        // Aggregate player stats by team
+        playerStatsData.forEach((stat) => {
+          const teamStat = stat.team_id === match.home_team_id ? homeStats : awayStats
+
+          teamStat.goals += stat.goals || 0
+          teamStat.shots += stat.shots || 0
+          teamStat.hits += stat.hits || 0
+          teamStat.pim += stat.pim || 0
+          teamStat.blocks += stat.blocks || 0
+          teamStat.takeaways += stat.takeaways || 0
+          teamStat.giveaways += stat.giveaways || 0
+          teamStat.shot_attempts += stat.shot_attempts || 0
+          teamStat.pass_attempts += stat.pass_attempts || 0
+          teamStat.pass_complete += stat.pass_complete || 0
+          teamStat.faceoffs_won += stat.faceoffs_won || 0
+          teamStat.faceoffs_taken += stat.faceoffs_taken || 0
+          teamStat.pp_goals += stat.ppg || 0
+          teamStat.time_in_offensive_zone += stat.offensive_zone_time || 0
+          teamStat.time_in_defensive_zone += stat.defensive_zone_time || 0
+          teamStat.time_in_neutral_zone += stat.neutral_zone_time || 0
+        })
+
+        // Calculate percentages
+        homeStats.shot_pct = homeStats.shot_attempts > 0 ? (homeStats.shots / homeStats.shot_attempts) * 100 : 0
+        homeStats.passing_pct = homeStats.pass_attempts > 0 ? (homeStats.pass_complete / homeStats.pass_attempts) * 100 : 0
+        homeStats.faceoff_pct = homeStats.faceoffs_taken > 0 ? (homeStats.faceoffs_won / homeStats.faceoffs_taken) * 100 : 0
+
+        awayStats.shot_pct = awayStats.shot_attempts > 0 ? (awayStats.shots / awayStats.shot_attempts) * 100 : 0
+        awayStats.passing_pct = awayStats.pass_attempts > 0 ? (awayStats.pass_complete / awayStats.pass_attempts) * 100 : 0
+        awayStats.faceoff_pct = awayStats.faceoffs_taken > 0 ? (awayStats.faceoffs_won / awayStats.faceoffs_taken) * 100 : 0
+
+        setEaTeamStats({ home: homeStats, away: awayStats })
+      }
+
+      // Fetch period scores if available
+      const { data: periodData, error: periodError } = await supabase
+        .from("period_scores")
+        .select("*")
+        .eq("match_id", matchId)
+        .order("period_number")
+
+      if (!periodError && periodData) {
+        setPeriodScores(periodData)
+      }
+
+    } catch (error) {
+      console.error("Error fetching EA statistics:", error)
     }
   }
 
@@ -90,6 +213,9 @@ export default function MatchDetailPage() {
       }
 
       setMatch(matchData)
+
+      // Fetch EA statistics if available
+      await fetchEaStatistics()
 
       // Fetch additional match data
       await fetchMatchStats()
@@ -450,13 +576,6 @@ export default function MatchDetailPage() {
               Lineups
               </TabsTrigger>
               <TabsTrigger 
-                value="stats" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white hover:bg-assist-green-200/50 dark:hover:bg-assist-green-800/30 transition-all duration-300 flex items-center gap-2"
-            >
-              <BarChart3 className="h-4 w-4" />
-              EA Statistics
-              </TabsTrigger>
-              <TabsTrigger 
                 value="highlights" 
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white hover:bg-goal-red-200/50 dark:hover:bg-goal-red-800/30 transition-all duration-300 flex items-center gap-2"
             >
@@ -498,31 +617,31 @@ export default function MatchDetailPage() {
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Goals</span>
                         <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {matchStats?.home_goals || match.home_score || 0}
+                          {eaTeamStats?.home?.goals || match.home_score || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Shots</span>
                         <span className="text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {matchStats?.home_shots || 0}
+                          {eaTeamStats?.home?.shots || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Hits</span>
                         <span className="text-2xl font-bold text-assist-green-600 dark:text-assist-green-400">
-                          {matchStats?.home_hits || 0}
+                          {eaTeamStats?.home?.hits || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Faceoff%</span>
                         <span className="text-2xl font-bold text-goal-red-600 dark:text-goal-red-400">
-                          {matchStats?.home_faceoff_percentage ? `${matchStats.home_faceoff_percentage.toFixed(1)}%` : "0.0%"}
+                          {eaTeamStats?.home?.faceoff_pct ? `${eaTeamStats.home.faceoff_pct.toFixed(1)}%` : "0.0%"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Passing%</span>
                         <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {matchStats?.home_passing_percentage ? `${matchStats.home_passing_percentage.toFixed(1)}%` : "0.0%"}
+                          {eaTeamStats?.home?.passing_pct ? `${eaTeamStats.home.passing_pct.toFixed(1)}%` : "0.0%"}
                         </span>
                       </div>
                     </div>
@@ -539,31 +658,31 @@ export default function MatchDetailPage() {
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Goals</span>
                         <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {matchStats?.away_goals || match.away_score || 0}
+                          {eaTeamStats?.away?.goals || match.away_score || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Shots</span>
                         <span className="text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {matchStats?.away_shots || 0}
+                          {eaTeamStats?.away?.shots || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Hits</span>
                         <span className="text-2xl font-bold text-assist-green-600 dark:text-assist-green-400">
-                          {matchStats?.away_hits || 0}
+                          {eaTeamStats?.away?.hits || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Faceoff%</span>
                         <span className="text-2xl font-bold text-goal-red-600 dark:text-goal-red-400">
-                          {matchStats?.away_faceoff_percentage ? `${matchStats.away_faceoff_percentage.toFixed(1)}%` : "0.0%"}
+                          {eaTeamStats?.away?.faceoff_pct ? `${eaTeamStats.away.faceoff_pct.toFixed(1)}%` : "0.0%"}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Passing%</span>
                         <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {matchStats?.away_passing_percentage ? `${matchStats.away_passing_percentage.toFixed(1)}%` : "0.0%"}
+                          {eaTeamStats?.away?.passing_pct ? `${eaTeamStats.away.passing_pct.toFixed(1)}%` : "0.0%"}
                         </span>
                       </div>
                     </div>
@@ -607,38 +726,38 @@ export default function MatchDetailPage() {
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">1st Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {match.period_scores?.[0]?.home || 0}
+                          {periodScores.find(p => p.period_number === 1)?.home_score || match.period_scores?.[0]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {match.period_scores?.[0]?.away || 0}
+                          {periodScores.find(p => p.period_number === 1)?.away_score || match.period_scores?.[0]?.away || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">2nd Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {match.period_scores?.[1]?.home || 0}
+                          {periodScores.find(p => p.period_number === 2)?.home_score || match.period_scores?.[1]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {match.period_scores?.[1]?.away || 0}
+                          {periodScores.find(p => p.period_number === 2)?.away_score || match.period_scores?.[1]?.away || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">3rd Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {match.period_scores?.[2]?.home || 0}
+                          {periodScores.find(p => p.period_number === 3)?.home_score || match.period_scores?.[2]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {match.period_scores?.[2]?.away || 0}
+                          {periodScores.find(p => p.period_number === 3)?.away_score || match.period_scores?.[2]?.away || 0}
                         </TableCell>
                       </TableRow>
                       {wentToOvertime && (
                         <TableRow className="hockey-table-row-hover">
                           <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Overtime</TableCell>
                           <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                            {match.period_scores?.[3]?.home || 0}
+                            {periodScores.find(p => p.period_number === 4)?.home_score || match.period_scores?.[3]?.home || 0}
                           </TableCell>
                           <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                            {match.period_scores?.[3]?.away || 0}
+                            {periodScores.find(p => p.period_number === 4)?.away_score || match.period_scores?.[3]?.away || 0}
                           </TableCell>
                         </TableRow>
                       )}
@@ -675,37 +794,67 @@ export default function MatchDetailPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-8">
-                {threeStars.length > 0 ? (
-                  <div className="space-y-4">
-                    {threeStars.map((star, index) => (
-                      <div key={star.id} className="flex items-center gap-4 p-4 hockey-alert hover:scale-105 transition-all duration-300">
-                        <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                          {star.star_number}
+                {(() => {
+                  // Calculate three stars from EA player stats
+                  const calculateThreeStars = () => {
+                    if (!eaPlayerStats || eaPlayerStats.length === 0) return []
+                    
+                    // Sort players by performance score (goals * 3 + assists * 2 + shots + hits + blocks)
+                    const playersWithScore = eaPlayerStats.map(player => ({
+                      ...player,
+                      performanceScore: (player.goals || 0) * 3 + (player.assists || 0) * 2 + (player.shots || 0) + (player.hits || 0) + (player.blocks || 0)
+                    }))
+                    
+                    return playersWithScore
+                      .sort((a, b) => b.performanceScore - a.performanceScore)
+                      .slice(0, 3)
+                      .map((player, index) => ({
+                        id: player.id,
+                        star_number: index + 1,
+                        player_name: player.player_name,
+                        team_name: player.team_id === match.home_team_id ? match.home_team?.name : match.away_team?.name,
+                        position: player.position,
+                        goals: player.goals || 0,
+                        assists: player.assists || 0,
+                        points: (player.goals || 0) + (player.assists || 0),
+                        performanceScore: player.performanceScore
+                      }))
+                  }
+                  
+                  const topPerformers = calculateThreeStars()
+                  
+                  return topPerformers.length > 0 ? (
+                    <div className="space-y-4">
+                      {topPerformers.map((star, index) => (
+                        <div key={star.id} className="flex items-center gap-4 p-4 hockey-alert hover:scale-105 transition-all duration-300">
+                          <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {star.star_number}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
+                              {star.player_name || "Unknown Player"}
+                            </h4>
+                            <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {star.position || "N/A"} • {star.team_name || "Unknown Team"}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">
+                              {star.points} points ({star.goals}G, {star.assists}A)
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                            {star.player?.gamer_tag_id || "Unknown Player"}
-                          </h4>
-                          <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                            {star.player?.position || "N/A"} • {star.team?.name || "Unknown Team"}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">
-                            {star.reason || "Outstanding Performance"}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Star className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
-                    <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
-                      Three stars have not been selected yet
-                    </p>
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Star className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
+                      <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
+                        No EA statistics available to calculate three stars
+                      </p>
+                    </div>
+                  )
+                })()}
               </CardContent>
             </Card>
 
@@ -727,7 +876,7 @@ export default function MatchDetailPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-8">
-                {playerStats.length > 0 ? (
+                {eaPlayerStats.length > 0 ? (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -746,10 +895,13 @@ export default function MatchDetailPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {playerStats.map((player, index) => (
+                        {eaPlayerStats
+                          .filter(player => player.position !== 'G') // Filter out goalies
+                          .sort((a, b) => ((b.goals || 0) + (b.assists || 0)) - ((a.goals || 0) + (a.assists || 0)))
+                          .map((player, index) => (
                           <TableRow key={player.id} className="hockey-table-row-hover">
                             <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
-                              {player.player?.gamer_tag_id || "Unknown"}
+                              {player.player_name || "Unknown"}
                             </TableCell>
                             <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">
                               {player.position || "N/A"}
@@ -773,13 +925,13 @@ export default function MatchDetailPage() {
                               {player.hits || 0}
                             </TableCell>
                             <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.blocked_shots || 0}
+                              {player.blocks || 0}
                             </TableCell>
                             <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.penalty_minutes || 0}
+                              {player.pim || 0}
                             </TableCell>
                             <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.time_on_ice || "0:00"}
+                              {player.time_on_ice ? `${Math.floor(player.time_on_ice / 60)}:${(player.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -790,7 +942,7 @@ export default function MatchDetailPage() {
                   <div className="text-center py-8">
                     <Users className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
                     <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
-                      Player statistics are not available yet
+                      No EA player statistics available
                     </p>
                   </div>
                 )}
@@ -815,7 +967,7 @@ export default function MatchDetailPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-8">
-                {goalieStats.length > 0 ? (
+                {eaPlayerStats.filter(player => player.position === 'G').length > 0 ? (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
@@ -833,10 +985,12 @@ export default function MatchDetailPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {goalieStats.map((goalie, index) => (
+                        {eaPlayerStats
+                          .filter(player => player.position === 'G')
+                          .map((goalie, index) => (
                           <TableRow key={goalie.id} className="hockey-table-row-hover">
                             <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
-                              {goalie.player?.gamer_tag_id || "Unknown"}
+                              {goalie.player_name || "Unknown"}
                             </TableCell>
                             <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
                               {goalie.shots_against || 0}
@@ -863,7 +1017,7 @@ export default function MatchDetailPage() {
                               {goalie.losses || 0}
                             </TableCell>
                             <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {goalie.time_on_ice || "0:00"}
+                              {goalie.time_on_ice ? `${Math.floor(goalie.time_on_ice / 60)}:${(goalie.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -874,7 +1028,7 @@ export default function MatchDetailPage() {
                   <div className="text-center py-8">
                     <Shield className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
                     <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
-                      Goalie statistics are not available yet
+                      No EA goalie statistics available
                     </p>
                   </div>
                 )}
@@ -890,42 +1044,6 @@ export default function MatchDetailPage() {
             />
           </TabsContent>
 
-          <TabsContent value="stats" className="space-y-8">
-            {/* EA Match Statistics (if available) */}
-            {match?.ea_match_id && (
-              <EaMatchStatistics
-                matchId={matchId}
-                eaMatchId={match.ea_match_id}
-                homeTeamEaClubId={match.home_team?.ea_club_id}
-                awayTeamEaClubId={match.away_team?.ea_club_id}
-                isAdmin={canManageMatch}
-              />
-            )}
-
-            {/* No EA Statistics Message */}
-            {!match?.ea_match_id && (
-              <Card className="hockey-enhanced-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
-                <CardContent className="p-8 text-center">
-                  <AlertCircle className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">
-                    No EA Statistics Available
-                  </h3>
-                  <p className="text-hockey-silver-500 dark:text-hockey-silver-500 mb-4">
-                    This match doesn't have EA statistics imported yet.
-                  </p>
-                  {canManageMatch && (
-                    <Button 
-                      onClick={() => setOpenModal(true)} 
-                      className="hockey-button-enhanced hover:scale-105 transition-all duration-200"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Import EA Match Data
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
 
           <TabsContent value="highlights" className="space-y-8">
               <MatchHighlightsWrapper matchId={matchId} canEdit={canManageMatch} />
