@@ -212,7 +212,7 @@ export default function EloMatchesPage() {
         </div>
 
         {/* Filter Buttons */}
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
           {[
             { key: 'all', label: 'All Matches' },
             { key: 'recent', label: 'Recent' },
@@ -222,7 +222,7 @@ export default function EloMatchesPage() {
             <button
               key={key}
               onClick={() => setFilter(key as any)}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-200 flex-shrink-0 ${
                 filter === key
                   ? 'bg-green-600 text-white shadow-lg'
                   : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'

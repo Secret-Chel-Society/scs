@@ -826,10 +826,10 @@ export default function SCSBotPanel() {
 
         <Tabs defaultValue="discord" className="w-full">
           <div className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg rounded-xl p-2">
-            <TabsList className="grid w-full grid-cols-5 bg-transparent">
+            <TabsList className="flex flex-wrap w-full bg-transparent gap-1 sm:gap-2">
               <TabsTrigger 
                 value="discord" 
-                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300 flex-shrink-0 text-xs sm:text-sm"
               >
                 <Users className="h-4 w-4 mr-2" />
                 Discord Users

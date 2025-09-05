@@ -454,10 +454,10 @@ function StandingsContent({ seasonId }: { seasonId: number }) {
 
   return (
     <Tabs defaultValue="overall" className="space-y-8">
-      <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg">
+      <TabsList className="flex flex-wrap w-full bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg gap-1 sm:gap-2">
         <TabsTrigger 
           value="overall" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm flex-shrink-0"
         >
           <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
           <span className="hidden sm:inline">Overall Standings</span>
@@ -465,14 +465,14 @@ function StandingsContent({ seasonId }: { seasonId: number }) {
         </TabsTrigger>
         <TabsTrigger 
           value="conference" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm flex-shrink-0"
         >
           <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
           Conference
         </TabsTrigger>
         <TabsTrigger 
           value="playoffs" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm flex-shrink-0"
         >
           <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
           <span className="hidden sm:inline">Playoff Picture</span>

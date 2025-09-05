@@ -1507,7 +1507,6 @@ export default function AdminTeamsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
     </div>
   )
 }

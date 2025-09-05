@@ -1557,28 +1557,28 @@ const ManagementPage = () => {
 
             {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
-                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
+              <TabsList className="flex flex-wrap w-full mb-6 md:mb-8 h-auto gap-1 sm:gap-2">
+                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2 flex-shrink-0">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
                 </TabsTrigger>
-                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2 flex-shrink-0">
                   <span className="hidden md:inline">Team Avail</span>
                   <span className="md:hidden">Avail</span>
                 </TabsTrigger>
-                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2 flex-shrink-0">
                   <span className="hidden md:inline">Team Schedule</span>
                   <span className="md:hidden">Schedule</span>
                 </TabsTrigger>
-                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2 flex-shrink-0">
                   <span className="hidden md:inline">Free Agents</span>
                   <span className="md:hidden">Free Agents</span>
                 </TabsTrigger>
-                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2 flex-shrink-0">
                   <span className="hidden md:inline">My Bids</span>
                   <span className="md:hidden">Bids</span>
                 </TabsTrigger>
-                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2 flex-shrink-0">
                   <span className="hidden md:inline">Waivers</span>
                   <span className="md:hidden">Waivers</span>
                 </TabsTrigger>
