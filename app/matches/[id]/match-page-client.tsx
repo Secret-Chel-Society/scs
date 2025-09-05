@@ -402,14 +402,17 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-20">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+        <div className="container mx-auto px-6 py-20">
           <div className="animate-pulse">
-            <div className="h-8 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded w-1/4 mb-8"></div>
+            <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mb-8"></div>
+            <div className="max-w-4xl mx-auto">
+              <div className="h-64 bg-slate-200 dark:bg-slate-700 rounded-lg mb-8"></div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-32 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded"></div>
+                <div key={i} className="h-32 bg-slate-200 dark:bg-slate-700 rounded"></div>
               ))}
             </div>
           </div>
@@ -420,16 +423,16 @@ export default function MatchDetailPage() {
 
   if (error || !match) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-20 text-center">
-          <AlertCircle className="h-16 w-16 text-goal-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+        <div className="container mx-auto px-6 py-20 text-center">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             {error ? "Error Loading Match" : "Match Not Found"}
           </h1>
-          <p className="text-hockey-silver-600 dark:text-hockey-silver-400 mb-4">
+          <p className="text-slate-600 dark:text-slate-400 mb-4">
             {error || "The match you're looking for doesn't exist or has been removed."}
           </p>
-          <Button onClick={() => router.back()} className="hockey-button">
+          <Button onClick={() => router.back()} className="bg-blue-600 hover:bg-blue-700 text-white">
             Go Back
           </Button>
         </div>
@@ -458,135 +461,150 @@ export default function MatchDetailPage() {
   const canManageMatch = matchInProgress;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
       {/* Clean Professional Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700">
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="container mx-auto px-6 py-8">
-          {/* Page Title */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Match Details</h1>
+          {/* Back Button */}
+          <div className="mb-6">
+            <Button
+              onClick={() => router.back()}
+              variant="ghost"
+              className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Matches
+            </Button>
           </div>
 
-          {/* Team vs Team Layout */}
-          <div className="flex items-center justify-between max-w-4xl mx-auto">
-            {/* Home Team */}
-            <div className="flex flex-col items-center text-center flex-1">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-lg">
-                  {match?.home_team?.name?.charAt(0) || "H"}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-white mb-1">
-                {match?.home_team?.name || "Home Team"}
-              </h2>
-            </div>
+          {/* Main Match Card */}
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
+              <CardContent className="p-8">
+                {/* Match Header */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Match Details</h1>
+                  </div>
+                  
+                  {/* Management Buttons */}
+                  {canManageMatch && (
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => setOpenScoreModal(true)}
+                        size="sm"
+                        className="bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-all duration-200"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Score
+                      </Button>
+                      <Button
+                        onClick={() => setOpenModal(true)}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white hover:scale-105 transition-all duration-200"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Import EA Data
+                      </Button>
+                      <Button
+                        onClick={handleManualRefresh}
+                        size="sm"
+                        variant="outline"
+                        className="hover:scale-105 transition-all duration-200"
+                        disabled={forceRefreshing}
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${forceRefreshing ? "animate-spin" : ""}`} />
+                        {forceRefreshing ? "Refreshing..." : "Refresh"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
 
-            {/* Score Section */}
-            <div className="flex flex-col items-center mx-8">
-              <div className="text-6xl font-black text-white mb-2">
-                {match?.home_score || 0} - {match?.away_score || 0}
-              </div>
-              <div className="text-lg font-medium text-slate-300">
-                {match?.status || "Status Unknown"}
-              </div>
-            </div>
+                {/* Team vs Team Layout */}
+                <div className="flex items-center justify-between">
+                  {/* Home Team */}
+                  <div className="flex flex-col items-center text-center flex-1">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
+                      <span className="text-white font-bold text-lg">
+                        {match?.home_team?.name?.charAt(0) || "H"}
+                      </span>
+                    </div>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                      {match?.home_team?.name || "Home Team"}
+                    </h2>
+                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
+                      {match?.home_score || 0}
+                    </div>
+                  </div>
 
-            {/* Away Team */}
-            <div className="flex flex-col items-center text-center flex-1">
-              <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-lg">
-                  {match?.away_team?.name?.charAt(0) || "A"}
-                </span>
-              </div>
-              <h2 className="text-xl font-semibold text-white mb-1">
-                {match?.away_team?.name || "Away Team"}
-              </h2>
-            </div>
+                  {/* VS Section */}
+                  <div className="flex flex-col items-center mx-8">
+                    <div className="text-2xl font-bold text-slate-400 dark:text-slate-500 mb-2">VS</div>
+                    <div className="text-sm text-slate-500 dark:text-slate-400 text-center">
+                      <div>{formattedDate}</div>
+                    </div>
+                  </div>
+
+                  {/* Away Team */}
+                  <div className="flex flex-col items-center text-center flex-1">
+                    <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
+                      <span className="text-white font-bold text-lg">
+                        {match?.away_team?.name?.charAt(0) || "A"}
+                      </span>
+                    </div>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                      {match?.away_team?.name || "Away Team"}
+                    </h2>
+                    <div className="text-4xl font-bold text-red-600 dark:text-red-400">
+                      {match?.away_score || 0}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Badge */}
+                <div className="flex justify-center mt-6">
+                  <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                    match?.status === 'Completed' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      : match?.status === 'Scheduled'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                  }`}>
+                    {match?.status || "Status Unknown"}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-
-          {/* Management Buttons */}
-          {canManageMatch && (
-            <div className="flex justify-center gap-4 mt-8">
-              <Button
-                onClick={() => setOpenScoreModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Score
-              </Button>
-              <Button
-                onClick={() => setOpenModal(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import EA Data
-              </Button>
-              <Button
-                onClick={handleManualRefresh}
-                className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
-                disabled={forceRefreshing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${forceRefreshing ? "animate-spin" : ""}`} />
-                {forceRefreshing ? "Refreshing..." : "Refresh"}
-              </Button>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Clean Main Content */}
       <div className="container mx-auto px-6 py-8">
-        {/* Clean Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Date Card */}
-          <div className="bg-blue-600 rounded-lg p-6 text-white hover:scale-105 transition-all duration-300 shadow-lg">
-            <div className="flex items-center gap-3 mb-3">
-              <Calendar className="h-6 w-6 text-blue-200" />
-              <span className="text-sm font-semibold uppercase tracking-wider">DATE</span>
-            </div>
-            <div className="text-lg font-medium">{formattedDate}</div>
-          </div>
-
-          {/* Season Card */}
-          <div className="bg-green-600 rounded-lg p-6 text-white hover:scale-105 transition-all duration-300 shadow-lg">
-            <div className="flex items-center gap-3 mb-3">
-              <Trophy className="h-6 w-6 text-green-200" />
-              <span className="text-sm font-semibold uppercase tracking-wider">SEASON</span>
-            </div>
-            <div className="text-lg font-medium">{match?.season?.name || "Season 1"}</div>
-          </div>
-
-          {/* Status Card */}
-          <div className="bg-red-600 rounded-lg p-6 text-white hover:scale-105 transition-all duration-300 shadow-lg">
-            <div className="flex items-center gap-3 mb-3">
-              <Activity className="h-6 w-6 text-red-200" />
-              <span className="text-sm font-semibold uppercase tracking-wider">STATUS</span>
-            </div>
-            <div className="text-lg font-medium">{match?.status || "Status Unknown"}</div>
-          </div>
-        </div>
 
         {/* Clean Tabs */}
         <Tabs defaultValue="details" className="w-full">
           <div className="mb-8">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800 border border-slate-700 rounded-lg p-1">
+            <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
               <TabsTrigger 
                 value="details" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-md font-medium"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
               >
                 <Trophy className="h-4 w-4" />
                 Details
               </TabsTrigger>
               <TabsTrigger 
                 value="lineups" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-md font-medium"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
               >
                 <Users className="h-4 w-4" />
                 Lineups
               </TabsTrigger>
               <TabsTrigger 
                 value="highlights" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-md font-medium"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
               >
                 <Camera className="h-4 w-4" />
                 Highlights
@@ -887,67 +905,164 @@ export default function MatchDetailPage() {
               </CardHeader>
               <CardContent className="p-8">
                 {eaPlayerStats.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Player</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Pos</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">G</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">A</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">P</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">+/-</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">H</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">BLK</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">PIM</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {eaPlayerStats
-                          .filter(player => player.position !== 'G') // Filter out goalies
-                          .sort((a, b) => ((b.goals || 0) + (b.assists || 0)) - ((a.goals || 0) + (a.assists || 0)))
-                          .map((player, index) => (
-                          <TableRow key={player.id} className="hockey-table-row-hover">
-                            <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
-                              {player.player_name || "Unknown"}
-                            </TableCell>
-                            <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.position || "N/A"}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                              {player.goals || 0}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                              {player.assists || 0}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
-                              {(player.goals || 0) + (player.assists || 0)}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
-                              {player.plus_minus || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.shots || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.hits || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.blocks || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.pim || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {player.time_on_ice ? `${Math.floor(player.time_on_ice / 60)}:${(player.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <Tabs defaultValue="home" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                      <TabsTrigger 
+                        value="home" 
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-xs">
+                              {match?.home_team?.name?.charAt(0) || "H"}
+                            </span>
+                          </div>
+                          {match?.home_team?.name || "Home Team"}
+                        </div>
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="away"
+                        className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-xs">
+                              {match?.away_team?.name?.charAt(0) || "A"}
+                            </span>
+                          </div>
+                          {match?.away_team?.name || "Away Team"}
+                        </div>
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="home" className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Player</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Pos</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">G</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">A</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">P</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">+/-</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">H</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">BLK</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">PIM</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {eaPlayerStats
+                              .filter(player => player.position !== 'G' && player.team_id === match?.home_team_id)
+                              .sort((a, b) => ((b.goals || 0) + (b.assists || 0)) - ((a.goals || 0) + (a.assists || 0)))
+                              .map((player, index) => (
+                              <TableRow key={player.id} className="hockey-table-row-hover">
+                                <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                                  {player.player_name || "Unknown"}
+                                </TableCell>
+                                <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.position || "N/A"}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                                  {player.goals || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                                  {player.assists || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
+                                  {(player.goals || 0) + (player.assists || 0)}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                                  {player.plus_minus || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.shots || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.hits || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.blocks || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.pim || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.time_on_ice ? `${Math.floor(player.time_on_ice / 60)}:${(player.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="away" className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Player</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Pos</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">G</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">A</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">P</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">+/-</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">H</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">BLK</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">PIM</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {eaPlayerStats
+                              .filter(player => player.position !== 'G' && player.team_id === match?.away_team_id)
+                              .sort((a, b) => ((b.goals || 0) + (b.assists || 0)) - ((a.goals || 0) + (a.assists || 0)))
+                              .map((player, index) => (
+                              <TableRow key={player.id} className="hockey-table-row-hover">
+                                <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                                  {player.player_name || "Unknown"}
+                                </TableCell>
+                                <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.position || "N/A"}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                                  {player.goals || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                                  {player.assists || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
+                                  {(player.goals || 0) + (player.assists || 0)}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                                  {player.plus_minus || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.shots || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.hits || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.blocks || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.pim || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {player.time_on_ice ? `${Math.floor(player.time_on_ice / 60)}:${(player.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 ) : (
                   <div className="text-center py-8">
                     <Users className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
@@ -978,62 +1093,154 @@ export default function MatchDetailPage() {
               </CardHeader>
               <CardContent className="p-8">
                 {eaPlayerStats.filter(player => player.position === 'G').length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Goalie</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SA</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GA</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SV%</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GAA</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SO</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">W</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">L</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {eaPlayerStats
-                          .filter(player => player.position === 'G')
-                          .map((goalie, index) => (
-                          <TableRow key={goalie.id} className="hockey-table-row-hover">
-                            <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
-                              {goalie.player_name || "Unknown"}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {goalie.shots_against || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {goalie.saves || 0}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
-                              {goalie.goals_against || 0}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                              {goalie.save_percentage ? `${goalie.save_percentage.toFixed(1)}%` : "0.0%"}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                              {goalie.goals_against_average ? goalie.goals_against_average.toFixed(2) : "0.00"}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {goalie.shutouts || 0}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
-                              {goalie.wins || 0}
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
-                              {goalie.losses || 0}
-                            </TableCell>
-                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {goalie.time_on_ice ? `${Math.floor(goalie.time_on_ice / 60)}:${(goalie.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <Tabs defaultValue="home" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                      <TabsTrigger 
+                        value="home" 
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-xs">
+                              {match?.home_team?.name?.charAt(0) || "H"}
+                            </span>
+                          </div>
+                          {match?.home_team?.name || "Home Team"}
+                        </div>
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="away"
+                        className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-xs">
+                              {match?.away_team?.name?.charAt(0) || "A"}
+                            </span>
+                          </div>
+                          {match?.away_team?.name || "Away Team"}
+                        </div>
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="home" className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Goalie</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SA</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GA</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SV%</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GAA</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SO</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">W</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">L</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {eaPlayerStats
+                              .filter(player => player.position === 'G' && player.team_id === match?.home_team_id)
+                              .map((goalie, index) => (
+                              <TableRow key={goalie.id} className="hockey-table-row-hover">
+                                <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                                  {goalie.player_name || "Unknown"}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.shots_against || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.saves || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                                  {goalie.goals_against || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                                  {goalie.save_percentage ? `${goalie.save_percentage.toFixed(1)}%` : "0.0%"}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                                  {goalie.goals_against_average ? goalie.goals_against_average.toFixed(2) : "0.00"}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.shutouts || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
+                                  {goalie.wins || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                                  {goalie.losses || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.time_on_ice ? `${Math.floor(goalie.time_on_ice / 60)}:${(goalie.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="away" className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Goalie</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SA</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GA</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SV%</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GAA</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SO</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">W</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">L</TableHead>
+                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {eaPlayerStats
+                              .filter(player => player.position === 'G' && player.team_id === match?.away_team_id)
+                              .map((goalie, index) => (
+                              <TableRow key={goalie.id} className="hockey-table-row-hover">
+                                <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                                  {goalie.player_name || "Unknown"}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.shots_against || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.saves || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                                  {goalie.goals_against || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                                  {goalie.save_percentage ? `${goalie.save_percentage.toFixed(1)}%` : "0.0%"}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                                  {goalie.goals_against_average ? goalie.goals_against_average.toFixed(2) : "0.00"}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.shutouts || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
+                                  {goalie.wins || 0}
+                                </TableCell>
+                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                                  {goalie.losses || 0}
+                                </TableCell>
+                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                                  {goalie.time_on_ice ? `${Math.floor(goalie.time_on_ice / 60)}:${(goalie.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 ) : (
                   <div className="text-center py-8">
                     <Shield className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
