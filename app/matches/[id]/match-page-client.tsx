@@ -459,96 +459,123 @@ export default function MatchDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-16 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+      {/* Stunning Hockey Arena Hero Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-ice-blue-600 via-rink-blue-700 to-hockey-silver-800 dark:from-ice-blue-900 dark:via-rink-blue-900 dark:to-hockey-silver-900 py-24 px-4">
+        {/* Dynamic Hockey Arena Background */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,198,0.3),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,119,198,0.2),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(120,200,255,0.1),transparent_50%)]"></div>
         
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        {/* Enhanced Floating Hockey Elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-assist-green-200/20 to-goal-red-200/20 rounded-full blur-2xl animate-float"></div>
+        <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-10 left-20 w-20 h-20 bg-gradient-to-br from-hockey-silver-200/25 to-ice-blue-200/25 rounded-full blur-lg animate-float" style={{ animationDelay: '0.5s' }}></div>
         
         <div className="container mx-auto text-center relative z-10">
-          <div>
-            <h1 className="hockey-title-enhanced mb-6">
-              {match?.home_team?.name || "Home Team"} vs {match?.away_team?.name || "Away Team"}
-              {wentToOvertime && <span className="text-ice-blue-400 ml-2">(OT)</span>}
-            </h1>
-            <p className="hockey-subtitle-enhanced mx-auto mb-8">{formattedDate}</p>
+          <div className="max-w-6xl mx-auto">
+            {/* Premium Typography with Hockey Theme */}
+            <div className="mb-12">
+              <h1 className="hockey-title-enhanced mb-6 text-5xl md:text-6xl lg:text-7xl font-black tracking-tight">
+                <span className="hockey-gradient-text-animated">
+                  {match?.home_team?.name || "Home Team"}
+                </span>
+                <span className="mx-6 text-hockey-silver-300 dark:text-hockey-silver-400 text-4xl md:text-5xl lg:text-6xl font-bold">vs</span>
+                <span className="hockey-gradient-text-animated">
+                  {match?.away_team?.name || "Away Team"}
+                </span>
+                {wentToOvertime && (
+                  <span className="ml-4 text-ice-blue-400 text-3xl md:text-4xl lg:text-5xl font-bold animate-pulse">
+                    (OT)
+                  </span>
+                )}
+              </h1>
+              <p className="hockey-subtitle-enhanced text-xl md:text-2xl font-medium">{formattedDate}</p>
+            </div>
             
-            {/* Enhanced Match Status Cards - Redesigned */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+            {/* Premium Match Status Cards - Championship Style */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+              {/* Final Score Card - Trophy Style */}
               <div className="group animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="hockey-stat-hover-enhanced">
-                  <div className="w-14 h-14 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
-                    <Trophy className="h-7 w-7 text-white" />
+                <div className="hockey-stat-hover-enhanced relative overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-ice-blue-500/10 to-rink-blue-600/10 rounded-3xl"></div>
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl group-hover:shadow-ice-blue-500/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                      <Trophy className="h-10 w-10 text-white" />
+                    </div>
+                    <div className="text-5xl font-black text-white mb-3 tracking-tight">
+                      {match?.home_score || 0} - {match?.away_score || 0}
+                    </div>
+                    <div className="text-sm font-bold text-hockey-silver-200 dark:text-hockey-silver-300 uppercase tracking-widest">
+                      Final Score
+                    </div>
+                    <div className="w-20 h-1 bg-gradient-to-r from-ice-blue-400 to-rink-blue-500 rounded-full mx-auto mt-4 group-hover:w-24 transition-all duration-500"></div>
                   </div>
-                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-1">
-                    {match?.home_score || 0} - {match?.away_score || 0}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Final Score
-                  </div>
-                  <div className="w-12 h-0.5 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-2 group-hover:w-16 transition-all duration-300"></div>
                 </div>
               </div>
               
+              {/* Match Status Card - Dynamic */}
               <div className="group animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="hockey-stat-hover-enhanced">
-                  <div className="w-14 h-14 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
-                    <Activity className="h-7 w-7 text-white" />
+                <div className="hockey-stat-hover-enhanced relative overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-assist-green-500/10 to-goal-red-600/10 rounded-3xl"></div>
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl group-hover:shadow-assist-green-500/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                      <Activity className="h-10 w-10 text-white" />
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-3">
+                      {match?.status || "Status Unknown"}
+                    </div>
+                    <div className="text-sm font-bold text-hockey-silver-200 dark:text-hockey-silver-300 uppercase tracking-widest">
+                      Match Status
+                    </div>
+                    <div className="w-20 h-1 bg-gradient-to-r from-assist-green-400 to-goal-red-500 rounded-full mx-auto mt-4 group-hover:w-24 transition-all duration-500"></div>
                   </div>
-                  <div className="text-lg font-bold text-assist-green-700 dark:text-assist-green-300 mb-1">
-                    {match?.status || "Status Unknown"}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Match Status
-                  </div>
-                  <div className="w-12 h-0.5 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-2 group-hover:w-16 transition-all duration-300"></div>
                 </div>
               </div>
               
+              {/* Game Type Card - Premium */}
               <div className="group animate-slide-in-up" style={{ animationDelay: '0.3s' }}>
-                <div className="hockey-stat-hover-enhanced">
-                  <div className="w-14 h-14 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
-                    <Clock className="h-7 w-7 text-white" />
+                <div className="hockey-stat-hover-enhanced relative overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-goal-red-500/10 to-assist-green-600/10 rounded-3xl"></div>
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl group-hover:shadow-goal-red-500/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                      <Clock className="h-10 w-10 text-white" />
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-3">
+                      {wentToOvertime ? "Overtime" : "Regulation"}
+                    </div>
+                    <div className="text-sm font-bold text-hockey-silver-200 dark:text-hockey-silver-300 uppercase tracking-widest">
+                      Game Type
+                    </div>
+                    <div className="w-20 h-1 bg-gradient-to-r from-goal-red-400 to-assist-green-500 rounded-full mx-auto mt-4 group-hover:w-24 transition-all duration-500"></div>
                   </div>
-                  <div className="text-lg font-bold text-goal-red-700 dark:text-goal-red-300 mb-1">
-                    {wentToOvertime ? "Overtime" : "Regulation"}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Game Type
-                  </div>
-                  <div className="w-12 h-0.5 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-2 group-hover:w-16 transition-all duration-300"></div>
                 </div>
               </div>
             </div>
 
-            {/* Management buttons - only visible if canManageMatch is true */}
+            {/* Premium Management Buttons */}
             {canManageMatch && (
-              <div className="flex flex-wrap justify-center gap-4 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
+              <div className="flex flex-wrap justify-center gap-6 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
                 <Button
                   onClick={() => setOpenScoreModal(true)}
-                  className="hockey-button-hover-enhanced"
+                  className="hockey-button-hover-enhanced hockey-hover-lift px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 hover:from-ice-blue-700 hover:to-rink-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <Edit className="h-4 w-4 mr-2" />
+                  <Edit className="h-5 w-5 mr-3" />
                   Edit Score
                 </Button>
                 <Button
                   onClick={() => setOpenModal(true)}
-                  variant="outline"
-                  className="border-ice-blue-300 dark:border-ice-blue-600 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hockey-hover-lift"
+                  className="hockey-button-hover-enhanced hockey-hover-lift px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-assist-green-600 to-goal-red-700 hover:from-assist-green-700 hover:to-goal-red-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <Upload className="h-4 w-4 mr-2" />
+                  <Upload className="h-5 w-5 mr-3" />
                   Import EA Data
                 </Button>
                 <Button
                   onClick={handleManualRefresh}
-                  variant="outline"
-                  className="border-rink-blue-300 dark:border-rink-blue-600 hover:bg-rink-blue-100 dark:hover:bg-rink-blue-900/30 hockey-hover-lift"
+                  className="hockey-button-hover-enhanced hockey-hover-lift px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-hockey-silver-600 to-ice-blue-700 hover:from-hockey-silver-700 hover:to-ice-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                   disabled={forceRefreshing}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${forceRefreshing ? "animate-spin" : ""}`} />
+                  <RefreshCw className={`h-5 w-5 mr-3 ${forceRefreshing ? "animate-spin" : ""}`} />
                   {forceRefreshing ? "Refreshing..." : "Refresh"}
                 </Button>
               </div>
@@ -557,33 +584,35 @@ export default function MatchDetailPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-20">
-        {/* Enhanced Tabs */}
+      {/* Premium Main Content */}
+      <div className="container mx-auto px-4 pb-20 -mt-8 relative z-10">
+        {/* Stunning Premium Tabs */}
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-ice-blue-700 p-2">
-            <TabsTrigger 
-              value="details" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-ice-blue-200/50 dark:hover:bg-ice-blue-800/30 transition-all duration-300 flex items-center gap-2"
-            >
-              <Trophy className="h-4 w-4" />
-              Details
-            </TabsTrigger>
+          <div className="relative mb-12">
+            <TabsList className="grid w-full grid-cols-3 bg-white/80 dark:bg-hockey-silver-900/80 backdrop-blur-xl border-2 border-white/20 dark:border-hockey-silver-700/50 rounded-2xl p-2 shadow-2xl">
+              <TabsTrigger 
+                value="details" 
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-ice-blue-100/50 dark:hover:bg-ice-blue-800/30 transition-all duration-500 flex items-center gap-3 px-6 py-4 rounded-xl font-semibold hockey-hover-lift"
+              >
+                <Trophy className="h-5 w-5" />
+                Details
+              </TabsTrigger>
               <TabsTrigger 
                 value="lineups" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-ice-blue-600 data-[state=active]:text-white hover:bg-rink-blue-200/50 dark:hover:bg-rink-blue-800/30 transition-all duration-300 flex items-center gap-2"
-            >
-              <Users className="h-4 w-4" />
-              Lineups
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-ice-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-rink-blue-100/50 dark:hover:bg-rink-blue-800/30 transition-all duration-500 flex items-center gap-3 px-6 py-4 rounded-xl font-semibold hockey-hover-lift"
+              >
+                <Users className="h-5 w-5" />
+                Lineups
               </TabsTrigger>
               <TabsTrigger 
                 value="highlights" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white hover:bg-goal-red-200/50 dark:hover:bg-goal-red-800/30 transition-all duration-300 flex items-center gap-2"
-            >
-              <Camera className="h-4 w-4" />
-              Highlights
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-goal-red-100/50 dark:hover:bg-goal-red-800/30 transition-all duration-500 flex items-center gap-3 px-6 py-4 rounded-xl font-semibold hockey-hover-lift"
+              >
+                <Camera className="h-5 w-5" />
+                Highlights
               </TabsTrigger>
             </TabsList>
+          </div>
 
           <TabsContent value="details" className="space-y-8">
             <MatchDetails match={match} />

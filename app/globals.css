@@ -680,6 +680,73 @@
     @apply absolute inset-0 opacity-5;
     @apply bg-hockey-pattern;
   }
+
+  /* Premium Hockey Gradient Text Animation */
+  .hockey-gradient-text-animated {
+    @apply bg-gradient-to-r from-ice-blue-400 via-rink-blue-500 to-assist-green-400;
+    @apply dark:from-ice-blue-300 dark:via-rink-blue-400 dark:to-assist-green-300;
+    @apply bg-clip-text text-transparent;
+    @apply bg-[length:200%_200%];
+    @apply animate-gradient-text;
+    @apply font-black;
+  }
+
+  /* Premium Hockey Card Hover Effects */
+  .hockey-stat-hover-enhanced {
+    @apply transition-all duration-500 ease-out;
+    @apply hover:scale-105 hover:shadow-2xl;
+    @apply hover:shadow-ice-blue-500/20;
+    @apply rounded-2xl;
+    @apply backdrop-blur-sm;
+  }
+
+  /* Premium Hockey Button Enhancements */
+  .hockey-button-hover-enhanced {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-105 hover:shadow-xl;
+    @apply hover:shadow-ice-blue-500/30;
+    @apply transform-gpu;
+  }
+
+  /* Premium Hockey Hover Lift Effect */
+  .hockey-hover-lift {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-105 hover:-translate-y-1;
+    @apply hover:shadow-xl;
+    @apply transform-gpu;
+  }
+
+  /* Premium Hockey Enhanced Cards */
+  .hockey-enhanced-card {
+    @apply bg-white/90 dark:bg-hockey-silver-900/90;
+    @apply backdrop-blur-xl;
+    @apply border border-white/20 dark:border-hockey-silver-700/50;
+    @apply shadow-2xl;
+    @apply hover:shadow-3xl;
+    @apply transition-all duration-500 ease-out;
+    @apply hover:scale-[1.02];
+    @apply rounded-3xl;
+    @apply overflow-hidden;
+  }
+
+  /* Premium Hockey Table Row Hover */
+  .hockey-table-row-hover {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:bg-gradient-to-r hover:from-ice-blue-50 hover:to-rink-blue-50;
+    @apply dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20;
+    @apply hover:shadow-lg;
+    @apply hover:scale-[1.01];
+  }
+
+  /* Premium Hockey Alert Styling */
+  .hockey-alert {
+    @apply bg-gradient-to-r from-ice-blue-50 to-rink-blue-50;
+    @apply dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
+    @apply border border-ice-blue-200 dark:border-ice-blue-700;
+    @apply rounded-2xl;
+    @apply shadow-lg;
+    @apply transition-all duration-300 ease-out;
+  }
 }
 
 /* Custom container class to ensure proper centering */
@@ -931,6 +998,42 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   }
 }
 
+@keyframes gradient-text {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(-5px); 
+  }
+}
+
+@keyframes rotate-slow {
+  from { 
+    transform: rotate(0deg); 
+  }
+  to { 
+    transform: rotate(360deg); 
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.2);
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -945,6 +1048,22 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
 
 .animate-slide-in-up {
   animation: slide-in-up 0.6s ease-out;
+}
+
+.animate-gradient-text {
+  animation: gradient-text 3s ease infinite;
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+.animate-rotate-slow {
+  animation: rotate-slow 8s linear infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
 }
 
 .animate-slide-in-left {
