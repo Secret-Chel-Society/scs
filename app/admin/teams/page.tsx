@@ -440,12 +440,16 @@ export default function AdminTeamsPage() {
 
       if (error) {
         console.error("Error loading conferences:", error)
+        // If conferences table doesn't exist, set empty array
+        setConferences([])
         return
       }
 
       setConferences(data || [])
     } catch (error: any) {
       console.error("Error loading conferences:", error)
+      // If conferences table doesn't exist, set empty array
+      setConferences([])
     }
   }
 
@@ -462,8 +466,8 @@ export default function AdminTeamsPage() {
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
 
-      // Load teams with conference data
-      const { data, error } = await supabase
+      // Load teams with conference data (fallback to basic query if conference join fails)
+      let { data, error } = await supabase
         .from("teams")
         .select(`
           *,
@@ -471,6 +475,19 @@ export default function AdminTeamsPage() {
         `)
         .eq("season_id", season)
         .order("name")
+
+      // If conference join fails, try without conference data
+      if (error && error.message.includes("conferences")) {
+        console.log("Conference table not found, loading teams without conference data")
+        const fallbackResult = await supabase
+          .from("teams")
+          .select("*")
+          .eq("season_id", season)
+          .order("name")
+        
+        data = fallbackResult.data
+        error = fallbackResult.error
+      }
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -592,9 +609,17 @@ export default function AdminTeamsPage() {
         teamData.is_active = teamForm.is_active
       }
 
-      // Include conference_id if provided
-      if (teamForm.conference_id) {
-        teamData.conference_id = teamForm.conference_id
+      // Include conference_id if provided and conferences table exists
+      if (teamForm.conference_id && conferences.length > 0) {
+        try {
+          // Test if conference_id column exists by trying to query it
+          const testQuery = await supabase.from("teams").select("conference_id").limit(1)
+          if (!testQuery.error) {
+            teamData.conference_id = teamForm.conference_id
+          }
+        } catch (error) {
+          console.log("Conference_id column not available, skipping conference assignment")
+        }
       }
 
       if (isAddingTeam) {
@@ -1315,34 +1340,36 @@ export default function AdminTeamsPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="conference" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                <Users className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
-                Conference
-              </Label>
-              <Select
-                value={teamForm.conference_id}
-                onValueChange={(value) => setTeamForm({ ...teamForm, conference_id: value })}
-              >
-                <SelectTrigger id="conference" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                  <SelectValue placeholder="Select Conference" />
-                </SelectTrigger>
-                <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                  <SelectItem value="">No Conference</SelectItem>
-                  {conferences.map((conference: Conference) => (
-                    <SelectItem key={conference.id} value={conference.id}>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: conference.color }}
-                        />
-                        {conference.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {conferences && conferences.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="conference" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <Users className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                  Conference
+                </Label>
+                <Select
+                  value={teamForm.conference_id}
+                  onValueChange={(value) => setTeamForm({ ...teamForm, conference_id: value })}
+                >
+                  <SelectTrigger id="conference" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
+                    <SelectValue placeholder="Select Conference" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                    <SelectItem value="">No Conference</SelectItem>
+                    {conferences.map((conference: Conference) => (
+                      <SelectItem key={conference.id} value={conference.id}>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: conference.color }}
+                          />
+                          {conference.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {hasEaColumn && (
               <div className="space-y-3 p-4 bg-gradient-to-r from-ice-blue-50/30 to-rink-blue-50/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
