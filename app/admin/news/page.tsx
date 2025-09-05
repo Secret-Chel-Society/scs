@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Edit, Eye, Plus, Trash2, Newspaper, Calendar, Trophy, Star, Medal, Crown, Activity, TrendingUp, Users, Target, Zap, Shield, Database, Settings, BarChart3, Clock, Award, BookOpen, FileText, Globe, Publish } from "lucide-react"
+import { ArrowLeft, Edit, Eye, Plus, Trash2, Newspaper, Calendar, Trophy, Star, Medal, Crown, Activity, TrendingUp, Users, Target, Zap, Shield, Database, Settings, BarChart3, Clock, Award, BookOpen, FileText, Globe, Send } from "lucide-react"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import {
@@ -249,33 +249,6 @@ export default function AdminNewsPage() {
       </div>
 
       {/* Main Content */}
-      {/* Enhanced Hero Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div>
-            <h1 className="hockey-title mb-6">
-              Content Management Hub
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-8">
-              Create, edit, and manage news articles and announcements for the Secret Chel Society
-            </p>
-            
-            {/* Admin Status Badge */}
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-6 py-3 rounded-full shadow-lg shadow-assist-green-500/25 border-2 border-white dark:border-hockey-silver-800">
-              <Newspaper className="h-5 w-5" />
-              <span className="font-semibold">Content Administrator</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 pb-20">
         {/* Enhanced Navigation */}
         <div className="flex items-center gap-2 mb-8">
@@ -455,7 +428,7 @@ export default function AdminNewsPage() {
                                 >
                                   {article.published ? (
                                     <>
-                                      <Publish className="h-3 w-3 mr-1" />
+                                      <Send className="h-3 w-3 mr-1" />
                                       Unpublish
                                     </>
                                   ) : (

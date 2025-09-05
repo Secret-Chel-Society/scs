@@ -569,11 +569,11 @@
     content: '';
     @apply absolute inset-0 rounded-lg blur-xl opacity-30 scale-150;
     @apply bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30;
-    @apply transition-opacity duration-300;
+    @apply transition-all duration-500 ease-out;
   }
   
   .hockey-glow-effect:hover::before {
-    @apply opacity-50;
+    @apply opacity-50 scale-125;
   }
   
   .hockey-enhanced-card {
@@ -581,6 +581,84 @@
     @apply hover:shadow-2xl hover:shadow-ice-blue-500/25 dark:hover:shadow-rink-blue-500/30;
     @apply hover:scale-105 hover:border-ice-blue-300/70 dark:hover:border-rink-blue-600/70;
     @apply transition-all duration-300 ease-out;
+  }
+  
+  /* Enhanced Button Styles */
+  .btn-ice {
+    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+    @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
+    @apply text-white font-semibold py-2 px-4 rounded-lg;
+    @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/25;
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .btn-championship {
+    @apply bg-gradient-to-r from-goal-red-500 to-assist-green-600;
+    @apply hover:from-goal-red-600 hover:to-assist-green-700;
+    @apply text-white font-semibold py-2 px-4 rounded-lg;
+    @apply hover:scale-105 hover:shadow-lg hover:shadow-goal-red-500/25;
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  /* Enhanced Animation Classes */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounce 2s infinite;
+  }
+  
+  /* Enhanced Gradient Underlines */
+  .gradient-underline {
+    @apply relative;
+  }
+  
+  .gradient-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .gradient-underline:hover::after {
+    @apply w-full;
+  }
+  
+  /* Enhanced Card Hover Effects */
+  .card-hover-lift {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:-translate-y-2 hover:shadow-2xl;
+  }
+  
+  .card-hover-glow {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-2xl hover:shadow-ice-blue-500/20;
+  }
+  
+  /* Enhanced Text Effects */
+  .text-gradient-ice {
+    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
+    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+    @apply bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-championship {
+    @apply bg-gradient-to-r from-goal-red-600 via-assist-green-600 to-goal-red-800;
+    @apply dark:from-goal-red-400 dark:via-assist-green-400 dark:to-goal-red-600;
+    @apply bg-clip-text text-transparent;
   }
   
   .hockey-enhanced-card::before {
@@ -680,7 +758,6 @@
     @apply absolute inset-0 opacity-5;
     @apply bg-hockey-pattern;
   }
-}
 
 /* Custom container class to ensure proper centering */
 .container {

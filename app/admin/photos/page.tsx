@@ -8,7 +8,7 @@ import { CarouselManager } from "@/components/admin/carousel-manager"
 import { LogoManager } from "@/components/admin/logo-manager"
 import { AdminProtected } from "@/components/auth/admin-protected"
 import { useSearchParams, useRouter } from "next/navigation"
-import { Camera, Image, Upload, Gallery, Carousel, Shield, Zap, Target, Database, Trophy, Star, Medal, Crown, Activity, Settings, Users } from "lucide-react"
+import { Camera, Image, Upload, Images, Layout, Shield, Zap, Target, Database, Trophy, Star, Medal, Crown, Activity, Settings, Users } from "lucide-react"
 
 export default function AdminPhotosPage() {
   const searchParams = useSearchParams()
@@ -75,7 +75,7 @@ export default function AdminPhotosPage() {
                 <div className="group">
                   <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
                     <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
-                      <Gallery className="h-8 w-8 text-white" />
+                      <Images className="h-8 w-8 text-white" />
                     </div>
                     <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
                       Photo
@@ -90,7 +90,7 @@ export default function AdminPhotosPage() {
                 <div className="group">
                   <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
                     <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
-                      <Carousel className="h-8 w-8 text-white" />
+                      <Layout className="h-8 w-8 text-white" />
                     </div>
                     <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
                       Homepage
@@ -148,14 +148,14 @@ export default function AdminPhotosPage() {
                 value="gallery"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-ice-blue-600 data-[state=active]:text-white hover:bg-rink-blue-200/50 dark:hover:bg-rink-blue-800/30 transition-all duration-300 flex items-center gap-2"
               >
-                <Gallery className="h-4 w-4" />
+                <Images className="h-4 w-4" />
                 Photo Gallery
               </TabsTrigger>
               <TabsTrigger 
                 value="carousel"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white hover:bg-assist-green-200/50 dark:hover:bg-assist-green-800/30 transition-all duration-300 flex items-center gap-2"
               >
-                <Carousel className="h-4 w-4" />
+                <Layout className="h-4 w-4" />
                 Homepage Carousel
               </TabsTrigger>
               <TabsTrigger 
@@ -187,7 +187,7 @@ export default function AdminPhotosPage() {
               <TabsContent value="gallery" className="space-y-6">
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Gallery className="h-8 w-8 text-white" />
+                    <Images className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
                     Photo Gallery Management
@@ -202,7 +202,7 @@ export default function AdminPhotosPage() {
               <TabsContent value="carousel" className="space-y-6">
                 <div className="text-center mb-8">
                   <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Carousel className="h-8 w-8 text-white" />
+                    <Layout className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
                     Homepage Carousel Manager
