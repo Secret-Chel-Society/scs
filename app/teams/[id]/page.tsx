@@ -727,7 +727,7 @@ export default function TeamDetailPage() {
             </Card>
           )}
 
-        <Tabs defaultValue="roster" className="w-full">
+          <Tabs defaultValue="roster" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="roster">Roster</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
@@ -1130,8 +1130,9 @@ export default function TeamDetailPage() {
               </Card>
             </div>
           </TabsContent>
-        </Tabs>
-      </motion.div>
+          </Tabs>
+        </motion.div>
+      </div>
     </div>
   )
 }
