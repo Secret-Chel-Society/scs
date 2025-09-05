@@ -76,6 +76,7 @@ export function AdminProtected({ children }: AdminProtectedProps) {
           if (!hasAdminRole) {
             router.push("/?message=You do not have permission to access this page")
           }
+        }
         } catch (error: any) {
           const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
 

@@ -214,129 +214,179 @@ export default function MatchDetailPage() {
   const canManageMatch = matchInProgress
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-6 max-w-7xl">
-      <PageHeader
-        heading={`${match.home_team?.name || "Home Team"} vs ${match.away_team?.name || "Away Team"} ${
-          wentToOvertime ? "(OT)" : ""
-        }`}
-        text={formattedDate}
-      />
-
-      <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <span className="text-sm text-muted-foreground">
-            Match Status: <span className="font-medium capitalize">{match.status || "Scheduled"}</span>
-            {wentToOvertime && <span className="ml-2 font-medium">(Overtime)</span>}
-          </span>
-          <div className="mt-1">
-            <span className="text-sm text-muted-foreground">
-              Score:{" "}
-              <span className="font-medium">
-                {match.home_score || 0} - {match.away_score || 0}
-              </span>
-            </span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
+      {/* Hero Header Section */}
+      <div className="clean-header relative py-16 px-4">
+        <div className="container mx-auto text-center">
+          <div>
+            <h1 className="clean-title mb-6">
+              {match.home_team?.name || "Home Team"} vs {match.away_team?.name || "Away Team"}
+              {wentToOvertime && <span className="text-blue-400 ml-2">(OT)</span>}
+            </h1>
+            <p className="clean-subtitle mb-8">{formattedDate}</p>
+            
+            {/* Match Status Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+              <div className="clean-stat-item">
+                <div className="clean-icon-container mb-3">
+                  <div className="text-2xl">🏆</div>
+                </div>
+                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                  {match.home_score || 0} - {match.away_score || 0}
+                </div>
+                <div className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">
+                  Final Score
+                </div>
+              </div>
+              
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-emerald mb-3">
+                  <div className="text-2xl">📅</div>
+                </div>
+                <div className="text-lg font-bold text-emerald-700 dark:text-emerald-300">
+                  {match.status || "Scheduled"}
+                </div>
+                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wide">
+                  Match Status
+                </div>
+              </div>
+              
+              <div className="clean-stat-item">
+                <div className="clean-icon-container-red mb-3">
+                  <div className="text-2xl">⏰</div>
+                </div>
+                <div className="text-lg font-bold text-red-700 dark:text-red-300">
+                  {wentToOvertime ? "Overtime" : "Regular"}
+                </div>
+                <div className="text-xs text-red-600 dark:text-red-400 font-medium uppercase tracking-wide">
+                  Game Type
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={handleManualRefresh}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            disabled={forceRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 ${forceRefreshing ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
-
-          {/* Management buttons - only visible if canManageMatch is true */}
-          {canManageMatch && (
-            <>
-              <Button
-                onClick={() => setOpenScoreModal(true)}
-                variant="default"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                <span className="hidden sm:inline">Edit Score</span>
-              </Button>
-              <Button
-                onClick={() => {
-                  setOpenModal(true)
-                }}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                <span className="hidden sm:inline">
-                  {match.ea_match_id ? "Update Match Data" : "Upload Match Data"}
-                </span>
-              </Button>
-            </>
-          )}
-        </div>
       </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="space-y-8">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button
+              onClick={handleManualRefresh}
+              variant="outline"
+              size="sm"
+              className="clean-button-outline flex items-center gap-2"
+              disabled={forceRefreshing}
+            >
+              <RefreshCw className={`h-4 w-4 ${forceRefreshing ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
+
+            {/* Management buttons - only visible if canManageMatch is true */}
+            {canManageMatch && (
+              <>
+                <Button
+                  onClick={() => setOpenScoreModal(true)}
+                  variant="default"
+                  size="sm"
+                  className="clean-button flex items-center gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span className="hidden sm:inline">Edit Score</span>
+                </Button>
+                <Button
+                  onClick={() => setOpenModal(true)}
+                  variant="outline"
+                  size="sm"
+                  className="clean-button-outline flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {match.ea_match_id ? "Update Match Data" : "Upload Match Data"}
+                  </span>
+                </Button>
+              </>
+            )}
+          </div>
 
       <div className="space-y-3 sm:space-y-6">
         {/* Match Details */}
         <MatchDetails match={match} onMatchUpdated={fetchMatchData} isAdmin={canManageMatch} />
 
-        {/* Tabs for mobile-friendly navigation */}
-        <Tabs defaultValue="lineups" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-3 sm:mb-4">
-            <TabsTrigger value="lineups" className="text-xs sm:text-sm">
-              Lineups
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs sm:text-sm">
-              Statistics
-            </TabsTrigger>
-            <TabsTrigger value="highlights" className="text-xs sm:text-sm">
-              Highlights
-            </TabsTrigger>
-          </TabsList>
+          {/* Enhanced Tabs Section */}
+          <Tabs defaultValue="lineups" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg gap-3 mb-6">
+              <TabsTrigger 
+                value="lineups" 
+                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <div className="text-lg">👥</div>
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Lineups</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="stats" 
+                className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <div className="text-lg">📊</div>
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Statistics</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="highlights" 
+                className="data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-3 px-6 py-3 rounded-lg min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <div className="text-lg">🎥</div>
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Highlights</span>
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="lineups" className="mt-0">
-            <MatchLineups matchId={matchId} homeTeam={match?.home_team} awayTeam={match?.away_team} />
-          </TabsContent>
+            <TabsContent value="lineups" className="mt-0">
+              <MatchLineups matchId={matchId} homeTeam={match?.home_team} awayTeam={match?.away_team} />
+            </TabsContent>
 
-          <TabsContent value="stats" className="mt-0">
-            {match?.ea_match_id ? (
-              <EaMatchStatistics
-                matchId={matchId}
-                eaMatchId={match.ea_match_id}
-                homeTeamEaClubId={match?.home_team?.ea_club_id}
-                awayTeamEaClubId={match?.away_team?.ea_club_id}
-                homeTeamName={match?.home_team?.name}
-                awayTeamName={match?.away_team?.name}
-                homeScore={match?.home_score}
-                awayScore={match?.away_score}
-                isAdmin={canManageMatch}
-              />
-            ) : (
-              <Card>
-                <CardContent className="p-4 sm:p-6">
-                  <div className="text-center text-muted-foreground">
-                    <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                    <p>No EA statistics available for this match.</p>
-                    {canManageMatch && (
-                      <div className="mt-4">
-                        <Button onClick={() => setOpenModal(true)} variant="outline">
-                          Import EA Match Data
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+            <TabsContent value="stats" className="mt-0">
+              {match?.ea_match_id ? (
+                <EaMatchStatistics
+                  matchId={matchId}
+                  eaMatchId={match.ea_match_id}
+                  homeTeamEaClubId={match?.home_team?.ea_club_id}
+                  awayTeamEaClubId={match?.away_team?.ea_club_id}
+                  homeTeamName={match?.home_team?.name}
+                  awayTeamName={match?.away_team?.name}
+                  homeScore={match?.home_score}
+                  awayScore={match?.away_score}
+                  isAdmin={canManageMatch}
+                />
+              ) : (
+                <Card className="clean-card">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="text-center text-muted-foreground">
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                      <p>No EA statistics available for this match.</p>
+                      {canManageMatch && (
+                        <div className="mt-4">
+                          <Button onClick={() => setOpenModal(true)} variant="outline" className="clean-button-outline">
+                            Import EA Match Data
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
 
-          <TabsContent value="highlights" className="mt-0">
-            <MatchHighlightsWrapper matchId={matchId} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="highlights" className="mt-0">
+              <MatchHighlightsWrapper matchId={matchId} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* EA Match Import Modal */}

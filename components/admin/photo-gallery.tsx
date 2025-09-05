@@ -351,8 +351,6 @@ export function PhotoGallery() {
           ))}
         </div>
       )}
-        </>
-      )}
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
