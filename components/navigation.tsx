@@ -27,7 +27,8 @@ import {
   Lock,
   Eye,
   Cog,
-  Database
+  Database,
+  LayoutDashboard
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
@@ -444,6 +445,12 @@ export default function Navigation() {
                           <Link href={`/players/${playerId || session.user.id}`} className="flex items-center gap-2">
                             <Eye className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
                             View Profile
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-green-100/50 hover:to-green-200/50 dark:hover:from-green-900/20 dark:hover:to-green-800/20 transition-all duration-300">
+                          <Link href="/dashboard" className="flex items-center gap-2">
+                            <LayoutDashboard className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            Dashboard
                           </Link>
                         </DropdownMenuItem>
                         {isTeamManager && (

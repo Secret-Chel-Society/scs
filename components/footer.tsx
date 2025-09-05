@@ -255,33 +255,6 @@ export default function Footer() {
                     <ul className="space-y-2">
                       <li>
                         <Link 
-                          href="/profile" 
-                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                        >
-                          <User className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors duration-200" />
-                          View Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
-                          href="/dashboard" 
-                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                        >
-                          <div className="w-1 h-1 bg-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                          Dashboard
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
-                          href="/settings" 
-                          className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
-                        >
-                          <Settings className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors duration-200" />
-                          Settings
-                        </Link>
-                      </li>
-                      <li>
-                        <Link 
                           href="/management" 
                           className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                         >
