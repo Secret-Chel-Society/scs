@@ -56,8 +56,9 @@ export default function MatchDetailPage() {
     }
   }
 
-  const fetchEaStatistics = async () => {
-    if (!match?.ea_match_id) return
+  const fetchEaStatistics = async (matchData?: any) => {
+    const currentMatch = matchData || match
+    if (!currentMatch?.ea_match_id) return
 
     try {
       // Fetch EA player statistics
@@ -76,8 +77,8 @@ export default function MatchDetailPage() {
       // Calculate team statistics from player stats
       if (playerStatsData && playerStatsData.length > 0) {
         const homeStats = {
-          team_id: match.home_team_id,
-          team_name: match.home_team.name,
+          team_id: currentMatch.home_team_id,
+          team_name: currentMatch.home_team.name,
           goals: 0,
           shots: 0,
           hits: 0,
@@ -102,8 +103,8 @@ export default function MatchDetailPage() {
         }
 
         const awayStats = {
-          team_id: match.away_team_id,
-          team_name: match.away_team.name,
+          team_id: currentMatch.away_team_id,
+          team_name: currentMatch.away_team.name,
           goals: 0,
           shots: 0,
           hits: 0,
@@ -129,7 +130,7 @@ export default function MatchDetailPage() {
 
         // Aggregate player stats by team
         playerStatsData.forEach((stat) => {
-          const teamStat = stat.team_id === match.home_team_id ? homeStats : awayStats
+          const teamStat = stat.team_id === currentMatch.home_team_id ? homeStats : awayStats
 
           teamStat.goals += stat.goals || 0
           teamStat.shots += stat.shots || 0
@@ -215,7 +216,7 @@ export default function MatchDetailPage() {
       setMatch(matchData)
 
       // Fetch EA statistics if available
-      await fetchEaStatistics()
+      await fetchEaStatistics(matchData)
 
       // Fetch additional match data
       await fetchMatchStats()
@@ -437,7 +438,7 @@ export default function MatchDetailPage() {
   }
 
   // Format the date for display in the header
-  const matchDate = match.match_date;
+  const matchDate = match?.match_date;
   const formattedDate = matchDate
     ? `${new Date(matchDate).toLocaleDateString(undefined, {
         weekday: "long",
@@ -451,9 +452,9 @@ export default function MatchDetailPage() {
     : "Date TBD";
 
   // Check both overtime fields
-  const wentToOvertime = match.overtime === true || match.has_overtime === true;
+  const wentToOvertime = match?.overtime === true || match?.has_overtime === true;
 
-  const matchInProgress = match.status?.toLowerCase() === "in progress" || match.status?.toLowerCase() === "inprogress";
+  const matchInProgress = match?.status?.toLowerCase() === "in progress" || match?.status?.toLowerCase() === "inprogress";
   const canManageMatch = matchInProgress;
 
   return (
@@ -470,7 +471,7 @@ export default function MatchDetailPage() {
         <div className="container mx-auto text-center relative z-10">
           <div>
             <h1 className="hockey-title-enhanced mb-6">
-              {match.home_team?.name || "Home Team"} vs {match.away_team?.name || "Away Team"}
+              {match?.home_team?.name || "Home Team"} vs {match?.away_team?.name || "Away Team"}
               {wentToOvertime && <span className="text-ice-blue-400 ml-2">(OT)</span>}
             </h1>
             <p className="hockey-subtitle-enhanced mx-auto mb-8">{formattedDate}</p>
@@ -483,7 +484,7 @@ export default function MatchDetailPage() {
                     <Trophy className="h-7 w-7 text-white" />
                   </div>
                   <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-1">
-                    {match.home_score || 0} - {match.away_score || 0}
+                    {match?.home_score || 0} - {match?.away_score || 0}
                   </div>
                   <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
                     Final Score
@@ -498,7 +499,7 @@ export default function MatchDetailPage() {
                     <Activity className="h-7 w-7 text-white" />
                   </div>
                   <div className="text-lg font-bold text-assist-green-700 dark:text-assist-green-300 mb-1">
-                    {match.status || "Status Unknown"}
+                    {match?.status || "Status Unknown"}
                   </div>
                   <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
                     Match Status
@@ -610,14 +611,14 @@ export default function MatchDetailPage() {
                   <div className="space-y-4">
                     <div className="text-center">
                       <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
-                        {match.home_team?.name || "Home Team"}
+                        {match?.home_team?.name || "Home Team"}
                       </h3>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Goals</span>
                         <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {eaTeamStats?.home?.goals || match.home_score || 0}
+                          {eaTeamStats?.home?.goals || match?.home_score || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
@@ -651,14 +652,14 @@ export default function MatchDetailPage() {
                   <div className="space-y-4">
                     <div className="text-center">
                       <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
-                        {match.away_team?.name || "Away Team"}
+                        {match?.away_team?.name || "Away Team"}
                       </h3>
                     </div>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 hockey-alert">
                         <span className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Goals</span>
                         <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {eaTeamStats?.away?.goals || match.away_score || 0}
+                          {eaTeamStats?.away?.goals || match?.away_score || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center p-3 hockey-alert">
@@ -715,10 +716,10 @@ export default function MatchDetailPage() {
                       <TableRow className="hover:bg-transparent">
                         <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Period</TableHead>
                         <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          {match.home_team?.name || "Home"}
+                          {match?.home_team?.name || "Home"}
                         </TableHead>
                         <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          {match.away_team?.name || "Away"}
+                          {match?.away_team?.name || "Away"}
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -726,48 +727,48 @@ export default function MatchDetailPage() {
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">1st Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {periodScores.find(p => p.period_number === 1)?.home_score || match.period_scores?.[0]?.home || 0}
+                          {periodScores.find(p => p.period_number === 1)?.home_score || match?.period_scores?.[0]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {periodScores.find(p => p.period_number === 1)?.away_score || match.period_scores?.[0]?.away || 0}
+                          {periodScores.find(p => p.period_number === 1)?.away_score || match?.period_scores?.[0]?.away || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">2nd Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {periodScores.find(p => p.period_number === 2)?.home_score || match.period_scores?.[1]?.home || 0}
+                          {periodScores.find(p => p.period_number === 2)?.home_score || match?.period_scores?.[1]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {periodScores.find(p => p.period_number === 2)?.away_score || match.period_scores?.[1]?.away || 0}
+                          {periodScores.find(p => p.period_number === 2)?.away_score || match?.period_scores?.[1]?.away || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">3rd Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {periodScores.find(p => p.period_number === 3)?.home_score || match.period_scores?.[2]?.home || 0}
+                          {periodScores.find(p => p.period_number === 3)?.home_score || match?.period_scores?.[2]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {periodScores.find(p => p.period_number === 3)?.away_score || match.period_scores?.[2]?.away || 0}
+                          {periodScores.find(p => p.period_number === 3)?.away_score || match?.period_scores?.[2]?.away || 0}
                         </TableCell>
                       </TableRow>
                       {wentToOvertime && (
                         <TableRow className="hockey-table-row-hover">
                           <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Overtime</TableCell>
                           <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                            {periodScores.find(p => p.period_number === 4)?.home_score || match.period_scores?.[3]?.home || 0}
+                            {periodScores.find(p => p.period_number === 4)?.home_score || match?.period_scores?.[3]?.home || 0}
                           </TableCell>
                           <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                            {periodScores.find(p => p.period_number === 4)?.away_score || match.period_scores?.[3]?.away || 0}
+                            {periodScores.find(p => p.period_number === 4)?.away_score || match?.period_scores?.[3]?.away || 0}
                           </TableCell>
                         </TableRow>
                       )}
                       <TableRow className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 font-bold">
                         <TableCell className="font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Total</TableCell>
                         <TableCell className="text-center text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
-                          {match.home_score || 0}
+                          {match?.home_score || 0}
                         </TableCell>
                         <TableCell className="text-center text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
-                          {match.away_score || 0}
+                          {match?.away_score || 0}
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -797,7 +798,7 @@ export default function MatchDetailPage() {
                 {(() => {
                   // Calculate three stars from EA player stats
                   const calculateThreeStars = () => {
-                    if (!eaPlayerStats || eaPlayerStats.length === 0) return []
+                    if (!eaPlayerStats || eaPlayerStats.length === 0 || !match) return []
                     
                     // Sort players by performance score (goals * 3 + assists * 2 + shots + hits + blocks)
                     const playersWithScore = eaPlayerStats.map(player => ({
@@ -812,7 +813,7 @@ export default function MatchDetailPage() {
                         id: player.id,
                         star_number: index + 1,
                         player_name: player.player_name,
-                        team_name: player.team_id === match.home_team_id ? match.home_team?.name : match.away_team?.name,
+                        team_name: player.team_id === match?.home_team_id ? match?.home_team?.name : match?.away_team?.name,
                         position: player.position,
                         goals: player.goals || 0,
                         assists: player.assists || 0,
@@ -1039,8 +1040,8 @@ export default function MatchDetailPage() {
           <TabsContent value="lineups" className="space-y-8">
             <MatchLineups 
               matchId={matchId} 
-              homeTeam={match.home_team} 
-              awayTeam={match.away_team} 
+              homeTeam={match?.home_team} 
+              awayTeam={match?.away_team} 
             />
           </TabsContent>
 
@@ -1056,8 +1057,8 @@ export default function MatchDetailPage() {
         open={openModal}
         onOpenChange={setOpenModal}
         match={match}
-        homeTeamEaClubId={match.home_team?.ea_club_id}
-        awayTeamEaClubId={match.away_team?.ea_club_id}
+        homeTeamEaClubId={match?.home_team?.ea_club_id}
+        awayTeamEaClubId={match?.away_team?.ea_club_id}
         onImportSuccess={handleImportSuccess}
       />
 
