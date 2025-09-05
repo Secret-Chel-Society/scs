@@ -847,3 +847,233 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   @apply text-white font-semibold px-3 py-1 rounded-full;
   @apply text-sm;
 }
+
+/* Enhanced Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 3s ease infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Enhanced Hover Effects */
+.hockey-hover-lift {
+  @apply transition-all duration-300 ease-out;
+  @apply hover:scale-105 hover:-translate-y-1;
+  @apply hover:shadow-xl hover:shadow-ice-blue-500/25;
+}
+
+.hockey-hover-glow {
+  @apply transition-all duration-300 ease-out;
+  @apply hover:shadow-lg hover:shadow-ice-blue-500/30;
+  @apply hover:ring-2 hover:ring-ice-blue-500/20;
+}
+
+.hockey-hover-underline {
+  @apply relative;
+  @apply after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0;
+  @apply after:bg-gradient-to-r after:from-ice-blue-500 after:to-rink-blue-600;
+  @apply after:transition-all after:duration-300 after:ease-out;
+  @apply hover:after:w-full;
+}
+
+/* Enhanced Gradient Text Effects */
+.hockey-gradient-text-animated {
+  @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
+  @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+  @apply bg-clip-text text-transparent;
+  @apply animate-gradient-x;
+  @apply bg-[length:200%_100%];
+}
+
+/* Enhanced Card Hover Effects */
+.hockey-card-hover-enhanced {
+  @apply hockey-enhanced-card;
+  @apply hover:shadow-2xl hover:shadow-ice-blue-500/30;
+  @apply hover:scale-[1.02] hover:-translate-y-2;
+  @apply hover:border-ice-blue-400 dark:hover:border-rink-blue-500;
+  @apply transition-all duration-500 ease-out;
+}
+
+/* Enhanced Button Hover Effects */
+.hockey-button-hover-enhanced {
+  @apply hockey-button-enhanced;
+  @apply hover:scale-110 hover:shadow-2xl hover:shadow-ice-blue-500/40;
+  @apply hover:brightness-110;
+  @apply transition-all duration-300 ease-out;
+}
+
+/* Enhanced Stat Item Hover Effects */
+.hockey-stat-hover-enhanced {
+  @apply hockey-stat-item;
+  @apply hover:scale-110 hover:shadow-xl hover:shadow-ice-blue-500/30;
+  @apply hover:bg-white/90 dark:hover:bg-hockey-silver-800/90;
+  @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-600;
+  @apply transition-all duration-300 ease-out;
+  @apply cursor-pointer;
+}
+
+/* Enhanced Table Row Hover Effects */
+.hockey-table-row-hover {
+  @apply transition-all duration-200 ease-out;
+  @apply hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50;
+  @apply dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20;
+  @apply hover:shadow-md hover:shadow-ice-blue-500/10;
+  @apply hover:scale-[1.01];
+}
+
+/* Enhanced Loading States */
+.hockey-loading-skeleton {
+  @apply bg-gradient-to-r from-hockey-silver-200 via-hockey-silver-100 to-hockey-silver-200;
+  @apply dark:from-hockey-silver-700 dark:via-hockey-silver-600 dark:to-hockey-silver-700;
+  @apply animate-shimmer;
+  @apply rounded-lg;
+}
+
+/* Enhanced Focus States */
+.hockey-focus-enhanced {
+  @apply focus:outline-none focus:ring-4 focus:ring-ice-blue-500/30;
+  @apply focus:border-ice-blue-500 dark:focus:border-rink-blue-500;
+  @apply focus:scale-105;
+  @apply transition-all duration-200 ease-out;
+}
+
+/* Enhanced Scrollbar for Hockey Theme */
+.hockey-scrollbar-enhanced {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--ice-blue) / 0.8) hsl(var(--hockey-silver) / 0.3);
+}
+
+.hockey-scrollbar-enhanced::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.hockey-scrollbar-enhanced::-webkit-scrollbar-track {
+  background: hsl(var(--hockey-silver) / 0.2);
+  border-radius: 5px;
+}
+
+.hockey-scrollbar-enhanced::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, hsl(var(--ice-blue) / 0.8), hsl(var(--rink-blue) / 0.8));
+  border-radius: 5px;
+  border: 2px solid hsl(var(--hockey-silver) / 0.3);
+}
+
+.hockey-scrollbar-enhanced::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, hsl(var(--ice-blue)), hsl(var(--rink-blue)));
+  box-shadow: 0 0 10px hsl(var(--ice-blue) / 0.5);
+}
+
+.hockey-scrollbar-enhanced::-webkit-scrollbar-corner {
+  background: hsl(var(--hockey-silver) / 0.2);
+}
