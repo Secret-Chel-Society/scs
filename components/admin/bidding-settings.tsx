@@ -28,7 +28,30 @@ export function BiddingSettings() {
         const { data: settings, error } = await supabase.from("system_settings").select("key, value")
 
         if (error) {
-          throw error
+          console.error("Error loading settings:", error)
+          
+          // Check if it's a permission error
+          if (error.message.includes("permission denied") || error.message.includes("system_settings")) {
+            toast({
+              title: "Permission Error",
+              description: "You don't have permission to access system settings. Please run the SQL script to fix permissions.",
+              variant: "destructive",
+            })
+          } else {
+            toast({
+              title: "Error loading settings",
+              description: "Failed to load bidding settings.",
+              variant: "destructive",
+            })
+          }
+          
+          // Set default values when there's an error
+          setIsBiddingEnabled(false)
+          setBidDuration(14400)
+          setBidIncrement(250000)
+          setMinSalary(750000)
+          setMaxSalary(15000000)
+          return
         }
 
         const settingsMap = settings.reduce((acc, setting) => {
@@ -48,6 +71,13 @@ export function BiddingSettings() {
           description: "Failed to load bidding settings.",
           variant: "destructive",
         })
+        
+        // Set default values when there's an error
+        setIsBiddingEnabled(false)
+        setBidDuration(14400)
+        setBidIncrement(250000)
+        setMinSalary(750000)
+        setMaxSalary(15000000)
       } finally {
         setIsLoading(false)
       }
@@ -524,6 +554,20 @@ export function BiddingSettings() {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Authentication Error</AlertTitle>
             <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
+
+        {authError && authError.includes("permission denied") && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Permission Error</AlertTitle>
+            <AlertDescription>
+              You don't have permission to access the system_settings table. Please run the SQL script to fix permissions:
+              <br />
+              <code className="mt-2 block p-2 bg-gray-100 rounded text-sm">
+                Run the SQL in fix_system_settings_permissions.sql
+              </code>
+            </AlertDescription>
           </Alert>
         )}
 
