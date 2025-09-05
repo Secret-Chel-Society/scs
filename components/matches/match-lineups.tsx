@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, ExternalLink, Users, Trophy, Shield, Target, Zap, Activity, TrendingUp, BarChart3, Award, BookOpen, FileText, Globe, Camera, Image, Play, Pause, SkipForward, SkipBack, Clock, Calendar, Star, Medal, Crown } from "lucide-react"
+import { AlertCircle, ExternalLink, Users, Trophy, Shield, Target, Zap, Activity, TrendingUp, BarChart3, Award, BookOpen, FileText, Globe, Camera, Image as ImageIcon, Play, Pause, SkipForward, SkipBack, Clock, Calendar, Star, Medal, Crown } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 

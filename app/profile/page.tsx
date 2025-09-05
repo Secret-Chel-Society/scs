@@ -27,7 +27,7 @@ import {
   FileText, 
   Globe, 
   Camera, 
-  Image, 
+  Image as ImageIcon, 
   Play, 
   Pause, 
   SkipForward, 
