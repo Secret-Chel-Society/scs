@@ -418,8 +418,8 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
       hasDivisionColumn = false
     }
 
-    // Get all teams for the season with conference data
-    const { data: teams, error: teamsError } = await supabase
+    // Get all teams for the season with conference data (fallback to basic query if conference join fails)
+    let { data: teams, error: teamsError } = await supabase
       .from("teams")
       .select(`
         id, 
@@ -430,6 +430,24 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         ${hasDivisionColumn ? ", division" : ""}
       `)
       .eq("is_active", true)
+
+    // If conference join fails, try without conference data
+    if (teamsError && teamsError.message.includes("conferences")) {
+      console.log("Conference table not found, loading teams without conference data")
+      const fallbackResult = await supabase
+        .from("teams")
+        .select(`
+          id, 
+          name, 
+          logo_url,
+          conference_id
+          ${hasDivisionColumn ? ", division" : ""}
+        `)
+        .eq("is_active", true)
+      
+      teams = fallbackResult.data
+      teamsError = fallbackResult.error
+    }
 
     if (teamsError) {
       console.error("Error fetching teams:", teamsError)
