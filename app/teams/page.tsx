@@ -8,7 +8,26 @@ import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Trophy, Award, Users, Search, TrendingUp, DollarSign, Target, Medal, Star, Zap, Crown, Flame, Shield, Rocket } from "lucide-react"
+import { 
+  Trophy, 
+  Award, 
+  Users, 
+  Search, 
+  TrendingUp, 
+  DollarSign, 
+  Target, 
+  Medal, 
+  Star, 
+  Zap, 
+  Crown, 
+  Flame, 
+  Shield, 
+  Rocket,
+  BarChart3,
+  Activity,
+  Calendar,
+  RefreshCw
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { TeamLogo } from "@/components/team-logo"
 import { getAllTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
@@ -76,92 +95,71 @@ export default function TeamsPage() {
   const totalSalary = teams.reduce((sum, team) => sum + (team.total_salary || 0), 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            <h1 className="hockey-title mb-6">
-              Elite Team Directory
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+      {/* Header Section */}
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-4 mb-6">
+              <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                <Trophy className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+                Elite Team Directory
+              </h1>
+            </div>
+            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-8" />
+            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
               Discover the powerhouse teams competing in the most competitive hockey league. Each team brings unique talent, strategy, and determination to the ice.
             </p>
-            
-            {/* Enhanced League Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="group"
-              >
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
-                    {totalTeams}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Active Teams
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="group"
-              >
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
-                    <Target className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
-                    {totalPlayers}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Elite Players
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="group"
-              >
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
-                    <DollarSign className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
-                    ${(totalSalary / 1000000000).toFixed(1)}B
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Total Value
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* League Statistics */}
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {totalTeams}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Total Teams
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-4">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {totalPlayers}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Total Players
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                ${totalSalary.toLocaleString()}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Total Salary
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 

@@ -38,7 +38,9 @@ import {
   Users,
   Edit,
   Eye,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  DollarSign,
+  LayoutDashboard
 } from "lucide-react"
 import Image from "next/image"
 
@@ -122,138 +124,153 @@ export default function ProfilePage() {
   const salary = userData?.salary || 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div>
-            <div className="w-24 h-24 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <User className="h-12 w-12 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+      {/* Header Section */}
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-4 mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-ice-blue-500 via-rink-blue-600 to-ice-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
+                <User className="h-10 w-10 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+                  {displayName}
+                </h1>
+                <p className="text-xl text-slate-600 dark:text-slate-400 mt-2">
+                  Player Profile & Statistics
+                </p>
+              </div>
             </div>
-            <h1 className="hockey-title mb-6">
-              {displayName}
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-12">
-              Player Profile & Statistics
-            </p>
+            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto" />
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-20">
+      <div className="container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Profile Overview */}
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="group">
-              <Card className="hockey-card hover:scale-105 transition-all duration-300 cursor-pointer">
-                <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg text-hockey-silver-800 dark:text-hockey-silver-200">
-                        Position
-                      </CardTitle>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
-                    {position}
-                  </div>
-                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                    Primary Position
-                  </p>
-                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Profile Overview Cards */}
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
+                  <User className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  {position}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Primary Position
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="group">
-              <Card className="hockey-card hover:scale-105 transition-all duration-300 cursor-pointer">
-                <CardHeader className="bg-gradient-to-r from-rink-blue-50 to-ice-blue-50 dark:from-rink-blue-900/30 dark:to-ice-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-lg flex items-center justify-center">
-                      <Trophy className="h-5 w-5 text-white" />
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-4">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  {teamLogo && (
+                    <div className="h-6 w-6 relative">
+                      <Image src={teamLogo || "/placeholder.svg"} alt={teamName} fill className="object-contain" />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg text-hockey-silver-800 dark:text-hockey-silver-200">
-                        Team
-                      </CardTitle>
-                    </div>
+                  )}
+                  <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                    {teamName}
                   </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    {teamLogo && (
-                      <div className="h-8 w-8 relative">
-                        <Image src={teamLogo || "/placeholder.svg"} alt={teamName} fill className="object-contain" />
-                      </div>
-                    )}
-                    <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
-                      {teamName}
-                    </div>
-                  </div>
-                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                    {teamName === "Free Agent" ? "No Team" : "Current Team"}
-                  </p>
-                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  {teamName === "Free Agent" ? "No Team" : "Current Team"}
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="group">
-              <Card className="hockey-card hover:scale-105 transition-all duration-300 cursor-pointer">
-                <CardHeader className="bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/30 dark:to-assist-green-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-lg flex items-center justify-center">
-                      <BarChart3 className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg text-hockey-silver-800 dark:text-hockey-silver-200">
-                        Salary
-                      </CardTitle>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
-                    ${salary.toLocaleString()}
-                  </div>
-                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                    {salary > 0 ? "Current Contract" : "No Contract"}
-                  </p>
-                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <CardContent className="p-6 text-center">
+                <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
+                  <DollarSign className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  ${salary.toLocaleString()}
+                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  {salary > 0 ? "Current Contract" : "No Contract"}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button 
-              onClick={() => router.push("/settings")} 
-              className="hockey-button hover:scale-105 transition-all duration-200"
-            >
-              <SettingsIcon className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-            <Button 
-              onClick={() => router.push("/dashboard")} 
-              variant="outline"
-              className="border-ice-blue-300 dark:border-ice-blue-600 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:scale-105 transition-all duration-200"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              View Dashboard
-            </Button>
+          {/* Additional Profile Information */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-slate-200 dark:border-slate-700">
+                <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  Player Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 dark:text-slate-400">Gamer Tag</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{displayName}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 dark:text-slate-400">Position</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{position}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 dark:text-slate-400">Team Status</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{teamName}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600 dark:text-slate-400">Contract Value</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">${salary.toLocaleString()}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-assist-green-50 to-assist-green-100 dark:from-assist-green-900/30 dark:to-assist-green-800/30 border-b border-slate-200 dark:border-slate-700">
+                <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <Button 
+                    onClick={() => router.push("/settings")} 
+                    className="w-full bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white hover:scale-105 transition-all duration-200"
+                  >
+                    <SettingsIcon className="h-4 w-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                  <Button 
+                    onClick={() => router.push("/dashboard")} 
+                    variant="outline"
+                    className="w-full border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200"
+                  >
+                    <LayoutDashboard className="h-4 w-4 mr-2" />
+                    View Dashboard
+                  </Button>
+                  <Button 
+                    onClick={() => router.push("/players/" + user?.id)} 
+                    variant="outline"
+                    className="w-full border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Public Profile
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

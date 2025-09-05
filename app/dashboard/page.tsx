@@ -6,7 +6,25 @@ import { useSupabase } from "@/lib/supabase/client"
 import { UserTokenDashboard } from "@/components/tokens/user-token-dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { User, Trophy, Calendar, BarChart3, RefreshCw } from "lucide-react"
+import { 
+  User, 
+  Trophy, 
+  Calendar, 
+  BarChart3, 
+  RefreshCw, 
+  Star, 
+  Shield, 
+  Target, 
+  Zap, 
+  Activity,
+  TrendingUp,
+  Award,
+  Crown,
+  Users,
+  Clock,
+  DollarSign,
+  LayoutDashboard
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { authGet } from "@/lib/auth-fetch"
@@ -144,103 +162,132 @@ export default function DashboardPage() {
   const salary = userData?.player?.salary || 0
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        {/* Welcome Header */}
-        <div>
-          <h1 className="text-3xl font-bold">Welcome back, {displayName}!</h1>
-          <p className="text-muted-foreground">Manage your MGHL profile and tokens</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+      <div className="container mx-auto px-6 py-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-4 mb-6">
+            <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+              <LayoutDashboard className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+              Welcome back, {displayName}!
+            </h1>
+          </div>
+          <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-8" />
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+            Manage your MGHL profile, tokens, and track your performance
+          </p>
         </div>
 
         {/* Debug Info (Development Only) */}
         {process.env.NODE_ENV === "development" && (
-          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded text-sm space-y-1">
-            <p>
-              <strong>Debug Info:</strong>
-            </p>
-            <p>Session: {session ? "✓ Active" : "✗ None"}</p>
-            <p>User Data: {userData ? "✓ Loaded" : "✗ Not loaded"}</p>
-            <p>Loading: {dataLoading ? "✓ Loading" : "✗ Complete"}</p>
-            <p>User ID: {session?.user?.id}</p>
-            <p>Email: {session?.user?.email}</p>
-            <p>Access Token: {session?.access_token ? "✓ Present" : "✗ Missing"}</p>
-            <p>Has Registration: {userData?.registration ? "✓" : "✗"}</p>
-            <p>Has Player: {userData?.player ? "✓" : "✗"}</p>
-            <p>Has Team: {userData?.team ? "✓" : "✗"}</p>
-            <p>Team ID: {userData?.player?.team_id || "None"}</p>
-            <p>Salary: ${userData?.player?.salary || 0}</p>
-            <Button onClick={handleRefreshSession} size="sm" variant="outline" className="mt-2">
-              Refresh Session
-            </Button>
-          </div>
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg mb-8">
+            <CardHeader>
+              <CardTitle className="text-slate-800 dark:text-slate-200">Debug Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>Session: {session ? "✓ Active" : "✗ None"}</div>
+                <div>User Data: {userData ? "✓ Loaded" : "✗ Not loaded"}</div>
+                <div>Loading: {dataLoading ? "✓ Loading" : "✗ Complete"}</div>
+                <div>User ID: {session?.user?.id}</div>
+                <div>Email: {session?.user?.email}</div>
+                <div>Access Token: {session?.access_token ? "✓ Present" : "✗ Missing"}</div>
+                <div>Has Registration: {userData?.registration ? "✓" : "✗"}</div>
+                <div>Has Player: {userData?.player ? "✓" : "✗"}</div>
+                <div>Has Team: {userData?.team ? "✓" : "✗"}</div>
+                <div>Team ID: {userData?.player?.team_id || "None"}</div>
+                <div>Salary: ${userData?.player?.salary || 0}</div>
+              </div>
+              <Button onClick={handleRefreshSession} size="sm" variant="outline" className="mt-4">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Session
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Quick Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Position</CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dataLoading ? <Skeleton className="h-6 w-16" /> : primaryPosition}
+        {/* Quick Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
+                <User className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {dataLoading ? <Skeleton className="h-6 w-16 mx-auto" /> : primaryPosition}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
                 {secondaryPosition ? `Secondary: ${secondaryPosition}` : "Primary Position"}
-              </p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Team</CardTitle>
-              <Trophy className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-4">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex items-center justify-center gap-2 mb-1">
                 {teamLogo && (
                   <div className="h-6 w-6 relative">
                     <Image src={teamLogo || "/placeholder.svg"} alt={teamName} fill className="object-contain" />
                   </div>
                 )}
-                <div className="text-2xl font-bold">{dataLoading ? <Skeleton className="h-6 w-16" /> : teamName}</div>
+                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                  {dataLoading ? <Skeleton className="h-6 w-16" /> : teamName}
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">{hasTeam ? "Current Team" : "Free Agent"}</p>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                {hasTeam ? "Current Team" : "Free Agent"}
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Registration</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dataLoading ? <Skeleton className="h-6 w-16" /> : registrationStatus}
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-4">
+                <Calendar className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {dataLoading ? <Skeleton className="h-6 w-16 mx-auto" /> : registrationStatus}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
                 {seasonNumber ? `Season ${seasonNumber}` : "Current Status"}
-              </p>
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Salary</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dataLoading ? <Skeleton className="h-6 w-16" /> : `$${salary.toLocaleString()}`}
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
+                <DollarSign className="h-6 w-6 text-white" />
               </div>
-              <p className="text-xs text-muted-foreground">{hasTeam ? "Current Contract" : "No Contract"}</p>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {dataLoading ? <Skeleton className="h-6 w-16 mx-auto" /> : `$${salary.toLocaleString()}`}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                {hasTeam ? "Current Contract" : "No Contract"}
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Token Dashboard */}
-        <UserTokenDashboard />
+        <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-slate-200 dark:border-slate-700">
+            <CardTitle className="text-2xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                <Star className="h-5 w-5 text-white" />
+              </div>
+              Token Dashboard
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <UserTokenDashboard />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

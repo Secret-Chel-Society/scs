@@ -7,7 +7,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
+import { 
+  AlertCircle, 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronDown, 
+  ChevronUp, 
+  ArrowUpDown,
+  BarChart3,
+  Trophy,
+  Users,
+  Target,
+  Star,
+  Zap,
+  Activity,
+  TrendingUp,
+  Award,
+  Crown,
+  Shield,
+  DollarSign,
+  Calendar,
+  RefreshCw
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PlayerClickableLinkFlexible } from "@/components/matches/player-clickable-link-flexible"
 import { useMobile } from "@/hooks/use-mobile"
@@ -1751,100 +1772,109 @@ export default function StatisticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
-      {/* Hero Header Section */}
-      <div className="clean-header relative py-16 px-4">
-        <div className="container mx-auto text-center">
-          <div>
-            <h1 className="clean-title mb-6">
-              Player Statistics
-            </h1>
-            <p className="clean-subtitle mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
+      {/* Header Section */}
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-4 mb-6">
+              <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+                <BarChart3 className="h-10 w-10 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+                Player Statistics
+              </h1>
+            </div>
+            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-8" />
+            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
               Comprehensive player performance data across all seasons and positions
             </p>
-            
-            {/* Stats Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
-              <div className="clean-stat-item">
-                <div className="clean-icon-container mb-3">
-                  <div className="h-6 w-6 text-white">📊</div>
-                </div>
-                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  {totalPlayers.length + goalieStats.length}
-                </div>
-                <div className="text-xs text-blue-600 dark:text-blue-400 font-medium uppercase tracking-wide">
-                  Total Players
-                </div>
-              </div>
-              
-              <div className="clean-stat-item">
-                <div className="clean-icon-container-emerald mb-3">
-                  <div className="h-6 w-6 text-white">🎯</div>
-                </div>
-                <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                  {forwards.length}
-                </div>
-                <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wide">
-                  Forwards
-                </div>
-              </div>
-              
-              <div className="clean-stat-item">
-                <div className="clean-icon-container-indigo mb-3">
-                  <div className="h-6 w-6 text-white">🛡️</div>
-                </div>
-                <div className="text-2xl font-bold text-indigo-700 dark:text-indigo-300">
-                  {defensemen.length}
-                </div>
-                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wide">
-                  Defensemen
-                </div>
-              </div>
-              
-              <div className="clean-stat-item">
-                <div className="clean-icon-container-red mb-3">
-                  <div className="h-6 w-6 text-white">🥅</div>
-                </div>
-                <div className="text-2xl font-bold text-red-700 dark:text-red-300">
-                  {goalieStats.length}
-                </div>
-                <div className="text-xs text-red-600 dark:text-red-400 font-medium uppercase tracking-wide">
-                  Goalies
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
+      {/* Stats Overview Cards */}
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid gap-6 md:grid-cols-4 mb-8">
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {totalPlayers.length + goalieStats.length}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Total Players
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-4">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {forwards.length}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Forwards
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-4">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {defensemen.length}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Defensemen
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <CardContent className="p-6 text-center">
+              <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {goalieStats.length}
+              </div>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Goalies
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-6 py-8">
         <div className="space-y-8">
           {/* Filters */}
-          <Card className="clean-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3">
-                <div className="clean-icon-container">
-                  <div className="h-6 w-6 text-white">⚙️</div>
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-slate-200 dark:border-slate-700">
+              <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <Activity className="h-5 w-5 text-white" />
                 </div>
-                <div>
-                  <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                    Filters & Settings
-                  </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
-                    Customize your statistics view
-                  </div>
-                </div>
+                Filters & Settings
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div>
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     Season
                   </label>
                   <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-300 dark:border-slate-600">
                       <SelectValue placeholder="Select season" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1862,7 +1892,7 @@ export default function StatisticsPage() {
                     Week
                   </label>
                   <Select value={selectedWeek} onValueChange={handleWeekChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-300 dark:border-slate-600">
                       <SelectValue placeholder="Select week" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1880,7 +1910,7 @@ export default function StatisticsPage() {
                     Team
                   </label>
                   <Select value={selectedTeam} onValueChange={handleTeamChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-300 dark:border-slate-600">
                       <SelectValue placeholder="Select team" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1902,111 +1932,99 @@ export default function StatisticsPage() {
             <TabsList className="grid w-full grid-cols-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
               <TabsTrigger 
                 value="total" 
-                className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 hover:scale-105"
               >
-                📊 Total
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Total
               </TabsTrigger>
               <TabsTrigger 
                 value="offense" 
-                className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 hover:scale-105"
               >
-                🎯 Offense
+                <Target className="h-4 w-4 mr-2" />
+                Offense
               </TabsTrigger>
               <TabsTrigger 
                 value="defense" 
-                className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 hover:scale-105"
               >
-                🛡️ Defense
+                <Shield className="h-4 w-4 mr-2" />
+                Defense
               </TabsTrigger>
               <TabsTrigger 
                 value="goalies" 
-                className="data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 hover:scale-105"
               >
-                🥅 Goalies
+                <Trophy className="h-4 w-4 mr-2" />
+                Goalies
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="total" className="space-y-4 mt-6">
-              <Card className="clean-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="clean-icon-container">
-                      <div className="h-6 w-6 text-white">📊</div>
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-slate-200 dark:border-slate-700">
+                  <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                      <BarChart3 className="h-5 w-5 text-white" />
                     </div>
-                    <div>
-                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                        All Players
-                      </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">
-                        Combined statistics for all skaters (excludes goalies)
-                      </div>
-                    </div>
+                    All Players
                   </CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    Combined statistics for all skaters (excludes goalies)
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
+                <CardContent className="p-6">{renderPlayerStatsTable(totalPlayers, false, totalPage, setTotalPage)}</CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="offense" className="space-y-4 mt-6">
-              <Card className="clean-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="clean-icon-container-emerald">
-                      <div className="h-6 w-6 text-white">🎯</div>
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-assist-green-50 to-assist-green-100 dark:from-assist-green-900/30 dark:to-assist-green-800/30 border-b border-slate-200 dark:border-slate-700">
+                  <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                      <Target className="h-5 w-5 text-white" />
                     </div>
-                    <div>
-                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                        Forwards
-                      </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">
-                        Statistics for centers, left wings, and right wings
-                      </div>
-                    </div>
+                    Forwards
                   </CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    Statistics for centers, left wings, and right wings
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
+                <CardContent className="p-6">{renderPlayerStatsTable(forwards, false, offensePage, setOffensePage)}</CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="defense" className="space-y-4 mt-6">
-              <Card className="clean-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="clean-icon-container-indigo">
-                      <div className="h-6 w-6 text-white">🛡️</div>
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-rink-blue-50 to-rink-blue-100 dark:from-rink-blue-900/30 dark:to-rink-blue-800/30 border-b border-slate-200 dark:border-slate-700">
+                  <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                      <Shield className="h-5 w-5 text-white" />
                     </div>
-                    <div>
-                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                        Defensemen
-                      </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">
-                        Statistics for left and right defensemen
-                      </div>
-                    </div>
+                    Defensemen
                   </CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    Statistics for left and right defensemen
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
+                <CardContent className="p-6">{renderPlayerStatsTable(defensemen, true, defensePage, setDefensePage)}</CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="goalies" className="space-y-4 mt-6">
-              <Card className="clean-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3">
-                    <div className="clean-icon-container-red">
-                      <div className="h-6 w-6 text-white">🥅</div>
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/30 dark:to-goal-red-800/30 border-b border-slate-200 dark:border-slate-700">
+                  <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                      <Trophy className="h-5 w-5 text-white" />
                     </div>
-                    <div>
-                      <div className="text-xl font-bold text-slate-800 dark:text-slate-200">
-                        Goalies
-                      </div>
-                      <div className="text-sm text-slate-600 dark:text-slate-400">
-                        Statistics for goaltenders
-                      </div>
-                    </div>
+                    Goalies
                   </CardTitle>
+                  <CardDescription className="text-slate-600 dark:text-slate-400">
+                    Statistics for goaltenders
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
+                <CardContent className="p-6">{renderGoalieStatsTable(goalieStats, goaliePage, setGoaliePage)}</CardContent>
               </Card>
             </TabsContent>
           </Tabs>
