@@ -26,6 +26,7 @@ import { TeamsActiveMigration } from "@/components/admin/teams-active-migration"
 import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
+import { ConferenceManagement } from "@/components/admin/conference-management"
 import { getCurrentSeasonId } from "@/lib/team-utils"
 
 interface Season {
@@ -114,6 +115,7 @@ export default function AdminTeamsPage() {
   const [lastRefresh, setLastRefresh] = useState(Date.now())
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isAddingColumns, setIsAddingColumns] = useState(false)
+  const [showConferenceManagement, setShowConferenceManagement] = useState(false)
 
   useEffect(() => {
     async function checkAuthorizationAndLoadData() {
@@ -811,6 +813,12 @@ export default function AdminTeamsPage() {
     setLastRefresh(Date.now())
   }
 
+  const handleConferencesUpdated = async () => {
+    // Reload conferences and teams
+    await loadConferences()
+    setLastRefresh(Date.now())
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -1058,6 +1066,43 @@ export default function AdminTeamsPage() {
             </div>
           </div>
         </CardContent>
+      </Card>
+
+      {/* Conference Management Section */}
+      <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20 mb-8">
+        <CardHeader className="relative">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-900/30 dark:to-ice-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-hockey-silver-500 to-ice-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-hockey-silver-500/25">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  Conference Management
+                </CardTitle>
+                <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Manage conference names and team assignments for standings display
+                </CardDescription>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowConferenceManagement(!showConferenceManagement)}
+              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-ice-blue-600 hover:from-hockey-silver-600 hover:to-ice-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              {showConferenceManagement ? "Hide" : "Manage"} Conferences
+            </Button>
+          </div>
+        </CardHeader>
+        {showConferenceManagement && (
+          <CardContent className="relative z-10">
+            <ConferenceManagement 
+              conferences={conferences} 
+              onConferencesUpdated={handleConferencesUpdated} 
+            />
+          </CardContent>
+        )}
       </Card>
 
       {/* Enhanced Teams Table Card */}
