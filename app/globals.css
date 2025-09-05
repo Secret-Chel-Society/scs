@@ -724,3 +724,126 @@ div[style*="position: fixed"][style*="bottom: 16px"][style*="right: 16px"],
 div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   display: none !important;
 }
+
+/* Enhanced Hockey Button Styles */
+.hockey-button {
+  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+  @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
+  @apply text-white font-semibold py-2 px-4 rounded-lg;
+  @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/25;
+  @apply transition-all duration-200 ease-out;
+}
+
+.hockey-button-secondary {
+  @apply bg-gradient-to-r from-rink-blue-500 to-ice-blue-600;
+  @apply hover:from-rink-blue-600 hover:to-ice-blue-700;
+  @apply text-white font-semibold py-2 px-4 rounded-lg;
+  @apply hover:scale-105 hover:shadow-lg hover:shadow-rink-blue-500/25;
+  @apply transition-all duration-200 ease-out;
+}
+
+.hockey-button-success {
+  @apply bg-gradient-to-r from-assist-green-500 to-goal-red-600;
+  @apply hover:from-assist-green-600 hover:to-goal-red-700;
+  @apply text-white font-semibold py-2 px-4 rounded-lg;
+  @apply hover:scale-105 hover:shadow-lg hover:shadow-assist-green-500/25;
+  @apply transition-all duration-200 ease-out;
+}
+
+.hockey-button-danger {
+  @apply bg-gradient-to-r from-goal-red-500 to-assist-green-600;
+  @apply hover:from-goal-red-600 hover:to-assist-green-700;
+  @apply text-white font-semibold py-2 px-4 rounded-lg;
+  @apply hover:scale-105 hover:shadow-lg hover:shadow-goal-red-500/25;
+  @apply transition-all duration-200 ease-out;
+}
+
+/* Enhanced Hockey Card Styles */
+.hockey-card {
+  @apply bg-white dark:bg-hockey-silver-800;
+  @apply border border-ice-blue-200 dark:border-ice-blue-700;
+  @apply rounded-xl shadow-lg;
+  @apply transition-all duration-300 ease-out;
+}
+
+.hockey-card-hover {
+  @apply hover:shadow-2xl hover:shadow-ice-blue-500/10;
+  @apply hover:-translate-y-1;
+}
+
+.hockey-stat-item {
+  @apply bg-white dark:bg-hockey-silver-800;
+  @apply border border-ice-blue-200 dark:border-ice-blue-700;
+  @apply rounded-xl p-6 shadow-lg;
+  @apply transition-all duration-300 ease-out;
+}
+
+/* Enhanced Hockey Title Styles */
+.hockey-title {
+  @apply text-4xl md:text-5xl font-bold;
+  @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
+  @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+  @apply bg-clip-text text-transparent;
+  @apply mb-6;
+}
+
+.hockey-subtitle {
+  @apply text-lg md:text-xl text-hockey-silver-600 dark:text-hockey-silver-400;
+  @apply max-w-2xl;
+}
+
+/* Enhanced Hockey Search Styles */
+.hockey-search {
+  @apply bg-white dark:bg-hockey-silver-800;
+  @apply border-2 border-ice-blue-200 dark:border-ice-blue-700;
+  @apply rounded-xl shadow-lg;
+  @apply focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20;
+  @apply transition-all duration-300 ease-out;
+}
+
+/* Enhanced Hockey Alert Styles */
+.hockey-alert {
+  @apply bg-gradient-to-r from-ice-blue-50 to-rink-blue-50;
+  @apply dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
+  @apply border border-ice-blue-200 dark:border-ice-blue-700;
+  @apply rounded-xl shadow-lg;
+}
+
+.hockey-alert-success {
+  @apply bg-gradient-to-r from-assist-green-50 to-goal-red-50;
+  @apply dark:from-assist-green-900/30 dark:to-goal-red-900/30;
+  @apply border border-assist-green-200 dark:border-assist-green-700;
+  @apply rounded-xl shadow-lg;
+}
+
+.hockey-alert-warning {
+  @apply bg-gradient-to-r from-goal-red-50 to-assist-green-50;
+  @apply dark:from-goal-red-900/30 dark:to-assist-green-900/30;
+  @apply border border-goal-red-200 dark:border-goal-red-700;
+  @apply rounded-xl shadow-lg;
+}
+
+/* Enhanced Hockey Badge Styles */
+.hockey-badge {
+  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
+  @apply text-white font-semibold px-3 py-1 rounded-full;
+  @apply text-sm;
+}
+
+.hockey-badge-secondary {
+  @apply bg-gradient-to-r from-rink-blue-500 to-ice-blue-600;
+  @apply text-white font-semibold px-3 py-1 rounded-full;
+  @apply text-sm;
+}
+
+.hockey-badge-success {
+  @apply bg-gradient-to-r from-assist-green-500 to-goal-red-600;
+  @apply text-white font-semibold px-3 py-1 rounded-full;
+  @apply text-sm;
+}
+
+.hockey-badge-danger {
+  @apply bg-gradient-to-r from-goal-red-500 to-assist-green-600;
+  @apply text-white font-semibold px-3 py-1 rounded-full;
+  @apply text-sm;
+}

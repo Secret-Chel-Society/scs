@@ -23,6 +23,29 @@ import {
   RefreshCw,
   MessageSquare,
   Unlink,
+  Shield,
+  Star,
+  Medal,
+  Crown,
+  Target,
+  Zap,
+  Activity,
+  TrendingUp,
+  Award,
+  BookOpen,
+  FileText,
+  Globe,
+  Image,
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
+  Clock,
+  Database,
+  Users,
+  Trophy,
+  BarChart3,
+  Calendar,
 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useSupabase } from "@/lib/supabase/client"
@@ -504,15 +527,49 @@ export default function SettingsPage() {
 
   // Main settings interface
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Account Settings</h1>
-          <Button variant="outline" size="sm" onClick={refreshSession} className="flex items-center gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Refresh Session
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Enhanced Hero Header Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
+          <div>
+            <h1 className="hockey-title mb-6">
+              Account Settings
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-12">
+              Manage your profile, preferences, and account settings.
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+                <Settings className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  Settings Center
+                </h2>
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Customize your account and preferences
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={refreshSession} className="border-ice-blue-300 dark:border-ice-blue-600 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:scale-105 transition-all duration-200 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Refresh Session
+            </Button>
+          </div>
 
         <SessionRefresh />
 
@@ -533,43 +590,68 @@ export default function SettingsPage() {
         )}
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="mb-6 grid w-full grid-cols-4">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
+          <TabsList className="mb-8 grid w-full grid-cols-4 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-ice-blue-700 p-2">
+            <TabsTrigger 
+              value="profile" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-ice-blue-200/50 dark:hover:bg-ice-blue-800/30 transition-all duration-300 flex items-center gap-2"
+            >
               <User className="h-4 w-4" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="discord" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="discord"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-ice-blue-600 data-[state=active]:text-white hover:bg-rink-blue-200/50 dark:hover:bg-rink-blue-800/30 transition-all duration-300 flex items-center gap-2"
+            >
               <MessageSquare className="h-4 w-4" />
               Discord
             </TabsTrigger>
-            <TabsTrigger value="account" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="account"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white hover:bg-assist-green-200/50 dark:hover:bg-assist-green-800/30 transition-all duration-300 flex items-center gap-2"
+            >
               <Settings className="h-4 w-4" />
               Account
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="notifications"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white hover:bg-goal-red-200/50 dark:hover:bg-goal-red-800/30 transition-all duration-300 flex items-center gap-2"
+            >
               <Bell className="h-4 w-4" />
               Notifications
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="profile">
-            <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Picture</CardTitle>
-                  <CardDescription>Upload a profile picture to personalize your account</CardDescription>
+          <TabsContent value="profile" className="space-y-8">
+            <div className="grid gap-8">
+              <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+                      <Camera className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Profile Picture
+                      </CardTitle>
+                      <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Upload a profile picture to personalize your account
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center">
+                <CardContent className="p-8 flex flex-col items-center">
                   <div className="relative cursor-pointer group" onClick={handleAvatarClick}>
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage src={avatarUrl || "/placeholder.svg?height=96&width=96"} alt={gamerTag || "User"} />
-                      <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
+                    <Avatar className="h-32 w-32 border-4 border-ice-blue-200 dark:border-ice-blue-700 shadow-lg">
+                      <AvatarImage src={avatarUrl || "/placeholder.svg?height=128&width=128"} alt={gamerTag || "User"} />
+                      <AvatarFallback className="text-3xl bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white">
+                        {getInitials()}
+                      </AvatarFallback>
                     </Avatar>
-                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-500/80 to-rink-blue-600/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105">
                       {isUploading ? (
-                        <Loader2 className="h-8 w-8 text-white animate-spin" />
+                        <Loader2 className="h-10 w-10 text-white animate-spin" />
                       ) : (
-                        <Camera className="h-8 w-8 text-white" />
+                        <Camera className="h-10 w-10 text-white" />
                       )}
                     </div>
                   </div>
@@ -581,61 +663,91 @@ export default function SettingsPage() {
                     onChange={handleAvatarChange}
                     disabled={isUploading}
                   />
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mt-4 text-center">
                     Click on the avatar to upload a new profile picture
                   </p>
                 </CardContent>
               </Card>
 
               <form onSubmit={handleSubmit}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>Update your account profile information</CardDescription>
+                <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-rink-blue-50 to-ice-blue-50 dark:from-rink-blue-900/30 dark:to-ice-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-lg flex items-center justify-center">
+                        <User className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">
+                          Profile Information
+                        </CardTitle>
+                        <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                          Update your account profile information
+                        </CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" value={session?.user?.email || ""} disabled />
-                      <p className="text-sm text-muted-foreground">Your email cannot be changed</p>
+                  <CardContent className="p-8 space-y-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="email" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">
+                        Email
+                      </Label>
+                      <Input 
+                        id="email" 
+                        value={session?.user?.email || ""} 
+                        disabled 
+                        className="hockey-search"
+                      />
+                      <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">Your email cannot be changed</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="gamerTag">Username / Gamer Tag</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="gamerTag" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">
+                        Username / Gamer Tag
+                      </Label>
                       <Input
                         id="gamerTag"
                         value={gamerTag}
                         onChange={(e) => setGamerTag(e.target.value)}
                         placeholder="Your username or gamer tag"
                         required
+                        className="hockey-search"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="discordName">Discord Name</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="discordName" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">
+                        Discord Name
+                      </Label>
                       <Input
                         id="discordName"
                         value={discordName}
                         onChange={(e) => setDiscordName(e.target.value)}
                         placeholder="Your Discord username"
+                        className="hockey-search"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="console">Console</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="console" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">
+                        Console
+                      </Label>
                       <Select value={console} onValueChange={setConsole}>
-                        <SelectTrigger>
+                        <SelectTrigger className="hockey-search">
                           <SelectValue placeholder="Select console" />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Xbox">Xbox</SelectItem>
-                          <SelectItem value="PS5">PS5</SelectItem>
+                        <SelectContent className="hockey-card">
+                          <SelectItem value="Xbox" className="hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/30">Xbox</SelectItem>
+                          <SelectItem value="PS5" className="hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/30">PS5</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </CardContent>
-                  <CardFooter>
-                    <Button type="submit" disabled={isSaving}>
+                  <CardFooter className="p-8 pt-0">
+                    <Button 
+                      type="submit" 
+                      disabled={isSaving}
+                      className="hockey-button hover:scale-105 transition-all duration-200"
+                    >
                       {isSaving ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -651,66 +763,79 @@ export default function SettingsPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="discord">
-            <Card>
-              <CardHeader>
+          <TabsContent value="discord" className="space-y-8">
+            <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-assist-green-50 to-goal-red-50 dark:from-assist-green-900/30 dark:to-goal-red-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
                 <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Discord Integration</CardTitle>
-                    <CardDescription>
-                      Connect your Discord account to automatically receive the "Registered" role in the SCS Discord
-                      server
-                    </CardDescription>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-lg flex items-center justify-center">
+                      <MessageSquare className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Discord Integration
+                      </CardTitle>
+                      <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Connect your Discord account to automatically receive the "Registered" role in the SCS Discord server
+                      </CardDescription>
+                    </div>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={refreshDiscordConnection}
                     disabled={isRefreshingDiscord}
-                    className="flex items-center gap-2"
+                    className="border-ice-blue-300 dark:border-ice-blue-600 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:scale-105 transition-all duration-200 flex items-center gap-2"
                   >
                     <RefreshCw className={`h-4 w-4 ${isRefreshingDiscord ? "animate-spin" : ""}`} />
                     Refresh
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="p-8 space-y-6">
                 {isDiscordConnected && discordConnection ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-900 rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <div className="flex-1">
-                        <p className="font-medium text-green-800 dark:text-green-200">Discord Connected</p>
-                        <p className="text-sm text-green-600 dark:text-green-400">
-                          Connected as {discordConnection.discord_username}#{discordConnection.discord_discriminator}
-                        </p>
+                  <div className="space-y-6">
+                    <div className="hockey-alert-success p-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-lg flex items-center justify-center">
+                          <CheckCircle className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-assist-green-800 dark:text-assist-green-200 text-lg">Discord Connected</p>
+                          <p className="text-assist-green-600 dark:text-assist-green-400">
+                            Connected as {discordConnection.discord_username}#{discordConnection.discord_discriminator}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Discord Username</Label>
-                      <Input
-                        value={`${discordConnection.discord_username}#${discordConnection.discord_discriminator}`}
-                        disabled
-                      />
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div className="space-y-3">
+                        <Label className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Discord Username</Label>
+                        <Input
+                          value={`${discordConnection.discord_username}#${discordConnection.discord_discriminator}`}
+                          disabled
+                          className="hockey-search"
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Discord ID</Label>
+                        <Input value={discordConnection.discord_id} disabled className="hockey-search font-mono text-xs" />
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Discord ID</Label>
-                      <Input value={discordConnection.discord_id} disabled className="font-mono text-xs" />
+                    <div className="space-y-3">
+                      <Label className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Connected On</Label>
+                      <Input value={new Date(discordConnection.created_at).toLocaleString()} disabled className="hockey-search" />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Connected On</Label>
-                      <Input value={new Date(discordConnection.created_at).toLocaleString()} disabled />
-                    </div>
-
-                    <div className="pt-4 space-y-2">
+                    <div className="pt-4 space-y-3">
                       <Button
                         variant="destructive"
                         onClick={handleDiscordDisconnect}
                         disabled={isSaving}
-                        className="flex items-center gap-2 w-full"
+                        className="hockey-button-danger hover:scale-105 transition-all duration-200 flex items-center gap-2 w-full"
                       >
                         {isSaving ? (
                           <>
@@ -724,21 +849,40 @@ export default function SettingsPage() {
                           </>
                         )}
                       </Button>
-                      <p className="text-sm text-muted-foreground text-center">
+                      <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500 text-center">
                         You can connect a different Discord account after disconnecting
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-                      <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Why Connect Discord?</h4>
-                      <ul className="text-sm text-blue-600 dark:text-blue-400 space-y-1">
-                        <li>• Automatically receive the "Registered" role in SCS Discord</li>
-                        <li>• Get team-specific roles when you join a team</li>
-                        <li>• Access to team management channels if you're a GM/AGM</li>
-                        <li>• Stay updated with league announcements</li>
-                      </ul>
+                  <div className="space-y-6">
+                    <div className="hockey-alert p-6">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <MessageSquare className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-ice-blue-800 dark:text-ice-blue-200 mb-3 text-lg">Why Connect Discord?</h4>
+                          <ul className="text-ice-blue-600 dark:text-ice-blue-400 space-y-2">
+                            <li className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full"></div>
+                              Automatically receive the "Registered" role in SCS Discord
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full"></div>
+                              Get team-specific roles when you join a team
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full"></div>
+                              Access to team management channels if you're a GM/AGM
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full"></div>
+                              Stay updated with league announcements
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="flex justify-center">
@@ -754,20 +898,34 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="account">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Information</CardTitle>
-                <CardDescription>View and manage your account details</CardDescription>
+          <TabsContent value="account" className="space-y-8">
+            <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/30 dark:to-assist-green-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-lg flex items-center justify-center">
+                    <Settings className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">
+                      Account Information
+                    </CardTitle>
+                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                      View and manage your account details
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>User ID</Label>
-                  <div className="flex">
-                    <Input value={session?.user?.id || ""} disabled className="font-mono text-xs" />
+              <CardContent className="p-8 space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">User ID</Label>
+                  <div className="flex gap-3">
+                    <Input 
+                      value={session?.user?.id || ""} 
+                      disabled 
+                      className="hockey-search font-mono text-xs flex-1" 
+                    />
                     <Button
                       variant="outline"
-                      className="ml-2"
                       onClick={() => {
                         navigator.clipboard.writeText(session?.user?.id || "")
                         toast({
@@ -775,88 +933,144 @@ export default function SettingsPage() {
                           description: "User ID copied to clipboard",
                         })
                       }}
+                      className="border-ice-blue-300 dark:border-ice-blue-600 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:scale-105 transition-all duration-200"
                     >
                       Copy
                     </Button>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Account Created</Label>
-                  <Input
-                    value={userProfile?.created_at ? new Date(userProfile.created_at).toLocaleString() : "Unknown"}
-                    disabled
-                  />
-                </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-3">
+                    <Label className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Account Created</Label>
+                    <Input
+                      value={userProfile?.created_at ? new Date(userProfile.created_at).toLocaleString() : "Unknown"}
+                      disabled
+                      className="hockey-search"
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Last Updated</Label>
-                  <Input
-                    value={userProfile?.updated_at ? new Date(userProfile.updated_at).toLocaleString() : "Unknown"}
-                    disabled
-                  />
+                  <div className="space-y-3">
+                    <Label className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Last Updated</Label>
+                    <Input
+                      value={userProfile?.updated_at ? new Date(userProfile.updated_at).toLocaleString() : "Unknown"}
+                      disabled
+                      className="hockey-search"
+                    />
+                  </div>
                 </div>
 
                 {debugInfo && (
-                  <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-md">
-                    <p className="text-xs font-mono">{debugInfo}</p>
+                  <div className="mt-6 p-4 hockey-alert">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Database className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-ice-blue-800 dark:text-ice-blue-200 mb-2">Debug Information</h4>
+                        <p className="text-xs font-mono text-ice-blue-600 dark:text-ice-blue-400 break-all">{debugInfo}</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle>Email Notifications</CardTitle>
-                <CardDescription>Manage your email notification preferences</CardDescription>
+          <TabsContent value="notifications" className="space-y-8">
+            <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-rink-blue-50 to-ice-blue-50 dark:from-rink-blue-900/30 dark:to-ice-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-lg flex items-center justify-center">
+                    <Bell className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">
+                      Email Notifications
+                    </CardTitle>
+                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                      Manage your email notification preferences
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="emailNotifications">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Receive email notifications from SCS</p>
+              <CardContent className="p-8 space-y-8">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-6 hockey-alert hover:scale-105 transition-all duration-300 cursor-pointer">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+                          <Bell className="h-4 w-4 text-white" />
+                        </div>
+                        <Label htmlFor="emailNotifications" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold text-lg">
+                          Email Notifications
+                        </Label>
+                      </div>
+                      <p className="text-hockey-silver-600 dark:text-hockey-silver-400 ml-11">
+                        Receive email notifications from SCS
+                      </p>
+                    </div>
+                    <Switch
+                      id="emailNotifications"
+                      checked={emailNotifications}
+                      onCheckedChange={setEmailNotifications}
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600"
+                    />
                   </div>
-                  <Switch
-                    id="emailNotifications"
-                    checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
-                  />
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="gameNotifications">Game Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive notifications about upcoming games and match results
-                    </p>
+                  <div className="flex items-center justify-between p-6 hockey-alert hover:scale-105 transition-all duration-300 cursor-pointer">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-lg flex items-center justify-center">
+                          <Trophy className="h-4 w-4 text-white" />
+                        </div>
+                        <Label htmlFor="gameNotifications" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold text-lg">
+                          Game Notifications
+                        </Label>
+                      </div>
+                      <p className="text-hockey-silver-600 dark:text-hockey-silver-400 ml-11">
+                        Receive notifications about upcoming games and match results
+                      </p>
+                    </div>
+                    <Switch
+                      id="gameNotifications"
+                      checked={gameNotifications}
+                      onCheckedChange={setGameNotifications}
+                      disabled={!emailNotifications}
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-assist-green-500 data-[state=checked]:to-goal-red-600"
+                    />
                   </div>
-                  <Switch
-                    id="gameNotifications"
-                    checked={gameNotifications}
-                    onCheckedChange={setGameNotifications}
-                    disabled={!emailNotifications}
-                  />
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="newsNotifications">News & Announcements</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive notifications about league news and announcements
-                    </p>
+                  <div className="flex items-center justify-between p-6 hockey-alert hover:scale-105 transition-all duration-300 cursor-pointer">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-lg flex items-center justify-center">
+                          <FileText className="h-4 w-4 text-white" />
+                        </div>
+                        <Label htmlFor="newsNotifications" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold text-lg">
+                          News & Announcements
+                        </Label>
+                      </div>
+                      <p className="text-hockey-silver-600 dark:text-hockey-silver-400 ml-11">
+                        Receive notifications about league news and announcements
+                      </p>
+                    </div>
+                    <Switch
+                      id="newsNotifications"
+                      checked={newsNotifications}
+                      onCheckedChange={setNewsNotifications}
+                      disabled={!emailNotifications}
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-goal-red-500 data-[state=checked]:to-assist-green-600"
+                    />
                   </div>
-                  <Switch
-                    id="newsNotifications"
-                    checked={newsNotifications}
-                    onCheckedChange={setNewsNotifications}
-                    disabled={!emailNotifications}
-                  />
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button onClick={handleNotificationPreferences} disabled={isSaving}>
+              <CardFooter className="p-8 pt-0">
+                <Button 
+                  onClick={handleNotificationPreferences} 
+                  disabled={isSaving}
+                  className="hockey-button hover:scale-105 transition-all duration-200"
+                >
                   {isSaving ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -870,6 +1084,7 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   )
