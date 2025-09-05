@@ -430,6 +430,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         ${hasDivisionColumn ? ", division" : ""}
       `)
       .eq("is_active", true)
+      .eq("season_id", seasonId)
 
     // If conference join fails, try without conference data
     if (teamsError && teamsError.message.includes("conferences")) {
@@ -444,6 +445,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           ${hasDivisionColumn ? ", division" : ""}
         `)
         .eq("is_active", true)
+        .eq("season_id", seasonId)
       
       teams = fallbackResult.data
       teamsError = fallbackResult.error
@@ -492,32 +494,44 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
     if (!matches || matches.length === 0) {
       console.log(`No completed matches found for season ${seasonName}`)
       // Return teams with zero stats
-      const zeroStatsTeams = teams.map((team) => ({
-        id: team.id,
-        name: team.name,
-        logo_url: team.logo_url,
-        wins: 0,
-        losses: 0,
-        otl: 0,
-        goals_for: 0,
-        goals_against: 0,
-        games_played: 0,
-        points: 0,
-        goal_differential: 0,
-        shots_per_game: 0,
-        total_shots: 0,
-        powerplay_goals: 0,
-        powerplay_opportunities: 0,
-        powerplay_percentage: 0,
-        penalty_kill_goals_against: 0,
-        penalty_kill_opportunities: 0,
-        penalty_kill_percentage: 0,
-        division: hasDivisionColumn ? team.division : nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom",
-        conference: hasDivisionColumn ? team.conference : nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom",
-        last_10: "0-0-0",
-        current_streak: "-",
-        playoff_status: "active" as const,
-      }))
+      const zeroStatsTeams = teams.map((team) => {
+        // Handle conference data properly
+        const conferenceName = team.conference?.name || (nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom")
+        const conferenceData = team.conference ? {
+          id: team.conference.id,
+          name: team.conference.name,
+          color: team.conference.color
+        } : null
+
+        return {
+          id: team.id,
+          name: team.name,
+          logo_url: team.logo_url,
+          wins: 0,
+          losses: 0,
+          otl: 0,
+          goals_for: 0,
+          goals_against: 0,
+          games_played: 0,
+          points: 0,
+          goal_differential: 0,
+          shots_per_game: 0,
+          total_shots: 0,
+          powerplay_goals: 0,
+          powerplay_opportunities: 0,
+          powerplay_percentage: 0,
+          penalty_kill_goals_against: 0,
+          penalty_kill_opportunities: 0,
+          penalty_kill_percentage: 0,
+          division: hasDivisionColumn ? team.division : nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom",
+          conference: conferenceName,
+          conference_id: team.conference_id,
+          conference_data: conferenceData,
+          last_10: "0-0-0",
+          current_streak: "-",
+          playoff_status: "active" as const,
+        }
+      })
 
       return calculatePlayoffStatus(zeroStatsTeams)
     }
@@ -693,8 +707,13 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         }
 
         // Use conference data from database if available, otherwise fall back to string
-        const conferenceName = team.conference?.name || conference
+        const conferenceName = team.conference?.name || conference || "Unassigned"
         const conferenceId = team.conference_id
+        const conferenceData = team.conference ? {
+          id: team.conference.id,
+          name: team.conference.name,
+          color: team.conference.color
+        } : null
 
         return {
           id: team.id,
@@ -719,7 +738,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           division,
           conference: conferenceName,
           conference_id: conferenceId,
-          conference_data: team.conference,
+          conference_data: conferenceData,
           last_10: last10Record,
           current_streak: currentStreak,
           playoff_status: "active" as const, // Will be calculated below
