@@ -716,18 +716,6 @@
     @apply transform-gpu;
   }
 
-  /* Premium Hockey Enhanced Cards */
-  .hockey-enhanced-card {
-    @apply bg-white/90 dark:bg-hockey-silver-900/90;
-    @apply backdrop-blur-xl;
-    @apply border border-white/20 dark:border-hockey-silver-700/50;
-    @apply shadow-2xl;
-    @apply hover:shadow-3xl;
-    @apply transition-all duration-500 ease-out;
-    @apply hover:scale-[1.02];
-    @apply rounded-3xl;
-    @apply overflow-hidden;
-  }
 
   /* Premium Hockey Table Row Hover */
   .hockey-table-row-hover {
@@ -1105,14 +1093,6 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   @apply hover:after:w-full;
 }
 
-/* Enhanced Gradient Text Effects */
-.hockey-gradient-text-animated {
-  @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-  @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
-  @apply bg-clip-text text-transparent;
-  @apply animate-gradient-x;
-  @apply bg-[length:200%_100%];
-}
 
 /* Enhanced Card Hover Effects */
 .hockey-card-hover-enhanced {
@@ -1123,32 +1103,8 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   @apply transition-all duration-500 ease-out;
 }
 
-/* Enhanced Button Hover Effects */
-.hockey-button-hover-enhanced {
-  @apply hockey-button-enhanced;
-  @apply hover:scale-110 hover:shadow-2xl hover:shadow-ice-blue-500/40;
-  @apply hover:brightness-110;
-  @apply transition-all duration-300 ease-out;
-}
 
-/* Enhanced Stat Item Hover Effects */
-.hockey-stat-hover-enhanced {
-  @apply hockey-stat-item;
-  @apply hover:scale-110 hover:shadow-xl hover:shadow-ice-blue-500/30;
-  @apply hover:bg-white/90 dark:hover:bg-hockey-silver-800/90;
-  @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-600;
-  @apply transition-all duration-300 ease-out;
-  @apply cursor-pointer;
-}
 
-/* Enhanced Table Row Hover Effects */
-.hockey-table-row-hover {
-  @apply transition-all duration-200 ease-out;
-  @apply hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50;
-  @apply dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20;
-  @apply hover:shadow-md hover:shadow-ice-blue-500/10;
-  @apply hover:scale-[1.01];
-}
 
 /* Enhanced Loading States */
 .hockey-loading-skeleton {

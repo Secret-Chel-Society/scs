@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MatchDetails } from "@/components/matches/match-details"
-import { AlertCircle, Upload, Edit, RefreshCw, Trophy, Star, Medal, Crown, Target, Zap, Shield, Users, Clock, Calendar, Activity, TrendingUp, Award, BookOpen, FileText, Globe, Camera, Image, Play, Pause, SkipForward, SkipBack } from "lucide-react"
+import { AlertCircle, Upload, Edit, RefreshCw, Trophy, Star, Medal, Crown, Target, Zap, Shield, Users, Clock, Calendar, Activity, TrendingUp, Award, BookOpen, FileText, Globe, Camera, Image, Play, Pause, SkipForward, SkipBack, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { EaMatchImportModal } from "@/components/matches/ea-match-import-modal"
@@ -129,7 +129,7 @@ export default function MatchDetailPage() {
         }
 
         // Aggregate player stats by team
-        playerStatsData.forEach((stat) => {
+        playerStatsData.forEach((stat: any) => {
           const teamStat = stat.team_id === currentMatch.home_team_id ? homeStats : awayStats
 
           teamStat.goals += stat.goals || 0
@@ -232,7 +232,7 @@ export default function MatchDetailPage() {
       }
     } catch (err) {
       console.error("Error in fetchMatchData:", err)
-      setError(err.message || "Failed to load match data")
+      setError(err instanceof Error ? err.message : "Failed to load match data")
     } finally {
       setLoading(false)
       setForceRefreshing(false)
@@ -356,7 +356,7 @@ export default function MatchDetailPage() {
     })
 
     // Force a refresh of the component
-    setRefreshKey((prev) => prev + 1)
+    setRefreshKey((prev: number) => prev + 1)
 
     // Force a refresh of the page to ensure we have the latest data
     router.refresh()
@@ -398,7 +398,7 @@ export default function MatchDetailPage() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [match])
+  }, [])
 
   if (loading) {
     return (
@@ -756,38 +756,38 @@ export default function MatchDetailPage() {
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">1st Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {periodScores.find(p => p.period_number === 1)?.home_score || match?.period_scores?.[0]?.home || 0}
+                          {periodScores.find((p: any) => p.period_number === 1)?.home_score || match?.period_scores?.[0]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {periodScores.find(p => p.period_number === 1)?.away_score || match?.period_scores?.[0]?.away || 0}
+                          {periodScores.find((p: any) => p.period_number === 1)?.away_score || match?.period_scores?.[0]?.away || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">2nd Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {periodScores.find(p => p.period_number === 2)?.home_score || match?.period_scores?.[1]?.home || 0}
+                          {periodScores.find((p: any) => p.period_number === 2)?.home_score || match?.period_scores?.[1]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {periodScores.find(p => p.period_number === 2)?.away_score || match?.period_scores?.[1]?.away || 0}
+                          {periodScores.find((p: any) => p.period_number === 2)?.away_score || match?.period_scores?.[1]?.away || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow className="hockey-table-row-hover">
                         <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">3rd Period</TableCell>
                         <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                          {periodScores.find(p => p.period_number === 3)?.home_score || match?.period_scores?.[2]?.home || 0}
+                          {periodScores.find((p: any) => p.period_number === 3)?.home_score || match?.period_scores?.[2]?.home || 0}
                         </TableCell>
                         <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                          {periodScores.find(p => p.period_number === 3)?.away_score || match?.period_scores?.[2]?.away || 0}
+                          {periodScores.find((p: any) => p.period_number === 3)?.away_score || match?.period_scores?.[2]?.away || 0}
                         </TableCell>
                       </TableRow>
                       {wentToOvertime && (
                         <TableRow className="hockey-table-row-hover">
                           <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Overtime</TableCell>
                           <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                            {periodScores.find(p => p.period_number === 4)?.home_score || match?.period_scores?.[3]?.home || 0}
+                            {periodScores.find((p: any) => p.period_number === 4)?.home_score || match?.period_scores?.[3]?.home || 0}
                           </TableCell>
                           <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                            {periodScores.find(p => p.period_number === 4)?.away_score || match?.period_scores?.[3]?.away || 0}
+                            {periodScores.find((p: any) => p.period_number === 4)?.away_score || match?.period_scores?.[3]?.away || 0}
                           </TableCell>
                         </TableRow>
                       )}
@@ -830,15 +830,15 @@ export default function MatchDetailPage() {
                     if (!eaPlayerStats || eaPlayerStats.length === 0 || !match) return []
                     
                     // Sort players by performance score (goals * 3 + assists * 2 + shots + hits + blocks)
-                    const playersWithScore = eaPlayerStats.map(player => ({
+                    const playersWithScore = eaPlayerStats.map((player: any) => ({
                       ...player,
                       performanceScore: (player.goals || 0) * 3 + (player.assists || 0) * 2 + (player.shots || 0) + (player.hits || 0) + (player.blocks || 0)
                     }))
                     
                     return playersWithScore
-                      .sort((a, b) => b.performanceScore - a.performanceScore)
+                      .sort((a: any, b: any) => b.performanceScore - a.performanceScore)
                       .slice(0, 3)
-                      .map((player, index) => ({
+                      .map((player: any, index: number) => ({
                         id: player.id,
                         star_number: index + 1,
                         player_name: player.player_name,
@@ -855,7 +855,7 @@ export default function MatchDetailPage() {
                   
                   return topPerformers.length > 0 ? (
                     <div className="space-y-4">
-                      {topPerformers.map((star, index) => (
+                      {topPerformers.map((star: any, index: number) => (
                         <div key={star.id} className="flex items-center gap-4 p-4 hockey-alert hover:scale-105 transition-all duration-300">
                           <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                             {star.star_number}
