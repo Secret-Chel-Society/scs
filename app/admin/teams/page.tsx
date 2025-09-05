@@ -114,7 +114,6 @@ export default function AdminTeamsPage() {
   const [lastRefresh, setLastRefresh] = useState(Date.now())
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isAddingColumns, setIsAddingColumns] = useState(false)
-  const [hasConferenceColumn, setHasConferenceColumn] = useState(false)
 
   useEffect(() => {
     async function checkAuthorizationAndLoadData() {
@@ -168,7 +167,6 @@ export default function AdminTeamsPage() {
         await checkManualOverrideColumnExists()
         await checkGamesPlayedColumn()
         await checkPointsColumn()
-        await checkConferenceColumn()
 
         // Load seasons
         try {
@@ -344,30 +342,6 @@ export default function AdminTeamsPage() {
     }
   }
 
-  // Check if conference_id column exists
-  const checkConferenceColumn = async () => {
-    try {
-      // Try to query a team with conference_id to see if the column exists
-      const { data, error } = await supabase.from("teams").select("conference_id").limit(1).maybeSingle()
-
-      if (error) {
-        // If there's an error about the column not existing, set hasConferenceColumn to false
-        if (error.message.includes("column") && error.message.includes("conference_id")) {
-          setHasConferenceColumn(false)
-        } else {
-          // For other errors, log but don't assume the column doesn't exist
-          console.error("Error checking conference_id column:", error)
-        }
-      } else {
-        // If no error, the column exists
-        setHasConferenceColumn(true)
-      }
-    } catch (error) {
-      console.error("Error checking conference_id column:", error)
-      setHasConferenceColumn(false)
-    }
-  }
-
   // Handle migration completion
   const handleMigrationComplete = async () => {
     await checkEaColumnExists()
@@ -375,7 +349,6 @@ export default function AdminTeamsPage() {
     await checkManualOverrideColumnExists()
     await checkGamesPlayedColumn()
     await checkPointsColumn()
-    await checkConferenceColumn()
     setLastRefresh(Date.now()) // This will trigger a reload of teams data
   }
 
@@ -467,16 +440,13 @@ export default function AdminTeamsPage() {
 
       if (error) {
         console.error("Error loading conferences:", error)
-        // If conferences table doesn't exist, set empty array
         setConferences([])
         return
       }
 
       setConferences(data || [])
-      console.log("Conferences loaded:", data)
     } catch (error: any) {
       console.error("Error loading conferences:", error)
-      // If conferences table doesn't exist, set empty array
       setConferences([])
     }
   }
@@ -596,7 +566,6 @@ export default function AdminTeamsPage() {
   }
 
   const handleEditTeam = (team: Team) => {
-    console.log("handleEditTeam called with team:", team)
     setIsAddingTeam(false)
     setEditingTeam(team)
     setTeamForm({
@@ -607,7 +576,6 @@ export default function AdminTeamsPage() {
       is_active: team.is_active !== false, // Default to true if undefined
       conference_id: team.conference_id || "",
     })
-    console.log("Dialog should be open now. editingTeam:", team, "isAddingTeam:", false)
   }
 
   const handleSaveTeam = async () => {
@@ -639,17 +607,9 @@ export default function AdminTeamsPage() {
         teamData.is_active = teamForm.is_active
       }
 
-      // Include conference_id if provided and conferences table exists
-      if (teamForm.conference_id && conferences.length > 0) {
-        try {
-          // Test if conference_id column exists by trying to query it
-          const testQuery = await supabase.from("teams").select("conference_id").limit(1)
-          if (!testQuery.error) {
-            teamData.conference_id = teamForm.conference_id
-          }
-        } catch (error) {
-          console.log("Conference_id column not available, skipping conference assignment")
-        }
+      // Include conference_id if provided
+      if (teamForm.conference_id) {
+        teamData.conference_id = teamForm.conference_id
       }
 
       if (isAddingTeam) {
@@ -1019,76 +979,6 @@ export default function AdminTeamsPage() {
         </Alert>
       )}
 
-      {!hasConferenceColumn && (
-        <Alert className="mb-6 border-2 border-blue-200/50 dark:border-blue-700/50 bg-gradient-to-r from-blue-50/50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/20">
-          <AlertTriangle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <AlertTitle className="text-blue-800 dark:text-blue-200">Conference Column Needs to be Added</AlertTitle>
-          <AlertDescription className="text-blue-700 dark:text-blue-300">
-            To assign teams to conferences, you need to add the conference_id column to the teams table.
-            <div className="mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/admin/run-migration/conference-column", {
-                      method: "POST",
-                    })
-                    if (!response.ok) {
-                      throw new Error("Failed to run migration")
-                    }
-                    toast({
-                      title: "Migration successful",
-                      description: "The conference_id column has been added to the teams table.",
-                    })
-                    await checkConferenceColumn()
-                    setLastRefresh(Date.now())
-                  } catch (error) {
-                    console.error("Error running migration:", error)
-                    toast({
-                      title: "Migration failed",
-                      description: "Failed to add the conference_id column.",
-                      variant: "destructive",
-                    })
-                  }
-                }}
-                className="hockey-button bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Add Conference Column
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/admin/run-migration/sample-conferences", {
-                      method: "POST",
-                    })
-                    if (!response.ok) {
-                      throw new Error("Failed to create sample conferences")
-                    }
-                    toast({
-                      title: "Sample conferences created",
-                      description: "Eastern and Western conferences have been added to the database.",
-                    })
-                    await loadConferences()
-                  } catch (error) {
-                    console.error("Error creating sample conferences:", error)
-                    toast({
-                      title: "Failed to create conferences",
-                      description: "Failed to add sample conferences to the database.",
-                      variant: "destructive",
-                    })
-                  }
-                }}
-                className="hockey-button bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 ml-2"
-              >
-                Create Sample Conferences
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Enhanced Controls Section */}
       <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20 mb-8">
@@ -1350,10 +1240,7 @@ export default function AdminTeamsPage() {
                                 onStatsUpdated={handleStatsUpdated}
                               />
                             )}
-                            <Button variant="ghost" size="icon" onClick={() => {
-                              console.log("Edit button clicked for team:", team)
-                              handleEditTeam(team)
-                            }} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditTeam(team)} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" onClick={() => handleDeleteTeam(team.id)} className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
@@ -1374,8 +1261,6 @@ export default function AdminTeamsPage() {
       <Dialog
         open={isAddingTeam || editingTeam !== null}
         onOpenChange={(open) => {
-          console.log("Dialog onOpenChange called with open:", open)
-          console.log("Current state - isAddingTeam:", isAddingTeam, "editingTeam:", editingTeam)
           if (!open) {
             setIsAddingTeam(false)
             setEditingTeam(null)
@@ -1383,7 +1268,6 @@ export default function AdminTeamsPage() {
         }}
       >
         <DialogContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-          {console.log("Dialog content rendering. editingTeam:", editingTeam, "isAddingTeam:", isAddingTeam)}
           <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
             <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-lg flex items-center justify-center">
