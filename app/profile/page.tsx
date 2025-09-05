@@ -127,74 +127,74 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
       {/* Header Section */}
       <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-        <div className="container mx-auto px-6 py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="text-center">
-            <div className="inline-flex items-center gap-4 mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-ice-blue-500 via-rink-blue-600 to-ice-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
-                <User className="h-10 w-10 text-white" />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-ice-blue-500 via-rink-blue-600 to-ice-blue-700 rounded-2xl shadow-lg flex items-center justify-center">
+                <User className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
                   {displayName}
                 </h1>
-                <p className="text-xl text-slate-600 dark:text-slate-400 mt-2">
+                <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">
                   Player Profile & Statistics
                 </p>
               </div>
             </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto" />
+            <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto" />
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-12">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
           {/* Profile Overview Cards */}
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3">
             <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
-                  <User className="h-6 w-6 text-white" />
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                  <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
                   {position}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
+                <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                   Primary Position
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-4">
-                  <Trophy className="h-6 w-6 text-white" />
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                  <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <div className="flex items-center justify-center gap-2 mb-1">
+                <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
                   {teamLogo && (
-                    <div className="h-6 w-6 relative">
+                    <div className="h-5 w-5 sm:h-6 sm:w-6 relative">
                       <Image src={teamLogo || "/placeholder.svg"} alt={teamName} fill className="object-contain" />
                     </div>
                   )}
-                  <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200">
                     {teamName}
                   </div>
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
+                <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                   {teamName === "Free Agent" ? "No Team" : "Current Team"}
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-              <CardContent className="p-6 text-center">
-                <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
-                  <DollarSign className="h-6 w-6 text-white" />
+              <CardContent className="p-4 sm:p-6 text-center">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
                   ${salary.toLocaleString()}
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
+                <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                   {salary > 0 ? "Current Contract" : "No Contract"}
                 </div>
               </CardContent>

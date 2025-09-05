@@ -1794,59 +1794,59 @@ export default function StatisticsPage() {
       </div>
 
       {/* Stats Overview Cards */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid gap-6 md:grid-cols-4 mb-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-4 mb-6 sm:mb-8">
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
-                <BarChart3 className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+              <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
                 {totalPlayers.length + goalieStats.length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 Total Players
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-4">
-                <Target className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+              <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
                 {forwards.length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 Forwards
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-4">
-                <Shield className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+              <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
                 {defensemen.length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 Defensemen
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
-                <Trophy className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+              <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
                 {goalieStats.length}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 Goalies
               </div>
             </CardContent>
@@ -1855,20 +1855,20 @@ export default function StatisticsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="space-y-8">
           {/* Filters */}
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-slate-200 dark:border-slate-700">
-              <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
+              <CardTitle className="text-lg sm:text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-                  <Activity className="h-5 w-5 text-white" />
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 Filters & Settings
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <CardContent className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     Season

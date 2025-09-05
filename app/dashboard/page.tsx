@@ -163,19 +163,19 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-4 mb-6">
-            <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
-              <LayoutDashboard className="h-10 w-10 text-white" />
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+              <LayoutDashboard className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
               Welcome back, {displayName}!
             </h1>
           </div>
-          <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-8" />
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+          <div className="h-1 w-24 sm:w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-6 sm:mb-8" />
+          <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed px-4">
             Manage your MGHL profile, tokens, and track your performance
           </p>
         </div>
@@ -209,65 +209,65 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Stats Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-4 sm:gap-6 grid-cols-2 md:grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
-                <User className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {dataLoading ? <Skeleton className="h-6 w-16 mx-auto" /> : primaryPosition}
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {dataLoading ? <Skeleton className="h-5 sm:h-6 w-12 sm:w-16 mx-auto" /> : primaryPosition}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 {secondaryPosition ? `Secondary: ${secondaryPosition}` : "Primary Position"}
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-4">
-                <Trophy className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="flex items-center justify-center gap-2 mb-1">
+              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1">
                 {teamLogo && (
-                  <div className="h-6 w-6 relative">
+                  <div className="h-5 w-5 sm:h-6 sm:w-6 relative">
                     <Image src={teamLogo || "/placeholder.svg"} alt={teamName} fill className="object-contain" />
                   </div>
                 )}
-                <div className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-                  {dataLoading ? <Skeleton className="h-6 w-16" /> : teamName}
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200">
+                  {dataLoading ? <Skeleton className="h-5 sm:h-6 w-12 sm:w-16" /> : teamName}
                 </div>
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 {hasTeam ? "Current Team" : "Free Agent"}
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-4">
-                <Calendar className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {dataLoading ? <Skeleton className="h-6 w-16 mx-auto" /> : registrationStatus}
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {dataLoading ? <Skeleton className="h-5 sm:h-6 w-12 sm:w-16 mx-auto" /> : registrationStatus}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 {seasonNumber ? `Season ${seasonNumber}` : "Current Status"}
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
-                <DollarSign className="h-6 w-6 text-white" />
+            <CardContent className="p-4 sm:p-6 text-center">
+              <div className="p-2 sm:p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-3 sm:mb-4">
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {dataLoading ? <Skeleton className="h-6 w-16 mx-auto" /> : `$${salary.toLocaleString()}`}
+              <div className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
+                {dataLoading ? <Skeleton className="h-5 sm:h-6 w-12 sm:w-16 mx-auto" /> : `$${salary.toLocaleString()}`}
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
+              <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                 {hasTeam ? "Current Contract" : "No Contract"}
               </div>
             </CardContent>
