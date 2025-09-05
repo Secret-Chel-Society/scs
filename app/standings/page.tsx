@@ -287,34 +287,72 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
 }
 
 function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
-  // Group teams by conference/division
-  const nhlTeams = standings.filter((team) => team.division === "NHL" || team.conference === "NHL")
-  const customTeams = standings.filter((team) => team.division === "Custom" || team.conference === "Custom")
+  // Group teams by conference using database conference data
+  const conferences = new Map<string, { teams: TeamStanding[], name: string, color: string }>()
+  
+  standings.forEach(team => {
+    if (team.conference_data) {
+      const conferenceId = team.conference_data.id
+      if (!conferences.has(conferenceId)) {
+        conferences.set(conferenceId, {
+          teams: [],
+          name: team.conference_data.name,
+          color: team.conference_data.color
+        })
+      }
+      conferences.get(conferenceId)!.teams.push(team)
+    } else if (team.conference) {
+      // Fallback to string-based conference grouping
+      const conferenceKey = team.conference
+      if (!conferences.has(conferenceKey)) {
+        conferences.set(conferenceKey, {
+          teams: [],
+          name: team.conference,
+          color: '#6366f1' // Default color
+        })
+      }
+      conferences.get(conferenceKey)!.teams.push(team)
+    }
+  })
 
-  // If no division data, split teams roughly in half
-  const hasConferenceData = nhlTeams.length > 0 || customTeams.length > 0
+  // If no conference data, split teams roughly in half
+  const conferenceArray = Array.from(conferences.values())
+  const hasConferenceData = conferenceArray.length > 0
 
-  const conference1Teams = hasConferenceData ? nhlTeams : standings.slice(0, Math.ceil(standings.length / 2))
-  const conference2Teams = hasConferenceData ? customTeams : standings.slice(Math.ceil(standings.length / 2))
+  const conference1Teams = hasConferenceData ? conferenceArray[0]?.teams || [] : standings.slice(0, Math.ceil(standings.length / 2))
+  const conference2Teams = hasConferenceData ? conferenceArray[1]?.teams || [] : standings.slice(Math.ceil(standings.length / 2))
 
-  const conference1Name = hasConferenceData ? "NHL Conference" : "Eastern Conference"
-  const conference2Name = hasConferenceData ? "Custom Conference" : "Western Conference"
+  const conference1Name = hasConferenceData ? conferenceArray[0]?.name || "Conference 1" : "Eastern Conference"
+  const conference2Name = hasConferenceData ? conferenceArray[1]?.name || "Conference 2" : "Western Conference"
+  const conference1Color = hasConferenceData ? conferenceArray[0]?.color || '#6366f1' : '#6366f1'
+  const conference2Color = hasConferenceData ? conferenceArray[1]?.color || '#6366f1' : '#6366f1'
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
+    <div className="grid gap-4 sm:gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2">
       <div>
         <Card className="hockey-card hockey-card-hover h-full group">
           <CardHeader className="pb-4 relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-            <CardTitle className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
-                <Star className="h-6 w-6 text-white" />
+            <div 
+              className="absolute top-0 right-0 w-24 h-24 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+              style={{ 
+                background: `linear-gradient(135deg, ${conference1Color}20, ${conference1Color}40)`
+              }}
+            ></div>
+            <CardTitle className="flex items-center gap-2 sm:gap-3 relative z-10">
+              <div 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg"
+                style={{ 
+                  background: `linear-gradient(135deg, ${conference1Color}, ${conference1Color}dd)`,
+                  boxShadow: `0 10px 25px ${conference1Color}40`
+                }}
+              >
+                <Star className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                   {conference1Name}
                 </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                <div className="text-xs sm:text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                   {conference1Teams.length} teams
                 </div>
               </div>
@@ -329,16 +367,27 @@ function ConferenceStandings({ standings }: { standings: TeamStanding[] }) {
       <div>
         <Card className="hockey-card hockey-card-hover h-full group">
           <CardHeader className="pb-4 relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rink-blue-100 to-rink-blue-200 dark:from-rink-blue-900/30 dark:to-rink-blue-800/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-            <CardTitle className="flex items-center gap-3 relative z-10">
-              <div className="w-12 h-12 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-rink-blue-500/25">
-                <Award className="h-6 w-6 text-white" />
+            <div 
+              className="absolute top-0 right-0 w-24 h-24 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"
+              style={{ 
+                background: `linear-gradient(135deg, ${conference2Color}20, ${conference2Color}40)`
+              }}
+            ></div>
+            <CardTitle className="flex items-center gap-2 sm:gap-3 relative z-10">
+              <div 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-lg"
+                style={{ 
+                  background: `linear-gradient(135deg, ${conference2Color}, ${conference2Color}dd)`,
+                  boxShadow: `0 10px 25px ${conference2Color}40`
+                }}
+              >
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                   {conference2Name}
                 </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                <div className="text-xs sm:text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                   {conference2Teams.length} teams
                 </div>
               </div>
@@ -408,24 +457,26 @@ function StandingsContent({ seasonId }: { seasonId: number }) {
       <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg">
         <TabsTrigger 
           value="overall" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
         >
-          <TrendingUp className="h-4 w-4 mr-2" />
-          Overall Standings
+          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Overall Standings</span>
+          <span className="sm:hidden">Overall</span>
         </TabsTrigger>
         <TabsTrigger 
           value="conference" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
         >
-          <Users className="h-4 w-4 mr-2" />
+          <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
           Conference
         </TabsTrigger>
         <TabsTrigger 
           value="playoffs" 
-          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105"
+          className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 hover:scale-105 text-xs sm:text-sm"
         >
-          <Trophy className="h-4 w-4 mr-2" />
-          Playoff Picture
+          <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Playoff Picture</span>
+          <span className="sm:hidden">Playoffs</span>
         </TabsTrigger>
       </TabsList>
 
@@ -434,30 +485,30 @@ function StandingsContent({ seasonId }: { seasonId: number }) {
           <Card className="hockey-card hockey-card-hover group">
             <CardHeader className="pb-4 relative">
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-              <CardTitle className="flex items-center gap-3 relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
-                  <Zap className="h-6 w-6 text-white" />
+              <CardTitle className="flex items-center gap-2 sm:gap-3 relative z-10">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
+                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="text-lg sm:text-xl lg:text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                     League Standings
                   </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  <div className="text-xs sm:text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                     Complete standings for all teams in the league
                   </div>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="mb-8 flex items-center gap-8 text-sm">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white text-sm px-3 py-1 rounded-full shadow-lg shadow-assist-green-500/25">
+              <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-8 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full shadow-lg shadow-assist-green-500/25">
                     X
                   </Badge>
                   <span className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Clinched Playoff Spot</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white text-sm px-3 py-1 rounded-full shadow-lg shadow-goal-red-500/25">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Badge className="bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full shadow-lg shadow-goal-red-500/25">
                     E
                   </Badge>
                   <span className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Eliminated from Playoffs</span>
@@ -527,12 +578,12 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
         
-        <div className="container mx-auto text-center relative z-10">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-8 text-center relative z-10">
           <div>
-            <h1 className="hockey-title mb-6">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-hockey-silver-800 dark:text-hockey-silver-200">
               League Standings
             </h1>
-            <p className="hockey-subtitle mx-auto mb-12">
+            <p className="text-sm sm:text-base lg:text-lg mx-auto mb-8 sm:mb-12 max-w-3xl text-hockey-silver-600 dark:text-hockey-silver-400 px-2">
               Track team performance, conference rankings, and playoff races. See who's leading the pack and fighting for playoff spots.
             </p>
             
@@ -582,7 +633,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-16">
         <div>
           <Suspense fallback={<StandingsLoadingSkeleton />}>
             <StandingsContent seasonId={selectedSeasonId} />

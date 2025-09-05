@@ -27,6 +27,12 @@ export interface TeamStanding {
   penalty_kill_percentage?: number
   division?: string
   conference?: string
+  conference_id?: string
+  conference_data?: {
+    id: string
+    name: string
+    color: string
+  }
   last_10?: string // Format: "W-L-OTL"
   current_streak?: string // Format: "W5", "L3", "OTL2"
   playoff_status?: "clinched" | "eliminated" | "active" // New field for playoff status
@@ -412,10 +418,17 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
       hasDivisionColumn = false
     }
 
-    // Get all teams for the season
+    // Get all teams for the season with conference data
     const { data: teams, error: teamsError } = await supabase
       .from("teams")
-      .select("id, name, logo_url" + (hasDivisionColumn ? ", division, conference" : ""))
+      .select(`
+        id, 
+        name, 
+        logo_url,
+        conference_id,
+        conference:conferences(id, name, color)
+        ${hasDivisionColumn ? ", division" : ""}
+      `)
       .eq("is_active", true)
 
     if (teamsError) {
@@ -661,6 +674,10 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           }
         }
 
+        // Use conference data from database if available, otherwise fall back to string
+        const conferenceName = team.conference?.name || conference
+        const conferenceId = team.conference_id
+
         return {
           id: team.id,
           name: team.name,
@@ -682,7 +699,9 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           penalty_kill_opportunities: penaltyKillOpportunities,
           penalty_kill_percentage: penaltyKillPercentage,
           division,
-          conference,
+          conference: conferenceName,
+          conference_id: conferenceId,
+          conference_data: team.conference,
           last_10: last10Record,
           current_streak: currentStreak,
           playoff_status: "active" as const, // Will be calculated below

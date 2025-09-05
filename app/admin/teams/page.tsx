@@ -53,6 +53,21 @@ interface Team {
   powerplay_opportunities?: number
   penalty_kill_goals_against?: number
   penalty_kill_opportunities?: number
+  conference_id?: string
+  conference?: {
+    id: string
+    name: string
+    color: string
+  }
+}
+
+interface Conference {
+  id: string
+  name: string
+  description: string | null
+  color: string
+  created_at: string
+  updated_at: string
 }
 
 interface EATeam {
@@ -69,6 +84,7 @@ export default function AdminTeamsPage() {
   const [loading, setLoading] = useState(true)
   const [teams, setTeams] = useState<Team[]>([])
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([])
+  const [conferences, setConferences] = useState<Conference[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAddingTeam, setIsAddingTeam] = useState(false)
@@ -79,6 +95,7 @@ export default function AdminTeamsPage() {
     season_id: 1,
     ea_club_id: "",
     is_active: true,
+    conference_id: "",
   })
   const [seasons, setSeasons] = useState<Season[]>([])
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
@@ -184,6 +201,9 @@ export default function AdminTeamsPage() {
           setSeasons([{ id: 1, name: "Season 1", is_active: true }])
           setSelectedSeason(1)
         }
+
+        // Load conferences
+        await loadConferences()
 
         // Load teams - will be done by effect that watches selectedSeason
       } catch (error: any) {
@@ -411,6 +431,24 @@ export default function AdminTeamsPage() {
     }
   }
 
+  // Load conferences
+  const loadConferences = async () => {
+    if (!supabase) return
+
+    try {
+      const { data, error } = await supabase.from("conferences").select("*").order("name")
+
+      if (error) {
+        console.error("Error loading conferences:", error)
+        return
+      }
+
+      setConferences(data || [])
+    } catch (error: any) {
+      console.error("Error loading conferences:", error)
+    }
+  }
+
   // Load teams based on selected season
   const loadTeams = async (seasonId?: number) => {
     if (!supabase) {
@@ -424,8 +462,15 @@ export default function AdminTeamsPage() {
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
 
-      // Use standard Supabase query instead of exec_sql
-      const { data, error } = await supabase.from("teams").select("*").eq("season_id", season).order("name")
+      // Load teams with conference data
+      const { data, error } = await supabase
+        .from("teams")
+        .select(`
+          *,
+          conference:conferences(id, name, color)
+        `)
+        .eq("season_id", season)
+        .order("name")
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -501,6 +546,7 @@ export default function AdminTeamsPage() {
       season_id: selectedSeason || 1,
       ea_club_id: "",
       is_active: true,
+      conference_id: "",
     })
   }
 
@@ -513,6 +559,7 @@ export default function AdminTeamsPage() {
       season_id: team.season_id,
       ea_club_id: team.ea_club_id || "",
       is_active: team.is_active !== false, // Default to true if undefined
+      conference_id: team.conference_id || "",
     })
   }
 
@@ -543,6 +590,11 @@ export default function AdminTeamsPage() {
       // Only include is_active if the column exists
       if (hasActiveColumn) {
         teamData.is_active = teamForm.is_active
+      }
+
+      // Include conference_id if provided
+      if (teamForm.conference_id) {
+        teamData.conference_id = teamForm.conference_id
       }
 
       if (isAddingTeam) {
@@ -768,35 +820,35 @@ export default function AdminTeamsPage() {
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
         
-        <div className="container mx-auto text-center relative z-10">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-8 text-center relative z-10">
           <div>
-            <div className="w-20 h-20 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-assist-green-500/25">
-              <Trophy className="h-10 w-10 text-white" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl shadow-assist-green-500/25">
+              <Trophy className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
             </div>
-            <h1 className="hockey-title mb-6">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-hockey-silver-800 dark:text-hockey-silver-200">
               Team Management
             </h1>
-            <p className="hockey-subtitle mx-auto mb-8 max-w-3xl">
+            <p className="text-sm sm:text-base lg:text-lg mx-auto mb-6 sm:mb-8 max-w-3xl text-hockey-silver-600 dark:text-hockey-silver-400 px-2">
               Comprehensive team administration and roster management. Create, edit, and monitor team statistics, EA integration, and league standings.
             </p>
             
             {/* Feature Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 mb-8">
-              <div className="flex items-center gap-2 bg-gradient-to-r from-assist-green-100/50 to-assist-green-100/50 dark:from-assist-green-900/20 dark:to-assist-green-900/20 px-4 py-2 rounded-full border border-assist-green-200/30 dark:border-assist-green-700/30">
-                <Users className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Team Roster</span>
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 px-2">
+              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-assist-green-100/50 to-assist-green-100/50 dark:from-assist-green-900/20 dark:to-assist-green-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-assist-green-200/30 dark:border-assist-green-700/30">
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-assist-green-600 dark:text-assist-green-400" />
+                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Team Roster</span>
               </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-4 py-2 rounded-full border border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                <Target className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">EA Integration</span>
+              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-ice-blue-200/30 dark:border-rink-blue-700/30">
+                <Target className="h-3 w-3 sm:h-4 sm:w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">EA Integration</span>
               </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-goal-red-100/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 px-4 py-2 rounded-full border border-goal-red-200/30 dark:border-goal-red-700/30">
-                <TrendingUp className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Statistics</span>
+              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-goal-red-100/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-goal-red-200/30 dark:border-goal-red-700/30">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-goal-red-600 dark:text-goal-red-400" />
+                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Statistics</span>
               </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-hockey-silver-100/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 px-4 py-2 rounded-full border border-hockey-silver-200/30 dark:border-hockey-silver-700/30">
-                <Settings className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Management</span>
+              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-hockey-silver-100/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-hockey-silver-200/30 dark:border-hockey-silver-700/30">
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
+                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Management</span>
               </div>
             </div>
           </div>
@@ -804,7 +856,7 @@ export default function AdminTeamsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pb-20">
+      <div className="container mx-auto px-2 sm:px-4 pb-12 sm:pb-20">
 
       {loadError && (
         <Alert className="mb-6 border-2 border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-r from-goal-red-50/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-800/20">
@@ -916,23 +968,23 @@ export default function AdminTeamsPage() {
       <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20 mb-8">
         <CardHeader className="relative">
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
-              <Settings className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-2 sm:gap-4 relative z-10">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
+              <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
                 Team Controls
               </CardTitle>
-              <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+              <CardDescription className="text-sm sm:text-base lg:text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
                 Manage seasons, search teams, and perform administrative actions
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <div className="space-y-2">
                 <Label htmlFor="season-select" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                   <Trophy className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
@@ -962,7 +1014,7 @@ export default function AdminTeamsPage() {
                   placeholder="Search teams..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-[250px] hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
+                  className="w-full sm:w-[200px] lg:w-[250px] hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                 />
               </div>
 
@@ -974,16 +1026,16 @@ export default function AdminTeamsPage() {
               )}
             </div>
 
-            <div className="flex gap-3">
-              <Button onClick={handleAddTeam} className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                <Plus className="h-4 w-4 mr-2" />
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Button onClick={handleAddTeam} className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm sm:text-base">
+                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
                 Add Team
               </Button>
-              <Button variant="outline" onClick={() => setLastRefresh(Date.now())} disabled={isLoadingStats} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+              <Button variant="outline" onClick={() => setLastRefresh(Date.now())} disabled={isLoadingStats} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm sm:text-base">
                 {isLoadingStats ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-1 sm:mr-2" />
                 ) : (
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
                 )}
                 Refresh Stats
               </Button>
@@ -1020,6 +1072,7 @@ export default function AdminTeamsPage() {
                   <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Points</TableHead>
                   <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Goal Diff</TableHead>
                   <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Season</TableHead>
+                  <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Conference</TableHead>
                   {hasEaColumn && <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">EA Club ID</TableHead>}
                   {hasActiveColumn && <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Status</TableHead>}
                   <TableHead className="text-right text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Actions</TableHead>
@@ -1029,7 +1082,7 @@ export default function AdminTeamsPage() {
                 {filteredTeams.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={hasEaColumn && hasActiveColumn ? 8 : hasEaColumn || hasActiveColumn ? 7 : 6}
+                      colSpan={hasEaColumn && hasActiveColumn ? 9 : hasEaColumn || hasActiveColumn ? 8 : 7}
                       className="text-center py-6 text-muted-foreground"
                     >
                       {loadError
@@ -1076,6 +1129,21 @@ export default function AdminTeamsPage() {
                         </TableCell>
                         <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
                           <span className="text-base font-medium">{seasonName}</span>
+                        </TableCell>
+                        <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
+                          {team.conference ? (
+                            <Badge 
+                              className="text-sm px-3 py-1 rounded-full shadow-md"
+                              style={{ 
+                                backgroundColor: team.conference.color,
+                                color: 'white'
+                              }}
+                            >
+                              {team.conference.name}
+                            </Badge>
+                          ) : (
+                            <span className="text-hockey-silver-500 dark:text-hockey-silver-500 font-medium">Not assigned</span>
+                          )}
                         </TableCell>
                         {hasEaColumn && (
                           <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300">
@@ -1241,6 +1309,35 @@ export default function AdminTeamsPage() {
                   {seasons.map((season: Season) => (
                     <SelectItem key={season.id} value={season.id.toString()}>
                       {season.name} {season.is_active ? "(Active)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="conference" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <Users className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                Conference
+              </Label>
+              <Select
+                value={teamForm.conference_id}
+                onValueChange={(value) => setTeamForm({ ...teamForm, conference_id: value })}
+              >
+                <SelectTrigger id="conference" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
+                  <SelectValue placeholder="Select Conference" />
+                </SelectTrigger>
+                <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                  <SelectItem value="">No Conference</SelectItem>
+                  {conferences.map((conference: Conference) => (
+                    <SelectItem key={conference.id} value={conference.id}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: conference.color }}
+                        />
+                        {conference.name}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
