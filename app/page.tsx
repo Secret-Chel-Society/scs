@@ -102,6 +102,7 @@ export default function Home() {
   const [upcomingGames, setUpcomingGames] = useState([])
   const [completedGames, setCompletedGames] = useState([])
   const [standings, setStandings] = useState([])
+  const [featuredGames, setFeaturedGames] = useState([])
   const [stats, setStats] = useState({
     totalPlayers: 0,
     totalTeams: 0,
@@ -112,6 +113,7 @@ export default function Home() {
     news: true,
     games: true,
     standings: true,
+    featured: true,
   })
   const [heroImages, setHeroImages] = useState([
     {
@@ -244,6 +246,27 @@ export default function Home() {
         if (completedError) throw completedError
         setCompletedGames(completedData || [])
 
+        // Fetch featured games
+        const { data: featuredData, error: featuredError } = await supabase
+          .from("matches")
+          .select(`
+            id, 
+            match_date, 
+            status,
+            home_score,
+            away_score,
+            featured,
+            home_team:home_team_id(id, name, logo_url),
+            away_team:away_team_id(id, name, logo_url)
+          `)
+          .eq("featured", true)
+          .order("match_date", { ascending: false })
+          .limit(6)
+
+        if (featuredError) throw featuredError
+        setFeaturedGames(featuredData || [])
+        setLoading((prev) => ({ ...prev, featured: false }))
+
         setLoading((prev) => ({ ...prev, games: false }))
 
         // Fetch team standings
@@ -272,6 +295,7 @@ export default function Home() {
           news: false,
           games: false,
           standings: false,
+          featured: false,
         })
       }
     }
@@ -377,6 +401,158 @@ export default function Home() {
             </div>
           </CardContent>
         </Card>
+      </motion.section>
+
+      {/* Featured Games Section */}
+      <motion.section
+        className="container mx-auto px-4 py-20"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="text-center mb-16">
+          <motion.div 
+            className="inline-flex items-center gap-4 mb-6" 
+            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="p-4 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl shadow-lg">
+              <Star className="h-10 w-10 text-white" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-600 to-orange-800 dark:from-yellow-400 dark:to-orange-600 bg-clip-text text-transparent">
+              Featured Games
+            </h2>
+          </motion.div>
+          <div className="h-1 w-32 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full mx-auto mb-8" />
+          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+            Don't miss these highlighted matches from our competitive league
+          </p>
+        </div>
+
+        {loading.featured ? (
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="w-full h-32 rounded-xl" />
+                    <Skeleton className="w-3/4 h-4 rounded" />
+                    <Skeleton className="w-1/2 h-3 rounded" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : featuredGames.length > 0 ? (
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredGames.map((game, index) => (
+                  <motion.div
+                    key={game.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="group"
+                  >
+                    <Link href={`/matches/${game.id}`}>
+                      <Card className="h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-600 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <Star className="h-5 w-5 text-yellow-500" />
+                              <span className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">
+                                Featured Match
+                              </span>
+                            </div>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                              {new Date(game.match_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            {/* Home Team */}
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold text-sm">
+                                  {game.home_team?.name?.charAt(0) || "H"}
+                                </span>
+                              </div>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
+                                {game.home_team?.name || "Home Team"}
+                              </span>
+                              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                {game.home_score || 0}
+                              </span>
+                            </div>
+
+                            {/* VS */}
+                            <div className="text-center">
+                              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">VS</span>
+                            </div>
+
+                            {/* Away Team */}
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
+                                <span className="text-white font-bold text-sm">
+                                  {game.away_team?.name?.charAt(0) || "A"}
+                                </span>
+                              </div>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
+                                {game.away_team?.name || "Away Team"}
+                              </span>
+                              <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+                                {game.away_score || 0}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                            <div className="flex items-center justify-between">
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                game.status === 'Completed' 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                  : game.status === 'Scheduled'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              }`}>
+                                {game.status}
+                              </span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+                                View Details →
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
+            <CardContent className="p-12 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-full">
+                  <Star className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+                  No Featured Games Yet
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400 max-w-md">
+                  Check back soon for highlighted matches from our competitive league.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </motion.section>
 
       {/* Clean About SCS Section */}

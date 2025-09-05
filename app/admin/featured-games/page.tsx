@@ -105,7 +105,40 @@ export default function AdminFeaturedGamesPage() {
     checkAuthorization()
   }, [supabase, session, toast, router])
 
-  // Check if featured column exists (it should already exist)
+  // Set up real-time subscription for matches table
+  useEffect(() => {
+    if (!isAdmin) return
+
+    const channel = supabase
+      .channel('matches-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'matches',
+          filter: 'featured=is.not.null'
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload)
+          // Update the local state with the new data
+          setMatches(prevMatches => 
+            prevMatches.map(match => 
+              match.id === payload.new.id 
+                ? { ...match, featured: payload.new.featured }
+                : match
+            )
+          )
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, isAdmin])
+
+  // Check if featured column exists and test permissions
   const checkFeaturedColumn = async () => {
     setMigrationStatus("pending")
     setMigrationError(null)
@@ -121,6 +154,22 @@ export default function AdminFeaturedGamesPage() {
         setMigrationStatus("error")
         setMigrationError(`The 'featured' column doesn't exist: ${error.message}`)
         return false
+      }
+
+      // Test if we can update the featured column (permission check)
+      if (data && data.length > 0) {
+        const testMatch = data[0]
+        const { error: updateTestError } = await supabase
+          .from("matches")
+          .update({ featured: testMatch.featured }) // Set to same value to test permissions
+          .eq("id", testMatch.id)
+
+        if (updateTestError) {
+          console.error("Update permission test failed:", updateTestError)
+          setMigrationStatus("error")
+          setMigrationError(`Update permissions issue: ${updateTestError.message}`)
+          return false
+        }
       }
 
       setMigrationStatus("success")
@@ -180,19 +229,43 @@ export default function AdminFeaturedGamesPage() {
     }
   }
 
-  // Toggle featured status
+  // Toggle featured status with immediate UI update
   const toggleFeatured = async (matchId: string, currentStatus: boolean) => {
     setUpdatingId(matchId)
+    
+    // Immediately update the local state for instant UI feedback
+    setMatches(prevMatches => 
+      prevMatches.map(match => 
+        match.id === matchId 
+          ? { ...match, featured: !currentStatus }
+          : match
+      )
+    )
+
     try {
+      console.log(`Updating match ${matchId} featured status from ${currentStatus} to ${!currentStatus}`)
+      
       // Update the featured status using standard Supabase update
-      const { error: updateError } = await supabase
+      const { data, error: updateError } = await supabase
         .from("matches")
         .update({ featured: !currentStatus })
         .eq("id", matchId)
+        .select()
 
       if (updateError) {
+        console.error('Update error:', updateError)
+        // Revert the local state if the update failed
+        setMatches(prevMatches => 
+          prevMatches.map(match => 
+            match.id === matchId 
+              ? { ...match, featured: currentStatus }
+              : match
+          )
+        )
         throw new Error(`Failed to update: ${updateError.message}`)
       }
+
+      console.log('Update successful:', data)
 
       toast({
         title: currentStatus ? "Match unfeatured" : "Match featured",
@@ -201,8 +274,9 @@ export default function AdminFeaturedGamesPage() {
           : "The match has been added to featured matches.",
       })
 
-      // Refresh matches after a short delay to allow for database updates
-      setTimeout(() => fetchMatches(), 500)
+      // Optional: Refresh matches to ensure data consistency (but UI is already updated)
+      // Uncomment the line below if you want to refresh from database after update
+      // setTimeout(() => fetchMatches(), 1000)
     } catch (error: any) {
       console.error("Error toggling featured status:", error)
       toast({
