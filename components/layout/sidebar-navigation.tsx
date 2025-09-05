@@ -399,6 +399,18 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
       ],
     },
     {
+      name: "ELO",
+      href: "/elo/rankings",
+      icon: Target,
+      color: "rink-blue",
+      description: "ELO rankings and competitive matches",
+      submenu: [
+        { name: "ELO Rankings", href: "/elo/rankings", icon: Trophy },
+        { name: "ELO Statistics", href: "/elo/statistics", icon: BarChart3 },
+        { name: "ELO Matches", href: "/elo/matches", icon: Calendar },
+      ],
+    },
+    {
       name: "News",
       href: "/news",
       icon: Newspaper,
