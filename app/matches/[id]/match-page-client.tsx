@@ -458,157 +458,137 @@ export default function MatchDetailPage() {
   const canManageMatch = matchInProgress;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Stunning Hockey Arena Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-ice-blue-600 via-rink-blue-700 to-hockey-silver-800 dark:from-ice-blue-900 dark:via-rink-blue-900 dark:to-hockey-silver-900 py-24 px-4">
-        {/* Dynamic Hockey Arena Background */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(120,119,198,0.3),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,119,198,0.2),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_40%_40%,rgba(120,200,255,0.1),transparent_50%)]"></div>
-        
-        {/* Enhanced Floating Hockey Elements */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-assist-green-200/20 to-goal-red-200/20 rounded-full blur-2xl animate-float"></div>
-        <div className="absolute top-20 right-20 w-24 h-24 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-xl animate-float" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-10 left-20 w-20 h-20 bg-gradient-to-br from-hockey-silver-200/25 to-ice-blue-200/25 rounded-full blur-lg animate-float" style={{ animationDelay: '0.5s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-6xl mx-auto">
-            {/* Premium Typography with Hockey Theme */}
-            <div className="mb-12">
-              <h1 className="hockey-title-enhanced mb-6 text-5xl md:text-6xl lg:text-7xl font-black tracking-tight">
-                <span className="hockey-gradient-text-animated">
-                  {match?.home_team?.name || "Home Team"}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      {/* Clean Professional Header */}
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700">
+        <div className="container mx-auto px-6 py-8">
+          {/* Page Title */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Match Details</h1>
+          </div>
+
+          {/* Team vs Team Layout */}
+          <div className="flex items-center justify-between max-w-4xl mx-auto">
+            {/* Home Team */}
+            <div className="flex flex-col items-center text-center flex-1">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
+                <span className="text-white font-bold text-lg">
+                  {match?.home_team?.name?.charAt(0) || "H"}
                 </span>
-                <span className="mx-6 text-hockey-silver-300 dark:text-hockey-silver-400 text-4xl md:text-5xl lg:text-6xl font-bold">vs</span>
-                <span className="hockey-gradient-text-animated">
-                  {match?.away_team?.name || "Away Team"}
-                </span>
-                {wentToOvertime && (
-                  <span className="ml-4 text-ice-blue-400 text-3xl md:text-4xl lg:text-5xl font-bold animate-pulse">
-                    (OT)
-                  </span>
-                )}
-              </h1>
-              <p className="hockey-subtitle-enhanced text-xl md:text-2xl font-medium">{formattedDate}</p>
+              </div>
+              <h2 className="text-xl font-semibold text-white mb-1">
+                {match?.home_team?.name || "Home Team"}
+              </h2>
             </div>
-            
-            {/* Premium Match Status Cards - Championship Style */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
-              {/* Final Score Card - Trophy Style */}
-              <div className="group animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
-                <div className="hockey-stat-hover-enhanced relative overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-ice-blue-500/10 to-rink-blue-600/10 rounded-3xl"></div>
-                  <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-br from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl group-hover:shadow-ice-blue-500/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                      <Trophy className="h-10 w-10 text-white" />
-                    </div>
-                    <div className="text-5xl font-black text-white mb-3 tracking-tight">
-                      {match?.home_score || 0} - {match?.away_score || 0}
-                    </div>
-                    <div className="text-sm font-bold text-hockey-silver-200 dark:text-hockey-silver-300 uppercase tracking-widest">
-                      Final Score
-                    </div>
-                    <div className="w-20 h-1 bg-gradient-to-r from-ice-blue-400 to-rink-blue-500 rounded-full mx-auto mt-4 group-hover:w-24 transition-all duration-500"></div>
-                  </div>
-                </div>
+
+            {/* Score Section */}
+            <div className="flex flex-col items-center mx-8">
+              <div className="text-6xl font-black text-white mb-2">
+                {match?.home_score || 0} - {match?.away_score || 0}
               </div>
-              
-              {/* Match Status Card - Dynamic */}
-              <div className="group animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
-                <div className="hockey-stat-hover-enhanced relative overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-assist-green-500/10 to-goal-red-600/10 rounded-3xl"></div>
-                  <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-br from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl group-hover:shadow-assist-green-500/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                      <Activity className="h-10 w-10 text-white" />
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-3">
-                      {match?.status || "Status Unknown"}
-                    </div>
-                    <div className="text-sm font-bold text-hockey-silver-200 dark:text-hockey-silver-300 uppercase tracking-widest">
-                      Match Status
-                    </div>
-                    <div className="w-20 h-1 bg-gradient-to-r from-assist-green-400 to-goal-red-500 rounded-full mx-auto mt-4 group-hover:w-24 transition-all duration-500"></div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Game Type Card - Premium */}
-              <div className="group animate-slide-in-up" style={{ animationDelay: '0.3s' }}>
-                <div className="hockey-stat-hover-enhanced relative overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-white/10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-goal-red-500/10 to-assist-green-600/10 rounded-3xl"></div>
-                  <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-br from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl group-hover:shadow-goal-red-500/40 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
-                      <Clock className="h-10 w-10 text-white" />
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-3">
-                      {wentToOvertime ? "Overtime" : "Regulation"}
-                    </div>
-                    <div className="text-sm font-bold text-hockey-silver-200 dark:text-hockey-silver-300 uppercase tracking-widest">
-                      Game Type
-                    </div>
-                    <div className="w-20 h-1 bg-gradient-to-r from-goal-red-400 to-assist-green-500 rounded-full mx-auto mt-4 group-hover:w-24 transition-all duration-500"></div>
-                  </div>
-                </div>
+              <div className="text-lg font-medium text-slate-300">
+                {match?.status || "Status Unknown"}
               </div>
             </div>
 
-            {/* Premium Management Buttons */}
-            {canManageMatch && (
-              <div className="flex flex-wrap justify-center gap-6 animate-slide-in-up" style={{ animationDelay: '0.4s' }}>
-                <Button
-                  onClick={() => setOpenScoreModal(true)}
-                  className="hockey-button-hover-enhanced hockey-hover-lift px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 hover:from-ice-blue-700 hover:to-rink-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Edit className="h-5 w-5 mr-3" />
-                  Edit Score
-                </Button>
-                <Button
-                  onClick={() => setOpenModal(true)}
-                  className="hockey-button-hover-enhanced hockey-hover-lift px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-assist-green-600 to-goal-red-700 hover:from-assist-green-700 hover:to-goal-red-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Upload className="h-5 w-5 mr-3" />
-                  Import EA Data
-                </Button>
-                <Button
-                  onClick={handleManualRefresh}
-                  className="hockey-button-hover-enhanced hockey-hover-lift px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-hockey-silver-600 to-ice-blue-700 hover:from-hockey-silver-700 hover:to-ice-blue-800 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-                  disabled={forceRefreshing}
-                >
-                  <RefreshCw className={`h-5 w-5 mr-3 ${forceRefreshing ? "animate-spin" : ""}`} />
-                  {forceRefreshing ? "Refreshing..." : "Refresh"}
-                </Button>
+            {/* Away Team */}
+            <div className="flex flex-col items-center text-center flex-1">
+              <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
+                <span className="text-white font-bold text-lg">
+                  {match?.away_team?.name?.charAt(0) || "A"}
+                </span>
               </div>
-            )}
+              <h2 className="text-xl font-semibold text-white mb-1">
+                {match?.away_team?.name || "Away Team"}
+              </h2>
+            </div>
           </div>
+
+          {/* Management Buttons */}
+          {canManageMatch && (
+            <div className="flex justify-center gap-4 mt-8">
+              <Button
+                onClick={() => setOpenScoreModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Score
+              </Button>
+              <Button
+                onClick={() => setOpenModal(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import EA Data
+              </Button>
+              <Button
+                onClick={handleManualRefresh}
+                className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg hover:scale-105 transition-all duration-300 shadow-lg"
+                disabled={forceRefreshing}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${forceRefreshing ? "animate-spin" : ""}`} />
+                {forceRefreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Premium Main Content */}
-      <div className="container mx-auto px-4 pb-20 -mt-8 relative z-10">
-        {/* Stunning Premium Tabs */}
+      {/* Clean Main Content */}
+      <div className="container mx-auto px-6 py-8">
+        {/* Clean Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* Date Card */}
+          <div className="bg-blue-600 rounded-lg p-6 text-white hover:scale-105 transition-all duration-300 shadow-lg">
+            <div className="flex items-center gap-3 mb-3">
+              <Calendar className="h-6 w-6 text-blue-200" />
+              <span className="text-sm font-semibold uppercase tracking-wider">DATE</span>
+            </div>
+            <div className="text-lg font-medium">{formattedDate}</div>
+          </div>
+
+          {/* Season Card */}
+          <div className="bg-green-600 rounded-lg p-6 text-white hover:scale-105 transition-all duration-300 shadow-lg">
+            <div className="flex items-center gap-3 mb-3">
+              <Trophy className="h-6 w-6 text-green-200" />
+              <span className="text-sm font-semibold uppercase tracking-wider">SEASON</span>
+            </div>
+            <div className="text-lg font-medium">{match?.season?.name || "Season 1"}</div>
+          </div>
+
+          {/* Status Card */}
+          <div className="bg-red-600 rounded-lg p-6 text-white hover:scale-105 transition-all duration-300 shadow-lg">
+            <div className="flex items-center gap-3 mb-3">
+              <Activity className="h-6 w-6 text-red-200" />
+              <span className="text-sm font-semibold uppercase tracking-wider">STATUS</span>
+            </div>
+            <div className="text-lg font-medium">{match?.status || "Status Unknown"}</div>
+          </div>
+        </div>
+
+        {/* Clean Tabs */}
         <Tabs defaultValue="details" className="w-full">
-          <div className="relative mb-12">
-            <TabsList className="grid w-full grid-cols-3 bg-white/80 dark:bg-hockey-silver-900/80 backdrop-blur-xl border-2 border-white/20 dark:border-hockey-silver-700/50 rounded-2xl p-2 shadow-2xl">
+          <div className="mb-8">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-800 border border-slate-700 rounded-lg p-1">
               <TabsTrigger 
                 value="details" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-ice-blue-100/50 dark:hover:bg-ice-blue-800/30 transition-all duration-500 flex items-center gap-3 px-6 py-4 rounded-xl font-semibold hockey-hover-lift"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-md font-medium"
               >
-                <Trophy className="h-5 w-5" />
+                <Trophy className="h-4 w-4" />
                 Details
               </TabsTrigger>
               <TabsTrigger 
                 value="lineups" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-ice-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-rink-blue-100/50 dark:hover:bg-rink-blue-800/30 transition-all duration-500 flex items-center gap-3 px-6 py-4 rounded-xl font-semibold hockey-hover-lift"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-md font-medium"
               >
-                <Users className="h-5 w-5" />
+                <Users className="h-4 w-4" />
                 Lineups
               </TabsTrigger>
               <TabsTrigger 
                 value="highlights" 
-                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-goal-red-100/50 dark:hover:bg-goal-red-800/30 transition-all duration-500 flex items-center gap-3 px-6 py-4 rounded-xl font-semibold hockey-hover-lift"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-700 transition-all duration-300 flex items-center gap-2 px-4 py-3 rounded-md font-medium"
               >
-                <Camera className="h-5 w-5" />
+                <Camera className="h-4 w-4" />
                 Highlights
               </TabsTrigger>
             </TabsList>
@@ -617,18 +597,18 @@ export default function MatchDetailPage() {
           <TabsContent value="details" className="space-y-8">
             <MatchDetails match={match} />
             
-            {/* Team Stats Comparison - Moved from Stats tab */}
-            <Card className="hockey-enhanced-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
+            {/* Team Stats Comparison */}
+            <Card className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+              <CardHeader className="bg-slate-700 border-b border-slate-600">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                     <BarChart3 className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">
+                    <CardTitle className="text-xl text-white">
                       Team Statistics Comparison
                     </CardTitle>
-                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                    <CardDescription className="text-slate-300">
                       Goals, Shots, Hits, Faceoff%, Passing%
                     </CardDescription>
                   </div>
@@ -742,61 +722,61 @@ export default function MatchDetailPage() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="hover:bg-transparent">
-                        <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Period</TableHead>
-                        <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
+                      <TableRow className="bg-slate-700">
+                        <TableHead className="text-slate-300 font-semibold">Period</TableHead>
+                        <TableHead className="text-center text-blue-300 font-semibold">
                           {match?.home_team?.name || "Home"}
                         </TableHead>
-                        <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
+                        <TableHead className="text-center text-red-300 font-semibold">
                           {match?.away_team?.name || "Away"}
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow className="hockey-table-row-hover">
-                        <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">1st Period</TableCell>
-                        <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                      <TableRow className="hover:bg-slate-700/50 transition-colors duration-200">
+                        <TableCell className="font-medium text-white">1st Period</TableCell>
+                        <TableCell className="text-center text-2xl font-bold text-blue-400">
                           {periodScores.find((p: any) => p.period_number === 1)?.home_score || match?.period_scores?.[0]?.home || 0}
                         </TableCell>
-                        <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                        <TableCell className="text-center text-2xl font-bold text-red-400">
                           {periodScores.find((p: any) => p.period_number === 1)?.away_score || match?.period_scores?.[0]?.away || 0}
                         </TableCell>
                       </TableRow>
-                      <TableRow className="hockey-table-row-hover">
-                        <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">2nd Period</TableCell>
-                        <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                      <TableRow className="hover:bg-slate-700/50 transition-colors duration-200">
+                        <TableCell className="font-medium text-white">2nd Period</TableCell>
+                        <TableCell className="text-center text-2xl font-bold text-blue-400">
                           {periodScores.find((p: any) => p.period_number === 2)?.home_score || match?.period_scores?.[1]?.home || 0}
                         </TableCell>
-                        <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                        <TableCell className="text-center text-2xl font-bold text-red-400">
                           {periodScores.find((p: any) => p.period_number === 2)?.away_score || match?.period_scores?.[1]?.away || 0}
                         </TableCell>
                       </TableRow>
-                      <TableRow className="hockey-table-row-hover">
-                        <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">3rd Period</TableCell>
-                        <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                      <TableRow className="hover:bg-slate-700/50 transition-colors duration-200">
+                        <TableCell className="font-medium text-white">3rd Period</TableCell>
+                        <TableCell className="text-center text-2xl font-bold text-blue-400">
                           {periodScores.find((p: any) => p.period_number === 3)?.home_score || match?.period_scores?.[2]?.home || 0}
                         </TableCell>
-                        <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                        <TableCell className="text-center text-2xl font-bold text-red-400">
                           {periodScores.find((p: any) => p.period_number === 3)?.away_score || match?.period_scores?.[2]?.away || 0}
                         </TableCell>
                       </TableRow>
                       {wentToOvertime && (
-                        <TableRow className="hockey-table-row-hover">
-                          <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Overtime</TableCell>
-                          <TableCell className="text-center text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                        <TableRow className="hover:bg-slate-700/50 transition-colors duration-200">
+                          <TableCell className="font-medium text-white">Overtime</TableCell>
+                          <TableCell className="text-center text-2xl font-bold text-blue-400">
                             {periodScores.find((p: any) => p.period_number === 4)?.home_score || match?.period_scores?.[3]?.home || 0}
                           </TableCell>
-                          <TableCell className="text-center text-2xl font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                          <TableCell className="text-center text-2xl font-bold text-red-400">
                             {periodScores.find((p: any) => p.period_number === 4)?.away_score || match?.period_scores?.[3]?.away || 0}
                           </TableCell>
                         </TableRow>
                       )}
-                      <TableRow className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 font-bold">
-                        <TableCell className="font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Total</TableCell>
-                        <TableCell className="text-center text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                      <TableRow className="bg-slate-700 font-bold">
+                        <TableCell className="font-bold text-white">Total</TableCell>
+                        <TableCell className="text-center text-3xl font-black text-blue-400">
                           {match?.home_score || 0}
                         </TableCell>
-                        <TableCell className="text-center text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
+                        <TableCell className="text-center text-3xl font-black text-red-400">
                           {match?.away_score || 0}
                         </TableCell>
                       </TableRow>
