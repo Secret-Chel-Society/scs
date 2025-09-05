@@ -19,15 +19,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, Plus, Pencil, Trash2, Search, RefreshCw, AlertTriangle, Eye, EyeOff, Trophy, Users, Target, TrendingUp, Award, Medal, Star, Shield, Database, Settings, Zap } from "lucide-react"
+import { 
+  Loader2, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Search, 
+  RefreshCw, 
+  AlertTriangle, 
+  Eye, 
+  EyeOff,
+  Users,
+  Trophy,
+  Settings,
+  Database,
+  Shield,
+  Activity,
+  MapPin,
+  Target
+} from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { DirectColumnMigration } from "@/components/admin/direct-column-migration"
 import { TeamsActiveMigration } from "@/components/admin/teams-active-migration"
 import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
-import { ConferenceManagement } from "@/components/admin/conference-management"
 import { getCurrentSeasonId } from "@/lib/team-utils"
+import { CONFERENCES, type ConferenceType } from "@/lib/standings-calculator"
 
 interface Season {
   id: number
@@ -54,21 +72,7 @@ interface Team {
   powerplay_opportunities?: number
   penalty_kill_goals_against?: number
   penalty_kill_opportunities?: number
-  conference_id?: string
-  conference?: {
-    id: string
-    name: string
-    color: string
-  }
-}
-
-interface Conference {
-  id: string
-  name: string
-  description: string | null
-  color: string
-  created_at: string
-  updated_at: string
+  conference?: string
 }
 
 interface EATeam {
@@ -85,7 +89,6 @@ export default function AdminTeamsPage() {
   const [loading, setLoading] = useState(true)
   const [teams, setTeams] = useState<Team[]>([])
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([])
-  const [conferences, setConferences] = useState<Conference[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAddingTeam, setIsAddingTeam] = useState(false)
@@ -96,10 +99,13 @@ export default function AdminTeamsPage() {
     season_id: 1,
     ea_club_id: "",
     is_active: true,
-    conference_id: "",
+    conference: "" as ConferenceType | "",
   })
   const [seasons, setSeasons] = useState<Season[]>([])
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
+  const [conferenceFilter, setConferenceFilter] = useState<string>("all")
+  const [showConferenceManagement, setShowConferenceManagement] = useState(false)
+  const [isUpdatingConference, setIsUpdatingConference] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isSearchingEA, setIsSearchingEA] = useState(false)
   const [eaSearchQuery, setEaSearchQuery] = useState("")
@@ -115,7 +121,6 @@ export default function AdminTeamsPage() {
   const [lastRefresh, setLastRefresh] = useState(Date.now())
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isAddingColumns, setIsAddingColumns] = useState(false)
-  const [showConferenceManagement, setShowConferenceManagement] = useState(false)
 
   useEffect(() => {
     async function checkAuthorizationAndLoadData() {
@@ -203,9 +208,6 @@ export default function AdminTeamsPage() {
           setSeasons([{ id: 1, name: "Season 1", is_active: true }])
           setSelectedSeason(1)
         }
-
-        // Load conferences
-        await loadConferences()
 
         // Load teams - will be done by effect that watches selectedSeason
       } catch (error: any) {
@@ -354,6 +356,55 @@ export default function AdminTeamsPage() {
     setLastRefresh(Date.now()) // This will trigger a reload of teams data
   }
 
+  // Update team conference
+  const updateTeamConference = async (teamId: string, conference: ConferenceType) => {
+    try {
+      setIsUpdatingConference(true)
+      
+      const { error } = await supabase
+        .from("teams")
+        .update({ conference })
+        .eq("id", teamId)
+
+      if (error) throw error
+
+      // Update local state
+      setTeams(prevTeams => 
+        prevTeams.map(team => 
+          team.id === teamId ? { ...team, conference } : team
+        )
+      )
+
+      toast({
+        title: "Conference Updated",
+        description: `Team conference updated to ${conference}`,
+      })
+    } catch (error: any) {
+      console.error("Error updating conference:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update conference",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUpdatingConference(false)
+    }
+  }
+
+  // Get conference statistics
+  const getConferenceStats = () => {
+    const easternTeams = teams.filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
+    const westernTeams = teams.filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
+    const unassignedTeams = teams.filter(team => !team.conference || team.conference === "")
+
+    return {
+      eastern: easternTeams.length,
+      western: westernTeams.length,
+      unassigned: unassignedTeams.length,
+      total: teams.length
+    }
+  }
+
   // Add missing columns directly using exec_sql
   const addMissingColumns = async () => {
     try {
@@ -433,26 +484,6 @@ export default function AdminTeamsPage() {
     }
   }
 
-  // Load conferences
-  const loadConferences = async () => {
-    if (!supabase) return
-
-    try {
-      const { data, error } = await supabase.from("conferences").select("*").order("name")
-
-      if (error) {
-        console.error("Error loading conferences:", error)
-        setConferences([])
-        return
-      }
-
-      setConferences(data || [])
-    } catch (error: any) {
-      console.error("Error loading conferences:", error)
-      setConferences([])
-    }
-  }
-
   // Load teams based on selected season
   const loadTeams = async (seasonId?: number) => {
     if (!supabase) {
@@ -466,28 +497,8 @@ export default function AdminTeamsPage() {
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
 
-      // Load teams with conference data (fallback to basic query if conference join fails)
-      let { data, error } = await supabase
-        .from("teams")
-        .select(`
-          *,
-          conference:conferences(id, name, color)
-        `)
-        .eq("season_id", season)
-        .order("name")
-
-      // If conference join fails, try without conference data
-      if (error && error.message.includes("conferences")) {
-        console.log("Conference table not found, loading teams without conference data")
-        const fallbackResult = await supabase
-          .from("teams")
-          .select("*")
-          .eq("season_id", season)
-          .order("name")
-        
-        data = fallbackResult.data
-        error = fallbackResult.error
-      }
+      // Use standard Supabase query instead of exec_sql
+      const { data, error } = await supabase.from("teams").select("*").eq("season_id", season).order("name")
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -563,7 +574,7 @@ export default function AdminTeamsPage() {
       season_id: selectedSeason || 1,
       ea_club_id: "",
       is_active: true,
-      conference_id: "",
+      conference: "",
     })
   }
 
@@ -576,7 +587,7 @@ export default function AdminTeamsPage() {
       season_id: team.season_id,
       ea_club_id: team.ea_club_id || "",
       is_active: team.is_active !== false, // Default to true if undefined
-      conference_id: team.conference_id || "",
+      conference: team.conference || "",
     })
   }
 
@@ -607,11 +618,6 @@ export default function AdminTeamsPage() {
       // Only include is_active if the column exists
       if (hasActiveColumn) {
         teamData.is_active = teamForm.is_active
-      }
-
-      // Include conference_id if provided
-      if (teamForm.conference_id) {
-        teamData.conference_id = teamForm.conference_id
       }
 
       if (isAddingTeam) {
@@ -813,17 +819,17 @@ export default function AdminTeamsPage() {
     setLastRefresh(Date.now())
   }
 
-  const handleConferencesUpdated = async () => {
-    // Reload conferences and teams
-    await loadConferences()
-    setLastRefresh(Date.now())
-  }
-
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-12 w-1/3 mb-6" />
-        <Skeleton className="h-[400px] w-full rounded-lg" />
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ice-blue-500 mx-auto mb-4"></div>
+              <p className="text-ice-blue-600 dark:text-ice-blue-400">Loading team management...</p>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -842,185 +848,522 @@ export default function AdminTeamsPage() {
         {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto px-3 sm:px-6 lg:px-8 text-center relative z-10">
-          <div>
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl shadow-assist-green-500/25">
-              <Trophy className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-br from-hockey-silver-200/20 to-ice-blue-200/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="flex items-center gap-6 mb-8">
+            <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
+              <Users className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-hockey-silver-800 dark:text-hockey-silver-200">
-              Team Management
-            </h1>
-            <p className="text-sm sm:text-base lg:text-lg mx-auto mb-6 sm:mb-8 max-w-3xl text-hockey-silver-600 dark:text-hockey-silver-400 px-2">
-              Comprehensive team administration and roster management. Create, edit, and monitor team statistics, EA integration, and league standings.
-            </p>
-            
-            {/* Feature Highlights */}
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 px-2">
-              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-assist-green-100/50 to-assist-green-100/50 dark:from-assist-green-900/20 dark:to-assist-green-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-assist-green-200/30 dark:border-assist-green-700/30">
-                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-assist-green-600 dark:text-assist-green-400" />
-                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Team Roster</span>
-              </div>
-              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                <Target className="h-3 w-3 sm:h-4 sm:w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">EA Integration</span>
-              </div>
-              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-goal-red-100/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-goal-red-200/30 dark:border-goal-red-700/30">
-                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-goal-red-600 dark:text-goal-red-400" />
-                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Statistics</span>
-              </div>
-              <div className="flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-hockey-silver-100/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 px-2 sm:px-4 py-1 sm:py-2 rounded-full border border-hockey-silver-200/30 dark:border-hockey-silver-700/30">
-                <Settings className="h-3 w-3 sm:h-4 sm:w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                <span className="text-xs sm:text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Management</span>
-              </div>
+            <div>
+              <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-hockey-silver-600 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-hockey-silver-400 bg-clip-text text-transparent leading-tight">
+                Team Management
+              </h1>
+              <p className="text-xl text-ice-blue-700 dark:text-ice-blue-300 mt-3">Manage teams, statistics, and league configuration</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-2 sm:px-4 pb-12 sm:pb-20">
+      <div className="relative container mx-auto px-4 pb-20">
+        {loadError && (
+          <Card className="mb-8 hockey-card border-2 border-goal-red-200/50 dark:border-goal-red-700/50 shadow-2xl shadow-goal-red-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-goal-red-500 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-goal-red-600 dark:text-goal-red-400 mb-2">Error loading data</h3>
+                  <p className="text-goal-red-600 dark:text-goal-red-400 mb-3">{loadError}</p>
+                  <Button variant="outline" size="sm" onClick={handleRetry} className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {loadError && (
-        <Alert className="mb-6 border-2 border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-r from-goal-red-50/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-800/20">
-          <AlertTriangle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-          <AlertTitle className="text-goal-red-800 dark:text-goal-red-200">Error loading data</AlertTitle>
-          <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">
-            {loadError}
-            <div className="mt-2">
-              <Button variant="outline" size="sm" onClick={handleRetry} className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Retry
-              </Button>
+        {/* Enhanced Conference Management Section */}
+        <Card className="mb-8 hockey-card hockey-card-hover border-2 border-assist-green-200/50 dark:border-assist-green-700/50 shadow-2xl shadow-assist-green-500/20">
+          <CardHeader className="relative">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/30 dark:to-assist-green-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
+            <CardTitle className="flex items-center gap-4 relative z-10">
+              <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-assist-green-500/25">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-ice-blue-800 dark:text-ice-blue-200">Conference Management</div>
+                <div className="text-lg text-ice-blue-600 dark:text-ice-blue-400">Manage team conferences for the Eastern Elites and Western Warriors divisions</div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="hockey-card bg-gradient-to-r from-ice-blue-500/20 to-ice-blue-500/20 backdrop-blur-sm border-2 border-ice-blue-200/50 dark:border-ice-blue-700/50 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="text-3xl font-bold text-ice-blue-600 dark:text-ice-blue-400">{getConferenceStats().eastern}</div>
+                <div className="text-lg text-ice-blue-600 dark:text-ice-blue-400 font-semibold">Eastern Elites</div>
+              </div>
+              <div className="hockey-card bg-gradient-to-r from-rink-blue-500/20 to-rink-blue-500/20 backdrop-blur-sm border-2 border-rink-blue-200/50 dark:border-rink-blue-700/50 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="text-3xl font-bold text-rink-blue-600 dark:text-rink-blue-400">{getConferenceStats().western}</div>
+                <div className="text-lg text-rink-blue-600 dark:text-rink-blue-400 font-semibold">Western Warriors</div>
+              </div>
+              <div className="hockey-card bg-gradient-to-r from-hockey-silver-500/20 to-hockey-silver-500/20 backdrop-blur-sm border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 rounded-2xl p-6 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <div className="text-3xl font-bold text-hockey-silver-600 dark:text-hockey-silver-400">{getConferenceStats().unassigned}</div>
+                <div className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400 font-semibold">Unassigned</div>
+              </div>
             </div>
-          </AlertDescription>
-        </Alert>
-      )}
 
-      {!hasEaColumn && (
-        <Alert className="mb-6 border-2 border-orange-200/50 dark:border-orange-700/50 bg-gradient-to-r from-orange-50/50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/20">
-          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-          <AlertTitle className="text-orange-800 dark:text-orange-200">EA Club ID column needs to be added</AlertTitle>
-          <AlertDescription className="text-orange-700 dark:text-orange-300">
-            To use EA integration features, you need to add the EA Club ID column to the teams table.
-            <div className="mt-2">
-              <DirectColumnMigration onComplete={handleMigrationComplete} />
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xl font-bold text-ice-blue-800 dark:text-ice-blue-200 mb-2">Conference Assignment</h4>
+                  <p className="text-ice-blue-600 dark:text-ice-blue-400 text-sm">
+                    Assign teams to conferences. Top 4 teams from each conference qualify for playoffs.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowConferenceManagement(!showConferenceManagement)}
+                  className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  {showConferenceManagement ? "Hide" : "Show"} Conference Management
+                </Button>
+              </div>
 
-      {!hasActiveColumn && (
-        <Alert className="mb-6 border-2 border-orange-200/50 dark:border-orange-700/50 bg-gradient-to-r from-orange-50/50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/20">
-          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-          <AlertTitle className="text-orange-800 dark:text-orange-200">Team Active Status column needs to be added</AlertTitle>
-          <AlertDescription className="text-orange-700 dark:text-orange-300">
-            To manage team visibility, you need to add the is_active column to the teams table.
-            <div className="mt-2">
-              <TeamsActiveMigration onComplete={handleMigrationComplete} />
+              {showConferenceManagement && (
+                <div className="space-y-4">
+                  {teams.map((team) => (
+                    <div key={team.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium text-white">{team.name}</span>
+                        {team.conference && (
+                          <Badge 
+                            variant="outline" 
+                            className={team.conference === CONFERENCES.EASTERN_ELITES 
+                              ? "border-blue-500/30 text-blue-400" 
+                              : "border-purple-500/30 text-purple-400"
+                            }
+                          >
+                            {team.conference}
+                          </Badge>
+                        )}
+                      </div>
+                      <Select
+                        value={team.conference || ""}
+                        onValueChange={(value) => updateTeamConference(team.id, value as ConferenceType)}
+                        disabled={isUpdatingConference}
+                      >
+                        <SelectTrigger className="w-48 bg-slate-800/50 border-white/20 text-white">
+                          <SelectValue placeholder="Select conference" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={CONFERENCES.EASTERN_ELITES}>Eastern Elites</SelectItem>
+                          <SelectItem value={CONFERENCES.WESTERN_WARRIORS}>Western Warriors</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </AlertDescription>
-        </Alert>
-      )}
+          </CardContent>
+        </Card>
 
-      {!hasManualOverrideColumn && (
-        <Alert className="mb-6 border-2 border-orange-200/50 dark:border-orange-700/50 bg-gradient-to-r from-orange-50/50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/20">
-          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-          <AlertTitle className="text-orange-800 dark:text-orange-200">Manual Override column needs to be added</AlertTitle>
-          <AlertDescription className="text-orange-700 dark:text-orange-300">
-            To manually edit team statistics, you need to add the manual_override column to the teams table.
-            <div className="mt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const response = await fetch("/api/admin/run-migration/manual-override", {
-                      method: "POST",
-                    })
-                    if (!response.ok) {
-                      throw new Error("Failed to run migration")
-                    }
-                    toast({
-                      title: "Migration successful",
-                      description: "The manual_override column has been added to the teams table.",
-                    })
-                    await checkManualOverrideColumnExists()
-                    setLastRefresh(Date.now())
-                  } catch (error) {
-                    console.error("Error running migration:", error)
-                    toast({
-                      title: "Migration failed",
-                      description: "Failed to add the manual_override column to the teams table.",
-                      variant: "destructive",
-                    })
-                  }
-                }}
-                className="hockey-button bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Run Migration
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
+        {/* Migration Alerts */}
+        {!hasEaColumn && (
+          <Card className="mb-6 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <Database className="h-5 w-5 text-amber-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-400 mb-2">EA Club ID Column Required</h3>
+                  <p className="text-amber-300/80 mb-3">To use EA integration features, you need to add the EA Club ID column to the teams table.</p>
+                  <DirectColumnMigration onComplete={handleMigrationComplete} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {(!hasGamesPlayedColumn || !hasPointsColumn) && (
-        <Alert className="mb-6 border-2 border-orange-200/50 dark:border-orange-700/50 bg-gradient-to-r from-orange-50/50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/20">
-          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-          <AlertTitle className="text-orange-800 dark:text-orange-200">Team Stats Columns Need to be Added</AlertTitle>
-          <AlertDescription className="text-orange-700 dark:text-orange-300">
-            To properly track team statistics, you need to add the points and games_played columns to the teams table.
-            <div className="mt-2">
-              <Button variant="outline" size="sm" onClick={addMissingColumns} disabled={isAddingColumns} className="hockey-button bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                {isAddingColumns ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adding Columns...
-                  </>
-                ) : (
-                  "Add Required Columns"
-                )}
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
+        {!hasActiveColumn && (
+          <Card className="mb-6 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <Activity className="h-5 w-5 text-amber-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-400 mb-2">Team Active Status Column Required</h3>
+                  <p className="text-amber-300/80 mb-3">To manage team visibility, you need to add the is_active column to the teams table.</p>
+                  <TeamsActiveMigration onComplete={handleMigrationComplete} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
+        {!hasManualOverrideColumn && (
+          <Card className="mb-6 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <Settings className="h-5 w-5 text-amber-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-400 mb-2">Manual Override Column Required</h3>
+                  <p className="text-amber-300/80 mb-3">To manually edit team statistics, you need to add the manual_override column to the teams table.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch("/api/admin/run-migration/manual-override", {
+                          method: "POST",
+                        })
+                        if (!response.ok) {
+                          throw new Error("Failed to run migration")
+                        }
+                        toast({
+                          title: "Migration successful",
+                          description: "The manual_override column has been added to the teams table.",
+                        })
+                        await checkManualOverrideColumnExists()
+                        setLastRefresh(Date.now())
+                      } catch (error) {
+                        console.error("Error running migration:", error)
+                        toast({
+                          title: "Migration failed",
+                          description: "Failed to add the manual_override column to the teams table.",
+                          variant: "destructive",
+                        })
+                      }
+                    }}
+                    className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  >
+                    Run Migration
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Enhanced Controls Section */}
-      <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20 mb-8">
-        <CardHeader className="relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
-          <div className="flex items-center gap-2 sm:gap-4 relative z-10">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
-              <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                Team Controls
-              </CardTitle>
-              <CardDescription className="text-sm sm:text-base lg:text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                Manage seasons, search teams, and perform administrative actions
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6 relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="season-select" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                  <Trophy className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                  Season
-                </Label>
+        {(!hasGamesPlayedColumn || !hasPointsColumn) && (
+          <Card className="mb-6 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <Trophy className="h-5 w-5 text-amber-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-400 mb-2">Team Stats Columns Required</h3>
+                  <p className="text-amber-300/80 mb-3">To properly track team statistics, you need to add the points and games_played columns to the teams table.</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addMissingColumns} 
+                    disabled={isAddingColumns}
+                    className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                  >
+                    {isAddingColumns ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Adding Columns...
+                      </>
+                    ) : (
+                      "Add Required Columns"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Controls Section */}
+        <Card className="mb-6 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-sm border border-white/20">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex items-center gap-4">
                 <Select value={selectedSeason?.toString() || ""} onValueChange={(value) => setSelectedSeason(Number(value))}>
-                  <SelectTrigger id="season-select" className="w-[200px] hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
+                  <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                     <SelectValue placeholder="Select Season" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                  <SelectContent className="bg-slate-800 border-white/20">
                     {seasons.map((season: Season) => (
-                      <SelectItem key={season.id} value={season.id.toString()}>
+                      <SelectItem key={season.id} value={season.id.toString()} className="text-white hover:bg-slate-700">
+                        {season.name} {season.is_active ? "(Active)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Input
+                  placeholder="Search teams..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-sm bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                />
+
+                {hasActiveColumn && (
+                  <div className="flex items-center space-x-2">
+                    <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
+                    <Label htmlFor="show-inactive" className="text-white/70">Show inactive teams</Label>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleAddTeam}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Team
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setLastRefresh(Date.now())} 
+                  disabled={isLoadingStats}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  {isLoadingStats ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Refresh Stats
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Teams Table */}
+        <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <CardHeader className="relative">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-assist-green-100 to-goal-red-100 dark:from-assist-green-900/30 dark:to-goal-red-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
+            <CardTitle className="flex items-center gap-4 relative z-10">
+              <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-ice-blue-800 dark:text-ice-blue-200">Teams</div>
+                <div className="text-lg text-ice-blue-600 dark:text-ice-blue-400">Manage teams in the league</div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="rounded-xl border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 overflow-x-auto shadow-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-ice-blue-200/50 dark:border-rink-blue-700/50 hover:bg-ice-blue-50/50 dark:hover:bg-rink-blue-900/20">
+                    <TableHead className="text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Team Name</TableHead>
+                    <TableHead className="text-center text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Record</TableHead>
+                    <TableHead className="text-center text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Points</TableHead>
+                    <TableHead className="text-center text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Goal Diff</TableHead>
+                    <TableHead className="text-center text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Season</TableHead>
+                    {hasEaColumn && <TableHead className="text-center text-ice-blue-700 dark:text-ice-blue-300 font-semibold">EA Club ID</TableHead>}
+                    {hasActiveColumn && <TableHead className="text-center text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Status</TableHead>}
+                    <TableHead className="text-right text-ice-blue-700 dark:text-ice-blue-300 font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTeams.length === 0 ? (
+                    <TableRow className="border-ice-blue-200/50 dark:border-rink-blue-700/50 hover:bg-ice-blue-50/50 dark:hover:bg-rink-blue-900/20">
+                      <TableCell
+                        colSpan={hasEaColumn && hasActiveColumn ? 8 : hasEaColumn || hasActiveColumn ? 7 : 6}
+                        className="text-center py-6 text-ice-blue-600 dark:text-ice-blue-400"
+                      >
+                        {loadError
+                          ? "Failed to load teams. Please try again."
+                          : searchQuery
+                            ? "No teams found matching your search."
+                            : "No teams have been created yet."}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredTeams.map((team) => {
+                      const seasonName =
+                        seasons.find((s: Season) => s.id === team.season_id)?.name || `Season ${team.season_id}`
+
+                      const wins = team.wins || 0
+                      const losses = team.losses || 0
+                      const otl = team.otl || 0
+                      const points = team.points || wins * 2 + otl
+                      const goalDiff = (team.goals_for || 0) - (team.goals_against || 0)
+
+                      return (
+                        <TableRow key={team.id} className={`border-ice-blue-200/50 dark:border-rink-blue-700/50 hover:bg-ice-blue-50/50 dark:hover:bg-rink-blue-900/20 transition-all duration-300 hover:scale-[1.01] ${!team.is_active ? "opacity-60" : ""}`}>
+                          <TableCell className="font-medium text-ice-blue-800 dark:text-ice-blue-200">
+                            <div className="flex items-center gap-2">
+                              {team.name}
+                              {team.manual_override && (
+                                <Badge variant="outline" className="text-xs border-ice-blue-500/30 text-ice-blue-600 dark:text-ice-blue-400">
+                                  Manual
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center text-ice-blue-800 dark:text-ice-blue-200">{wins}-{losses}-{otl}</TableCell>
+                          <TableCell className="text-center text-ice-blue-800 dark:text-ice-blue-200">{points}</TableCell>
+                          <TableCell className="text-center text-ice-blue-800 dark:text-ice-blue-200">{goalDiff}</TableCell>
+                          <TableCell className="text-center text-ice-blue-800 dark:text-ice-blue-200">{seasonName}</TableCell>
+                          {hasEaColumn && (
+                            <TableCell className="text-center">
+                              {team.ea_club_id ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <span className="text-white">{team.ea_club_id}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => viewEATeamStats(team.ea_club_id!)}
+                                    title="View EA Stats"
+                                    className="text-white/70 hover:text-white hover:bg-white/10"
+                                  >
+                                    <RefreshCw className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <span className="text-white/50">Not set</span>
+                              )}
+                            </TableCell>
+                          )}
+                          {hasActiveColumn && (
+                            <TableCell className="text-center">
+                              <Button
+                                variant={team.is_active ? "outline" : "secondary"}
+                                size="sm"
+                                onClick={() => toggleTeamActive(team)}
+                                className={`flex items-center gap-1 ${
+                                  team.is_active 
+                                    ? "border-green-500/30 text-green-400 hover:bg-green-500/10" 
+                                    : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                                }`}
+                              >
+                                {team.is_active ? (
+                                  <>
+                                    <Eye className="h-3 w-3" />
+                                    <span>Active</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <EyeOff className="h-3 w-3" />
+                                    <span>Inactive</span>
+                                  </>
+                                )}
+                              </Button>
+                            </TableCell>
+                          )}
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              {hasManualOverrideColumn && (
+                                <EditTeamStatsModal
+                                  team={{
+                                    id: team.id,
+                                    name: team.name,
+                                    logo_url: team.logo_url,
+                                    wins: wins,
+                                    losses: losses,
+                                    otl: otl,
+                                    games_played: team.games_played || wins + losses + otl,
+                                    points: points,
+                                    goals_for: team.goals_for || 0,
+                                    goals_against: team.goals_against || 0,
+                                    goal_differential: goalDiff,
+                                    powerplay_goals: team.powerplay_goals,
+                                    powerplay_opportunities: team.powerplay_opportunities,
+                                    powerplay_percentage: team.powerplay_opportunities
+                                      ? (team.powerplay_goals / team.powerplay_opportunities) * 100
+                                      : 0,
+                                    penalty_kill_goals_against: team.penalty_kill_goals_against,
+                                    penalty_kill_opportunities: team.penalty_kill_opportunities,
+                                    penalty_kill_percentage: team.penalty_kill_opportunities
+                                      ? ((team.penalty_kill_opportunities - team.penalty_kill_goals_against) /
+                                          team.penalty_kill_opportunities) *
+                                        100
+                                      : 0,
+                                    manual_override: team.manual_override,
+                                  }}
+                                  onStatsUpdated={handleStatsUpdated}
+                                />
+                              )}
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={() => handleEditTeam(team)}
+                                className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteTeam(team.id)}
+                                className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Add/Edit Team Dialog */}
+        <Dialog
+          open={isAddingTeam || editingTeam !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setIsAddingTeam(false)
+              setEditingTeam(null)
+            }
+          }}
+        >
+          <DialogContent className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">{isAddingTeam ? "Add New Team" : "Edit Team"}</DialogTitle>
+              <DialogDescription className="text-white/70">
+                {isAddingTeam ? "Create a new team for the league." : "Update the details for this team."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="team-name" className="text-white">Team Name</Label>
+                <Input
+                  id="team-name"
+                  value={teamForm.name}
+                  onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                  placeholder="e.g. Toronto Maple Leafs"
+                  className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="logo-url" className="text-white">Logo URL (optional)</Label>
+                <Input
+                  id="logo-url"
+                  value={teamForm.logo_url}
+                  onChange={(e) => setTeamForm({ ...teamForm, logo_url: e.target.value })}
+                  placeholder="https://example.com/logo.png"
+                  className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="season" className="text-white">Season</Label>
+                <Select
+                  value={teamForm.season_id.toString()}
+                  onValueChange={(value) => setTeamForm({ ...teamForm, season_id: Number(value) })}
+                >
+                  <SelectTrigger id="season" className="bg-slate-800/50 border-white/20 text-white">
+                    <SelectValue placeholder="Select Season" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-white/20">
+                    {seasons.map((season: Season) => (
+                      <SelectItem key={season.id} value={season.id.toString()} className="text-white hover:bg-slate-700">
                         {season.name} {season.is_active ? "(Active)" : ""}
                       </SelectItem>
                     ))}
@@ -1028,530 +1371,146 @@ export default function AdminTeamsPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="team-search" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                  <Search className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                  Search Teams
-                </Label>
-                <Input
-                  id="team-search"
-                  placeholder="Search teams..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-[200px] lg:w-[250px] hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                />
-              </div>
+              {hasEaColumn && (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="ea-club-id" className="text-white">EA Club ID</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={openEASearch} className="border-white/20 text-white hover:bg-white/10">
+                      <Search className="h-4 w-4 mr-2" />
+                      Search EA Teams
+                    </Button>
+                  </div>
+                  <Input
+                    id="ea-club-id"
+                    value={teamForm.ea_club_id}
+                    onChange={(e) => setTeamForm({ ...teamForm, ea_club_id: e.target.value })}
+                    placeholder="e.g. 204949"
+                    className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                  />
+                  <p className="text-sm text-white/50">
+                    EA Club ID is used to fetch stats and match data from EA Sports NHL.
+                  </p>
+                </div>
+              )}
 
               {hasActiveColumn && (
-                <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-assist-green-50/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-900/10 rounded-lg border border-assist-green-200/30 dark:border-assist-green-700/30">
-                  <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-assist-green-500 data-[state=checked]:to-assist-green-600" />
-                  <Label htmlFor="show-inactive" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Show inactive teams</Label>
+                <div className="flex items-center space-x-2 pt-2">
+                  <Switch
+                    id="team-active"
+                    checked={teamForm.is_active}
+                    onCheckedChange={(checked) => setTeamForm({ ...teamForm, is_active: checked })}
+                  />
+                  <Label htmlFor="team-active" className="text-white">Team is active</Label>
+                  <p className="text-sm text-white/50 ml-2">
+                    Inactive teams won't appear on the public teams and standings pages.
+                  </p>
                 </div>
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Button onClick={handleAddTeam} className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm sm:text-base">
-                <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-                Add Team
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAddingTeam(false)
+                  setEditingTeam(null)
+                }}
+                className="border-white/20 text-white hover:bg-white/10"
+              >
+                Cancel
               </Button>
-              <Button variant="outline" onClick={() => setLastRefresh(Date.now())} disabled={isLoadingStats} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm sm:text-base">
-                {isLoadingStats ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-1 sm:mr-2" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-1 sm:mr-2" />
-                )}
-                Refresh Stats
+              <Button 
+                onClick={handleSaveTeam} 
+                disabled={isSaving}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+              >
+                {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {isAddingTeam ? "Add Team" : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* EA Search Dialog */}
+        <Dialog open={showEaSearchDialog} onOpenChange={setShowEaSearchDialog}>
+          <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 to-slate-800 border border-white/20">
+            <DialogHeader>
+              <DialogTitle className="text-white">Search EA Teams</DialogTitle>
+              <DialogDescription className="text-white/70">Search for teams in EA Sports NHL to link with your SCS team.</DialogDescription>
+            </DialogHeader>
+
+            <div className="flex items-center space-x-2 py-4">
+              <div className="grid flex-1 gap-2">
+                <Label htmlFor="ea-search" className="sr-only text-white">
+                  EA Team Name
+                </Label>
+                <Input
+                  id="ea-search"
+                  placeholder="Enter EA team name..."
+                  value={eaSearchQuery}
+                  onChange={(e) => setEaSearchQuery(e.target.value)}
+                  className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                />
+              </div>
+              <Button 
+                type="button" 
+                onClick={searchEATeams} 
+                disabled={isSearchingEA}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
+              >
+                {isSearchingEA ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Conference Management Section */}
-      <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20 mb-8">
-        <CardHeader className="relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-900/30 dark:to-ice-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-hockey-silver-500 to-ice-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-hockey-silver-500/25">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                  Conference Management
-                </CardTitle>
-                <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Manage conference names and team assignments for standings display
-                </CardDescription>
-              </div>
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowConferenceManagement(!showConferenceManagement)}
-              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-ice-blue-600 hover:from-hockey-silver-600 hover:to-ice-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              {showConferenceManagement ? "Hide" : "Manage"} Conferences
-            </Button>
-          </div>
-        </CardHeader>
-        {showConferenceManagement && (
-          <CardContent className="relative z-10">
-            <ConferenceManagement 
-              conferences={conferences} 
-              onConferencesUpdated={handleConferencesUpdated} 
-            />
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Enhanced Teams Table Card */}
-      <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-        <CardHeader className="relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-assist-green-100 to-goal-red-100 dark:from-assist-green-900/30 dark:to-goal-red-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-assist-green-500/25">
-              <Users className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                Teams
-              </CardTitle>
-              <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                Manage teams in the league with comprehensive statistics and controls
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="relative z-10">
-          <div className="rounded-xl border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 overflow-x-auto shadow-lg shadow-ice-blue-500/10">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                  <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Team Name</TableHead>
-                  <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Record</TableHead>
-                  <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Points</TableHead>
-                  <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Goal Diff</TableHead>
-                  <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Season</TableHead>
-                  <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Conference</TableHead>
-                  {hasEaColumn && <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">EA Club ID</TableHead>}
-                  {hasActiveColumn && <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Status</TableHead>}
-                  <TableHead className="text-right text-hockey-silver-800 dark:text-hockey-silver-200 font-bold text-base">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTeams.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={hasEaColumn && hasActiveColumn ? 9 : hasEaColumn || hasActiveColumn ? 8 : 7}
-                      className="text-center py-6 text-muted-foreground"
-                    >
-                      {loadError
-                        ? "Failed to load teams. Please try again."
-                        : searchQuery
-                          ? "No teams found matching your search."
-                          : "No teams have been created yet."}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredTeams.map((team) => {
-                    const seasonName =
-                      seasons.find((s: Season) => s.id === team.season_id)?.name || `Season ${team.season_id}`
-
-                    // Use database values directly for more accurate display
-                    const wins = team.wins || 0
-                    const losses = team.losses || 0
-                    const otl = team.otl || 0
-                    const points = team.points || wins * 2 + otl
-                    const goalDiff = (team.goals_for || 0) - (team.goals_against || 0)
-
-                    return (
-                      <TableRow key={team.id} className={`hover:bg-gradient-to-r hover:from-ice-blue-50/30 hover:to-rink-blue-50/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-200/30 dark:border-rink-blue-700/30 ${!team.is_active ? "opacity-60" : ""}`}>
-                        <TableCell className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold">{team.name}</span>
-                            {team.manual_override && (
-                              <Badge className="text-xs bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 text-white shadow-md">
-                                Manual
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          <span className="text-lg font-bold">{wins}-{losses}-{otl}</span>
-                        </TableCell>
-                        <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          <span className="text-lg font-bold text-assist-green-600 dark:text-assist-green-400">{points}</span>
-                        </TableCell>
-                        <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          <span className={`text-lg font-bold ${goalDiff >= 0 ? 'text-assist-green-600 dark:text-assist-green-400' : 'text-goal-red-600 dark:text-goal-red-400'}`}>
-                            {goalDiff >= 0 ? '+' : ''}{goalDiff}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          <span className="text-base font-medium">{seasonName}</span>
-                        </TableCell>
-                        <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">
-                          {team.conference ? (
-                            <Badge 
-                              className="text-sm px-3 py-1 rounded-full shadow-md"
-                              style={{ 
-                                backgroundColor: team.conference.color,
-                                color: 'white'
-                              }}
-                            >
-                              {team.conference.name}
-                            </Badge>
-                          ) : (
-                            <span className="text-hockey-silver-500 dark:text-hockey-silver-500 font-medium">Not assigned</span>
-                          )}
-                        </TableCell>
-                        {hasEaColumn && (
-                          <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300">
-                            {team.ea_club_id ? (
-                              <div className="flex items-center justify-center gap-2">
-                                <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{team.ea_club_id}</span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => viewEATeamStats(team.ea_club_id!)}
-                                  title="View EA Stats"
-                                  className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-                                >
-                                  <RefreshCw className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <span className="text-hockey-silver-500 dark:text-hockey-silver-500 font-medium">Not set</span>
-                            )}
-                          </TableCell>
-                        )}
-                        {hasActiveColumn && (
-                          <TableCell className="text-center">
-                            <Button
-                              variant={team.is_active ? "outline" : "secondary"}
-                              size="sm"
-                              onClick={() => toggleTeamActive(team)}
-                              className={`flex items-center gap-1 hockey-button transition-all duration-300 ${
-                                team.is_active 
-                                  ? "bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-md hover:shadow-lg hover:scale-105" 
-                                  : "bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white shadow-md hover:shadow-lg hover:scale-105"
-                              }`}
-                            >
-                              {team.is_active ? (
-                                <>
-                                  <Eye className="h-3 w-3" />
-                                  <span>Active</span>
-                                </>
-                              ) : (
-                                <>
-                                  <EyeOff className="h-3 w-3" />
-                                  <span>Inactive</span>
-                                </>
-                              )}
-                            </Button>
-                          </TableCell>
-                        )}
+            <div className="max-h-[300px] overflow-y-auto border border-white/20 rounded-md">
+              {eaSearchResults.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-white/20 hover:bg-white/5">
+                      <TableHead className="text-white/70">Team Name</TableHead>
+                      <TableHead className="text-center text-white/70">Club ID</TableHead>
+                      <TableHead className="text-right text-white/70">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {eaSearchResults.map((team) => (
+                      <TableRow key={team.clubId} className="border-white/20 hover:bg-white/5">
+                        <TableCell className="text-white">{team.name}</TableCell>
+                        <TableCell className="text-center text-white">{team.clubId}</TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            {hasManualOverrideColumn && (
-                              <EditTeamStatsModal
-                                team={{
-                                  id: team.id,
-                                  name: team.name,
-                                  logo_url: team.logo_url,
-                                  wins: wins,
-                                  losses: losses,
-                                  otl: otl,
-                                  games_played: team.games_played || wins + losses + otl,
-                                  points: points,
-                                  goals_for: team.goals_for || 0,
-                                  goals_against: team.goals_against || 0,
-                                  goal_differential: goalDiff,
-                                  powerplay_goals: team.powerplay_goals,
-                                  powerplay_opportunities: team.powerplay_opportunities,
-                                  powerplay_percentage: team.powerplay_opportunities
-                                    ? (team.powerplay_goals / team.powerplay_opportunities) * 100
-                                    : 0,
-                                  penalty_kill_goals_against: team.penalty_kill_goals_against,
-                                  penalty_kill_opportunities: team.penalty_kill_opportunities,
-                                  penalty_kill_percentage: team.penalty_kill_opportunities
-                                    ? ((team.penalty_kill_opportunities - team.penalty_kill_goals_against) /
-                                        team.penalty_kill_opportunities) *
-                                      100
-                                    : 0,
-                                  manual_override: team.manual_override,
-                                }}
-                                onStatsUpdated={handleStatsUpdated}
-                              />
-                            )}
-                            <Button variant="ghost" size="icon" onClick={() => handleEditTeam(team)} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteTeam(team.id)} className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => selectEATeam(team)}
+                            className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+                          >
+                            Select
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog
-        open={isAddingTeam || editingTeam !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsAddingTeam(false)
-            setEditingTeam(null)
-          }
-        }}
-      >
-        <DialogContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-lg flex items-center justify-center">
-                <Trophy className="h-4 w-4 text-white" />
-              </div>
-              {isAddingTeam ? "Add New Team" : "Edit Team"}
-            </DialogTitle>
-            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-              {isAddingTeam ? "Create a new team for the league with comprehensive settings and EA integration." : "Update the details and settings for this team."}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="team-name" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                <Users className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                Team Name
-              </Label>
-              <Input
-                id="team-name"
-                value={teamForm.name}
-                onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
-                placeholder="e.g. Toronto Maple Leafs"
-                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="logo-url" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                <Target className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                Logo URL (optional)
-              </Label>
-              <Input
-                id="logo-url"
-                value={teamForm.logo_url}
-                onChange={(e) => setTeamForm({ ...teamForm, logo_url: e.target.value })}
-                placeholder="https://example.com/logo.png"
-                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="season" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                <Trophy className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                Season
-              </Label>
-              <Select
-                value={teamForm.season_id.toString()}
-                onValueChange={(value) => setTeamForm({ ...teamForm, season_id: Number(value) })}
-              >
-                <SelectTrigger id="season" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                  <SelectValue placeholder="Select Season" />
-                </SelectTrigger>
-                <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                  {seasons.map((season: Season) => (
-                    <SelectItem key={season.id} value={season.id.toString()}>
-                      {season.name} {season.is_active ? "(Active)" : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="conference" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                <Users className="h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
-                Conference {conferences && conferences.length > 0 && `(${conferences.length} available)`}
-              </Label>
-              <Select
-                value={teamForm.conference_id}
-                onValueChange={(value) => setTeamForm({ ...teamForm, conference_id: value })}
-              >
-                <SelectTrigger id="conference" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                  <SelectValue placeholder={conferences && conferences.length > 0 ? "Select Conference" : "No conferences available"} />
-                </SelectTrigger>
-                <SelectContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                  <SelectItem value="">No Conference</SelectItem>
-                  {conferences && conferences.length > 0 ? (
-                    conferences.map((conference: Conference) => (
-                      <SelectItem key={conference.id} value={conference.id}>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: conference.color }}
-                          />
-                          {conference.name}
-                        </div>
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="" disabled>
-                      No conferences available. Create conferences first.
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {hasEaColumn && (
-              <div className="space-y-3 p-4 bg-gradient-to-r from-ice-blue-50/30 to-rink-blue-50/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="ea-club-id" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Database className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                    EA Club ID
-                  </Label>
-                  <Button type="button" variant="outline" size="sm" onClick={openEASearch} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                    <Search className="h-4 w-4 mr-2" />
-                    Search EA Teams
-                  </Button>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="p-4 text-center text-white/50">
+                  {isSearchingEA ? "Searching..." : "No results. Search for a team name."}
                 </div>
-                <Input
-                  id="ea-club-id"
-                  value={teamForm.ea_club_id}
-                  onChange={(e) => setTeamForm({ ...teamForm, ea_club_id: e.target.value })}
-                  placeholder="e.g. 204949"
-                  className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                />
-                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  EA Club ID is used to fetch stats and match data from EA Sports NHL.
-                </p>
-              </div>
-            )}
-
-            {hasActiveColumn && (
-              <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-assist-green-50/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-900/10 rounded-lg border border-assist-green-200/30 dark:border-assist-green-700/30">
-                <Switch
-                  id="team-active"
-                  checked={teamForm.is_active}
-                  onCheckedChange={(checked) => setTeamForm({ ...teamForm, is_active: checked })}
-                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-assist-green-500 data-[state=checked]:to-assist-green-600"
-                />
-                <Label htmlFor="team-active" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Team is active</Label>
-                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 ml-2">
-                  Inactive teams won't appear on the public teams and standings pages.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddingTeam(false)
-                setEditingTeam(null)
-              }}
-              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleSaveTeam} disabled={isSaving} className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isAddingTeam ? "Add Team" : "Save Changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showEaSearchDialog} onOpenChange={setShowEaSearchDialog}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                <Search className="h-4 w-4 text-white" />
-              </div>
-              Search EA Teams
-            </DialogTitle>
-            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-              Search for teams in EA Sports NHL to link with your SCS team and enable automatic statistics synchronization.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex items-center space-x-3 py-4">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="ea-search" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                <Database className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                EA Team Name
-              </Label>
-              <Input
-                id="ea-search"
-                placeholder="Enter EA team name..."
-                value={eaSearchQuery}
-                onChange={(e) => setEaSearchQuery(e.target.value)}
-                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-              />
+              )}
             </div>
-            <Button type="button" onClick={searchEATeams} disabled={isSearchingEA} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-              {isSearchingEA ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            </Button>
-          </div>
 
-          <div className="max-h-[300px] overflow-y-auto border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 rounded-lg shadow-lg shadow-ice-blue-500/10">
-            {eaSearchResults.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                    <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team Name</TableHead>
-                    <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Club ID</TableHead>
-                    <TableHead className="text-right text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {eaSearchResults.map((team) => (
-                    <TableRow key={team.clubId} className="hover:bg-gradient-to-r hover:from-ice-blue-50/30 hover:to-rink-blue-50/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                      <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">{team.name}</TableCell>
-                      <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold text-ice-blue-600 dark:text-ice-blue-400">{team.clubId}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={() => selectEATeam(team)} className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                          Select
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="p-6 text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                {isSearchingEA ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Searching EA teams...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Search className="h-4 w-4" />
-                    <span>No results. Search for a team name.</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="sm:justify-start pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-            <Button type="button" variant="secondary" onClick={() => setShowEaSearchDialog(false)} className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="sm:justify-start">
+              <Button 
+                type="button" 
+                variant="secondary" 
+                onClick={() => setShowEaSearchDialog(false)}
+                className="bg-slate-700 text-white hover:bg-slate-600"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   )
 }
