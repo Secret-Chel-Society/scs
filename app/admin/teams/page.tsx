@@ -116,7 +116,6 @@ export default function AdminTeamsPage() {
   const [isAddingColumns, setIsAddingColumns] = useState(false)
 
   useEffect(() => {
-    // Check authorization and load initial data
     async function checkAuthorizationAndLoadData() {
       if (!session?.user) {
         toast({
@@ -1508,6 +1507,7 @@ export default function AdminTeamsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }

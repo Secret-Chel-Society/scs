@@ -477,8 +477,8 @@ export default function MatchDetailPage() {
               </svg>
               Back to Matches
             </Button>
-          </div>
-
+              </div>
+              
           {/* Main Match Card */}
           <div className="max-w-4xl mx-auto">
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
@@ -487,40 +487,40 @@ export default function MatchDetailPage() {
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-4">
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Match Details</h1>
-                  </div>
-                  
+              </div>
+              
                   {/* Management Buttons */}
-                  {canManageMatch && (
+            {canManageMatch && (
                     <div className="flex gap-3">
-                      <Button
-                        onClick={() => setOpenScoreModal(true)}
+                <Button
+                  onClick={() => setOpenScoreModal(true)}
                         size="sm"
                         className="bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 transition-all duration-200"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Score
-                      </Button>
-                      <Button
-                        onClick={() => setOpenModal(true)}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Score
+                </Button>
+                <Button
+                  onClick={() => setOpenModal(true)}
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white hover:scale-105 transition-all duration-200"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Import EA Data
-                      </Button>
-                      <Button
-                        onClick={handleManualRefresh}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import EA Data
+                </Button>
+                <Button
+                  onClick={handleManualRefresh}
                         size="sm"
-                        variant="outline"
+                  variant="outline"
                         className="hover:scale-105 transition-all duration-200"
-                        disabled={forceRefreshing}
-                      >
-                        <RefreshCw className={`h-4 w-4 mr-2 ${forceRefreshing ? "animate-spin" : ""}`} />
-                        {forceRefreshing ? "Refreshing..." : "Refresh"}
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                  disabled={forceRefreshing}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${forceRefreshing ? "animate-spin" : ""}`} />
+                  {forceRefreshing ? "Refreshing..." : "Refresh"}
+                </Button>
+              </div>
+            )}
+          </div>
 
                 {/* Team vs Team Layout */}
                 <div className="flex items-center justify-between">
@@ -536,8 +536,8 @@ export default function MatchDetailPage() {
                     </h2>
                     <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                       {match?.home_score || 0}
-                    </div>
-                  </div>
+        </div>
+          </div>
 
                   {/* VS Section */}
                   <div className="flex flex-col items-center mx-8">
@@ -588,33 +588,33 @@ export default function MatchDetailPage() {
         <Tabs defaultValue="details" className="w-full">
           <div className="mb-8">
             <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
-              <TabsTrigger 
-                value="details" 
+            <TabsTrigger 
+              value="details" 
                 className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
-              >
-                <Trophy className="h-4 w-4" />
-                Details
-              </TabsTrigger>
+            >
+              <Trophy className="h-4 w-4" />
+              Details
+            </TabsTrigger>
               <TabsTrigger 
                 value="lineups" 
                 className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
-              >
-                <Users className="h-4 w-4" />
-                Lineups
+            >
+              <Users className="h-4 w-4" />
+              Lineups
               </TabsTrigger>
               <TabsTrigger 
                 value="highlights" 
                 className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
-              >
-                <Camera className="h-4 w-4" />
-                Highlights
+            >
+              <Camera className="h-4 w-4" />
+              Highlights
               </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="details" className="space-y-8">
             <MatchDetails match={match} />
-            
+
             {/* Team Stats Comparison */}
             <Card className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
               <CardHeader className="bg-slate-700 border-b border-slate-600">
@@ -734,7 +734,7 @@ export default function MatchDetailPage() {
                       Score breakdown by period
                     </CardDescription>
                   </div>
-                </div>
+                        </div>
               </CardHeader>
               <CardContent className="p-8">
                 <div className="overflow-x-auto">
@@ -800,9 +800,9 @@ export default function MatchDetailPage() {
                       </TableRow>
                     </TableBody>
                   </Table>
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                  </CardContent>
+                            </Card>
 
             {/* Three Stars of the Match - Moved from Stats tab */}
             <Card className="hockey-enhanced-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
@@ -852,35 +852,35 @@ export default function MatchDetailPage() {
                   const topPerformers = calculateThreeStars()
                   
                   return topPerformers.length > 0 ? (
-                    <div className="space-y-4">
+                  <div className="space-y-4">
                       {topPerformers.map((star: any, index: number) => (
-                        <div key={star.id} className="flex items-center gap-4 p-4 hockey-alert hover:scale-105 transition-all duration-300">
-                          <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {star.star_number}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                              {star.player_name || "Unknown Player"}
-                            </h4>
-                            <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                              {star.position || "N/A"} • {star.team_name || "Unknown Team"}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">
-                              {star.points} points ({star.goals}G, {star.assists}A)
-                            </p>
-                          </div>
+                      <div key={star.id} className="flex items-center gap-4 p-4 hockey-alert hover:scale-105 transition-all duration-300">
+                        <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {star.star_number}
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Star className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
-                      <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
+                              {star.player_name || "Unknown Player"}
+                          </h4>
+                          <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {star.position || "N/A"} • {star.team_name || "Unknown Team"}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">
+                              {star.points} points ({star.goals}G, {star.assists}A)
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Star className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
+                    <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
                         No EA statistics available to calculate three stars
-                      </p>
-                    </div>
+                    </p>
+                  </div>
                   )
                 })()}
               </CardContent>
@@ -936,67 +936,67 @@ export default function MatchDetailPage() {
                     </TabsList>
                     
                     <TabsContent value="home" className="space-y-4">
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="hover:bg-transparent">
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Player</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Pos</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">G</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">A</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">P</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">+/-</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">H</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">BLK</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">PIM</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Player</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Pos</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">G</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">A</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">P</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">+/-</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">H</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">BLK</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">PIM</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                             {eaPlayerStats
                               .filter(player => player.position !== 'G' && player.team_id === match?.home_team_id)
                               .sort((a, b) => ((b.goals || 0) + (b.assists || 0)) - ((a.goals || 0) + (a.assists || 0)))
                               .map((player, index) => (
                               <TableRow key={player.id} className="hockey-table-row-hover">
-                                <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                            <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
                                   {player.player_name || "Unknown"}
-                                </TableCell>
-                                <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  {player.position || "N/A"}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                                  {player.goals || 0}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                                  {player.assists || 0}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
-                                  {(player.goals || 0) + (player.assists || 0)}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
-                                  {player.plus_minus || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  {player.shots || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  {player.hits || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                            </TableCell>
+                            <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {player.position || "N/A"}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                              {player.goals || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                              {player.assists || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
+                              {(player.goals || 0) + (player.assists || 0)}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                              {player.plus_minus || 0}
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {player.shots || 0}
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {player.hits || 0}
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
                                   {player.blocks || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
                                   {player.pim || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
                                   {player.time_on_ice ? `${Math.floor(player.time_on_ice / 60)}:${(player.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                     </TabsContent>
                     
                     <TabsContent value="away" className="space-y-4">
@@ -1124,62 +1124,62 @@ export default function MatchDetailPage() {
                     </TabsList>
                     
                     <TabsContent value="home" className="space-y-4">
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow className="hover:bg-transparent">
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Goalie</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SA</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GA</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SV%</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GAA</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SO</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">W</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">L</TableHead>
-                              <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">Goalie</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SA</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">S</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GA</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SV%</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">GAA</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">SO</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">W</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">L</TableHead>
+                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold">TOI</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                             {eaPlayerStats
                               .filter(player => player.position === 'G' && player.team_id === match?.home_team_id)
                               .map((goalie, index) => (
                               <TableRow key={goalie.id} className="hockey-table-row-hover">
-                                <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                            <TableCell className="font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
                                   {goalie.player_name || "Unknown"}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  {goalie.shots_against || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  {goalie.saves || 0}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
-                                  {goalie.goals_against || 0}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
-                                  {goalie.save_percentage ? `${goalie.save_percentage.toFixed(1)}%` : "0.0%"}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
-                                  {goalie.goals_against_average ? goalie.goals_against_average.toFixed(2) : "0.00"}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  {goalie.shutouts || 0}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
-                                  {goalie.wins || 0}
-                                </TableCell>
-                                <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
-                                  {goalie.losses || 0}
-                                </TableCell>
-                                <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {goalie.shots_against || 0}
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {goalie.saves || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                              {goalie.goals_against || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                              {goalie.save_percentage ? `${goalie.save_percentage.toFixed(1)}%` : "0.0%"}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-rink-blue-600 dark:text-rink-blue-400">
+                              {goalie.goals_against_average ? goalie.goals_against_average.toFixed(2) : "0.00"}
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
+                              {goalie.shutouts || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">
+                              {goalie.wins || 0}
+                            </TableCell>
+                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">
+                              {goalie.losses || 0}
+                            </TableCell>
+                            <TableCell className="text-center text-hockey-silver-600 dark:text-hockey-silver-400">
                                   {goalie.time_on_ice ? `${Math.floor(goalie.time_on_ice / 60)}:${(goalie.time_on_ice % 60).toString().padStart(2, '0')}` : "0:00"}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                     </TabsContent>
                     
                     <TabsContent value="away" className="space-y-4">
@@ -1255,7 +1255,7 @@ export default function MatchDetailPage() {
 
           <TabsContent value="lineups" className="space-y-8">
             <MatchLineups 
-              matchId={matchId} 
+                matchId={matchId}
               homeTeam={match?.home_team} 
               awayTeam={match?.away_team} 
             />
