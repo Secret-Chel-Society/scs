@@ -1522,35 +1522,23 @@ export default function UsersManagementClient() {
             data.message || "Player has been removed from their team and marked to prevent automatic re-assignment.",
         })
       } else {
-        // Regular team assignment - update player and reset manual removal flags
-        const { error } = await supabase
-          .from("players")
-          .update({
-            team_id: teamId,
-            manually_removed: false, // Reset manual removal flag
-            manually_removed_at: null,
-          })
-          .eq("id", playerId)
+        // Regular team assignment - use the proper API endpoint
+        const response = await fetch("/api/players/assign-team", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            playerId: playerId,
+            teamId: teamId,
+            adminOverride: true, // Admin override to bypass permission checks
+          }),
+        })
 
-        if (error) {
-          console.error("Error assigning team:", error)
-          throw error
-        }
+        const data = await response.json()
 
-        // Also mark any related bids as processed to prevent conflicts
-        const { error: bidUpdateError } = await supabase
-          .from("player_bidding")
-          .update({
-            status: "manually_assigned",
-            processed: true,
-            processed_at: new Date().toISOString(),
-          })
-          .eq("player_id", playerId)
-          .in("status", ["active", "pending"])
-
-        if (bidUpdateError) {
-          console.error("Error updating bids for assigned player:", bidUpdateError)
-          // Don't fail the request as team assignment is more important
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to assign player to team")
         }
 
         // Get team name for the toast message
