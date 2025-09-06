@@ -616,7 +616,7 @@ export default function UsersManagementClient() {
           role
         )
       `)
-        .order("created_at", { ascending: false })
+        .order("created_on", { ascending: false })
 
       if (usersError) {
         console.error("Error fetching users:", usersError)
