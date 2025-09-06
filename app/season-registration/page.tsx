@@ -47,7 +47,7 @@ export default function SeasonRegistrationPage() {
         .from("seasons")
         .select("id, name, season_number")
         .eq("is_active", true)
-        .single()
+        .maybeSingle()
 
       if (seasonError) {
         window.console.error("Error fetching active season:", seasonError)
@@ -59,7 +59,7 @@ export default function SeasonRegistrationPage() {
           .select("id, name, season_number")
           .order("id")
           .limit(1)
-          .single()
+          .maybeSingle()
 
         if (firstSeasonError) {
           window.console.error("Error fetching first season:", firstSeasonError)
@@ -120,7 +120,7 @@ export default function SeasonRegistrationPage() {
         setLoadingActiveSeason(false)
 
         // Check if user has already registered for this season
-        checkRegistration(seasonData.id)
+        checkRegistration(seasonData.season_number || 1)
       } catch (error) {
         window.console.error("Error in fetchActiveSeasonData:", error)
         setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)
@@ -132,7 +132,7 @@ export default function SeasonRegistrationPage() {
   }, [session, router, toast, supabase])
 
   // Check if user has already registered for the current season
-  const checkRegistration = async (seasonId: string) => {
+  const checkRegistration = async (seasonNumber: number) => {
     if (!session?.user) return
 
     setIsCheckingRegistration(true)
@@ -141,8 +141,8 @@ export default function SeasonRegistrationPage() {
         .from("season_registrations")
         .select("*")
         .eq("user_id", session.user.id)
-        .eq("season_id", seasonId)
-        .single()
+        .eq("season_number", seasonNumber)
+        .maybeSingle()
 
       if (error && error.code !== "PGRST116") {
         // PGRST116 is the error code for "no rows returned"
@@ -217,8 +217,8 @@ export default function SeasonRegistrationPage() {
         .from("season_registrations")
         .select("*")
         .eq("user_id", session.user.id)
-        .eq("season_id", activeSeason.id)
-        .single()
+        .eq("season_number", activeSeason.season_number || 1)
+        .maybeSingle()
 
       if (existingReg) {
         setHasRegistered(true)
@@ -293,7 +293,7 @@ export default function SeasonRegistrationPage() {
             .from("users")
             .select("is_banned, ban_reason, ban_expires_at")
             .eq("id", session.user.id)
-            .single()
+            .maybeSingle()
 
           if (error) {
             // If ban_expires_at column doesn't exist, try without it
@@ -304,7 +304,7 @@ export default function SeasonRegistrationPage() {
                 .from("users")
                 .select("is_banned, ban_reason")
                 .eq("id", session.user.id)
-                .single()
+                .maybeSingle()
 
               if (fallbackError) {
                 console.error("Error checking ban status (fallback):", fallbackError)

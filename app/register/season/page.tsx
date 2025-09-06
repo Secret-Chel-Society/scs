@@ -80,7 +80,7 @@ export default function SeasonRegistrationPage() {
   }
 
   // Simplified registration check
-  const checkRegistration = async (seasonId: string) => {
+  const checkRegistration = async (seasonNumber: number) => {
     if (!session?.user) return
 
     try {
@@ -89,7 +89,7 @@ export default function SeasonRegistrationPage() {
         .from("season_registrations")
         .select("*")
         .eq("user_id", session.user.id)
-        .eq("season_id", seasonId)
+        .eq("season_number", seasonNumber)
         .maybeSingle()
 
       setHasRegistered(!!data)
@@ -116,7 +116,7 @@ export default function SeasonRegistrationPage() {
     const loadData = async () => {
       const season = await fetchActiveSeason()
       if (season) {
-        await checkRegistration(season.id)
+        await checkRegistration(season.season_number || 1)
       }
     }
 
@@ -162,7 +162,7 @@ export default function SeasonRegistrationPage() {
         .from("season_registrations")
         .select("*")
         .eq("user_id", session.user.id)
-        .eq("season_id", activeSeason.id)
+        .eq("season_number", activeSeason.season_number || 1)
         .maybeSingle()
 
       if (existingReg) {
