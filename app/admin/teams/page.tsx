@@ -45,7 +45,7 @@ import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
 import { getCurrentSeasonId } from "@/lib/team-utils"
-// import { CONFERENCES, type ConferenceType } from "@/lib/standings-calculator"
+import { CONFERENCES, type ConferenceType } from "@/lib/standings-calculator"
 
 interface Season {
   id: number
@@ -99,7 +99,7 @@ export default function AdminTeamsPage() {
     season_id: 1,
     ea_club_id: "",
     is_active: true,
-    conference: "",
+    conference: "" as ConferenceType | "",
   })
   const [seasons, setSeasons] = useState<Season[]>([])
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
@@ -357,7 +357,7 @@ export default function AdminTeamsPage() {
   }
 
   // Update team conference
-  const updateTeamConference = async (teamId: string, conference: string) => {
+  const updateTeamConference = async (teamId: string, conference: ConferenceType) => {
     try {
       setIsUpdatingConference(true)
       
@@ -393,8 +393,8 @@ export default function AdminTeamsPage() {
 
   // Get conference statistics
   const getConferenceStats = () => {
-    const easternTeams = teams.filter(team => team.conference === "Eastern Elites")
-    const westernTeams = teams.filter(team => team.conference === "Western Warriors")
+    const easternTeams = teams.filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
+    const westernTeams = teams.filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
     const unassignedTeams = teams.filter(team => !team.conference || team.conference === "")
 
     return {
@@ -941,51 +941,134 @@ export default function AdminTeamsPage() {
         </Alert>
       )}
 
+      {/* Conference Management Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Conference Management
+          </CardTitle>
+          <CardDescription>
+            Manage team conferences for the Eastern Elites and Western Warriors divisions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{getConferenceStats().eastern}</div>
+              <div className="text-sm text-blue-600 dark:text-blue-400">Eastern Elites</div>
+            </div>
+            <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{getConferenceStats().western}</div>
+              <div className="text-sm text-purple-600 dark:text-purple-400">Western Warriors</div>
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 text-center">
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{getConferenceStats().unassigned}</div>
+              <div className="text-sm text-amber-600 dark:text-amber-400">Unassigned</div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-lg font-semibold mb-2">Conference Assignment</h4>
+                <p className="text-muted-foreground text-sm">
+                  Assign teams to conferences. Top 4 teams from each conference qualify for playoffs.
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowConferenceManagement(!showConferenceManagement)}
+                variant="outline"
+              >
+                <Target className="h-4 w-4 mr-2" />
+                {showConferenceManagement ? "Hide" : "Show"} Conference Management
+              </Button>
+            </div>
+
+            {showConferenceManagement && (
+              <div className="space-y-4">
+                {teams.map((team) => (
+                  <div key={team.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">{team.name}</span>
+                      {team.conference && (
+                        <Badge 
+                          variant="outline" 
+                          className={team.conference === CONFERENCES.EASTERN_ELITES 
+                            ? "border-blue-500/30 text-blue-600 dark:text-blue-400" 
+                            : "border-purple-500/30 text-purple-600 dark:text-purple-400"
+                          }
+                        >
+                          {team.conference}
+                        </Badge>
+                      )}
+                    </div>
+                    <Select
+                      value={team.conference || ""}
+                      onValueChange={(value) => updateTeamConference(team.id, value as ConferenceType)}
+                      disabled={isUpdatingConference}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Select conference" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={CONFERENCES.EASTERN_ELITES}>Eastern Elites</SelectItem>
+                        <SelectItem value={CONFERENCES.WESTERN_WARRIORS}>Western Warriors</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <Select value={selectedSeason?.toString() || ""} onValueChange={(value) => setSelectedSeason(Number(value))}>
+                <Select value={selectedSeason?.toString() || ""} onValueChange={(value) => setSelectedSeason(Number(value))}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select Season" />
-            </SelectTrigger>
+                    <SelectValue placeholder="Select Season" />
+                  </SelectTrigger>
             <SelectContent>
-              {seasons.map((season: Season) => (
-                <SelectItem key={season.id} value={season.id.toString()}>
-                  {season.name} {season.is_active ? "(Active)" : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                    {seasons.map((season: Season) => (
+                      <SelectItem key={season.id} value={season.id.toString()}>
+                        {season.name} {season.is_active ? "(Active)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-          <Input
-            placeholder="Search teams..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+                <Input
+                  placeholder="Search teams..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-sm"
-          />
+                />
 
-          {hasActiveColumn && (
+              {hasActiveColumn && (
             <div className="flex items-center space-x-2">
               <Switch id="show-inactive" checked={showInactive} onCheckedChange={setShowInactive} />
               <Label htmlFor="show-inactive">Show inactive teams</Label>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
         <div className="flex gap-2">
           <Button onClick={handleAddTeam}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Team
-          </Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Team
+              </Button>
           <Button variant="outline" onClick={() => setLastRefresh(Date.now())} disabled={isLoadingStats}>
-            {isLoadingStats ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Refresh Stats
-          </Button>
-        </div>
-      </div>
+                {isLoadingStats ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                )}
+                Refresh Stats
+              </Button>
+            </div>
+          </div>
 
       <Card>
         <CardHeader>
