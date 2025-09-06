@@ -272,17 +272,18 @@ export default function Home() {
         // Fetch team standings
         try {
           const response = await fetch("/api/standings")
-          if (!response.ok) throw new Error("Failed to fetch standings")
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch standings`)
+          }
           const data = await response.json()
           setStandings(data.standings || [])
           setLoading((prev) => ({ ...prev, standings: false }))
         } catch (error) {
           console.error("Error fetching standings:", error)
-          toast({
-            title: "Error loading standings",
-            description: error.message || "Failed to load standings data.",
-            variant: "destructive",
-          })
+          // Don't show toast for standings error, just log it and continue
+          console.log("Standings not available - continuing without standings data")
+          setStandings([]) // Set empty array so component doesn't break
           setLoading((prev) => ({ ...prev, standings: false }))
         }
       } catch (error) {
@@ -1209,7 +1210,7 @@ export default function Home() {
                         className="mb-6"
                       >
                         <div className="p-4 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 rounded-full w-fit mx-auto">
-                          <Target className="h-16 w-16 text-indigo-600 dark:text-indigo-400" />
+                          <Trophy className="h-16 w-16 text-indigo-600 dark:text-indigo-400" />
                         </div>
                       </motion.div>
                       <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-3">

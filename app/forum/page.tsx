@@ -346,7 +346,7 @@ export default function ForumPage() {
                     <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
                       <Target className="h-5 w-5" />
                     </div>
-                    <span className="text-center font-medium text-sm truncate">All Posts</span>
+                    <span className="text-center font-medium text-sm truncate w-full">All Posts</span>
                   </TabsTrigger>
                   {categories.map((category) => (
                     <TabsTrigger 
@@ -357,7 +357,7 @@ export default function ForumPage() {
                       <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
                         <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color }} />
                       </div>
-                      <span className="text-center font-medium text-sm truncate">{category.name}</span>
+                      <span className="text-center font-medium text-sm truncate w-full">{category.name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
