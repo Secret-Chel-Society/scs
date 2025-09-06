@@ -42,111 +42,49 @@ export default function SeasonRegistrationPage() {
     try {
       setLoadingActiveSeason(true)
 
-      // First try to get from system_settings
-      const { data: settingsData, error: settingsError } = await supabase
-        .from("system_settings")
-        .select("value")
-        .eq("key", "current_season")
-        .single()
+      // Skip system_settings entirely and go straight to seasons table
+      // Use .maybeSingle() instead of .single() to avoid 406 errors
+      console.log("Fetching seasons without .single() to avoid 406 errors")
+      setDebugInfo((prev) => prev + `\nFetching seasons without .single()`)
 
-      if (settingsError) {
-        console.log("System settings approach failed, trying seasons table:", settingsError.message)
-        setDebugInfo((prev) => prev + `\nSystem settings failed: ${settingsError.message}`)
-        
-        // Fallback: Get active season from seasons table
-        const { data: seasonData, error: seasonError } = await supabase
-          .from("seasons")
-          .select("id, name, season_number")
-          .eq("is_active", true)
-          .single()
+      // Get all seasons and find the active one
+      const { data: seasons, error: seasonsError } = await supabase
+        .from("seasons")
+        .select("id, name, season_number, is_active")
+        .order("created_at")
 
-        if (seasonError) {
-          console.log("Active season not found, trying first season:", seasonError.message)
-          setDebugInfo((prev) => prev + `\nActive season failed: ${seasonError.message}`)
-          
-          // Final fallback: Get first season
-          const { data: firstSeason, error: firstSeasonError } = await supabase
-            .from("seasons")
-            .select("id, name, season_number")
-            .order("id")
-            .limit(1)
-            .single()
-
-          if (firstSeasonError) {
-            console.error("No seasons found:", firstSeasonError.message)
-            setDebugInfo((prev) => prev + `\nNo seasons found: ${firstSeasonError.message}`)
-            setLoadingActiveSeason(false)
-            return null
-          }
-
-          console.log("Using first season:", firstSeason)
-          setDebugInfo((prev) => prev + `\nUsing first season: ${JSON.stringify(firstSeason)}`)
-          setLoadingActiveSeason(false)
-          return firstSeason
-        }
-
-        console.log("Using active season:", seasonData)
-        setDebugInfo((prev) => prev + `\nUsing active season: ${JSON.stringify(seasonData)}`)
+      if (seasonsError) {
+        console.error("Error fetching seasons:", seasonsError.message)
+        setDebugInfo((prev) => prev + `\nError fetching seasons: ${seasonsError.message}`)
         setLoadingActiveSeason(false)
-        return seasonData
+        return null
       }
 
-      // If we have a current_season setting, use that exact ID
-      if (settingsData?.value) {
-        const seasonId = settingsData.value
-        setDebugInfo((prev) => prev + `\nActive season ID from settings: ${seasonId}`)
-
-        // Get season details with exact match
-        const { data: seasonData, error: seasonError } = await supabase
-          .from("seasons")
-          .select("id, name, season_number")
-          .eq("id", seasonId)
-          .single()
-
-        if (seasonError) {
-          console.log("Season by ID failed, trying active season:", seasonError.message)
-          setDebugInfo((prev) => prev + `\nSeason by ID failed: ${seasonError.message}`)
-
-          // As a fallback, try to get any active season
-          const { data: fallbackSeason, error: fallbackError } = await supabase
-            .from("seasons")
-            .select("id, name, season_number")
-            .eq("is_active", true)
-            .single()
-
-          if (fallbackError) {
-            console.error("Fallback season failed:", fallbackError.message)
-            setDebugInfo((prev) => prev + `\nFallback season failed: ${fallbackError.message}`)
-            setLoadingActiveSeason(false)
-            return null
-          }
-
-          setDebugInfo((prev) => prev + `\nUsing fallback active season: ${JSON.stringify(fallbackSeason)}`)
-          setLoadingActiveSeason(false)
-          return fallbackSeason
-        }
-
-        setDebugInfo((prev) => prev + `\nFound season by ID: ${JSON.stringify(seasonData)}`)
+      if (!seasons || seasons.length === 0) {
+        console.error("No seasons found")
+        setDebugInfo((prev) => prev + `\nNo seasons found`)
         setLoadingActiveSeason(false)
-        return seasonData
+        return null
+      }
+
+      // Find active season
+      let activeSeason = seasons.find(season => season.is_active === true)
+      
+      // If no active season, use the first one
+      if (!activeSeason) {
+        activeSeason = seasons[0]
+        console.log("No active season found, using first season:", activeSeason)
+        setDebugInfo((prev) => prev + `\nNo active season found, using first: ${JSON.stringify(activeSeason)}`)
       } else {
-        // If no current_season setting, try to find an active season
-        const { data: activeSeason, error: activeSeasonError } = await supabase
-          .from("seasons")
-          .select("id, name, season_number")
-          .eq("is_active", true)
-          .single()
-
-        if (activeSeasonError) {
-          console.error("Error fetching active season:", activeSeasonError.message)
-          setDebugInfo((prev) => prev + `\nError fetching active season: ${activeSeasonError.message}`)
-          setLoadingActiveSeason(false)
-          return null
-        }
-
+        console.log("Found active season:", activeSeason)
         setDebugInfo((prev) => prev + `\nFound active season: ${JSON.stringify(activeSeason)}`)
-        setLoadingActiveSeason(false)
-        return activeSeason
+      }
+
+      setLoadingActiveSeason(false)
+      return {
+        id: activeSeason.id,
+        name: activeSeason.name,
+        season_number: activeSeason.season_number
       }
     } catch (error) {
       console.error("Error in fetchActiveSeason:", error)
@@ -207,24 +145,27 @@ export default function SeasonRegistrationPage() {
 
     setIsCheckingRegistration(true)
     try {
+      // Use .maybeSingle() instead of .single() to avoid 406 errors
       const { data, error } = await supabase
         .from("season_registrations")
         .select("*")
         .eq("user_id", session.user.id)
         .eq("season_id", seasonId)
-        .single()
+        .maybeSingle()
 
-      if (error && error.code !== "PGRST116") {
-        // PGRST116 is the error code for "no rows returned"
-        window.console.error("Error checking registration:", error)
+      if (error) {
+        console.error("Error checking registration:", error)
         setDebugInfo((prev) => prev + `\nRegistration check error: ${error.message}`)
+        // Don't set hasRegistered to true on error, let user try to register
+        setHasRegistered(false)
+      } else {
+        setHasRegistered(!!data)
+        setDebugInfo((prev) => prev + `\nHas registered: ${!!data}`)
       }
-
-      setHasRegistered(!!data)
-      setDebugInfo((prev) => prev + `\nHas registered: ${!!data}`)
     } catch (error) {
-      window.console.error("Error checking registration:", error)
+      console.error("Error checking registration:", error)
       setDebugInfo((prev) => prev + `\nRegistration check exception: ${JSON.stringify(error)}`)
+      setHasRegistered(false)
     } finally {
       setIsCheckingRegistration(false)
     }
