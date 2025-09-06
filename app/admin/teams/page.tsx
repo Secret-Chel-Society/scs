@@ -44,7 +44,7 @@ import { TeamsActiveMigration } from "@/components/admin/teams-active-migration"
 import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
-import { getCurrentSeasonId } from "@/lib/team-utils"
+import { getCurrentSeasonId, getSalaryCap, updateSalaryCap } from "@/lib/team-utils"
 
 // Conference interface to match database schema
 interface Conference {
@@ -130,6 +130,8 @@ export default function AdminTeamsPage() {
   const [lastRefresh, setLastRefresh] = useState(Date.now())
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isAddingColumns, setIsAddingColumns] = useState(false)
+  const [salaryCap, setSalaryCap] = useState<number>(30000000)
+  const [isUpdatingSalaryCap, setIsUpdatingSalaryCap] = useState(false)
 
   useEffect(() => {
     async function checkAuthorizationAndLoadData() {
@@ -206,6 +208,9 @@ export default function AdminTeamsPage() {
 
         // Load conferences
         await loadConferences()
+        
+        // Load salary cap
+        await loadSalaryCap()
 
         // Load seasons
         console.log("🔍 Loading seasons...")
@@ -582,6 +587,49 @@ export default function AdminTeamsPage() {
       })
       // If conferences table doesn't exist, set empty array
       setConferences([])
+    }
+  }
+
+  // Load salary cap from system settings
+  const loadSalaryCap = async () => {
+    try {
+      const cap = await getSalaryCap()
+      setSalaryCap(cap)
+      console.log("✅ Salary cap loaded:", cap)
+    } catch (error) {
+      console.error("❌ Error loading salary cap:", error)
+    }
+  }
+
+  // Update salary cap
+  const handleUpdateSalaryCap = async (newCap: number) => {
+    try {
+      setIsUpdatingSalaryCap(true)
+      const success = await updateSalaryCap(newCap)
+      
+      if (success) {
+        setSalaryCap(newCap)
+        toast({
+          title: "Salary Cap Updated",
+          description: `Salary cap updated to $${newCap.toLocaleString()}`,
+          variant: "default",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update salary cap",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error updating salary cap:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update salary cap",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUpdatingSalaryCap(false)
     }
   }
 
@@ -1140,6 +1188,68 @@ export default function AdminTeamsPage() {
             </CardContent>
           </Card>
       )}
+
+        {/* Salary Cap Management Section */}
+        <Card className="mb-8 hockey-card hockey-card-hover border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 shadow-2xl shadow-hockey-silver-500/20">
+          <CardHeader className="relative">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-hockey-silver-100 dark:from-hockey-silver-900/30 dark:to-hockey-silver-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
+            <CardTitle className="flex items-center gap-4 relative z-10">
+              <div className="w-12 h-12 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-xl flex items-center justify-center shadow-lg shadow-hockey-silver-500/25">
+                <Trophy className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-ice-blue-800 dark:text-ice-blue-200">Salary Cap Management</div>
+                <div className="text-lg text-ice-blue-600 dark:text-ice-blue-400">Configure the league salary cap</div>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-hockey-silver-500/10 to-hockey-silver-500/10 rounded-xl border border-hockey-silver-200/50 dark:border-hockey-silver-700/50">
+              <div>
+                <div className="text-3xl font-bold text-hockey-silver-600 dark:text-hockey-silver-400">
+                  ${salaryCap.toLocaleString()}
+                </div>
+                <div className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400 font-semibold">Current Salary Cap</div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Input
+                  type="number"
+                  placeholder="Enter new cap"
+                  className="w-48 bg-slate-800/50 border-white/20 text-white"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const input = e.target as HTMLInputElement
+                      const newCap = parseInt(input.value)
+                      if (!isNaN(newCap) && newCap > 0) {
+                        handleUpdateSalaryCap(newCap)
+                        input.value = ''
+                      }
+                    }
+                  }}
+                />
+                <Button
+                  onClick={() => {
+                    const input = document.querySelector('input[placeholder="Enter new cap"]') as HTMLInputElement
+                    const newCap = parseInt(input.value)
+                    if (!isNaN(newCap) && newCap > 0) {
+                      handleUpdateSalaryCap(newCap)
+                      input.value = ''
+                    }
+                  }}
+                  disabled={isUpdatingSalaryCap}
+                  className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                >
+                  {isUpdatingSalaryCap ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Settings className="h-4 w-4 mr-2" />
+                  )}
+                  Update Cap
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Enhanced Conference Management Section */}
         <Card className="mb-8 hockey-card hockey-card-hover border-2 border-assist-green-200/50 dark:border-assist-green-700/50 shadow-2xl shadow-assist-green-500/20">
