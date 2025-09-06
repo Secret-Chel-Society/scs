@@ -229,7 +229,7 @@ export default function SeasonRegistrationPage() {
         .select("*")
         .eq("user_id", session.user.id)
         .eq("season_id", activeSeason.id)
-        .single()
+        .maybeSingle()
 
       if (existingReg) {
         setHasRegistered(true)
@@ -244,8 +244,8 @@ export default function SeasonRegistrationPage() {
       }
 
       // Prepare registration data
-      // Use season_number if it exists, otherwise use derived_season_number or a default
-      const seasonNumber = activeSeason.season_number || activeSeason.derived_season_number || 1
+      // Use season_number if it exists, otherwise use a default
+      const seasonNumber = activeSeason.season_number || 1
 
       const registrationData = {
         user_id: session.user.id,
