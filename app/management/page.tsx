@@ -1557,36 +1557,36 @@ const ManagementPage = () => {
 
             {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="flex flex-wrap w-full mb-6 md:mb-8 h-auto gap-1 sm:gap-2 overflow-hidden">
-                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2 overflow-hidden">
+              <TabsList className="flex flex-wrap w-full mb-6 md:mb-8 h-auto gap-2 p-2">
+                <TabsTrigger value="roster" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0">
                   <span className="hidden md:inline truncate">Team Roster</span>
                   <span className="md:hidden truncate">Roster</span>
                 </TabsTrigger>
-                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2 overflow-hidden">
+                <TabsTrigger value="availability" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0">
                   <span className="hidden md:inline truncate">Team Avail</span>
                   <span className="md:hidden truncate">Avail</span>
                 </TabsTrigger>
-                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2 overflow-hidden">
+                <TabsTrigger value="schedule" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0">
                   <span className="hidden md:inline truncate">Team Schedule</span>
                   <span className="md:hidden truncate">Schedule</span>
                 </TabsTrigger>
-                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2 overflow-hidden">
+                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0">
                   <span className="hidden md:inline truncate">Free Agents</span>
                   <span className="md:hidden truncate">Free Agents</span>
                 </TabsTrigger>
-                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2 overflow-hidden">
+                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0">
                   <span className="hidden md:inline truncate">My Bids</span>
                   <span className="md:hidden truncate">Bids</span>
                 </TabsTrigger>
-                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2 overflow-hidden">
+                <TabsTrigger value="waivers" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0">
                   <span className="hidden md:inline truncate">Waivers</span>
                   <span className="md:hidden truncate">Waivers</span>
                 </TabsTrigger>
-                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative overflow-hidden">
+                <TabsTrigger value="trades" className="text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 relative">
                   <span className="hidden md:inline truncate">Trades</span>
                   <span className="md:hidden truncate">Trades</span>
                   {incomingTradeProposals.length > 0 && (
-                    <span className="ml-1 md:ml-2 bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs flex-shrink-0">
+                    <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs flex-shrink-0 shadow-sm">
                       {incomingTradeProposals.length}
                     </span>
                   )}
@@ -2137,11 +2137,11 @@ const ManagementPage = () => {
                   </CardHeader>
                   <CardContent>
                     <Tabs defaultValue="available" className="w-full">
-                      <TabsList className="mb-4 overflow-hidden">
-                        <TabsTrigger value="available" className="overflow-hidden">
+                      <TabsList className="mb-4 gap-2 p-2">
+                        <TabsTrigger value="available" className="flex-1 min-w-0">
                           <span className="truncate">Available Players</span>
                         </TabsTrigger>
-                        <TabsTrigger value="waive" className="overflow-hidden">
+                        <TabsTrigger value="waive" className="flex-1 min-w-0">
                           <span className="truncate">Waive Player</span>
                         </TabsTrigger>
                       </TabsList>
@@ -2372,11 +2372,11 @@ const ManagementPage = () => {
                   </CardHeader>
                   <CardContent>
                     <Tabs defaultValue="propose" className="w-full">
-                      <TabsList className="mb-4 overflow-hidden">
-                        <TabsTrigger value="propose" className="overflow-hidden">
+                      <TabsList className="mb-4 gap-2 p-2">
+                        <TabsTrigger value="propose" className="flex-1 min-w-0">
                           <span className="truncate">Propose Trade</span>
                         </TabsTrigger>
-                        <TabsTrigger value="incoming" className="overflow-hidden">
+                        <TabsTrigger value="incoming" className="flex-1 min-w-0">
                           <span className="truncate">Incoming Proposals</span>
                           {incomingTradeProposals.length > 0 && (
                             <Badge variant="destructive" className="ml-2 flex-shrink-0">
@@ -2384,7 +2384,7 @@ const ManagementPage = () => {
                             </Badge>
                           )}
                         </TabsTrigger>
-                        <TabsTrigger value="outgoing" className="overflow-hidden">
+                        <TabsTrigger value="outgoing" className="flex-1 min-w-0">
                           <span className="truncate">Outgoing Proposals</span>
                         </TabsTrigger>
                       </TabsList>

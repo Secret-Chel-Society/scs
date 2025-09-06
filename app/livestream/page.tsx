@@ -398,14 +398,14 @@ export default function LiveStreamPage() {
       <section>
         <h2 className="mb-6 text-3xl font-bold">Stream Archive</h2>
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-6 overflow-hidden">
-            <TabsTrigger value="all" className="overflow-hidden">
+          <TabsList className="mb-6 gap-2 p-2">
+            <TabsTrigger value="all" className="flex-1 min-w-0">
               <span className="truncate">All Streams</span>
             </TabsTrigger>
-            <TabsTrigger value="twitch" className="overflow-hidden">
+            <TabsTrigger value="twitch" className="flex-1 min-w-0">
               <span className="truncate">Twitch</span>
             </TabsTrigger>
-            <TabsTrigger value="youtube" className="overflow-hidden">
+            <TabsTrigger value="youtube" className="flex-1 min-w-0">
               <span className="truncate">YouTube</span>
             </TabsTrigger>
           </TabsList>

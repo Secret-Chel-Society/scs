@@ -338,26 +338,26 @@ export default function ForumPage() {
           <Card className="clean-card">
             <CardContent className="p-6">
               <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-                <TabsList className="flex flex-wrap w-full bg-slate-100 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg gap-2 sm:gap-3">
+                <TabsList className="flex flex-wrap w-full gap-2 sm:gap-3 p-2">
                   <TabsTrigger 
                     value="all" 
-                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg min-h-[50px] sm:min-h-[60px] max-w-full overflow-hidden"
+                    className="flex items-center gap-2 sm:gap-3 px-4 py-3 rounded-lg min-h-[60px] sm:min-h-[70px] flex-1 min-w-0"
                   >
-                    <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
-                      <Target className="h-5 w-5" />
+                    <div className="p-2 bg-white/20 dark:bg-slate-600/30 rounded-lg flex-shrink-0 backdrop-blur-sm">
+                      <Target className="h-5 w-5 text-current" />
                     </div>
-                    <span className="text-center font-medium text-sm truncate w-full">All Posts</span>
+                    <span className="font-medium text-sm truncate">All Posts</span>
                   </TabsTrigger>
                   {categories.map((category) => (
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id}
-                      className="data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-200 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg min-h-[50px] sm:min-h-[60px] max-w-full overflow-hidden"
+                      className="flex items-center gap-2 sm:gap-3 px-4 py-3 rounded-lg min-h-[60px] sm:min-h-[70px] flex-1 min-w-0"
                     >
-                      <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
-                        <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color }} />
+                      <div className="p-2 bg-white/20 dark:bg-slate-600/30 rounded-lg flex-shrink-0 backdrop-blur-sm">
+                        <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: category.color }} />
                       </div>
-                      <span className="text-center font-medium text-sm truncate w-full">{category.name}</span>
+                      <span className="font-medium text-sm truncate">{category.name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>

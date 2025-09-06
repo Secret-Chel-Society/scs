@@ -25,12 +25,68 @@
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
     
-    /* Hockey-themed custom properties */
-    --ice-blue: 217.2 91.2% 59.8%;
-    --hockey-silver: 220 13% 91%;
-    --rink-blue: 217.2 91.2% 59.8%;
-    --goal-red: 0 84.2% 60.2%;
-    --assist-green: 142.1 76.2% 36.3%;
+  /* Hockey-themed custom properties */
+  --ice-blue: 217.2 91.2% 59.8%;
+  --hockey-silver: 220 13% 91%;
+  --rink-blue: 217.2 91.2% 59.8%;
+  --goal-red: 0 84.2% 60.2%;
+  --assist-green: 142.1 76.2% 36.3%;
+  
+  /* Enhanced hockey theme colors */
+  --ice-blue-50: 217.2 91.2% 95%;
+  --ice-blue-100: 217.2 91.2% 90%;
+  --ice-blue-200: 217.2 91.2% 80%;
+  --ice-blue-300: 217.2 91.2% 70%;
+  --ice-blue-400: 217.2 91.2% 60%;
+  --ice-blue-500: 217.2 91.2% 59.8%;
+  --ice-blue-600: 217.2 91.2% 50%;
+  --ice-blue-700: 217.2 91.2% 40%;
+  --ice-blue-800: 217.2 91.2% 30%;
+  --ice-blue-900: 217.2 91.2% 20%;
+  
+  --hockey-silver-50: 220 13% 98%;
+  --hockey-silver-100: 220 13% 95%;
+  --hockey-silver-200: 220 13% 90%;
+  --hockey-silver-300: 220 13% 85%;
+  --hockey-silver-400: 220 13% 80%;
+  --hockey-silver-500: 220 13% 75%;
+  --hockey-silver-600: 220 13% 70%;
+  --hockey-silver-700: 220 13% 65%;
+  --hockey-silver-800: 220 13% 60%;
+  --hockey-silver-900: 220 13% 55%;
+  
+  --rink-blue-50: 217.2 91.2% 95%;
+  --rink-blue-100: 217.2 91.2% 90%;
+  --rink-blue-200: 217.2 91.2% 80%;
+  --rink-blue-300: 217.2 91.2% 70%;
+  --rink-blue-400: 217.2 91.2% 60%;
+  --rink-blue-500: 217.2 91.2% 59.8%;
+  --rink-blue-600: 217.2 91.2% 50%;
+  --rink-blue-700: 217.2 91.2% 40%;
+  --rink-blue-800: 217.2 91.2% 30%;
+  --rink-blue-900: 217.2 91.2% 20%;
+  
+  --goal-red-50: 0 84.2% 95%;
+  --goal-red-100: 0 84.2% 90%;
+  --goal-red-200: 0 84.2% 80%;
+  --goal-red-300: 0 84.2% 70%;
+  --goal-red-400: 0 84.2% 60%;
+  --goal-red-500: 0 84.2% 60.2%;
+  --goal-red-600: 0 84.2% 50%;
+  --goal-red-700: 0 84.2% 40%;
+  --goal-red-800: 0 84.2% 30%;
+  --goal-red-900: 0 84.2% 20%;
+  
+  --assist-green-50: 142.1 76.2% 95%;
+  --assist-green-100: 142.1 76.2% 90%;
+  --assist-green-200: 142.1 76.2% 80%;
+  --assist-green-300: 142.1 76.2% 70%;
+  --assist-green-400: 142.1 76.2% 60%;
+  --assist-green-500: 142.1 76.2% 36.3%;
+  --assist-green-600: 142.1 76.2% 30%;
+  --assist-green-700: 142.1 76.2% 25%;
+  --assist-green-800: 142.1 76.2% 20%;
+  --assist-green-900: 142.1 76.2% 15%;
   }
 
   .dark {
@@ -1091,6 +1147,27 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   @apply after:bg-gradient-to-r after:from-ice-blue-500 after:to-rink-blue-600;
   @apply after:transition-all after:duration-300 after:ease-out;
   @apply hover:after:w-full;
+}
+
+/* Enhanced tab utilities */
+.hockey-tab-active {
+  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg shadow-ice-blue-500/25;
+}
+
+.hockey-tab-hover {
+  @apply hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md;
+}
+
+.hockey-gradient-text {
+  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 bg-clip-text text-transparent;
+}
+
+.hockey-border-gradient {
+  @apply border-2 border-transparent bg-gradient-to-r from-ice-blue-200 to-rink-blue-200 bg-clip-border;
+}
+
+.hockey-shadow {
+  @apply shadow-lg shadow-ice-blue-500/10 hover:shadow-xl hover:shadow-ice-blue-500/20;
 }
 
 
