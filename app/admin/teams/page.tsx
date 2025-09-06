@@ -511,12 +511,16 @@ export default function AdminTeamsPage() {
 
       if (error) {
         console.error("Error loading conferences:", error)
+        // If conferences table doesn't exist, set empty array
+        setConferences([])
         return
       }
 
       setConferences(data || [])
     } catch (error) {
       console.error("Error loading conferences:", error)
+      // If conferences table doesn't exist, set empty array
+      setConferences([])
     }
   }
 
@@ -532,8 +536,8 @@ export default function AdminTeamsPage() {
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
 
-      // Load teams with conference data
-      const { data, error } = await supabase
+      // Load teams with conference data (fallback if conferences table doesn't exist)
+      let { data, error } = await supabase
         .from("teams")
         .select(`
           *,
@@ -541,6 +545,23 @@ export default function AdminTeamsPage() {
         `)
         .eq("season_id", season)
         .order("name")
+
+      // If the join fails, try loading teams without conference data
+      if (error && error.message.includes("conferences")) {
+        console.log("Conferences table not found, loading teams without conference data")
+        const { data: teamsData, error: teamsError } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("season_id", season)
+          .order("name")
+        
+        if (teamsError) {
+          throw teamsError
+        }
+        
+        data = teamsData
+        error = null
+      }
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -1070,6 +1091,13 @@ export default function AdminTeamsPage() {
                   <p className="text-ice-blue-600 dark:text-ice-blue-400 text-sm">
                     Assign teams to conferences. Top 4 teams from each conference qualify for playoffs.
                   </p>
+                  {conferences.length === 0 && (
+                    <div className="mt-2 p-3 bg-amber-500/20 border border-amber-500/30 rounded-lg">
+                      <p className="text-amber-700 dark:text-amber-300 text-sm">
+                        <strong>Note:</strong> No conferences found. You may need to create conferences first or run the database setup.
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <Button
                   onClick={() => setShowConferenceManagement(!showConferenceManagement)}
@@ -1105,11 +1133,17 @@ export default function AdminTeamsPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="">No Conference</SelectItem>
-                          {conferences.map((conference) => (
-                            <SelectItem key={conference.id} value={conference.id} className="text-white hover:bg-slate-700">
-                              {conference.name}
+                          {conferences.length > 0 ? (
+                            conferences.map((conference) => (
+                              <SelectItem key={conference.id} value={conference.id} className="text-white hover:bg-slate-700">
+                                {conference.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled className="text-gray-500">
+                              No conferences available
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
