@@ -45,7 +45,13 @@ import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
 import { getCurrentSeasonId } from "@/lib/team-utils"
-import { CONFERENCES, type ConferenceType } from "@/lib/standings-calculator"
+
+// Conference types
+type ConferenceType = "Eastern Elites" | "Western Warriors"
+const CONFERENCES = {
+  EASTERN_ELITES: "Eastern Elites" as ConferenceType,
+  WESTERN_WARRIORS: "Western Warriors" as ConferenceType,
+}
 
 interface Season {
   id: number
