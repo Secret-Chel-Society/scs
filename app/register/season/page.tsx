@@ -42,7 +42,7 @@ export default function SeasonRegistrationPage() {
     try {
       setLoadingActiveSeason(true)
 
-      // Get current active season ID from system settings
+      // First try to get from system_settings
       const { data: settingsData, error: settingsError } = await supabase
         .from("system_settings")
         .select("value")
@@ -50,10 +50,45 @@ export default function SeasonRegistrationPage() {
         .single()
 
       if (settingsError) {
-        window.console.error("Error fetching current season setting:", settingsError)
-        setDebugInfo((prev) => prev + `\nError fetching settings: ${settingsError.message}`)
+        console.log("System settings approach failed, trying seasons table:", settingsError.message)
+        setDebugInfo((prev) => prev + `\nSystem settings failed: ${settingsError.message}`)
+        
+        // Fallback: Get active season from seasons table
+        const { data: seasonData, error: seasonError } = await supabase
+          .from("seasons")
+          .select("id, name, season_number")
+          .eq("is_active", true)
+          .single()
+
+        if (seasonError) {
+          console.log("Active season not found, trying first season:", seasonError.message)
+          setDebugInfo((prev) => prev + `\nActive season failed: ${seasonError.message}`)
+          
+          // Final fallback: Get first season
+          const { data: firstSeason, error: firstSeasonError } = await supabase
+            .from("seasons")
+            .select("id, name, season_number")
+            .order("id")
+            .limit(1)
+            .single()
+
+          if (firstSeasonError) {
+            console.error("No seasons found:", firstSeasonError.message)
+            setDebugInfo((prev) => prev + `\nNo seasons found: ${firstSeasonError.message}`)
+            setLoadingActiveSeason(false)
+            return null
+          }
+
+          console.log("Using first season:", firstSeason)
+          setDebugInfo((prev) => prev + `\nUsing first season: ${JSON.stringify(firstSeason)}`)
+          setLoadingActiveSeason(false)
+          return firstSeason
+        }
+
+        console.log("Using active season:", seasonData)
+        setDebugInfo((prev) => prev + `\nUsing active season: ${JSON.stringify(seasonData)}`)
         setLoadingActiveSeason(false)
-        return null
+        return seasonData
       }
 
       // If we have a current_season setting, use that exact ID
@@ -69,8 +104,8 @@ export default function SeasonRegistrationPage() {
           .single()
 
         if (seasonError) {
-          window.console.error("Error fetching season:", seasonError)
-          setDebugInfo((prev) => prev + `\nError fetching season: ${seasonError.message}`)
+          console.log("Season by ID failed, trying active season:", seasonError.message)
+          setDebugInfo((prev) => prev + `\nSeason by ID failed: ${seasonError.message}`)
 
           // As a fallback, try to get any active season
           const { data: fallbackSeason, error: fallbackError } = await supabase
@@ -80,8 +115,8 @@ export default function SeasonRegistrationPage() {
             .single()
 
           if (fallbackError) {
-            window.console.error("Error fetching fallback season:", fallbackError)
-            setDebugInfo((prev) => prev + `\nError fetching fallback season: ${fallbackError.message}`)
+            console.error("Fallback season failed:", fallbackError.message)
+            setDebugInfo((prev) => prev + `\nFallback season failed: ${fallbackError.message}`)
             setLoadingActiveSeason(false)
             return null
           }
@@ -103,7 +138,7 @@ export default function SeasonRegistrationPage() {
           .single()
 
         if (activeSeasonError) {
-          window.console.error("Error fetching active season:", activeSeasonError)
+          console.error("Error fetching active season:", activeSeasonError.message)
           setDebugInfo((prev) => prev + `\nError fetching active season: ${activeSeasonError.message}`)
           setLoadingActiveSeason(false)
           return null
@@ -114,7 +149,7 @@ export default function SeasonRegistrationPage() {
         return activeSeason
       }
     } catch (error) {
-      window.console.error("Error in fetchActiveSeason:", error)
+      console.error("Error in fetchActiveSeason:", error)
       setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)
       setLoadingActiveSeason(false)
       return null
@@ -322,36 +357,63 @@ export default function SeasonRegistrationPage() {
   useEffect(() => {
     if (session?.user) {
       const checkBanStatus = async () => {
-        const { data: user, error } = await supabase
-          .from("users")
-          .select("is_banned, ban_reason, ban_expires_at")
-          .eq("id", session.user.id)
-          .single()
+        try {
+          // First try to get ban status with ban_expires_at column
+          const { data: user, error } = await supabase
+            .from("users")
+            .select("is_banned, ban_reason, ban_expires_at")
+            .eq("id", session.user.id)
+            .single()
 
-        if (error) {
-          console.error("Error checking ban status:", error)
-          toast({
-            title: "Error",
-            description: "Failed to check account status. Please try again.",
-            variant: "destructive",
-          })
-          return
-        }
+          if (error) {
+            // If ban_expires_at column doesn't exist, try without it
+            if (error.message.includes("ban_expires_at") || error.code === "42703") {
+              console.log("ban_expires_at column not found, trying without it")
+              
+              const { data: userFallback, error: fallbackError } = await supabase
+                .from("users")
+                .select("is_banned, ban_reason")
+                .eq("id", session.user.id)
+                .single()
 
-        if (user?.is_banned) {
-          const isTemporaryBan = user.ban_expires_at && new Date(user.ban_expires_at) > new Date()
+              if (fallbackError) {
+                console.error("Error checking ban status (fallback):", fallbackError)
+                // Don't show error toast for missing column, just log it
+                return
+              }
 
-          toast({
-            title: "Account Suspended",
-            description: `Your account is currently suspended and you cannot register for the season. ${
-              isTemporaryBan
-                ? `Suspension expires: ${new Date(user.ban_expires_at).toLocaleDateString()}`
-                : "This is a permanent suspension."
-            }`,
-            variant: "destructive",
-          })
-          router.push("/") // Redirect to home page where they'll see the ban modal
-          return
+              if (userFallback?.is_banned) {
+                toast({
+                  title: "Account Suspended",
+                  description: "Your account is currently suspended and you cannot register for the season.",
+                  variant: "destructive",
+                })
+                router.push("/")
+                return
+              }
+            } else {
+              console.error("Error checking ban status:", error)
+              // Don't show error toast for database issues, just log it
+              return
+            }
+          } else if (user?.is_banned) {
+            const isTemporaryBan = user.ban_expires_at && new Date(user.ban_expires_at) > new Date()
+
+            toast({
+              title: "Account Suspended",
+              description: `Your account is currently suspended and you cannot register for the season. ${
+                isTemporaryBan
+                  ? `Suspension expires: ${new Date(user.ban_expires_at).toLocaleDateString()}`
+                  : "This is a permanent suspension."
+              }`,
+              variant: "destructive",
+            })
+            router.push("/")
+            return
+          }
+        } catch (error) {
+          console.error("Error in checkBanStatus:", error)
+          // Don't show error toast, just log it
         }
       }
 
