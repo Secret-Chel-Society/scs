@@ -133,7 +133,12 @@ export default function AdminTeamsPage() {
 
   useEffect(() => {
     async function checkAuthorizationAndLoadData() {
+      console.log("🔍 Starting authorization check...")
+      console.log("Session:", session)
+      console.log("Supabase client:", supabase)
+      
       if (!session?.user) {
+        console.log("❌ No session user found")
         toast({
           title: "Unauthorized",
           description: "You must be logged in to access this page.",
@@ -143,10 +148,14 @@ export default function AdminTeamsPage() {
         return
       }
 
+      console.log("✅ Session user found:", session.user.id)
+
       try {
         setLoading(true)
         setLoadError(null)
 
+        console.log("🔍 Checking admin role for user:", session.user.id)
+        
         // Check for Admin role
         const { data: adminRoleData, error: adminRoleError } = await supabase
           .from("user_roles")
@@ -154,8 +163,16 @@ export default function AdminTeamsPage() {
           .eq("user_id", session.user.id)
           .eq("role", "Admin")
 
+        console.log("Admin role check result:", { adminRoleData, adminRoleError })
+
         if (adminRoleError) {
-          console.error("Error checking admin role:", adminRoleError)
+          console.error("❌ Error checking admin role:", adminRoleError)
+          console.error("Admin role error details:", {
+            message: adminRoleError.message,
+            details: adminRoleError.details,
+            hint: adminRoleError.hint,
+            code: adminRoleError.code
+          })
           setLoadError(`Error checking admin role: ${adminRoleError.message}`)
           toast({
             title: "Authentication error",
@@ -166,6 +183,7 @@ export default function AdminTeamsPage() {
         }
 
         if (!adminRoleData || adminRoleData.length === 0) {
+          console.log("❌ No admin role found for user")
           toast({
             title: "Access denied",
             description: "You don't have permission to access the admin panel.",
@@ -175,8 +193,10 @@ export default function AdminTeamsPage() {
           return
         }
 
+        console.log("✅ Admin role confirmed")
         setIsAdmin(true)
 
+        console.log("🔍 Checking database columns...")
         // Check if columns exist
         await checkEaColumnExists()
         await checkActiveColumnExists()
@@ -188,6 +208,7 @@ export default function AdminTeamsPage() {
         await loadConferences()
 
         // Load seasons
+        console.log("🔍 Loading seasons...")
         try {
           const { data: seasonsData, error: seasonsError } = await supabase
             .from("system_settings")
@@ -195,16 +216,26 @@ export default function AdminTeamsPage() {
             .eq("key", "seasons")
             .single()
 
+          console.log("Seasons query result:", { seasonsData, seasonsError })
+
           if (seasonsError) {
-            console.error("Error loading seasons:", seasonsError)
+            console.error("❌ Error loading seasons:", seasonsError)
+            console.error("Seasons error details:", {
+              message: seasonsError.message,
+              details: seasonsError.details,
+              hint: seasonsError.hint,
+              code: seasonsError.code
+            })
             // Use default season if can't load from database
             setSeasons([{ id: 1, name: "Season 1", is_active: true }])
             setSelectedSeason(1)
           } else if (seasonsData) {
+            console.log("✅ Seasons loaded successfully")
             const seasonsArray = seasonsData.value || []
             setSeasons(seasonsArray)
 
             // Get current season
+            console.log("🔍 Getting current season...")
             try {
               const currentSeason = await getCurrentSeasonId()
               setSelectedSeason(currentSeason)
@@ -223,14 +254,22 @@ export default function AdminTeamsPage() {
 
         // Load teams - will be done by effect that watches selectedSeason
       } catch (error: any) {
-        console.error("Setup error:", error)
+        console.error("❌ CRITICAL SETUP ERROR:", error)
+        console.error("Error stack:", error.stack)
+        console.error("Error details:", {
+          message: error.message,
+          name: error.name,
+          cause: error.cause,
+          code: error.code
+        })
         setLoadError(`Setup error: ${error.message}`)
         toast({
-          title: "Error",
+          title: "Critical Error",
           description: error.message || "An error occurred during setup",
           variant: "destructive",
         })
       } finally {
+        console.log("🏁 Setup process finished")
         setLoading(false)
       }
     }
@@ -373,15 +412,18 @@ export default function AdminTeamsPage() {
     try {
       setIsUpdatingConference(true)
       
+      // Handle "none" value by setting to null
+      const actualConferenceId = conferenceId === "none" ? null : conferenceId
+      
       const { error } = await supabase
         .from("teams")
-        .update({ conference_id: conferenceId || null })
+        .update({ conference_id: actualConferenceId })
         .eq("id", teamId)
   
       if (error) throw error
 
       // Find the conference data
-      const conference = conferences.find(c => c.id === conferenceId)
+      const conference = actualConferenceId ? conferences.find(c => c.id === actualConferenceId) : null
   
       // Update local state
       setTeams(prevTeams => 
@@ -501,16 +543,23 @@ export default function AdminTeamsPage() {
 
   // Load teams based on selected season
   const loadConferences = async () => {
-    if (!supabase) return
+    console.log("🔍 Loading conferences...")
+    if (!supabase) {
+      console.log("❌ No supabase client available")
+      return
+    }
 
     try {
+      console.log("🔍 Querying conferences table...")
       const { data, error } = await supabase
         .from("conferences")
         .select("*")
         .order("name")
 
+      console.log("Conferences query result:", { data, error })
+
       if (error) {
-        console.error("Error loading conferences:", error)
+        console.error("❌ Error loading conferences:", error)
         console.error("Conference error details:", {
           message: error.message,
           details: error.details,
@@ -522,9 +571,15 @@ export default function AdminTeamsPage() {
         return
       }
 
+      console.log("✅ Conferences loaded successfully:", data?.length || 0, "conferences")
       setConferences(data || [])
     } catch (error) {
-      console.error("Error loading conferences:", error)
+      console.error("❌ Exception loading conferences:", error)
+      console.error("Conference exception details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
       // If conferences table doesn't exist, set empty array
       setConferences([])
     }
@@ -1136,7 +1191,7 @@ export default function AdminTeamsPage() {
                         )}
                       </div>
                       <Select
-                        value={team.conference_id || ""}
+                        value={team.conference_id || "none"}
                         onValueChange={(value) => updateTeamConference(team.id, value)}
                         disabled={isUpdatingConference}
                       >
@@ -1144,7 +1199,7 @@ export default function AdminTeamsPage() {
                           <SelectValue placeholder="Select conference" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Conference</SelectItem>
+                          <SelectItem value="none">No Conference</SelectItem>
                           {conferences.length > 0 ? (
                             conferences.map((conference) => (
                               <SelectItem key={conference.id} value={conference.id} className="text-white hover:bg-slate-700">
@@ -1152,7 +1207,7 @@ export default function AdminTeamsPage() {
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="" disabled className="text-gray-500">
+                            <SelectItem value="no-conferences" disabled className="text-gray-500">
                               No conferences available
                             </SelectItem>
                           )}
@@ -1171,7 +1226,7 @@ export default function AdminTeamsPage() {
           <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-center gap-4">
-                <Select value={selectedSeason?.toString() || ""} onValueChange={(value) => setSelectedSeason(Number(value))}>
+                <Select value={selectedSeason?.toString() || "1"} onValueChange={(value) => setSelectedSeason(Number(value))}>
                   <SelectTrigger className="w-[180px] bg-slate-800/50 border-white/20 text-white">
                     <SelectValue placeholder="Select Season" />
                   </SelectTrigger>
