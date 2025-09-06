@@ -287,36 +287,63 @@ export default function SeasonRegistrationPage() {
   useEffect(() => {
     if (session?.user) {
       const checkBanStatus = async () => {
-        const { data: user, error } = await supabase
-          .from("users")
-          .select("is_banned, ban_reason, ban_expires_at")
-          .eq("id", session.user.id)
-          .single()
+        try {
+          // First try to get ban status with ban_expires_at column
+          const { data: user, error } = await supabase
+            .from("users")
+            .select("is_banned, ban_reason, ban_expires_at")
+            .eq("id", session.user.id)
+            .single()
 
-        if (error) {
-          console.error("Error checking ban status:", error)
-          toast({
-            title: "Error",
-            description: "Failed to check account status. Please try again.",
-            variant: "destructive",
-          })
-          return
-        }
+          if (error) {
+            // If ban_expires_at column doesn't exist, try without it
+            if (error.message.includes("ban_expires_at") || error.code === "42703") {
+              console.log("ban_expires_at column not found, trying without it")
+              
+              const { data: userFallback, error: fallbackError } = await supabase
+                .from("users")
+                .select("is_banned, ban_reason")
+                .eq("id", session.user.id)
+                .single()
 
-        if (user?.is_banned) {
-          const isTemporaryBan = user.ban_expires_at && new Date(user.ban_expires_at) > new Date()
+              if (fallbackError) {
+                console.error("Error checking ban status (fallback):", fallbackError)
+                // Don't show error toast for missing column, just log it
+                return
+              }
 
-          toast({
-            title: "Account Suspended",
-            description: `Your account is currently suspended and you cannot register for the season. ${
-              isTemporaryBan
-                ? `Suspension expires: ${new Date(user.ban_expires_at).toLocaleDateString()}`
-                : "This is a permanent suspension."
-            }`,
-            variant: "destructive",
-          })
-          router.push("/") // Redirect to home page where they'll see the ban modal
-          return
+              if (userFallback?.is_banned) {
+                toast({
+                  title: "Account Suspended",
+                  description: "Your account is currently suspended and you cannot register for the season.",
+                  variant: "destructive",
+                })
+                router.push("/")
+                return
+              }
+            } else {
+              console.error("Error checking ban status:", error)
+              // Don't show error toast for database issues, just log it
+              return
+            }
+          } else if (user?.is_banned) {
+            const isTemporaryBan = user.ban_expires_at && new Date(user.ban_expires_at) > new Date()
+
+            toast({
+              title: "Account Suspended",
+              description: `Your account is currently suspended and you cannot register for the season. ${
+                isTemporaryBan
+                  ? `Suspension expires: ${new Date(user.ban_expires_at).toLocaleDateString()}`
+                  : "This is a permanent suspension."
+              }`,
+              variant: "destructive",
+            })
+            router.push("/")
+            return
+          }
+        } catch (error) {
+          console.error("Error in checkBanStatus:", error)
+          // Don't show error toast, just log it
         }
       }
 
