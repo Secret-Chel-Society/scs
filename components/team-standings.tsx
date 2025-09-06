@@ -83,9 +83,7 @@ export default function TeamStandings({ teams }: TeamStandingsProps) {
                         />
                       </div>
                     ) : (
-                      <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-sm font-bold text-ice-blue-700 dark:text-ice-blue-300 border border-ice-blue-200 dark:border-rink-blue-700 shadow-md">
-                        <TeamLogo teamName={team.name} size="sm" />
-                      </div>
+                      <TeamLogo teamName={team.name} logoUrl={team.logo_url} size="sm" />
                     )}
                   </div>
                   <div className="flex items-center">

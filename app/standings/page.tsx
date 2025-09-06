@@ -57,26 +57,27 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
   const sortedEastern = sortConferenceTeams(easternTeams)
   const sortedWestern = sortConferenceTeams(westernTeams)
 
-  // Top 4 teams from each conference make playoffs
-  const easternPlayoffTeams = sortedEastern.slice(0, 4)
-  const westernPlayoffTeams = sortedWestern.slice(0, 4)
+  // Top 4 teams from each conference make playoffs (only if there are enough teams)
+  const easternPlayoffTeams = sortedEastern.length >= 4 ? sortedEastern.slice(0, 4) : []
+  const westernPlayoffTeams = sortedWestern.length >= 4 ? sortedWestern.slice(0, 4) : []
 
-  // Bottom 2 teams from each conference are eliminated
-  const easternEliminatedTeams = sortedEastern.slice(-2)
-  const westernEliminatedTeams = sortedWestern.slice(-2)
+  // Bottom 2 teams from each conference are eliminated (only if there are enough teams)
+  const easternEliminatedTeams = sortedEastern.length >= 6 ? sortedEastern.slice(-2) : []
+  const westernEliminatedTeams = sortedWestern.length >= 6 ? sortedWestern.slice(-2) : []
 
-  // Bubble teams (5th and 6th place in each conference)
-  const easternBubbleTeams = sortedEastern.slice(4, 6)
-  const westernBubbleTeams = sortedWestern.slice(4, 6)
+  // Bubble teams (5th and 6th place in each conference) (only if there are enough teams)
+  const easternBubbleTeams = sortedEastern.length >= 6 ? sortedEastern.slice(4, 6) : []
+  const westernBubbleTeams = sortedWestern.length >= 6 ? sortedWestern.slice(4, 6) : []
 
   return (
     <div className="space-y-8">
-      {/* Overall Playoff Teams */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
+      {/* Overall Playoff Teams - Only show if there are playoff teams */}
+      {(easternPlayoffTeams.length > 0 || westernPlayoffTeams.length > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
         <Card className="hockey-card hockey-card-hover border-2 border-assist-green-200/50 dark:border-assist-green-700/50 shadow-2xl shadow-assist-green-500/20 overflow-hidden">
           <CardHeader className="relative bg-gradient-to-r from-assist-green-500/20 to-assist-green-500/20 border-b-2 border-assist-green-200/50 dark:border-assist-green-700/50">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-assist-green-100 to-assist-green-100 dark:from-assist-green-900/30 dark:to-assist-green-900/30 rounded-full -mr-6 -mt-6 opacity-60"></div>
@@ -153,7 +154,8 @@ function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* Bubble Teams Section */}
       {(easternBubbleTeams.length > 0 || westernBubbleTeams.length > 0) && (

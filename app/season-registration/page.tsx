@@ -42,77 +42,42 @@ export default function SeasonRegistrationPage() {
     try {
       setLoadingActiveSeason(true)
 
-      // Get current active season ID from system settings
-      const { data: settingsData, error: settingsError } = await supabase
-        .from("system_settings")
-        .select("value")
-        .eq("key", "current_season")
+      // Try to get any active season directly from seasons table
+      const { data: seasonData, error: seasonError } = await supabase
+        .from("seasons")
+        .select("id, name, season_number")
+        .eq("is_active", true)
         .single()
 
-      if (settingsError) {
-        window.console.error("Error fetching current season setting:", settingsError)
-        setDebugInfo((prev) => prev + `\nError fetching settings: ${settingsError.message}`)
-        setLoadingActiveSeason(false)
-        return null
-      }
-
-      // If we have a current_season setting, use that exact ID
-      if (settingsData?.value) {
-        const seasonId = settingsData.value
-        setDebugInfo((prev) => prev + `\nActive season ID from settings: ${seasonId}`)
-
-        // Get season details with exact match
-        const { data: seasonData, error: seasonError } = await supabase
+      if (seasonError) {
+        window.console.error("Error fetching active season:", seasonError)
+        setDebugInfo((prev) => prev + `\nError fetching active season: ${seasonError.message}`)
+        
+        // If no active season, try to get the first season
+        const { data: firstSeason, error: firstSeasonError } = await supabase
           .from("seasons")
           .select("id, name, season_number")
-          .eq("id", seasonId)
+          .order("id")
+          .limit(1)
           .single()
 
-        if (seasonError) {
-          window.console.error("Error fetching season:", seasonError)
-          setDebugInfo((prev) => prev + `\nError fetching season: ${seasonError.message}`)
-
-          // As a fallback, try to get any active season
-          const { data: fallbackSeason, error: fallbackError } = await supabase
-            .from("seasons")
-            .select("id, name, season_number")
-            .eq("is_active", true)
-            .single()
-
-          if (fallbackError) {
-            window.console.error("Error fetching fallback season:", fallbackError)
-            setDebugInfo((prev) => prev + `\nError fetching fallback season: ${fallbackError.message}`)
-            setLoadingActiveSeason(false)
-            return null
-          }
-
-          setDebugInfo((prev) => prev + `\nUsing fallback active season: ${JSON.stringify(fallbackSeason)}`)
-          setLoadingActiveSeason(false)
-          return fallbackSeason
-        }
-
-        setDebugInfo((prev) => prev + `\nFound season by ID: ${JSON.stringify(seasonData)}`)
-        setLoadingActiveSeason(false)
-        return seasonData
-      } else {
-        // If no current_season setting, try to find an active season
-        const { data: activeSeason, error: activeSeasonError } = await supabase
-          .from("seasons")
-          .select("id, name, season_number")
-          .eq("is_active", true)
-          .single()
-
-        if (activeSeasonError) {
-          window.console.error("Error fetching active season:", activeSeasonError)
-          setDebugInfo((prev) => prev + `\nError fetching active season: ${activeSeasonError.message}`)
+        if (firstSeasonError) {
+          window.console.error("Error fetching first season:", firstSeasonError)
+          setDebugInfo((prev) => prev + `\nError fetching first season: ${firstSeasonError.message}`)
           setLoadingActiveSeason(false)
           return null
         }
 
-        setDebugInfo((prev) => prev + `\nFound active season: ${JSON.stringify(activeSeason)}`)
+        setDebugInfo((prev) => prev + `\nUsing first season: ${JSON.stringify(firstSeason)}`)
+        setActiveSeason(firstSeason)
         setLoadingActiveSeason(false)
-        return activeSeason
+        return firstSeason
       }
+
+      setDebugInfo((prev) => prev + `\nFound active season: ${JSON.stringify(seasonData)}`)
+      setActiveSeason(seasonData)
+      setLoadingActiveSeason(false)
+      return seasonData
     } catch (error) {
       window.console.error("Error in fetchActiveSeason:", error)
       setDebugInfo((prev) => prev + `\nUnhandled error: ${JSON.stringify(error)}`)

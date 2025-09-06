@@ -46,11 +46,12 @@ import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
 import { getCurrentSeasonId } from "@/lib/team-utils"
 
-// Conference types
-type ConferenceType = "Eastern Elites" | "Western Warriors"
-const CONFERENCES = {
-  EASTERN_ELITES: "Eastern Elites" as ConferenceType,
-  WESTERN_WARRIORS: "Western Warriors" as ConferenceType,
+// Conference interface to match database schema
+interface Conference {
+  id: string
+  name: string
+  description?: string
+  color: string
 }
 
 interface Season {
@@ -78,7 +79,8 @@ interface Team {
   powerplay_opportunities?: number
   penalty_kill_goals_against?: number
   penalty_kill_opportunities?: number
-  conference?: string
+  conference_id?: string | null
+  conference?: Conference
 }
 
 interface EATeam {
@@ -105,9 +107,10 @@ export default function AdminTeamsPage() {
     season_id: 1,
     ea_club_id: "",
     is_active: true,
-    conference: "" as ConferenceType | "",
+    conference_id: "",
   })
   const [seasons, setSeasons] = useState<Season[]>([])
+  const [conferences, setConferences] = useState<Conference[]>([])
   const [selectedSeason, setSelectedSeason] = useState<number | null>(null)
   const [conferenceFilter, setConferenceFilter] = useState<string>("all")
   const [showConferenceManagement, setShowConferenceManagement] = useState(false)
@@ -180,6 +183,9 @@ export default function AdminTeamsPage() {
         await checkManualOverrideColumnExists()
         await checkGamesPlayedColumn()
         await checkPointsColumn()
+
+        // Load conferences
+        await loadConferences()
 
         // Load seasons
         try {
@@ -363,27 +369,30 @@ export default function AdminTeamsPage() {
   }
 
   // Update team conference
-  const updateTeamConference = async (teamId: string, conference: ConferenceType) => {
+  const updateTeamConference = async (teamId: string, conferenceId: string) => {
     try {
       setIsUpdatingConference(true)
       
       const { error } = await supabase
         .from("teams")
-        .update({ conference })
+        .update({ conference_id: conferenceId || null })
         .eq("id", teamId)
-
+  
       if (error) throw error
 
+      // Find the conference data
+      const conference = conferences.find(c => c.id === conferenceId)
+  
       // Update local state
       setTeams(prevTeams => 
         prevTeams.map(team => 
-          team.id === teamId ? { ...team, conference } : team
+          team.id === teamId ? { ...team, conference_id: conferenceId, conference } : team
         )
       )
-
+  
       toast({
         title: "Conference Updated",
-        description: `Team conference updated to ${conference}`,
+        description: `Team conference updated to ${conference?.name || "None"}`,
       })
     } catch (error: any) {
       console.error("Error updating conference:", error)
@@ -399,9 +408,9 @@ export default function AdminTeamsPage() {
 
   // Get conference statistics
   const getConferenceStats = () => {
-    const easternTeams = teams.filter(team => team.conference === CONFERENCES.EASTERN_ELITES)
-    const westernTeams = teams.filter(team => team.conference === CONFERENCES.WESTERN_WARRIORS)
-    const unassignedTeams = teams.filter(team => !team.conference || team.conference === "")
+    const easternTeams = teams.filter(team => team.conference?.name === "Eastern Conference")
+    const westernTeams = teams.filter(team => team.conference?.name === "Western Conference")
+    const unassignedTeams = teams.filter(team => !team.conference_id || !team.conference)
 
     return {
       eastern: easternTeams.length,
@@ -491,6 +500,26 @@ export default function AdminTeamsPage() {
   }
 
   // Load teams based on selected season
+  const loadConferences = async () => {
+    if (!supabase) return
+
+    try {
+      const { data, error } = await supabase
+        .from("conferences")
+        .select("*")
+        .order("name")
+
+      if (error) {
+        console.error("Error loading conferences:", error)
+        return
+      }
+
+      setConferences(data || [])
+    } catch (error) {
+      console.error("Error loading conferences:", error)
+    }
+  }
+
   const loadTeams = async (seasonId?: number) => {
     if (!supabase) {
       console.error("Supabase client not available")
@@ -503,8 +532,15 @@ export default function AdminTeamsPage() {
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
 
-      // Use standard Supabase query instead of exec_sql
-      const { data, error } = await supabase.from("teams").select("*").eq("season_id", season).order("name")
+      // Load teams with conference data
+      const { data, error } = await supabase
+        .from("teams")
+        .select(`
+          *,
+          conference:conferences(id, name, description, color)
+        `)
+        .eq("season_id", season)
+        .order("name")
 
       if (error) {
         console.error("Error loading teams:", error)
@@ -580,7 +616,7 @@ export default function AdminTeamsPage() {
       season_id: selectedSeason || 1,
       ea_club_id: "",
       is_active: true,
-      conference: "",
+      conference_id: "",
     })
   }
 
@@ -593,7 +629,7 @@ export default function AdminTeamsPage() {
       season_id: team.season_id,
       ea_club_id: team.ea_club_id || "",
       is_active: team.is_active !== false, // Default to true if undefined
-      conference: team.conference || "",
+      conference_id: team.conference_id || "",
     })
   }
 
@@ -614,6 +650,7 @@ export default function AdminTeamsPage() {
         name: teamForm.name,
         logo_url: teamForm.logo_url || null,
         season_id: teamForm.season_id,
+        conference_id: teamForm.conference_id || null,
       }
 
       // Only include ea_club_id if the column exists
@@ -1052,26 +1089,27 @@ export default function AdminTeamsPage() {
                         {team.conference && (
                           <Badge 
                             variant="outline" 
-                            className={team.conference === CONFERENCES.EASTERN_ELITES 
-                              ? "border-blue-500/30 text-blue-400" 
-                              : "border-purple-500/30 text-purple-400"
-                            }
+                            className="border-white/30 text-white"
                           >
-                            {team.conference}
+                            {team.conference.name}
                           </Badge>
                         )}
                       </div>
                       <Select
-                        value={team.conference || ""}
-                        onValueChange={(value) => updateTeamConference(team.id, value as ConferenceType)}
+                        value={team.conference_id || ""}
+                        onValueChange={(value) => updateTeamConference(team.id, value)}
                         disabled={isUpdatingConference}
                       >
                         <SelectTrigger className="w-48 bg-slate-800/50 border-white/20 text-white">
                           <SelectValue placeholder="Select conference" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={CONFERENCES.EASTERN_ELITES}>Eastern Elites</SelectItem>
-                          <SelectItem value={CONFERENCES.WESTERN_WARRIORS}>Western Warriors</SelectItem>
+                          <SelectItem value="">No Conference</SelectItem>
+                          {conferences.map((conference) => (
+                            <SelectItem key={conference.id} value={conference.id} className="text-white hover:bg-slate-700">
+                              {conference.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1319,73 +1357,73 @@ export default function AdminTeamsPage() {
       </Card>
 
         {/* Enhanced Team Dialog */}
-        <Dialog
-          open={isAddingTeam || editingTeam !== null}
-          onOpenChange={(open) => {
-            if (!open) {
-              setIsAddingTeam(false)
-              setEditingTeam(null)
-            }
-          }}
-        >
+      <Dialog
+        open={isAddingTeam || editingTeam !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsAddingTeam(false)
+            setEditingTeam(null)
+          }
+        }}
+      >
           <DialogContent className="hockey-card bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-sm border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-ice-blue-200 flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
                   {isAddingTeam ? <Plus className="h-4 w-4 text-white" /> : <Pencil className="h-4 w-4 text-white" />}
-                </div>
-                {isAddingTeam ? "Add New Team" : "Edit Team"}
-              </DialogTitle>
+              </div>
+              {isAddingTeam ? "Add New Team" : "Edit Team"}
+            </DialogTitle>
               <DialogDescription className="text-ice-blue-300">
                 {isAddingTeam ? "Create a new team for the league." : "Update the details for this team."}
-              </DialogDescription>
-            </DialogHeader>
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="space-y-6 py-4">
-              <div className="space-y-2">
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
                 <Label htmlFor="team-name" className="text-ice-blue-200 font-semibold">Team Name</Label>
-                <Input
-                  id="team-name"
-                  value={teamForm.name}
-                  onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
-                  placeholder="e.g. Toronto Maple Leafs"
+              <Input
+                id="team-name"
+                value={teamForm.name}
+                onChange={(e) => setTeamForm({ ...teamForm, name: e.target.value })}
+                placeholder="e.g. Toronto Maple Leafs"
                   className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                />
-              </div>
+              />
+            </div>
 
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="logo-url" className="text-ice-blue-200 font-semibold">Logo URL (optional)</Label>
-                <Input
-                  id="logo-url"
-                  value={teamForm.logo_url}
-                  onChange={(e) => setTeamForm({ ...teamForm, logo_url: e.target.value })}
-                  placeholder="https://example.com/logo.png"
+              <Input
+                id="logo-url"
+                value={teamForm.logo_url}
+                onChange={(e) => setTeamForm({ ...teamForm, logo_url: e.target.value })}
+                placeholder="https://example.com/logo.png"
                   className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                />
-              </div>
+              />
+            </div>
 
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="season" className="text-ice-blue-200 font-semibold">Season</Label>
-                <Select
-                  value={teamForm.season_id.toString()}
-                  onValueChange={(value) => setTeamForm({ ...teamForm, season_id: Number(value) })}
-                >
+              <Select
+                value={teamForm.season_id.toString()}
+                onValueChange={(value) => setTeamForm({ ...teamForm, season_id: Number(value) })}
+              >
                   <SelectTrigger id="season" className="bg-slate-800/50 border-white/20 text-white">
-                    <SelectValue placeholder="Select Season" />
-                  </SelectTrigger>
+                  <SelectValue placeholder="Select Season" />
+                </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-white/20">
-                    {seasons.map((season: Season) => (
+                  {seasons.map((season: Season) => (
                       <SelectItem key={season.id} value={season.id.toString()} className="text-white hover:bg-slate-700">
-                        {season.name} {season.is_active ? "(Active)" : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      {season.name} {season.is_active ? "(Active)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              {hasEaColumn && (
+            {hasEaColumn && (
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center">
                     <Label htmlFor="ea-club-id" className="text-ice-blue-200 font-semibold">EA Club ID</Label>
                     <Button 
                       type="button" 
@@ -1394,60 +1432,60 @@ export default function AdminTeamsPage() {
                       onClick={openEASearch}
                       className="border-white/20 text-white hover:bg-white/10"
                     >
-                      <Search className="h-4 w-4 mr-2" />
-                      Search EA Teams
-                    </Button>
-                  </div>
-                  <Input
-                    id="ea-club-id"
-                    value={teamForm.ea_club_id}
-                    onChange={(e) => setTeamForm({ ...teamForm, ea_club_id: e.target.value })}
-                    placeholder="e.g. 204949"
-                    className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
-                  />
-                  <p className="text-sm text-ice-blue-300">
-                    EA Club ID is used to fetch stats and match data from EA Sports NHL.
-                  </p>
+                    <Search className="h-4 w-4 mr-2" />
+                    Search EA Teams
+                  </Button>
                 </div>
-              )}
+                <Input
+                  id="ea-club-id"
+                  value={teamForm.ea_club_id}
+                  onChange={(e) => setTeamForm({ ...teamForm, ea_club_id: e.target.value })}
+                  placeholder="e.g. 204949"
+                    className="bg-slate-800/50 border-white/20 text-white placeholder:text-white/50"
+                />
+                  <p className="text-sm text-ice-blue-300">
+                  EA Club ID is used to fetch stats and match data from EA Sports NHL.
+                </p>
+              </div>
+            )}
 
-              {hasActiveColumn && (
+            {hasActiveColumn && (
                 <div className="flex items-center space-x-2 pt-2">
-                  <Switch
-                    id="team-active"
-                    checked={teamForm.is_active}
-                    onCheckedChange={(checked) => setTeamForm({ ...teamForm, is_active: checked })}
-                  />
+                <Switch
+                  id="team-active"
+                  checked={teamForm.is_active}
+                  onCheckedChange={(checked) => setTeamForm({ ...teamForm, is_active: checked })}
+                />
                   <Label htmlFor="team-active" className="text-ice-blue-200 font-semibold">Team is active</Label>
                   <p className="text-sm text-ice-blue-300 ml-2">
-                    Inactive teams won't appear on the public teams and standings pages.
-                  </p>
-                </div>
-              )}
-            </div>
+                  Inactive teams won't appear on the public teams and standings pages.
+                </p>
+              </div>
+            )}
+          </div>
 
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsAddingTeam(false)
-                  setEditingTeam(null)
-                }}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddingTeam(false)
+                setEditingTeam(null)
+              }}
                 className="border-white/20 text-white hover:bg-white/10"
-              >
-                Cancel
-              </Button>
+            >
+              Cancel
+            </Button>
               <Button 
                 onClick={handleSaveTeam} 
                 disabled={isSaving}
                 className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
               >
-                {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {isAddingTeam ? "Add Team" : "Save Changes"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isAddingTeam ? "Add Team" : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showEaSearchDialog} onOpenChange={setShowEaSearchDialog}>
         <DialogContent className="sm:max-w-md">
@@ -1510,7 +1548,7 @@ export default function AdminTeamsPage() {
             </Button>
           </DialogFooter>
         </DialogContent>
-        </Dialog>
+      </Dialog>
       </div>
     </div>
   )
