@@ -47,7 +47,7 @@ export default function SeasonRegistrationPage() {
         .from("system_settings")
         .select("value")
         .eq("key", "current_season")
-        .single()
+        .maybeSingle()
 
       if (settingsError) {
         window.console.error("Error fetching current season setting:", settingsError)
@@ -66,7 +66,7 @@ export default function SeasonRegistrationPage() {
           .from("seasons")
           .select("id, name, season_number")
           .eq("id", seasonId)
-          .single()
+          .maybeSingle()
 
         if (seasonError) {
           window.console.error("Error fetching season:", seasonError)
@@ -77,7 +77,7 @@ export default function SeasonRegistrationPage() {
             .from("seasons")
             .select("id, name, season_number")
             .eq("is_active", true)
-            .single()
+            .maybeSingle()
 
           if (fallbackError) {
             window.console.error("Error fetching fallback season:", fallbackError)
@@ -100,7 +100,7 @@ export default function SeasonRegistrationPage() {
           .from("seasons")
           .select("id, name, season_number")
           .eq("is_active", true)
-          .single()
+          .maybeSingle()
 
         if (activeSeasonError) {
           window.console.error("Error fetching active season:", activeSeasonError)
@@ -177,7 +177,7 @@ export default function SeasonRegistrationPage() {
         .select("*")
         .eq("user_id", session.user.id)
         .eq("season_id", seasonId)
-        .single()
+        .maybeSingle()
 
       if (error && error.code !== "PGRST116") {
         // PGRST116 is the error code for "no rows returned"
@@ -253,7 +253,7 @@ export default function SeasonRegistrationPage() {
         .select("*")
         .eq("user_id", session.user.id)
         .eq("season_id", activeSeason.id)
-        .single()
+        .maybeSingle()
 
       if (existingReg) {
         setHasRegistered(true)
@@ -326,7 +326,7 @@ export default function SeasonRegistrationPage() {
           .from("users")
           .select("is_banned, ban_reason, ban_expires_at")
           .eq("id", session.user.id)
-          .single()
+          .maybeSingle()
 
         if (error) {
           console.error("Error checking ban status:", error)
