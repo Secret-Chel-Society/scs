@@ -511,6 +511,12 @@ export default function AdminTeamsPage() {
 
       if (error) {
         console.error("Error loading conferences:", error)
+        console.error("Conference error details:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         // If conferences table doesn't exist, set empty array
         setConferences([])
         return
@@ -547,8 +553,8 @@ export default function AdminTeamsPage() {
         .order("name")
 
       // If the join fails, try loading teams without conference data
-      if (error && error.message.includes("conferences")) {
-        console.log("Conferences table not found, loading teams without conference data")
+      if (error && (error.message.includes("conferences") || error.message.includes("relation") || error.message.includes("does not exist"))) {
+        console.log("Conference join failed, loading teams without conference data:", error.message)
         const { data: teamsData, error: teamsError } = await supabase
           .from("teams")
           .select("*")
@@ -565,6 +571,12 @@ export default function AdminTeamsPage() {
 
       if (error) {
         console.error("Error loading teams:", error)
+        console.error("Error details:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         setLoadError(`Database error: ${error.message}`)
         toast({
           title: "Error loading teams",

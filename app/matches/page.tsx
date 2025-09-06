@@ -12,6 +12,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter, Calendar, Trophy, Zap, Target, Users, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { TeamLogo } from "@/components/team-logo"
 
 export default function MatchesPage() {
   const router = useRouter()
@@ -661,9 +662,11 @@ export default function MatchesPage() {
                                          className="object-contain"
                                        />
                                      ) : (
-                                       <div className="w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300 rounded-lg border border-hockey-silver-200 dark:border-hockey-silver-600">
-                                         {match.home_team.name.substring(0, 2)}
-                                       </div>
+                                       <TeamLogo 
+                                         teamName={match.home_team.name}
+                                         logoUrl={match.home_team.logo_url}
+                                         size="lg"
+                                       />
                                      )}
                                    </div>
                                   <div className="flex flex-col items-center">
@@ -712,9 +715,11 @@ export default function MatchesPage() {
                                          className="object-contain"
                                        />
                                      ) : (
-                                       <div className="w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800 to-rink-blue-900/30 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300 rounded-lg border border-hockey-silver-200 dark:border-hockey-silver-600">
-                                         {match.away_team.name.substring(0, 2)}
-                                       </div>
+                                       <TeamLogo 
+                                         teamName={match.away_team.name}
+                                         logoUrl={match.away_team.logo_url}
+                                         size="lg"
+                                       />
                                      )}
                                    </div>
                                   <div className="flex flex-col items-center">

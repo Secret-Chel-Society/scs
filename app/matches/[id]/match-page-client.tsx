@@ -17,6 +17,7 @@ import { MatchLineups } from "@/components/matches/match-lineups"
 import { MatchHighlightsWrapper } from "@/components/matches/match-highlights-wrapper"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { TeamLogo } from "@/components/team-logo"
 
 export default function MatchDetailPage() {
   const params = useParams()
@@ -526,10 +527,12 @@ export default function MatchDetailPage() {
                 <div className="flex items-center justify-between">
                   {/* Home Team */}
                   <div className="flex flex-col items-center text-center flex-1">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
-                      <span className="text-white font-bold text-lg">
-                        {match?.home_team?.name?.charAt(0) || "H"}
-                      </span>
+                    <div className="w-20 h-20 mb-4 hover:scale-105 transition-all duration-300">
+                      <TeamLogo 
+                        teamName={match?.home_team?.name || "Home Team"}
+                        logoUrl={match?.home_team?.logo_url}
+                        size="lg"
+                      />
                     </div>
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
                       {match?.home_team?.name || "Home Team"}
@@ -549,10 +552,12 @@ export default function MatchDetailPage() {
 
                   {/* Away Team */}
                   <div className="flex flex-col items-center text-center flex-1">
-                    <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-4 shadow-lg hover:scale-105 transition-all duration-300">
-                      <span className="text-white font-bold text-lg">
-                        {match?.away_team?.name?.charAt(0) || "A"}
-                      </span>
+                    <div className="w-20 h-20 mb-4 hover:scale-105 transition-all duration-300">
+                      <TeamLogo 
+                        teamName={match?.away_team?.name || "Away Team"}
+                        logoUrl={match?.away_team?.logo_url}
+                        size="lg"
+                      />
                     </div>
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
                       {match?.away_team?.name || "Away Team"}
@@ -925,10 +930,12 @@ export default function MatchDetailPage() {
                         className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
                       >
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-xs">
-                              {match?.away_team?.name?.charAt(0) || "A"}
-                            </span>
+                          <div className="w-6 h-6">
+                            <TeamLogo 
+                              teamName={match?.away_team?.name || "Away Team"}
+                              logoUrl={match?.away_team?.logo_url}
+                              size="xs"
+                            />
                           </div>
                           {match?.away_team?.name || "Away Team"}
                         </div>
@@ -1113,10 +1120,12 @@ export default function MatchDetailPage() {
                         className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
                       >
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-xs">
-                              {match?.away_team?.name?.charAt(0) || "A"}
-                            </span>
+                          <div className="w-6 h-6">
+                            <TeamLogo 
+                              teamName={match?.away_team?.name || "Away Team"}
+                              logoUrl={match?.away_team?.logo_url}
+                              size="xs"
+                            />
                           </div>
                           {match?.away_team?.name || "Away Team"}
                         </div>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Edit } from "lucide-react"
 import { useState } from "react"
 import { EditScoreModal } from "./edit-score-modal"
+import { TeamLogo } from "@/components/team-logo"
 
 interface MatchDetailsProps {
   match: any
@@ -67,16 +68,12 @@ export function MatchDetails({ match, onMatchUpdated, isAdmin }: MatchDetailsPro
       <div className="flex flex-col space-y-4 sm:space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex flex-col items-center space-y-3 w-1/3">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/20 rounded-full flex items-center justify-center shadow-lg">
-              {match.home_team?.logo_url ? (
-                <img
-                  src={match.home_team.logo_url || "/placeholder.svg"}
-                  alt={homeTeam}
-                  className="w-10 h-10 sm:w-14 sm:h-14 object-contain"
-                />
-              ) : (
-                <span className="text-lg sm:text-2xl font-bold text-blue-700 dark:text-blue-300">{homeTeam.substring(0, 2)}</span>
-              )}
+            <div className="w-16 h-16 sm:w-20 sm:h-20">
+              <TeamLogo 
+                teamName={homeTeam}
+                logoUrl={match.home_team?.logo_url}
+                size="lg"
+              />
             </div>
             <span className="font-semibold text-center text-sm sm:text-lg text-slate-700 dark:text-slate-300">{homeTeam}</span>
           </div>
@@ -92,16 +89,12 @@ export function MatchDetails({ match, onMatchUpdated, isAdmin }: MatchDetailsPro
           </div>
 
           <div className="flex flex-col items-center space-y-3 w-1/3">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/20 rounded-full flex items-center justify-center shadow-lg">
-              {match.away_team?.logo_url ? (
-                <img
-                  src={match.away_team.logo_url || "/placeholder.svg"}
-                  alt={awayTeam}
-                  className="w-10 h-10 sm:w-14 sm:h-14 object-contain"
-                />
-              ) : (
-                <span className="text-lg sm:text-2xl font-bold text-blue-700 dark:text-blue-300">{awayTeam.substring(0, 2)}</span>
-              )}
+            <div className="w-16 h-16 sm:w-20 sm:h-20">
+              <TeamLogo 
+                teamName={awayTeam}
+                logoUrl={match.away_team?.logo_url}
+                size="lg"
+              />
             </div>
             <span className="font-semibold text-center text-sm sm:text-lg text-slate-700 dark:text-slate-300">{awayTeam}</span>
           </div>
