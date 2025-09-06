@@ -288,10 +288,10 @@ export default function AdminNewsPage() {
             </p>
           </div>
           
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-ice-blue-700 p-2">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-ice-blue-700 p-2 overflow-hidden">
             <TabsTrigger 
               value="all" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-ice-blue-200/50 dark:hover:bg-ice-blue-800/30 transition-all duration-300 flex items-center gap-2"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-ice-blue-200/50 dark:hover:bg-ice-blue-800/30 transition-all duration-300 flex items-center gap-2 overflow-hidden"
             >
               <Newspaper className="h-4 w-4" />
               All Articles

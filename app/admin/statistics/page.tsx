@@ -1298,20 +1298,20 @@ export default function AdminStatisticsPage() {
             </p>
           </div>
           
-          <TabsList className="grid w-full grid-cols-2 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-ice-blue-700">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
             <TabsTrigger 
               value="players" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-ice-blue-200/50 dark:hover:bg-ice-blue-800/30 transition-all duration-300"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-ice-blue-200/50 dark:hover:bg-ice-blue-800/30 transition-all duration-300 overflow-hidden"
             >
-              <Users className="h-4 w-4 mr-2" />
-              Player Stats
+              <Users className="h-4 w-4 mr-2 flex-shrink-0" />
+              <span className="truncate">Player Stats</span>
             </TabsTrigger>
             <TabsTrigger 
               value="goalies"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white hover:bg-assist-green-200/50 dark:hover:bg-assist-green-800/30 transition-all duration-300"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white hover:bg-assist-green-200/50 dark:hover:bg-assist-green-800/30 transition-all duration-300 overflow-hidden"
             >
-              <Shield className="h-4 w-4 mr-2" />
-              Goalie Stats
+              <Shield className="h-4 w-4 mr-2 flex-shrink-0" />
+              <span className="truncate">Goalie Stats</span>
             </TabsTrigger>
           </TabsList>
 

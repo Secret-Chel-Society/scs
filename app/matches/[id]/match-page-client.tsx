@@ -595,24 +595,24 @@ export default function MatchDetailPage() {
             <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1 shadow-sm">
             <TabsTrigger 
               value="details" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center justify-center gap-2 px-3 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300 overflow-hidden"
             >
-              <Trophy className="h-4 w-4" />
-              Details
+              <Trophy className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Details</span>
             </TabsTrigger>
               <TabsTrigger 
                 value="lineups" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
-            >
-              <Users className="h-4 w-4" />
-              Lineups
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center justify-center gap-2 px-3 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300 overflow-hidden"
+              >
+                <Users className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Lineups</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="highlights" 
-                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center gap-2 px-4 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300"
-            >
-              <Camera className="h-4 w-4" />
-              Highlights
+                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 flex items-center justify-center gap-2 px-3 py-3 rounded-md font-medium text-slate-700 dark:text-slate-300 overflow-hidden"
+              >
+                <Camera className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Highlights</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -914,7 +914,7 @@ export default function MatchDetailPage() {
                     <TabsList className="grid w-full grid-cols-2 mb-6">
                       <TabsTrigger 
                         value="home" 
-                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200 overflow-hidden"
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -927,7 +927,7 @@ export default function MatchDetailPage() {
                       </TabsTrigger>
                       <TabsTrigger 
                         value="away"
-                        className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                        className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200 overflow-hidden"
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6">
@@ -1104,7 +1104,7 @@ export default function MatchDetailPage() {
                     <TabsList className="grid w-full grid-cols-2 mb-6">
                       <TabsTrigger 
                         value="home" 
-                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                        className="data-[state=active]:bg-blue-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200 overflow-hidden"
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -1117,7 +1117,7 @@ export default function MatchDetailPage() {
                       </TabsTrigger>
                       <TabsTrigger 
                         value="away"
-                        className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200"
+                        className="data-[state=active]:bg-red-600 data-[state=active]:text-white hover:scale-105 transition-all duration-200 overflow-hidden"
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6">
