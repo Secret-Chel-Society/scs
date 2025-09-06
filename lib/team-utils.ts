@@ -173,7 +173,21 @@ export async function getCurrentSeasonId(): Promise<number> {
       return 1 // Default to season 1 if not found
     }
 
-    return data?.value || 1
+    const value = data?.value
+    console.log("Current season value from database:", value, "type:", typeof value)
+    
+    // Ensure we return a number
+    if (typeof value === 'string') {
+      const parsed = parseInt(value, 10)
+      if (!isNaN(parsed)) {
+        return parsed
+      }
+    } else if (typeof value === 'number') {
+      return value
+    }
+    
+    console.log("Invalid season value, defaulting to 1")
+    return 1 // Default to season 1 if invalid
   } catch (error) {
     console.error("Error getting current season:", error)
     return 1 // Default to season 1 if error

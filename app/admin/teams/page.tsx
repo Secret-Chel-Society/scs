@@ -596,6 +596,26 @@ export default function AdminTeamsPage() {
       setIsLoadingStats(true)
       setLoadError(null)
       const season = seasonId || selectedSeason || 1
+      
+      // Ensure season is a number
+      const numericSeason = typeof season === 'string' ? parseInt(season, 10) : season
+      if (isNaN(numericSeason)) {
+        console.error("Invalid season ID:", season, "defaulting to 1")
+        const fallbackSeason = 1
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("season_id", fallbackSeason)
+          .order("name")
+        
+        if (fallbackError) {
+          throw fallbackError
+        }
+        
+        setTeams(fallbackData || [])
+        applyFilters(fallbackData || [], searchQuery, showInactive)
+        return
+      }
 
       // Load teams with conference data (fallback if conferences table doesn't exist)
       let { data, error } = await supabase
@@ -604,7 +624,7 @@ export default function AdminTeamsPage() {
           *,
           conference:conferences(id, name, description, color)
         `)
-        .eq("season_id", season)
+        .eq("season_id", numericSeason)
         .order("name")
 
       // If the join fails, try loading teams without conference data
@@ -613,7 +633,7 @@ export default function AdminTeamsPage() {
         const { data: teamsData, error: teamsError } = await supabase
           .from("teams")
           .select("*")
-          .eq("season_id", season)
+          .eq("season_id", numericSeason)
           .order("name")
         
         if (teamsError) {
