@@ -1495,31 +1495,28 @@ export default function UsersManagementClient() {
 
       console.log("Assigning player to team:", playerId, teamId)
 
-      // If setting to free agent (null), use the special removal API
+      // If setting to free agent (null), handle it directly
       if (teamId === null) {
-        console.log("Setting player as free agent - using manual removal API")
+        console.log("Setting player as free agent - using direct database update")
 
-        const response = await fetch("/api/admin/remove-player-from-team", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            playerId: playerId,
-            reason: "Admin set as free agent via user management",
-          }),
-        })
+        const { error } = await supabase
+          .from("players")
+          .update({
+            team_id: null,
+            status: "free_agent",
+            manually_removed: true,
+            manually_removed_at: new Date().toISOString(),
+          })
+          .eq("id", playerId)
 
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to set player as free agent")
+        if (error) {
+          console.error("Error setting player as free agent:", error)
+          throw error
         }
 
         toast({
           title: "Player set as free agent",
-          description:
-            data.message || "Player has been removed from their team and marked to prevent automatic re-assignment.",
+          description: "Player has been removed from their team and marked to prevent automatic re-assignment.",
         })
       } else {
         // Regular team assignment - use the proper API endpoint
