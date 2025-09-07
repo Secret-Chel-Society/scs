@@ -39,12 +39,12 @@ export function applyMobileScaling(): void {
   const scale = calculateOptimalScale()
   const mobileContent = document.querySelector('.mobile-content') as HTMLElement
   
-  if (window.innerWidth < 768 && mobileContent) {
-    mobileContent.style.transform = `scale(${scale})`
-    mobileContent.style.transformOrigin = 'top left'
-    mobileContent.style.width = `${100 / scale}%`
-    mobileContent.style.height = `${100 / scale}%`
-  } else if (mobileContent) {
+              if (window.innerWidth < 768 && mobileContent) {
+                mobileContent.style.transform = `scale(${scale})`
+                mobileContent.style.transformOrigin = 'top left'
+                mobileContent.style.width = '100vw'
+                mobileContent.style.height = `${100 / scale}%`
+              } else if (mobileContent) {
     // Reset for desktop
     mobileContent.style.transform = ''
     mobileContent.style.transformOrigin = ''

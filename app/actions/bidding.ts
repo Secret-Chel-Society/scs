@@ -128,7 +128,7 @@ export async function extendBidExpiration(bidId: string, hoursToAdd = 24) {
     const { error } = await supabase
       .from("player_bidding")
       .update({
-        bid_expires: new Date(Date.now() + hoursToAdd * 60 * 60 * 1000).toISOString(),
+        bid_expires_at: new Date(Date.now() + hoursToAdd * 60 * 60 * 1000).toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", bidId)
