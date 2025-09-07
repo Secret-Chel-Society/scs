@@ -1560,17 +1560,17 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   /* Mobile Tab Selector Fixes */
   .mobile-content [role="tablist"] {
     flex-wrap: wrap !important;
-    gap: 8px !important;
-    padding: 8px !important;
+    gap: 4px !important;
+    padding: 4px !important;
   }
   
   .mobile-content [role="tab"] {
     min-width: 0 !important;
     flex: 1 1 auto !important;
     font-size: 12px !important;
-    padding: 8px 12px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
+    padding: 4px 8px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
   }
   
   .mobile-content [role="tab"] span {
@@ -1610,18 +1610,18 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   /* Fix TabsList component on mobile */
   .mobile-content .tabs-list {
     height: auto !important;
-    min-height: 48px !important;
+    min-height: 24px !important;
     flex-wrap: wrap !important;
-    gap: 4px !important;
-    padding: 4px !important;
+    gap: 2px !important;
+    padding: 2px !important;
   }
   
   /* Fix TabsTrigger component on mobile */
   .mobile-content .tabs-trigger {
     font-size: 12px !important;
-    padding: 6px 8px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
+    padding: 3px 6px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
   }
@@ -1639,15 +1639,38 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     }
     
     .mobile-content .tabs-trigger {
-      min-width: 32px !important;
-      max-width: 32px !important;
-      padding: 4px !important;
+      min-width: 16px !important;
+      max-width: 16px !important;
+      padding: 2px !important;
     }
   }
   
   /* Ensure all nested containers fill width */
   .mobile-content * {
     max-width: 100vw !important;
+  }
+  
+  /* Global Tab Selector Height Reduction */
+  [role="tablist"] {
+    min-height: 24px !important;
+    height: auto !important;
+  }
+  
+  [role="tab"] {
+    min-height: 20px !important;
+    max-height: 20px !important;
+    padding: 2px 8px !important;
+  }
+  
+  .tabs-list {
+    min-height: 24px !important;
+    height: auto !important;
+  }
+  
+  .tabs-trigger {
+    min-height: 20px !important;
+    max-height: 20px !important;
+    padding: 2px 8px !important;
   }
   
   /* Remove any potential margins from all elements */
