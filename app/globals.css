@@ -1271,21 +1271,14 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   background: hsl(var(--hockey-silver) / 0.2);
 }
 
-/* Responsive Mobile Scaling - Adapts to different phone sizes */
+/* Responsive Mobile Scaling - Only scale the main content area */
 @media (max-width: 767px) {
-  html {
-    /* Base scale for small phones (320px width) */
-    transform: scale(0.4);
+  /* Scale only the main content area, not the entire page */
+  .mobile-content {
+    transform: scale(0.7);
     transform-origin: top left;
-    width: 250%; /* Compensate for the scaling */
-    height: 250%;
-  }
-  
-  body {
-    width: 250%;
-    height: 250%;
-    overflow-x: auto;
-    overflow-y: auto;
+    width: 143%; /* Compensate for the scaling */
+    height: 143%;
   }
   
   /* Ensure the main container takes full width */
@@ -1331,52 +1324,36 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   }
 }
 
-/* Responsive scaling for different phone sizes */
+/* Responsive scaling for different phone sizes - only affect mobile content */
 @media (min-width: 320px) and (max-width: 374px) {
-  html {
-    transform: scale(0.35);
-    width: 285%;
-    height: 285%;
-  }
-  body {
-    width: 285%;
-    height: 285%;
+  .mobile-content {
+    transform: scale(0.6);
+    width: 167%;
+    height: 167%;
   }
 }
 
 @media (min-width: 375px) and (max-width: 414px) {
-  html {
-    transform: scale(0.4);
-    width: 250%;
-    height: 250%;
-  }
-  body {
-    width: 250%;
-    height: 250%;
+  .mobile-content {
+    transform: scale(0.7);
+    width: 143%;
+    height: 143%;
   }
 }
 
 @media (min-width: 415px) and (max-width: 480px) {
-  html {
-    transform: scale(0.45);
-    width: 222%;
-    height: 222%;
-  }
-  body {
-    width: 222%;
-    height: 222%;
+  .mobile-content {
+    transform: scale(0.75);
+    width: 133%;
+    height: 133%;
   }
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
-  html {
-    transform: scale(0.5);
-    width: 200%;
-    height: 200%;
-  }
-  body {
-    width: 200%;
-    height: 200%;
+  .mobile-content {
+    transform: scale(0.8);
+    width: 125%;
+    height: 125%;
   }
 }
 

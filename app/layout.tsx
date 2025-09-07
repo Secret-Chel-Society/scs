@@ -54,7 +54,7 @@ export default function RootLayout({
               <div className="flex min-h-screen">
                 <Navigation />
                 {/* Main content area */}
-                <div className="flex-1 flex flex-col md:ml-72">
+                <div className="flex-1 flex flex-col md:ml-72 mobile-content">
                   <Suspense>
                     <main className="flex-1 p-6 hockey-scrollbar">
                       {children}

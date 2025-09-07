@@ -245,7 +245,7 @@ export default function Navigation() {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20 border-r border-slate-200/50 dark:border-slate-700/50 shadow-2xl transition-transform duration-300 ease-in-out md:translate-x-0 mobile-sidebar",
+        "fixed inset-y-0 left-0 z-40 w-72 md:w-72 bg-gradient-to-b from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20 border-r border-slate-200/50 dark:border-slate-700/50 shadow-2xl transition-transform duration-300 ease-in-out md:translate-x-0 mobile-sidebar",
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">

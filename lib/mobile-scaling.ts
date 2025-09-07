@@ -24,10 +24,10 @@ export function calculateOptimalScale(): number {
     scale = targetWidth / baseWidth
     
     // Ensure minimum scale for readability
-    scale = Math.max(scale, 0.3)
+    scale = Math.max(scale, 0.5)
     
     // Ensure maximum scale to prevent content from being too large
-    scale = Math.min(scale, 0.6)
+    scale = Math.min(scale, 0.8)
   }
   
   return scale
@@ -37,19 +37,19 @@ export function applyMobileScaling(): void {
   if (typeof window === 'undefined') return
   
   const scale = calculateOptimalScale()
-  const html = document.documentElement
+  const mobileContent = document.querySelector('.mobile-content') as HTMLElement
   
-  if (window.innerWidth < 768) {
-    html.style.transform = `scale(${scale})`
-    html.style.transformOrigin = 'top left'
-    html.style.width = `${100 / scale}%`
-    html.style.height = `${100 / scale}%`
-  } else {
+  if (window.innerWidth < 768 && mobileContent) {
+    mobileContent.style.transform = `scale(${scale})`
+    mobileContent.style.transformOrigin = 'top left'
+    mobileContent.style.width = `${100 / scale}%`
+    mobileContent.style.height = `${100 / scale}%`
+  } else if (mobileContent) {
     // Reset for desktop
-    html.style.transform = ''
-    html.style.transformOrigin = ''
-    html.style.width = ''
-    html.style.height = ''
+    mobileContent.style.transform = ''
+    mobileContent.style.transformOrigin = ''
+    mobileContent.style.width = ''
+    mobileContent.style.height = ''
   }
 }
 
