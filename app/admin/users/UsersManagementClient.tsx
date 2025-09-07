@@ -262,7 +262,7 @@ export default function UsersManagementClient() {
   const [submitting, setSubmitting] = useState(false)
   const [isActiveColumnExists, setIsActiveColumnExists] = useState(false)
   const [showMigrationAlert, setShowMigrationAlert] = useState(false)
-  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(false) // Disabled by default to prevent rate limiting
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null)
   const [nextRefreshCountdown, setNextRefreshCountdown] = useState(30)
 
@@ -468,15 +468,15 @@ export default function UsersManagementClient() {
         return
       }
 
-      // Set up the main refresh interval (30 seconds)
+      // Set up the main refresh interval (5 minutes to prevent rate limiting)
       refreshInterval = setInterval(() => {
         if (!refreshing) {
           // Use the auto-refresh version that doesn't require admin key verification
           autoRefreshUsers()
           setLastRefreshTime(new Date())
-          setNextRefreshCountdown(30)
+          setNextRefreshCountdown(300) // 5 minutes
         }
-      }, 30000)
+      }, 300000) // 5 minutes = 300,000ms
 
       // Set up countdown timer (updates every second)
       countdownInterval = setInterval(() => {
@@ -487,7 +487,7 @@ export default function UsersManagementClient() {
       if (!lastRefreshTime) {
         autoRefreshUsers()
         setLastRefreshTime(new Date())
-        setNextRefreshCountdown(30)
+        setNextRefreshCountdown(300) // 5 minutes
       }
     }
 
@@ -900,13 +900,19 @@ export default function UsersManagementClient() {
       fetchUsers()
     } catch (error: any) {
       console.error("Error in auto-refresh:", error)
-      // Disable auto-refresh on error
-      setAutoRefresh(false)
-      toast({
-        title: "Auto-refresh disabled",
-        description: error.message || "Failed to auto-refresh users",
-        variant: "destructive",
-      })
+      // Only disable auto-refresh on critical errors, not rate limiting
+      if (error.message && error.message.includes("Too Many Requests")) {
+        console.log("Rate limited during auto-refresh, will retry later")
+        // Don't disable auto-refresh for rate limiting, just skip this refresh
+      } else {
+        // Disable auto-refresh on other critical errors
+        setAutoRefresh(false)
+        toast({
+          title: "Auto-refresh disabled",
+          description: error.message || "Auto-refresh was disabled due to an error",
+          variant: "destructive",
+        })
+      }
     } finally {
       setRefreshing(false)
     }
@@ -1928,132 +1934,85 @@ export default function UsersManagementClient() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
+    <div className="min-h-screen bg-background">
+      {/* Header Section */}
+      <div className="py-8 px-4">
+        <div className="container mx-auto text-center">
           <div>
-            <h1 className="hockey-title mb-6">
-              User Management Center
+            <h1 className="text-4xl font-bold mb-4">
+              User Management
             </h1>
-            <p className="hockey-subtitle mx-auto mb-12">
-              Comprehensive user management for the league. 
-              Manage player accounts, roles, team assignments, and league administration.
+            <p className="text-lg text-muted-foreground mx-auto mb-8">
+              Manage user accounts, roles, and team assignments
             </p>
             
-            {/* Enhanced Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto mb-16">
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
-                    {users.length}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Total Users
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-8">
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Users className="h-8 w-8 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{users.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Users</div>
+                </CardContent>
+              </Card>
               
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
-                    <Shield className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
-                    {users.filter(u => u.roles?.includes('Admin')).length}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Administrators
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Shield className="h-8 w-8 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{users.filter(u => u.user_roles?.some((r: any) => r.role === 'Admin')).length}</div>
+                  <div className="text-sm text-muted-foreground">Administrators</div>
+                </CardContent>
+              </Card>
               
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
-                    <Trophy className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
-                    {users.filter(u => u.roles?.includes('Player')).length}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Players
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Trophy className="h-8 w-8 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{users.filter(u => u.players && u.players.length > 0 && u.players[0].teams).length}</div>
+                  <div className="text-sm text-muted-foreground">Team Members</div>
+                </CardContent>
+              </Card>
               
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
-                    <Crown className="h-8 w-8 text-white" />
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Crown className="h-8 w-8 mx-auto mb-2" />
+                  <div className="text-2xl font-bold">{teams.length}</div>
+                  <div className="text-sm text-muted-foreground">Teams</div>
+                </CardContent>
+              </Card>
                   </div>
-                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
-                    {teams.length}
                   </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Teams
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-20">
+      <div className="container mx-auto px-4 pb-8">
         {renderButtonsSection()}
 
       {/* Search Bar */}
-      <div className="relative mb-8">
-        <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-          <CardContent className="p-6">
+      <div className="mb-6">
+        <Card>
+          <CardContent className="p-4">
             <div className="relative">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-                <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <Search className="h-5 w-5 text-white" />
-                </div>
-              </div>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by gamer tag..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="hockey-search h-14 text-lg pl-16 pr-16 border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
+                className="pl-10"
               />
               {searchQuery && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 hover:bg-ice-blue-100 dark:hover:bg-rink-blue-900/30 rounded-xl transition-all duration-200 z-10"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
                   onClick={() => setSearchQuery("")}
                 >
-                  <X className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
+                  <X className="h-4 w-4" />
                 </Button>
               )}
             </div>
             {searchQuery && (
-              <div className="mt-4 flex items-center justify-between">
-                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Found <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{filteredUsers.length}</span> {filteredUsers.length === 1 ? "user" : "users"} matching "{searchQuery}"
-                </p>
-                {totalPages > 1 && (
-                  <Badge variant="outline" className="bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300">
-                    Page {currentPage} of {totalPages}
-                  </Badge>
-                )}
+              <div className="mt-2 text-sm text-muted-foreground">
+                Found {filteredUsers.length} {filteredUsers.length === 1 ? "user" : "users"} matching "{searchQuery}"
               </div>
             )}
           </CardContent>
@@ -2151,46 +2110,38 @@ export default function UsersManagementClient() {
         </Card>
       )}
 
-      <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-        <CardHeader className="relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-          <div className="flex flex-row items-center justify-between relative z-10">
+      <Card>
+        <CardHeader>
+          <div className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Users className="h-6 w-6 text-white" />
-              </div>
+              <Users className="h-6 w-6" />
               <div>
-                <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200">Users</CardTitle>
-                <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                <CardTitle>Users</CardTitle>
+                <CardDescription>
                   Manage user accounts and assign roles
                 </CardDescription>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300">
+              <Badge variant="outline">
                 {filteredUsers.length} Total Users
               </Badge>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="relative z-10">
+        <CardContent>
           {loading ? (
             <Skeleton className="w-full h-[500px]" />
           ) : (
             <>
               {/* Pagination Info */}
               {!loading && filteredUsers.length > 0 && (
-                <Card className="hockey-card mb-6 border border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                  <CardContent className="p-4">
+                <div className="mb-4 p-4 border rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                          <Users className="h-4 w-4 text-white" />
-                        </div>
-                        <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                          Showing <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{startIndex + 1}</span> to{" "}
-                          <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{Math.min(endIndex, filteredUsers.length)}</span> of{" "}
-                          <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{filteredUsers.length}</span> users
+                      <Users className="h-4 w-4" />
+                      <p className="text-sm text-muted-foreground">
+                        Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
                         </p>
                       </div>
                       {totalPages > 1 && (
@@ -2200,11 +2151,10 @@ export default function UsersManagementClient() {
                             size="sm"
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
-                            className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200"
                           >
                             Previous
                           </Button>
-                          <Badge variant="outline" className="bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300 px-3 py-1">
+                        <Badge variant="outline">
                             Page {currentPage} of {totalPages}
                           </Badge>
                           <Button
@@ -2212,29 +2162,27 @@ export default function UsersManagementClient() {
                             size="sm"
                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
-                            className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200"
                           >
                             Next
                           </Button>
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                </div>
               )}
-                              <div className="rounded-xl border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 overflow-hidden shadow-lg">
+              <div className="border rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 hover:from-ice-blue-100 dark:hover:from-ice-blue-800/30 hover:to-rink-blue-100 dark:hover:to-rink-blue-800/30 transition-all duration-300">
-                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Email</TableHead>
-                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Gamer Tag</TableHead>
-                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
-                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Console</TableHead>
-                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Roles</TableHead>
-                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team</TableHead>
-                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Salary</TableHead>
-                        {isActiveColumnExists && <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Status</TableHead>}
-                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Gamer Tag</TableHead>
+                      <TableHead className="text-center">Position</TableHead>
+                      <TableHead className="text-center">Console</TableHead>
+                      <TableHead className="text-center">Roles</TableHead>
+                      <TableHead className="text-center">Team</TableHead>
+                      <TableHead className="text-center">Salary</TableHead>
+                      {isActiveColumnExists && <TableHead className="text-center">Status</TableHead>}
+                      <TableHead className="text-center">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                   <TableBody>
@@ -2269,9 +2217,9 @@ export default function UsersManagementClient() {
                         }
 
                         return (
-                          <TableRow key={user.id} className="hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-100/50 dark:border-rink-blue-800/50">
-                            <TableCell className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{user.email}</TableCell>
-                            <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300">{user.gamer_tag_id}</TableCell>
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.email}</TableCell>
+                            <TableCell>{user.gamer_tag_id}</TableCell>
                             <TableCell className="text-center">
                               {user.primary_position && (
                                 <span className={`${positionColors[positionAbbreviations[user.primary_position] || ""]} text-lg font-bold`}>
