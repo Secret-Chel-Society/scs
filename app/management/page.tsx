@@ -1486,8 +1486,8 @@ const ManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+      <div className="container mx-auto px-4 py-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {/* Enhanced Hockey-Themed Header */}
           <div className="relative overflow-hidden bg-gradient-to-br from-blue-100/50 via-white to-slate-100/50 dark:from-slate-900/50 dark:via-slate-800 dark:to-blue-900/30 rounded-3xl p-6 md:p-8 mb-8 border border-blue-200/50 dark:border-blue-800/50 shadow-xl shadow-blue-500/10 dark:shadow-blue-500/20">
             <div className="relative z-10">
