@@ -196,13 +196,14 @@ export async function processExpiredBids(): Promise<number> {
 
       // Assign player to winning team
       const { error: assignError } = await supabase
-        .from("season_registrations")
+        .from("players")
         .update({
           team_id: winningBid.team_id,
           salary: winningBid.current_bid,
+          status: 'active',
           updated_at: now,
         })
-        .eq("user_id", playerId)
+        .eq("id", playerId)
 
       if (assignError) {
         console.error(`Error assigning player ${playerId} to team:`, assignError)
