@@ -1448,40 +1448,61 @@ const ManagementPage = () => {
 
   if (!isAuthorized && !loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-        <p className="text-muted-foreground mb-8">
-          You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
-        </p>
-        <Button asChild>
-          <Link href="/">Return to Home</Link>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20 flex items-center justify-center p-6">
+        <Card className="hockey-card w-full max-w-lg">
+          <CardHeader className="text-center pb-6">
+            <div className="hockey-icon-container-red mx-auto mb-6 w-fit">
+              <XCircle className="h-12 w-12 text-white" />
+        </div>
+            <CardTitle className="hockey-gradient-text-red text-3xl font-black mb-4">Access Denied</CardTitle>
+            <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+              You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <Button asChild className="hockey-button w-full">
+              <Link href="/" className="flex items-center gap-3">
+                <Home className="h-5 w-5" />
+                Return to Home
+              </Link>
         </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        {/* Update the main title section to be more mobile-friendly: */}
-        <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20">
+      <div className="container mx-auto px-4 py-8">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* Enhanced Hockey-Themed Header */}
+          <div className="hockey-header p-8 mb-8 rounded-3xl">
+            <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
+              <div className="hockey-icon-container">
+                <Gavel className="h-12 w-12 text-white" />
+                  </div>
+              <div className="text-center md:text-left">
+                <h1 className="hockey-title mb-4">Team Management</h1>
             {teamData && (
-              <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
+                    <div className="flex items-center justify-center md:justify-start gap-3">
                 {teamData.logo_url && (
                   <Image
                     src={teamData.logo_url || "/placeholder.svg"}
                     alt={teamData.name}
-                    width={20}
-                    height={20}
-                    className="rounded-full md:w-6 md:h-6"
-                  />
-                )}
+                            width={32}
+                            height={32}
+                        className="rounded-full shadow-lg"
+                          />
+                      )}
+                    <p className="hockey-subtitle">
                 {teamData.name}
               </p>
+                    </div>
             )}
-          </div>
+                </div>
+              </div>
+            <div className="hockey-divider" />
         </div>
 
         {loading ? (
@@ -1491,102 +1512,113 @@ const ManagementPage = () => {
           </div>
         ) : (
           <>
-            {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
-              <Card>
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-ice-blue-100 dark:bg-ice-blue-900/30 p-3 rounded-full">
-                    <Users className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" />
+          {/* Enhanced Hockey-Themed Stats Grid */}
+          <div className="hockey-stats-grid mb-8">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="hockey-stat-item"
+            >
+              <div className="hockey-stat-icon bg-gradient-to-r from-ice-blue-500 to-rink-blue-600">
+                <Users className="h-8 w-8 text-white" />
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Team Size</div>
-                    <div className="text-2xl font-bold">
+              <div className="hockey-stat-value">
                       {teamPlayers.length}
                       {projectedRosterSize !== teamPlayers.length && (
-                        <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
+                  <span className="text-lg text-hockey-silver-500 ml-1">→ {projectedRosterSize}</span>
                       )}
                     </div>
+              <div className="hockey-stat-label">Team Size</div>
+              <div className="hockey-stat-desc">Current roster</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="hockey-stat-item"
+            >
+              <div className="hockey-stat-icon bg-gradient-to-r from-rink-blue-500 to-ice-blue-600">
+                <Calendar className="h-8 w-8 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-rink-blue-100 dark:bg-rink-blue-900/30 p-3 rounded-full">
-                    <Calendar className="h-6 w-6 text-rink-blue-600 dark:text-rink-blue-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Upcoming Matches</div>
-                    <div className="text-2xl font-bold">
+              <div className="hockey-stat-value">
                       {teamMatches.filter((m) => m.status === "Scheduled").length}
                     </div>
+              <div className="hockey-stat-label">Upcoming Matches</div>
+              <div className="hockey-stat-desc">Scheduled games</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="hockey-stat-item"
+            >
+              <div className="hockey-stat-icon bg-gradient-to-r from-goal-red-500 to-goal-red-600">
+                <Trophy className="h-8 w-8 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-goal-red-100 dark:bg-goal-red-900/30 p-3 rounded-full">
-                    <Trophy className="h-6 w-6 text-goal-red-600 dark:text-goal-red-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Record</div>
-                    <div className="text-2xl font-bold">
+              <div className="hockey-stat-value">
                       {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
                     </div>
+              <div className="hockey-stat-label">Record</div>
+              <div className="hockey-stat-desc">Season record</div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="hockey-stat-item"
+            >
+              <div className="hockey-stat-icon bg-gradient-to-r from-assist-green-500 to-assist-green-600">
+                <DollarSign className="h-8 w-8 text-white" />
                   </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="bg-assist-green-100 dark:bg-assist-green-900/30 p-3 rounded-full">
-                    <DollarSign className="h-6 w-6 text-assist-green-600 dark:text-assist-green-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">Salary Cap</div>
-                    <div className="text-2xl font-bold">
+              <div className="hockey-stat-value">
                       ${(currentTeamSalary / 1000000).toFixed(1)}M
                       {projectedSalary !== currentTeamSalary && (
-                        <span className="text-sm text-muted-foreground ml-1">
+                  <span className="text-lg text-hockey-silver-500 ml-1">
                           → ${(projectedSalary / 1000000).toFixed(1)}M
                         </span>
                       )}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="hockey-stat-label">Salary Cap</div>
+              <div className="hockey-stat-desc">Current usage</div>
+            </motion.div>
             </div>
 
-            {/* Update the tabs to be more mobile-friendly: */}
+          {/* Enhanced Hockey-Themed Tabs */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
-                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Roster</span>
-                  <span className="md:hidden">Roster</span>
+            <TabsList className="hockey-tabs-list grid w-full grid-cols-3 md:grid-cols-7 mb-8 h-auto">
+              <TabsTrigger value="roster" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <span className="hidden md:inline">Team Roster</span>
+                <span className="md:hidden">Roster</span>
                 </TabsTrigger>
-                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Avail</span>
-                  <span className="md:hidden">Avail</span>
+              <TabsTrigger value="availability" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <span className="hidden md:inline">Team Avail</span>
+                <span className="md:hidden">Avail</span>
                 </TabsTrigger>
-                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Schedule</span>
-                  <span className="md:hidden">Schedule</span>
+              <TabsTrigger value="schedule" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <span className="hidden md:inline">Team Schedule</span>
+                <span className="md:hidden">Schedule</span>
                 </TabsTrigger>
-                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Free Agents</span>
-                  <span className="md:hidden">Free Agents</span>
+              <TabsTrigger value="free-agents" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <span className="hidden md:inline">Free Agents</span>
+                <span className="md:hidden">Free Agents</span>
                 </TabsTrigger>
-                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">My Bids</span>
-                  <span className="md:hidden">Bids</span>
+              <TabsTrigger value="my-bids" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <span className="hidden md:inline">My Bids</span>
+                <span className="md:hidden">Bids</span>
                 </TabsTrigger>
-                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Waivers</span>
-                  <span className="md:hidden">Waivers</span>
+              <TabsTrigger value="waivers" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <span className="hidden md:inline">Waivers</span>
+                <span className="md:hidden">Waivers</span>
                 </TabsTrigger>
-                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
-                  <span className="hidden md:inline">Trades</span>
-                  <span className="md:hidden">Trades</span>
+              <TabsTrigger value="trades" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3 relative">
+                <span className="hidden md:inline">Trades</span>
+                <span className="md:hidden">Trades</span>
                   {incomingTradeProposals.length > 0 && (
-                    <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs shadow-lg">
+                  <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs font-bold shadow-lg">
                       {incomingTradeProposals.length}
                     </span>
                   )}
@@ -3021,7 +3053,8 @@ const ManagementPage = () => {
             </Tabs>
           </>
         )}
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Bid Modal */}
       {selectedPlayer && (
