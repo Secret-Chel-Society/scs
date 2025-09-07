@@ -129,9 +129,42 @@
 }
 
 @layer components {
-  /* New Clean Design System */
+  /* Enhanced Hockey-Themed Design System */
+  .hockey-card {
+    @apply bg-gradient-to-br from-white via-ice-blue-50/30 to-rink-blue-50/20 dark:from-hockey-silver-900 dark:via-ice-blue-900/20 dark:to-rink-blue-900/10;
+    @apply border border-ice-blue-200/60 dark:border-rink-blue-800/60;
+    @apply shadow-xl shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
+    @apply backdrop-blur-sm rounded-2xl;
+    @apply transition-all duration-500 ease-out;
+    @apply hover:shadow-2xl hover:shadow-ice-blue-500/20 dark:hover:shadow-rink-blue-500/30;
+    @apply hover:scale-[1.02] hover:-translate-y-1;
+    @apply hover:border-ice-blue-300/80 dark:hover:border-rink-blue-700/80;
+  }
+  
   .clean-card {
     @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .hockey-button {
+    @apply bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-ice-blue-600;
+    @apply hover:from-ice-blue-600 hover:via-rink-blue-600 hover:to-ice-blue-700;
+    @apply text-white font-bold py-3 px-6 rounded-xl;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-105 hover:shadow-xl hover:shadow-ice-blue-500/30;
+    @apply focus:outline-none focus:ring-4 focus:ring-ice-blue-500/30;
+    @apply relative overflow-hidden;
+    @apply border border-ice-blue-400/20;
+  }
+  
+  .hockey-button::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20;
+    @apply transform -skew-x-12 -translate-x-full;
+    @apply transition-transform duration-700;
+  }
+  
+  .hockey-button:hover::before {
+    @apply translate-x-full;
   }
   
   .clean-button {
@@ -140,6 +173,14 @@
   
   .clean-button-secondary {
     @apply border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-700;
+  }
+  
+  .hockey-gradient-text {
+    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
+    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
+    @apply bg-clip-text text-transparent;
+    @apply animate-gradient-x;
+    @apply font-black;
   }
   
   .clean-gradient-text {
