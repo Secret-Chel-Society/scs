@@ -1485,47 +1485,46 @@ const ManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
+    <div className="container mx-auto px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {/* Enhanced Hockey-Themed Header */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-ice-blue-100/50 via-white to-rink-blue-100/50 dark:from-hockey-silver-900/50 dark:via-hockey-silver-800 dark:to-rink-blue-900/30 rounded-3xl p-6 md:p-8 mb-8 border border-ice-blue-200/50 dark:border-rink-blue-800/50 shadow-xl shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20">
-            <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+          <div className="relative overflow-hidden bg-gradient-to-br from-blue-100/50 via-white to-slate-100/50 dark:from-slate-900/50 dark:via-slate-800 dark:to-blue-900/30 rounded-3xl p-6 md:p-8 mb-8 border border-blue-200/50 dark:border-blue-800/50 shadow-xl shadow-blue-500/10 dark:shadow-blue-500/20">
             <div className="relative z-10">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="text-center md:text-left">
                   <div className="inline-flex items-center gap-3 mb-3">
-                    <div className="h-1 w-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full"></div>
-                    <Trophy className="h-6 w-6 text-ice-blue-600 dark:text-rink-blue-400 animate-bounce-gentle" />
-                    <div className="h-1 w-12 bg-gradient-to-r from-rink-blue-600 to-ice-blue-500 rounded-full"></div>
+                    <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
+                    <Trophy className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-bounce" />
+                    <div className="h-1 w-12 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full"></div>
                   </div>
-                  <h1 className="hockey-title-enhanced text-2xl md:text-3xl mb-2">
+                  <h1 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 dark:from-blue-400 dark:via-blue-500 dark:to-blue-600 bg-clip-text text-transparent">
                     Team Management
                   </h1>
-                  {teamData && (
+            {teamData && (
                     <div className="flex items-center justify-center md:justify-start gap-3">
-                      {teamData.logo_url && (
+                {teamData.logo_url && (
                         <div className="relative">
-                          <Image
-                            src={teamData.logo_url || "/placeholder.svg"}
-                            alt={teamData.name}
+                  <Image
+                    src={teamData.logo_url || "/placeholder.svg"}
+                    alt={teamData.name}
                             width={32}
                             height={32}
-                            className="rounded-full border-2 border-ice-blue-200 dark:border-rink-blue-700 shadow-lg"
+                            className="rounded-full border-2 border-blue-200 dark:border-blue-700 shadow-lg"
                           />
-                          <div className="absolute -inset-1 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded-full blur-sm"></div>
+                          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-blue-500/20 rounded-full blur-sm"></div>
                         </div>
                       )}
-                      <p className="hockey-subtitle-enhanced text-base md:text-lg font-semibold">
-                        {teamData.name}
-                      </p>
+                      <p className="text-base md:text-lg font-semibold text-slate-600 dark:text-slate-400">
+                {teamData.name}
+              </p>
                     </div>
-                  )}
+            )}
                 </div>
-                <div className="hockey-section-divider w-24 md:w-32 mx-auto md:mx-0"></div>
+                <div className="h-1 w-24 md:w-32 bg-gradient-to-r from-blue-500 via-blue-600 to-transparent rounded-full mx-auto md:mx-0"></div>
               </div>
-            </div>
           </div>
+        </div>
 
         {loading ? (
           <div className="grid gap-6">
@@ -1535,105 +1534,105 @@ const ManagementPage = () => {
         ) : (
           <>
             {/* Enhanced Hockey-Themed Stats Grid */}
-            <div className="hockey-stats-grid mb-8">
-              <div className="hockey-stat-item hockey-hover-lift">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full bg-gradient-to-br from-slate-50 to-blue-50/30 dark:from-slate-900/50 dark:to-blue-900/20 rounded-xl p-4 border border-slate-200/50 dark:border-slate-700/50 mb-8">
+              <div className="text-center p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 transition-all duration-200 ease-out hover:scale-105 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md hover:shadow-blue-500/20 min-h-[70px] flex flex-col justify-center">
                 <div className="flex items-center justify-center mb-2">
-                  <div className="hockey-feature-icon">
+                  <div className="relative p-3 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300">
                     <Users className="h-5 w-5 text-white" />
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium mb-1">Team Size</div>
-                  <div className="text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
-                    {teamPlayers.length}
-                    {projectedRosterSize !== teamPlayers.length && (
-                      <span className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 ml-1">→ {projectedRosterSize}</span>
-                    )}
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Team Size</div>
+                  <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                      {teamPlayers.length}
+                      {projectedRosterSize !== teamPlayers.length && (
+                      <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">→ {projectedRosterSize}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
+                  </div>
               
-              <div className="hockey-stat-item hockey-hover-lift">
+              <div className="text-center p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 transition-all duration-200 ease-out hover:scale-105 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md hover:shadow-blue-500/20 min-h-[70px] flex flex-col justify-center">
                 <div className="flex items-center justify-center mb-2">
-                  <div className="hockey-feature-icon">
+                  <div className="relative p-3 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300">
                     <Calendar className="h-5 w-5 text-white" />
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium mb-1">Upcoming</div>
-                  <div className="text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
-                    {teamMatches.filter((m) => m.status === "Scheduled").length}
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Upcoming</div>
+                  <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                      {teamMatches.filter((m) => m.status === "Scheduled").length}
+                    </div>
                   </div>
-                </div>
-              </div>
+                  </div>
               
-              <div className="hockey-stat-item hockey-hover-lift">
+              <div className="text-center p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 transition-all duration-200 ease-out hover:scale-105 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md hover:shadow-blue-500/20 min-h-[70px] flex flex-col justify-center">
                 <div className="flex items-center justify-center mb-2">
-                  <div className="hockey-feature-icon">
+                  <div className="relative p-3 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300">
                     <Trophy className="h-5 w-5 text-white" />
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium mb-1">Record</div>
-                  <div className="text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
-                    {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Record</div>
+                  <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                      {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
+                    </div>
                   </div>
-                </div>
-              </div>
+                  </div>
               
-              <div className="hockey-stat-item hockey-hover-lift">
+              <div className="text-center p-3 rounded-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50 transition-all duration-200 ease-out hover:scale-105 hover:bg-white dark:hover:bg-slate-800 hover:shadow-md hover:shadow-blue-500/20 min-h-[70px] flex flex-col justify-center">
                 <div className="flex items-center justify-center mb-2">
-                  <div className="hockey-feature-icon">
+                  <div className="relative p-3 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300">
                     <DollarSign className="h-5 w-5 text-white" />
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 font-medium mb-1">Salary Cap</div>
-                  <div className="text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
-                    ${(currentTeamSalary / 1000000).toFixed(1)}M
-                    {projectedSalary !== currentTeamSalary && (
-                      <span className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 ml-1">
-                        → ${(projectedSalary / 1000000).toFixed(1)}M
-                      </span>
-                    )}
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Salary Cap</div>
+                  <div className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                      ${(currentTeamSalary / 1000000).toFixed(1)}M
+                      {projectedSalary !== currentTeamSalary && (
+                      <span className="text-sm text-slate-500 dark:text-slate-400 ml-1">
+                          → ${(projectedSalary / 1000000).toFixed(1)}M
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
               </div>
             </div>
 
             {/* Enhanced Hockey-Themed Tabs */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <div className="hockey-tabs-list mb-8">
+              <div className="bg-gradient-to-r from-blue-100 to-slate-100 dark:from-blue-900/30 dark:to-slate-900/30 p-1 rounded-xl border border-blue-200/50 dark:border-blue-700/50 mb-8">
                 <TabsList className="flex flex-wrap w-full h-auto gap-2 p-2 bg-transparent">
-                  <TabsTrigger value="roster" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg">
-                    <span className="hidden md:inline truncate">Team Roster</span>
-                    <span className="md:hidden truncate">Roster</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="availability" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg">
-                    <span className="hidden md:inline truncate">Team Avail</span>
-                    <span className="md:hidden truncate">Avail</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="schedule" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg">
-                    <span className="hidden md:inline truncate">Team Schedule</span>
-                    <span className="md:hidden truncate">Schedule</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="free-agents" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg">
-                    <span className="hidden md:inline truncate">Free Agents</span>
-                    <span className="md:hidden truncate">Free Agents</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="my-bids" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg">
-                    <span className="hidden md:inline truncate">My Bids</span>
-                    <span className="md:hidden truncate">Bids</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="waivers" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg">
-                    <span className="hidden md:inline truncate">Waivers</span>
-                    <span className="md:hidden truncate">Waivers</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="trades" className="hockey-tab-trigger hockey-tab-hover text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg relative">
-                    <span className="hidden md:inline truncate">Trades</span>
+                  <TabsTrigger value="roster" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md">
+                  <span className="hidden md:inline truncate">Team Roster</span>
+                  <span className="md:hidden truncate">Roster</span>
+                </TabsTrigger>
+                  <TabsTrigger value="availability" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md">
+                  <span className="hidden md:inline truncate">Team Avail</span>
+                  <span className="md:hidden truncate">Avail</span>
+                </TabsTrigger>
+                  <TabsTrigger value="schedule" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md">
+                  <span className="hidden md:inline truncate">Team Schedule</span>
+                  <span className="md:hidden truncate">Schedule</span>
+                </TabsTrigger>
+                  <TabsTrigger value="free-agents" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md">
+                  <span className="hidden md:inline truncate">Free Agents</span>
+                  <span className="md:hidden truncate">Free Agents</span>
+                </TabsTrigger>
+                  <TabsTrigger value="my-bids" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md">
+                  <span className="hidden md:inline truncate">My Bids</span>
+                  <span className="md:hidden truncate">Bids</span>
+                </TabsTrigger>
+                  <TabsTrigger value="waivers" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md">
+                  <span className="hidden md:inline truncate">Waivers</span>
+                  <span className="md:hidden truncate">Waivers</span>
+                </TabsTrigger>
+                  <TabsTrigger value="trades" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 text-xs md:text-sm px-3 md:px-4 py-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md relative">
+                  <span className="hidden md:inline truncate">Trades</span>
                   <span className="md:hidden truncate">Trades</span>
                   {incomingTradeProposals.length > 0 && (
-                    <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs flex-shrink-0 shadow-sm">
+                    <span className="ml-1 md:ml-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs flex-shrink-0 shadow-sm">
                       {incomingTradeProposals.length}
                     </span>
                   )}
