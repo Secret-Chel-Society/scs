@@ -1557,6 +1557,94 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     margin-bottom: 32px !important;
   }
   
+  /* Mobile Tab Selector Fixes */
+  .mobile-content [role="tablist"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 8px !important;
+  }
+  
+  .mobile-content [role="tab"] {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+  
+  .mobile-content [role="tab"] span {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Specific fixes for different tab layouts */
+  .mobile-content .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+  }
+  
+  .mobile-content .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+  }
+  
+  .mobile-content .grid-cols-7 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+  }
+  
+  /* Hide icons on very small screens to save space */
+  .mobile-content [role="tab"] svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  /* Ensure tab text is readable */
+  .mobile-content [role="tab"] {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Fix TabsList component on mobile */
+  .mobile-content .tabs-list {
+    height: auto !important;
+    min-height: 48px !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    padding: 4px !important;
+  }
+  
+  /* Fix TabsTrigger component on mobile */
+  .mobile-content .tabs-trigger {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  
+  /* Responsive tab text sizing */
+  .mobile-content .tabs-trigger span {
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+  }
+  
+  /* Hide long text on very small screens */
+  @media (max-width: 375px) {
+    .mobile-content .tabs-trigger span {
+      display: none !important;
+    }
+    
+    .mobile-content .tabs-trigger {
+      min-width: 32px !important;
+      max-width: 32px !important;
+      padding: 4px !important;
+    }
+  }
+  
   /* Ensure all nested containers fill width */
   .mobile-content * {
     max-width: 100vw !important;
