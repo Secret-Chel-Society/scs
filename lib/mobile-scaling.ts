@@ -1,0 +1,73 @@
+"use client"
+
+/**
+ * Dynamic mobile scaling utility
+ * Calculates optimal scale based on viewport width to fit content perfectly
+ */
+
+export function calculateOptimalScale(): number {
+  if (typeof window === 'undefined') return 1
+  
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  
+  // Base desktop width (where content looks perfect)
+  const baseWidth = 1200
+  
+  // Calculate scale based on viewport width
+  let scale = 1
+  
+  if (viewportWidth < 768) {
+    // For mobile devices, calculate scale to fit content optimally
+    // We want the content to be scaled so it fits well on the screen
+    const targetWidth = Math.min(viewportWidth * 0.95, baseWidth) // 95% of viewport width
+    scale = targetWidth / baseWidth
+    
+    // Ensure minimum scale for readability
+    scale = Math.max(scale, 0.3)
+    
+    // Ensure maximum scale to prevent content from being too large
+    scale = Math.min(scale, 0.6)
+  }
+  
+  return scale
+}
+
+export function applyMobileScaling(): void {
+  if (typeof window === 'undefined') return
+  
+  const scale = calculateOptimalScale()
+  const html = document.documentElement
+  
+  if (window.innerWidth < 768) {
+    html.style.transform = `scale(${scale})`
+    html.style.transformOrigin = 'top left'
+    html.style.width = `${100 / scale}%`
+    html.style.height = `${100 / scale}%`
+  } else {
+    // Reset for desktop
+    html.style.transform = ''
+    html.style.transformOrigin = ''
+    html.style.width = ''
+    html.style.height = ''
+  }
+}
+
+export function initializeMobileScaling(): void {
+  if (typeof window === 'undefined') return
+  
+  // Apply scaling on load
+  applyMobileScaling()
+  
+  // Apply scaling on resize
+  let resizeTimeout: NodeJS.Timeout
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout)
+    resizeTimeout = setTimeout(applyMobileScaling, 100)
+  })
+  
+  // Apply scaling on orientation change
+  window.addEventListener('orientationchange', () => {
+    setTimeout(applyMobileScaling, 100)
+  })
+}

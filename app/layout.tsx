@@ -10,6 +10,7 @@ import SupabaseProvider from "@/lib/supabase/client"
 // import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
+import { MobileScalingProvider } from "@/components/mobile-scaling-provider"
 
 // Optimize font loading
 const inter = Inter({
@@ -49,21 +50,23 @@ export default function RootLayout({
       <body className={`${inter.className} hockey-scrollbar`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <div className="flex min-h-screen">
-              <Navigation />
-              {/* Main content area */}
-              <div className="flex-1 flex flex-col md:ml-72">
-                <Suspense>
-                  <main className="flex-1 p-6 hockey-scrollbar">
-                    {children}
-                  </main>
-                </Suspense>
-                <Footer />
+            <MobileScalingProvider>
+              <div className="flex min-h-screen">
+                <Navigation />
+                {/* Main content area */}
+                <div className="flex-1 flex flex-col md:ml-72">
+                  <Suspense>
+                    <main className="flex-1 p-6 hockey-scrollbar">
+                      {children}
+                    </main>
+                  </Suspense>
+                  <Footer />
+                </div>
               </div>
-            </div>
-            <Toaster />
-            <BannedUserModal />
-            {/* <Analytics /> */}
+              <Toaster />
+              <BannedUserModal />
+              {/* <Analytics /> */}
+            </MobileScalingProvider>
           </SupabaseProvider>
         </ThemeProvider>
       </body>

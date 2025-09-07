@@ -1271,18 +1271,19 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   background: hsl(var(--hockey-silver) / 0.2);
 }
 
-/* Mobile Scaling - Make everything 3x smaller on mobile */
+/* Responsive Mobile Scaling - Adapts to different phone sizes */
 @media (max-width: 767px) {
   html {
-    transform: scale(0.33);
+    /* Base scale for small phones (320px width) */
+    transform: scale(0.4);
     transform-origin: top left;
-    width: 300%; /* Compensate for the scaling */
-    height: 300%;
+    width: 250%; /* Compensate for the scaling */
+    height: 250%;
   }
   
   body {
-    width: 300%;
-    height: 300%;
+    width: 250%;
+    height: 250%;
     overflow-x: auto;
     overflow-y: auto;
   }
@@ -1327,5 +1328,84 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   [style*="position: fixed"][style*="z-index: 999"],
   [style*="position: fixed"][style*="z-index: 1000"] {
     transform: scale(1) !important;
+  }
+}
+
+/* Responsive scaling for different phone sizes */
+@media (min-width: 320px) and (max-width: 374px) {
+  html {
+    transform: scale(0.35);
+    width: 285%;
+    height: 285%;
+  }
+  body {
+    width: 285%;
+    height: 285%;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 414px) {
+  html {
+    transform: scale(0.4);
+    width: 250%;
+    height: 250%;
+  }
+  body {
+    width: 250%;
+    height: 250%;
+  }
+}
+
+@media (min-width: 415px) and (max-width: 480px) {
+  html {
+    transform: scale(0.45);
+    width: 222%;
+    height: 222%;
+  }
+  body {
+    width: 222%;
+    height: 222%;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  html {
+    transform: scale(0.5);
+    width: 200%;
+    height: 200%;
+  }
+  body {
+    width: 200%;
+    height: 200%;
+  }
+}
+
+/* Additional mobile scaling optimizations */
+@media (max-width: 767px) {
+  /* Ensure smooth scaling transitions */
+  html {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  /* Prevent horizontal scroll on very small screens */
+  body {
+    min-width: 320px;
+  }
+  
+  /* Optimize touch targets for scaled content */
+  button, a, input, select, textarea {
+    min-height: 44px; /* iOS recommended touch target size */
+    min-width: 44px;
+  }
+  
+  /* Ensure text remains readable */
+  p, span, div {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px;
   }
 }
