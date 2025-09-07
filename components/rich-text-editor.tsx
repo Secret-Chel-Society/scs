@@ -101,7 +101,7 @@ export default function RichTextEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: "text-primary underline",
+          class: "text-ice-blue-600 dark:text-ice-blue-400 underline",
         },
       }),
       TiptapImage.configure({
@@ -292,7 +292,7 @@ export default function RichTextEditor({
                     {colors.map((color) => (
                       <button
                         key={color}
-                        className="w-8 h-8 rounded border-2 border-gray-200 hover:border-gray-400 transition-colors"
+                        className="w-8 h-8 rounded border-2 border-hockey-silver-200 hover:border-hockey-silver-400 transition-colors"
                         style={{ backgroundColor: color }}
                         onClick={() => setTextColor(color)}
                         title={color}

@@ -210,7 +210,7 @@ export async function getSalaryCap(): Promise<number> {
 
     if (error) {
       console.error("Error fetching salary cap:", error)
-      return 30000000 // Default to $30M if not found
+      return 65000000 // Default to $65M if not found
     }
 
     const value = data?.value
@@ -227,10 +227,10 @@ export async function getSalaryCap(): Promise<number> {
     }
     
     console.log("Invalid salary cap value, defaulting to 30000000")
-    return 30000000 // Default to $30M if invalid
+    return 65000000 // Default to $65M if invalid
   } catch (error) {
     console.error("Error getting salary cap:", error)
-    return 30000000 // Default to $30M if error
+    return 65000000 // Default to $65M if error
   }
 }
 

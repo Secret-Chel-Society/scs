@@ -13,7 +13,7 @@ import { AlertCircle } from "lucide-react"
 export function BiddingSettings() {
   const [isBiddingEnabled, setIsBiddingEnabled] = useState(false)
   const [bidDuration, setBidDuration] = useState(14400) // Default to 14400 seconds (4 hours)
-  const [bidIncrement, setBidIncrement] = useState(250000)
+  const [bidIncrement, setBidIncrement] = useState(2000000)
   const [minSalary, setMinSalary] = useState(750000)
   const [maxSalary, setMaxSalary] = useState(15000000)
   const [isLoading, setIsLoading] = useState(true)

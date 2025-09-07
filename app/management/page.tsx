@@ -182,7 +182,7 @@ const getPositionColor = (position: string): string => {
       return "text-green-400"
     case "Right Wing":
     case "RW":
-      return "text-blue-400"
+      return "text-ice-blue-400"
     case "Left Defense":
     case "LD":
       return "text-cyan-400"
@@ -190,7 +190,7 @@ const getPositionColor = (position: string): string => {
     case "RD":
       return "text-yellow-400"
     default:
-      return "text-gray-400"
+      return "text-hockey-silver-400"
   }
 }
 
@@ -242,7 +242,7 @@ const ManagementPage = () => {
   const [tradeError, setTradeError] = useState<string | null>(null)
   const [tradeSuccess, setTradeSuccess] = useState<string | null>(null)
   const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(30000000) // $30M salary cap
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $65M salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
@@ -1448,62 +1448,41 @@ const ManagementPage = () => {
 
   if (!isAuthorized && !loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20 flex items-center justify-center p-6">
-        <Card className="hockey-card w-full max-w-lg">
-          <CardHeader className="text-center pb-6">
-            <div className="hockey-icon-container-red mx-auto mb-6 w-fit">
-              <XCircle className="h-12 w-12 text-white" />
-            </div>
-            <CardTitle className="hockey-gradient-text-red text-3xl font-black mb-4">Access Denied</CardTitle>
-            <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-              You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <Button asChild className="hockey-button w-full">
-              <Link href="/" className="flex items-center gap-3">
-                <Home className="h-5 w-5" />
-                Return to Home
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+        <p className="text-muted-foreground mb-8">
+          You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
+        </p>
+        <Button asChild>
+          <Link href="/">Return to Home</Link>
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* Enhanced Hockey-Themed Header */}
-          <div className="hockey-header p-8 mb-8 rounded-3xl">
-            <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
-              <div className="hockey-icon-container">
-                <Gavel className="h-12 w-12 text-white" />
-              </div>
-              <div className="text-center md:text-left">
-                <h1 className="hockey-title mb-4">Team Management</h1>
-                {teamData && (
-                  <div className="flex items-center justify-center md:justify-start gap-3">
-                    {teamData.logo_url && (
-                      <Image
-                        src={teamData.logo_url || "/placeholder.svg"}
-                        alt={teamData.name}
-                        width={32}
-                        height={32}
-                        className="rounded-full shadow-lg"
-                      />
-                    )}
-                    <p className="hockey-subtitle">
-                      {teamData.name}
-                    </p>
-                  </div>
+    <div className="container mx-auto px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        {/* Update the main title section to be more mobile-friendly: */}
+        <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
+            {teamData && (
+              <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
+                {teamData.logo_url && (
+                  <Image
+                    src={teamData.logo_url || "/placeholder.svg"}
+                    alt={teamData.name}
+                    width={20}
+                    height={20}
+                    className="rounded-full md:w-6 md:h-6"
+                  />
                 )}
-              </div>
-            </div>
-            <div className="hockey-divider" />
+                {teamData.name}
+              </p>
+            )}
           </div>
+        </div>
 
         {loading ? (
           <div className="grid gap-6">
@@ -1512,113 +1491,102 @@ const ManagementPage = () => {
           </div>
         ) : (
           <>
-            {/* Enhanced Hockey-Themed Stats Grid */}
-            <div className="hockey-stats-grid mb-8">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="hockey-stat-item"
-              >
-                <div className="hockey-stat-icon bg-gradient-to-r from-ice-blue-500 to-rink-blue-600">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <div className="hockey-stat-value">
-                  {teamPlayers.length}
-                  {projectedRosterSize !== teamPlayers.length && (
-                    <span className="text-lg text-hockey-silver-500 ml-1">→ {projectedRosterSize}</span>
-                  )}
-                </div>
-                <div className="hockey-stat-label">Team Size</div>
-                <div className="hockey-stat-desc">Current roster</div>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="hockey-stat-item"
-              >
-                <div className="hockey-stat-icon bg-gradient-to-r from-assist-green-500 to-assist-green-600">
-                  <Calendar className="h-8 w-8 text-white" />
-                </div>
-                <div className="hockey-stat-value">
-                  {teamMatches.filter((m) => m.status === "Scheduled").length}
-                </div>
-                <div className="hockey-stat-label">Upcoming Matches</div>
-                <div className="hockey-stat-desc">Scheduled games</div>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className="hockey-stat-item"
-              >
-                <div className="hockey-stat-icon bg-gradient-to-r from-goal-red-500 to-goal-red-600">
-                  <Trophy className="h-8 w-8 text-white" />
-                </div>
-                <div className="hockey-stat-value">
-                  {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
-                </div>
-                <div className="hockey-stat-label">Record</div>
-                <div className="hockey-stat-desc">W-L-OTL</div>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="hockey-stat-item"
-              >
-                <div className="hockey-stat-icon bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600">
-                  <DollarSign className="h-8 w-8 text-white" />
-                </div>
-                <div className="hockey-stat-value">
-                  ${(currentTeamSalary / 1000000).toFixed(1)}M
-                  {projectedSalary !== currentTeamSalary && (
-                    <span className="text-lg text-hockey-silver-500 ml-1">
-                      → ${(projectedSalary / 1000000).toFixed(1)}M
-                    </span>
-                  )}
-                </div>
-                <div className="hockey-stat-label">Salary Cap</div>
-                <div className="hockey-stat-desc">Team payroll</div>
-              </motion.div>
+            {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-ice-blue-100 dark:bg-ice-blue-900/30 p-3 rounded-full">
+                    <Users className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Team Size</div>
+                    <div className="text-2xl font-bold">
+                      {teamPlayers.length}
+                      {projectedRosterSize !== teamPlayers.length && (
+                        <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-rink-blue-100 dark:bg-rink-blue-900/30 p-3 rounded-full">
+                    <Calendar className="h-6 w-6 text-rink-blue-600 dark:text-rink-blue-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Upcoming Matches</div>
+                    <div className="text-2xl font-bold">
+                      {teamMatches.filter((m) => m.status === "Scheduled").length}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-goal-red-100 dark:bg-goal-red-900/30 p-3 rounded-full">
+                    <Trophy className="h-6 w-6 text-goal-red-600 dark:text-goal-red-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Record</div>
+                    <div className="text-2xl font-bold">
+                      {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-assist-green-100 dark:bg-assist-green-900/30 p-3 rounded-full">
+                    <DollarSign className="h-6 w-6 text-assist-green-600 dark:text-assist-green-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Salary Cap</div>
+                    <div className="text-2xl font-bold">
+                      ${(currentTeamSalary / 1000000).toFixed(1)}M
+                      {projectedSalary !== currentTeamSalary && (
+                        <span className="text-sm text-muted-foreground ml-1">
+                          → ${(projectedSalary / 1000000).toFixed(1)}M
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Enhanced Hockey-Themed Tabs */}
+            {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="hockey-tabs-list grid w-full grid-cols-3 md:grid-cols-7 mb-8 h-auto">
-                <TabsTrigger value="roster" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
+                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
                 </TabsTrigger>
-                <TabsTrigger value="availability" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Avail</span>
                   <span className="md:hidden">Avail</span>
                 </TabsTrigger>
-                <TabsTrigger value="schedule" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Schedule</span>
                   <span className="md:hidden">Schedule</span>
                 </TabsTrigger>
-                <TabsTrigger value="free-agents" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Free Agents</span>
                   <span className="md:hidden">Free Agents</span>
                 </TabsTrigger>
-                <TabsTrigger value="my-bids" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">My Bids</span>
                   <span className="md:hidden">Bids</span>
                 </TabsTrigger>
-                <TabsTrigger value="waivers" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
+                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Waivers</span>
                   <span className="md:hidden">Waivers</span>
                 </TabsTrigger>
-                <TabsTrigger value="trades" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3 relative">
+                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
                   <span className="hidden md:inline">Trades</span>
                   <span className="md:hidden">Trades</span>
                   {incomingTradeProposals.length > 0 && (
-                    <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs font-bold shadow-lg">
+                    <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs shadow-lg">
                       {incomingTradeProposals.length}
                     </span>
                   )}
@@ -1839,7 +1807,7 @@ const ManagementPage = () => {
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
                       {/* Team Salary */}
-                      <Card className="bg-slate-800 border-slate-700">
+                      <Card className="bg-hockey-silver-800 border-hockey-silver-700">
                         <CardContent className="p-3 md:p-4">
                           <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Team Salary</h3>
                           <SalaryProgress
@@ -1851,7 +1819,7 @@ const ManagementPage = () => {
                       </Card>
 
                       {/* Roster Size */}
-                      <Card className="bg-slate-800 border-slate-700">
+                      <Card className="bg-hockey-silver-800 border-hockey-silver-700">
                         <CardContent className="p-3 md:p-4">
                           <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
                           <RosterProgress current={teamPlayers.length} max={15} projected={projectedRosterSize} />
@@ -1859,7 +1827,7 @@ const ManagementPage = () => {
                       </Card>
 
                       {/* Position Breakdown */}
-                      <Card className="bg-slate-800 border-slate-700">
+                      <Card className="bg-hockey-silver-800 border-hockey-silver-700">
                         <CardContent className="p-3 md:p-4">
                           <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">
                             Position Breakdown
@@ -1894,7 +1862,7 @@ const ManagementPage = () => {
                                     <span className="text-white">{positions.LW}</span>
                                   </div>
                                   <div className="flex justify-between">
-                                    <span className="text-blue-400 font-medium">RW:</span>
+                                    <span className="text-ice-blue-500 font-medium">RW:</span>
                                     <span className="text-white">{positions.RW}</span>
                                   </div>
                                   <div className="flex justify-between">
@@ -1983,7 +1951,7 @@ const ManagementPage = () => {
                             return (
                               <div
                                 key={player.id}
-                                className="border rounded-lg p-3 md:p-4 shadow-sm dark:border-gray-800"
+                                className="border border-ice-blue-200 dark:border-ice-blue-700 rounded-lg p-3 md:p-4 shadow-sm"
                               >
                                 <div className="flex justify-between items-start mb-2 md:mb-3">
                                   <div>
@@ -2184,7 +2152,7 @@ const ManagementPage = () => {
                                   .map((_, i) => (
                                     <div
                                       key={i}
-                                      className="h-20 w-full bg-gray-200 dark:bg-gray-800 animate-pulse rounded-lg"
+                                      className="h-20 w-full bg-hockey-silver-200 dark:bg-hockey-silver-800 animate-pulse rounded-lg"
                                     />
                                   ))}
                               </div>
@@ -2217,7 +2185,7 @@ const ManagementPage = () => {
                                   return (
                                     <div
                                       key={waiver.id}
-                                      className="border rounded-lg p-4 shadow-sm dark:border-gray-800"
+                                      className="border border-ice-blue-200 dark:border-ice-blue-700 rounded-lg p-4 shadow-sm"
                                     >
                                       <div className="flex justify-between items-start mb-3">
                                         <div>
@@ -2338,7 +2306,7 @@ const ManagementPage = () => {
                                 const isWaivingThisPlayer = waivingPlayers.has(player.id)
 
                                 return (
-                                  <div key={player.id} className="border rounded-lg p-4 shadow-sm dark:border-gray-800">
+                                  <div key={player.id} className="border border-ice-blue-200 dark:border-ice-blue-700 rounded-lg p-4 shadow-sm">
                                     <div className="flex justify-between items-start mb-2">
                                       <div>
                                         <h3 className="font-medium">
@@ -2463,7 +2431,7 @@ const ManagementPage = () => {
                                       <div
                                         key={player.id}
                                         className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer ${
-                                          selectedMyPlayers.includes(player.id) ? "bg-primary/10" : ""
+                                          selectedMyPlayers.includes(player.id) ? "bg-ice-blue-100 dark:bg-ice-blue-900/30" : ""
                                         }`}
                                         onClick={() => {
                                           if (selectedMyPlayers.includes(player.id)) {
@@ -2544,7 +2512,7 @@ const ManagementPage = () => {
                                       <div
                                         key={player.id}
                                         className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer ${
-                                          selectedOtherPlayers.includes(player.id) ? "bg-primary/10" : ""
+                                          selectedOtherPlayers.includes(player.id) ? "bg-rink-blue-100 dark:bg-rink-blue-900/30" : ""
                                         }`}
                                         onClick={() => {
                                           if (selectedOtherPlayers.includes(player.id)) {
@@ -3076,8 +3044,6 @@ const ManagementPage = () => {
           projectedRosterSize={projectedRosterSize}
         />
       )}
-        </motion.div>
-      </div>
     </div>
   )
 }

@@ -294,9 +294,9 @@ export default function SideNavigation() {
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-ice-blue-600 dark:hover:text-ice-blue-400 ${
                   pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
-                    ? "bg-muted text-primary"
+                    ? "bg-ice-blue-100 dark:bg-ice-blue-900/30 text-ice-blue-600 dark:text-ice-blue-400"
                     : "text-muted-foreground"
                 }`}
                 onClick={closeMenu}
@@ -309,8 +309,8 @@ export default function SideNavigation() {
                     <li key={subItem.name}>
                       <Link
                         href={subItem.href}
-                        className={`block rounded-lg py-2 pl-2 pr-3 transition-all hover:text-primary text-sm ${
-                          pathname === subItem.href ? "text-primary" : "text-muted-foreground"
+                        className={`block rounded-lg py-2 pl-2 pr-3 transition-all hover:text-ice-blue-600 dark:hover:text-ice-blue-400 text-sm ${
+                          pathname === subItem.href ? "text-ice-blue-600 dark:text-ice-blue-400" : "text-hockey-silver-600 dark:text-hockey-silver-400"
                         }`}
                         onClick={closeMenu}
                       >

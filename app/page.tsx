@@ -75,7 +75,7 @@ function FloatingParticles() {
       {[...Array(30)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute w-1 h-1 bg-primary/30 rounded-full"
+          className="absolute w-1 h-1 bg-ice-blue-500/30 rounded-full"
           initial={{
             x: Math.random() * (typeof window !== "undefined" ? window.innerWidth : 1200),
             y: Math.random() * (typeof window !== "undefined" ? window.innerHeight : 800),
@@ -337,7 +337,7 @@ export default function Home() {
             </h2>
           </motion.div>
           <div className="hockey-divider" />
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed">
             Real-time data from our advanced tracking system with comprehensive analytics
           </p>
         </div>
@@ -429,13 +429,13 @@ export default function Home() {
             </h2>
           </motion.div>
           <div className="hockey-divider-red" />
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed">
             Don't miss these highlighted matches from our competitive league
           </p>
         </div>
 
         {loading.featured ? (
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
+          <Card className="bg-white/80 dark:bg-hockey-silver-800/80 backdrop-blur-sm border border-ice-blue-200 dark:border-ice-blue-700 shadow-xl">
             <CardContent className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -462,7 +462,7 @@ export default function Home() {
                     className="group"
                   >
                     <Link href={`/matches/${game.id}`}>
-                      <Card className="h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-600 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
+                      <Card className="h-full bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-700 dark:to-hockey-silver-800 border border-ice-blue-200 dark:border-ice-blue-600 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
@@ -471,7 +471,7 @@ export default function Home() {
                                 Featured Match
                               </span>
                             </div>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                            <span className="text-xs text-hockey-silver-500 dark:text-hockey-silver-400">
                               {new Date(game.match_date).toLocaleDateString()}
                             </span>
                           </div>
@@ -484,17 +484,17 @@ export default function Home() {
                                   {game.home_team?.name?.charAt(0) || "H"}
                                 </span>
                               </div>
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
+                              <span className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex-1">
                                 {game.home_team?.name || "Home Team"}
                               </span>
-                              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                              <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
                                 {game.home_score || 0}
                               </span>
                             </div>
 
                             {/* VS */}
                             <div className="text-center">
-                              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">VS</span>
+                              <span className="text-sm font-medium text-hockey-silver-500 dark:text-hockey-silver-400">VS</span>
                             </div>
 
                             {/* Away Team */}
@@ -504,7 +504,7 @@ export default function Home() {
                                   {game.away_team?.name?.charAt(0) || "A"}
                                 </span>
                               </div>
-                              <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
+                              <span className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 flex-1">
                                 {game.away_team?.name || "Away Team"}
                               </span>
                               <span className="text-2xl font-bold text-red-600 dark:text-red-400">
@@ -513,18 +513,18 @@ export default function Home() {
                             </div>
                           </div>
 
-                          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                          <div className="mt-4 pt-4 border-t border-ice-blue-200 dark:border-ice-blue-600">
                             <div className="flex items-center justify-between">
                               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                 game.status === 'Completed' 
                                   ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                   : game.status === 'Scheduled'
-                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                  ? 'bg-ice-blue-100 text-ice-blue-800 dark:bg-ice-blue-900 dark:text-ice-blue-200'
                                   : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                               }`}>
                                 {game.status}
                               </span>
-                              <span className="text-xs text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+                              <span className="text-xs text-hockey-silver-500 dark:text-hockey-silver-400 group-hover:text-hockey-silver-700 dark:group-hover:text-hockey-silver-300 transition-colors">
                                 View Details →
                               </span>
                             </div>
@@ -538,16 +538,16 @@ export default function Home() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
+          <Card className="bg-white/80 dark:bg-hockey-silver-800/80 backdrop-blur-sm border border-ice-blue-200 dark:border-ice-blue-700 shadow-xl">
             <CardContent className="p-12 text-center">
               <div className="flex flex-col items-center gap-4">
-                <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-full">
-                  <Star className="h-8 w-8 text-slate-400" />
+                <div className="p-4 bg-hockey-silver-100 dark:bg-hockey-silver-700 rounded-full">
+                  <Star className="h-8 w-8 text-hockey-silver-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+                <h3 className="text-xl font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                   No Featured Games Yet
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 max-w-md">
+                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 max-w-md">
                   Check back soon for highlighted matches from our competitive league.
                 </p>
               </div>
@@ -581,7 +581,7 @@ export default function Home() {
             </h2>
           </motion.div>
           <div className="hockey-divider-red" />
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400 max-w-3xl mx-auto leading-relaxed">
             Discover what makes the Secret Chel Society the premier destination for competitive NHL 26 gaming
           </p>
         </div>

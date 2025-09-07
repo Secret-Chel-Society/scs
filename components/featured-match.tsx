@@ -102,7 +102,7 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
                 </div>
                 <Link
                   href={`/teams/${match.home_team.id}`}
-                  className="font-bold text-lg hover:text-primary transition-colors"
+                  className="font-bold text-lg hover:text-ice-blue-600 dark:hover:text-ice-blue-400 transition-colors"
                 >
                   {match.home_team.name}
                 </Link>
@@ -126,7 +126,7 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
                 </div>
                 <Link
                   href={`/teams/${match.away_team.id}`}
-                  className="font-bold text-lg hover:text-primary transition-colors"
+                  className="font-bold text-lg hover:text-ice-blue-600 dark:hover:text-ice-blue-400 transition-colors"
                 >
                   {match.away_team.name}
                 </Link>

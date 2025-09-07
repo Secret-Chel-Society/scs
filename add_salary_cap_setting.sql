@@ -8,7 +8,7 @@ WHERE key = 'salary_cap';
 
 -- 2. Insert salary cap setting if it doesn't exist
 INSERT INTO public.system_settings (key, value, description)
-VALUES ('salary_cap', '30000000', 'Salary cap amount in dollars (default: $30,000,000)')
+VALUES ('salary_cap', '65000000', 'Salary cap amount in dollars (default: $65,000,000)')
 ON CONFLICT (key) DO NOTHING;
 
 -- 3. Verify the setting was added
