@@ -39,10 +39,10 @@ export default async function ManagementBidsPage() {
         <h3 className="text-lg font-medium mb-2">Bidding Rules</h3>
         <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
           <li>Bids last for 5 minutes (300 seconds)</li>
-          <li>New bids must be at least $250,000 higher than the current highest bid</li>
+          <li>New bids must be at least $2,000,000 higher than the current highest bid</li>
           <li>You can extend your own bid to reset the 5-minute timer</li>
           <li>When a bid expires with no higher bids, the player is automatically assigned to your team</li>
-          <li>Your team's total salary cannot exceed the $75M salary cap</li>
+          <li>Your team's total salary cannot exceed the $65M salary cap</li>
         </ul>
       </div>
     </div>
