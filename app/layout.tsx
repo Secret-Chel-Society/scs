@@ -51,12 +51,12 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
             <MobileScalingProvider>
-              <div className="flex min-h-screen">
+              <div className="flex min-h-screen w-full">
                 <Navigation />
                 {/* Main content area */}
-                <div className="flex-1 flex flex-col md:ml-72 mobile-content">
+                <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
                   <Suspense>
-                    <main className="flex-1 p-6 hockey-scrollbar">
+                    <main className="flex-1 p-6 hockey-scrollbar w-full">
                       {children}
                     </main>
                   </Suspense>
