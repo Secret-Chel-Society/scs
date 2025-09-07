@@ -1477,7 +1477,7 @@ const ManagementPage = () => {
           </ul>
         </div>
         
-        <Button asChild className="mt-4">
+        <Button asChild className="hockey-button-enhanced mt-4">
           <Link href="/">Return to Home</Link>
         </Button>
       </div>
@@ -1486,7 +1486,7 @@ const ManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-slate-800 dark:to-rink-blue-900/30">
-    <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
         <motion.div 
           initial={{ opacity: 0, y: 20 }} 
           animate={{ opacity: 1, y: 0 }} 
@@ -1642,6 +1642,7 @@ const ManagementPage = () => {
                   )}
                 </TabsTrigger>
               </TabsList>
+              </div>
 
               {/* Roster Tab Content */}
               <TabsContent value="roster">
@@ -1794,7 +1795,7 @@ const ManagementPage = () => {
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className="hockey-badge text-xs">
                                     {isHomeTeam ? "HOME" : "AWAY"}
                                   </Badge>
                                   <span>vs {opponent?.name}</span>
@@ -1823,13 +1824,13 @@ const ManagementPage = () => {
                                     </Badge>
                                   </div>
                                 ) : (
-                                  <Badge variant="outline">{match.status}</Badge>
+                                  <Badge variant="outline" className="hockey-badge">{match.status}</Badge>
                                 )}
-                                <Button variant="outline" size="sm" asChild>
+                                <Button variant="outline" size="sm" asChild className="hockey-button-secondary">
                                   <Link href={`/matches/${match.id}`}>View</Link>
                                 </Button>
                                 {match.status === "Scheduled" && (
-                                  <Button variant="outline" size="sm" asChild>
+                                  <Button variant="outline" size="sm" asChild className="hockey-button-secondary">
                                     <Link href={`/management/lineups/${match.id}`}>Set Lineup</Link>
                                   </Button>
                                 )}
@@ -1970,7 +1971,7 @@ const ManagementPage = () => {
                       </div>
                     ) : freeAgentsError ? (
                       <div className="text-center py-8">
-                        <div className="text-red-500 mb-4">{freeAgentsError}</div>
+                        <div className="text-goal-red-500 mb-4">{freeAgentsError}</div>
                         <Button onClick={loadFreeAgents} variant="outline">
                           Try Again
                         </Button>
@@ -2212,8 +2213,8 @@ const ManagementPage = () => {
                               </div>
                             ) : waiverError ? (
                               <div className="text-center py-8">
-                                <p className="text-red-500">{waiverError}</p>
-                                <Button onClick={loadWaiversData} className="mt-4">
+                                <p className="text-goal-red-500">{waiverError}</p>
+                                <Button onClick={loadWaiversData} className="hockey-button-enhanced mt-4">
                                   Try Again
                                 </Button>
                               </div>
