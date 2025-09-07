@@ -728,10 +728,25 @@ export default function TeamDetailPage() {
           )}
 
           <Tabs defaultValue="roster" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="roster">Roster</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="stats">Team Stats</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-8 h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
+            <TabsTrigger 
+              value="roster"
+              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+            >
+              Roster
+            </TabsTrigger>
+            <TabsTrigger 
+              value="schedule"
+              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+            >
+              Schedule
+            </TabsTrigger>
+            <TabsTrigger 
+              value="stats"
+              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+            >
+              Team Stats
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="roster">

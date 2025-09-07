@@ -826,41 +826,46 @@ export default function SCSBotPanel() {
 
         <Tabs defaultValue="discord" className="w-full">
           <div className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg rounded-xl p-2">
-            <TabsList className="flex flex-wrap w-full bg-transparent gap-1 sm:gap-2">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-10 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
               <TabsTrigger 
                 value="discord" 
-                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300 flex-shrink-0 text-xs sm:text-sm"
+                className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white flex items-center gap-2"
               >
-                <Users className="h-4 w-4 mr-2" />
-                Discord Users
+                <Users className="h-4 w-4" />
+                <span className="hidden sm:inline">Discord Users</span>
+                <span className="sm:hidden">Discord</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="unconnected" 
-                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-goal-red-500 data-[state=active]:to-goal-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+                className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white flex items-center gap-2"
               >
-                <UserX className="h-4 w-4 mr-2" />
-                Unconnected Users
+                <UserX className="h-4 w-4" />
+                <span className="hidden sm:inline">Unconnected Users</span>
+                <span className="sm:hidden">Unconnected</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="config" 
-                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+                className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white flex items-center gap-2"
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Bot Config
+                <Settings className="h-4 w-4" />
+                <span className="hidden sm:inline">Bot Config</span>
+                <span className="sm:hidden">Config</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="roles" 
-                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-rink-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+                className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white flex items-center gap-2"
               >
-                <Shield className="h-4 w-4 mr-2" />
-                Role Mapping
+                <Shield className="h-4 w-4" />
+                <span className="hidden lg:inline">Role Mapping</span>
+                <span className="lg:hidden">Roles</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="twitch" 
-                className="hockey-button data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-silver-500 data-[state=active]:to-hockey-silver-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
+                className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white flex items-center gap-2"
               >
-                <Twitch className="h-4 w-4 mr-2" />
-                Twitch Integration
+                <Twitch className="h-4 w-4" />
+                <span className="hidden lg:inline">Twitch Integration</span>
+                <span className="lg:hidden">Twitch</span>
               </TabsTrigger>
             </TabsList>
           </div>
