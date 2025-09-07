@@ -34,7 +34,7 @@ interface Player {
   role: string
   users: {
     id: string
-    gamer_tag_id: string
+    gamer_tag_name: string
     primary_position: string
     secondary_position?: string
     console: string
@@ -572,21 +572,28 @@ const ManagementPage = () => {
     setLoading(true)
     try {
       // Check if user is a team manager (GM, AGM, Owner)
+      console.log("Checking management access for user:", session.user.id)
+      
       const { data: playerData, error: playerError } = await supabase
         .from("players")
         .select("role, team_id")
         .eq("user_id", session.user.id)
         .single()
 
+      console.log("Player data query result:", { playerData, playerError })
+
       if (playerError || !playerData) {
+        console.log("No player record found or error:", playerError)
         setIsAuthorized(false)
         throw new Error("You don't have permission to access team management")
       }
 
       const isManager = ["GM", "AGM", "Owner"].includes(playerData.role)
+      console.log("Is manager check:", { role: playerData.role, isManager, teamId: playerData.team_id })
       setIsAuthorized(isManager)
 
       if (!isManager || !playerData.team_id) {
+        console.log("Access denied - not manager or no team:", { isManager, teamId: playerData.team_id })
         throw new Error("You must be a team manager to access this page")
       }
 
@@ -1453,7 +1460,24 @@ const ManagementPage = () => {
         <p className="text-muted-foreground mb-8">
           You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
         </p>
-        <Button asChild>
+        
+        {/* Debug information */}
+        <div className="mt-8 p-4 border rounded bg-muted/20 text-left max-w-2xl mx-auto">
+          <h3 className="font-semibold mb-2">Debug Information</h3>
+          <p className="text-sm text-muted-foreground mb-2">
+            Check your browser's developer console (F12) for detailed error messages.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            The management page is looking for a record in the <code>players</code> table where:
+          </p>
+          <ul className="text-sm text-muted-foreground mt-2 list-disc list-inside">
+            <li><code>user_id</code> matches your user ID</li>
+            <li><code>role</code> is one of: 'GM', 'AGM', or 'Owner'</li>
+            <li><code>team_id</code> is not NULL</li>
+          </ul>
+        </div>
+        
+        <Button asChild className="mt-4">
           <Link href="/">Return to Home</Link>
         </Button>
       </div>
