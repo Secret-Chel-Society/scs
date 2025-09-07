@@ -3098,7 +3098,6 @@ const ManagementPage = () => {
           projectedRosterSize={projectedRosterSize}
         />
       )}
-      </motion.div>
     </div>
   )
 }
