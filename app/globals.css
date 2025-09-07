@@ -1278,9 +1278,10 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     transform: none;
     transform-origin: unset;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   
   /* Ensure the main container takes full width */
@@ -1309,12 +1310,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     margin-right: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    position: fixed !important;
-    z-index: 1 !important;
+    position: relative !important;
   }
   
   /* Override the md:ml-72 class on mobile */
@@ -1363,6 +1359,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     padding: 0 !important;
     width: 100vw !important;
     overflow-x: hidden !important;
+    overflow-y: auto !important;
   }
   
   /* Ensure the root div fills the entire viewport */
@@ -1436,7 +1433,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   .mobile-content {
     transform: none;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh;
   }
 }
 
@@ -1444,7 +1441,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   .mobile-content {
     transform: none;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh;
   }
 }
 
@@ -1452,7 +1449,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   .mobile-content {
     transform: none;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh;
   }
 }
 
@@ -1460,7 +1457,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   .mobile-content {
     transform: none;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh;
   }
 }
 
@@ -1518,7 +1515,7 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     padding: 0 !important;
     margin: 0 !important;
     width: 100vw !important;
-    height: 100vh !important;
+    min-height: 100vh;
     position: relative !important;
   }
   

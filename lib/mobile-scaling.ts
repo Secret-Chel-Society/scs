@@ -43,7 +43,8 @@ export function applyMobileScaling(): void {
                 mobileContent.style.transform = 'none'
                 mobileContent.style.transformOrigin = 'unset'
                 mobileContent.style.width = '100vw'
-                mobileContent.style.height = '100vh'
+                mobileContent.style.minHeight = '100vh'
+                mobileContent.style.height = 'auto'
               } else if (mobileContent) {
     // Reset for desktop
     mobileContent.style.transform = ''
