@@ -40,10 +40,10 @@ export function applyMobileScaling(): void {
   const mobileContent = document.querySelector('.mobile-content') as HTMLElement
   
               if (window.innerWidth < 768 && mobileContent) {
-                mobileContent.style.transform = `scale(${scale})`
-                mobileContent.style.transformOrigin = 'top left'
+                mobileContent.style.transform = 'none'
+                mobileContent.style.transformOrigin = 'unset'
                 mobileContent.style.width = '100vw'
-                mobileContent.style.height = `${100 / scale}%`
+                mobileContent.style.height = '100vh'
               } else if (mobileContent) {
     // Reset for desktop
     mobileContent.style.transform = ''
