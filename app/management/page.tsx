@@ -1513,170 +1513,145 @@ const ManagementPage = () => {
         ) : (
           <>
           {/* Enhanced Hockey-Themed Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="hockey-stats-grid mb-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="hockey-card p-6 text-center hover:scale-105 transition-all duration-300"
+              className="hockey-stat-item"
             >
-              <div className="hockey-icon-container mx-auto mb-4 w-16 h-16">
+              <div className="hockey-stat-icon bg-gradient-to-r from-ice-blue-500 to-rink-blue-600">
                 <Users className="h-8 w-8 text-white" />
                   </div>
-              <div className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+              <div className="hockey-stat-value">
                       {teamPlayers.length}
                       {projectedRosterSize !== teamPlayers.length && (
-                  <span className="text-lg text-ice-blue-500 ml-1">→ {projectedRosterSize}</span>
+                  <span className="text-lg text-hockey-silver-500 ml-1">→ {projectedRosterSize}</span>
                       )}
                     </div>
-              <div className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-1">Team Size</div>
-              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Current roster</div>
+              <div className="hockey-stat-label">Team Size</div>
+              <div className="hockey-stat-desc">Current roster</div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="hockey-card p-6 text-center hover:scale-105 transition-all duration-300"
+              className="hockey-stat-item"
             >
-              <div className="hockey-icon-container-indigo mx-auto mb-4 w-16 h-16">
+              <div className="hockey-stat-icon bg-gradient-to-r from-rink-blue-500 to-ice-blue-600">
                 <Calendar className="h-8 w-8 text-white" />
                   </div>
-              <div className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+              <div className="hockey-stat-value">
                       {teamMatches.filter((m) => m.status === "Scheduled").length}
                     </div>
-              <div className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-1">Upcoming Matches</div>
-              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Scheduled games</div>
+              <div className="hockey-stat-label">Upcoming Matches</div>
+              <div className="hockey-stat-desc">Scheduled games</div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="hockey-card p-6 text-center hover:scale-105 transition-all duration-300"
+              className="hockey-stat-item"
             >
-              <div className="hockey-icon-container-red mx-auto mb-4 w-16 h-16">
+              <div className="hockey-stat-icon bg-gradient-to-r from-goal-red-500 to-goal-red-600">
                 <Trophy className="h-8 w-8 text-white" />
                   </div>
-              <div className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+              <div className="hockey-stat-value">
                       {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
                     </div>
-              <div className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-1">Record</div>
-              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Season record</div>
+              <div className="hockey-stat-label">Record</div>
+              <div className="hockey-stat-desc">Season record</div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="hockey-card p-6 text-center hover:scale-105 transition-all duration-300"
+              className="hockey-stat-item"
             >
-              <div className="hockey-icon-container-emerald mx-auto mb-4 w-16 h-16">
+              <div className="hockey-stat-icon bg-gradient-to-r from-assist-green-500 to-assist-green-600">
                 <DollarSign className="h-8 w-8 text-white" />
                   </div>
-              <div className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
+              <div className="hockey-stat-value">
                       ${(currentTeamSalary / 1000000).toFixed(1)}M
                       {projectedSalary !== currentTeamSalary && (
-                  <span className="text-lg text-assist-green-500 ml-1">
+                  <span className="text-lg text-hockey-silver-500 ml-1">
                           → ${(projectedSalary / 1000000).toFixed(1)}M
                         </span>
                       )}
                     </div>
-              <div className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-1">Salary Cap</div>
-              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Current usage</div>
+              <div className="hockey-stat-label">Salary Cap</div>
+              <div className="hockey-stat-desc">Current usage</div>
             </motion.div>
             </div>
 
-          {/* Clean Professional Tabs */}
-          <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-8 h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
-              <TabsTrigger 
-                value="roster" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-              >
+          {/* Enhanced Hockey-Themed Tabs */}
+            <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="hockey-tabs-list grid w-full grid-cols-3 md:grid-cols-7 mb-8 h-auto">
+              <TabsTrigger value="roster" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
                 <span className="hidden md:inline">Team Roster</span>
                 <span className="md:hidden">Roster</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="availability" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-              >
+                </TabsTrigger>
+              <TabsTrigger value="availability" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
                 <span className="hidden md:inline">Team Avail</span>
                 <span className="md:hidden">Avail</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="schedule" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-              >
+                </TabsTrigger>
+              <TabsTrigger value="schedule" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
                 <span className="hidden md:inline">Team Schedule</span>
                 <span className="md:hidden">Schedule</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="free-agents" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-              >
+                </TabsTrigger>
+              <TabsTrigger value="free-agents" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
                 <span className="hidden md:inline">Free Agents</span>
                 <span className="md:hidden">Free Agents</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="my-bids" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-              >
+                </TabsTrigger>
+              <TabsTrigger value="my-bids" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
                 <span className="hidden md:inline">My Bids</span>
                 <span className="md:hidden">Bids</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="waivers" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-              >
+                </TabsTrigger>
+              <TabsTrigger value="waivers" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3">
                 <span className="hidden md:inline">Waivers</span>
                 <span className="md:hidden">Waivers</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="trades" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white relative"
-              >
+                </TabsTrigger>
+              <TabsTrigger value="trades" className="hockey-tab-trigger text-xs md:text-sm px-3 md:px-6 py-3 relative">
                 <span className="hidden md:inline">Trades</span>
                 <span className="md:hidden">Trades</span>
-                {incomingTradeProposals.length > 0 && (
-                  <span className="ml-2 bg-goal-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-                    {incomingTradeProposals.length}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
+                  {incomingTradeProposals.length > 0 && (
+                  <span className="ml-1 md:ml-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs font-bold shadow-lg">
+                      {incomingTradeProposals.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
 
               {/* Roster Tab Content */}
               <TabsContent value="roster">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container mx-auto mb-4 w-fit">
-                      <Users className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Team Roster</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
                       Manage your team's players and roles
                     </CardDescription>
-                    <div className="hockey-divider mt-4" />
                   </CardHeader>
                   <CardContent>
                     {teamPlayers.length > 0 ? (
                       <>
                         {/* Desktop Table */}
-                        <div className="hidden md:block rounded-xl border border-ice-blue-200 dark:border-ice-blue-700 overflow-x-auto hockey-scrollbar-enhanced">
-                          <Table className="hockey-standings-table">
+                        <div className="hidden md:block rounded-md border overflow-x-auto">
+                          <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Player</TableHead>
-                                <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Position</TableHead>
-                                <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Role</TableHead>
-                                <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Console</TableHead>
-                                <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Salary</TableHead>
+                                <TableHead>Player</TableHead>
+                                <TableHead className="text-center">Position</TableHead>
+                                <TableHead className="text-center">Role</TableHead>
+                                <TableHead className="text-center">Console</TableHead>
+                                <TableHead className="text-center">Salary</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {teamPlayers.map((player) => (
-                                <TableRow key={player.id} className="hockey-table-row-hover">
+                                <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
                                   <TableCell>
                                     <div className="font-medium">{player.users?.gamer_tag_id || "Unknown Player"}</div>
                                   </TableCell>
@@ -1711,9 +1686,9 @@ const ManagementPage = () => {
                         </div>
 
                         {/* Mobile Cards */}
-                        <div className="md:hidden space-y-4">
+                        <div className="md:hidden space-y-3">
                           {teamPlayers.map((player) => (
-                            <div key={player.id} className="hockey-card p-6 hover:scale-105 transition-all duration-300">
+                            <div key={player.id} className="border rounded-lg p-4 bg-card">
                               <div className="flex justify-between items-start mb-2">
                                 <div className="flex-1">
                                   <h3 className="font-medium text-base">
@@ -1750,13 +1725,7 @@ const ManagementPage = () => {
                         </div>
                       </>
                     ) : (
-                      <div className="text-center py-12">
-                        <div className="hockey-icon-container mx-auto mb-4 w-fit">
-                          <Users className="h-12 w-12 text-white" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">No Players Found</h3>
-                        <p className="text-hockey-silver-600 dark:text-hockey-silver-400">No players are currently on this team.</p>
-                      </div>
+                      <div className="text-center py-8 text-muted-foreground">No players on this team.</div>
                     )}
                   </CardContent>
                 </Card>
@@ -1764,28 +1733,16 @@ const ManagementPage = () => {
 
               {/* Team Availability Tab Content */}
               <TabsContent value="availability">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container-indigo mx-auto mb-4 w-fit">
-                      <Calendar className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Team Availability</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                      View your team's availability for upcoming games
-                    </CardDescription>
-                    <div className="hockey-divider mt-4" />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Team Availability</CardTitle>
+                    <CardDescription>View your team's availability for upcoming games</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {teamData ? (
                       <TeamAvailabilityTab teamId={teamData.id} teamName={teamData.name} />
                     ) : (
-                      <div className="text-center py-12">
-                        <div className="hockey-icon-container mx-auto mb-4 w-fit">
-                          <Calendar className="h-12 w-12 text-white" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">Loading Team Data</h3>
-                        <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Please wait while we load your team information...</p>
-                      </div>
+                      <div className="text-center py-8 text-muted-foreground">Loading team data...</div>
                     )}
                   </CardContent>
                 </Card>
@@ -1793,16 +1750,10 @@ const ManagementPage = () => {
 
               {/* Schedule Tab Content */}
               <TabsContent value="schedule">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container-red mx-auto mb-4 w-fit">
-                      <Clock className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Team Schedule</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                      Upcoming and recent matches for {teamData?.name}
-                    </CardDescription>
-                    <div className="hockey-divider mt-4" />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Team Schedule</CardTitle>
+                    <CardDescription>Upcoming and recent matches for {teamData?.name}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {teamMatches.length > 0 ? (
@@ -1815,7 +1766,7 @@ const ManagementPage = () => {
                           return (
                             <div
                               key={match.id}
-                              className="hockey-card p-6 hover:scale-105 transition-all duration-300"
+                              className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                             >
                               <div className="flex items-center gap-4">
                                 <div className="text-center">
@@ -1878,26 +1829,19 @@ const ManagementPage = () => {
 
               {/* Free Agents Tab Content */}
               <TabsContent value="free-agents">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container-emerald mx-auto mb-4 w-fit">
-                      <Users className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Free Agents</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg md:text-xl">Free Agents</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
                       Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
                     </CardDescription>
-                    <div className="hockey-divider mt-4" />
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
                       {/* Team Salary */}
-                      <Card className="hockey-card">
-                        <CardContent className="p-4 text-center">
-                          <div className="hockey-icon-container-emerald mx-auto mb-3 w-fit">
-                            <DollarSign className="h-6 w-6 text-white" />
-                          </div>
-                          <h3 className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold mb-3">Team Salary</h3>
+                      <Card className="bg-hockey-silver-800 border-hockey-silver-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Team Salary</h3>
                           <SalaryProgress
                             current={currentTeamSalary}
                             max={currentSalaryCap}
@@ -1907,23 +1851,17 @@ const ManagementPage = () => {
                       </Card>
 
                       {/* Roster Size */}
-                      <Card className="hockey-card">
-                        <CardContent className="p-4 text-center">
-                          <div className="hockey-icon-container mx-auto mb-3 w-fit">
-                            <Users className="h-6 w-6 text-white" />
-                          </div>
-                          <h3 className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold mb-3">Roster Size</h3>
+                      <Card className="bg-hockey-silver-800 border-hockey-silver-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
                           <RosterProgress current={teamPlayers.length} max={15} projected={projectedRosterSize} />
                         </CardContent>
                       </Card>
 
                       {/* Position Breakdown */}
-                      <Card className="hockey-card">
-                        <CardContent className="p-4 text-center">
-                          <div className="hockey-icon-container-indigo mx-auto mb-3 w-fit">
-                            <Trophy className="h-6 w-6 text-white" />
-                          </div>
-                          <h3 className="text-hockey-silver-700 dark:text-hockey-silver-300 font-semibold mb-3">
+                      <Card className="bg-hockey-silver-800 border-hockey-silver-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">
                             Position Breakdown
                           </h3>
                           <div className="grid grid-cols-3 gap-1 md:gap-2 text-xs md:text-sm">
@@ -2131,16 +2069,12 @@ const ManagementPage = () => {
 
               {/* My Bids Tab Content */}
               <TabsContent value="my-bids">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container-emerald mx-auto mb-4 w-fit">
-                      <DollarSign className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">My Bids</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>My Bids</CardTitle>
+                    <CardDescription>
                       Bids placed by {teamData?.name}. Active: {activeBidsCount} | Outbid: {outbidCount}
                     </CardDescription>
-                    <div className="hockey-divider mt-4" />
                   </CardHeader>
                   <CardContent>
                     {myBids.length > 0 ? (
@@ -2225,33 +2159,19 @@ const ManagementPage = () => {
 
               {/* Waivers Tab Content */}
               <TabsContent value="waivers">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container-red mx-auto mb-4 w-fit">
-                      <ArrowLeftRight className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Waiver Wire</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Waiver Wire</CardTitle>
+                    <CardDescription>
                       Waive players from your roster or claim players from other teams. Claims are processed based on
                       waiver priority. Waivers are automatically processed when they expire.
                     </CardDescription>
-                    <div className="hockey-divider mt-4" />
                   </CardHeader>
                   <CardContent>
                     <Tabs defaultValue="available" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2 mb-4 h-10 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
-                        <TabsTrigger 
-                          value="available"
-                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-                        >
-                          Available Players
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="waive"
-                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-                        >
-                          Waive Player
-                        </TabsTrigger>
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="available">Available Players</TabsTrigger>
+                        <TabsTrigger value="waive">Waive Player</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="available">
@@ -2473,43 +2393,24 @@ const ManagementPage = () => {
 
               {/* Trades Tab Content */}
               <TabsContent value="trades">
-                <Card className="hockey-card">
-                  <CardHeader className="text-center pb-6">
-                    <div className="hockey-icon-container mx-auto mb-4 w-fit">
-                      <ArrowLeftRight className="h-8 w-8 text-white" />
-                    </div>
-                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Trade Center</CardTitle>
-                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-                      Propose trades with other teams and manage trade proposals
-                    </CardDescription>
-                    <div className="hockey-divider mt-4" />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Trade Center</CardTitle>
+                    <CardDescription>Propose trades with other teams and manage trade proposals</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Tabs defaultValue="propose" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3 mb-4 h-10 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
-                        <TabsTrigger 
-                          value="propose"
-                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-                        >
-                          Propose Trade
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="incoming"
-                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white relative"
-                        >
+                      <TabsList className="mb-4">
+                        <TabsTrigger value="propose">Propose Trade</TabsTrigger>
+                        <TabsTrigger value="incoming">
                           Incoming Proposals
                           {incomingTradeProposals.length > 0 && (
-                            <span className="ml-1 bg-goal-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                            <Badge variant="destructive" className="ml-2">
                               {incomingTradeProposals.length}
-                            </span>
+                            </Badge>
                           )}
                         </TabsTrigger>
-                        <TabsTrigger 
-                          value="outgoing"
-                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-                        >
-                          Outgoing Proposals
-                        </TabsTrigger>
+                        <TabsTrigger value="outgoing">Outgoing Proposals</TabsTrigger>
                       </TabsList>
 
                       <TabsContent value="propose">
@@ -3152,7 +3053,7 @@ const ManagementPage = () => {
             </Tabs>
           </>
         )}
-      </motion.div>
+        </motion.div>
       </div>
 
       {/* Bid Modal */}

@@ -59,7 +59,7 @@ export function BidPlayerModal({
       // Set minimum bid amount
       const currentBidAmount = currentBid?.bid_amount || 0
       const playerSalary = player.salary || 750000
-      const minimumBid = Math.max(currentBidAmount + 2000000, 2000000)
+      const minimumBid = Math.max(currentBidAmount + 2000000, playerSalary + 2000000)
       setBidAmount(minimumBid.toString())
       setError(null)
     } else {
@@ -90,7 +90,7 @@ export function BidPlayerModal({
     // Validate minimum bid
     const currentBidAmount = currentBid?.bid_amount || 0
     const playerSalary = player.salary || 750000
-    const minimumBid = Math.max(currentBidAmount + 2000000, 2000000)
+    const minimumBid = Math.max(currentBidAmount + 2000000, playerSalary + 2000000)
 
     if (amount < minimumBid) {
       setError(`Minimum bid is $${minimumBid.toLocaleString()}`)
