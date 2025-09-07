@@ -235,9 +235,10 @@ export default function Navigation() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 p-3 rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 mobile-nav-button"
+        className="md:hidden fixed top-4 left-4 z-50 w-12 h-12 rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 mobile-nav-button flex items-center justify-center"
+        aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
       >
-        {isMobileOpen ? <X className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" /> : <Menu className="h-6 w-6 text-ice-blue-600 dark:text-ice-blue-400" />}
+        {isMobileOpen ? <X className="h-7 w-7 text-ice-blue-600 dark:text-ice-blue-400" /> : <Menu className="h-7 w-7 text-ice-blue-600 dark:text-ice-blue-400" />}
       </button>
 
       {/* Mobile Overlay */}
@@ -280,7 +281,7 @@ export default function Navigation() {
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-8 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon
               const isActive = item.href === "/" 
@@ -296,7 +297,7 @@ export default function Navigation() {
                       href={item.href}
                       onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 group relative overflow-hidden hover:scale-105 flex-1",
+                        "flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium transition-all duration-300 group relative overflow-hidden hover:scale-105 flex-1 min-h-[48px]",
                         isActive
                           ? "bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg shadow-ice-blue-500/25"
                           : "text-slate-700 dark:text-slate-300 hover:bg-gradient-to-r hover:from-ice-blue-100/50 hover:to-rink-blue-100/50 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20 hover:text-ice-blue-700 dark:hover:text-ice-blue-300"
@@ -324,8 +325,9 @@ export default function Navigation() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-300 hover:scale-105"
+                        className="h-12 w-12 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-300 hover:scale-105"
                         onClick={() => toggleSubmenu(item.name)}
+                        aria-label={isExpanded ? `Collapse ${item.name} submenu` : `Expand ${item.name} submenu`}
                       >
                         {isExpanded ? (
                           <ChevronDown className="h-4 w-4" />
@@ -337,14 +339,14 @@ export default function Navigation() {
                   </div>
 
                   {hasSubmenu && isExpanded && (
-                    <div className="mt-2 ml-8 space-y-2">
+                    <div className="mt-4 ml-8 space-y-4">
                       {item.submenu.map((subItem) => (
                         <Link
                           key={subItem.name}
                           href={subItem.href}
                           onClick={() => setIsMobileOpen(false)}
                           className={cn(
-                            "block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 hover:scale-105",
+                            "block px-4 py-4 rounded-xl text-base font-medium transition-all duration-300 hover:scale-105 min-h-[48px] flex items-center",
                             pathname === subItem.href
                               ? "bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30 text-ice-blue-800 dark:text-ice-blue-200 shadow-lg shadow-ice-blue-500/20"
                               : "text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-gradient-to-r hover:from-ice-blue-100/40 hover:to-rink-blue-100/40 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20"
