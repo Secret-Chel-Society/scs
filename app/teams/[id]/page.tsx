@@ -615,7 +615,7 @@ export default function TeamDetailPage() {
 
           {/* Team Header */}
           <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl mb-6 sm:mb-8 overflow-hidden">
-            <div className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-4 sm:p-6 lg:p-8">
+            <div className="bg-muted/50 p-4 sm:p-6 lg:p-8">
               <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
                 <div className="relative h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32">
                   {team.logo_url ? (
@@ -626,7 +626,7 @@ export default function TeamDetailPage() {
                 </div>
 
                 <div className="text-center md:text-left flex-1">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
                     {team.name}
                   </h1>
                   <div className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-4 sm:mb-6">
@@ -665,9 +665,9 @@ export default function TeamDetailPage() {
           {/* Team Awards */}
           {awards && awards.length > 0 && (
             <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg mb-8">
-              <CardHeader className="bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/30 dark:to-goal-red-800/30 border-b border-slate-200 dark:border-slate-700">
-                <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <div className="p-2 bg-primary rounded-lg">
                     <Trophy className="h-5 w-5 text-white" />
                   </div>
                   Team Awards
@@ -687,18 +687,18 @@ export default function TeamDetailPage() {
                         key={award.id}
                         className={`flex items-center gap-4 p-4 rounded-lg border transition-all duration-300 hover:scale-105 ${
                           isPresident
-                            ? "bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700"
+                            ? "bg-primary/10 border-primary/20"
                             : isCup
-                              ? "bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/20 dark:to-assist-green-900/20 border-goal-red-200 dark:border-goal-red-700"
+                              ? "bg-secondary/10 border-secondary/20"
                               : "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600"
                         }`}
                       >
                         <div
                           className={`p-3 rounded-lg ${
                             isPresident
-                              ? "bg-gradient-to-r from-ice-blue-500 to-rink-blue-600"
+                              ? "bg-primary"
                               : isCup
-                                ? "bg-gradient-to-r from-goal-red-500 to-assist-green-600"
+                                ? "bg-secondary"
                                 : "bg-slate-500"
                           }`}
                         >
