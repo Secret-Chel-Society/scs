@@ -1270,3 +1270,62 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
 .hockey-scrollbar-enhanced::-webkit-scrollbar-corner {
   background: hsl(var(--hockey-silver) / 0.2);
 }
+
+/* Mobile Scaling - Make everything 3x smaller on mobile */
+@media (max-width: 767px) {
+  html {
+    transform: scale(0.33);
+    transform-origin: top left;
+    width: 300%; /* Compensate for the scaling */
+    height: 300%;
+  }
+  
+  body {
+    width: 300%;
+    height: 300%;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+  
+  /* Ensure the main container takes full width */
+  .container {
+    width: 100%;
+  }
+  
+  /* Fix any fixed positioned elements */
+  .fixed {
+    transform: scale(1) !important;
+  }
+  
+  /* Ensure navigation elements work properly */
+  .md\\:hidden {
+    transform: scale(1) !important;
+  }
+  
+  /* Mobile navigation button should not be scaled */
+  .mobile-nav-button {
+    transform: scale(1) !important;
+  }
+  
+  /* Mobile sidebar should not be scaled */
+  .mobile-sidebar {
+    transform: scale(1) !important;
+  }
+  
+  /* Mobile overlay should not be scaled */
+  .mobile-overlay {
+    transform: scale(1) !important;
+  }
+  
+  /* Toast notifications should not be scaled */
+  [data-radix-toast-viewport] {
+    transform: scale(1) !important;
+  }
+  
+  /* Any other fixed positioned elements with high z-index should not be scaled */
+  [style*="position: fixed"][style*="z-index: 100"],
+  [style*="position: fixed"][style*="z-index: 999"],
+  [style*="position: fixed"][style*="z-index: 1000"] {
+    transform: scale(1) !important;
+  }
+}

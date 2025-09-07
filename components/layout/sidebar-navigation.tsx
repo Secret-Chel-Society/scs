@@ -439,14 +439,14 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
       {/* Overlay for mobile */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden mobile-overlay" 
           onClick={onToggle}
         />
       )}
 
       {/* Enhanced Hockey-Themed Sidebar */}
       <aside className={cn(
-        "fixed left-0 top-0 z-50 h-full w-64 bg-gradient-to-b from-ice-blue-50/80 via-white to-rink-blue-50/80 dark:from-hockey-silver-900/90 dark:via-hockey-silver-800 dark:to-rink-blue-900/90 backdrop-blur-md border-r-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 transform transition-all duration-300 ease-in-out shadow-2xl shadow-ice-blue-500/20",
+        "fixed left-0 top-0 z-50 h-full w-64 bg-gradient-to-b from-ice-blue-50/80 via-white to-rink-blue-50/80 dark:from-hockey-silver-900/90 dark:via-hockey-silver-800 dark:to-rink-blue-900/90 backdrop-blur-md border-r-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 transform transition-all duration-300 ease-in-out shadow-2xl shadow-ice-blue-500/20 mobile-sidebar",
         "md:translate-x-0 md:static md:z-auto",
         isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
