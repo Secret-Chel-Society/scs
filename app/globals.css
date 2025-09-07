@@ -1560,22 +1560,24 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   /* Mobile Tab Selector Fixes */
   .mobile-content [role="tablist"] {
     flex-wrap: wrap !important;
-    gap: 4px !important;
-    padding: 4px !important;
+    gap: 2px !important;
+    padding: 2px !important;
+    min-height: 16px !important;
   }
   
   .mobile-content [role="tab"] {
     min-width: 0 !important;
     flex: 1 1 auto !important;
-    font-size: 12px !important;
-    padding: 4px 8px !important;
-    min-height: 20px !important;
-    max-height: 20px !important;
+    font-size: 10px !important;
+    padding: 2px 4px !important;
+    min-height: 12px !important;
+    max-height: 12px !important;
+    line-height: 1 !important;
   }
   
   .mobile-content [role="tab"] span {
-    font-size: 12px !important;
-    line-height: 1.2 !important;
+    font-size: 9px !important;
+    line-height: 1 !important;
   }
   
   /* Specific fixes for different tab layouts */
@@ -1610,26 +1612,27 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   /* Fix TabsList component on mobile */
   .mobile-content .tabs-list {
     height: auto !important;
-    min-height: 24px !important;
+    min-height: 16px !important;
     flex-wrap: wrap !important;
-    gap: 2px !important;
-    padding: 2px !important;
+    gap: 1px !important;
+    padding: 1px !important;
   }
   
   /* Fix TabsTrigger component on mobile */
   .mobile-content .tabs-trigger {
-    font-size: 12px !important;
-    padding: 3px 6px !important;
-    min-height: 18px !important;
-    max-height: 18px !important;
+    font-size: 9px !important;
+    padding: 1px 3px !important;
+    min-height: 12px !important;
+    max-height: 12px !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
+    line-height: 1 !important;
   }
   
   /* Responsive tab text sizing */
   .mobile-content .tabs-trigger span {
-    font-size: 11px !important;
-    line-height: 1.1 !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
   }
   
   /* Hide long text on very small screens */
@@ -1639,9 +1642,9 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     }
     
     .mobile-content .tabs-trigger {
-      min-width: 16px !important;
-      max-width: 16px !important;
-      padding: 2px !important;
+      min-width: 12px !important;
+      max-width: 12px !important;
+      padding: 1px !important;
     }
   }
   
@@ -1671,6 +1674,33 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     min-height: 20px !important;
     max-height: 20px !important;
     padding: 2px 8px !important;
+  }
+  
+  /* Extra Mobile Tab Compactness */
+  @media (max-width: 767px) {
+    [role="tablist"] {
+      min-height: 16px !important;
+      padding: 1px !important;
+    }
+    
+    [role="tab"] {
+      min-height: 12px !important;
+      max-height: 12px !important;
+      padding: 1px 3px !important;
+      font-size: 9px !important;
+    }
+    
+    .tabs-list {
+      min-height: 16px !important;
+      padding: 1px !important;
+    }
+    
+    .tabs-trigger {
+      min-height: 12px !important;
+      max-height: 12px !important;
+      padding: 1px 3px !important;
+      font-size: 9px !important;
+    }
   }
   
   /* Remove any potential margins from all elements */
