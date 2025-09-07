@@ -1301,9 +1301,24 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
     transform: scale(1) !important;
   }
   
-  /* Mobile sidebar should not be scaled */
+  /* Mobile sidebar should not be scaled and should be hidden by default */
   .mobile-sidebar {
     transform: scale(1) !important;
+  }
+  
+  /* Force sidebar to be hidden on mobile by default */
+  aside.mobile-sidebar {
+    transform: translateX(-100%) !important;
+  }
+  
+  /* Show sidebar only when mobile menu is open */
+  aside.mobile-sidebar.translate-x-0 {
+    transform: translateX(0) !important;
+  }
+  
+  /* Additional override to ensure sidebar is hidden on mobile */
+  .mobile-sidebar:not(.translate-x-0) {
+    transform: translateX(-100%) !important;
   }
   
   /* Mobile overlay should not be scaled */

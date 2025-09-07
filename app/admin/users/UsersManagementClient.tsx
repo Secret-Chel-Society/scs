@@ -616,10 +616,9 @@ export default function UsersManagementClient() {
           role
         )
       `)
-        .order("created_on", { ascending: false })
+        .order("created_at", { ascending: false })
 
       if (usersError) {
-        console.error("Error fetching users:", usersError)
         // Check if this is a rate limit error
         if (usersError.message && usersError.message.includes("Too Many Requests") && retryCount < 3) {
           console.log(`Rate limited, retrying in ${(retryCount + 1) * 1000}ms...`)
@@ -1496,45 +1495,73 @@ export default function UsersManagementClient() {
 
       console.log("Assigning player to team:", playerId, teamId)
 
-      // Regular team assignment - update player and reset manual removal flags
-      const { error } = await supabase
-        .from("players")
-        .update({
-          team_id: teamId,
-          manually_removed: false, // Reset manual removal flag
-          manually_removed_at: null,
+      // If setting to free agent (null), use the special removal API
+      if (teamId === null) {
+        console.log("Setting player as free agent - using manual removal API")
+
+        const response = await fetch("/api/admin/remove-player-from-team", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            playerId: playerId,
+            reason: "Admin set as free agent via user management",
+          }),
         })
-        .eq("id", playerId)
 
-      if (error) {
-        console.error("Error assigning team:", error)
-        throw error
-      }
+        const data = await response.json()
 
-      // Also mark any related bids as processed to prevent conflicts
-      const { error: bidUpdateError } = await supabase
-        .from("player_bidding")
-        .update({
-          status: "manually_assigned",
-          processed: true,
-          processed_at: new Date().toISOString(),
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to set player as free agent")
+        }
+
+        toast({
+          title: "Player set as free agent",
+          description:
+            data.message || "Player has been removed from their team and marked to prevent automatic re-assignment.",
         })
-        .eq("player_id", playerId)
-        .in("status", ["active", "pending"])
+      } else {
+        // Regular team assignment - update player and reset manual removal flags
+        const { error } = await supabase
+          .from("players")
+          .update({
+            team_id: teamId,
+            manually_removed: false, // Reset manual removal flag
+            manually_removed_at: null,
+          })
+          .eq("id", playerId)
 
-      if (bidUpdateError) {
-        console.error("Error updating bids for assigned player:", bidUpdateError)
-        // Don't fail the request as team assignment is more important
+        if (error) {
+          console.error("Error assigning team:", error)
+          throw error
+        }
+
+        // Also mark any related bids as processed to prevent conflicts
+        const { error: bidUpdateError } = await supabase
+          .from("player_bidding")
+          .update({
+            status: "manually_assigned",
+            processed: true,
+            processed_at: new Date().toISOString(),
+          })
+          .eq("player_id", playerId)
+          .in("status", ["active", "pending"])
+
+        if (bidUpdateError) {
+          console.error("Error updating bids for assigned player:", bidUpdateError)
+          // Don't fail the request as team assignment is more important
+        }
+
+        // Get team name for the toast message
+        const team = teams.find((t) => t.id === teamId)
+        const teamName = team ? team.name : "Unknown Team"
+
+        toast({
+          title: "Team assigned",
+          description: `Player has been assigned to ${teamName}.`,
+        })
       }
-
-      // Get team name for the toast message
-      const team = teams.find((t) => t.id === teamId)
-      const teamName = team ? team.name : "Unknown Team"
-
-      toast({
-        title: "Team assigned",
-        description: `Player has been assigned to ${teamName}.`,
-      })
 
       setTeamAssignDialogOpen(false)
       await fetchUsers() // Refresh the user list to show updated team

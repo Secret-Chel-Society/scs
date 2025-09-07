@@ -66,6 +66,11 @@ export default function Navigation() {
   const { supabase, session, isLoading } = useSupabase()
   const { toast } = useToast()
 
+  // Ensure mobile menu is closed on route change
+  useEffect(() => {
+    setIsMobileOpen(false)
+  }, [pathname])
+
   // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
@@ -244,11 +249,13 @@ export default function Navigation() {
       )}
 
       {/* Sidebar */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20 border-r border-slate-200/50 dark:border-slate-700/50 shadow-2xl transition-transform duration-300 ease-in-out mobile-sidebar",
-        "md:translate-x-0", // Always visible on desktop
-        isMobileOpen ? "translate-x-0" : "-translate-x-full" // Hidden on mobile unless menu is open
-      )}>
+      <aside 
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20 border-r border-slate-200/50 dark:border-slate-700/50 shadow-2xl transition-transform duration-300 ease-in-out mobile-sidebar",
+          "md:translate-x-0", // Always visible on desktop
+          isMobileOpen ? "translate-x-0" : "-translate-x-full" // Hidden on mobile unless menu is open
+        )}
+      >
         <div className="flex flex-col h-full">
           {/* Logo Section */}
           <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20">
