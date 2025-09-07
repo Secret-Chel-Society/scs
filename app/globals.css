@@ -1275,10 +1275,10 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
 @media (max-width: 767px) {
   /* Scale only the main content area, not the entire page */
   .mobile-content {
-    transform: scale(0.7);
+    transform: scale(0.9);
     transform-origin: top left;
-    width: 143%; /* Compensate for the scaling */
-    height: 143%;
+    width: 111%; /* Compensate for the scaling */
+    height: 111%;
     position: relative;
     overflow: hidden;
   }
@@ -1394,33 +1394,33 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
 /* Responsive scaling for different phone sizes - only affect mobile content */
 @media (min-width: 320px) and (max-width: 374px) {
   .mobile-content {
-    transform: scale(0.6);
-    width: 167%;
-    height: 167%;
+    transform: scale(0.85);
+    width: 118%;
+    height: 118%;
   }
 }
 
 @media (min-width: 375px) and (max-width: 414px) {
   .mobile-content {
-    transform: scale(0.7);
-    width: 143%;
-    height: 143%;
+    transform: scale(0.9);
+    width: 111%;
+    height: 111%;
   }
 }
 
 @media (min-width: 415px) and (max-width: 480px) {
   .mobile-content {
-    transform: scale(0.75);
-    width: 133%;
-    height: 133%;
+    transform: scale(0.95);
+    width: 105%;
+    height: 105%;
   }
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
   .mobile-content {
-    transform: scale(0.8);
-    width: 125%;
-    height: 125%;
+    transform: scale(1.0);
+    width: 100%;
+    height: 100%;
   }
 }
 
@@ -1452,4 +1452,24 @@ div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
   input, select, textarea {
     font-size: 16px;
   }
+  
+  /* Make text and elements larger on mobile */
+  body {
+    font-size: 1.1rem;
+  }
+  
+  /* Increase button and interactive element sizes */
+  button, a, input, select, textarea {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 1rem;
+  }
+  
+  /* Make headings larger */
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.75rem; }
+  h4 { font-size: 1.5rem; }
+  h5 { font-size: 1.25rem; }
+  h6 { font-size: 1.1rem; }
 }

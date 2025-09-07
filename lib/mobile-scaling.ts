@@ -23,11 +23,11 @@ export function calculateOptimalScale(): number {
     const targetWidth = Math.min(viewportWidth * 0.95, baseWidth) // 95% of viewport width
     scale = targetWidth / baseWidth
     
-    // Ensure minimum scale for readability
-    scale = Math.max(scale, 0.5)
+    // Ensure minimum scale for readability - much larger now
+    scale = Math.max(scale, 0.8)
     
     // Ensure maximum scale to prevent content from being too large
-    scale = Math.min(scale, 0.8)
+    scale = Math.min(scale, 1.0)
   }
   
   return scale
