@@ -7,19 +7,19 @@ export interface Database {
         Row: {
           id: string
           email: string
-          gamer_tag_name: string
+          gamer_tag_id: string
           discord_name: string | null
           primary_position: string
           secondary_position: string | null
           console: string
-          created_on: string
+          created_at: string
           updated_at: string
           is_active: boolean
           registration_ip: string | null
           last_login_ip: string | null
           last_login_at: string | null
           username: string | null
-          gamer_tag: string | null
+          gamer_tag_id: string | null
           twitch_username: string | null
           twitch_user_id: string | null
           twitch_access_token: string | null
@@ -48,7 +48,7 @@ export interface Database {
         Insert: {
           id?: string
           email: string
-          gamer_tag_name: string
+          gamer_tag_id: string
           discord_name?: string | null
           primary_position: string
           secondary_position?: string | null
@@ -373,7 +373,7 @@ export interface Database {
           season_number: number
           primary_position: string
           secondary_position: string | null
-          gamer_tag: string
+          gamer_tag_id: string
           console: string
           status: string
           created_at: string
@@ -385,7 +385,7 @@ export interface Database {
           season_number: number
           primary_position: string
           secondary_position?: string | null
-          gamer_tag: string
+          gamer_tag_id: string
           console: string
           status?: string
           created_at?: string
