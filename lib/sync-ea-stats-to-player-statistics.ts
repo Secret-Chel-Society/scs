@@ -102,7 +102,7 @@ async function getMappedPlayerId(eaPlayerId: string): Promise<string | null> {
 // Hardcoded mappings for critical players
 function getHardcodedMapping(eaPlayerId: string): string | null {
   const hardcodedMappings: Record<string, string> = {
-    "1005699228134": "657dbb12-0db5-4a8b-94da-7dea7eba7409", // DarkWolf
+    "1005699228134": "657dbb12-0db5-4a8b-94da-7dea7eba7409", // LispDoge
     // Add more hardcoded mappings as needed
   }
 

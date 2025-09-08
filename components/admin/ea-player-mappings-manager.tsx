@@ -168,12 +168,12 @@ export function EaPlayerMappingsManager() {
                 id="persona"
                 value={newPersona}
                 onChange={(e) => setNewPersona(e.target.value)}
-                placeholder="Enter EA persona (e.g., DarkWolf)"
+                placeholder="Enter EA persona (e.g., LispDoge)"
               />
             </div>
             <div className="flex-1">
               <label htmlFor="player" className="block text-sm font-medium mb-1">
-                SCS Player
+                MGHL Player
               </label>
               <select
                 id="player"
@@ -201,7 +201,7 @@ export function EaPlayerMappingsManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead>EA Persona</TableHead>
-                  <TableHead>SCS Player</TableHead>
+                  <TableHead>MGHL Player</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>

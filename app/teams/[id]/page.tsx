@@ -11,24 +11,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Trophy, 
-  Award, 
-  RefreshCw, 
-  ChevronLeft, 
-  ChevronRight,
-  Users,
-  BarChart3,
-  Target,
-  Shield,
-  Star,
-  Activity,
-  TrendingUp,
-  DollarSign,
-  Crown
-} from "lucide-react"
+import { ArrowLeft, Calendar, Trophy, Award, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { Button } from "@/components/ui/button"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
@@ -595,158 +578,135 @@ export default function TeamDetailPage() {
     .sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime())
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-            <Link href="/teams" className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200 text-sm sm:text-base">
-              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+    <div className="container mx-auto px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <ArrowLeft className="h-5 w-5" />
+            <Link href="/teams" className="text-muted-foreground hover:text-foreground">
               Back to Teams
             </Link>
-
-            {session?.user && (
-              <Button variant="outline" size="sm" onClick={refreshTeamStats} disabled={refreshing} className="border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm">
-                <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? "animate-spin" : ""}`} />
-                Refresh Stats
-              </Button>
-            )}
           </div>
 
-          {/* Team Header */}
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl mb-6 sm:mb-8 overflow-hidden">
-            <div className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-4 sm:p-6 lg:p-8">
-              <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
-                <div className="relative h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32">
-                  {team.logo_url ? (
-                    <Image src={team.logo_url || "/placeholder.svg"} alt={team.name} fill className="object-contain" />
-                  ) : (
-                    <TeamLogo teamName={team.name} size="xl" />
-                  )}
+          {session?.user && (
+            <Button variant="outline" size="sm" onClick={refreshTeamStats} disabled={refreshing}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh Stats
+            </Button>
+          )}
+        </div>
+
+        {/* Team Header */}
+        <Card className="mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/20 to-primary/5 p-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="relative h-32 w-32">
+                {team.logo_url ? (
+                  <Image src={team.logo_url || "/placeholder.svg"} alt={team.name} fill className="object-contain" />
+                ) : (
+                  <TeamLogo teamName={team.name} size="xl" />
+                )}
+              </div>
+
+              <div className="text-center md:text-left">
+                <h1 className="text-3xl font-bold mb-2">{team.name}</h1>
+                <div className="text-lg text-muted-foreground mb-4">
+                  Record: {team.wins}-{team.losses}-{team.otl}
                 </div>
 
-                <div className="text-center md:text-left flex-1">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
-                    {team.name}
-                  </h1>
-                  <div className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-4 sm:mb-6">
-                    Record: {team.wins}-{team.losses}-{team.otl}
+                <div className="flex flex-wrap justify-center md:justify-start gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.points}</div>
+                    <div className="text-sm text-muted-foreground">Points</div>
                   </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.points}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Points</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.games_played}</div>
+                    <div className="text-sm text-muted-foreground">Games Played</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.goals_for}</div>
+                    <div className="text-sm text-muted-foreground">Goals For</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.goals_against}</div>
+                    <div className="text-sm text-muted-foreground">Goals Against</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">
+                      {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.games_played}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Games Played</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.goals_for}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Goals For</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.goals_against}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Goals Against</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">
-                        {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
-                      </div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Goal Diff</div>
-                    </div>
+                    <div className="text-sm text-muted-foreground">Goal Diff</div>
                   </div>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
+        </Card>
 
-          {/* Team Awards */}
-          {awards && awards.length > 0 && (
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg mb-8">
-              <CardHeader className="bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/30 dark:to-goal-red-800/30 border-b border-slate-200 dark:border-slate-700">
-                <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
-                    <Trophy className="h-5 w-5 text-white" />
-                  </div>
-                  Team Awards
-                </CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Achievements and honors earned by {team.name}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {awards.map((award) => {
-                    const isPresident = award.award_type === "President Trophy"
-                    const isCup = award.award_type === "SCS Cup"
+        {/* Team Awards */}
+        {awards && awards.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Team Awards
+              </CardTitle>
+              <CardDescription>Achievements and honors earned by {team.name}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                {awards.map((award) => {
+                  const isPresident = award.award_type === "President Trophy"
+                  const isCup = award.award_type === "MGHL Cup"
 
-                    return (
+                  return (
+                    <div
+                      key={award.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg ${
+                        isPresident
+                          ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                          : isCup
+                            ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
+                            : "bg-muted/50"
+                      }`}
+                    >
                       <div
-                        key={award.id}
-                        className={`flex items-center gap-4 p-4 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                        className={`p-2 rounded-full ${
                           isPresident
-                            ? "bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700"
+                            ? "bg-blue-100 dark:bg-blue-800"
                             : isCup
-                              ? "bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/20 dark:to-assist-green-900/20 border-goal-red-200 dark:border-goal-red-700"
-                              : "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600"
+                              ? "bg-yellow-100 dark:bg-yellow-800"
+                              : "bg-muted"
                         }`}
                       >
-                        <div
-                          className={`p-3 rounded-lg ${
-                            isPresident
-                              ? "bg-gradient-to-r from-ice-blue-500 to-rink-blue-600"
-                              : isCup
-                                ? "bg-gradient-to-r from-goal-red-500 to-assist-green-600"
-                                : "bg-slate-500"
-                          }`}
-                        >
-                          {isPresident ? (
-                            <Award className="h-6 w-6 text-white" />
-                          ) : isCup ? (
-                            <Trophy className="h-6 w-6 text-white" />
-                          ) : (
-                            <Award className="h-6 w-6 text-white" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-800 dark:text-slate-200">{award.award_type}</div>
-                          <div className="text-sm text-slate-600 dark:text-slate-400">
-                            Season {award.season_number} ({award.year})
-                          </div>
-                          {award.description && (
-                            <div className="text-sm text-slate-500 dark:text-slate-500 mt-1">{award.description}</div>
-                          )}
-                        </div>
+                        {isPresident ? (
+                          <Award className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        ) : isCup ? (
+                          <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                        ) : (
+                          <Award className="h-6 w-6" />
+                        )}
                       </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      <div>
+                        <div className="font-medium">{award.award_type}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Season {award.season_number} ({award.year})
+                        </div>
+                        {award.description && <div className="text-sm mt-1">{award.description}</div>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          <Tabs defaultValue="roster" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
-            <TabsTrigger 
-              value="roster"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-            >
-              Roster
-            </TabsTrigger>
-            <TabsTrigger 
-              value="schedule"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-            >
-              Schedule
-            </TabsTrigger>
-            <TabsTrigger 
-              value="stats"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-            >
-              Team Stats
-            </TabsTrigger>
+        <Tabs defaultValue="roster" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="roster">Roster</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            <TabsTrigger value="stats">Team Stats</TabsTrigger>
           </TabsList>
 
           <TabsContent value="roster">
@@ -1145,9 +1105,8 @@ export default function TeamDetailPage() {
               </Card>
             </div>
           </TabsContent>
-          </Tabs>
-        </motion.div>
-      </div>
+        </Tabs>
+      </motion.div>
     </div>
   )
 }

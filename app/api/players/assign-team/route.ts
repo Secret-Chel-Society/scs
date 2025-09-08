@@ -76,9 +76,8 @@ export async function POST(request: Request) {
         team_id: teamId,
         salary: newSalary,
         status: playerStatus,
-        manually_removed: false, // Reset manual removal flag when assigning to team
-        manually_removed_at: null, // Clear manual removal timestamp
-        manually_removed_by: null, // Clear manual removal user
+        manually_removed: teamId === null, // Mark as manually removed if set to free agent
+        manually_removed_at: teamId === null ? new Date().toISOString() : null,
       })
       .eq("id", playerId)
 

@@ -5,10 +5,9 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { format, parse } from "date-fns"
-import { Calendar, Clock, Edit, Plus, Trash2, AlertCircle, Download, Upload, FileUp, Trophy, Award, Medal, Star, Shield, Database, Settings, Zap, Target, Users, CheckCircle, XCircle, AlertTriangle } from "lucide-react"
+import { Calendar, Clock, Edit, Plus, Trash2, AlertCircle, Download, Upload, FileUp } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -1325,16 +1324,11 @@ export default function AdminSchedulePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-20">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Loading Schedule Management...</p>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-12 w-1/3 mb-6" />
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-64 w-full" />
         </div>
       </div>
     )
@@ -1345,780 +1339,485 @@ export default function AdminSchedulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div>
-            <div className="w-20 h-20 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-ice-blue-500/25">
-              <Calendar className="h-10 w-10 text-white" />
-            </div>
-            <h1 className="hockey-title mb-6">
-              Schedule Management
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-8 max-w-3xl">
-              Comprehensive game schedule management and match tracking. Create, edit, and monitor all league matches with advanced scheduling tools.
-            </p>
-            
-            {/* Feature Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 mb-8">
-              <div className="flex items-center gap-2 bg-gradient-to-r from-assist-green-100/50 to-assist-green-100/50 dark:from-assist-green-900/20 dark:to-assist-green-900/20 px-4 py-2 rounded-full border border-assist-green-200/30 dark:border-assist-green-700/30">
-                <Calendar className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Match Scheduling</span>
-              </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-ice-blue-100/50 to-rink-blue-100/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 px-4 py-2 rounded-full border border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                <Trophy className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Season Management</span>
-              </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-goal-red-100/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-900/20 px-4 py-2 rounded-full border border-goal-red-200/30 dark:border-goal-red-700/30">
-                <Database className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">CSV Import/Export</span>
-              </div>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-hockey-silver-100/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-900/20 px-4 py-2 rounded-full border border-hockey-silver-200/30 dark:border-hockey-silver-700/30">
-                <Settings className="h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">Advanced Controls</span>
-              </div>
-            </div>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Schedule Management</h1>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsSeasonDialogOpen(true)} variant="outline">
+            <Plus className="mr-2 h-4 w-4" /> Add Season
+          </Button>
+          <Button onClick={downloadMatchesAsCSV} variant="outline">
+            <Download className="mr-2 h-4 w-4" /> Download CSV
+          </Button>
+          <Button onClick={() => setIsUploadDialogOpen(true)} variant="outline">
+            <Upload className="mr-2 h-4 w-4" /> Upload CSV
+          </Button>
+          <Button onClick={() => openMatchDialog()}>
+            <Plus className="mr-2 h-4 w-4" /> Add Match
+          </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-20">
-        {/* Enhanced Dashboard Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg flex items-center justify-center">
-              <Trophy className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Match Management</h2>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Create and manage league matches</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button 
-              onClick={() => setIsSeasonDialogOpen(true)} 
-              className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add Season
+      {seasonError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Season Error</AlertTitle>
+          <AlertDescription>{seasonError}</AlertDescription>
+        </Alert>
+      )}
+
+      {fetchError && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>{fetchError}</AlertDescription>
+        </Alert>
+      )}
+
+      {!hasSeasonNameColumn && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Database Update Required</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            <p>The season_name column needs to be added to the matches table.</p>
+            <Button onClick={runSeasonNameMigration} variant="outline" size="sm" disabled={migrationRunning}>
+              {migrationRunning ? "Adding Column..." : "Add Column Now"}
             </Button>
-            <Button 
-              onClick={downloadMatchesAsCSV} 
-              className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-            >
-              <Download className="mr-2 h-4 w-4" /> Download CSV
-            </Button>
-            <Button 
-              onClick={() => setIsUploadDialogOpen(true)} 
-              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-            >
-              <Upload className="mr-2 h-4 w-4" /> Upload CSV
-            </Button>
-            <Button 
-              onClick={() => openMatchDialog()}
-              className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add Match
-            </Button>
-          </div>
+            <p className="text-xs">
+              Note: If this doesn't work, you can run the SQL manually from the migrations folder. The system will still
+              work without the column.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {seasonIdType === "uuid" && (
+        <Alert variant="warning" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Type Mismatch Warning</AlertTitle>
+          <AlertDescription>
+            <p>
+              There appears to be a type mismatch between season IDs in the seasons table (UUID) and the matches table
+              (integer).
+            </p>
+            <p className="text-xs mt-2">
+              The system will try to handle this automatically by converting between types, but you may see some
+              unexpected behavior. Using season names instead of IDs will help avoid these issues.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {seasons.length > 0 && (
+        <div className="mb-4">
+          <p className="text-sm text-muted-foreground">Available Seasons: {seasons.map((s) => s.name).join(", ")}</p>
+          <p className="text-sm text-muted-foreground">
+            Active Season: {seasons.find((s) => s.is_active)?.name || "None"}
+          </p>
         </div>
+      )}
 
-        {seasonError && (
-          <Alert className="mb-6 border-2 border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-r from-goal-red-50/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-800/20">
-            <AlertCircle className="h-5 w-5 text-goal-red-600 dark:text-goal-red-400" />
-            <AlertTitle className="text-goal-red-800 dark:text-goal-red-200 font-bold">Season Error</AlertTitle>
-            <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">{seasonError}</AlertDescription>
-          </Alert>
-        )}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <TabsList>
+          <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="all">All Matches</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-        {fetchError && (
-          <Alert className="mb-6 border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-r from-hockey-silver-50/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-800/20">
-            <AlertCircle className="h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
-            <AlertTitle className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Warning</AlertTitle>
-            <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">{fetchError}</AlertDescription>
-          </Alert>
-        )}
+      {filteredMatches.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No matches found</p>
+        </div>
+      ) : (
+        <div className="border rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Home Team</TableHead>
+                <TableHead>Away Team</TableHead>
+                <TableHead>Score</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Season</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredMatches.map((match) => {
+                // Get season name - either from season_name column or from the seasons array
+                let seasonName = match.season_name || ""
+                if (!seasonName && match.season_id) {
+                  const season = seasons.find((s) => {
+                    // Handle both string and number comparisons
+                    if (typeof s.id === "string" && typeof match.season_id === "string") {
+                      return s.id === match.season_id
+                    } else if (typeof s.id === "string" && typeof match.season_id === "number") {
+                      // Try to extract numbers from UUID and compare
+                      const numericId = s.id.replace(/\D/g, "")
+                      return numericId === match.season_id.toString()
+                    } else {
+                      return s.id === match.season_id
+                    }
+                  })
 
-        {!hasSeasonNameColumn && (
-          <Alert className="mb-6 border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-r from-hockey-silver-50/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-800/20">
-            <AlertCircle className="h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
-            <AlertTitle className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Database Update Required</AlertTitle>
-            <AlertDescription className="flex flex-col gap-3 text-hockey-silver-700 dark:text-hockey-silver-300">
-              <p>The season_name column needs to be added to the matches table.</p>
-              <Button 
-                onClick={runSeasonNameMigration} 
-                className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 w-fit"
-                disabled={migrationRunning}
-              >
-                {migrationRunning ? "Adding Column..." : "Add Column Now"}
-              </Button>
-              <p className="text-xs">
-                Note: If this doesn't work, you can run the SQL manually from the migrations folder. The system will still
-                work without the column.
-              </p>
-            </AlertDescription>
-          </Alert>
-        )}
+                  if (season) {
+                    seasonName = season.name
+                  }
+                }
 
-        {seasonIdType === "uuid" && (
-          <Alert className="mb-6 border-2 border-hockey-silver-200/50 dark:border-hockey-silver-700/50 bg-gradient-to-r from-hockey-silver-50/50 to-hockey-silver-100/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-800/20">
-            <AlertCircle className="h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
-            <AlertTitle className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Type Mismatch Warning</AlertTitle>
-            <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">
-              <p>
-                There appears to be a type mismatch between season IDs in the seasons table (UUID) and the matches table
-                (integer).
-              </p>
-              <p className="text-xs mt-2">
-                The system will try to handle this automatically by converting between types, but you may see some
-                unexpected behavior. Using season names instead of IDs will help avoid these issues.
-              </p>
-            </AlertDescription>
-          </Alert>
-        )}
+                return (
+                  <TableRow key={match.id}>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{format(new Date(match[dateColumnName]), "MMM d, yyyy")}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {format(new Date(match[dateColumnName]), "h:mm a")}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{match.home_team?.name || "Unknown Team"}</TableCell>
+                    <TableCell>{match.away_team?.name || "Unknown Team"}</TableCell>
+                    <TableCell>
+                      {match.home_score !== null && match.away_score !== null
+                        ? `${match.home_score} - ${match.away_score}`
+                        : "TBD"}
+                      {match.overtime && <span className="ml-1 text-xs text-muted-foreground">(OT)</span>}
+                    </TableCell>
+                    <TableCell>
+                      <div className="capitalize">{formatStatusForDisplay(match.status)}</div>
+                    </TableCell>
+                    <TableCell>{seasonName || "No Season"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => openMatchDialog(match)}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(match)}>
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
-        {seasons.length > 0 && (
-          <Card className="hockey-card hockey-card-hover mb-6 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg shadow-ice-blue-500/10">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200">
-                    Available Seasons: <span className="text-assist-green-600 dark:text-assist-green-400">{seasons.map((s) => s.name).join(", ")}</span>
-                  </p>
-                  <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                    Active Season: <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{seasons.find((s) => s.is_active)?.name || "None"}</span>
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <Card className="hockey-card border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg shadow-ice-blue-500/10 mb-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-              <TabsTrigger 
-                value="upcoming" 
-                className="hockey-button flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
-              >
-                <Calendar className="h-4 w-4" />
-                Upcoming
-              </TabsTrigger>
-              <TabsTrigger 
-                value="completed" 
-                className="hockey-button flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-assist-green-500 data-[state=active]:to-assist-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
-              >
-                <CheckCircle className="h-4 w-4" />
-                Completed
-              </TabsTrigger>
-              <TabsTrigger 
-                value="all" 
-                className="hockey-button flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-hockey-silver-500 data-[state=active]:to-hockey-silver-600 data-[state=active]:text-white data-[state=active]:shadow-lg hover:scale-105 transition-all duration-300"
-              >
-                <Database className="h-4 w-4" />
-                All Matches
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </Card>
-
-        {filteredMatches.length === 0 ? (
-          <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg shadow-ice-blue-500/10">
-            <CardContent className="text-center py-12">
-              <div className="w-16 h-16 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-hockey-silver-500/25">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">No Matches Found</h3>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400 mb-6 max-w-md mx-auto">
-                No matches found for the selected filter. Create a new match or adjust your search criteria.
-              </p>
-              <Button 
-                onClick={() => openMatchDialog()}
-                className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create First Match
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-lg shadow-ice-blue-500/10">
-            <CardHeader className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-ice-blue-50/30 to-rink-blue-50/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-t-lg"></div>
-              <div className="relative z-10 flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Match Schedule</CardTitle>
-                  <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                    {filteredMatches.length} matches found • {activeTab === "upcoming" ? "Upcoming games" : activeTab === "completed" ? "Completed games" : "All matches"}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="rounded-xl border-2 border-ice-blue-200/30 dark:border-rink-blue-700/30 overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                      <TableHead className="text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Date & Time</TableHead>
-                      <TableHead className="text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Home Team</TableHead>
-                      <TableHead className="text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Away Team</TableHead>
-                      <TableHead className="text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Score</TableHead>
-                      <TableHead className="text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Status</TableHead>
-                      <TableHead className="text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Season</TableHead>
-                      <TableHead className="text-right text-base font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMatches.map((match) => {
-                      // Get season name - either from season_name column or from the seasons array
-                      let seasonName = match.season_name || ""
-                      if (!seasonName && match.season_id) {
-                        const season = seasons.find((s) => {
-                          // Handle both string and number comparisons
-                          if (typeof s.id === "string" && typeof match.season_id === "string") {
-                            return s.id === match.season_id
-                          } else if (typeof s.id === "string" && typeof match.season_id === "number") {
-                            // Try to extract numbers from UUID and compare
-                            const numericId = s.id.replace(/\D/g, "")
-                            return numericId === match.season_id.toString()
-                          } else {
-                            return s.id === match.season_id
-                          }
-                        })
-
-                        if (season) {
-                          seasonName = season.name
-                        }
-                      }
-
-                      return (
-                        <TableRow 
-                          key={match.id}
-                          className="hover:bg-gradient-to-r hover:from-ice-blue-50/30 hover:to-rink-blue-50/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-200/30 dark:border-rink-blue-700/30"
-                        >
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">{format(new Date(match[dateColumnName]), "MMM d, yyyy")}</span>
-                              <span className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {format(new Date(match[dateColumnName]), "h:mm a")}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                              {match.home_team?.name || "Unknown Team"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                              {match.away_team?.name || "Unknown Team"}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {match.home_score !== null && match.away_score !== null ? (
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-lg text-hockey-silver-800 dark:text-hockey-silver-200">
-                                    {match.home_score} - {match.away_score}
-                                  </span>
-                                  {match.overtime && (
-                                    <span className="text-xs bg-gradient-to-r from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/30 text-goal-red-700 dark:text-goal-red-300 px-2 py-1 rounded-full border border-goal-red-300 dark:border-goal-red-600">
-                                      OT
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                <span className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">TBD</span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="capitalize font-medium">
-                              {match.status === "Completed" ? (
-                                <span className="text-assist-green-600 dark:text-assist-green-400">Completed</span>
-                              ) : match.status === "In Progress" ? (
-                                <span className="text-ice-blue-600 dark:text-ice-blue-400">In Progress</span>
-                              ) : match.status === "Postponed" ? (
-                                <span className="text-hockey-silver-600 dark:text-hockey-silver-400">Postponed</span>
-                              ) : match.status === "Cancelled" ? (
-                                <span className="text-goal-red-600 dark:text-goal-red-400">Cancelled</span>
-                              ) : (
-                                <span className="text-hockey-silver-600 dark:text-hockey-silver-400">Scheduled</span>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                              {seasonName || "No Season"}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => openMatchDialog(match)}
-                                className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-                              >
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => openDeleteDialog(match)}
-                                className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                <span className="sr-only">Delete</span>
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Create/Edit Match Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-            <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-              <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-4 w-4 text-white" />
-                </div>
-                {currentMatch ? "Edit Match" : "Create Match"}
-              </DialogTitle>
-              <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-                {currentMatch ? "Update the details for this match." : "Enter the details for the new match."}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label htmlFor="seasonName" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Trophy className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                    Season
-                  </Label>
-                  {seasons.length > 0 ? (
-                    <Select value={formData.seasonName} onValueChange={(value) => handleInputChange("seasonName", value)}>
-                      <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                        <SelectValue placeholder="Select season" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {seasons.map((season) => (
-                          <SelectItem key={season.id} value={season.name}>
-                            {season.name} {season.is_active ? "(Active)" : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Input disabled value="No seasons available" className="hockey-search" />
-                      <Button 
-                        type="button" 
-                        onClick={() => setIsSeasonDialogOpen(true)}
-                        className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-                      >
-                        Create
-                      </Button>
-                    </div>
-                  )}
-                  {formErrors.seasonName && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.seasonName}</p>}
-                  {!hasSeasonNameColumn && (
-                    <p className="text-xs p-2 bg-gradient-to-r from-hockey-silver-100/50 to-hockey-silver-200/50 dark:from-hockey-silver-900/20 dark:to-hockey-silver-800/20 rounded-lg border border-hockey-silver-200/30 dark:border-hockey-silver-700/30 text-hockey-silver-600 dark:text-hockey-silver-400">
-                      Note: The season_name column doesn't exist yet. The season will be stored by ID.
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <Label htmlFor="status" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Settings className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                    Status
-                  </Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => handleInputChange("status", value as MatchStatus)}
-                  >
-                    <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                      <SelectValue placeholder="Select status" />
+      {/* Create/Edit Match Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{currentMatch ? "Edit Match" : "Create Match"}</DialogTitle>
+            <DialogDescription>
+              {currentMatch ? "Update the details for this match." : "Enter the details for the new match."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="seasonName">Season</Label>
+                {seasons.length > 0 ? (
+                  <Select value={formData.seasonName} onValueChange={(value) => handleInputChange("seasonName", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select season" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Scheduled">Scheduled</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Completed">Completed</SelectItem>
-                      <SelectItem value="Postponed">Postponed</SelectItem>
-                      <SelectItem value="Cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {formErrors.status && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.status}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label htmlFor="date" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Calendar className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                    Date
-                  </Label>
-                  <div className="flex items-center">
-                    <Calendar className="mr-3 h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => handleInputChange("date", e.target.value)}
-                      className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                    />
-                  </div>
-                  {formErrors.date && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.date}</p>}
-                </div>
-                <div className="space-y-3">
-                  <Label htmlFor="time" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Clock className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                    Time
-                  </Label>
-                  <div className="flex items-center">
-                    <Clock className="mr-3 h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                    <Input
-                      id="time"
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => handleInputChange("time", e.target.value)}
-                      className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                    />
-                  </div>
-                  {formErrors.time && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.time}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label htmlFor="homeTeamId" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Users className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                    Home Team
-                  </Label>
-                  <Select value={formData.homeTeamId} onValueChange={(value) => handleInputChange("homeTeamId", value)}>
-                    <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                      <SelectValue placeholder="Select home team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name}
+                      {seasons.map((season) => (
+                        <SelectItem key={season.id} value={season.name}>
+                          {season.name} {season.is_active ? "(Active)" : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {formErrors.homeTeamId && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.homeTeamId}</p>}
-                </div>
-                <div className="space-y-3">
-                  <Label htmlFor="awayTeamId" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Users className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                    Away Team
-                  </Label>
-                  <Select value={formData.awayTeamId} onValueChange={(value) => handleInputChange("awayTeamId", value)}>
-                    <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                      <SelectValue placeholder="Select away team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {formErrors.awayTeamId && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.awayTeamId}</p>}
-                </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input disabled value="No seasons available" />
+                    <Button type="button" onClick={() => setIsSeasonDialogOpen(true)}>
+                      Create
+                    </Button>
+                  </div>
+                )}
+                {formErrors.seasonName && <p className="text-sm text-red-500">{formErrors.seasonName}</p>}
+                {!hasSeasonNameColumn && (
+                  <p className="text-xs text-amber-500">
+                    Note: The season_name column doesn't exist yet. The season will be stored by ID.
+                  </p>
+                )}
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label htmlFor="homeScore" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Target className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                    Home Score
-                  </Label>
-                  <Input
-                    id="homeScore"
-                    type="number"
-                    placeholder="Home Score"
-                    value={formData.homeScore}
-                    onChange={(e) => handleInputChange("homeScore", e.target.value)}
-                    className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                  />
-                  {formErrors.homeScore && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.homeScore}</p>}
-                </div>
-                <div className="space-y-3">
-                  <Label htmlFor="awayScore" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Target className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                    Away Score
-                  </Label>
-                  <Input
-                    id="awayScore"
-                    type="number"
-                    placeholder="Away Score"
-                    value={formData.awayScore}
-                    onChange={(e) => handleInputChange("awayScore", e.target.value)}
-                    className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                  />
-                  {formErrors.awayScore && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 font-medium">{formErrors.awayScore}</p>}
-                </div>
-              </div>
-
-              <div className="space-y-4 p-4 bg-gradient-to-r from-ice-blue-50/30 to-rink-blue-50/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border-2 border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                <div className="flex items-center space-x-3">
-                  <Checkbox
-                    id="overtime"
-                    checked={formData.overtime}
-                    onCheckedChange={(checked) => handleInputChange("overtime", checked === true)}
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
-                  />
-                  <Label htmlFor="overtime" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    Game went to overtime (affects standings calculations)
-                  </Label>
-                </div>
-                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Check this box if the game was decided in overtime or shootout. This ensures teams get the correct
-                  points in standings.
-                </p>
-              </div>
-
-              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-                <Button 
-                  type="button" 
-                  onClick={() => setIsDialogOpen(false)}
-                  className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleInputChange("status", value as MatchStatus)}
                 >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                >
-                  {currentMatch ? "Update Match" : "Create Match"}
-                </Button>
-              </DialogFooter>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Scheduled">Scheduled</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="Postponed">Postponed</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formErrors.status && <p className="text-sm text-red-500">{formErrors.status}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => handleInputChange("date", e.target.value)}
+                  />
+                </div>
+                {formErrors.date && <p className="text-sm text-red-500">{formErrors.date}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="time">Time</Label>
+                <div className="flex items-center">
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="time"
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => handleInputChange("time", e.target.value)}
+                  />
+                </div>
+                {formErrors.time && <p className="text-sm text-red-500">{formErrors.time}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="homeTeamId">Home Team</Label>
+                <Select value={formData.homeTeamId} onValueChange={(value) => handleInputChange("homeTeamId", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select home team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.homeTeamId && <p className="text-sm text-red-500">{formErrors.homeTeamId}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="awayTeamId">Away Team</Label>
+                <Select value={formData.awayTeamId} onValueChange={(value) => handleInputChange("awayTeamId", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select away team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.awayTeamId && <p className="text-sm text-red-500">{formErrors.awayTeamId}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="homeScore">Home Score</Label>
+                <Input
+                  id="homeScore"
+                  type="number"
+                  placeholder="Home Score"
+                  value={formData.homeScore}
+                  onChange={(e) => handleInputChange("homeScore", e.target.value)}
+                />
+                {formErrors.homeScore && <p className="text-sm text-red-500">{formErrors.homeScore}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="awayScore">Away Score</Label>
+                <Input
+                  id="awayScore"
+                  type="number"
+                  placeholder="Away Score"
+                  value={formData.awayScore}
+                  onChange={(e) => handleInputChange("awayScore", e.target.value)}
+                />
+                {formErrors.awayScore && <p className="text-sm text-red-500">{formErrors.awayScore}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="overtime"
+                  checked={formData.overtime}
+                  onCheckedChange={(checked) => handleInputChange("overtime", checked === true)}
+                />
+                <Label htmlFor="overtime" className="font-normal">
+                  Game went to overtime (affects standings calculations)
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Check this box if the game was decided in overtime or shootout. This ensures teams get the correct
+                points in standings.
+              </p>
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">{currentMatch ? "Update Match" : "Create Match"}</Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-            <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-              <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg flex items-center justify-center">
-                  <Trash2 className="h-4 w-4 text-white" />
-                </div>
-                Delete Match
-              </DialogTitle>
-              <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-                Are you sure you want to delete this match? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-              <Button 
-                onClick={() => setIsDeleteDialogOpen(false)}
-                className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={deleteMatch}
-                className="hockey-button bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Match</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this match? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={deleteMatch}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        {/* Create Season Dialog */}
-        <Dialog open={isSeasonDialogOpen} onOpenChange={setIsSeasonDialogOpen}>
-          <DialogContent className="bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-            <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-              <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg flex items-center justify-center">
-                  <Trophy className="h-4 w-4 text-white" />
-                </div>
-                Create Season
-              </DialogTitle>
-              <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-                Enter a name for the new season.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6 py-6">
-              <div className="space-y-3">
-                <Label htmlFor="seasonName" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                  <Trophy className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                  Season Name
-                </Label>
+      {/* Create Season Dialog */}
+      <Dialog open={isSeasonDialogOpen} onOpenChange={setIsSeasonDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Season</DialogTitle>
+            <DialogDescription>Enter a name for the new season.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="seasonName">Season Name</Label>
+              <Input
+                id="seasonName"
+                placeholder="e.g., Season 1"
+                value={newSeasonName}
+                onChange={(e) => setNewSeasonName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSeasonDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createSeason}>Create Season</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload CSV Dialog */}
+      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Upload Matches from CSV</DialogTitle>
+            <DialogDescription>
+              Upload a CSV file with match data. The file must include columns for Date, Time, Home Team, and Away Team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="csvFile">CSV File</Label>
+              <div className="flex items-center gap-2">
                 <Input
-                  id="seasonName"
-                  placeholder="e.g., Season 1"
-                  value={newSeasonName}
-                  onChange={(e) => setNewSeasonName(e.target.value)}
-                  className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
+                  id="csvFile"
+                  type="file"
+                  accept=".csv"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
                 />
+                <Button type="button" onClick={openFileInput} className="w-full" variant="outline">
+                  <FileUp className="mr-2 h-4 w-4" />
+                  {csvFile ? csvFile.name : "Select CSV File"}
+                </Button>
               </div>
+              {csvFile && <p className="text-sm text-muted-foreground">{csvFile.name}</p>}
             </div>
-            <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-              <Button 
-                onClick={() => setIsSeasonDialogOpen(false)}
-                className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={createSeason}
-                className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Create Season
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
-        {/* Upload CSV Dialog */}
-        <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
-            <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-              <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                  <Upload className="h-4 w-4 text-white" />
-                </div>
-                Upload Matches from CSV
-              </DialogTitle>
-              <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
-                Upload a CSV file with match data. The file must include columns for Date, Time, Home Team, and Away Team.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6 py-6">
-              <div className="space-y-3">
-                <Label htmlFor="csvFile" className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                  <Database className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                  CSV File
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="csvFile"
-                    type="file"
-                    accept=".csv"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <Button 
-                    type="button" 
-                    onClick={openFileInput} 
-                    className="w-full hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
-                  >
-                    <FileUp className="mr-2 h-4 w-4" />
-                    {csvFile ? csvFile.name : "Select CSV File"}
-                  </Button>
-                </div>
-                {csvFile && <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">{csvFile.name}</p>}
+            {isUploading && (
+              <div className="space-y-2">
+                <Label>Upload Progress</Label>
+                <Progress value={uploadProgress} className="w-full" />
+                <p className="text-sm text-center">{uploadProgress}%</p>
               </div>
+            )}
 
-              {isUploading && (
-                <div className="space-y-3 p-4 bg-gradient-to-r from-ice-blue-50/30 to-rink-blue-50/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border-2 border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                  <Label className="flex items-center gap-2 text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    <Zap className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                    Upload Progress
-                  </Label>
-                  <Progress value={uploadProgress} className="w-full" />
-                  <p className="text-sm text-center text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">{uploadProgress}%</p>
-                </div>
-              )}
-
-              {uploadResults && (
-                <div className="space-y-4 p-4 bg-gradient-to-r from-assist-green-50/30 to-assist-green-100/30 dark:from-assist-green-900/10 dark:to-assist-green-800/10 rounded-lg border-2 border-assist-green-200/30 dark:border-assist-green-700/30">
-                  <h3 className="font-bold text-lg text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-assist-green-600 dark:text-assist-green-400" />
-                    Upload Results
-                  </h3>
-                  <p className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Successfully imported {uploadResults.success} of {uploadResults.total} matches.
-                  </p>
-                  {uploadResults.errors.length > 0 && (
-                    <div>
-                      <p className="font-bold text-goal-red-600 dark:text-goal-red-400 flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        Errors:
-                      </p>
-                      <ul className="text-sm text-goal-red-600 dark:text-goal-red-400 list-disc pl-5 space-y-1 max-h-40 overflow-y-auto mt-2">
-                        {uploadResults.errors.map((error, index) => (
-                          <li key={index}>{error}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="space-y-4 p-4 bg-gradient-to-r from-hockey-silver-50/30 to-hockey-silver-100/30 dark:from-hockey-silver-900/10 dark:to-hockey-silver-800/10 rounded-lg border-2 border-hockey-silver-200/30 dark:border-hockey-silver-700/30">
-                <h3 className="font-bold text-lg text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                  CSV Format
-                </h3>
-                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Your CSV file should have the following columns:</p>
-                <ul className="text-sm list-disc pl-5 space-y-2 text-hockey-silver-600 dark:text-hockey-silver-400">
-                  <li>
-                    <span className="font-bold text-assist-green-600 dark:text-assist-green-400">Required:</span> Date (YYYY-MM-DD), Time (HH:MM), Home Team, Away Team
-                  </li>
-                  <li>
-                    <span className="font-bold text-ice-blue-600 dark:text-ice-blue-400">Optional:</span> Home Score, Away Score, Status, Season
-                  </li>
-                </ul>
-                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                  Team names must match exactly with the teams in the database.
+            {uploadResults && (
+              <div className="space-y-2 border rounded-md p-4">
+                <h3 className="font-medium">Upload Results</h3>
+                <p>
+                  Successfully imported {uploadResults.success} of {uploadResults.total} matches.
                 </p>
+                {uploadResults.errors.length > 0 && (
+                  <div>
+                    <p className="font-medium text-red-500">Errors:</p>
+                    <ul className="text-sm text-red-500 list-disc pl-5 space-y-1 max-h-40 overflow-y-auto">
+                      {uploadResults.errors.map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
-            </div>
-            <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
-              <Button 
-                onClick={() => setIsUploadDialogOpen(false)} 
-                disabled={isUploading}
-                className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={uploadMatchesFromCSV} 
-                disabled={!csvFile || isUploading}
-                className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                {isUploading ? "Uploading..." : "Upload"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            )}
 
-        {/* Hidden file input for CSV upload */}
-        <input type="file" accept=".csv" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-      </div>
+            <div className="space-y-2">
+              <h3 className="font-medium">CSV Format</h3>
+              <p className="text-sm text-muted-foreground">Your CSV file should have the following columns:</p>
+              <ul className="text-sm list-disc pl-5 space-y-1">
+                <li>
+                  <span className="font-medium">Required:</span> Date (YYYY-MM-DD), Time (HH:MM), Home Team, Away Team
+                </li>
+                <li>
+                  <span className="font-medium">Optional:</span> Home Score, Away Score, Status, Season
+                </li>
+              </ul>
+              <p className="text-sm text-muted-foreground">
+                Team names must match exactly with the teams in the database.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} disabled={isUploading}>
+              Cancel
+            </Button>
+            <Button onClick={uploadMatchesFromCSV} disabled={!csvFile || isUploading}>
+              {isUploading ? "Uploading..." : "Upload"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hidden file input for CSV upload */}
+      <input type="file" accept=".csv" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
     </div>
   )
 }

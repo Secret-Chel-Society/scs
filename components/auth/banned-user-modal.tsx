@@ -85,7 +85,7 @@ export function BannedUserModal() {
             <AlertTriangle className="h-5 w-5" />
             Account Suspended
           </DialogTitle>
-          <DialogDescription>Your account has been suspended from the Secret Chel Society.</DialogDescription>
+          <DialogDescription>Your account has been suspended from the Major Gaming Hockey League.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -138,7 +138,7 @@ export function BannedUserModal() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.open("https://discord.gg/scs", "_blank")}
+                onClick={() => window.open("https://discord.gg/mghl", "_blank")}
                 className="flex-1"
               >
                 Contact on Discord

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Admin access required" }, { status: 403 })
     }
 
-    // Create the specific mapping for DarkWolf
+    // Create the specific mapping for LispDoge
     const { data: existingMapping } = await supabase
       .from("ea_player_mappings")
       .select("*")
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
         .from("ea_player_mappings")
         .update({
           player_id: "657dbb12-0db5-4a8b-94da-7dea7eba7409",
-          player_name: "DarkWolf",
+          player_name: "LispDoge",
         })
         .eq("ea_player_id", "1005699228134")
         .select()
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         .insert({
           ea_player_id: "1005699228134",
           player_id: "657dbb12-0db5-4a8b-94da-7dea7eba7409",
-          player_name: "DarkWolf",
+          player_name: "LispDoge",
         })
         .select()
 
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, data, created: true })
     }
   } catch (error: any) {
-    console.error("Error setting up DarkWolf mapping:", error)
-    return NextResponse.json({ error: error.message || "Failed to set up DarkWolf mapping" }, { status: 500 })
+    console.error("Error setting up LispDoge mapping:", error)
+    return NextResponse.json({ error: error.message || "Failed to set up LispDoge mapping" }, { status: 500 })
   }
 }

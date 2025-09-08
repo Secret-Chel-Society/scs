@@ -1,4 +1,3 @@
-// Midnight Studios INTl - All rights reserved
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"

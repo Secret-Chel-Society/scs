@@ -30,7 +30,7 @@ export function TeamSummaryStats({ userTeam, playerBids = {} }: TeamSummaryStats
   const [loading, setLoading] = useState(true)
   const supabase = createClientComponentClient()
 
-  const SALARY_CAP = 65000000 // $65M
+  const SALARY_CAP = 75000000 // $75M
 
   useEffect(() => {
     if (userTeam) {

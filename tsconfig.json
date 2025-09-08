@@ -1,5 +1,4 @@
 {
-  // Midnight Studios INTl - All rights reserved
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

@@ -67,7 +67,7 @@ export async function POST(request: Request) {
               <p>This link will expire in 24 hours.</p>
               <p>If you did not request a password reset, you can safely ignore this email.</p>
               <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;" />
-              <p style="color: #666; font-size: 14px;">SCS - Multiplayer Gaming Hockey League</p>
+              <p style="color: #666; font-size: 14px;">MGHL - Multiplayer Gaming Hockey League</p>
             </div>
           `,
         }

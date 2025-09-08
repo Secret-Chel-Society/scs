@@ -488,7 +488,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       if (teamError) throw new Error(teamError.message)
 
       const currentSalaryTotal = teamPlayers.reduce((sum, player) => sum + (player.salary || 0), 0)
-      const salaryCap = 65000000 // $65M salary cap
+      const salaryCap = 75000000 // $75M salary cap
 
       if (currentSalaryTotal + amount > salaryCap) {
         toast({
@@ -507,10 +507,10 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       }
 
       // Check if the bid meets the minimum increment requirement
-      if (currentBid && amount < currentBid.bid_amount + 2000000) {
+      if (currentBid && amount < currentBid.bid_amount + 250000) {
         toast({
           title: "Bid too low",
-          description: "New bids must be at least $2,000,000 higher than the current highest bid.",
+          description: "New bids must be at least $250,000 higher than the current highest bid.",
           variant: "destructive",
         })
         return
@@ -650,27 +650,27 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       {userTeam && teamStats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
           {/* Team Salary */}
-          <div className="bg-hockey-silver-800 border border-hockey-silver-700 rounded-lg p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Team Salary</h3>
             <div className="space-y-2">
               <div>
                 <p className="text-white text-lg font-bold">
-                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $65M
+                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $75M
                 </p>
-                <div className="w-full bg-hockey-silver-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
                     className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.current_salary / 65000000) * 100}%` }}
+                    style={{ width: `${(teamStats.current_salary / 75000000) * 100}%` }}
                   />
                 </div>
               </div>
               {potentialStats && potentialStats.potentialSalary !== teamStats.current_salary && (
-                <div className="text-hockey-silver-400 text-sm">
+                <div className="text-gray-400 text-sm">
                   <p>Potential: ${(potentialStats.potentialSalary / 1000000).toFixed(1)}M</p>
                   <div className="w-full bg-gray-700 rounded-full h-1">
                     <div
                       className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialSalary / 65000000) * 100}%` }}
+                      style={{ width: `${(potentialStats.potentialSalary / 75000000) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -679,12 +679,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
           </div>
 
           {/* Roster Size */}
-          <div className="bg-hockey-silver-800 border border-hockey-silver-700 rounded-lg p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Roster Size</h3>
             <div className="space-y-2">
               <div>
                 <p className="text-white text-lg font-bold">{teamStats.roster_size} / 15 players</p>
-                <div className="w-full bg-hockey-silver-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full"
                     style={{ width: `${(teamStats.roster_size / 15) * 100}%` }}
@@ -692,7 +692,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
                 </div>
               </div>
               {potentialStats && potentialStats.potentialRosterSize !== teamStats.roster_size && (
-                <div className="text-hockey-silver-400 text-sm">
+                <div className="text-gray-400 text-sm">
                   <p>Potential: {potentialStats.potentialRosterSize} players</p>
                   <div className="w-full bg-gray-700 rounded-full h-1">
                     <div
@@ -706,7 +706,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
           </div>
 
           {/* Position Breakdown */}
-          <div className="bg-hockey-silver-800 border border-hockey-silver-700 rounded-lg p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Position Breakdown</h3>
             <div className="space-y-2">
               <div className="grid grid-cols-3 gap-2 text-xs md:text-sm">

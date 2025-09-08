@@ -165,7 +165,7 @@ export default function MatchLineupsPage() {
   const renderLineup = (lineup: Lineup | null, teamName: string, logoUrl: string | null) => {
     if (!lineup || lineup.players.length === 0) {
       return (
-        <div className="text-center py-6 text-hockey-silver-600 dark:text-hockey-silver-400">No lineup has been submitted for {teamName} yet.</div>
+        <div className="text-center py-6 text-muted-foreground">No lineup has been submitted for {teamName} yet.</div>
       )
     }
 
@@ -178,22 +178,22 @@ export default function MatchLineupsPage() {
       <div className="space-y-6">
         <div className="flex items-center gap-3 mb-4">
           <TeamLogo logoUrl={logoUrl} teamName={teamName} size="small" />
-          <h3 className="text-xl font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">{teamName} Lineup</h3>
+          <h3 className="text-xl font-semibold">{teamName} Lineup</h3>
         </div>
 
         {/* Forwards */}
         <div>
-          <h4 className="text-sm font-medium text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">Forwards</h4>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">Forwards</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {forwards.map((player) => (
-              <Card key={player.id} className="hockey-alert hover:scale-105 transition-all duration-300">
+              <Card key={player.id} className="bg-muted/30">
                 <CardContent className="p-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.players.users.gamer_tag_id}</div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{formatPosition(player.position)}</div>
+                      <div className="font-medium">{player.players.users.gamer_tag_id}</div>
+                      <div className="text-sm text-muted-foreground">{formatPosition(player.position)}</div>
                     </div>
-                    <div className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                    <div className="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold">
                       {player.position}
                     </div>
                   </div>
@@ -201,24 +201,24 @@ export default function MatchLineupsPage() {
               </Card>
             ))}
             {forwards.length === 0 && (
-              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 col-span-3">No forwards in lineup</div>
+              <div className="text-sm text-muted-foreground col-span-3">No forwards in lineup</div>
             )}
           </div>
         </div>
 
         {/* Defense */}
         <div>
-          <h4 className="text-sm font-medium text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">Defense</h4>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">Defense</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {defense.map((player) => (
-              <Card key={player.id} className="hockey-alert hover:scale-105 transition-all duration-300">
+              <Card key={player.id} className="bg-muted/30">
                 <CardContent className="p-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.players.users.gamer_tag_id}</div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{formatPosition(player.position)}</div>
+                      <div className="font-medium">{player.players.users.gamer_tag_id}</div>
+                      <div className="text-sm text-muted-foreground">{formatPosition(player.position)}</div>
                     </div>
-                    <div className="bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                    <div className="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold">
                       {player.position}
                     </div>
                   </div>
@@ -226,31 +226,31 @@ export default function MatchLineupsPage() {
               </Card>
             ))}
             {defense.length === 0 && (
-              <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 col-span-2">No defensemen in lineup</div>
+              <div className="text-sm text-muted-foreground col-span-2">No defensemen in lineup</div>
             )}
           </div>
         </div>
 
         {/* Goalies */}
         <div>
-          <h4 className="text-sm font-medium text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">Goalies</h4>
+          <h4 className="text-sm font-medium text-muted-foreground mb-2">Goalies</h4>
           <div className="grid grid-cols-1 gap-3">
             {goalies.map((player) => (
-              <Card key={player.id} className="hockey-alert hover:scale-105 transition-all duration-300">
+              <Card key={player.id} className="bg-muted/30">
                 <CardContent className="p-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.players.users.gamer_tag_id}</div>
-                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">{formatPosition(player.position)}</div>
+                      <div className="font-medium">{player.players.users.gamer_tag_id}</div>
+                      <div className="text-sm text-muted-foreground">{formatPosition(player.position)}</div>
                     </div>
-                    <div className="bg-gradient-to-r from-assist-green-500 to-goal-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                    <div className="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold">
                       {player.position}
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
-            {goalies.length === 0 && <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">No goalies in lineup</div>}
+            {goalies.length === 0 && <div className="text-sm text-muted-foreground">No goalies in lineup</div>}
           </div>
         </div>
       </div>
@@ -285,50 +285,44 @@ export default function MatchLineupsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-6xl mx-auto"
-        >
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <div>
-              <h1 className="hockey-title-enhanced mb-2">Team Lineups</h1>
-              <p className="hockey-subtitle-enhanced">
-                {match.home_team.name} vs {match.away_team.name}
-              </p>
-            </div>
-            <Button 
-              variant="outline" 
-              onClick={() => router.push(`/matches/${matchId}`)}
-              className="hockey-hover-lift"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Match
-            </Button>
+    <div className="container mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto"
+      >
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Team Lineups</h1>
+            <p className="text-muted-foreground">
+              {match.home_team.name} vs {match.away_team.name}
+            </p>
           </div>
+          <Button variant="outline" onClick={() => router.push(`/matches/${matchId}`)}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Match
+          </Button>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="hockey-enhanced-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-                <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">Home Team</CardTitle>
-                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">Players in the lineup for this match</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">{renderLineup(homeLineup, match.home_team.name, match.home_team.logo_url)}</CardContent>
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Home Team</CardTitle>
+              <CardDescription>Players in the lineup for this match</CardDescription>
+            </CardHeader>
+            <CardContent>{renderLineup(homeLineup, match.home_team.name, match.home_team.logo_url)}</CardContent>
+          </Card>
 
-            <Card className="hockey-enhanced-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-rink-blue-50 to-ice-blue-50 dark:from-rink-blue-900/30 dark:to-ice-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-                <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200">Away Team</CardTitle>
-                <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">Players in the lineup for this match</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">{renderLineup(awayLineup, match.away_team.name, match.away_team.logo_url)}</CardContent>
-            </Card>
-          </div>
-        </motion.div>
-      </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Away Team</CardTitle>
+              <CardDescription>Players in the lineup for this match</CardDescription>
+            </CardHeader>
+            <CardContent>{renderLineup(awayLineup, match.away_team.name, match.away_team.logo_url)}</CardContent>
+          </Card>
+        </div>
+      </motion.div>
     </div>
   )
 }

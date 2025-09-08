@@ -8,8 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { AlertCircle, Search, Trash2, UserCheck, RefreshCw, Shield, Users, Database, Key, AlertTriangle, CheckCircle2 } from "lucide-react"
-import { motion } from "framer-motion"
+import { AlertCircle, Search, Trash2, UserCheck, RefreshCw } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export function UserAccountManager() {
@@ -164,35 +163,28 @@ export function UserAccountManager() {
     return (
       <div className="space-y-6">
         {/* Show summary first */}
-        <Card className="hockey-enhanced-card">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-                <Database className="h-5 w-5 text-white" />
-              </div>
-              Search Summary
-            </CardTitle>
-            <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-              Results for: {searchResults.searchEmail}
-            </CardDescription>
+            <CardTitle>Search Summary</CardTitle>
+            <CardDescription>Results for: {searchResults.searchEmail}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3">
-              <div className="flex justify-between items-center">
-                <span className="text-hockey-silver-700 dark:text-hockey-silver-300">Auth User:</span>
-                <Badge className={searchResults.authUser ? "bg-assist-green-500 text-white" : "bg-hockey-silver-500 text-white"}>
+            <div className="grid gap-2">
+              <div className="flex justify-between">
+                <span>Auth User:</span>
+                <Badge variant={searchResults.authUser ? "success" : "secondary"}>
                   {searchResults.authUser ? "Found" : "Not Found"}
                 </Badge>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-hockey-silver-700 dark:text-hockey-silver-300">Database User:</span>
-                <Badge className={searchResults.dbUser ? "bg-assist-green-500 text-white" : "bg-hockey-silver-500 text-white"}>
+              <div className="flex justify-between">
+                <span>Database User:</span>
+                <Badge variant={searchResults.dbUser ? "success" : "secondary"}>
                   {searchResults.dbUser ? "Found" : "Not Found"}
                 </Badge>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-hockey-silver-700 dark:text-hockey-silver-300">Verification Tokens:</span>
-                <Badge className={hasTokens ? "bg-ice-blue-500 text-white" : "bg-hockey-silver-500 text-white"}>
+              <div className="flex justify-between">
+                <span>Verification Tokens:</span>
+                <Badge variant={hasTokens ? "warning" : "secondary"}>
                   {hasTokens ? `${searchResults.verificationTokens.length} Found` : "None"}
                 </Badge>
               </div>
@@ -396,48 +388,23 @@ export function UserAccountManager() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      <div className="space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 gap-2 p-2 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded-xl">
-              <TabsTrigger 
-                value="search" 
-                className="px-6 py-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
-              >
-                <Search className="mr-2 h-4 w-4" />
-                Search User
-              </TabsTrigger>
-              <TabsTrigger 
-                value="results" 
-                disabled={!searchResults}
-                className="px-6 py-3 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white hover:bg-hockey-silver-200 dark:hover:bg-hockey-silver-700 transition-all duration-200"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Results
-              </TabsTrigger>
-            </TabsList>
+    <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="search">Search User</TabsTrigger>
+          <TabsTrigger value="results" disabled={!searchResults}>
+            Results
+          </TabsTrigger>
+        </TabsList>
         <TabsContent value="search" className="space-y-4 pt-4">
-          <Card className="hockey-enhanced-card">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-2xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-                  <Shield className="h-6 w-6 text-white" />
-                </div>
-                Search for User Account
-              </CardTitle>
-              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                Enter an email address to search for a user across all systems
-              </CardDescription>
+              <CardTitle>Search for User Account</CardTitle>
+              <CardDescription>Enter an email address to search for a user across all systems</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <label htmlFor="email" className="text-sm font-medium text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
-                  <Users className="h-4 w-4 text-assist-green-500" />
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
                   User Email
                 </label>
                 <Input
@@ -446,12 +413,10 @@ export function UserAccountManager() {
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="hockey-search"
                 />
               </div>
-              <div className="space-y-3">
-                <label htmlFor="adminKey" className="text-sm font-medium text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
-                  <Key className="h-4 w-4 text-ice-blue-500" />
+              <div className="space-y-2">
+                <label htmlFor="adminKey" className="text-sm font-medium">
                   Admin Key
                 </label>
                 <Input
@@ -460,19 +425,18 @@ export function UserAccountManager() {
                   placeholder="Enter your admin key"
                   value={adminKey}
                   onChange={(e) => setAdminKey(e.target.value)}
-                  className="hockey-search"
                 />
               </div>
               {error && (
-                <Alert variant="destructive" className="hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+                <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Error</AlertTitle>
-                  <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">{error}</AlertDescription>
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
             </CardContent>
             <CardFooter>
-              <Button onClick={handleSearch} disabled={isLoading || !email || !adminKey} className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white">
+              <Button onClick={handleSearch} disabled={isLoading || !email || !adminKey} className="w-full">
                 {isLoading ? (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -490,20 +454,18 @@ export function UserAccountManager() {
         </TabsContent>
         <TabsContent value="results" className="space-y-4 pt-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-hockey-silver-900 dark:text-hockey-silver-100">
-              Results for: <span className="font-bold text-ice-blue-600 dark:text-ice-blue-400">{email}</span>
+            <h3 className="text-lg font-medium">
+              Results for: <span className="font-bold">{email}</span>
             </h3>
-            <Button variant="outline" onClick={() => handleSearch()} disabled={isLoading} className="hockey-button-enhanced">
+            <Button variant="outline" onClick={() => handleSearch()} disabled={isLoading}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
           </div>
-          <Separator className="bg-hockey-silver-200 dark:bg-hockey-silver-700" />
+          <Separator />
           {renderUserDetails()}
         </TabsContent>
       </Tabs>
-        </motion.div>
-      </div>
     </div>
   )
 }

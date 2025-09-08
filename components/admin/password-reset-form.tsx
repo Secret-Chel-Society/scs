@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { AlertCircle, CheckCircle, RefreshCw, Key, Shield, Users, Lock, Mail, Eye, EyeOff } from "lucide-react"
+import { AlertCircle, CheckCircle, RefreshCw, Key } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function PasswordResetForm() {
@@ -19,13 +19,10 @@ export default function PasswordResetForm() {
   const [adminKey, setAdminKey] = useState("")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [showAdminKey, setShowAdminKey] = useState(false)
 
   // Load saved admin key if available
   useState(() => {
-    const savedKey = localStorage.getItem("scs-admin-key")
+    const savedKey = localStorage.getItem("mghl-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
     }
@@ -85,7 +82,7 @@ export default function PasswordResetForm() {
       setResult(null)
 
       // Save admin key for future use
-      localStorage.setItem("scs-admin-key", adminKey)
+      localStorage.setItem("mghl-admin-key", adminKey)
 
       const response = await fetch("/api/admin/reset-user-password", {
         method: "POST",
@@ -138,132 +135,71 @@ export default function PasswordResetForm() {
   }
 
   return (
-    <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
-      <CardHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
-        <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-          <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-            <Shield className="h-6 w-6 text-white" />
-          </div>
-          Reset User Password
-        </CardTitle>
-        <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Reset a user's password by email address</CardDescription>
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Reset User Password</CardTitle>
+        <CardDescription>Reset a user's password by email address</CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
-        <form onSubmit={handleResetPassword} className="space-y-6">
-          <div className="space-y-3">
-            <Label htmlFor="email" className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
-              <Mail className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-              User Email
-            </Label>
+      <CardContent>
+        <form onSubmit={handleResetPassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">User Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="user@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="hockey-search border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:ring-ice-blue-500/20 focus:border-ice-blue-500"
               required
             />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="password" className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
-              <Lock className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-              New Password
-            </Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter new password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="hockey-search border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:ring-ice-blue-500/20 focus:border-ice-blue-500 pr-12"
-                required
-                minLength={6}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-ice-blue-600 dark:text-ice-blue-400"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">New Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter new password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="confirm-password" className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-              Confirm Password
-            </Label>
-            <div className="relative">
-              <Input
-                id="confirm-password"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="hockey-search border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:ring-ice-blue-500/20 focus:border-ice-blue-500 pr-12"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-ice-blue-600 dark:text-ice-blue-400"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="Confirm new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="admin-key" className="text-sm font-medium text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center gap-2">
-              <Key className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-              Admin Key
-            </Label>
-            <div className="relative">
-              <Input
-                id="admin-key"
-                type={showAdminKey ? "text" : "password"}
-                placeholder="Enter admin key"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                className="hockey-search border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:ring-ice-blue-500/20 focus:border-ice-blue-500 pr-12"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-ice-blue-600 dark:text-ice-blue-400"
-                onClick={() => setShowAdminKey(!showAdminKey)}
-              >
-                {showAdminKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="admin-key">Admin Key</Label>
+            <Input
+              id="admin-key"
+              type="password"
+              placeholder="Enter admin key"
+              value={adminKey}
+              onChange={(e) => setAdminKey(e.target.value)}
+              required
+            />
           </div>
 
           {result && (
-            <Alert variant={result.success ? "default" : "destructive"} className={`hockey-card ${result.success 
-              ? "border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20" 
-              : "border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20"
-            }`}>
-              {result.success ? <CheckCircle className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" /> : <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />}
-              <AlertTitle className="text-hockey-silver-800 dark:text-hockey-silver-200">{result.success ? "Success" : "Error"}</AlertTitle>
-              <AlertDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">{result.message}</AlertDescription>
+            <Alert variant={result.success ? "default" : "destructive"}>
+              {result.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+              <AlertTitle>{result.success ? "Success" : "Error"}</AlertTitle>
+              <AlertDescription>{result.message}</AlertDescription>
             </Alert>
           )}
 
-          <Button 
-            type="submit" 
-            className="w-full hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300" 
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -271,7 +207,7 @@ export default function PasswordResetForm() {
               </>
             ) : (
               <>
-                <Shield className="h-4 w-4 mr-2" />
+                <Key className="h-4 w-4 mr-2" />
                 Reset Password
               </>
             )}

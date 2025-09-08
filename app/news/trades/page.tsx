@@ -495,7 +495,7 @@ export default function TradesNewsPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Trade History</h1>
-            <p className="text-muted-foreground">Recent completed trades between SCS teams</p>
+            <p className="text-muted-foreground">Recent completed trades between MGHL teams</p>
           </div>
           <Link href="/news" className="text-primary hover:underline flex items-center gap-1">
             ← Back to News

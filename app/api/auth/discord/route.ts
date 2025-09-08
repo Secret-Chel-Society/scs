@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server"
 
 const isDevelopment = process.env.NODE_ENV === "development"
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1365888660171653150"
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
-// Trim environment variable to prevent leading/trailing spaces
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  (isDevelopment ? "http://localhost:3000" : "https://www.secretchelsociety.com")
-const DISCORD_REDIRECT_URI = `${SITE_URL}/api/auth/discord/callback`
+const DISCORD_REDIRECT_URI = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/discord/callback`
 
 export async function GET(request: Request) {
   try {
@@ -21,7 +17,6 @@ export async function GET(request: Request) {
       hasClientId: !!DISCORD_CLIENT_ID,
       hasClientSecret: !!DISCORD_CLIENT_SECRET,
       redirectUri: DISCORD_REDIRECT_URI,
-      siteUrl: SITE_URL, // Log the site URL for debugging
     })
 
     // Check if Discord is properly configured

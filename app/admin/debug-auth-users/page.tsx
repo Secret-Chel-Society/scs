@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import DebugAuthUsers from "@/components/admin/debug-auth-users"
 
 export const metadata: Metadata = {
-  title: "Debug Auth Users - SCS Admin",
+  title: "Debug Auth Users - MGHL Admin",
   description: "Debug and search for users in the Supabase Auth system",
 }
 

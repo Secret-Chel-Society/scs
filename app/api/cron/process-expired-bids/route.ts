@@ -1,4 +1,3 @@
-// Midnight Studios INTl - All rights reserved
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
@@ -27,14 +26,11 @@ export async function POST(request: Request) {
       .from("player_bidding")
       .select(`
         *,
-        players!player_bidding_player_id_fkey(
-          user_id,
-          users!players_user_id_fkey(id, gamer_tag_id, discord_id)
-        ),
+        users!player_bidding_user_id_fkey(id, gamer_tag_id, discord_id),
         teams!player_bidding_team_id_fkey(id, name, discord_role_id)
       `)
-      .lt("bid_expires_at", new Date().toISOString())
-      .eq("status", "Active")
+      .lt("bid_expires", new Date().toISOString())
+      .eq("status", "active")
       .not("finalized", "eq", true)
 
     if (bidsError) {
@@ -58,13 +54,13 @@ export async function POST(request: Request) {
 
     for (const bid of expiredBids) {
       try {
-        console.log(`Processing bid for ${bid.players?.users?.gamer_tag_id} to team ${bid.teams?.name}`)
+        console.log(`Processing bid for ${bid.users?.gamer_tag_id} to team ${bid.teams?.name}`)
 
-        // Update bid status to Won
+        // Update bid status to completed
         const { error: updateError } = await supabaseAdmin
           .from("player_bidding")
           .update({
-            status: "Won",
+            status: "completed",
             finalized: true,
             updated_at: new Date().toISOString(),
           })
@@ -80,12 +76,12 @@ export async function POST(request: Request) {
         const { data: existingPlayer, error: playerCheckError } = await supabaseAdmin
           .from("players")
           .select("id, team_id, status")
-          .eq("user_id", bid.players.user_id)
+          .eq("user_id", bid.user_id)
           .single()
 
         if (playerCheckError && playerCheckError.code !== "PGRST116") {
-          console.error(`Error checking player ${bid.players.user_id}:`, playerCheckError)
-          errors.push(`Failed to check player ${bid.players.user_id}: ${playerCheckError.message}`)
+          console.error(`Error checking player ${bid.user_id}:`, playerCheckError)
+          errors.push(`Failed to check player ${bid.user_id}: ${playerCheckError.message}`)
           continue
         }
 
@@ -100,19 +96,19 @@ export async function POST(request: Request) {
               salary: bid.bid_amount,
               updated_at: new Date().toISOString(),
             })
-            .eq("user_id", bid.players.user_id)
+            .eq("user_id", bid.user_id)
 
           if (playerUpdateError) {
-            console.error(`Error updating player ${bid.players.user_id}:`, playerUpdateError)
-            errors.push(`Failed to update player ${bid.players.user_id}: ${playerUpdateError.message}`)
+            console.error(`Error updating player ${bid.user_id}:`, playerUpdateError)
+            errors.push(`Failed to update player ${bid.user_id}: ${playerUpdateError.message}`)
             continue
           }
 
-          console.log(`Updated existing player ${bid.players?.users?.gamer_tag_id} to team ${bid.teams?.name}`)
+          console.log(`Updated existing player ${bid.users?.gamer_tag_id} to team ${bid.teams?.name}`)
         } else {
           // Insert new player record
           const { error: playerInsertError } = await supabaseAdmin.from("players").insert({
-            user_id: bid.players.user_id,
+            user_id: bid.user_id,
             team_id: bid.team_id,
             status: "active",
             salary: bid.bid_amount,
@@ -121,18 +117,18 @@ export async function POST(request: Request) {
           })
 
           if (playerInsertError) {
-            console.error(`Error inserting player ${bid.players.user_id}:`, playerInsertError)
-            errors.push(`Failed to insert player ${bid.players.user_id}: ${playerInsertError.message}`)
+            console.error(`Error inserting player ${bid.user_id}:`, playerInsertError)
+            errors.push(`Failed to insert player ${bid.user_id}: ${playerInsertError.message}`)
             continue
           }
 
-          console.log(`Created new player record for ${bid.players?.users?.gamer_tag_id} on team ${bid.teams?.name}`)
+          console.log(`Created new player record for ${bid.users?.gamer_tag_id} on team ${bid.teams?.name}`)
         }
 
         // Sync Discord roles if user has Discord connection
-        if (bid.players?.users?.discord_id) {
+        if (bid.users?.discord_id) {
           try {
-            console.log(`Syncing Discord roles for ${bid.players.users.gamer_tag_id}...`)
+            console.log(`Syncing Discord roles for ${bid.users.gamer_tag_id}...`)
 
             const discordSyncResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/discord/assign-roles`, {
               method: "POST",
@@ -140,28 +136,28 @@ export async function POST(request: Request) {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                userId: bid.players.user_id,
+                userId: bid.user_id,
               }),
             })
 
             if (!discordSyncResponse.ok) {
               const errorText = await discordSyncResponse.text()
-              console.error(`Discord sync failed for ${bid.players.users.gamer_tag_id}:`, errorText)
-              errors.push(`Discord sync failed for ${bid.players.users.gamer_tag_id}: ${errorText}`)
+              console.error(`Discord sync failed for ${bid.users.gamer_tag_id}:`, errorText)
+              errors.push(`Discord sync failed for ${bid.users.gamer_tag_id}: ${errorText}`)
             } else {
               const syncResult = await discordSyncResponse.json()
-              console.log(`Discord roles synced for ${bid.players.users.gamer_tag_id}:`, syncResult.message)
+              console.log(`Discord roles synced for ${bid.users.gamer_tag_id}:`, syncResult.message)
             }
           } catch (discordError) {
-            console.error(`Discord sync error for ${bid.players.users.gamer_tag_id}:`, discordError)
-            errors.push(`Discord sync error for ${bid.players.users.gamer_tag_id}: ${discordError.message}`)
+            console.error(`Discord sync error for ${bid.users.gamer_tag_id}:`, discordError)
+            errors.push(`Discord sync error for ${bid.users.gamer_tag_id}: ${discordError.message}`)
           }
         } else {
-          console.log(`No Discord connection found for ${bid.players?.users?.gamer_tag_id}`)
+          console.log(`No Discord connection found for ${bid.users?.gamer_tag_id}`)
         }
 
         processed++
-        console.log(`Successfully processed bid for ${bid.players?.users?.gamer_tag_id}`)
+        console.log(`Successfully processed bid for ${bid.users?.gamer_tag_id}`)
       } catch (error) {
         console.error(`Error processing bid ${bid.id}:`, error)
         errors.push(`Error processing bid ${bid.id}: ${error.message}`)

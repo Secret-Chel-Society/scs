@@ -15,4 +15,3 @@ export function PageHeader({ className, title, description, ...props }: PageHead
     </div>
   )
 }
-

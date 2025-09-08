@@ -1,4 +1,3 @@
-// Midnight Studios INTl - All rights reserved
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -37,7 +36,6 @@ const nextConfig = {
         "@supabase/node-fetch": false,
       };
     }
-    
     return config;
   },
 };

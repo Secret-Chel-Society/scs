@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Plus, Trash2, Video, Camera, Image, Play, Pause, SkipForward, SkipBack, Trophy, Star, Medal, Crown, Target, Zap, Shield, Users, Clock, Calendar, Activity, TrendingUp, BarChart3, Award, BookOpen, FileText, Globe } from "lucide-react"
+import { Loader2, Plus, Trash2, Video } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 
@@ -196,89 +196,59 @@ export function MatchHighlights({ matchId, canEdit, className }: MatchHighlights
   }
 
   return (
-    <Card className={`hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden ${className}`}>
-      <CardHeader className="bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/30 dark:to-assist-green-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-        <div className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-lg flex items-center justify-center">
-              <Video className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center">
-                Match Highlights
-              </CardTitle>
-              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                Video highlights from this match
-              </CardDescription>
-            </div>
-          </div>
-          {canEdit && !adding && (
-            <Button 
-              className="hockey-button hover:scale-105 transition-all duration-200" 
-              onClick={() => setAdding(true)}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Highlight
-            </Button>
-          )}
+    <Card className={className}>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="flex items-center">
+            <Video className="mr-2 h-5 w-5" />
+            Match Highlights
+          </CardTitle>
+          <CardDescription>Video highlights from this match</CardDescription>
         </div>
+        {canEdit && !adding && (
+          <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Highlight
+          </Button>
+        )}
       </CardHeader>
-      <CardContent className="p-8">
+      <CardContent>
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="text-center">
-              <Loader2 className="h-12 w-12 animate-spin text-ice-blue-600 dark:text-ice-blue-400 mx-auto mb-4" />
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Loading highlights...</p>
-            </div>
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {adding && (
-              <div className="hockey-alert p-6 mb-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                    <Plus className="h-4 w-4 text-white" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Add New Highlight</h3>
-                </div>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="highlight-title" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">Title</Label>
+              <div className="border rounded-md p-4 mb-6 bg-muted/30">
+                <h3 className="font-medium mb-4">Add New Highlight</h3>
+                <div className="space-y-4">
+                  <div className="grid w-full gap-1.5">
+                    <Label htmlFor="highlight-title">Title</Label>
                     <Input
                       id="highlight-title"
                       placeholder="Goal Highlight, Game Winning Save, etc."
                       value={newHighlightTitle}
                       onChange={(e) => setNewHighlightTitle(e.target.value)}
-                      className="hockey-search"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="highlight-url" className="text-hockey-silver-700 dark:text-hockey-silver-300 font-medium">YouTube URL</Label>
+                  <div className="grid w-full gap-1.5">
+                    <Label htmlFor="highlight-url">YouTube URL</Label>
                     <Input
                       id="highlight-url"
                       placeholder="https://www.youtube.com/watch?v=..."
                       value={newHighlightUrl}
                       onChange={(e) => setNewHighlightUrl(e.target.value)}
-                      className="hockey-search"
                     />
-                    <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Paste a YouTube video URL (e.g., https://www.youtube.com/watch?v=abcdefg)
                     </p>
                   </div>
-                  <div className="flex justify-end space-x-3">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setAdding(false)} 
-                      disabled={submitting}
-                      className="border-ice-blue-300 dark:border-ice-blue-600 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:scale-105 transition-all duration-200"
-                    >
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setAdding(false)} disabled={submitting}>
                       Cancel
                     </Button>
-                    <Button 
-                      onClick={addHighlight} 
-                      disabled={submitting}
-                      className="hockey-button hover:scale-105 transition-all duration-200"
-                    >
+                    <Button onClick={addHighlight} disabled={submitting}>
                       {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       {submitting ? "Adding..." : "Add Highlight"}
                     </Button>
@@ -288,57 +258,38 @@ export function MatchHighlights({ matchId, canEdit, className }: MatchHighlights
             )}
 
             {highlights.length > 0 ? (
-              <div className="grid gap-8">
+              <div className="grid gap-6">
                 {highlights.map((highlight) => (
-                  <div key={highlight.id} className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden hover:scale-105 transition-all duration-300">
-                    <div className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700 p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                            <Play className="h-4 w-4 text-white" />
-                          </div>
-                          <h3 className="text-lg font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">{highlight.title}</h3>
-                        </div>
-                        {canEdit && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteHighlight(highlight.id)}
-                            className="h-8 w-8 p-0 hover:bg-goal-red-100 dark:hover:bg-goal-red-900/30 hover:scale-110 transition-all duration-200"
-                          >
-                            <Trash2 className="h-4 w-4 text-hockey-silver-500 hover:text-goal-red-600 dark:hover:text-goal-red-400" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        )}
-                      </div>
+                  <div key={highlight.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">{highlight.title}</h3>
+                      {canEdit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteHighlight(highlight.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      )}
                     </div>
-                    <div className="p-4">
-                      {renderYouTubeEmbed(highlight.embed_url)}
-                    </div>
+                    {renderYouTubeEmbed(highlight.embed_url)}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Video className="h-10 w-10 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
-                  No Highlights Yet
-                </h3>
-                <p className="text-hockey-silver-600 dark:text-hockey-silver-400 mb-6">
-                  No highlights have been added for this match yet.
-                </p>
+              <div className="text-center py-8 text-muted-foreground">
+                <Video className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                <p>No highlights have been added for this match yet.</p>
                 {canEdit && !adding && (
                   <>
-                    <Button 
-                      className="hockey-button hover:scale-105 transition-all duration-200 mb-4" 
-                      onClick={() => setAdding(true)}
-                    >
+                    <Button variant="outline" className="mt-4" onClick={() => setAdding(true)}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add First Highlight
                     </Button>
-                    <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-500">
+                    <p className="text-xs mt-2 text-muted-foreground">
                       Note: If you encounter errors, the highlights feature may need to be set up by an administrator.
                     </p>
                   </>

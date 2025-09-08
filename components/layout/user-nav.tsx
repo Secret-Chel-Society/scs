@@ -1,16 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
 import Image from "next/image"
-import { Menu, X, User, Settings, LogOut, Building, ShieldCheck, Wrench, Map } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ModeToggle } from "@/components/mode-toggle"
-import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown"
-import { TeamChatButton } from "@/components/team-chat/team-chat-button"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,417 +14,291 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
-import { useMobile } from "@/hooks/use-mobile"
-import { useSupabase } from "@/lib/supabase/client"
-import { avatarSync } from "@/lib/avatar-sync"
+import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
-export default function SideNavigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [userProfile, setUserProfile] = useState<any>(null)
-  const [playerRole, setPlayerRole] = useState<string | null>(null)
-  const [userRoles, setUserRoles] = useState<string[]>([])
-  const [teamInfo, setTeamInfo] = useState<{ id: string; name: string; logo_url: string | null } | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [isTeamManager, setIsTeamManager] = useState(false)
-  const [loadingProfile, setLoadingProfile] = useState(true)
-  const [fetchError, setFetchError] = useState<string | null>(null)
-  const [playerId, setPlayerId] = useState<string | null>(null)
-  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null)
-  const pathname = usePathname()
+export function UserNav({ user }: { user: any }) {
   const router = useRouter()
-  const isMobile = useMobile()
-  const { supabase, session, isLoading } = useSupabase()
+  const supabase = createClientComponentClient()
   const { toast } = useToast()
-
-  // All data fetching and helper functions remain unchanged.
-  // ... (fetchUserData, handleSignOut, getInitials, etc. from your original code)
-  // --- Start of Unchanged Logic ---
-
-  const fetchUserData = async () => {
-    if (!session?.user?.id || !supabase) {
-      setLoadingProfile(false)
-      setUserProfile(null)
-      return
-    }
-    try {
-      setLoadingProfile(true)
-      setFetchError(null)
-      const { data: user } = await supabase.from("users").select("*").eq("id", session.user.id).single()
-      if (user) {
-        setUserProfile(user)
-        setCurrentAvatarUrl(user.avatar_url)
-      }
-      const [playerResponse, rolesResponse] = await Promise.allSettled([
-        supabase.from("players").select("id, role, team_id").eq("user_id", session.user.id).single(),
-        supabase.from("user_roles").select("role").eq("user_id", session.user.id),
-      ])
-      if (playerResponse.status === "fulfilled" && playerResponse.value.data) {
-        const player = playerResponse.value.data
-        setPlayerRole(player.role)
-        setPlayerId(player.id)
-        setIsTeamManager(["GM", "AGM", "Owner"].includes(player.role))
-        if (player.team_id) {
-          const { data: team } = await supabase
-            .from("teams")
-            .select("id, name, logo_url")
-            .eq("id", player.team_id)
-            .single()
-          if (team) setTeamInfo(team)
-        }
-      }
-      if (rolesResponse.status === "fulfilled" && rolesResponse.value.data) {
-        const roles = rolesResponse.value.data
-        if (roles.length > 0) {
-          const roleNames = roles.map((r) => r.role)
-          setUserRoles(roleNames)
-          setIsAdmin(roleNames.includes("Admin"))
-        }
-      }
-    } catch (error) {
-      console.error("Error in profile fetch:", error)
-      setFetchError("Failed to load profile data. Please try again.")
-    } finally {
-      setLoadingProfile(false)
-    }
-  }
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [playerRole, setPlayerRole] = useState<string | null>(null)
+  const [teamInfo, setTeamInfo] = useState<{ id: string; name: string; logo_url: string | null } | null>(null)
+  const [playerId, setPlayerId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    let isMounted = true
-    const fetchData = async () => {
-      if (!session?.user?.id || !supabase) {
-        if (isMounted) {
-          setLoadingProfile(false)
-          setUserProfile(null)
-        }
-        return
-      }
+    async function fetchUserProfile() {
+      if (!user?.id) return
+
+      setIsLoading(true)
+
       try {
-        if (isMounted) {
-          setLoadingProfile(true)
-          setFetchError(null)
+        // Fetch user data, player role, and team information in a single query
+        const { data, error } = await supabase
+          .from("users")
+          .select(`
+            *,
+            players(
+              id,
+              role,
+              team_id,
+              teams:team_id(
+                id,
+                name,
+                logo_url
+              )
+            )
+          `)
+          .eq("id", user.id)
+          .single()
+
+        if (data && !error) {
+          console.log("UserNav: User profile loaded", data)
+          setUserProfile(data)
+
+          // Set player role and team info if available
+          if (data.players && data.players.length > 0) {
+            console.log("Player data found:", data.players[0])
+            setPlayerRole(data.players[0].role)
+
+            // Make sure we're setting the player ID correctly
+            const playerIdFromData = data.players[0].id
+            console.log("Setting player ID to:", playerIdFromData)
+            setPlayerId(playerIdFromData)
+
+            if (data.players[0].teams) {
+              setTeamInfo({
+                id: data.players[0].teams.id,
+                name: data.players[0].teams.name,
+                logo_url: data.players[0].teams.logo_url,
+              })
+            }
+          } else {
+            console.log("No player data found for user")
+          }
+
+          // Check if user has admin role
+          const { data: adminData } = await supabase.from("admins").select("*").eq("user_id", user.id).single()
+          setIsAdmin(!!adminData)
+        } else {
+          console.error("Error fetching user profile in UserNav:", error)
         }
-        await fetchUserData()
       } catch (error) {
-        console.error("Error in profile fetch:", error)
-        if (isMounted) {
-          setFetchError("Failed to load profile data. Please try again.")
-        }
+        console.error("Exception in UserNav:", error)
       } finally {
-        if (isMounted) {
-          setLoadingProfile(false)
-        }
+        setIsLoading(false)
       }
     }
-    fetchData()
-    return () => {
-      isMounted = false
-    }
-  }, [session, supabase])
 
-  useEffect(() => {
-    if (!session?.user?.id) return
-    const unsubscribe = avatarSync.subscribe((newAvatarUrl) => {
-      setCurrentAvatarUrl(newAvatarUrl)
-      setUserProfile((prev: any) => (prev ? { ...prev, avatar_url: newAvatarUrl } : prev))
-    })
-    return unsubscribe
-  }, [session?.user?.id])
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && session?.user?.id) fetchUserData()
-    }
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "avatar_updated" && session?.user?.id) fetchUserData()
-    }
-    const handleAvatarUpdate = (e: CustomEvent) => {
-      if (e.detail?.userId === session?.user?.id && e.detail?.avatarUrl) {
-        setCurrentAvatarUrl(e.detail.avatarUrl)
-        setUserProfile((prev: any) => (prev ? { ...prev, avatar_url: e.detail.avatarUrl } : prev))
-      }
-    }
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-    window.addEventListener("storage", handleStorageChange)
-    window.addEventListener("avatarUpdated", handleAvatarUpdate as EventListener)
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-      window.removeEventListener("storage", handleStorageChange)
-      window.removeEventListener("avatarUpdated", handleAvatarUpdate as EventListener)
-    }
-  }, [session])
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
-  const closeMenu = () => setIsMenuOpen(false)
+    fetchUserProfile()
+  }, [user, supabase])
 
   const handleSignOut = async () => {
-    if (!supabase) {
-      toast({
-        title: "Error",
-        description: "Unable to sign out. Please try again later.",
-        variant: "destructive",
-      })
-      return
-    }
-    try {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession()
-      if (currentSession) {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
-      }
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      })
-      window.location.href = "/"
-    } catch (error) {
-      console.error("Error signing out:", error)
-      if (error instanceof Error && error.message.includes("Auth session missing")) {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        })
-        window.location.href = "/"
-        return
-      }
-      toast({
-        title: "Sign out failed",
-        description: "There was a problem signing you out. Please try again.",
-        variant: "destructive",
-      })
-    }
+    await supabase.auth.signOut()
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully.",
+    })
+    // Force a hard navigation to ensure complete page refresh with new auth state
+    window.location.href = "/"
   }
 
   const getInitials = () => {
     if (userProfile?.gamer_tag_id) {
       return userProfile.gamer_tag_id.substring(0, 2).toUpperCase()
     }
-    return session?.user?.email?.substring(0, 2).toUpperCase() || "U"
+    return user?.email?.substring(0, 2).toUpperCase() || "U"
   }
 
-  const getProfileUrl = () => {
-    if (playerId) return `/players/${playerId}`
-    if (session?.user?.id) return `/players/${session.user.id}`
-    return "/profile"
+  // Get role badge color based on role
+  const getRoleBadgeColor = (role: string | null) => {
+    switch (role) {
+      case "Owner":
+        return "bg-purple-500 hover:bg-purple-600"
+      case "GM":
+        return "bg-red-500 hover:bg-red-600"
+      case "AGM":
+        return "bg-blue-500 hover:bg-blue-600"
+      case "Player":
+        return "bg-green-500 hover:bg-green-600"
+      default:
+        return "bg-gray-500 hover:bg-gray-600"
+    }
   }
 
-  const navigateToProfile = () => {
-    router.push(getProfileUrl())
-    closeMenu()
-  }
-
+  // Check if user has management role
   const hasManagementRole = () => {
+    console.log("Checking management role for:", playerRole) // Debug log
+    if (!playerRole) return false
     const managementRoles = ["Owner", "GM", "AGM", "General Manager", "Assistant General Manager"]
-    return playerRole && managementRoles.includes(playerRole)
+    const hasRole = managementRoles.includes(playerRole)
+    console.log("Has management role:", hasRole) // Debug log
+    return hasRole
   }
 
-  // --- End of Unchanged Logic ---
+  // Get the profile URL
+  const getProfileUrl = () => {
+    // If we have a player ID, use it
+    if (playerId) {
+      return `/players/${playerId}`
+    }
 
-  const baseNavigation = [
-    { name: "Home", href: "/" },
-    { name: "Teams", href: "/teams" },
-    { name: "Standings", href: "/standings" },
-    { name: "Stats", href: "/stats" },
-    { name: "Matches", href: "/matches" },
-    { name: "Awards", href: "/awards" },
-    {
-      name: "Free Agency",
-      href: "/free-agency",
-      submenu: [
-        { name: "Free Agency", href: "/free-agency" },
-        { name: "Bidding Recap", href: "/free-agency/bidding-recap" },
-      ],
-    },
-    {
-      name: "ELO",
-      href: "/elo/rankings",
-      submenu: [
-        { name: "ELO Rankings", href: "/elo/rankings" },
-        { name: "ELO Statistics", href: "/elo/statistics" },
-        { name: "ELO Matches", href: "/elo/matches" },
-      ],
-    },
-    {
-      name: "News",
-      href: "/news",
-      submenu: [
-        { name: "News", href: "/news" },
-        { name: "Daily Recap", href: "/news/daily-recap" },
-      ],
-    },
-    { name: "Forum", href: "/forum" },
-  ]
-  
-  if (session) {
-    baseNavigation.push({ name: "Season Registration", href: "/register/season" })
+    // If we have a user ID, use that for the player page
+    if (user?.id) {
+      return `/players/${user.id}`
+    }
+
+    // Last resort fallback
+    return "/players"
   }
 
-  const navigation = baseNavigation
-  const showFullUI = !isLoading
-
-  const NavContent = () => (
-    <div className="flex h-full flex-col">
-      {/* Logo */}
-      <div className="flex h-16 items-center border-b px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold" onClick={closeMenu}>
-          <Image
-            src="https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media//SCS.png"
-            alt="SCS Logo"
-            width={120}
-            height={40}
-            className="h-10 w-auto object-contain"
-            priority
-          />
-        </Link>
-      </div>
-      
-      {/* Main Navigation Links */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="grid items-start gap-2 px-4 text-sm font-medium">
-          {navigation.map((item) => (
-            <li key={item.name}>
-              <Link
-                href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-ice-blue-600 dark:hover:text-ice-blue-400 ${
-                  pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
-                    ? "bg-ice-blue-100 dark:bg-ice-blue-900/30 text-ice-blue-600 dark:text-ice-blue-400"
-                    : "text-muted-foreground"
-                }`}
-                onClick={closeMenu}
-              >
-                {item.name}
-              </Link>
-              {item.submenu && (
-                <ul className="ml-7 mt-1 border-l border-muted-foreground/20 pl-4">
-                  {item.submenu.map((subItem) => (
-                    <li key={subItem.name}>
-                      <Link
-                        href={subItem.href}
-                        className={`block rounded-lg py-2 pl-2 pr-3 transition-all hover:text-ice-blue-600 dark:hover:text-ice-blue-400 text-sm ${
-                          pathname === subItem.href ? "text-ice-blue-600 dark:text-ice-blue-400" : "text-hockey-silver-600 dark:text-hockey-silver-400"
-                        }`}
-                        onClick={closeMenu}
-                      >
-                        {subItem.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Bottom User Section */}
-      <div className="mt-auto border-t p-4">
-        {showFullUI && (
-          <>
-            {session ? (
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <TeamChatButton />
-                    <NotificationsDropdown userId={session.user.id} />
-                    <ModeToggle />
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex h-auto w-full items-center justify-start gap-3 p-2">
-                       <Avatar className="h-9 w-9 border">
-                         <AvatarImage
-                           src={currentAvatarUrl || "/placeholder.svg?height=32&width=32"}
-                           alt={userProfile?.gamer_tag_id || "User"}
-                           key={currentAvatarUrl}
-                         />
-                         <AvatarFallback>{getInitials()}</AvatarFallback>
-                       </Avatar>
-                       <div className="flex flex-col items-start">
-                         <span className="font-semibold text-sm">{userProfile?.gamer_tag_id || "User"}</span>
-                         <span className="text-xs text-muted-foreground">{playerRole || "No Role"}</span>
-                       </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 mb-2" align="start" side="top" forceMount>
-                     <DropdownMenuLabel className="font-normal">
-                       <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{userProfile?.gamer_tag_id || "User"}</p>
-                          <p className="text-xs leading-none text-muted-foreground">{session.user.email}</p>
-                       </div>
-                     </DropdownMenuLabel>
-                     <DropdownMenuSeparator />
-                     <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={navigateToProfile} className="cursor-pointer">
-                            <User className="mr-2 h-4 w-4" /> View My Profile
-                        </DropdownMenuItem>
-                        {hasManagementRole() && (
-                            <DropdownMenuItem asChild className="cursor-pointer">
-                                <Link href="/management"><Building className="mr-2 h-4 w-4" /> Management</Link>
-                            </DropdownMenuItem>
-                        )}
-                        {isAdmin && (
-                            <DropdownMenuItem asChild className="cursor-pointer">
-                                <Link href="/admin"><ShieldCheck className="mr-2 h-4 w-4" /> Admin</Link>
-                            </DropdownMenuItem>
-                        )}
-                        <DropdownMenuItem asChild className="cursor-pointer">
-                            <Link href="/settings"><Settings className="mr-2 h-4 w-4" /> Settings</Link>
-                        </DropdownMenuItem>
-                     </DropdownMenuGroup>
-                     <DropdownMenuSeparator />
-                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-                        <LogOut className="mr-2 h-4 w-4" /> Log out
-                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            ) : (
-               <div className="grid gap-2">
-                 <Button variant="outline" asChild><Link href="/login">Log in</Link></Button>
-                 <Button asChild><Link href="/register">Sign up</Link></Button>
-               </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  )
+  if (isLoading) {
+    return (
+      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="animate-pulse">...</AvatarFallback>
+        </Avatar>
+      </Button>
+    )
+  }
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-40 md:flex md:w-64 md:border-r md:bg-background">
-        <NavContent />
-      </aside>
-
-      {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:hidden">
-        <Button size="icon" variant="outline" className="md:hidden" onClick={toggleMenu}>
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle Menu</span>
-        </Button>
-        <div className="flex-1" /> {/* Spacer */}
-        <ModeToggle />
-        {session && <NotificationsDropdown userId={session.user.id} />}
-      </header>
-
-      {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden" onClick={closeMenu}>
-          <div
-            className="fixed inset-y-0 left-0 z-50 w-64 border-r bg-background"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the menu
-          >
-            <NavContent />
-            <Button size="icon" variant="ghost" className="absolute top-3 right-3" onClick={closeMenu}>
-                <X className="h-5 w-5" />
-                <span className="sr-only">Close Menu</span>
-            </Button>
-          </div>
-        </div>
+    <div className="flex items-center gap-2">
+      {/* Display team badge if available */}
+      {teamInfo && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href={`/teams/${teamInfo.id}`} className="flex items-center">
+                <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border bg-background">
+                  {teamInfo.logo_url ? (
+                    <Image
+                      src={teamInfo.logo_url || "/placeholder.svg"}
+                      alt={teamInfo.name}
+                      width={24}
+                      height={24}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold">{teamInfo.name.substring(0, 2)}</span>
+                  )}
+                </div>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{teamInfo.name}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
-    </>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Avatar className="h-8 w-8">
+              <AvatarImage
+                src={userProfile?.avatar_url || "/placeholder.svg?height=32&width=32"}
+                alt={userProfile?.gamer_tag_id || "User"}
+              />
+              <AvatarFallback>{getInitials()}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <button
+                onClick={() => {
+                  const url = playerId ? `/players/${playerId}` : user?.id ? `/players/${user.id}` : "/players"
+                  console.log("Direct navigation to:", url)
+                  router.push(url)
+                }}
+                className="text-left group hover:cursor-pointer"
+              >
+                <p className="text-sm font-medium leading-none group-hover:text-primary transition-colors">
+                  {userProfile?.gamer_tag_id || "User"}
+                </p>
+              </button>
+              <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+              <div className="mt-1 flex items-center gap-2">
+                {playerRole && (
+                  <Badge variant="outline" className="w-fit">
+                    {playerRole}
+                  </Badge>
+                )}
+                {teamInfo && (
+                  <Badge variant="secondary" className="w-fit">
+                    {teamInfo.name}
+                  </Badge>
+                )}
+              </div>
+              {/* Debug info - remove this after testing */}
+              <div className="text-xs text-muted-foreground">
+                Role: {playerRole || "None"} | Management: {hasManagementRole() ? "Yes" : "No"}
+              </div>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem>
+              <button
+                onClick={() => {
+                  const url = playerId ? `/players/${playerId}` : user?.id ? `/players/${user.id}` : "/players"
+                  console.log("Profile navigation to:", url)
+                  router.push(url)
+                }}
+                className="flex items-center w-full text-left"
+              >
+                <span className="mr-2">👤</span>
+                View My Profile
+              </button>
+            </DropdownMenuItem>
+
+            {/* Management Panel - Force show for debugging */}
+            {(playerRole === "Owner" || playerRole === "GM" || playerRole === "AGM" || hasManagementRole()) && (
+              <DropdownMenuItem asChild>
+                <Link href="/management" className="flex items-center">
+                  <span className="mr-2">🏢</span>
+                  Management Panel
+                </Link>
+              </DropdownMenuItem>
+            )}
+
+            <DropdownMenuItem asChild>
+              <Link href="/settings" className="flex items-center">
+                <span className="mr-2">⚙️</span>
+                Account Settings
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild>
+              <Link href="/register/season" className="flex items-center">
+                <span className="mr-2">🏒</span>
+                Season Registration
+              </Link>
+            </DropdownMenuItem>
+
+            {isAdmin && (
+              <DropdownMenuItem asChild>
+                <Link href="/admin" className="flex items-center">
+                  <span className="mr-2">🔧</span>
+                  Admin Dashboard
+                </Link>
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSignOut}>
+            <span className="mr-2">🚪</span>
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }

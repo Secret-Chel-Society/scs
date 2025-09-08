@@ -17,8 +17,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, UserMinus, AlertCircle, Clock, Shield, Ban } from "lucide-react"
-import { motion } from "framer-motion"
+import { Loader2 } from "lucide-react"
 
 interface BanUserDialogProps {
   open: boolean
@@ -113,47 +112,27 @@ export function BanUserDialog({ open, onOpenChange, userId, userName, onBanSucce
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-gradient-to-br from-goal-red-500 to-assist-green-500 rounded-full shadow-lg">
-              <UserMinus className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <DialogTitle className="text-2xl font-bold text-hockey-silver-900 dark:text-hockey-silver-100">
-            Ban User
-          </DialogTitle>
-          <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-            {userName ? (
-              <>Ban user: <span className="font-semibold text-hockey-silver-900 dark:text-hockey-silver-100">{userName}</span></>
-            ) : (
-              "Ban the selected user"
-            )}
-          </DialogDescription>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Ban User</DialogTitle>
+          <DialogDescription>{userName ? `Ban user: ${userName}` : "Ban the selected user"}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-3">
-            <Label htmlFor="banReason" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-goal-red-500" />
-              Ban Reason
-            </Label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="banReason">Ban Reason</Label>
             <Textarea
               id="banReason"
               placeholder="Enter the reason for banning this user..."
               value={banReason}
               onChange={(e) => setBanReason(e.target.value)}
               required
-              className="hockey-search min-h-[100px]"
             />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="banDuration" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-              <Clock className="h-4 w-4 text-ice-blue-500" />
-              Ban Duration
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="banDuration">Ban Duration</Label>
             <Select value={banDuration} onValueChange={setBanDuration} required>
-              <SelectTrigger className="hockey-search">
+              <SelectTrigger>
                 <SelectValue placeholder="Select ban duration" />
               </SelectTrigger>
               <SelectContent>
@@ -172,49 +151,31 @@ export function BanUserDialog({ open, onOpenChange, userId, userName, onBanSucce
           </div>
 
           {banDuration === "custom" && (
-            <div className="space-y-3">
-              <Label htmlFor="customDuration" className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
-                <Clock className="h-4 w-4 text-rink-blue-500" />
-                Custom Duration
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="customDuration">Custom Duration</Label>
               <Input
                 id="customDuration"
                 placeholder="e.g., 45 days, 2 months, 1.5 years"
                 value={customDuration}
                 onChange={(e) => setCustomDuration(e.target.value)}
                 required
-                className="hockey-search"
               />
-              <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 bg-hockey-silver-100 dark:bg-hockey-silver-800 p-2 rounded">
-                Examples: "45 days", "2 months", "1.5 years"
-              </p>
+              <p className="text-xs text-muted-foreground">Examples: "45 days", "2 months", "1.5 years"</p>
             </div>
           )}
 
-          <DialogFooter className="gap-3">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              className="hockey-button-enhanced"
-            >
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading} 
-              className="hockey-button-enhanced bg-goal-red-500 hover:bg-goal-red-600 text-white"
-            >
+            <Button type="submit" disabled={isLoading} variant="destructive">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Banning...
                 </>
               ) : (
-                <>
-                  <UserMinus className="mr-2 h-4 w-4" />
-                  Ban User
-                </>
+                "Ban User"
               )}
             </Button>
           </DialogFooter>

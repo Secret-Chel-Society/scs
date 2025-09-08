@@ -22,9 +22,9 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
   const [error, setError] = useState("")
   const { supabase } = useSupabase()
 
-  // Ensure bid amount is always in 2M increments
+  // Ensure bid amount is always in 250k increments
   const roundToIncrement = (value: number): number => {
-    const increment = 2000000
+    const increment = 250000
     return Math.round(value / increment) * increment
   }
 
@@ -47,7 +47,7 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
 
           if (data && data.length > 0) {
             setCurrentHighestBid(data[0].bid_amount)
-            const minimumBid = Math.max(data[0].bid_amount + 2000000, currentSalary || 750000)
+            const minimumBid = Math.max(data[0].bid_amount + 250000, currentSalary || 750000)
             setBidAmount(roundToIncrement(minimumBid))
           } else {
             setCurrentHighestBid(null)
@@ -74,7 +74,7 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
     e.preventDefault()
     setError("")
 
-    const minimumBid = currentHighestBid ? currentHighestBid + 2000000 : currentSalary || 750000
+    const minimumBid = currentHighestBid ? currentHighestBid + 250000 : currentSalary || 750000
 
     if (bidAmount < minimumBid) {
       setError(`Bid amount must be at least $${minimumBid.toLocaleString()}`)
@@ -86,9 +86,9 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
       return
     }
 
-    // Ensure bid is in 2M increments
-    if (bidAmount % 2000000 !== 0) {
-      setError("Bid amount must be in $2,000,000 increments")
+    // Ensure bid is in 250k increments
+    if (bidAmount % 250000 !== 0) {
+      setError("Bid amount must be in $250,000 increments")
       return
     }
 
@@ -101,7 +101,7 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-hockey-silver-900 border-hockey-silver-700 text-white">
+      <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700 text-white">
         <DialogHeader className="text-center">
           <DialogTitle className="text-xl font-bold">
             Place Bid for {player?.users?.gamer_tag_id || "Player"}
@@ -112,23 +112,23 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
           <div className="grid gap-6 py-4">
             {currentHighestBid ? (
               <div className="space-y-2">
-                <Label className="text-hockey-silver-300">Current Highest Bid</Label>
-                <div className="bg-hockey-silver-800 px-3 py-2 rounded-md font-mono text-lg text-assist-green-400 border border-hockey-silver-600">
+                <Label className="text-gray-300">Current Highest Bid</Label>
+                <div className="bg-gray-800 px-3 py-2 rounded-md font-mono text-lg text-green-400 border border-gray-600">
                   {formatCurrency(currentHighestBid)}
                 </div>
               </div>
             ) : (
               <div className="space-y-2">
-                <Label className="text-hockey-silver-300">Minimum Bid</Label>
-                <div className="bg-hockey-silver-800 px-3 py-2 rounded-md font-mono text-lg text-assist-green-400 border border-hockey-silver-600">
+                <Label className="text-gray-300">Minimum Bid</Label>
+                <div className="bg-gray-800 px-3 py-2 rounded-md font-mono text-lg text-green-400 border border-gray-600">
                   {formatCurrency(currentSalary || 750000)}
                 </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="bid-amount" className="text-hockey-silver-300">
-                Bid Amount <span className="text-xs text-hockey-silver-400">(in $2,000,000 increments)</span>
+              <Label htmlFor="bid-amount" className="text-gray-300">
+                Bid Amount <span className="text-xs text-gray-400">(in $250,000 increments)</span>
               </Label>
               <Input
                 id="bid-amount"
@@ -136,13 +136,13 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
                 value={bidAmount}
                 onChange={handleBidChange}
                 onBlur={() => setBidAmount(roundToIncrement(bidAmount))}
-                min={currentHighestBid ? currentHighestBid + 2000000 : currentSalary || 750000}
+                min={currentHighestBid ? currentHighestBid + 250000 : currentSalary || 750000}
                 max={15000000}
-                step={2000000}
+                step={250000}
                 required
-                className="bg-white text-black border-hockey-silver-300 font-mono text-lg focus:ring-2 focus:ring-ice-blue-500"
+                className="bg-white text-black border-gray-300 font-mono text-lg focus:ring-2 focus:ring-blue-500"
               />
-              <div className="text-sm text-hockey-silver-400">Bid will be rounded to nearest $2,000,000 increment</div>
+              <div className="text-sm text-gray-400">Bid will be rounded to nearest $250,000 increment</div>
             </div>
 
             {error && (
@@ -155,7 +155,7 @@ export function BidModal({ isOpen, onClose, player, onSubmit, currentSalary }: B
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-hockey-silver-700 text-hockey-silver-300 hover:bg-hockey-silver-800"
+              className="border-gray-700 text-gray-300 hover:bg-gray-800"
             >
               Cancel
             </Button>

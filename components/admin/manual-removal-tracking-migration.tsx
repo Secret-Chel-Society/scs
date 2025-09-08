@@ -17,7 +17,7 @@ export default function ManualRemovalTrackingMigration() {
     setError(null)
 
     try {
-      const adminKey = localStorage.getItem("scs-admin-key")
+      const adminKey = localStorage.getItem("mghl-admin-key")
       if (!adminKey) {
         throw new Error("Admin key not found. Please set it in the admin panel first.")
       }

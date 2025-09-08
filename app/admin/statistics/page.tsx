@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { AlertCircle, FileUp, Plus, Edit, RefreshCw, BarChart3, TrendingUp, Users, Target, Zap, Shield, Database, Trophy, Star, Medal, Crown, Activity, Search, Filter, Download, Upload, Settings } from "lucide-react"
+import { AlertCircle, FileUp, Plus, Edit, RefreshCw } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Dialog,
@@ -1083,481 +1083,240 @@ export default function AdminStatisticsPage() {
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div>
-            <h1 className="hockey-title mb-6">
-              Statistics Management
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-12">
-              Comprehensive player and goalie statistics management for the league. 
-              Track performance, analyze trends, and maintain accurate records.
-            </p>
-            
-            {/* Enhanced Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto mb-16">
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
-                    <BarChart3 className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
-                    {playerStats.length}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Player Stats
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
-              
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
-                    <Shield className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
-                    {goalieStats.length}
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Goalie Stats
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
-              
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
-                    <TrendingUp className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
-                    Live
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Analytics
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
-              
-              <div className="group">
-                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
-                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
-                    <Database className="h-8 w-8 text-white" />
-                  </div>
-                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
-                    Data
-                  </div>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
-                    Management
-                  </div>
-                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Statistics Management</h1>
+          <p className="text-muted-foreground">Manage player and goalie statistics for the league</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Select
+            value={selectedSeason?.toString() || ""}
+            onValueChange={(value) => setSelectedSeason(Number.parseInt(value))}
+            disabled={loadingSeasons}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={loadingSeasons ? "Loading..." : "Select Season"} />
+            </SelectTrigger>
+            <SelectContent>
+              {seasons.map((season) => (
+                <SelectItem key={season.id} value={season.id.toString()}>
+                  {season.name} {season.is_active ? "(Active)" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <SyncStatsButton seasonId={selectedSeason || 0} onSuccess={fetchStats} />
+          <SyncEaStatsButton />
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-16">
-        {/* Enhanced Header Controls */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-3">
-              League Statistics Center
-            </h2>
-            <p className="text-xl text-hockey-silver-600 dark:text-hockey-silver-400">
-              Manage and analyze player and goalie performance data
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Input
+            placeholder="Search players or teams..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Select
-              value={selectedSeason?.toString() || ""}
-              onValueChange={(value) => setSelectedSeason(Number.parseInt(value))}
-              disabled={loadingSeasons}
-            >
-              <SelectTrigger className="w-[200px] hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                <SelectValue placeholder={loadingSeasons ? "Loading..." : "Select Season"} />
-              </SelectTrigger>
-              <SelectContent>
-                {seasons.map((season) => (
-                  <SelectItem key={season.id} value={season.id.toString()}>
-                    {season.name} {season.is_active ? "(Active)" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by position" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Positions</SelectItem>
+              <SelectItem value="offense">Offense (C, LW, RW)</SelectItem>
+              <SelectItem value="defense">Defense (LD, RD)</SelectItem>
+              <SelectItem value="goalie">Goalie (G)</SelectItem>
+              <SelectItem value="C">Center (C)</SelectItem>
+              <SelectItem value="LW">Left Wing (LW)</SelectItem>
+              <SelectItem value="RW">Right Wing (RW)</SelectItem>
+              <SelectItem value="LD">Left Defense (LD)</SelectItem>
+              <SelectItem value="RD">Right Defense (RD)</SelectItem>
+            </SelectContent>
+          </Select>
 
-            <SyncStatsButton seasonId={selectedSeason || 0} onSuccess={fetchStats} />
-            <SyncEaStatsButton />
-          </div>
+          <Select defaultValue={statFilter} onValueChange={setStatFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by stat" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="points">Points</SelectItem>
+              <SelectItem value="goals">Goals</SelectItem>
+              <SelectItem value="assists">Assists</SelectItem>
+              <SelectItem value="plusminus">Plus/Minus</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Enhanced Search and Filter Controls */}
-        <div className="mb-12">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
-              Statistics Control Center
-            </h3>
-            <p className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400 max-w-2xl mx-auto">
-              Search, filter, and manage player and goalie statistics with advanced controls and real-time data synchronization.
-            </p>
-          </div>
-
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
-            {/* Enhanced Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-hockey-silver-400 z-10" />
-                <Input
-                  placeholder="Search players or teams..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="hockey-search pl-10 pr-4 py-3 text-lg border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
-                />
-              </div>
-
-              <Select defaultValue={positionFilter} onValueChange={setPositionFilter}>
-                <SelectTrigger className="w-[200px] hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by position" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Positions</SelectItem>
-                  <SelectItem value="offense">Offense (C, LW, RW)</SelectItem>
-                  <SelectItem value="defense">Defense (LD, RD)</SelectItem>
-                  <SelectItem value="goalie">Goalie (G)</SelectItem>
-                  <SelectItem value="C">Center (C)</SelectItem>
-                  <SelectItem value="LW">Left Wing (LW)</SelectItem>
-                  <SelectItem value="RW">Right Wing (RW)</SelectItem>
-                  <SelectItem value="LD">Left Defense (LD)</SelectItem>
-                  <SelectItem value="RD">Right Defense (RD)</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select defaultValue={statFilter} onValueChange={setStatFilter}>
-                <SelectTrigger className="w-[200px] hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Sort by stat" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="points">Points</SelectItem>
-                  <SelectItem value="goals">Goals</SelectItem>
-                  <SelectItem value="assists">Assists</SelectItem>
-                  <SelectItem value="plusminus">Plus/Minus</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Enhanced Action Buttons */}
-            <div className="flex flex-wrap gap-3">
-              <Button 
-                onClick={() => setIsAddStatDialogOpen(true)}
-                className="btn-championship hover:scale-105 transition-all duration-200"
-              >
-                <Plus className="mr-2 h-4 w-4" /> Add Stats
-              </Button>
-              <Button 
-                onClick={() => setIsImportDialogOpen(true)}
-                className="btn-ice hover:scale-105 transition-all duration-200"
-              >
-                <Upload className="mr-2 h-4 w-4" /> Import Stats
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => fetchStats()}
-                className="border-2 border-hockey-silver-300 dark:border-hockey-silver-600 hover:border-ice-blue-500 dark:hover:border-rink-blue-500 hover:scale-105 transition-all duration-200"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" /> Refresh
-              </Button>
-            </div>
-          </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsAddStatDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add Stats
+          </Button>
+          <Button onClick={() => setIsImportDialogOpen(true)}>
+            <FileUp className="mr-2 h-4 w-4" /> Import Stats
+          </Button>
+          <Button variant="outline" onClick={() => fetchStats()}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Refresh
+          </Button>
         </div>
+      </div>
 
-        {/* Enhanced Statistics Tabs */}
-        <Tabs defaultValue="players" className="w-full">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
-              Performance Analytics
-            </h3>
-            <p className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400 max-w-2xl mx-auto">
-              View detailed player and goalie statistics with comprehensive performance metrics and analytics.
-            </p>
-          </div>
-          
-          <TabsList className="grid w-full grid-cols-2 mb-8 gap-2 p-2">
-            <TabsTrigger 
-              value="players" 
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold"
-            >
-              <Users className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">Player Stats</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="goalies"
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold"
-            >
-              <Shield className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">Goalie Stats</span>
-            </TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="players" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="players">Player Stats</TabsTrigger>
+          <TabsTrigger value="goalies">Goalie Stats</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="players">
-            <Card className="hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
-                    <Users className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200">
-                      Player Statistics
-                    </CardTitle>
-                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                      {getSeasonName(selectedSeason)} - Sorted by {statFilter === "points" ? "total points" : statFilter}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {loading ? (
-                  <div className="p-8">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded w-1/4 mb-4"></div>
-                      <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="h-4 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded"></div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader className="bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20">
-                        <TableRow className="border-ice-blue-200 dark:border-ice-blue-700">
-                          <TableHead className="w-12 text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Rank</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Player</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Team</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Pos</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">GP</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">G</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">A</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">PTS</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">+/-</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredPlayerStats.map((player, index) => (
-                          <TableRow 
-                            key={player.id} 
-                            className="hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50 dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20 transition-all duration-300 border-hockey-silver-200 dark:border-hockey-silver-700"
-                          >
-                            <TableCell className="font-bold text-ice-blue-600 dark:text-ice-blue-400">{index + 1}</TableCell>
-                            <TableCell className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.player_name}</TableCell>
-                            <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">{player.team_name || "Free Agent"}</TableCell>
-                            <TableCell className="text-center">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ice-blue-100 text-ice-blue-800 dark:bg-ice-blue-900/30 dark:text-ice-blue-300">
-                                {player.position}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-center font-medium text-hockey-silver-700 dark:text-hockey-silver-300">{player.games_played}</TableCell>
-                            <TableCell className="text-center font-bold text-goal-red-600 dark:text-goal-red-400">{player.goals}</TableCell>
-                            <TableCell className="text-center font-bold text-assist-green-600 dark:text-assist-green-400">{player.assists}</TableCell>
-                            <TableCell className="text-center font-bold text-2xl text-ice-blue-600 dark:text-ice-blue-400">{player.points}</TableCell>
-                            <TableCell className="text-center">
-                              <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-bold ${
-                                  player.plus_minus > 0 
-                                    ? "bg-assist-green-100 text-assist-green-800 dark:bg-assist-green-900/30 dark:text-assist-green-300" 
-                                    : player.plus_minus < 0 
-                                    ? "bg-goal-red-100 text-goal-red-800 dark:bg-goal-red-900/30 dark:text-goal-red-300"
-                                    : "bg-hockey-silver-100 text-hockey-silver-800 dark:bg-hockey-silver-700 dark:text-hockey-silver-300"
-                                }`}
+        <TabsContent value="players">
+          <Card>
+            <CardHeader>
+              <CardTitle>Player Statistics</CardTitle>
+              <CardDescription>
+                {getSeasonName(selectedSeason)} - Sorted by {statFilter === "points" ? "total points" : statFilter}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="w-full h-[500px]" />
+              ) : (
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">Rank</TableHead>
+                        <TableHead>Player</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead className="text-center">Pos</TableHead>
+                        <TableHead className="text-center">GP</TableHead>
+                        <TableHead className="text-center">G</TableHead>
+                        <TableHead className="text-center">A</TableHead>
+                        <TableHead className="text-center">PTS</TableHead>
+                        <TableHead className="text-center">+/-</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPlayerStats.map((player, index) => (
+                        <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell>{player.player_name}</TableCell>
+                          <TableCell>{player.team_name || "Free Agent"}</TableCell>
+                          <TableCell className="text-center">{player.position}</TableCell>
+                          <TableCell className="text-center">{player.games_played}</TableCell>
+                          <TableCell className="text-center font-medium">{player.goals}</TableCell>
+                          <TableCell className="text-center font-medium">{player.assists}</TableCell>
+                          <TableCell className="text-center font-bold">{player.points}</TableCell>
+                          <TableCell className="text-center">
+                            <span
+                              className={
+                                player.plus_minus > 0 ? "text-green-500" : player.plus_minus < 0 ? "text-red-500" : ""
+                              }
+                            >
+                              {player.plus_minus > 0 ? `+${player.plus_minus}` : player.plus_minus}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditPlayer(player)}
+                                title="Edit stats"
                               >
-                                {player.plus_minus > 0 ? `+${player.plus_minus}` : player.plus_minus}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center justify-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleEditPlayer(player)}
-                                  title="Edit stats"
-                                  className="hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:scale-110 transition-all duration-200"
-                                >
-                                  <Edit className="h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {filteredPlayerStats.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={10} className="text-center py-12">
-                              <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 bg-gradient-to-r from-hockey-silver-200 to-ice-blue-200 dark:from-hockey-silver-700 dark:to-ice-blue-800 rounded-full flex items-center justify-center">
-                                  <Users className="h-8 w-8 text-hockey-silver-500 dark:text-hockey-silver-400" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">
-                                    No Player Stats Found
-                                  </h3>
-                                  <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
-                                    No player statistics found matching your search criteria.
-                                  </p>
-                                </div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="goalies">
-            <Card className="hockey-card border-2 border-assist-green-200 dark:border-assist-green-700 overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-assist-green-50 to-goal-red-50 dark:from-assist-green-900/30 dark:to-goal-red-900/30 border-b border-assist-green-200 dark:border-assist-green-700">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-lg flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200">
-                      Goalie Statistics
-                    </CardTitle>
-                    <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                      {getSeasonName(selectedSeason)} - Sorted by save percentage
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                {loading ? (
-                  <div className="p-8">
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded w-1/4 mb-4"></div>
-                      <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="h-4 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded"></div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader className="bg-gradient-to-r from-assist-green-100 to-goal-red-100 dark:from-assist-green-900/20 dark:to-goal-red-900/20">
-                        <TableRow className="border-assist-green-200 dark:border-assist-green-700">
-                          <TableHead className="w-12 text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Rank</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Goalie</TableHead>
-                          <TableHead className="text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Team</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">GP</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">W</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">L</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">OTL</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">SV%</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">GAA</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">SO</TableHead>
-                          <TableHead className="text-center text-hockey-silver-700 dark:text-hockey-silver-300 font-bold">Actions</TableHead>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredGoalieStats.map((goalie, index) => (
-                          <TableRow 
-                            key={goalie.id} 
-                            className="hover:bg-gradient-to-r hover:from-assist-green-50/50 hover:to-goal-red-50/50 dark:hover:from-assist-green-900/20 dark:hover:to-goal-red-900/20 transition-all duration-300 border-hockey-silver-200 dark:border-hockey-silver-700"
-                          >
-                            <TableCell className="font-bold text-assist-green-600 dark:text-assist-green-400">{index + 1}</TableCell>
-                            <TableCell className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{goalie.player_name}</TableCell>
-                            <TableCell className="text-hockey-silver-600 dark:text-hockey-silver-400">{goalie.team_name || "Free Agent"}</TableCell>
-                            <TableCell className="text-center font-medium text-hockey-silver-700 dark:text-hockey-silver-300">{goalie.games_played}</TableCell>
-                            <TableCell className="text-center">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-bold bg-assist-green-100 text-assist-green-800 dark:bg-assist-green-900/30 dark:text-assist-green-300">
-                                {goalie.wins}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-bold bg-goal-red-100 text-goal-red-800 dark:bg-goal-red-900/30 dark:text-goal-red-300">
-                                {goalie.losses}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-bold bg-hockey-silver-100 text-hockey-silver-800 dark:bg-hockey-silver-700 dark:text-hockey-silver-300">
-                                {goalie.otl}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-center font-bold text-2xl text-assist-green-600 dark:text-assist-green-400">
-                              {(goalie.save_pct * 100).toFixed(1)}%
-                            </TableCell>
-                            <TableCell className="text-center font-medium text-hockey-silver-700 dark:text-hockey-silver-300">{goalie.gaa.toFixed(2)}</TableCell>
-                            <TableCell className="text-center">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-bold bg-ice-blue-100 text-ice-blue-800 dark:bg-ice-blue-900/30 dark:text-ice-blue-300">
-                                {goalie.shutouts}
-                              </span>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center justify-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleEditGoalie(goalie)}
-                                  title="Edit stats"
-                                  className="hover:bg-assist-green-100 dark:hover:bg-assist-green-900/30 hover:scale-110 transition-all duration-200"
-                                >
-                                  <Edit className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {filteredGoalieStats.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={11} className="text-center py-12">
-                              <div className="flex flex-col items-center gap-4">
-                                <div className="w-16 h-16 bg-gradient-to-r from-hockey-silver-200 to-assist-green-200 dark:from-hockey-silver-700 dark:to-assist-green-800 rounded-full flex items-center justify-center">
-                                  <Shield className="h-8 w-8 text-hockey-silver-500 dark:text-hockey-silver-400" />
-                                </div>
-                                <div>
-                                  <h3 className="text-lg font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">
-                                    No Goalie Stats Found
-                                  </h3>
-                                  <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
-                                    No goalie statistics found matching your search criteria.
-                                  </p>
-                                </div>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+                      ))}
+                      {filteredPlayerStats.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={10} className="text-center py-4">
+                            No player stats found matching your search.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="goalies">
+          <Card>
+            <CardHeader>
+              <CardTitle>Goalie Statistics</CardTitle>
+              <CardDescription>{getSeasonName(selectedSeason)} - Sorted by save percentage</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="w-full h-[500px]" />
+              ) : (
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">Rank</TableHead>
+                        <TableHead>Goalie</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead className="text-center">GP</TableHead>
+                        <TableHead className="text-center">W</TableHead>
+                        <TableHead className="text-center">L</TableHead>
+                        <TableHead className="text-center">OTL</TableHead>
+                        <TableHead className="text-center">SV%</TableHead>
+                        <TableHead className="text-center">GAA</TableHead>
+                        <TableHead className="text-center">SO</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredGoalieStats.map((goalie, index) => (
+                        <TableRow key={goalie.id} className="hover:bg-muted/50 transition-colors">
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell>{goalie.player_name}</TableCell>
+                          <TableCell>{goalie.team_name || "Free Agent"}</TableCell>
+                          <TableCell className="text-center">{goalie.games_played}</TableCell>
+                          <TableCell className="text-center font-medium">{goalie.wins}</TableCell>
+                          <TableCell className="text-center">{goalie.losses}</TableCell>
+                          <TableCell className="text-center">{goalie.otl}</TableCell>
+                          <TableCell className="text-center font-bold">{goalie.save_pct.toFixed(3)}</TableCell>
+                          <TableCell className="text-center">{goalie.gaa.toFixed(2)}</TableCell>
+                          <TableCell className="text-center">{goalie.shutouts}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditGoalie(goalie)}
+                                title="Edit stats"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {filteredGoalieStats.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={11} className="text-center py-4">
+                            No goalie stats found matching your search.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Edit Player Stats Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -2127,7 +1886,6 @@ export default function AdminStatisticsPage() {
           </div>
         </div>
       </div>
-      </div>
-    </>
+    </div>
   )
 }

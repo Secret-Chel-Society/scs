@@ -49,28 +49,23 @@ export function FixWaiverTablesMigration() {
   }
 
   return (
-    <Card className="w-full hockey-premium-card">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="hockey-title text-2xl flex items-center justify-center gap-3">
-          <div className="hockey-feature-icon">
-            <CheckCircle className="h-5 w-5 text-white" />
-          </div>
-          Fix Waiver Tables Migration
-        </CardTitle>
-        <CardDescription className="hockey-subtitle text-center">
+        <CardTitle>Fix Waiver Tables Migration</CardTitle>
+        <CardDescription>
           This migration will fix the waiver priority and waiver claims tables by recreating them with the correct
           schema. It will also initialize waiver priority for all active teams based on current standings.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="hockey-premium-card bg-gradient-to-br from-rink-blue-25 to-rink-blue-50 dark:from-rink-blue-950/30 dark:to-rink-blue-900/30 border-2 border-rink-blue-200 dark:border-rink-blue-700">
-          <div className="flex items-start gap-3">
-            <div className="hockey-feature-icon bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 flex-shrink-0">
-              <AlertCircle className="h-5 w-5 text-white" />
+      <CardContent className="space-y-4">
+        <div className="rounded-md bg-amber-50 p-4 border border-amber-200">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertCircle className="h-5 w-5 text-amber-400" aria-hidden="true" />
             </div>
-            <div className="flex-1">
-              <h3 className="hockey-title text-lg text-rink-blue-800 dark:text-rink-blue-200 mb-2">Warning</h3>
-              <div className="hockey-subtitle text-rink-blue-700 dark:text-rink-blue-300">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-amber-800">Warning</h3>
+              <div className="text-sm text-amber-700">
                 <p>
                   This migration will drop and recreate the waiver_priority and waiver_claims tables. Any existing data
                   in these tables will be lost. Make sure you have a backup if needed.
@@ -81,14 +76,14 @@ export function FixWaiverTablesMigration() {
         </div>
 
         {error && (
-          <div className="hockey-premium-card bg-gradient-to-br from-goal-red-25 to-goal-red-50 dark:from-goal-red-950/30 dark:to-goal-red-900/30 border-2 border-goal-red-200 dark:border-goal-red-700">
-            <div className="flex items-start gap-3">
-              <div className="hockey-feature-icon bg-gradient-to-r from-goal-red-500 to-goal-red-600 flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-white" />
+          <div className="rounded-md bg-red-50 p-4 border border-red-200">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
               </div>
-              <div className="flex-1">
-                <h3 className="hockey-title text-lg text-goal-red-800 dark:text-goal-red-200 mb-2">Error</h3>
-                <div className="hockey-subtitle text-goal-red-700 dark:text-goal-red-300">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="text-sm text-red-700">
                   <p>{error}</p>
                 </div>
               </div>
@@ -97,14 +92,14 @@ export function FixWaiverTablesMigration() {
         )}
 
         {result && (
-          <div className="hockey-premium-card bg-gradient-to-br from-assist-green-25 to-assist-green-50 dark:from-assist-green-950/30 dark:to-assist-green-900/30 border-2 border-assist-green-200 dark:border-assist-green-700">
-            <div className="flex items-start gap-3">
-              <div className="hockey-feature-icon bg-gradient-to-r from-assist-green-500 to-assist-green-600 flex-shrink-0">
-                <CheckCircle className="h-5 w-5 text-white" />
+          <div className="rounded-md bg-green-50 p-4 border border-green-200">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <CheckCircle className="h-5 w-5 text-green-400" aria-hidden="true" />
               </div>
-              <div className="flex-1">
-                <h3 className="hockey-title text-lg text-assist-green-800 dark:text-assist-green-200 mb-2">Success</h3>
-                <div className="hockey-subtitle text-assist-green-700 dark:text-assist-green-300">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">Success</h3>
+                <div className="text-sm text-green-700">
                   <p>{result}</p>
                 </div>
               </div>
@@ -113,7 +108,7 @@ export function FixWaiverTablesMigration() {
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={runMigration} disabled={isRunning || isComplete} className="w-full hockey-button-enhanced">
+        <Button onClick={runMigration} disabled={isRunning || isComplete} className="w-full">
           {isRunning ? "Running Migration..." : isComplete ? "Migration Complete" : "Fix Waiver Tables"}
         </Button>
       </CardFooter>

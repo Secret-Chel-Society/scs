@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, AlertCircle, CheckCircle, Trophy, Calendar, Settings, Zap } from "lucide-react"
-// import { motion } from "framer-motion" - replaced with CSS animations
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useSupabase } from "@/lib/supabase/client"
 
@@ -116,72 +115,55 @@ export default function UpdateCurrentSeasonPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-ice-blue-500" />
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-fade-in-up">
-          <h1 className="text-3xl font-bold mb-6 text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-              <Trophy className="h-6 w-6 text-white" />
-            </div>
-            Update Current Season
-          </h1>
-          <Card className="max-w-md mx-auto hockey-enhanced-card">
-            <CardHeader>
-              <CardTitle className="text-2xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-                  <Settings className="h-5 w-5 text-white" />
-                </div>
-                Current Season
-              </CardTitle>
-              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                The current season is used for player registrations and other season-specific features.
-              </CardDescription>
-            </CardHeader>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">Update Current Season</h1>
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Current Season</CardTitle>
+          <CardDescription>
+            The current season is used for player registrations and other season-specific features.
+          </CardDescription>
+        </CardHeader>
         <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive" className="hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Error</AlertTitle>
-              <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">{error}</AlertDescription>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           {success && (
-            <Alert className="hockey-enhanced-card border-assist-green-200 dark:border-assist-green-800 bg-assist-green-50 dark:bg-assist-green-900/20">
-              <CheckCircle className="h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-              <AlertTitle className="text-assist-green-600 dark:text-assist-green-400">Success</AlertTitle>
-              <AlertDescription className="text-assist-green-600 dark:text-assist-green-400">{success}</AlertDescription>
+            <Alert
+              variant="default"
+              className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+            >
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertTitle className="text-green-600 dark:text-green-400">Success</AlertTitle>
+              <AlertDescription className="text-green-600 dark:text-green-400">{success}</AlertDescription>
             </Alert>
           )}
 
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-ice-blue-500" />
-              Current Season
-            </label>
-            <div className="p-3 border border-ice-blue-200 dark:border-rink-blue-700 rounded-lg bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 text-hockey-silver-900 dark:text-hockey-silver-100">
-              {getCurrentSeasonName()}
-            </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Current Season</label>
+            <div className="p-2 border rounded-md bg-muted/50">{getCurrentSeasonName()}</div>
           </div>
 
-          <div className="space-y-3">
-            <label htmlFor="season" className="text-sm font-medium text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-rink-blue-500" />
+          <div className="space-y-2">
+            <label htmlFor="season" className="text-sm font-medium">
               Select New Season
             </label>
             <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
-              <SelectTrigger className="hockey-search">
+              <SelectTrigger>
                 <SelectValue placeholder="Select a season" />
               </SelectTrigger>
               <SelectContent>
@@ -195,23 +177,18 @@ export default function UpdateCurrentSeasonPage() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleUpdateSeason} disabled={isUpdating || !selectedSeason} className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white">
+          <Button onClick={handleUpdateSeason} disabled={isUpdating || !selectedSeason} className="w-full">
             {isUpdating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Updating...
               </>
             ) : (
-              <>
-                <Zap className="mr-2 h-4 w-4" />
-                Update Current Season
-              </>
+              "Update Current Season"
             )}
           </Button>
         </CardFooter>
       </Card>
-        </div>
-      </div>
     </div>
   )
 }
