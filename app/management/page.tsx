@@ -583,12 +583,12 @@ const ManagementPage = () => {
       
       console.log('All player roles for user:', allPlayerRoles)
       
-      // Then check specifically for manager roles
+      // Then check specifically for manager roles with case-insensitive comparison
       const { data: playerRoles, error: playerError } = await supabase
         .from("players")
         .select("role, team_id")
         .eq("user_id", session.user.id)
-        .in("role", ["GM", "AGM", "Owner", "owner"]) // Check both cases
+        .or('role.ilike.GM,role.ilike.AGM,role.ilike.Owner,role.ilike.owner,role.ilike.%GM%,role.ilike.%AGM%,role.ilike.%Owner%')
       
       console.log('Manager role query results:', { playerRoles, playerError })
       
