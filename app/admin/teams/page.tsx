@@ -676,6 +676,13 @@ export default function AdminTeamsPage() {
       setIsUpdatingSalaryCap(false)
     }
   }
+
+  // Handle conference update from child component
+  const handleConferenceUpdate = () => {
+    // Refresh the teams list to ensure data consistency
+    loadTeams(selectedSeason);
+  };
+
   const loadTeams = async (seasonId?: number) => {
     if (!supabase) {
       console.error("Supabase client not available")

@@ -32,28 +32,38 @@ export function TeamConferenceSelect({
   }, [currentConferenceId])
 
   const handleSave = async () => {
-    if (!supabase) return
+    console.log('Saving conference change:', { teamId, selectedConferenceId });
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return;
+    }
     
-    setIsSaving(true)
+    setIsSaving(true);
     
     try {
-      const { error } = await supabase
+      console.log('Updating team in database...');
+      const { data, error } = await supabase
         .from("teams")
         .update({ 
           conference_id: selectedConferenceId || null,
           updated_at: new Date().toISOString()
         })
         .eq("id", teamId)
+        .select()
+        .single();
 
-      if (error) throw error
+      console.log('Update response:', { data, error });
+
+      if (error) throw error;
 
       toast({
         title: "Success",
         description: "Team conference updated successfully",
-      })
+      });
       
-      setHasChanges(false)
-      onSave?.()
+      setHasChanges(false);
+      console.log('Calling onSave callback');
+      onSave?.();
     } catch (error: any) {
       console.error("Error updating team conference:", error)
       toast({
