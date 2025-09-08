@@ -575,39 +575,28 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // Check both players and user_roles tables for manager access
-      const [
-        { data: playerRoles, error: playerError },
-        { data: adminRoles, error: adminError }
-      ] = await Promise.all([
-        supabase
-          .from("players")
-          .select("role, team_id")
-          .eq("user_id", session.user.id)
-          .in("role", ["GM", "AGM", "Owner"]),
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .in("role", ["Admin", "Super Admin"])
-      ])
+      // Check only the players table for manager access
+      const { data: playerRoles, error: playerError } = await supabase
+        .from("players")
+        .select("role, team_id")
+        .eq("user_id", session.user.id)
+        .in("role", ["GM", "AGM", "Owner"])
 
-      // Check if user has any manager or admin roles
+      // Only check for manager roles, not admin roles
       const isManager = !!playerRoles?.length
-      const isAdmin = !!adminRoles?.length
-      const hasAccess = isManager || isAdmin
+      const hasAccess = isManager
       
       // Get the first team ID if user is a manager
       const playerData = playerRoles?.[0]
       
-      console.log('Access check results:', { isManager, isAdmin, playerData, adminRoles })
+      console.log('Access check results:', { isManager, playerData })
       
       // Always update the authorization state
       setIsAuthorized(hasAccess)
 
       // If no access, redirect to unauthorized
       if (!hasAccess) {
-        const errorMsg = "You must be a team manager or admin to access this page"
+        const errorMsg = "You must be a team manager (GM, AGM, or Owner) to access this page"
         console.log(errorMsg)
         // Clear any existing team data since user is no longer authorized
         setTeamData(null)
