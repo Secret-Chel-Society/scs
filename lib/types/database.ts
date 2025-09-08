@@ -140,6 +140,7 @@ export interface Database {
           goals_against: number
           created_at: string
           updated_at: string
+          conference_id: string | null
         }
         Insert: {
           id?: string
@@ -152,6 +153,7 @@ export interface Database {
           goals_against?: number
           created_at?: string
           updated_at?: string
+          conference_id?: string | null
         }
         Update: {
           id?: string
@@ -164,6 +166,7 @@ export interface Database {
           goals_against?: number
           created_at?: string
           updated_at?: string
+          conference_id?: string | null
         }
       }
       players: {
