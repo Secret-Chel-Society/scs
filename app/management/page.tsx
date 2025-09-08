@@ -601,9 +601,9 @@ const ManagementPage = () => {
         .eq('user_id', session.user.id)
         .eq('role', 'admin');
       
-      // Check if user has any manager or admin roles (using lowercase to match database)
+      // Check if user has any manager or admin roles
       const isManager = managerCheck === true || 
-                       playerRoles?.some(role => ['gm', 'agm', 'owner'].includes(role.role?.toLowerCase()));
+                       playerRoles?.some(role => ['GM', 'AGM', 'Owner'].includes(role.role));
       const isAdmin = adminRoles && adminRoles.length > 0;
       const hasAccess = isManager || isAdmin;
       
