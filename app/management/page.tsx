@@ -615,11 +615,6 @@ const ManagementPage = () => {
         adminError
       })
       
-      // Check if user has any manager or admin roles
-      const isManager = !!playerRoles?.length
-      const isAdmin = !!adminRoles?.length
-      const hasAccess = isManager || isAdmin
-      
       // Get the first team ID if user is a manager
       const playerData = playerRoles?.[0]
       
