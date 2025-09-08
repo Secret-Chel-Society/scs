@@ -1,249 +1,139 @@
 import { NextResponse } from "next/server"
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
+import { z } from 'zod'
+import { validateBody } from "@/lib/middleware/validation"
+import { logger } from "@/lib/utils/logger"
+
+// Schema for the request body
+const toggleBiddingSchema = z.object({
+  enabled: z.boolean({
+    required_error: "enabled is required",
+    invalid_type_error: "enabled must be a boolean",
+  }),
+  // Add other fields as needed
+})
+
+type ToggleBiddingInput = z.infer<typeof toggleBiddingSchema>
 
 export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
-
+  
   try {
-    console.log("=== BIDDING API ROUTE START ===")
-
-    // Try multiple ways to get the session
-    let session = null
-    let sessionMethod = ""
-
-    // Method 1: Standard session check
-    try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-      console.log("Method 1 - Standard session:", { sessionData, sessionError })
-
-      if (!sessionError && sessionData?.session) {
-        session = sessionData.session
-        sessionMethod = "standard"
-      }
-    } catch (error) {
-      console.error("Method 1 failed:", error)
+    // 1. Validate the request body
+    const validation = await validateBody<ToggleBiddingInput>(
+      request,
+      toggleBiddingSchema
+    )
+    
+    if (validation instanceof NextResponse) {
+      return validation // Returns validation error response
     }
+    
+    const { enabled } = validation
 
-    // Method 2: Get user directly
+    // 2. Authentication - Single, secure method
+    const { data: { session } } = await supabase.auth.getSession()
+    
     if (!session) {
-      try {
-        const { data: userData, error: userError } = await supabase.auth.getUser()
-        console.log("Method 2 - Get user:", { userData, userError })
-
-        if (!userError && userData?.user) {
-          // Create a mock session object
-          session = {
-            user: userData.user,
-            access_token: "mock_token",
-          }
-          sessionMethod = "getUser"
-        }
-      } catch (error) {
-        console.error("Method 2 failed:", error)
-      }
-    }
-
-    // Method 3: Check Authorization header
-    if (!session) {
-      try {
-        const authHeader = request.headers.get("Authorization")
-        console.log("Method 3 - Auth header:", authHeader ? "present" : "missing")
-
-        if (authHeader && authHeader.startsWith("Bearer ")) {
-          const token = authHeader.substring(7)
-          const { data: userData, error: userError } = await supabase.auth.getUser(token)
-          console.log("Method 3 - Token user:", { userData, userError })
-
-          if (!userError && userData?.user) {
-            session = {
-              user: userData.user,
-              access_token: token,
-            }
-            sessionMethod = "authHeader"
-          }
-        }
-      } catch (error) {
-        console.error("Method 3 failed:", error)
-      }
-    }
-
-    console.log(`Session result: ${session ? "found" : "not found"} via ${sessionMethod}`)
-
-    if (!session) {
-      console.log("❌ No session found via any method")
-
-      // TEMPORARY BYPASS FOR TESTING - Remove this in production
-      console.log("🚨 TEMPORARY BYPASS ACTIVATED - ALLOWING ACCESS FOR TESTING")
-
-      const { enabled } = await request.json()
-
-      // Update the bidding_enabled setting without auth check
-      const { error } = await supabase
-        .from("system_settings")
-        .upsert({ key: "bidding_enabled", value: enabled }, { onConflict: "key" })
-
-      if (error) {
-        console.error("Database error:", error)
-        throw error
-      }
-
-      console.log(`✅ Bidding ${enabled ? "enabled" : "disabled"} via BYPASS`)
-
-      return NextResponse.json({
-        success: true,
-        enabled,
-        method: "bypass",
-      })
-    }
-
-    console.log("✅ Session found, proceeding with auth checks")
-    console.log("User ID:", session.user.id)
-    console.log("User Email:", session.user.email)
-
-    // Now do the admin checks with the session we found
-    let isAdmin = false
-    let authMethod = ""
-
-    // 1. Check user_roles table
-    try {
-      const { data: userRoles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-
-      console.log("User roles query:", { userRoles, rolesError })
-
-      if (!rolesError && userRoles && userRoles.length > 0) {
-        console.log("Found user roles:", userRoles)
-
-        isAdmin = userRoles.some((r) => {
-          if (!r.role) return false
-          const role = r.role.toLowerCase().trim()
-          const isAdminRole =
-            role.includes("admin") ||
-            role.includes("superadmin") ||
-            role.includes("owner") ||
-            role.includes("league manager") ||
-            role === "gm" ||
-            role === "general manager" ||
-            role === "manager"
-
-          console.log(`Role check: "${r.role}" → ${isAdminRole}`)
-          return isAdminRole
-        })
-
-        if (isAdmin) {
-          authMethod = "user_roles"
-          console.log("✅ Authorized via user_roles")
-        }
-      }
-    } catch (error) {
-      console.error("Error checking user_roles:", error)
-    }
-
-    // 2. Emergency fallback - allow ANY user with ANY role
-    if (!isAdmin) {
-      try {
-        const { data: anyRole, error: anyRoleError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .limit(1)
-
-        if (!anyRoleError && anyRole && anyRole.length > 0) {
-          authMethod = "any_role"
-          console.log("✅ Emergency auth: User has role:", anyRole[0].role)
-          isAdmin = true
-        }
-      } catch (error) {
-        console.error("Emergency fallback error:", error)
-      }
-    }
-
-    // 3. Ultimate fallback - check if user exists as player
-    if (!isAdmin) {
-      try {
-        const { data: playerExists, error: playerError } = await supabase
-          .from("players")
-          .select("id")
-          .eq("user_id", session.user.id)
-          .limit(1)
-
-        if (!playerError && playerExists && playerExists.length > 0) {
-          authMethod = "player_exists"
-          console.log("✅ Ultimate fallback: User exists as player")
-          isAdmin = true
-        }
-      } catch (error) {
-        console.error("Ultimate fallback error:", error)
-      }
-    }
-
-    if (!isAdmin) {
-      console.log("❌ User not authorized")
       return NextResponse.json(
-        {
-          error: "Unauthorized - Admin privileges required",
-          debug: {
-            userId: session.user.id,
-            email: session.user.email,
-            sessionMethod,
-            authMethod: authMethod || "none",
-          },
-        },
-        { status: 403 },
+        { error: "Authentication required" },
+        { status: 401 }
       )
     }
 
-    console.log(`✅ User authorized via: ${authMethod}`)
+    // 3. Authorization - Check admin role
+    const { data: userRole } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .single()
 
-    const { enabled } = await request.json()
+    const isAdmin = userRole?.role?.toLowerCase().includes("admin") || 
+                   userRole?.role?.toLowerCase().includes("superadmin")
 
-    // Update the bidding_enabled setting
-    const { error } = await supabase
-      .from("system_settings")
-      .upsert({ key: "bidding_enabled", value: enabled }, { onConflict: "key" })
-
-    if (error) {
-      console.error("Database error:", error)
-      throw error
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: "Insufficient permissions" },
+        { status: 403 }
+      )
     }
 
-    console.log(`✅ Bidding ${enabled ? "enabled" : "disabled"} by user:`, session.user.id)
+    // 4. Update the bidding_enabled setting
+    const { error } = await supabase
+      .from("system_settings")
+      .upsert(
+        { 
+          key: "bidding_enabled", 
+          value: enabled,
+          updated_by: session.user.id,
+          updated_at: new Date().toISOString()
+        },
+        { onConflict: "key" }
+      )
+
+    if (error) {
+      logger.error("Database error updating bidding status", error, {
+        userId: session.user.id,
+        action: 'update_bidding_status',
+        ipAddress: headers().get('x-forwarded-for'),
+        userAgent: headers().get('user-agent')
+      });
+      throw error;
+    }
+
+    // 5. Log the action
+    logger.info(`Bidding ${enabled ? 'enabled' : 'disabled'}`, {
+      userId: session.user.id,
+      action: `bidding_${enabled ? 'enabled' : 'disabled'}`,
+      ipAddress: headers().get('x-forwarded-for'),
+      userAgent: headers().get('user-agent')
+    })
 
     return NextResponse.json({
       success: true,
       enabled,
-      sessionMethod,
-      authMethod,
+      message: `Bidding has been ${enabled ? 'enabled' : 'disabled'}`
     })
+    
   } catch (error: any) {
-    console.error("❌ Error in bidding API:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    logger.error("Error in bidding API", error, {
+      action: 'bidding_api_error',
+      ipAddress: headers().get('x-forwarded-for'),
+      userAgent: headers().get('user-agent')
+    });
+    
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: "An error occurred while processing your request",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: 500 }
+    )
   }
 }
 
+// Add GET endpoint to check current bidding status
 export async function GET() {
   const supabase = createRouteHandlerClient({ cookies })
-
+  
   try {
-    // Get current bidding status
-    const { data: settings, error } = await supabase
+    const { data: setting } = await supabase
       .from("system_settings")
       .select("value")
       .eq("key", "bidding_enabled")
       .single()
 
-    if (error && error.code !== "PGRST116") {
-      throw error
-    }
-
     return NextResponse.json({
-      enabled: settings?.value || false,
+      enabled: setting?.value ?? false
     })
-  } catch (error: any) {
-    console.error("Error getting bidding status:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    
+  } catch (error) {
+    console.error("Error fetching bidding status:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch bidding status" },
+      { status: 500 }
+    )
   }
 }

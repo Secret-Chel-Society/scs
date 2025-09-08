@@ -40,12 +40,13 @@ export function AdminProtected({ children }: AdminProtectedProps) {
           return
         }
 
-        // Check if user has admin role
+        // Check if user has admin or management role (Owner, GM, AGM)
         try {
           const { data: roles, error: rolesError } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", session.user.id)
+            .in("role", ["Admin", "Owner", "GM", "AGM"])
 
           if (rolesError) {
             const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
@@ -70,11 +71,13 @@ export function AdminProtected({ children }: AdminProtectedProps) {
           }
 
           const hasAdminRole = roles?.some((role) => role.role === "Admin") || false
-          setIsAdmin(hasAdminRole)
-
-          // If not admin, redirect to home
-          if (!hasAdminRole) {
-            router.push("/?message=You do not have permission to access this page")
+          // Check if user has any of the allowed roles (Admin, Owner, GM, AGM)
+          const allowedRoles = ["Admin", "Owner", "GM", "AGM"]
+          const hasRequiredRole = roles.some((role: any) => allowedRoles.includes(role.role))
+          
+          if (!hasRequiredRole) {
+            router.push("/?error=unauthorized&message=You don't have permission to access this page")
+            return
           }
         } catch (error: any) {
           const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
