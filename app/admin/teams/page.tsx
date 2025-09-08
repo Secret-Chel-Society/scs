@@ -46,6 +46,7 @@ import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
 import { getCurrentSeasonId, updateSalaryCap } from "@/lib/team-utils"
 import { useSalaryCap } from "@/hooks/useSalaryCap"
+import { TeamConferenceSelect } from "@/components/admin/team-conference-select"
 
 // Conference interface to match database schema
 interface Conference {
@@ -1269,7 +1270,7 @@ export default function AdminTeamsPage() {
                   className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                 >
                   {isUpdatingSalaryCap || isLoadingSalaryCap ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
                     <Settings className="h-4 w-4 mr-2" />
                   )}
@@ -1349,29 +1350,14 @@ export default function AdminTeamsPage() {
                           </Badge>
                         )}
                       </div>
-                      <Select
-                        value={team.conference_id || "none"}
-                        onValueChange={(value) => updateTeamConference(team.id, value)}
-                        disabled={isUpdatingConference}
-                      >
-                        <SelectTrigger className="w-48 bg-slate-800/50 border-white/20 text-white">
-                          <SelectValue placeholder="Select conference" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">No Conference</SelectItem>
-                          {conferences.length > 0 ? (
-                            conferences.map((conference) => (
-                              <SelectItem key={conference.id} value={conference.id} className="text-white hover:bg-slate-700">
-                                {conference.name}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <SelectItem value="no-conferences" disabled className="text-gray-500">
-                              No conferences available
-                            </SelectItem>
-                          )}
-                        </SelectContent>
-                      </Select>
+                      <div className="flex items-center gap-2">
+                        <TeamConferenceSelect
+                          teamId={team.id}
+                          currentConferenceId={team.conference_id}
+                          conferences={conferences}
+                          onSave={handleConferenceUpdate}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
