@@ -44,7 +44,8 @@ import { TeamsActiveMigration } from "@/components/admin/teams-active-migration"
 import { Switch } from "@/components/ui/switch"
 import { EditTeamStatsModal } from "@/components/admin/edit-team-stats-modal"
 import { Badge } from "@/components/ui/badge"
-import { getCurrentSeasonId, getSalaryCap, updateSalaryCap } from "@/lib/team-utils"
+import { getCurrentSeasonId, updateSalaryCap } from "@/lib/team-utils"
+import { useSalaryCap } from "@/hooks/useSalaryCap"
 
 // Conference interface to match database schema
 interface Conference {
@@ -130,7 +131,7 @@ export default function AdminTeamsPage() {
   const [lastRefresh, setLastRefresh] = useState(Date.now())
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isAddingColumns, setIsAddingColumns] = useState(false)
-  const [salaryCap, setSalaryCap] = useState<number>(30000000)
+  const { salaryCap, isLoading: isLoadingSalaryCap } = useSalaryCap()
   const [isUpdatingSalaryCap, setIsUpdatingSalaryCap] = useState(false)
 
   useEffect(() => {
@@ -210,7 +211,7 @@ export default function AdminTeamsPage() {
         await loadConferences()
         
         // Load salary cap
-        await loadSalaryCap()
+        // Removed loadSalaryCap() call
 
         // Load seasons
         console.log("🔍 Loading seasons...")
@@ -591,15 +592,7 @@ export default function AdminTeamsPage() {
   }
 
   // Load salary cap from system settings
-  const loadSalaryCap = async () => {
-    try {
-      const cap = await getSalaryCap()
-      setSalaryCap(cap)
-      console.log("✅ Salary cap loaded:", cap)
-    } catch (error) {
-      console.error("❌ Error loading salary cap:", error)
-    }
-  }
+  // Removed loadSalaryCap() call
 
   // Update salary cap
   const handleUpdateSalaryCap = async (newCap: number) => {
@@ -608,7 +601,7 @@ export default function AdminTeamsPage() {
       const success = await updateSalaryCap(newCap)
       
       if (success) {
-        setSalaryCap(newCap)
+        // The useSalaryCap hook will automatically update the salary cap via the subscription
         toast({
           title: "Salary Cap Updated",
           description: `Salary cap updated to $${newCap.toLocaleString()}`,
@@ -1236,10 +1229,10 @@ export default function AdminTeamsPage() {
                       input.value = ''
                     }
                   }}
-                  disabled={isUpdatingSalaryCap}
+                  disabled={isUpdatingSalaryCap || isLoadingSalaryCap}
                   className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                 >
-                  {isUpdatingSalaryCap ? (
+                  {isUpdatingSalaryCap || isLoadingSalaryCap ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Settings className="h-4 w-4 mr-2" />

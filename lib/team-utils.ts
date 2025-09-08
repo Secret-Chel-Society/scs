@@ -4,7 +4,16 @@ import { calculateStandings } from "./standings-calculator"
 // Create a Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+})
+
+// Cache for salary cap to reduce database calls
+let salaryCapCache: number | null = null
 
 export interface TeamStats {
   id: string
@@ -202,32 +211,50 @@ export async function getCurrentSeasonId(): Promise<number> {
 
 /**
  * Gets the salary cap from system settings
+ * @param useCache Whether to use the cached value if available (default: true)
  * @returns The salary cap amount
  */
-export async function getSalaryCap(): Promise<number> {
+/**
+ * Gets the salary cap from system settings
+ * @param useCache Whether to use the cached value if available (default: true)
+ * @returns The salary cap amount
+ */
+export async function getSalaryCap(useCache: boolean = true): Promise<number> {
+  // Return cached value if available and cache is enabled
+  if (useCache && salaryCapCache !== null) {
+    return salaryCapCache
+  }
+  
   try {
-    const { data, error } = await supabase.from("system_settings").select("value").eq("key", "salary_cap").single()
+    const { data, error } = await supabase
+      .from("system_settings")
+      .select("value")
+      .eq("key", "salary_cap")
+      .single()
 
     if (error) {
       console.error("Error fetching salary cap:", error)
-      return 65000000 // Default to $65M if not found
+      return 65000000 // Default to $65M if error
     }
 
     const value = data?.value
-    console.log("Salary cap value from database:", value, "type:", typeof value)
-    
+    let cap = 65000000 // Default to $65M if invalid
+
     // Ensure we return a number
     if (typeof value === 'string') {
       const parsed = parseInt(value, 10)
       if (!isNaN(parsed)) {
-        return parsed
+        cap = parsed
       }
     } else if (typeof value === 'number') {
-      return value
+      cap = value
+    } else {
+      console.log("Invalid salary cap value, defaulting to 65000000")
     }
     
-    console.log("Invalid salary cap value, defaulting to 30000000")
-    return 65000000 // Default to $65M if invalid
+    // Update cache
+    salaryCapCache = cap
+    return cap
   } catch (error) {
     console.error("Error getting salary cap:", error)
     return 65000000 // Default to $65M if error
@@ -235,7 +262,7 @@ export async function getSalaryCap(): Promise<number> {
 }
 
 /**
- * Updates the salary cap in system settings
+ * Updates the salary cap in system settings and notifies all clients
  * @param newSalaryCap The new salary cap amount
  * @returns Promise<boolean> - true if successful, false otherwise
  */
@@ -245,7 +272,8 @@ export async function updateSalaryCap(newSalaryCap: number): Promise<boolean> {
       .from("system_settings")
       .upsert({
         key: "salary_cap",
-        value: newSalaryCap
+        value: newSalaryCap,
+        updated_at: new Date().toISOString()
       })
 
     if (error) {
@@ -253,11 +281,43 @@ export async function updateSalaryCap(newSalaryCap: number): Promise<boolean> {
       return false
     }
 
-    console.log("Salary cap updated successfully to:", newSalaryCap)
+    // Update cache
+    salaryCapCache = newSalaryCap
+    
+    // Send a notification to all clients
+    await supabase
+      .channel('salary_cap_updates')
+      .send({
+        type: 'broadcast',
+        event: 'SALARY_CAP_UPDATED',
+        payload: { newSalaryCap }
+      })
+
+    console.log("Salary cap updated and notifications sent:", newSalaryCap)
     return true
   } catch (error) {
     console.error("Error updating salary cap:", error)
     return false
+  }
+}
+
+/**
+ * Subscribes to salary cap updates
+ * @param callback Function to call when salary cap is updated
+ * @returns Unsubscribe function
+ */
+export function subscribeToSalaryCap(callback: (newCap: number) => void) {
+  const channel = supabase.channel('salary_cap_updates')
+  
+  channel
+    .on('broadcast', { event: 'SALARY_CAP_UPDATED' }, (payload) => {
+      callback(payload.payload.newSalaryCap)
+    })
+    .subscribe()
+
+  // Return unsubscribe function
+  return () => {
+    supabase.removeChannel(channel)
   }
 }
 
