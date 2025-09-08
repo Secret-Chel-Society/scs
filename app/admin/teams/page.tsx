@@ -96,9 +96,15 @@ export default function AdminTeamsPage() {
   const { toast } = useToast()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  // State management
   const [teams, setTeams] = useState<Team[]>([])
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([])
+  const [loadingTeams, setLoadingTeams] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [showInactive, setShowInactive] = useState(false)
+  const [isLoadingStats, setIsLoadingStats] = useState(false)
+  const [hasActiveColumn, setHasActiveColumn] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAddingTeam, setIsAddingTeam] = useState(false)
   const [editingTeam, setEditingTeam] = useState<Team | null>(null)
@@ -658,42 +664,41 @@ export default function AdminTeamsPage() {
       setIsUpdatingSalaryCap(false)
     }
   }
-
   const loadTeams = async (seasonId?: number) => {
     if (!supabase) {
       console.error("Supabase client not available")
       setLoadError("Database client not available")
-      return
+      return;
     }
 
-    setLoadingTeams(true)
-    setLoadError(null)
+    setLoadingTeams(true);
+    setLoadError(null);
     
     try {
       // First, ensure we have the latest conferences
-      await loadConferences()
+      await loadConferences();
       
-      const season = seasonId || selectedSeason || 1
+      const season = seasonId || selectedSeason || 1;
       
       // Ensure season is a number
-      const numericSeason = typeof season === 'string' ? parseInt(season, 10) : season
+      const numericSeason = typeof season === 'string' ? parseInt(season, 10) : season;
       if (isNaN(numericSeason)) {
-        console.error("Invalid season ID:", season, "defaulting to 1")
-        const fallbackSeason = 1
+        console.error("Invalid season ID:", season, "defaulting to 1");
+        const fallbackSeason = 1;
         const { data: fallbackData, error: fallbackError } = await supabase
           .from("teams")
           .select("*")
           .eq("season_id", fallbackSeason)
-          .order("name")
+          .order("name");
         
-        if (fallbackError) throw fallbackError
+        if (fallbackError) throw fallbackError;
         
-        setTeams(fallbackData || [])
-        applyFilters(fallbackData || [], searchQuery, showInactive)
-        return
+        setTeams(fallbackData || []);
+        applyFilters(fallbackData || [], searchQuery, showInactive);
+        return;
       }
 
-      // First try with conference_id join
+      // Try to load teams with conference data using a join
       const { data, error } = await supabase
         .from('teams')
         .select(`
@@ -701,84 +706,39 @@ export default function AdminTeamsPage() {
           conference:conference_id (id, name, description, color)
         `)
         .eq('season_id', numericSeason)
-        .order('name')
+        .order('name');
 
       if (error) {
-        console.warn("Error loading teams with conferences, trying without join:", error.message)
+        console.warn("Error loading teams with conferences, trying without join:", error.message);
         // Fallback to loading teams without conference data if join fails
         const { data: teamsData, error: teamsError } = await supabase
           .from("teams")
           .select("*")
           .eq("season_id", numericSeason)
-          .order("name")
+          .order("name");
           
-        if (teamsError) throw teamsError
+        if (teamsError) throw teamsError;
         
-        console.log('Loaded teams without conference data:', teamsData)
-        setTeams(teamsData || [])
-        applyFilters(teamsData || [], searchQuery, showInactive)
-        return
+        console.log('Loaded teams without conference data:', teamsData);
+        setTeams(teamsData || []);
+        applyFilters(teamsData || [], searchQuery, showInactive);
+        return;
       }
 
-      console.log('Loaded teams with conferences:', data)
-      setTeams(data || [])
-      applyFilters(data || [], searchQuery, showInactive)
+      console.log('Loaded teams with conferences:', data);
+      setTeams(data || []);
+      applyFilters(data || [], searchQuery, showInactive);
     } catch (error: any) {
-      console.error("Error loading teams:", error)
-      setLoadError(`Error: ${error.message}`)
+      console.error("Error loading teams:", error);
+      setLoadError(`Error: ${error.message}`);
       toast({
         title: "Error loading teams",
         description: error.message || "An unexpected error occurred while loading teams.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoadingTeams(false)
+      setLoadingTeams(false);
     }
-
-      // If the join fails, try loading teams without conference data
-      if (error && (error.message.includes("conferences") || error.message.includes("relation") || error.message.includes("does not exist"))) {
-        console.log("Conference join failed, loading teams without conference data:", error.message)
-        const { data: teamsData, error: teamsError } = await supabase
-          .from("teams")
-          .select("*")
-          .eq("season_id", numericSeason)
-          .order("name")
-        
-        if (teamsError) {
-          throw teamsError
-        }
-        
-        data = teamsData
-        error = null
-      }
-
-      if (error) {
-        console.error("Error loading teams:", error)
-        console.error("Error details:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
-        setLoadError(`Database error: ${error.message}`)
-        toast({
-          title: "Error loading teams",
-          description: error.message || "Failed to load teams data.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      console.log("Loaded teams from database:", data?.length || 0, "teams")
-
-      // Set teams and apply filters
-      setTeams(data || [])
-      applyFilters(data || [], searchQuery, showInactive)
-    } catch (error: any) {
-      console.error("Error loading teams:", error)
-      setLoadError(`Error: ${error.message}`)
-      toast({
-        title: "Error loading teams",
         description: error.message || "An unexpected error occurred while loading teams.",
         variant: "destructive",
       })
