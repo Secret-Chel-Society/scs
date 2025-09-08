@@ -62,27 +62,31 @@ interface Season {
   is_active: boolean
 }
 
+import type { Conference } from "@/lib/types/conferences";
+
 interface Team {
-  id: string
-  name: string
-  logo_url: string | null
-  wins: number
-  losses: number
-  otl: number
-  goals_for: number
-  goals_against: number
-  points?: number
-  games_played?: number
-  season_id: number
-  ea_club_id?: string
-  is_active: boolean
-  manual_override?: boolean
-  powerplay_goals?: number
-  powerplay_opportunities?: number
-  penalty_kill_goals_against?: number
-  penalty_kill_opportunities?: number
-  conference_id?: string | null
-  conference?: Conference
+  id: string;
+  name: string;
+  logo_url: string | null;
+  wins: number;
+  losses: number;
+  otl: number;
+  goals_for: number;
+  goals_against: number;
+  points?: number;
+  games_played?: number;
+  season_id: number;
+  ea_club_id?: string | null;
+  is_active: boolean;
+  manual_override?: boolean;
+  powerplay_goals?: number;
+  powerplay_opportunities?: number;
+  penalty_kill_goals_against?: number;
+  penalty_kill_opportunities?: number;
+  conference_id?: string | null;
+  conference?: Conference | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface EATeam {
@@ -678,9 +682,44 @@ export default function AdminTeamsPage() {
   }
 
   // Handle conference update from child component
-  const handleConferenceUpdate = () => {
-    // Refresh the teams list to ensure data consistency
-    loadTeams(selectedSeason);
+  const handleConferenceUpdate = async (teamId: string, conferenceId: string | null) => {
+    if (!supabase) {
+      console.error('Supabase client not available');
+      toast({
+        title: 'Error',
+        description: 'Database connection error',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Update the team's conference in the database
+      const { error } = await supabase
+        .from('teams')
+        .update({ 
+          conference_id: conferenceId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', teamId);
+
+      if (error) throw error;
+
+      // Refresh the teams list to reflect the changes
+      await loadTeams(selectedSeason);
+      
+      toast({
+        title: 'Success',
+        description: 'Team conference updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating team conference:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update team conference',
+        variant: 'destructive',
+      });
+    }
   };
 
   const loadTeams = async (seasonId?: number) => {

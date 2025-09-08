@@ -6,21 +6,13 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Loader2, Save } from "lucide-react"
-
-// Type definitions to prevent TypeScript errors
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
-}
+import type { Conference, OnSaveConferenceCallback } from "@/lib/types/conferences"
 
 interface TeamConferenceSelectProps {
   teamId: string
   currentConferenceId: string | null
-  conferences: Array<{ id: string; name: string }>
-  onSave?: (teamId: string, conferenceId: string | null) => void
+  conferences: Pick<Conference, 'id' | 'name'>[]
+  onSave?: OnSaveConferenceCallback
 }
 
 export function TeamConferenceSelect({
@@ -41,49 +33,46 @@ export function TeamConferenceSelect({
   }, [currentConferenceId])
 
   const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault(); // Prevent form submission if inside a form
+    e.preventDefault();
     
-    console.log('Saving conference change:', { teamId, selectedConferenceId });
     if (!supabase) {
       console.error('Supabase client not available');
+      toast({
+        title: "Error",
+        description: "Unable to connect to the database",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsSaving(true);
     
     try {
-      console.log('Updating team in database...');
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("teams")
         .update({ 
           conference_id: selectedConferenceId || null,
           updated_at: new Date().toISOString()
         })
-        .eq("id", teamId)
-        .select()
-        .single();
-
-      console.log('Update response:', { data, error });
+        .eq("id", teamId);
 
       if (error) throw error;
 
+      setHasChanges(false);
+      
       toast({
         title: "Success",
         description: "Team conference updated successfully",
       });
       
-      setHasChanges(false);
-      
-      // Refresh the parent component if onSave is provided
       if (onSave) {
-        console.log('Calling onSave callback');
-        onSave(teamId, selectedConferenceId);
+        await onSave(teamId, selectedConferenceId || null);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating team conference:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update team conference",
+        description: error instanceof Error ? error.message : "Failed to update team conference",
         variant: "destructive",
       });
     } finally {
