@@ -566,29 +566,47 @@ const ManagementPage = () => {
 
   async function fetchData() {
     if (!session?.user) {
-      setIsAuthorized(false)
+      console.log('No session found, redirecting to login')
+      router.push('/login?message=You must be logged in to access team management&redirect=/management')
       return
     }
 
     setLoading(true)
     try {
-      // Check if user is a team manager (GM, AGM, Owner)
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("role, team_id")
-        .eq("user_id", session.user.id)
-        .single()
+      console.log('Checking team manager access for user:', session.user.id)
+      
+      // Check both players and user_roles tables for manager access
+      const [
+        { data: playerData, error: playerError },
+        { data: adminRole, error: adminError }
+      ] = await Promise.all([
+        supabase
+          .from("players")
+          .select("role, team_id")
+          .eq("user_id", session.user.id)
+          .in("role", ["GM", "AGM", "Owner"])
+          .single(),
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .eq("role", "Admin")
+          .single()
+      ])
 
-      if (playerError || !playerData) {
-        setIsAuthorized(false)
-        throw new Error("You don't have permission to access team management")
-      }
+      const isManager = !!playerData
+      const isAdmin = !!adminRole
+      const hasAccess = isManager || isAdmin
+      
+      console.log('Access check results:', { isManager, isAdmin, playerData, adminRole })
+      
+      setIsAuthorized(hasAccess)
 
-      const isManager = ["GM", "AGM", "Owner"].includes(playerData.role)
-      setIsAuthorized(isManager)
-
-      if (!isManager || !playerData.team_id) {
-        throw new Error("You must be a team manager to access this page")
+      if (!hasAccess) {
+        const errorMsg = "You must be a team manager or admin to access this page"
+        console.log(errorMsg)
+        router.push('/unauthorized?message=' + encodeURIComponent(errorMsg))
+        return
       }
 
       // Get current season ID for team stats calculation
