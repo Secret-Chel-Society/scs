@@ -1343,19 +1343,40 @@ export default function AdminTeamsPage() {
               </div>
 
               {showConferenceManagement && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {teams.map((team) => (
-                    <div key={team.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium text-white">{team.name}</span>
-                        {team.conference && (
-                          <Badge 
-                            variant="outline" 
-                            className="border-white/30 text-white"
-                          >
-                            {team.conference.name}
-                          </Badge>
-                        )}
+                    <div key={team.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="relative h-10 w-10 flex-shrink-0">
+                          {team.logo_url ? (
+                            <img 
+                              src={team.logo_url} 
+                              alt={`${team.name} logo`}
+                              className="h-full w-full object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder-logo.png';
+                              }}
+                            />
+                          ) : (
+                            <div className="h-full w-full bg-slate-700 rounded-full flex items-center justify-center">
+                              <span className="text-xs font-bold text-white">
+                                {team.name.split(' ').map(word => word[0]).join('').toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-medium text-white">{team.name}</span>
+                          {team.conference && (
+                            <Badge 
+                              variant="outline" 
+                              className="mt-1 w-fit text-xs border-white/20 text-white/80 bg-white/5"
+                            >
+                              {team.conference.name}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <TeamConferenceSelect
