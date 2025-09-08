@@ -47,6 +47,7 @@ export function AdminProtected({ children }: AdminProtectedProps) {
             .select("role")
             .eq("user_id", session.user.id)
             .in("role", ["Admin", "Owner", "GM", "AGM"])
+            .limit(1) // We only need to know if at least one role exists
 
           if (rolesError) {
             const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
@@ -67,18 +68,16 @@ export function AdminProtected({ children }: AdminProtectedProps) {
               return
             }
 
-            throw new Error(`Failed to check admin status: ${rolesError.message}`)
           }
-
-          const hasAdminRole = roles?.some((role) => role.role === "Admin") || false
-          // Check if user has any of the allowed roles (Admin, Owner, GM, AGM)
-          const allowedRoles = ["Admin", "Owner", "GM", "AGM"]
-          const hasRequiredRole = roles.some((role: any) => allowedRoles.includes(role.role))
           
-          if (!hasRequiredRole) {
+          if (!roles || roles.length === 0) {
+            console.log("No admin/management role found in user_roles")
             router.push("/?error=unauthorized&message=You don't have permission to access this page")
             return
           }
+          
+          // User has required role, set isAdmin to true
+          setIsAdmin(true)
         } catch (error: any) {
           const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
 
