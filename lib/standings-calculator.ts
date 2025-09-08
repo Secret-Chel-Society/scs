@@ -27,6 +27,12 @@ export interface TeamStanding {
   penalty_kill_percentage?: number
   division?: string
   conference?: string
+  conference_id?: string
+  conference_data?: {
+    id: string
+    name: string
+    color: string
+  }
   last_10?: string // Format: "W-L-OTL"
   current_streak?: string // Format: "W5", "L3", "OTL2"
   playoff_status?: "clinched" | "eliminated" | "active" // New field for playoff status
@@ -412,11 +418,38 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
       hasDivisionColumn = false
     }
 
-    // Get all teams for the season
-    const { data: teams, error: teamsError } = await supabase
+    // Get all teams for the season with conference data (fallback to basic query if conference join fails)
+    let { data: teams, error: teamsError } = await supabase
       .from("teams")
-      .select("id, name, logo_url" + (hasDivisionColumn ? ", division, conference" : ""))
+      .select(`
+        id, 
+        name, 
+        logo_url,
+        conference_id,
+        conference:conferences(id, name, color)
+        ${hasDivisionColumn ? ", division" : ""}
+      `)
       .eq("is_active", true)
+      .eq("season_id", seasonId)
+
+    // If conference join fails, try without conference data
+    if (teamsError && teamsError.message.includes("conferences")) {
+      console.log("Conference table not found, loading teams without conference data")
+      const fallbackResult = await supabase
+        .from("teams")
+        .select(`
+          id, 
+          name, 
+          logo_url,
+          conference_id
+          ${hasDivisionColumn ? ", division" : ""}
+        `)
+        .eq("is_active", true)
+        .eq("season_id", seasonId)
+      
+      teams = fallbackResult.data
+      teamsError = fallbackResult.error
+    }
 
     if (teamsError) {
       console.error("Error fetching teams:", teamsError)
@@ -461,32 +494,44 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
     if (!matches || matches.length === 0) {
       console.log(`No completed matches found for season ${seasonName}`)
       // Return teams with zero stats
-      const zeroStatsTeams = teams.map((team) => ({
-        id: team.id,
-        name: team.name,
-        logo_url: team.logo_url,
-        wins: 0,
-        losses: 0,
-        otl: 0,
-        goals_for: 0,
-        goals_against: 0,
-        games_played: 0,
-        points: 0,
-        goal_differential: 0,
-        shots_per_game: 0,
-        total_shots: 0,
-        powerplay_goals: 0,
-        powerplay_opportunities: 0,
-        powerplay_percentage: 0,
-        penalty_kill_goals_against: 0,
-        penalty_kill_opportunities: 0,
-        penalty_kill_percentage: 0,
-        division: hasDivisionColumn ? team.division : nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom",
-        conference: hasDivisionColumn ? team.conference : nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom",
-        last_10: "0-0-0",
-        current_streak: "-",
-        playoff_status: "active" as const,
-      }))
+      const zeroStatsTeams = teams.map((team) => {
+        // Handle conference data properly
+        const conferenceName = team.conference?.name || (nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom")
+        const conferenceData = team.conference ? {
+          id: team.conference.id,
+          name: team.conference.name,
+          color: team.conference.color
+        } : null
+
+        return {
+          id: team.id,
+          name: team.name,
+          logo_url: team.logo_url,
+          wins: 0,
+          losses: 0,
+          otl: 0,
+          goals_for: 0,
+          goals_against: 0,
+          games_played: 0,
+          points: 0,
+          goal_differential: 0,
+          shots_per_game: 0,
+          total_shots: 0,
+          powerplay_goals: 0,
+          powerplay_opportunities: 0,
+          powerplay_percentage: 0,
+          penalty_kill_goals_against: 0,
+          penalty_kill_opportunities: 0,
+          penalty_kill_percentage: 0,
+          division: hasDivisionColumn ? team.division : nhlDivisionTeams.includes(team.name) ? "NHL" : "Custom",
+          conference: conferenceName,
+          conference_id: team.conference_id,
+          conference_data: conferenceData,
+          last_10: "0-0-0",
+          current_streak: "-",
+          playoff_status: "active" as const,
+        }
+      })
 
       return calculatePlayoffStatus(zeroStatsTeams)
     }
@@ -661,6 +706,15 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           }
         }
 
+        // Use conference data from database if available, otherwise fall back to string
+        const conferenceName = team.conference?.name || conference || "Unassigned"
+        const conferenceId = team.conference_id
+        const conferenceData = team.conference ? {
+          id: team.conference.id,
+          name: team.conference.name,
+          color: team.conference.color
+        } : null
+
         return {
           id: team.id,
           name: team.name,
@@ -682,7 +736,9 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           penalty_kill_opportunities: penaltyKillOpportunities,
           penalty_kill_percentage: penaltyKillPercentage,
           division,
-          conference,
+          conference: conferenceName,
+          conference_id: conferenceId,
+          conference_data: conferenceData,
           last_10: last10Record,
           current_streak: currentStreak,
           playoff_status: "active" as const, // Will be calculated below
@@ -806,14 +862,55 @@ export async function updateTeamStatistics(seasonId: number): Promise<boolean> {
  */
 export async function getCurrentSeasonId(): Promise<number> {
   try {
+    // First try to get from system_settings
     const { data, error } = await supabase.from("system_settings").select("value").eq("key", "current_season").single()
 
     if (error) {
-      console.error("Error fetching current season:", error)
-      return 1 // Default to season 1 if not found
+      console.log("System settings approach failed, trying seasons table:", error.message)
+      
+      // Fallback: Get active season from seasons table
+      const { data: seasonData, error: seasonError } = await supabase
+        .from("seasons")
+        .select("id, name, season_number")
+        .eq("is_active", true)
+        .single()
+
+      if (seasonError) {
+        console.log("Active season not found, trying first season:", seasonError.message)
+        
+        // Final fallback: Get first season
+        const { data: firstSeason, error: firstSeasonError } = await supabase
+          .from("seasons")
+          .select("id, name, season_number")
+          .order("id")
+          .limit(1)
+          .single()
+
+        if (firstSeasonError) {
+          console.error("No seasons found, defaulting to 1:", firstSeasonError.message)
+          return 1
+        }
+
+        console.log("Using first season:", firstSeason)
+        return firstSeason.id
+      }
+
+      console.log("Using active season:", seasonData)
+      return seasonData.id
     }
 
-    return data?.value || 1
+    const value = data?.value
+    if (typeof value === 'string') {
+      const parsed = parseInt(value, 10)
+      if (!isNaN(parsed)) {
+        return parsed
+      }
+    } else if (typeof value === 'number') {
+      return value
+    }
+
+    console.log("Invalid current_season value, defaulting to 1")
+    return 1
   } catch (error) {
     console.error("Error getting current season:", error)
     return 1 // Default to season 1 if error

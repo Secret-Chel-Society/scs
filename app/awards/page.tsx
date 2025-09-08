@@ -235,122 +235,233 @@ export default function AwardsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">League Awards</h1>
-            <p className="text-muted-foreground">Celebrating excellence in the Major Gaming Hockey League</p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
+      {/* Enhanced Hero Section */}
+      <div className="clean-header relative py-20 px-4">
+        <div className="container mx-auto text-center relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <h1 className="clean-title mb-6">
+              League Awards & Recognition
+            </h1>
+            <p className="clean-subtitle mb-8">
+              Celebrating excellence, achievements, and outstanding performances in the Secret Chel Society
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Select value={selectedSeason} onValueChange={setSelectedSeason}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by season" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Seasons</SelectItem>
-                {seasons.length > 0
-                  ? seasons.map((season) => (
-                      <SelectItem key={season.id} value={String(season.number)}>
-                        {season.name}
-                      </SelectItem>
-                    ))
-                  : [1, 2, 3, 4, 5].map((num) => (
-                      <SelectItem key={num} value={String(num)}>
-                        Season {num}
+            {/* Enhanced Awards Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-16">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="group"
+              >
+                <div className="clean-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="clean-icon-container-emerald mb-4 group-hover:shadow-xl group-hover:shadow-emerald-500/25 transition-all duration-300">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+                    {teamAwards.length}
+                  </div>
+                  <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                    Team Awards
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="group"
+              >
+                <div className="clean-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="clean-icon-container mb-4 group-hover:shadow-xl group-hover:shadow-blue-500/25 transition-all duration-300">
+                    <Award className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-2">
+                    {playerAwards.length}
+                  </div>
+                  <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                    Player Awards
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="group"
+              >
+                <div className="clean-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="clean-icon-container-red mb-4 group-hover:shadow-xl group-hover:shadow-red-500/25 transition-all duration-300">
+                    <Star className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                    {availableYears.length}
+                  </div>
+                  <div className="text-sm text-red-600 dark:text-red-400 font-medium">
+                    Award Years
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <motion.div 
+        className="container mx-auto px-4 py-12"
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        {/* Enhanced Filters Section */}
+        <div className="mb-8 clean-card p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Awards Gallery</h2>
+              <p className="text-slate-600 dark:text-slate-400">Filter awards by season and year</p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+              <div className="flex items-center gap-2">
+                <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by season" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Seasons</SelectItem>
+                    {seasons.length > 0
+                      ? seasons.map((season) => (
+                          <SelectItem key={season.id} value={String(season.number)}>
+                            {season.name}
+                          </SelectItem>
+                        ))
+                      : [1, 2, 3, 4, 5].map((num) => (
+                          <SelectItem key={num} value={String(num)}>
+                            Season {num}
+                          </SelectItem>
+                        ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={String(year)}>
+                        {year}
                       </SelectItem>
                     ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
-                {availableYears.map((year) => (
-                  <SelectItem key={year} value={String(year)}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         </div>
 
         <Tabs defaultValue="team-awards">
-          <TabsList className="mb-6">
-            <TabsTrigger value="team-awards">Team Awards</TabsTrigger>
-            <TabsTrigger value="player-awards">Player Awards</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center mb-8">
+            <TabsList className="grid grid-cols-2 w-full max-w-lg gap-3 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl">
+              <TabsTrigger 
+                value="team-awards" 
+                className="px-8 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Team Awards</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="player-awards" 
+                className="px-8 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Award className="h-5 w-5" />
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Player Awards</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="team-awards">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-64 w-full rounded-lg" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-64 rounded-xl" />
                 ))}
               </div>
             ) : (
-              <div className="space-y-12">
-                {Object.entries(teamAwardsByType).length > 0 ? (
-                  Object.entries(teamAwardsByType).map(([awardType, awards]) => (
-                    <div key={awardType} className="space-y-6">
-                      <h2 className="text-2xl font-bold flex items-center gap-2">
-                        {awardType === "MGHL Cup" ? (
-                          <Trophy className="h-6 w-6 text-yellow-500" />
-                        ) : (
-                          <Award className="h-6 w-6 text-blue-500" />
-                        )}
-                        {awardType}
-                      </h2>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {awards.map((award) => (
-                          <motion.div
-                            key={award.id}
-                            whileHover={{ y: -5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <Link href={`/teams/${award.team_id}`}>
-                              <Card
-                                className={`overflow-hidden h-full hover:border-primary transition-colors ${
-                                  awardType === "MGHL Cup" ? "border-yellow-200 dark:border-yellow-900" : ""
-                                }`}
-                              >
-                                <CardContent className="p-6">
-                                  <div className="flex flex-col items-center">
-                                    <div className="relative h-24 w-24 mb-4">
-                                      {award.team_logo ? (
-                                        <Image
-                                          src={award.team_logo || "/placeholder.svg"}
-                                          alt={award.team_name}
-                                          fill
-                                          className="object-contain"
-                                        />
-                                      ) : (
-                                        <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center text-3xl font-bold">
-                                          {award.team_name.substring(0, 2)}
-                                        </div>
-                                      )}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-center mb-2">{award.team_name}</h3>
-                                    <div className="text-sm text-muted-foreground text-center mb-4">
-                                      {getSeasonName(award.season_number)} • {award.year}
-                                    </div>
-                                    {award.description && <p className="text-sm text-center">{award.description}</p>}
+              <div className="space-y-8">
+                {Object.entries(teamAwardsByType).map(([awardType, awards]) => (
+                  <div key={awardType}>
+                    <h3 className="text-xl font-bold mb-4 text-hockey-silver-800 dark:text-hockey-silver-200">{awardType}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {awards.map((award) => (
+                        <motion.div
+                          key={award.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3 }}
+                          whileHover={{ y: -4, scale: 1.02 }}
+                        >
+                          <Link href={`/teams/${award.team_id}`}>
+                            <Card
+                              className={`hockey-card hockey-card-hover overflow-hidden h-full ${
+                                awardType === "SCS Cup" ? "border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/10" : ""
+                              }`}
+                            >
+                              <CardContent className="p-6">
+                                <div className="flex flex-col items-center">
+                                  <div className="relative h-24 w-24 mb-4">
+                                    {award.team_logo ? (
+                                      <Image
+                                        src={award.team_logo || "/placeholder.svg"}
+                                        alt={award.team_name}
+                                        fill
+                                        className="object-contain rounded-lg"
+                                      />
+                                    ) : (
+                                      <div className="w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-800/20 flex items-center justify-center text-xl font-bold text-ice-blue-700 dark:text-ice-blue-300 rounded-lg border-2 border-ice-blue-200 dark:border-rink-blue-700">
+                                        {award.team_name.substring(0, 2)}
+                                      </div>
+                                    )}
                                   </div>
-                                </CardContent>
-                              </Card>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </div>
+                                  <h3 className="text-lg font-semibold mb-2 text-hockey-silver-800 dark:text-hockey-silver-200 text-center">
+                                    {award.team_name}
+                                  </h3>
+                                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-3 text-center">
+                                    {getSeasonName(award.season_number)} • {award.year}
+                                  </div>
+                                  {award.description && (
+                                    <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 text-center">
+                                      {award.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        </motion.div>
+                      ))}
                     </div>
-                  ))
-                ) : (
+                  </div>
+                ))}
+                {Object.keys(teamAwardsByType).length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">No team awards found for the selected filters.</p>
                   </div>
@@ -361,62 +472,61 @@ export default function AwardsPage() {
 
           <TabsContent value="player-awards">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Skeleton key={i} className="h-64 w-full rounded-lg" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Skeleton key={i} className="h-64 rounded-xl" />
                 ))}
               </div>
             ) : (
-              <div className="space-y-12">
-                {Object.entries(playerAwardsByType).length > 0 ? (
-                  Object.entries(playerAwardsByType).map(([awardType, awards]) => (
-                    <div key={awardType} className="space-y-6">
-                      <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <Star className="h-6 w-6 text-yellow-500" />
-                        {awardType}
-                      </h2>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {awards.map((award) => (
-                          <motion.div
-                            key={award.id}
-                            whileHover={{ y: -5 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                          >
-                            <Link href={`/players/${award.player_id}`}>
-                              <Card className="overflow-hidden h-full hover:border-primary transition-colors">
-                                <CardContent className="p-6">
-                                  <div className="flex flex-col items-center">
-                                    <div className="flex items-center gap-3 mb-4">
-                                      <div className="text-2xl font-bold">{award.gamer_tag_id}</div>
-                                      {award.team_logo && (
-                                        <div className="relative h-6 w-6">
-                                          <Image
-                                            src={award.team_logo || "/placeholder.svg"}
-                                            alt={award.team_name || ""}
-                                            fill
-                                            className="object-contain"
-                                          />
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="text-sm text-muted-foreground text-center mb-4">
-                                      {getSeasonName(award.season_number)} • {award.year}
-                                    </div>
-                                    {award.team_name && (
-                                      <div className="text-sm text-center mb-2">Team: {award.team_name}</div>
+              <div className="space-y-8">
+                {Object.entries(playerAwardsByType).map(([awardType, awards]) => (
+                  <div key={awardType}>
+                    <h3 className="text-xl font-bold mb-4 text-hockey-silver-800 dark:text-hockey-silver-200">{awardType}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {awards.map((award) => (
+                        <motion.div
+                          key={award.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.3 }}
+                          whileHover={{ y: -4, scale: 1.02 }}
+                        >
+                          <Link href={`/players/${award.player_id}`}>
+                            <Card className="hockey-card hockey-card-hover overflow-hidden h-full">
+                              <CardContent className="p-6">
+                                <div className="flex flex-col items-center">
+                                  <div className="flex items-center gap-3 mb-4">
+                                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{award.gamer_tag_id}</div>
+                                    {award.team_logo && (
+                                      <div className="relative h-8 w-8">
+                                        <Image
+                                          src={award.team_logo || "/placeholder.svg"}
+                                          alt={award.team_name || ""}
+                                          fill
+                                          className="object-contain rounded"
+                                        />
+                                      </div>
                                     )}
-                                    {award.description && <p className="text-sm text-center">{award.description}</p>}
                                   </div>
-                                </CardContent>
-                              </Card>
-                            </Link>
-                          </motion.div>
-                        ))}
-                      </div>
+                                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">
+                                    {award.team_name && `${award.team_name} • `}
+                                    {getSeasonName(award.season_number)} • {award.year}
+                                  </div>
+                                  {award.description && (
+                                    <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 text-center">
+                                      {award.description}
+                                    </p>
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        </motion.div>
+                      ))}
                     </div>
-                  ))
-                ) : (
+                  </div>
+                ))}
+                {Object.keys(playerAwardsByType).length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">No player awards found for the selected filters.</p>
                   </div>

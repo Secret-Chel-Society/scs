@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     // Use Supabase's built-in password reset functionality
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://majorgaminghockeyleague.com/reset-password",
+      redirectTo: "https://www.secretchelsociety.com/reset-password",
     })
 
     if (error) {

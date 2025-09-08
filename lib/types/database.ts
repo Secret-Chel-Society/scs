@@ -7,38 +7,125 @@ export interface Database {
         Row: {
           id: string
           email: string
-          gamer_tag_id: string
+          gamer_tag_name: string
           discord_name: string | null
           primary_position: string
           secondary_position: string | null
           console: string
-          created_at: string
+          created_on: string
           updated_at: string
           is_active: boolean
+          registration_ip: string | null
+          last_login_ip: string | null
+          last_login_at: string | null
+          username: string | null
+          gamer_tag: string | null
+          twitch_username: string | null
+          twitch_user_id: string | null
+          twitch_access_token: string | null
+          twitch_refresh_token: string | null
+          twitch_connected_at: string | null
+          is_streaming: boolean
+          stream_title: string | null
+          stream_game_name: string | null
+          stream_viewer_count: number
+          stream_started_at: string | null
+          twitch_id: string | null
+          twitch_login: string | null
+          twitch_display_name: string | null
+          twitch_profile_image_url: string | null
+          twitch_connected: boolean
+          avatar_url: string | null
+          email_notifications: boolean
+          game_notifications: boolean
+          news_notifications: boolean
+          ban_reason: string | null
+          ban_expiration: string | null
+          is_banned: boolean
+          discord_id: string | null
+          ban_expires_at: string | null
         }
         Insert: {
           id?: string
           email: string
-          gamer_tag_id: string
+          gamer_tag_name: string
           discord_name?: string | null
           primary_position: string
           secondary_position?: string | null
           console: string
-          created_at?: string
+          created_on?: string
           updated_at?: string
           is_active?: boolean
+          registration_ip?: string | null
+          last_login_ip?: string | null
+          last_login_at?: string | null
+          username?: string | null
+          gamer_tag?: string | null
+          twitch_username?: string | null
+          twitch_user_id?: string | null
+          twitch_access_token?: string | null
+          twitch_refresh_token?: string | null
+          twitch_connected_at?: string | null
+          is_streaming?: boolean
+          stream_title?: string | null
+          stream_game_name?: string | null
+          stream_viewer_count?: number
+          stream_started_at?: string | null
+          twitch_id?: string | null
+          twitch_login?: string | null
+          twitch_display_name?: string | null
+          twitch_profile_image_url?: string | null
+          twitch_connected?: boolean
+          avatar_url?: string | null
+          email_notifications?: boolean
+          game_notifications?: boolean
+          news_notifications?: boolean
+          ban_reason?: string | null
+          ban_expiration?: string | null
+          is_banned?: boolean
+          discord_id?: string | null
+          ban_expires_at?: string | null
         }
         Update: {
           id?: string
           email?: string
-          gamer_tag_id?: string
+          gamer_tag_name?: string
           discord_name?: string | null
           primary_position?: string | null
           secondary_position?: string | null
           console?: string
-          created_at?: string
+          created_on?: string
           updated_at?: string
           is_active?: boolean
+          registration_ip?: string | null
+          last_login_ip?: string | null
+          last_login_at?: string | null
+          username?: string | null
+          gamer_tag?: string | null
+          twitch_username?: string | null
+          twitch_user_id?: string | null
+          twitch_access_token?: string | null
+          twitch_refresh_token?: string | null
+          twitch_connected_at?: string | null
+          is_streaming?: boolean
+          stream_title?: string | null
+          stream_game_name?: string | null
+          stream_viewer_count?: number
+          stream_started_at?: string | null
+          twitch_id?: string | null
+          twitch_login?: string | null
+          twitch_display_name?: string | null
+          twitch_profile_image_url?: string | null
+          twitch_connected?: boolean
+          avatar_url?: string | null
+          email_notifications?: boolean
+          game_notifications?: boolean
+          news_notifications?: boolean
+          ban_reason?: string | null
+          ban_expiration?: string | null
+          is_banned?: boolean
+          discord_id?: string | null
+          ban_expires_at?: string | null
         }
       }
       teams: {
@@ -88,6 +175,11 @@ export interface Database {
           role: string
           created_at: string
           updated_at: string
+          retained_salary: number
+          manually_removed: boolean
+          manually_removed_at: string | null
+          manually_removed_by: string | null
+          status: string
         }
         Insert: {
           id?: string
@@ -97,6 +189,11 @@ export interface Database {
           role?: string
           created_at?: string
           updated_at?: string
+          retained_salary?: number
+          manually_removed?: boolean
+          manually_removed_at?: string | null
+          manually_removed_by?: string | null
+          status?: string
         }
         Update: {
           id?: string
@@ -106,6 +203,11 @@ export interface Database {
           role?: string
           created_at?: string
           updated_at?: string
+          retained_salary?: number
+          manually_removed?: boolean
+          manually_removed_at?: string | null
+          manually_removed_by?: string | null
+          status?: string
         }
       }
       matches: {

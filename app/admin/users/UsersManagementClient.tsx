@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 "use client"
 
 import type React from "react"
@@ -41,6 +42,37 @@ import {
   Search,
   X,
   Download,
+  Crown,
+  Shield,
+  Target,
+  TrendingUp,
+  Award,
+  Medal,
+  Star,
+  ArrowRight,
+  Lock,
+  Eye,
+  Cog,
+  Wrench,
+  CheckCircle,
+  XCircle,
+  UserPlus,
+  Settings,
+  Database,
+  Activity,
+  Zap,
+  Calendar,
+  Clock,
+  Globe,
+  FileText,
+  BarChart3,
+  Trophy,
+  Camera,
+  Image,
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
 } from "lucide-react"
 
 // Define valid player roles - these must match the database constraint
@@ -319,7 +351,7 @@ export default function UsersManagementClient() {
 
   // Load saved admin key if available
   useEffect(() => {
-    const savedKey = localStorage.getItem("mghl-admin-key")
+    const savedKey = localStorage.getItem("scs-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
     }
@@ -425,7 +457,7 @@ export default function UsersManagementClient() {
 
     if (autoRefresh && !refreshing) {
       // Make sure we have an admin key before proceeding
-      const savedKey = localStorage.getItem("mghl-admin-key") || adminKey
+      const savedKey = localStorage.getItem("scs-admin-key") || adminKey
       if (!savedKey) {
         // If no admin key is available, disable auto-refresh
         setAutoRefresh(false)
@@ -709,7 +741,7 @@ export default function UsersManagementClient() {
 
   // Function to check if we have an admin key and prompt for one if needed
   function withAdminKey(action: () => Promise<void>) {
-    const savedKey = localStorage.getItem("mghl-admin-key")
+    const savedKey = localStorage.getItem("scs-admin-key")
     if (savedKey) {
       setAdminKey(savedKey)
       return action()
@@ -732,7 +764,7 @@ export default function UsersManagementClient() {
 
       // Save key if requested
       if (saveAdminKey && adminKey) {
-        localStorage.setItem("mghl-admin-key", adminKey)
+        localStorage.setItem("scs-admin-key", adminKey)
       }
 
       // Close dialog
@@ -760,7 +792,7 @@ export default function UsersManagementClient() {
         setRefreshResults(null)
 
         // Get admin key from state or localStorage
-        const keyToUse = adminKey || localStorage.getItem("mghl-admin-key") || ""
+        const keyToUse = adminKey || localStorage.getItem("scs-admin-key") || ""
 
         if (!keyToUse) {
           throw new Error("Admin key is required to refresh users")
@@ -785,7 +817,7 @@ export default function UsersManagementClient() {
 
           // If unauthorized, clear the stored key as it might be invalid
           if (response.status === 401) {
-            localStorage.removeItem("mghl-admin-key")
+            localStorage.removeItem("scs-admin-key")
             setAdminKey("")
 
             // Prompt for a new key
@@ -825,7 +857,7 @@ export default function UsersManagementClient() {
       setRefreshing(true)
 
       // Get admin key from localStorage or component state
-      const keyToUse = localStorage.getItem("mghl-admin-key") || adminKey
+      const keyToUse = localStorage.getItem("scs-admin-key") || adminKey
 
       if (!keyToUse) {
         // If no key is available, disable auto-refresh
@@ -852,7 +884,7 @@ export default function UsersManagementClient() {
 
         // If unauthorized, disable auto-refresh
         if (response.status === 401) {
-          localStorage.removeItem("mghl-admin-key")
+          localStorage.removeItem("scs-admin-key")
           setAdminKey("")
           setAutoRefresh(false)
           throw new Error("Invalid admin key. Auto-refresh disabled.")
@@ -887,7 +919,7 @@ export default function UsersManagementClient() {
         setSubmitting(true)
 
         // Get admin key from state or localStorage
-        const keyToUse = adminKey || localStorage.getItem("mghl-admin-key") || ""
+        const keyToUse = adminKey || localStorage.getItem("scs-admin-key") || ""
 
         if (!keyToUse) {
           throw new Error("Admin key is required to fix secondary positions")
@@ -936,7 +968,7 @@ export default function UsersManagementClient() {
         setSubmitting(true)
 
         // Get admin key from state or localStorage
-        const keyToUse = adminKey || localStorage.getItem("mghl-admin-key") || ""
+        const keyToUse = adminKey || localStorage.getItem("scs-admin-key") || ""
 
         if (!keyToUse) {
           throw new Error("Admin key is required to fix role constraint")
@@ -1036,7 +1068,7 @@ export default function UsersManagementClient() {
       const link = document.createElement("a")
       const url = URL.createObjectURL(blob)
       link.setAttribute("href", url)
-      link.setAttribute("download", `mghl-users-${new Date().toISOString().split("T")[0]}.csv`)
+      link.setAttribute("download", `scs-users-${new Date().toISOString().split("T")[0]}.csv`)
       link.style.visibility = "hidden"
       document.body.appendChild(link)
       link.click()
@@ -1801,260 +1833,438 @@ export default function UsersManagementClient() {
   }
 
   const renderButtonsSection = () => (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">User Management</h1>
-        <p className="text-muted-foreground">Manage user accounts and roles</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={() => setNewUserDialogOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
-        <Button variant="outline" onClick={refreshUsers} disabled={refreshing}>
-          <RefreshCcw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-          {refreshing ? "Refreshing..." : "Refresh Users"}
-        </Button>
-        <Button
-          variant={autoRefresh ? "default" : "outline"}
-          onClick={() => {
-            // Check if we have an admin key before enabling auto-refresh
-            const savedKey = localStorage.getItem("mghl-admin-key") || adminKey
-            if (!savedKey && !autoRefresh) {
-              // If trying to enable auto-refresh but no key exists, show admin key dialog
-              pendingActionRef.current = () => {
-                setAutoRefresh(true)
-                setLastRefreshTime(new Date())
-                setNextRefreshCountdown(30)
-                return Promise.resolve()
-              }
-              setAdminKeyDialogOpen(true)
-            } else {
-              // Toggle auto-refresh state
-              setAutoRefresh(!autoRefresh)
-              if (!autoRefresh) {
-                // If enabling, set initial refresh time
-                setLastRefreshTime(new Date())
-                setNextRefreshCountdown(30)
-              }
-            }
-          }}
-          className={autoRefresh ? "bg-green-600 hover:bg-green-700" : ""}
-        >
-          {autoRefresh ? (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Auto-Refresh On ({nextRefreshCountdown}s)
-            </>
-          ) : (
-            <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Auto-Refresh Off
-            </>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={fixSecondaryPositions}
-          disabled={submitting}
-          className="border-amber-200 hover:border-amber-300 hover:bg-amber-50 text-amber-600 bg-transparent"
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
-          {submitting ? "Fixing..." : "Fix Secondary Positions"}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={fixRoleConstraint}
-          disabled={submitting}
-          className="border-purple-200 hover:border-purple-300 hover:bg-purple-50 text-purple-600 bg-transparent"
-        >
-          <Key className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
-          {submitting ? "Fixing..." : "Fix Role Constraint"}
-        </Button>
-        <Button
-          variant="outline"
-          asChild
-          className="border-green-200 hover:border-green-300 hover:bg-green-50 text-green-600 bg-transparent"
-        >
-          <Link href="/admin/user-diagnostics">
-            <Stethoscope className="mr-2 h-4 w-4" />
-            User Diagnostics
-          </Link>
-        </Button>
-        <Button
-          variant="outline"
-          onClick={exportUsersToCSV}
-          disabled={submitting || filteredUsers.length === 0}
-          className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-600 bg-transparent"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          {submitting ? "Exporting..." : `Export CSV (${filteredUsers.length})`}
-        </Button>
+    <div className="relative overflow-hidden py-16 px-4 mb-8">
+      <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+      <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-10 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+      
+      <div className="relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center shadow-xl shadow-ice-blue-500/25">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="hockey-title text-4xl mb-2">User Management</h1>
+                <p className="hockey-subtitle text-lg">Manage user accounts, roles, and team assignments</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-3">
+            <Button 
+              onClick={() => setNewUserDialogOpen(true)}
+              className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+            >
+              <UserPlus className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+              Add User
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={refreshUsers} 
+              disabled={refreshing}
+              className="hockey-button border-2 border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-300 group"
+            >
+              <RefreshCcw className={`mr-2 h-5 w-5 ${refreshing ? "animate-spin" : "group-hover:rotate-180"} transition-all duration-300`} />
+              {refreshing ? "Refreshing..." : "Refresh Users"}
+            </Button>
+            
+            <Button
+              variant={autoRefresh ? "default" : "outline"}
+              onClick={() => {
+                const savedKey = localStorage.getItem("scs-admin-key") || adminKey
+                if (!savedKey && !autoRefresh) {
+                  pendingActionRef.current = () => {
+                    setAutoRefresh(true)
+                    setLastRefreshTime(new Date())
+                    setNextRefreshCountdown(30)
+                    return Promise.resolve()
+                  }
+                  setAdminKeyDialogOpen(true)
+                } else {
+                  setAutoRefresh(!autoRefresh)
+                  if (!autoRefresh) {
+                    setLastRefreshTime(new Date())
+                    setNextRefreshCountdown(30)
+                  }
+                }
+              }}
+              className={`hockey-button transition-all duration-300 ${
+                autoRefresh 
+                  ? "bg-gradient-to-r from-goal-red-500 to-goal-red-600 hover:from-goal-red-600 hover:to-goal-red-700 text-white shadow-lg hover:shadow-xl" 
+                  : "border-2 border-goal-red-300 hover:border-goal-red-500 hover:bg-goal-red-50 dark:hover:bg-goal-red-900/20 text-goal-red-700 dark:text-goal-red-300"
+              }`}
+            >
+              <Activity className={`mr-2 h-5 w-5 ${autoRefresh ? "animate-pulse" : ""}`} />
+              {autoRefresh ? (
+                <>
+                  Auto-Refresh On ({nextRefreshCountdown}s)
+                </>
+              ) : (
+                <>
+                  Auto-Refresh Off
+                </>
+              )}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={fixSecondaryPositions}
+              disabled={submitting}
+              className="hockey-button border-2 border-amber-300 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-300 transition-all duration-300 group"
+            >
+              <Wrench className={`mr-2 h-5 w-5 ${submitting ? "animate-spin" : "group-hover:rotate-12"} transition-transform duration-300`} />
+              {submitting ? "Fixing..." : "Fix Secondary Positions"}
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={fixRoleConstraint}
+              disabled={submitting}
+              className="hockey-button border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-700 dark:text-purple-300 transition-all duration-300 group"
+            >
+              <Key className={`mr-2 h-5 w-5 ${submitting ? "animate-spin" : "group-hover:scale-110"} transition-transform duration-300`} />
+              {submitting ? "Fixing..." : "Fix Role Constraint"}
+            </Button>
+            
+            <Button
+              variant="outline"
+              asChild
+              className="hockey-button border-2 border-assist-green-300 hover:border-assist-green-500 hover:bg-assist-green-50 dark:hover:bg-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 transition-all duration-300 group"
+            >
+              <Link href="/admin/user-diagnostics">
+                <Stethoscope className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                User Diagnostics
+              </Link>
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={exportUsersToCSV}
+              disabled={submitting || filteredUsers.length === 0}
+              className="hockey-button border-2 border-rink-blue-300 hover:border-rink-blue-500 hover:bg-rink-blue-50 dark:hover:bg-rink-blue-900/20 text-rink-blue-700 dark:text-rink-blue-300 transition-all duration-300 group"
+            >
+              <Download className={`mr-2 h-5 w-5 ${submitting ? "animate-bounce" : "group-hover:scale-110"} transition-transform duration-300`} />
+              {submitting ? "Exporting..." : `Export CSV (${filteredUsers.length})`}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {renderButtonsSection()}
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      {/* Enhanced Hero Header Section */}
+      <div className="relative overflow-hidden py-20 px-4">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        
+        <div className="container mx-auto text-center relative z-10">
+          <div>
+            <h1 className="hockey-title mb-6">
+              User Management Center
+            </h1>
+            <p className="hockey-subtitle mx-auto mb-12">
+              Comprehensive user management for the league. 
+              Manage player accounts, roles, team assignments, and league administration.
+            </p>
+            
+            {/* Enhanced Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto mb-16">
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-ice-blue-500/25 transition-all duration-300">
+                    <Users className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300 mb-2">
+                    {users.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Total Users
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-rink-blue-500/25 transition-all duration-300">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300 mb-2">
+                    {users.filter(u => u.roles?.includes('Admin')).length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Administrators
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-rink-blue-500 to-ice-blue-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-assist-green-500/25 transition-all duration-300">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300 mb-2">
+                    {users.filter(u => u.roles?.includes('Player')).length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Players
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-assist-green-500 to-goal-red-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+              
+              <div className="group">
+                <div className="hockey-stat-item hover:scale-110 transition-all duration-300 cursor-pointer">
+                  <div className="w-16 h-16 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:shadow-xl group-hover:shadow-goal-red-500/25 transition-all duration-300">
+                    <Crown className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300 mb-2">
+                    {teams.length}
+                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">
+                    Teams
+                  </div>
+                  <div className="w-16 h-1 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-full mx-auto mt-3 group-hover:w-20 transition-all duration-300"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-20">
+        {renderButtonsSection()}
 
       {/* Search Bar */}
-      <div className="relative mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search by gamer tag..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-        {searchQuery && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Found {filteredUsers.length} {filteredUsers.length === 1 ? "user" : "users"} matching "{searchQuery}"
-            {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
-          </p>
-        )}
+      <div className="relative mb-8">
+        <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+          <CardContent className="p-6">
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+                <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Search className="h-5 w-5 text-white" />
+                </div>
+              </div>
+              <Input
+                placeholder="Search by gamer tag..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="hockey-search h-14 text-lg pl-16 pr-16 border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-10 w-10 p-0 hover:bg-ice-blue-100 dark:hover:bg-rink-blue-900/30 rounded-xl transition-all duration-200 z-10"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
+                </Button>
+              )}
+            </div>
+            {searchQuery && (
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Found <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{filteredUsers.length}</span> {filteredUsers.length === 1 ? "user" : "users"} matching "{searchQuery}"
+                </p>
+                {totalPages > 1 && (
+                  <Badge variant="outline" className="bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300">
+                    Page {currentPage} of {totalPages}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {autoRefresh && lastRefreshTime && (
-        <div className="mb-4 text-sm text-muted-foreground">
-          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-          Auto-refresh active. Last refresh: {lastRefreshTime.toLocaleTimeString()}. Next refresh in{" "}
-          {nextRefreshCountdown} seconds.
-        </div>
+        <Card className="hockey-card hockey-card-hover mb-6 border-2 border-goal-red-200/50 dark:border-goal-red-700/50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-full animate-pulse"></div>
+              <div className="flex-1">
+                <p className="text-sm text-hockey-silver-700 dark:text-hockey-silver-300">
+                  <span className="font-semibold text-goal-red-600 dark:text-goal-red-400">Auto-refresh active.</span> Last refresh: {lastRefreshTime.toLocaleTimeString()}. Next refresh in{" "}
+                  <span className="font-mono font-bold text-goal-red-600 dark:text-goal-red-400">{nextRefreshCountdown}</span> seconds.
+                </p>
+              </div>
+              <div className="w-8 h-8 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-full flex items-center justify-center">
+                <Activity className="h-4 w-4 text-white animate-pulse" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {showMigrationAlert && (
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-6">
-          <div className="flex items-start">
-            <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 mr-3" />
-            <div>
-              <h3 className="font-medium text-amber-800">Database Update Required</h3>
-              <p className="text-amber-700 mt-1 text-sm">
-                The user activation feature requires a database update. Please run the SQL below in the Supabase SQL
-                Editor.
-              </p>
-              <div className="mt-3 space-y-2">
-                <div className="text-sm text-amber-700 mt-2">
-                  <p className="font-medium">SQL Migration:</p>
-                  <pre className="bg-amber-100 p-2 rounded mt-1 overflow-x-auto text-xs">
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
-                    <br />
-                    UPDATE users SET is_active = TRUE WHERE is_active IS NULL;
-                  </pre>
+        <Card className="hockey-card hockey-card-hover mb-6 border-2 border-amber-200/50 dark:border-amber-700/50">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Database className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200 mb-2">Database Update Required</h3>
+                <p className="text-amber-700 dark:text-amber-300 mb-4">
+                  The user activation feature requires a database update. Please run the SQL below in the Supabase SQL Editor.
+                </p>
+                <div className="space-y-3">
+                  <div className="text-sm text-amber-700 dark:text-amber-300">
+                    <p className="font-medium mb-2">SQL Migration:</p>
+                    <div className="bg-amber-100 dark:bg-amber-900/30 p-4 rounded-lg border border-amber-200 dark:border-amber-700 overflow-x-auto">
+                      <pre className="text-xs text-amber-800 dark:text-amber-200 font-mono">
+                        ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+                        UPDATE users SET is_active = TRUE WHERE is_active IS NULL;
+                      </pre>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hockey-button bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-600 hover:bg-amber-200 dark:hover:bg-amber-800/50 text-amber-800 dark:text-amber-200 transition-all duration-300"
+                      onClick={checkColumnAfterMigration}
+                      disabled={submitting}
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
+                      {submitting ? "Checking..." : "I've run the migration, check again"}
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center mt-3">
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {showDiscordAlert && (
+        <Card className="hockey-card hockey-card-hover mb-6 border-2 border-rink-blue-200/50 dark:border-rink-blue-700/50">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Settings className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-rink-blue-800 dark:text-rink-blue-200 mb-2">Discord Integration Not Set Up</h3>
+                <p className="text-rink-blue-700 dark:text-rink-blue-300 mb-4">
+                  Discord role synchronization is not available because the Discord integration tables don't exist.
+                </p>
+                <div>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-amber-100 border-amber-300 hover:bg-amber-200 text-amber-800"
-                    onClick={checkColumnAfterMigration}
-                    disabled={submitting}
+                    className="hockey-button bg-rink-blue-100 dark:bg-rink-blue-900/30 border-rink-blue-300 dark:border-rink-blue-600 hover:bg-rink-blue-200 dark:hover:bg-rink-blue-800/50 text-rink-blue-800 dark:text-rink-blue-200 transition-all duration-300"
+                    asChild
                   >
-                    <RefreshCw className={`mr-2 h-4 w-4 ${submitting ? "animate-spin" : ""}`} />
-                    {submitting ? "Checking..." : "I've run the migration, check again"}
+                    <Link href="/admin/scs-bot" className="flex items-center gap-2">
+                      <Cog className="h-4 w-4" />
+                      Set Up Discord Integration
+                    </Link>
                   </Button>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
-      {showDiscordAlert && (
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
-          <div className="flex items-start">
-            <AlertTriangle className="h-5 w-5 text-blue-500 mt-0.5 mr-3" />
-            <div>
-              <h3 className="font-medium text-blue-800">Discord Integration Not Set Up</h3>
-              <p className="text-blue-700 mt-1 text-sm">
-                Discord role synchronization is not available because the Discord integration tables don't exist.
-              </p>
-              <div className="mt-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-blue-100 border-blue-300 hover:bg-blue-200 text-blue-800"
-                  asChild
-                >
-                  <Link href="/admin/mghl-bot">Set Up Discord Integration</Link>
-                </Button>
+      <Card className="hockey-card hockey-card-hover border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+        <CardHeader className="relative">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+          <div className="flex flex-row items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl text-hockey-silver-800 dark:text-hockey-silver-200">Users</CardTitle>
+                <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                  Manage user accounts and assign roles
+                </CardDescription>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Users</CardTitle>
-            <CardDescription>Manage user accounts and assign roles</CardDescription>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300">
+                {filteredUsers.length} Total Users
+              </Badge>
+            </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           {loading ? (
             <Skeleton className="w-full h-[500px]" />
           ) : (
             <>
               {/* Pagination Info */}
               {!loading && filteredUsers.length > 0 && (
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-muted-foreground">
-                    Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length}{" "}
-                    users
-                  </p>
-                  {totalPages > 1 && (
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        disabled={currentPage === 1}
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        disabled={currentPage === totalPages}
-                      >
-                        Next
-                      </Button>
+                <Card className="hockey-card mb-6 border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+                          <Users className="h-4 w-4 text-white" />
+                        </div>
+                        <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                          Showing <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{startIndex + 1}</span> to{" "}
+                          <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{Math.min(endIndex, filteredUsers.length)}</span> of{" "}
+                          <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{filteredUsers.length}</span> users
+                        </p>
+                      </div>
+                      {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200"
+                          >
+                            Previous
+                          </Button>
+                          <Badge variant="outline" className="bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300 px-3 py-1">
+                            Page {currentPage} of {totalPages}
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200"
+                          >
+                            Next
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
               )}
-              <div className="rounded-md border overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Gamer Tag</TableHead>
-                      <TableHead className="text-center">Position</TableHead>
-                      <TableHead className="text-center">Console</TableHead>
-                      <TableHead className="text-center">Roles</TableHead>
-                      <TableHead className="text-center">Team</TableHead>
-                      <TableHead className="text-center">Salary</TableHead>
-                      {isActiveColumnExists && <TableHead className="text-center">Status</TableHead>}
-                      <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
+                              <div className="rounded-xl border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 overflow-hidden shadow-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 hover:from-ice-blue-100 dark:hover:from-ice-blue-800/30 hover:to-rink-blue-100 dark:hover:to-rink-blue-800/30 transition-all duration-300">
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Email</TableHead>
+                        <TableHead className="text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Gamer Tag</TableHead>
+                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Position</TableHead>
+                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Console</TableHead>
+                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Roles</TableHead>
+                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Team</TableHead>
+                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Salary</TableHead>
+                        {isActiveColumnExists && <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Status</TableHead>}
+                        <TableHead className="text-center text-hockey-silver-800 dark:text-hockey-silver-200 font-bold">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
                   <TableBody>
                     {paginatedUsers.length === 0 ? (
                       <TableRow>
@@ -2087,12 +2297,12 @@ export default function UsersManagementClient() {
                         }
 
                         return (
-                          <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
-                            <TableCell className="font-medium">{user.email}</TableCell>
-                            <TableCell>{user.gamer_tag_id}</TableCell>
+                          <TableRow key={user.id} className="hover:bg-gradient-to-r hover:from-ice-blue-50/50 hover:to-rink-blue-50/50 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border-b border-ice-blue-100/50 dark:border-rink-blue-800/50">
+                            <TableCell className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{user.email}</TableCell>
+                            <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300">{user.gamer_tag_id}</TableCell>
                             <TableCell className="text-center">
                               {user.primary_position && (
-                                <span className={positionColors[positionAbbreviations[user.primary_position] || ""]}>
+                                <span className={`${positionColors[positionAbbreviations[user.primary_position] || ""]} text-lg font-bold`}>
                                   {positionAbbreviations[user.primary_position] || user.primary_position}
                                 </span>
                               )}
@@ -2100,22 +2310,34 @@ export default function UsersManagementClient() {
                                 <>
                                   {" / "}
                                   <span
-                                    className={positionColors[positionAbbreviations[user.secondary_position] || ""]}
+                                    className={`${positionColors[positionAbbreviations[user.secondary_position] || ""]} text-sm opacity-80`}
                                   >
                                     {positionAbbreviations[user.secondary_position] || user.secondary_position}
                                   </span>
                                 </>
                               )}
                             </TableCell>
-                            <TableCell className="text-center">{user.console}</TableCell>
+                            <TableCell className="text-center text-hockey-silver-700 dark:text-hockey-silver-300">{user.console}</TableCell>
                             <TableCell className="text-center">
-                              <div className="flex flex-wrap justify-center gap-1">
+                              <div className="flex flex-wrap justify-center gap-2">
                                 {allRoles.map((role: string) => (
-                                  <Badge key={role} variant="outline" className="w-fit">
+                                  <Badge 
+                                    key={role} 
+                                    variant="outline" 
+                                    className={`w-fit transition-all duration-200 hover:scale-105 ${
+                                      role === "Admin" ? "bg-goal-red-50 dark:bg-goal-red-900/20 border-goal-red-200 dark:border-goal-red-700 text-goal-red-700 dark:text-goal-red-300" :
+                                      role === "Owner" ? "bg-assist-green-50 dark:bg-assist-green-900/20 border-assist-green-200 dark:border-assist-green-700 text-assist-green-700 dark:text-assist-green-300" :
+                                      role === "GM" ? "bg-ice-blue-50 dark:bg-ice-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300" :
+                                      "bg-hockey-silver-50 dark:bg-hockey-silver-900/20 border-hockey-silver-200 dark:border-hockey-silver-700 text-hockey-silver-700 dark:text-hockey-silver-300"
+                                    }`}
+                                  >
+                                    {role === "Admin" && <Crown className="h-3 w-3 mr-1" />}
+                                    {role === "Owner" && <Star className="h-3 w-3 mr-1" />}
+                                    {role === "GM" && <Shield className="h-3 w-3 mr-1" />}
                                     {role}
                                   </Badge>
                                 ))}
-                                {allRoles.length === 0 && <span className="text-muted-foreground">-</span>}
+                                {allRoles.length === 0 && <span className="text-hockey-silver-400 dark:text-hockey-silver-500">-</span>}
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
@@ -2123,20 +2345,30 @@ export default function UsersManagementClient() {
                               user.players.length > 0 &&
                               user.players[0].team_id &&
                               user.players[0].teams ? (
-                                <span>{user.players[0].teams.name}</span>
+                                <Badge variant="outline" className="bg-assist-green-50 dark:bg-assist-green-900/20 border-assist-green-200 dark:border-assist-green-700 text-assist-green-700 dark:text-assist-green-300">
+                                  {user.players[0].teams.name}
+                                </Badge>
                               ) : (
-                                <span className="text-muted-foreground">Free Agent</span>
+                                <Badge variant="outline" className="bg-hockey-silver-50 dark:bg-hockey-silver-900/20 border-hockey-silver-200 dark:border-hockey-silver-700 text-hockey-silver-700 dark:text-hockey-silver-300">
+                                  Free Agent
+                                </Badge>
                               )}
                             </TableCell>
-                            <TableCell className="text-center">${salary.toLocaleString()}</TableCell>
+                            <TableCell className="text-center">
+                              <span className="font-mono font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                                ${salary.toLocaleString()}
+                              </span>
+                            </TableCell>
                             {isActiveColumnExists && (
                               <TableCell className="text-center">
                                 {user.is_active ? (
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  <Badge variant="outline" className="bg-assist-green-50 dark:bg-assist-green-900/20 border-assist-green-200 dark:border-assist-green-700 text-assist-green-700 dark:text-assist-green-300">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
                                     Active
                                   </Badge>
                                 ) : (
-                                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                  <Badge variant="outline" className="bg-goal-red-50 dark:bg-goal-red-900/20 border-goal-red-200 dark:border-goal-red-700 text-goal-red-700 dark:text-goal-red-300">
+                                    <XCircle className="h-3 w-3 mr-1" />
                                     Inactive
                                   </Badge>
                                 )}
@@ -2144,13 +2376,19 @@ export default function UsersManagementClient() {
                             )}
                             <TableCell className="text-center">
                               <div className="flex flex-wrap justify-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => openRoleDialog(user)}>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  onClick={() => openRoleDialog(user)}
+                                  className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200 hover:scale-105"
+                                >
+                                  <Crown className="mr-1 h-3 w-3" />
                                   Manage Roles
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-green-200 hover:border-green-300 hover:bg-green-50 text-green-600 bg-transparent"
+                                  className="hockey-button border-assist-green-300 hover:border-assist-green-500 hover:bg-assist-green-50 dark:hover:bg-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 transition-all duration-200 hover:scale-105"
                                   onClick={() => openPositionDialog(user)}
                                 >
                                   <UserCog className="mr-1 h-3 w-3" />
@@ -2159,7 +2397,7 @@ export default function UsersManagementClient() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-blue-200 hover:border-blue-300 hover:bg-blue-50 text-blue-600 bg-transparent"
+                                  className="hockey-button border-rink-blue-300 hover:border-rink-blue-500 hover:bg-rink-blue-50 dark:hover:bg-rink-blue-900/20 text-rink-blue-700 dark:text-rink-blue-300 transition-all duration-200 hover:scale-105"
                                   onClick={() => openTeamAssignDialog(user)}
                                   disabled={submitting}
                                 >
@@ -2169,7 +2407,7 @@ export default function UsersManagementClient() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-yellow-200 hover:border-yellow-300 hover:bg-yellow-50 text-yellow-600 bg-transparent"
+                                  className="hockey-button border-goal-red-300 hover:border-goal-red-500 hover:bg-goal-red-50 dark:hover:bg-goal-red-900/20 text-goal-red-700 dark:text-goal-red-300 transition-all duration-200 hover:scale-105"
                                   onClick={() => openSalaryDialog(user)}
                                 >
                                   <DollarSign className="mr-1 h-3 w-3" />
@@ -2180,18 +2418,20 @@ export default function UsersManagementClient() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 bg-transparent"
+                                      className="hockey-button border-goal-red-300 hover:border-goal-red-500 hover:bg-goal-red-50 dark:hover:bg-goal-red-900/20 text-goal-red-700 dark:text-goal-red-300 transition-all duration-200 hover:scale-105"
                                       onClick={() => toggleUserActivation(user.id, false)}
                                     >
+                                      <XCircle className="mr-1 h-3 w-3" />
                                       Deactivate
                                     </Button>
                                   ) : (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      className="border-green-200 hover:border-green-300 hover:bg-green-50 text-green-600 bg-transparent"
+                                      className="hockey-button border-assist-green-300 hover:border-assist-green-500 hover:bg-assist-green-50 dark:hover:bg-assist-green-900/20 text-assist-green-700 dark:text-assist-green-300 transition-all duration-200 hover:scale-105"
                                       onClick={() => toggleUserActivation(user.id, true)}
                                     >
+                                      <CheckCircle className="mr-1 h-3 w-3" />
                                       Activate
                                     </Button>
                                   ))}
@@ -2206,66 +2446,87 @@ export default function UsersManagementClient() {
               </div>
               {/* Bottom Pagination Controls */}
               {!loading && totalPages > 1 && (
-                <div className="flex items-center justify-center mt-6">
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-                      First
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
+                <Card className="hockey-card mt-8 border border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-center">
+                      <div className="flex items-center gap-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setCurrentPage(1)} 
+                          disabled={currentPage === 1}
+                          className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200 hover:scale-105"
+                        >
+                          <ArrowRight className="h-4 w-4 mr-1 rotate-180" />
+                          First
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1}
+                          className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200 hover:scale-105"
+                        >
+                          <ArrowRight className="h-4 w-4 mr-1 rotate-180" />
+                          Previous
+                        </Button>
 
-                    {/* Page numbers */}
-                    <div className="flex items-center space-x-1">
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNum
-                        if (totalPages <= 5) {
-                          pageNum = i + 1
-                        } else if (currentPage <= 3) {
-                          pageNum = i + 1
-                        } else if (currentPage >= totalPages - 2) {
-                          pageNum = totalPages - 4 + i
-                        } else {
-                          pageNum = currentPage - 2 + i
-                        }
+                        {/* Page numbers */}
+                        <div className="flex items-center gap-2">
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            let pageNum
+                            if (totalPages <= 5) {
+                              pageNum = i + 1
+                            } else if (currentPage <= 3) {
+                              pageNum = i + 1
+                            } else if (currentPage >= totalPages - 2) {
+                              pageNum = totalPages - 4 + i
+                            } else {
+                              pageNum = currentPage - 2 + i
+                            }
 
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={currentPage === pageNum ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setCurrentPage(pageNum)}
-                            className="w-8 h-8 p-0"
-                          >
-                            {pageNum}
-                          </Button>
-                        )
-                      })}
+                            return (
+                              <Button
+                                key={pageNum}
+                                variant={currentPage === pageNum ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`w-10 h-10 p-0 transition-all duration-200 hover:scale-105 ${
+                                  currentPage === pageNum 
+                                    ? "bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg" 
+                                    : "hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300"
+                                }`}
+                              >
+                                {pageNum}
+                              </Button>
+                            )
+                          })}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          disabled={currentPage === totalPages}
+                          className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200 hover:scale-105"
+                        >
+                          Next
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(totalPages)}
+                          disabled={currentPage === totalPages}
+                          className="hockey-button border-ice-blue-300 hover:border-ice-blue-500 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 text-ice-blue-700 dark:text-ice-blue-300 transition-all duration-200 hover:scale-105"
+                        >
+                          Last
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </div>
                     </div>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(totalPages)}
-                      disabled={currentPage === totalPages}
-                    >
-                      Last
-                    </Button>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               )}
             </>
           )}
@@ -2274,31 +2535,32 @@ export default function UsersManagementClient() {
 
       {/* Edit Roles Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Manage User Roles</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Manage User Roles</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               {selectedUser && `Assign roles to ${selectedUser.gamer_tag_id || selectedUser.email}`}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
               <div>
-                <div className="text-sm font-medium mb-2">Roles</div>
-                <div className="text-sm text-muted-foreground mb-4">
+                <div className="text-lg font-semibold mb-3 text-hockey-silver-800 dark:text-hockey-silver-200">Roles</div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-4 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                   Select one or more roles for this user. The first role will be the primary player role.
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {validRoles.map((role) => (
-                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0">
+                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0 p-3 rounded-lg hover:bg-gradient-to-r hover:from-ice-blue-100/30 hover:to-rink-blue-100/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border border-transparent hover:border-ice-blue-200/30 dark:hover:border-rink-blue-700/30">
                       <Checkbox
                         id={`role-${role.value}`}
                         checked={selectedRoles.includes(role.value)}
                         onCheckedChange={(checked) => handleRoleToggle(role.value, checked === true)}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
                       />
                       <label
                         htmlFor={`role-${role.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hockey-silver-800 dark:text-hockey-silver-200 cursor-pointer"
                       >
                         {role.label}
                       </label>
@@ -2306,11 +2568,13 @@ export default function UsersManagementClient() {
                   ))}
                 </div>
                 {selectedRoles.length === 0 && (
-                  <p className="text-sm font-medium text-destructive mt-2">Select at least one role</p>
+                  <p className="text-sm font-medium text-goal-red-600 dark:text-goal-red-400 mt-3 p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-200/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
+                    Select at least one role
+                  </p>
                 )}
               </div>
-              <DialogFooter>
-                <Button type="submit" disabled={submitting || selectedRoles.length === 0}>
+              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <Button type="submit" disabled={submitting || selectedRoles.length === 0} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   {submitting ? "Saving..." : "Save changes"}
                 </Button>
               </DialogFooter>
@@ -2329,21 +2593,21 @@ export default function UsersManagementClient() {
 
       {/* Set Salary Dialog */}
       <Dialog open={salaryDialogOpen} onOpenChange={setSalaryDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Set Player Salary</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Set Player Salary</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               {selectedUser && `Set salary for ${selectedUser.gamer_tag_id || selectedUser.email}`}
             </DialogDescription>
           </DialogHeader>
           <Form {...salaryForm}>
-            <form onSubmit={salaryForm.handleSubmit(onUpdateSalary)} className="space-y-6">
+            <form onSubmit={salaryForm.handleSubmit(onUpdateSalary)} className="space-y-6 pt-4">
               <FormField
                 control={salaryForm.control}
                 name="salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="salary-amount">Salary Amount ($)</FormLabel>
+                    <FormLabel htmlFor="salary-amount" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Salary Amount ($)</FormLabel>
                     <FormControl>
                       <Input
                         id="salary-amount"
@@ -2353,18 +2617,21 @@ export default function UsersManagementClient() {
                         step="100000"
                         placeholder="Enter salary amount"
                         disabled={submitting}
+                        className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value) || 0)}
                       />
                     </FormControl>
-                    <p className="text-sm text-muted-foreground">Enter the player's salary amount (max $15,000,000)</p>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 p-2 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
+                      Enter the player's salary amount (max $15,000,000)
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <DialogFooter>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? "Saving..." : "Update Salary"}
+              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <Button type="submit" disabled={submitting} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                  {submitting ? "Setting..." : "Set Salary"}
                 </Button>
               </DialogFooter>
             </form>
@@ -2374,16 +2641,16 @@ export default function UsersManagementClient() {
 
       {/* Team Assignment Dialog */}
       <Dialog open={teamAssignDialogOpen} onOpenChange={handleTeamAssignDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Assign Team</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Assign Team</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               {selectedUser && `Assign ${selectedUser.gamer_tag_id || selectedUser.email} to a team`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="team-select" className="text-sm font-medium">
+          <div className="space-y-6 pt-4">
+            <div className="space-y-3">
+              <label htmlFor="team-select" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                 Team
               </label>
               <Select
@@ -2394,7 +2661,7 @@ export default function UsersManagementClient() {
                 }}
                 disabled={submitting}
               >
-                <SelectTrigger id="team-select">
+                <SelectTrigger id="team-select" className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                   <SelectValue placeholder="Select a team" />
                 </SelectTrigger>
                 <SelectContent>
@@ -2406,13 +2673,13 @@ export default function UsersManagementClient() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                 Select a team for this player or choose "Free Agent" to remove them from any team and prevent automatic
                 re-assignment.
               </p>
             </div>
-            <DialogFooter>
-              <Button onClick={() => teamAssignmentForm.handleSubmit(onAssignTeam)()} disabled={submitting}>
+            <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+              <Button onClick={() => teamAssignmentForm.handleSubmit(onAssignTeam)()} disabled={submitting} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                 {submitting ? "Saving..." : "Assign Team"}
               </Button>
             </DialogFooter>
@@ -2422,21 +2689,21 @@ export default function UsersManagementClient() {
 
       {/* Add New User Dialog */}
       <Dialog open={newUserDialogOpen} onOpenChange={handleNewUserDialogClose}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>Create a new user account and assign roles</DialogDescription>
+        <DialogContent className="sm:max-w-[500px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Add New User</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">Create a new user account and assign roles</DialogDescription>
           </DialogHeader>
           <Form {...newUserForm}>
-            <form onSubmit={newUserForm.handleSubmit(onCreateUser)} className="space-y-4">
+            <form onSubmit={newUserForm.handleSubmit(onCreateUser)} className="space-y-6 pt-4">
               <FormField
                 control={newUserForm.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="user@example.com" {...field} />
+                      <Input placeholder="user@example.com" {...field} className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -2448,9 +2715,9 @@ export default function UsersManagementClient() {
                 name="gamer_tag_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gamer Tag</FormLabel>
+                    <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Gamer Tag</FormLabel>
                     <FormControl>
-                      <Input placeholder="GamerTag123" {...field} />
+                      <Input placeholder="GamerTag123" {...field} className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -2463,7 +2730,7 @@ export default function UsersManagementClient() {
                   name="primary_position"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Primary Position</FormLabel>
+                      <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Primary Position</FormLabel>
                       <Select
                         defaultValue={field.value}
                         onValueChange={(value) => {
@@ -2471,7 +2738,7 @@ export default function UsersManagementClient() {
                         }}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                             <SelectValue placeholder="Select position" />
                           </SelectTrigger>
                         </FormControl>
@@ -2493,7 +2760,7 @@ export default function UsersManagementClient() {
                   name="secondary_position"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Secondary Position (Optional)</FormLabel>
+                      <FormLabel className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">Secondary Position (Optional)</FormLabel>
                       <Select
                         defaultValue={field.value || "none"}
                         onValueChange={(value) => {
@@ -2501,7 +2768,7 @@ export default function UsersManagementClient() {
                         }}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                             <SelectValue placeholder="Select position" />
                           </SelectTrigger>
                         </FormControl>
@@ -2551,21 +2818,22 @@ export default function UsersManagementClient() {
               />
 
               <div>
-                <div className="text-sm font-medium mb-2">Roles</div>
-                <div className="text-sm text-muted-foreground mb-4">
+                <div className="text-lg font-semibold mb-3 text-hockey-silver-800 dark:text-hockey-silver-200">Roles</div>
+                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-4 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
                   Select one or more roles for this user. The first role will be the primary player role.
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {validRoles.map((role) => (
-                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0">
+                    <div key={role.value} className="flex flex-row items-start space-x-3 space-y-0 p-3 rounded-lg hover:bg-gradient-to-r hover:from-ice-blue-100/30 hover:to-rink-blue-100/30 dark:hover:from-ice-blue-900/10 dark:hover:to-rink-blue-900/10 transition-all duration-300 border border-transparent hover:border-ice-blue-200/30 dark:hover:border-rink-blue-700/30">
                       <Checkbox
                         id={`new-role-${role.value}`}
                         checked={newUserSelectedRoles.includes(role.value)}
                         onCheckedChange={(checked) => handleNewUserRoleToggle(role.value, checked === true)}
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
                       />
                       <label
                         htmlFor={`new-role-${role.value}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hockey-silver-800 dark:text-hockey-silver-200 cursor-pointer"
                       >
                         {role.label}
                       </label>
@@ -2573,12 +2841,14 @@ export default function UsersManagementClient() {
                   ))}
                 </div>
                 {newUserSelectedRoles.length === 0 && (
-                  <p className="text-sm font-medium text-destructive mt-2">Select at least one role</p>
+                  <p className="text-sm font-medium text-goal-red-600 dark:text-goal-red-400 mt-3 p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-200/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">
+                    Select at least one role
+                  </p>
                 )}
               </div>
 
-              <DialogFooter>
-                <Button type="submit" disabled={submitting || newUserSelectedRoles.length === 0}>
+              <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <Button type="submit" disabled={submitting || newUserSelectedRoles.length === 0} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   {submitting ? "Creating..." : "Create User"}
                 </Button>
               </DialogFooter>
@@ -2589,16 +2859,16 @@ export default function UsersManagementClient() {
 
       {/* Admin Key Dialog */}
       <Dialog open={adminKeyDialogOpen} onOpenChange={setAdminKeyDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Admin Verification Required</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-2xl shadow-ice-blue-500/20">
+          <DialogHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+            <DialogTitle className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Admin Verification Required</DialogTitle>
+            <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
               Please enter your admin verification key to continue with this operation.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <label htmlFor="admin-key" className="text-sm font-medium">
+          <div className="space-y-6 py-2 pt-4">
+            <div className="space-y-3">
+              <label htmlFor="admin-key" className="text-base font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">
                 Admin Key
               </label>
               <Input
@@ -2607,36 +2877,39 @@ export default function UsersManagementClient() {
                 placeholder="Enter admin key"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
+                className="hockey-search border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300"
               />
-              {adminKeyError && <p className="text-sm text-destructive">{adminKeyError}</p>}
+              {adminKeyError && <p className="text-sm text-goal-red-600 dark:text-goal-red-400 p-2 bg-gradient-to-r from-goal-red-100/30 to-goal-red-200/30 dark:from-goal-red-900/10 dark:to-goal-red-800/10 rounded-lg border border-goal-red-200/30 dark:border-goal-red-700/30">{adminKeyError}</p>}
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-3 bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 rounded-lg border border-ice-blue-200/30 dark:border-rink-blue-700/30">
               <Checkbox
                 id="save-key"
                 checked={saveAdminKey}
                 onCheckedChange={(checked) => setSaveAdminKey(checked === true)}
+                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-ice-blue-500 data-[state=checked]:to-rink-blue-600 data-[state=checked]:border-ice-blue-500"
               />
               <div className="grid gap-1.5">
                 <label
                   htmlFor="save-key"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-hockey-silver-800 dark:text-hockey-silver-200 cursor-pointer"
                 >
                   Save key for future operations
                 </label>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                   This will store the key in your browser for this session.
                 </p>
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={handleAdminKeySubmit} disabled={!adminKey}>
+          <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
+            <Button onClick={handleAdminKeySubmit} disabled={!adminKey} className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
               <Key className="mr-2 h-4 w-4" />
               Verify
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }

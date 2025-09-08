@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 "use server"
 
 import { createAdminClient } from "@/lib/supabase/server"
@@ -14,7 +15,11 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
       .from("player_bidding")
       .select(`
         *,
-        users(gamer_tag_id, discord_id)
+        players!player_bidding_player_id_fkey(
+          id, 
+          user_id,
+          users!players_user_id_fkey(gamer_tag_id, discord_id)
+        )
       `)
       .eq("id", bidId)
       .single()
@@ -30,7 +35,7 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
       throw new Error(`Failed to get winning team details: ${teamError?.message}`)
     }
 
-    console.log(`Assigning player ${bid.users?.gamer_tag_id} to team ${winningTeam.name}`)
+    console.log(`Assigning player ${bid.players?.users?.gamer_tag_id} to team ${winningTeam.name}`)
 
     // Start a transaction to handle all the updates
     const { error: transactionError } = await supabase.rpc("exec_sql", {
@@ -43,7 +48,7 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
             salary = ${winningAmount},
             status = 'active',
             updated_at = NOW()
-        WHERE user_id = '${bid.user_id}';
+        WHERE user_id = '${bid.players.user_id}';
         
         -- Mark the bid as finalized
         UPDATE player_bidding 
@@ -55,7 +60,7 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
         UPDATE player_bidding 
         SET finalized = true,
             updated_at = NOW()
-        WHERE user_id = '${bid.user_id}' 
+        WHERE player_id = '${bid.player_id}' 
         AND id != '${bidId}' 
         AND finalized = false;
         
@@ -70,7 +75,7 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
     console.log(`Successfully assigned player to team, now syncing Discord roles...`)
 
     // Sync Discord roles for the player
-    if (bid.users?.discord_id) {
+    if (bid.players?.users?.discord_id) {
       try {
         const discordResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/discord/assign-roles`, {
           method: "POST",
@@ -78,22 +83,22 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: bid.user_id,
+            userId: bid.players.user_id,
           }),
         })
 
         const discordResult = await discordResponse.json()
 
         if (discordResponse.ok) {
-          console.log(`✓ Discord roles synced for ${bid.users.gamer_tag_id}:`, discordResult.message)
+          console.log(`✓ Discord roles synced for ${bid.players.users.gamer_tag_id}:`, discordResult.message)
         } else {
-          console.error(`✗ Discord role sync failed for ${bid.users.gamer_tag_id}:`, discordResult.error)
+          console.error(`✗ Discord role sync failed for ${bid.players.users.gamer_tag_id}:`, discordResult.error)
         }
       } catch (discordError) {
-        console.error(`Discord role sync error for ${bid.users?.gamer_tag_id}:`, discordError)
+        console.error(`Discord role sync error for ${bid.players?.users?.gamer_tag_id}:`, discordError)
       }
     } else {
-      console.log(`No Discord connection found for ${bid.users?.gamer_tag_id}, skipping role sync`)
+      console.log(`No Discord connection found for ${bid.players?.users?.gamer_tag_id}, skipping role sync`)
     }
 
     // Revalidate relevant pages
@@ -103,8 +108,8 @@ export async function processBidWinner(bidId: string, winnerId: string, winningA
 
     return {
       success: true,
-      message: `Successfully assigned ${bid.users?.gamer_tag_id} to ${winningTeam.name} for $${winningAmount.toLocaleString()}`,
-      playerName: bid.users?.gamer_tag_id,
+      message: `Successfully assigned ${bid.players?.users?.gamer_tag_id} to ${winningTeam.name} for $${winningAmount.toLocaleString()}`,
+      playerName: bid.players?.users?.gamer_tag_id,
       teamName: winningTeam.name,
       amount: winningAmount,
     }
@@ -124,7 +129,7 @@ export async function extendBidExpiration(bidId: string, hoursToAdd = 24) {
     const { error } = await supabase
       .from("player_bidding")
       .update({
-        bid_expires: new Date(Date.now() + hoursToAdd * 60 * 60 * 1000).toISOString(),
+        bid_expires_at: new Date(Date.now() + hoursToAdd * 60 * 60 * 1000).toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", bidId)

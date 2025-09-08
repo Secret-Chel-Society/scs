@@ -87,7 +87,7 @@ export default function MGHLBotPanel() {
           // Set default configuration if none exists
           setBotConfig({
             guild_id: "1345946042281234442",
-            bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
+            bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
             registered_role_id: "1376351990354804848",
           })
         } else if (configs && configs.length > 0) {
@@ -105,7 +105,7 @@ export default function MGHLBotPanel() {
           // Set default configuration if none exists
           setBotConfig({
             guild_id: "1345946042281234442",
-            bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
+            bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
             registered_role_id: "1376351990354804848",
           })
         }
@@ -113,7 +113,7 @@ export default function MGHLBotPanel() {
         console.warn("Could not load bot config:", configError)
         setBotConfig({
           guild_id: "1345946042281234442",
-          bot_token: "MTM2NTg4ODY2MDE3MTY1MzE1MA.G9DxJ3.QzAkopXtoHjPTjMo7gf1-MYaOmmVbk5K2Ca3Wc",
+          bot_token: "MTQwNzk0NzQxNjA5NDkwMDI0NQ.GOikOI.tD5VoGJoLAj8Zcj9qNLc7SfYLM_tE752vJDMDc",
           registered_role_id: "1376351990354804848",
         })
       }
@@ -1056,14 +1056,14 @@ export default function MGHLBotPanel() {
                 <div>
                   <Label>Client ID</Label>
                   <div className="flex items-center gap-2">
-                    <Input value="1365888660171653150" disabled />
+                    <Input value="1086490070984429638" disabled />
                     <Badge variant="secondary">Configured</Badge>
                   </div>
                 </div>
                 <div>
                   <Label>Client Secret</Label>
                   <div className="flex items-center gap-2">
-                    <Input value="mu3IdoBiG7zo4NDHYmGArCfMHoP4atbX" type="password" disabled />
+                    <Input value="QmI3KS7RYyvzy6dZLKmFVwgLhmuGJVs_" type="password" disabled />
                     <Badge variant="secondary">Configured</Badge>
                   </div>
                 </div>

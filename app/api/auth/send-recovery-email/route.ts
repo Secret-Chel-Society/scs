@@ -25,13 +25,13 @@ export async function POST(request: Request) {
 
     // Send the email
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"MGHL Support" <support@majorgaminghockeyleague.com>',
+      from: process.env.SMTP_FROM || '"SCS Support" <support@secretchelsociety.com>',
       to: email,
-      subject: "Reset Your MGHL Password",
+      subject: "Reset Your SCS Password",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">Reset Your Password</h2>
-          <p>You requested to reset your password for your Major Gaming Hockey League account.</p>
+          <p>You requested to reset your password for your Secret Chel Society.</p>
           <p>Click the button below to reset your password:</p>
           <a href="${recoveryLink}" style="display: inline-block; background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin: 20px 0;">Reset Password</a>
           <p>If you didn't request this, you can safely ignore this email.</p>

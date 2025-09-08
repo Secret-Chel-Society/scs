@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit } from "lucide-react"
+import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit, Trophy, Calendar, Users, Star, Shield, Target, Zap, CheckCircle2 } from "lucide-react"
+// import { motion } from "framer-motion" - replaced with CSS animations
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -239,13 +240,13 @@ export default function RegistrationsPage() {
   function getStatusBadge(status: string) {
     switch (status) {
       case "Approved":
-        return <Badge className="bg-green-500">Approved</Badge>
+        return <Badge className="bg-assist-green-500 text-white hover:bg-assist-green-600">Approved</Badge>
       case "Rejected":
-        return <Badge className="bg-red-500">Rejected</Badge>
+        return <Badge className="bg-goal-red-500 text-white hover:bg-goal-red-600">Rejected</Badge>
       case "Pending":
-        return <Badge className="bg-yellow-500">Pending</Badge>
+        return <Badge className="bg-ice-blue-500 text-white hover:bg-ice-blue-600">Pending</Badge>
       default:
-        return <Badge>{status}</Badge>
+        return <Badge className="bg-hockey-silver-500 text-white">{status}</Badge>
     }
   }
 
@@ -432,43 +433,52 @@ export default function RegistrationsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Season Registrations</CardTitle>
-          <CardDescription>
-            {activeSeason ? `Managing registrations for ${activeSeason.name}` : "Loading active season..."}
-          </CardDescription>
-        </CardHeader>
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
+      <div className="container mx-auto py-8">
+        <div className="animate-fade-in-up">
+          <Card className="hockey-enhanced-card">
+            <CardHeader>
+              <CardTitle className="text-3xl text-hockey-silver-900 dark:text-hockey-silver-100 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
+                Season Registrations
+              </CardTitle>
+              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+                {activeSeason ? `Managing registrations for ${activeSeason.name}` : "Loading active season..."}
+              </CardDescription>
+            </CardHeader>
         <CardContent>
           {error && (
-            <Alert variant="destructive" className="mb-6">
+            <Alert variant="destructive" className="mb-6 hockey-enhanced-card border-goal-red-200 dark:border-goal-red-800">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertTitle className="text-hockey-silver-900 dark:text-hockey-silver-100">Error</AlertTitle>
+              <AlertDescription className="text-hockey-silver-700 dark:text-hockey-silver-300">{error}</AlertDescription>
             </Alert>
           )}
 
           <div className="flex flex-col md:flex-row gap-4 mb-6 items-end">
             <div className="w-full md:w-1/3">
-              <Label htmlFor="active-season" className="mb-2 block">
+              <Label htmlFor="active-season" className="mb-2 block text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-ice-blue-500" />
                 Active Season
               </Label>
-              <div id="active-season" className="p-2 border rounded-md bg-muted">
+              <div id="active-season" className="p-3 border border-ice-blue-200 dark:border-rink-blue-700 rounded-lg bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 text-hockey-silver-900 dark:text-hockey-silver-100">
                 {activeSeason ? activeSeason.name : "Loading..."}
               </div>
             </div>
 
             <div className="w-full md:w-1/3">
-              <Label htmlFor="search" className="mb-2 block">
+              <Label htmlFor="search" className="mb-2 block text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                <Search className="h-4 w-4 text-assist-green-500" />
                 Search
               </Label>
               <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-hockey-silver-500" />
                 <Input
                   id="search"
                   placeholder="Search by name or email"
-                  className="pl-8"
+                  className="pl-10 hockey-search"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -476,12 +486,13 @@ export default function RegistrationsPage() {
             </div>
 
             <div className="w-full md:w-1/3">
-              <Label htmlFor="status-filter" className="mb-2 block">
+              <Label htmlFor="status-filter" className="mb-2 block text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold flex items-center gap-2">
+                <Target className="h-4 w-4 text-rink-blue-500" />
                 Filter by Status
               </Label>
               <select
                 id="status-filter"
-                className="w-full p-2 border rounded-md"
+                className="w-full p-3 border border-ice-blue-200 dark:border-rink-blue-700 rounded-lg bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700 text-hockey-silver-900 dark:text-hockey-silver-100 focus:ring-2 focus:ring-ice-blue-500 focus:border-ice-blue-500"
                 value={statusFilter || "all"}
                 onChange={(e) => setStatusFilter(e.target.value === "all" ? null : e.target.value)}
               >
@@ -494,7 +505,7 @@ export default function RegistrationsPage() {
 
             <Button
               variant="outline"
-              className="ml-auto mr-2"
+              className="ml-auto mr-2 hockey-button-enhanced"
               onClick={() => {
                 fetchRegistrations()
               }}
@@ -503,50 +514,53 @@ export default function RegistrationsPage() {
               Refresh
             </Button>
 
-            <Button variant="outline" onClick={exportToCSV} disabled={filteredRegistrations.length === 0}>
+            <Button variant="outline" onClick={exportToCSV} disabled={filteredRegistrations.length === 0} className="hockey-button-enhanced">
               <Download className="mr-2 h-4 w-4" />
               Export CSV
             </Button>
           </div>
 
           <div className="mb-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
               Showing {filteredRegistrations.length} of {registrations.length} registrations
             </p>
           </div>
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <Loader2 className="h-8 w-8 animate-spin text-ice-blue-500" />
             </div>
           ) : filteredRegistrations.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-hockey-silver-600 dark:text-hockey-silver-400">
               {registrations.length === 0
                 ? "No registrations found for this season."
                 : "No registrations match your search criteria."}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Player</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Primary Position</TableHead>
-                    <TableHead>Secondary Position</TableHead>
-                    <TableHead>Console</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
+              <Table className="overflow-hidden rounded-xl border border-hockey-silver-200 dark:border-hockey-silver-700">
+                <TableHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-hockey-silver-800 dark:to-hockey-silver-700">
+                  <TableRow className="border-hockey-silver-200 dark:border-hockey-silver-600">
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Player</TableHead>
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Email</TableHead>
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Primary Position</TableHead>
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Secondary Position</TableHead>
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Console</TableHead>
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Status</TableHead>
+                    <TableHead className="text-hockey-silver-900 dark:text-hockey-silver-100 font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredRegistrations.map((registration) => (
-                    <TableRow key={registration.id}>
-                      <TableCell className="font-medium">
+                  {filteredRegistrations.map((registration, index) => (
+                    <tr
+                      key={registration.id}
+                      className="border-hockey-silver-200 dark:border-hockey-silver-600 hover:bg-hockey-silver-50 dark:hover:bg-hockey-silver-800/50 transition-colors"
+                    >
+                      <TableCell className="font-semibold text-hockey-silver-900 dark:text-hockey-silver-100">
                         <div className="flex items-center gap-2">
                           <Button
                             variant="link"
-                            className="p-0 h-auto font-medium text-left"
+                            className="p-0 h-auto font-medium text-left text-ice-blue-600 hover:text-ice-blue-700"
                             onClick={() => viewRegistrationDetails(registration)}
                           >
                             {registration.gamer_tag}
@@ -554,7 +568,7 @@ export default function RegistrationsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-6 w-6 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30"
                             onClick={() => openEditName(registration)}
                             title="Edit Player Name"
                           >
@@ -562,14 +576,14 @@ export default function RegistrationsPage() {
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell>{registration.users?.email}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300">{registration.users?.email}</TableCell>
+                      <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300">
                         <div className="flex items-center gap-2">
-                          {registration.primary_position}
+                          <span className="bg-ice-blue-100 dark:bg-ice-blue-900/30 px-2 py-1 rounded text-sm">{registration.primary_position}</span>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-6 w-6 hover:bg-rink-blue-100 dark:hover:bg-rink-blue-900/30"
                             onClick={() => openEditPositions(registration)}
                             title="Edit Positions"
                           >
@@ -577,14 +591,20 @@ export default function RegistrationsPage() {
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell>{registration.secondary_position || "—"}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300">
+                        {registration.secondary_position ? (
+                          <span className="bg-rink-blue-100 dark:bg-rink-blue-900/30 px-2 py-1 rounded text-sm">{registration.secondary_position}</span>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-hockey-silver-700 dark:text-hockey-silver-300">
                         <div className="flex items-center gap-2">
-                          {registration.console}
+                          <span className="bg-assist-green-100 dark:bg-assist-green-900/30 px-2 py-1 rounded text-sm">{registration.console}</span>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-6 w-6 hover:bg-assist-green-100 dark:hover:bg-assist-green-900/30"
                             onClick={() => openEditConsole(registration)}
                             title="Edit Console"
                           >
@@ -599,9 +619,10 @@ export default function RegistrationsPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="bg-green-500 hover:bg-green-600 text-white"
+                              className="hockey-button-enhanced bg-assist-green-500 hover:bg-assist-green-600 text-white hover:border-assist-green-600"
                               onClick={() => updateStatus(registration.id, "Approved")}
                             >
+                              <CheckCircle2 className="mr-1 h-3 w-3" />
                               Approve
                             </Button>
                           )}
@@ -609,9 +630,10 @@ export default function RegistrationsPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="bg-red-500 hover:bg-red-600 text-white"
+                              className="hockey-button-enhanced bg-goal-red-500 hover:bg-goal-red-600 text-white hover:border-goal-red-600"
                               onClick={() => updateStatus(registration.id, "Rejected")}
                             >
+                              <AlertCircle className="mr-1 h-3 w-3" />
                               Reject
                             </Button>
                           )}
@@ -619,35 +641,38 @@ export default function RegistrationsPage() {
                             <Button
                               size="sm"
                               variant="outline"
+                              className="hockey-button-enhanced"
                               onClick={() => updateStatus(registration.id, "Pending")}
                             >
+                              <RefreshCw className="mr-1 h-3 w-3" />
                               Reset
                             </Button>
                           )}
                         </div>
                       </TableCell>
-                    </TableRow>
+                    </tr>
                   ))}
                 </TableBody>
               </Table>
             </div>
           )}
           {process.env.NODE_ENV === "development" && (
-            <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono overflow-auto max-h-60">
-              <p className="font-bold mb-2">Debug Information:</p>
-              <p>Active Season: {JSON.stringify(activeSeason)}</p>
-              <p>Total Registrations: {registrations.length}</p>
-              <p>Filtered Registrations: {filteredRegistrations.length}</p>
+            <div className="mt-4 p-4 bg-hockey-silver-100 dark:bg-hockey-silver-800 rounded text-xs font-mono overflow-auto max-h-60">
+              <p className="font-bold mb-2 text-hockey-silver-900 dark:text-hockey-silver-100">Debug Information:</p>
+              <p className="text-hockey-silver-700 dark:text-hockey-silver-300">Active Season: {JSON.stringify(activeSeason)}</p>
+              <p className="text-hockey-silver-700 dark:text-hockey-silver-300">Total Registrations: {registrations.length}</p>
+              <p className="text-hockey-silver-700 dark:text-hockey-silver-300">Filtered Registrations: {filteredRegistrations.length}</p>
               <details>
-                <summary>All Registrations Data</summary>
-                <pre>{JSON.stringify(registrations, null, 2)}</pre>
+                <summary className="text-hockey-silver-900 dark:text-hockey-silver-100">All Registrations Data</summary>
+                <pre className="text-hockey-silver-700 dark:text-hockey-silver-300">{JSON.stringify(registrations, null, 2)}</pre>
               </details>
             </div>
           )}
         </CardContent>
       </Card>
+        </div>
 
-      {/* Registration Details Dialog */}
+        {/* Registration Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -913,6 +938,7 @@ export default function RegistrationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   )
 }

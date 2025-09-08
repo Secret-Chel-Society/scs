@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header"
 export default function EaPlayerMappingsPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <PageHeader heading="EA Player Mappings" subheading="Manage mappings between EA personas and MGHL players" />
+      <PageHeader heading="EA Player Mappings" subheading="Manage mappings between EA personas and SCS players" />
       <EaPlayerMappingsManager />
     </div>
   )

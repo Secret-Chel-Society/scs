@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui/page-header"
 export default function LiveStreamLoading() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <PageHeader heading="LiveStream" text="Watch live and past streams of MGHL matches and events" />
+      <PageHeader heading="LiveStream" text="Watch live and past streams of SCS matches and events" />
 
       {/* Featured Streams Section */}
       <section className="mb-12">

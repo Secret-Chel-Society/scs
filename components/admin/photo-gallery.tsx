@@ -44,10 +44,61 @@ export function PhotoGallery() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [tableExists, setTableExists] = useState<boolean | null>(null)
+  const [isCreatingTable, setIsCreatingTable] = useState(false)
 
   useEffect(() => {
-    fetchPhotos()
+    checkTableExists()
   }, [])
+
+  const checkTableExists = async () => {
+    try {
+      const response = await fetch("/api/admin/check-table-exists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableName: "photos" }),
+      })
+      const data = await response.json()
+      setTableExists(data.exists)
+      
+      if (data.exists) {
+        fetchPhotos()
+      }
+    } catch (error) {
+      console.error("Error checking table existence:", error)
+      setTableExists(false)
+    }
+  }
+
+  const createPhotosTable = async () => {
+    setIsCreatingTable(true)
+    try {
+      const response = await fetch("/api/setup-photos-table", {
+        method: "POST",
+      })
+      const data = await response.json()
+      
+      if (data.success) {
+        setTableExists(true)
+        toast({
+          title: "Success",
+          description: "Photos table created successfully",
+        })
+        fetchPhotos()
+      } else {
+        throw new Error(data.error || "Failed to create table")
+      }
+    } catch (error: any) {
+      console.error("Error creating photos table:", error)
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create photos table",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCreatingTable(false)
+    }
+  }
 
   const fetchPhotos = async () => {
     setLoading(true)
@@ -173,7 +224,40 @@ export function PhotoGallery() {
         </Alert>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      {tableExists === false && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Photos table not found</AlertTitle>
+          <AlertDescription>
+            The photos table doesn't exist in your database. Click the button below to create it.
+          </AlertDescription>
+          <div className="mt-4">
+            <Button onClick={createPhotosTable} disabled={isCreatingTable}>
+              {isCreatingTable ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  Creating table...
+                </>
+              ) : (
+                "Create Photos Table"
+              )}
+            </Button>
+          </div>
+        </Alert>
+      )}
+
+      {tableExists === null && (
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ice-blue-500 mx-auto mb-4"></div>
+            <p>Checking database setup...</p>
+          </div>
+        </div>
+      )}
+
+      {tableExists === true && (
+        <>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -266,6 +350,8 @@ export function PhotoGallery() {
             </Card>
           ))}
         </div>
+      )}
+        </>
       )}
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

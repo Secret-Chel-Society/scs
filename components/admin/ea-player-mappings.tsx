@@ -189,7 +189,7 @@ export function EaPlayerMappings() {
         <div className="flex justify-between items-start">
           <div>
             <CardTitle>EA Player Mappings</CardTitle>
-            <CardDescription>Map EA player names to MGHL player profiles</CardDescription>
+            <CardDescription>Map EA player names to SCS player profiles</CardDescription>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
@@ -202,7 +202,7 @@ export function EaPlayerMappings() {
               <DialogHeader>
                 <DialogTitle>Add EA Player Mapping</DialogTitle>
                 <DialogDescription>
-                  Create a mapping between an EA player name and an MGHL player profile.
+                  Create a mapping between an EA player name and an SCS player profile.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -215,12 +215,12 @@ export function EaPlayerMappings() {
                     value={newMapping.ea_name}
                     onChange={(e) => setNewMapping({ ...newMapping, ea_name: e.target.value })}
                     className="col-span-3"
-                    placeholder="e.g. LispDoge"
+                    placeholder="e.g. DarkWolf"
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label htmlFor="player" className="text-right">
-                    MGHL Player
+                    SCS Player
                   </label>
                   <Select
                     value={newMapping.player_id}
@@ -268,7 +268,7 @@ export function EaPlayerMappings() {
           </div>
         ) : mappings.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            No EA player mappings found. Add a mapping to link EA player names to MGHL player profiles.
+            No EA player mappings found. Add a mapping to link EA player names to SCS player profiles.
           </div>
         ) : (
           <div className="border rounded-md overflow-hidden">
@@ -276,7 +276,7 @@ export function EaPlayerMappings() {
               <TableHeader>
                 <TableRow>
                   <TableHead>EA Player Name</TableHead>
-                  <TableHead>MGHL Player</TableHead>
+                  <TableHead>SCS Player</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>

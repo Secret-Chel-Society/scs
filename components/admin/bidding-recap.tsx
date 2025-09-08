@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Loader2, RefreshCw, DollarSign, Users, Trophy, Download, UserCheck, Target } from "lucide-react"
+import { Loader2, RefreshCw, DollarSign, Users, Trophy, Download, UserCheck, Target, Award, Medal, Star, Shield, Database, Settings, Zap, TrendingUp, Activity, BarChart3, CheckCircle, XCircle, AlertTriangle, Clock, GamepadIcon, Shield as GoalieMask } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { useToast } from "@/hooks/use-toast"
 
@@ -181,7 +181,7 @@ export function BiddingRecap() {
   const downloadCSV = () => {
     if (!data) return
 
-    let csvContent = "MGHL Bidding Recap\n\n"
+    let csvContent = "SCS Bidding Recap\n\n"
 
     // Summary
     csvContent += "SUMMARY\n"
@@ -215,7 +215,7 @@ export function BiddingRecap() {
     const link = document.createElement("a")
     const url = URL.createObjectURL(blob)
     link.setAttribute("href", url)
-    link.setAttribute("download", `MGHL_Bidding_Recap_${new Date().toISOString().split("T")[0]}.csv`)
+    link.setAttribute("download", `SCS_Bidding_Recap_${new Date().toISOString().split("T")[0]}.csv`)
     link.style.visibility = "hidden"
     document.body.appendChild(link)
     link.click()
@@ -224,19 +224,32 @@ export function BiddingRecap() {
 
   return (
     <div className="space-y-6">
+      {/* Enhanced Header Section */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Bidding Recap</h2>
-          <p className="text-muted-foreground">Comprehensive overview of all bidding activity</p>
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
+            <DollarSign className="h-8 w-8 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">Bidding Recap</h2>
+            <p className="text-hockey-silver-600 dark:text-hockey-silver-400 text-lg">Comprehensive overview of all bidding activity</p>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {data && (
-            <Button onClick={downloadCSV} variant="outline">
+            <Button 
+              onClick={downloadCSV} 
+              className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
               <Download className="mr-2 h-4 w-4" />
               Download CSV
             </Button>
           )}
-          <Button onClick={fetchBiddingRecap} disabled={loading}>
+          <Button 
+            onClick={fetchBiddingRecap} 
+            disabled={loading}
+            className="hockey-button bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+          >
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Generate Recap
           </Button>
@@ -244,69 +257,87 @@ export function BiddingRecap() {
       </div>
 
       {error && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="hockey-card border-2 border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-r from-goal-red-50/50 to-goal-red-100/50 dark:from-goal-red-900/20 dark:to-goal-red-800/20 shadow-2xl shadow-goal-red-500/20">
           <CardContent className="pt-6">
-            <p className="text-red-600">Error: {error}</p>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                <AlertTriangle className="h-5 w-5 text-white" />
+              </div>
+              <p className="text-goal-red-700 dark:text-goal-red-300 font-medium">Error: {error}</p>
+            </div>
           </CardContent>
         </Card>
       )}
 
       {data && (
         <div className="space-y-6">
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
+          {/* Enhanced Summary Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="pt-6">
-                <div className="flex items-center space-x-2">
-                  <Trophy className="h-4 w-4 text-blue-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
                   <div>
-                    <p className="text-2xl font-bold">{data.totalBids}</p>
-                    <p className="text-sm text-muted-foreground">Total Bids</p>
+                    <p className="text-3xl font-bold text-ice-blue-700 dark:text-ice-blue-300">{data.totalBids}</p>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Total Bids</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="hockey-card hockey-card-hover border-assist-green-200/50 dark:border-assist-green-700/50 bg-gradient-to-br from-white to-assist-green-50/50 dark:from-hockey-silver-900 dark:to-assist-green-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="pt-6">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-green-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                    <Users className="h-6 w-6 text-white" />
+                  </div>
                   <div>
-                    <p className="text-2xl font-bold">{data.totalPlayers}</p>
-                    <p className="text-sm text-muted-foreground">Players Bid On</p>
+                    <p className="text-3xl font-bold text-assist-green-700 dark:text-assist-green-300">{data.totalPlayers}</p>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Players Bid On</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="hockey-card hockey-card-hover border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-rink-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="pt-6">
-                <div className="flex items-center space-x-2">
-                  <Trophy className="h-4 w-4 text-purple-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
                   <div>
-                    <p className="text-2xl font-bold">{data.totalTeams}</p>
-                    <p className="text-sm text-muted-foreground">Teams Participating</p>
+                    <p className="text-3xl font-bold text-rink-blue-700 dark:text-rink-blue-300">{data.totalTeams}</p>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Teams Participating</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="hockey-card hockey-card-hover border-goal-red-200/50 dark:border-goal-red-700/50 bg-gradient-to-br from-white to-goal-red-50/50 dark:from-hockey-silver-900 dark:to-goal-red-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="pt-6">
-                <div className="flex items-center space-x-2">
-                  <DollarSign className="h-4 w-4 text-yellow-600" />
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
                   <div>
-                    <p className="text-2xl font-bold">
+                    <p className="text-3xl font-bold text-goal-red-700 dark:text-goal-red-300">
                       {formatCurrency(data.teamStats.reduce((sum, team) => sum + team.currentSalary, 0))}
                     </p>
-                    <p className="text-sm text-muted-foreground">Total League Salary</p>
+                    <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Total League Salary</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Team Statistics with Won Players and Roster */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Team Bidding Statistics & Rosters</CardTitle>
+          {/* Enhanced Team Statistics with Won Players and Roster */}
+          <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                Team Bidding Statistics & Rosters
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -315,12 +346,14 @@ export function BiddingRecap() {
                   const totalRosterSize = teamStat.currentRoster.length
 
                   return (
-                    <div key={teamStat.team.id} className="border rounded-lg p-6">
-                      {/* Team Header */}
-                      <div className="flex items-center justify-between mb-4">
+                    <div key={teamStat.team.id} className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 rounded-xl p-6 hover:shadow-lg transition-shadow duration-200">
+                      {/* Enhanced Team Header */}
+                      <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center space-x-4">
-                          <span className="text-lg font-medium text-muted-foreground">#{index + 1}</span>
-                          <div className="w-10 h-10">
+                          <div className="p-2 bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 rounded-lg text-white font-bold text-lg min-w-[3rem] text-center">
+                            #{index + 1}
+                          </div>
+                          <div className="w-12 h-12">
                             <TeamLogo
                               teamId={teamStat.team.id}
                               teamName={teamStat.team.name}
@@ -329,58 +362,63 @@ export function BiddingRecap() {
                             />
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold">{teamStat.team.name}</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <h3 className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{teamStat.team.name}</h3>
+                            <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                               {totalRosterSize} players • {formatCurrency(teamStat.currentSalary)} salary
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-green-600">{formatCurrency(capSpaceRemaining)}</p>
-                          <p className="text-sm text-muted-foreground">Cap Space Remaining</p>
+                          <p className="text-lg font-bold text-assist-green-600 dark:text-assist-green-400">{formatCurrency(capSpaceRemaining)}</p>
+                          <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Cap Space Remaining</p>
                         </div>
                       </div>
 
-                      {/* Bidding Stats */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="text-center p-3 bg-muted/50 rounded">
-                          <p className="text-lg font-semibold">{teamStat.totalBids}</p>
-                          <p className="text-xs text-muted-foreground">Total Bids</p>
+                      {/* Enhanced Bidding Stats */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="text-center p-3 bg-gradient-to-br from-ice-blue-100 to-ice-blue-200 dark:from-ice-blue-900/30 dark:to-ice-blue-800/20 rounded-lg border border-ice-blue-200/50 dark:border-ice-blue-700/50">
+                          <p className="text-lg font-semibold text-ice-blue-700 dark:text-ice-blue-300">{teamStat.totalBids}</p>
+                          <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Total Bids</p>
                         </div>
-                        <div className="text-center p-3 bg-muted/50 rounded">
-                          <p className="text-lg font-semibold">{teamStat.uniquePlayersCount}</p>
-                          <p className="text-xs text-muted-foreground">Players Bid On</p>
+                        <div className="text-center p-3 bg-gradient-to-br from-rink-blue-100 to-rink-blue-200 dark:from-rink-blue-900/30 dark:to-rink-blue-800/20 rounded-lg border border-rink-blue-200/50 dark:border-rink-blue-700/50">
+                          <p className="text-lg font-semibold text-rink-blue-700 dark:text-rink-blue-300">{teamStat.uniquePlayersCount}</p>
+                          <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Players Bid On</p>
                         </div>
-                        <div className="text-center p-3 bg-green-50 rounded">
-                          <p className="text-lg font-semibold text-green-600">{teamStat.wonPlayers.length}</p>
-                          <p className="text-xs text-muted-foreground">Won Players</p>
+                        <div className="text-center p-3 bg-gradient-to-br from-assist-green-100 to-assist-green-200 dark:from-assist-green-900/30 dark:to-assist-green-800/20 rounded-lg border border-assist-green-200/50 dark:border-assist-green-700/50">
+                          <p className="text-lg font-semibold text-assist-green-600 dark:text-assist-green-400">{teamStat.wonPlayers.length}</p>
+                          <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Won Players</p>
                         </div>
-                        <div className="text-center p-3 bg-blue-50 rounded">
-                          <p className="text-lg font-semibold text-blue-600">{totalRosterSize}</p>
-                          <p className="text-xs text-muted-foreground">Current Roster</p>
+                        <div className="text-center p-3 bg-gradient-to-br from-goal-red-100 to-goal-red-200 dark:from-goal-red-900/30 dark:to-goal-red-800/20 rounded-lg border border-goal-red-200/50 dark:border-goal-red-700/50">
+                          <p className="text-lg font-semibold text-goal-red-600 dark:text-goal-red-400">{totalRosterSize}</p>
+                          <p className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">Current Roster</p>
                         </div>
                       </div>
 
-                      {/* Won Players */}
+                      {/* Enhanced Won Players */}
                       {teamStat.wonPlayers.length > 0 && (
-                        <div className="mb-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <UserCheck className="h-4 w-4 text-green-600" />
-                            <h4 className="font-medium">Won Players ({teamStat.wonPlayers.length})</h4>
+                        <div className="mb-6">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="p-1 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                              <UserCheck className="h-4 w-4 text-white" />
+                            </div>
+                            <h4 className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Won Players ({teamStat.wonPlayers.length})</h4>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {teamStat.wonPlayers.map((player) => (
                               <div
                                 key={player.id}
-                                className="flex items-center justify-between p-2 bg-gray-800 border border-gray-700 rounded text-sm"
+                                className="flex items-center justify-between p-3 bg-gradient-to-br from-assist-green-100 to-assist-green-200 dark:from-assist-green-900/20 dark:to-assist-green-800/20 border border-assist-green-200/50 dark:border-assist-green-700/50 rounded-lg text-sm hover:scale-105 transition-transform duration-200"
                               >
-                                <div>
-                                  <span className="font-medium text-white">{player.gamer_tag_id}</span>
-                                  <span className="text-gray-300 ml-2">
-                                    ({getPositionAbbreviation(player.primary_position)})
-                                  </span>
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1 bg-gradient-to-r from-assist-green-500/20 to-assist-green-500/20 rounded">
+                                    <GamepadIcon className="h-3 w-3 text-assist-green-600 dark:text-assist-green-400" />
+                                  </div>
+                                  <span className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.gamer_tag_id}</span>
+                                  <Badge variant="outline" className="text-xs border-assist-green-300 dark:border-assist-green-600 text-assist-green-700 dark:text-assist-green-300">
+                                    {getPositionAbbreviation(player.primary_position)}
+                                  </Badge>
                                 </div>
-                                <span className="font-semibold text-green-400">
+                                <span className="font-semibold text-assist-green-600 dark:text-assist-green-400">
                                   {formatCurrency(player.winningBid)}
                                 </span>
                               </div>
@@ -389,26 +427,31 @@ export function BiddingRecap() {
                         </div>
                       )}
 
-                      {/* Current Roster Preview */}
+                      {/* Enhanced Current Roster Preview */}
                       {teamStat.currentRoster.length > 0 && (
                         <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-4 w-4 text-blue-600" />
-                            <h4 className="font-medium">Current Roster ({teamStat.currentRoster.length})</h4>
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="p-1 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                              <Target className="h-4 w-4 text-white" />
+                            </div>
+                            <h4 className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">Current Roster ({teamStat.currentRoster.length})</h4>
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-40 overflow-y-auto">
                             {teamStat.currentRoster.map((player) => (
                               <div
                                 key={player.id}
-                                className="flex items-center justify-between p-2 bg-gray-800 border border-gray-700 rounded text-sm"
+                                className="flex items-center justify-between p-3 bg-gradient-to-br from-rink-blue-100 to-rink-blue-200 dark:from-rink-blue-900/20 dark:to-rink-blue-800/20 border border-rink-blue-200/50 dark:border-rink-blue-700/50 rounded-lg text-sm hover:scale-105 transition-transform duration-200"
                               >
-                                <div>
-                                  <span className="font-medium text-white">{player.gamer_tag_id}</span>
-                                  <span className="text-gray-300 ml-2">
-                                    ({getPositionAbbreviation(player.primary_position)})
-                                  </span>
+                                <div className="flex items-center gap-2">
+                                  <div className="p-1 bg-gradient-to-r from-rink-blue-500/20 to-rink-blue-500/20 rounded">
+                                    <GoalieMask className="h-3 w-3 text-rink-blue-600 dark:text-rink-blue-400" />
+                                  </div>
+                                  <span className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{player.gamer_tag_id}</span>
+                                  <Badge variant="outline" className="text-xs border-rink-blue-300 dark:border-rink-blue-600 text-rink-blue-700 dark:text-rink-blue-300">
+                                    {getPositionAbbreviation(player.primary_position)}
+                                  </Badge>
                                 </div>
-                                <span className="font-semibold text-blue-400">{formatCurrency(player.salary)}</span>
+                                <span className="font-semibold text-rink-blue-600 dark:text-rink-blue-400">{formatCurrency(player.salary)}</span>
                               </div>
                             ))}
                           </div>
@@ -421,31 +464,39 @@ export function BiddingRecap() {
             </CardContent>
           </Card>
 
-          {/* Player Bid History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Player Bid History</CardTitle>
+          {/* Enhanced Player Bid History */}
+          <Card className="hockey-card hockey-card-hover border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="border-b-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 pb-4">
+              <CardTitle className="flex items-center gap-3 text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                  <Activity className="h-6 w-6 text-white" />
+                </div>
+                Player Bid History
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {data.playerBids.map((playerBid) => (
-                  <div key={playerBid.player.id} className="border rounded-lg p-4">
+                  <div key={playerBid.player.id} className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20 rounded-xl p-6 hover:shadow-lg transition-shadow duration-200">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gradient-to-r from-ice-blue-500/20 to-rink-blue-500/20 rounded-lg">
+                          <GamepadIcon className="h-5 w-5 text-ice-blue-600 dark:text-ice-blue-400" />
+                        </div>
                         <div>
-                          <h3 className="font-semibold text-lg">{playerBid.player.gamer_tag_id}</h3>
-                          <p className="text-sm text-muted-foreground">
+                          <h3 className="font-semibold text-lg text-hockey-silver-800 dark:text-hockey-silver-200">{playerBid.player.gamer_tag_id}</h3>
+                          <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
                             {playerBid.player.primary_position}
                             {playerBid.player.secondary_position && ` / ${playerBid.player.secondary_position}`}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">{formatCurrency(playerBid.highestBid)}</p>
-                        <p className="text-sm text-muted-foreground">Highest Bid • {playerBid.totalBids} total bids</p>
+                        <p className="text-lg font-bold text-assist-green-600 dark:text-assist-green-400">{formatCurrency(playerBid.highestBid)}</p>
+                        <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Highest Bid • {playerBid.totalBids} total bids</p>
                         {playerBid.winningTeam && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <div className="w-4 h-4">
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="w-5 h-5">
                               <TeamLogo
                                 teamId={playerBid.winningTeam.id}
                                 teamName={playerBid.winningTeam.name}
@@ -453,20 +504,23 @@ export function BiddingRecap() {
                                 size="xs"
                               />
                             </div>
-                            <span className="text-xs text-green-600 font-medium">
+                            <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white border-0 text-xs">
                               Won by {playerBid.winningTeam.name}
-                            </span>
+                            </Badge>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <Separator className="my-3" />
+                    <Separator className="my-4 bg-ice-blue-200/50 dark:bg-rink-blue-700/50" />
 
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm text-muted-foreground mb-2">Bid History</h4>
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-3 flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        Bid History
+                      </h4>
                       {playerBid.bids.map((bid, bidIndex) => (
-                        <div key={bid.id} className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded">
+                        <div key={bid.id} className="flex items-center justify-between py-3 px-4 bg-gradient-to-br from-hockey-silver-100 to-hockey-silver-200 dark:from-hockey-silver-900/30 dark:to-hockey-silver-800/20 rounded-lg border border-hockey-silver-200/50 dark:border-hockey-silver-700/50 hover:scale-105 transition-transform duration-200">
                           <div className="flex items-center space-x-3">
                             <div className="w-6 h-6">
                               <TeamLogo
@@ -476,16 +530,20 @@ export function BiddingRecap() {
                                 size="xs"
                               />
                             </div>
-                            <span className="font-medium">{bid.team.name}</span>
+                            <span className="font-medium text-hockey-silver-800 dark:text-hockey-silver-200">{bid.team.name}</span>
                             {bidIndex === 0 && (
-                              <Badge variant="default" className="text-xs">
+                              <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white border-0 text-xs">
+                                <Star className="h-3 w-3 mr-1" />
                                 Winner
                               </Badge>
                             )}
                           </div>
                           <div className="flex items-center space-x-3">
-                            <span className="font-semibold">{formatCurrency(bid.bid_amount)}</span>
-                            <span className="text-xs text-muted-foreground">{formatDate(bid.created_at)}</span>
+                            <span className="font-semibold text-hockey-silver-800 dark:text-hockey-silver-200">{formatCurrency(bid.bid_amount)}</span>
+                            <span className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400 flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {formatDate(bid.created_at)}
+                            </span>
                           </div>
                         </div>
                       ))}

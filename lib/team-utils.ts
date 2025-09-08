@@ -40,6 +40,9 @@ export interface TeamStats {
  */
 export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
   try {
+    // Get salary cap from system settings
+    const salaryCap = await getSalaryCap()
+    
     // Calculate standings to get accurate stats
     const standings = await calculateStandings(seasonId)
 
@@ -108,7 +111,7 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
         shots_per_game: Number(shotsPerGame.toFixed(1)),
         player_count: playerCountByTeam[team.id] || 0,
         total_salary: totalSalaryByTeam[team.id] || 0,
-        cap_space: 30000000 - (totalSalaryByTeam[team.id] || 0),
+        cap_space: salaryCap - (totalSalaryByTeam[team.id] || 0),
       }
     })
   } catch (error) {
@@ -125,6 +128,9 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
  */
 export async function getTeamStats(teamId: string, seasonId: number): Promise<TeamStats | null> {
   try {
+    // Get salary cap from system settings
+    const salaryCap = await getSalaryCap()
+    
     // Calculate standings to get accurate stats
     const standings = await calculateStandings(seasonId)
 
@@ -152,7 +158,7 @@ export async function getTeamStats(teamId: string, seasonId: number): Promise<Te
       ...team,
       player_count: playerData?.length || 0,
       total_salary: totalSalary,
-      cap_space: 30000000 - totalSalary,
+      cap_space: salaryCap - totalSalary,
     }
   } catch (error) {
     console.error("Error getting team stats:", error)
@@ -173,16 +179,94 @@ export async function getCurrentSeasonId(): Promise<number> {
       return 1 // Default to season 1 if not found
     }
 
-    return data?.value || 1
+    const value = data?.value
+    console.log("Current season value from database:", value, "type:", typeof value)
+    
+    // Ensure we return a number
+    if (typeof value === 'string') {
+      const parsed = parseInt(value, 10)
+      if (!isNaN(parsed)) {
+        return parsed
+      }
+    } else if (typeof value === 'number') {
+      return value
+    }
+    
+    console.log("Invalid season value, defaulting to 1")
+    return 1 // Default to season 1 if invalid
   } catch (error) {
     console.error("Error getting current season:", error)
     return 1 // Default to season 1 if error
   }
 }
 
+/**
+ * Gets the salary cap from system settings
+ * @returns The salary cap amount
+ */
+export async function getSalaryCap(): Promise<number> {
+  try {
+    const { data, error } = await supabase.from("system_settings").select("value").eq("key", "salary_cap").single()
+
+    if (error) {
+      console.error("Error fetching salary cap:", error)
+      return 65000000 // Default to $65M if not found
+    }
+
+    const value = data?.value
+    console.log("Salary cap value from database:", value, "type:", typeof value)
+    
+    // Ensure we return a number
+    if (typeof value === 'string') {
+      const parsed = parseInt(value, 10)
+      if (!isNaN(parsed)) {
+        return parsed
+      }
+    } else if (typeof value === 'number') {
+      return value
+    }
+    
+    console.log("Invalid salary cap value, defaulting to 30000000")
+    return 65000000 // Default to $65M if invalid
+  } catch (error) {
+    console.error("Error getting salary cap:", error)
+    return 65000000 // Default to $65M if error
+  }
+}
+
+/**
+ * Updates the salary cap in system settings
+ * @param newSalaryCap The new salary cap amount
+ * @returns Promise<boolean> - true if successful, false otherwise
+ */
+export async function updateSalaryCap(newSalaryCap: number): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("system_settings")
+      .upsert({
+        key: "salary_cap",
+        value: newSalaryCap
+      })
+
+    if (error) {
+      console.error("Error updating salary cap:", error)
+      return false
+    }
+
+    console.log("Salary cap updated successfully to:", newSalaryCap)
+    return true
+  } catch (error) {
+    console.error("Error updating salary cap:", error)
+    return false
+  }
+}
+
 // Helper function to calculate team stats including tie handling
 async function calculateTeamStats(teamId: string, seasonId: number): Promise<TeamStats | null> {
   try {
+    // Get salary cap from system settings
+    const salaryCap = await getSalaryCap()
+    
     const { data: matches, error: matchesError } = await supabase
       .from("matches")
       .select("home_team_id, away_team_id, home_score, away_score, overtime, has_overtime")
@@ -259,7 +343,7 @@ async function calculateTeamStats(teamId: string, seasonId: number): Promise<Tea
       goal_differential: goalsFor - goalsAgainst,
       player_count: 0, // Placeholder for player count
       total_salary: 0, // Placeholder for total salary
-      cap_space: 30000000, // Placeholder for cap space
+      cap_space: salaryCap, // Placeholder for cap space
     }
   } catch (error) {
     console.error("Error calculating team stats:", error)

@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 

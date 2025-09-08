@@ -75,7 +75,7 @@ export function LogoManager() {
     try {
       // Upload to the logos folder in the media bucket
       const fileExt = logoFile.name.split(".").pop()
-      const fileName = `mghl-logo-${logoType}-${Date.now()}.${fileExt}`
+      const fileName = `scs-logo-${logoType}-${Date.now()}.${fileExt}`
       const filePath = `logos/${fileName}`
 
       // Make sure the logos folder exists
@@ -148,7 +148,7 @@ export function LogoManager() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>MGHL Logo Management</CardTitle>
+          <CardTitle>SCS Logo Management</CardTitle>
           <CardDescription>Upload and manage the logo used in the navigation bar and footer</CardDescription>
         </CardHeader>
         <CardContent>
@@ -161,7 +161,7 @@ export function LogoManager() {
                   {currentLogo ? (
                     <Image
                       src={currentLogo || "/placeholder.svg"}
-                      alt="Current MGHL Logo"
+                      alt="Current SCS Logo"
                       width={200}
                       height={60}
                       className="object-contain max-h-full"

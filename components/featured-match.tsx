@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Calendar, Clock } from "lucide-react"
 import { motion } from "framer-motion"
+import { TeamLogo } from "@/components/team-logo"
 
 interface FeaturedMatchProps {
   match: {
@@ -93,22 +94,15 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <div className="relative h-24 w-24 mb-2">
-                  {match.home_team.logo_url ? (
-                    <Image
-                      src={match.home_team.logo_url || "/placeholder.svg"}
-                      alt={match.home_team.name}
-                      fill
-                      className="object-contain"
-                    />
-                  ) : (
-                    <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center text-2xl font-bold">
-                      {match.home_team.name.substring(0, 2)}
-                    </div>
-                  )}
+                  <TeamLogo 
+                    teamName={match.home_team.name}
+                    logoUrl={match.home_team.logo_url}
+                    size="lg"
+                  />
                 </div>
                 <Link
                   href={`/teams/${match.home_team.id}`}
-                  className="font-bold text-lg hover:text-primary transition-colors"
+                  className="font-bold text-lg hover:text-ice-blue-600 dark:hover:text-ice-blue-400 transition-colors"
                 >
                   {match.home_team.name}
                 </Link>
@@ -124,22 +118,15 @@ export default function FeaturedMatch({ match }: FeaturedMatchProps) {
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <div className="relative h-24 w-24 mb-2">
-                  {match.away_team.logo_url ? (
-                    <Image
-                      src={match.away_team.logo_url || "/placeholder.svg"}
-                      alt={match.away_team.name}
-                      fill
-                      className="object-contain"
-                    />
-                  ) : (
-                    <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center text-2xl font-bold">
-                      {match.away_team.name.substring(0, 2)}
-                    </div>
-                  )}
+                  <TeamLogo 
+                    teamName={match.away_team.name}
+                    logoUrl={match.away_team.logo_url}
+                    size="lg"
+                  />
                 </div>
                 <Link
                   href={`/teams/${match.away_team.id}`}
-                  className="font-bold text-lg hover:text-primary transition-colors"
+                  className="font-bold text-lg hover:text-ice-blue-600 dark:hover:text-ice-blue-400 transition-colors"
                 >
                   {match.away_team.name}
                 </Link>
