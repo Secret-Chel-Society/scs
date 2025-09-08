@@ -575,37 +575,19 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // Check if user has manager role using the database function
-      const { data: managerCheck, error: managerError } = await supabase
-        .rpc('check_manager_role', { user_id_param: session.user.id })
-      
-      // Get the actual player role and team info if manager
-      const { data: playerInfo, error: playerError } = managerCheck === true 
-        ? await supabase
-            .from('players')
-            .select('*, teams(*)')
-            .eq('user_id', session.user.id)
-            .single()
-        : { data: null, error: null };
-      
-      // Check if the user has any manager or admin roles
-      const { data: playerRoles, error: rolesError } = await supabase
+      // Check for any manager role using in operator
+      const { data: playerRoles, error: playerError } = await supabase
         .from('players')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .in('role', ['gm', 'agm', 'owner']);
-      
-      const { data: adminRoles, error: adminError } = await supabase
-        .from('user_roles')
         .select('*')
         .eq('user_id', session.user.id)
-        .eq('role', 'admin');
+        .in('role', ['GM', 'AGM', 'Owner', 'owner'])
       
-      // Check if user has any manager or admin roles
-      const isManager = managerCheck === true || 
-                       playerRoles?.some(role => ['GM', 'AGM', 'Owner'].includes(role.role));
-      const isAdmin = adminRoles && adminRoles.length > 0;
-      const hasAccess = isManager || isAdmin;
+      // Check for admin roles in user_roles table
+      const { data: adminRoles, error: adminError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .in("role", ["Admin", "Super Admin"])
       
       // Log the results for debugging
       console.log('Role check results:', {
@@ -615,6 +597,11 @@ const ManagementPage = () => {
         adminRoles,
         adminError
       })
+      
+      // Check if user has any manager or admin roles
+      const isManager = !!playerRoles?.length
+      const isAdmin = !!adminRoles?.length
+      const hasAccess = isManager || isAdmin
       
       // Get the first team ID if user is a manager
       const playerData = playerRoles?.[0]
