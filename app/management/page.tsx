@@ -577,28 +577,30 @@ const ManagementPage = () => {
       
       // Check both players and user_roles tables for manager access
       const [
-        { data: playerData, error: playerError },
-        { data: adminRole, error: adminError }
+        { data: playerRoles, error: playerError },
+        { data: adminRoles, error: adminError }
       ] = await Promise.all([
         supabase
           .from("players")
           .select("role, team_id")
           .eq("user_id", session.user.id)
-          .in("role", ["GM", "AGM", "Owner"])
-          .single(),
+          .in("role", ["GM", "AGM", "Owner"]),
         supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", session.user.id)
-          .eq("role", "Admin")
-          .single()
+          .in("role", ["Admin", "Super Admin"])
       ])
 
-      const isManager = !!playerData
-      const isAdmin = !!adminRole
+      // Check if user has any manager or admin roles
+      const isManager = !!playerRoles?.length
+      const isAdmin = !!adminRoles?.length
       const hasAccess = isManager || isAdmin
       
-      console.log('Access check results:', { isManager, isAdmin, playerData, adminRole })
+      // Get the first team ID if user is a manager
+      const playerData = playerRoles?.[0]
+      
+      console.log('Access check results:', { isManager, isAdmin, playerData, adminRoles })
       
       // Always update the authorization state
       setIsAuthorized(hasAccess)
