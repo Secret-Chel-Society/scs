@@ -145,6 +145,88 @@ const salarySchema = z.object({
   salary: z.coerce.number().min(0, "Salary cannot be negative").max(15000000, "Salary cannot exceed $15,000,000"),
 })
 
+// Role update dialog component
+function RoleUpdateDialog({
+  open,
+  onOpenChange,
+  user,
+  onSubmit,
+  submitting,
+  availableRoles,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  user: any
+  onSubmit: (values: { userId: string; roles: string[] }) => Promise<void>
+  submitting: boolean
+  availableRoles: { label: string; value: string }[]
+}) {
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([])
+
+  // Update state when user changes
+  useEffect(() => {
+    if (user) {
+      setSelectedRoles(user.roles || [])
+    }
+  }, [user])
+
+  const handleRoleChange = (role: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRoles([...selectedRoles, role])
+    } else {
+      setSelectedRoles(selectedRoles.filter((r) => r !== role))
+    }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || selectedRoles.length === 0) return
+    onSubmit({ userId: user.id, roles: selectedRoles })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Update Roles</DialogTitle>
+            <DialogDescription>
+              {user && `Update roles for ${user.gamer_tag_id || user.email}`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              {availableRoles.map((role) => (
+                <div key={role.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`role-${role.value}`}
+                    checked={selectedRoles.includes(role.value)}
+                    onCheckedChange={(checked) => handleRoleChange(role.value, !!checked)}
+                  />
+                  <label
+                    htmlFor={`role-${role.value}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {role.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting || selectedRoles.length === 0}>
+              {submitting ? 'Saving...' : 'Save changes'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // Simple component for position dialog using controlled components instead of React Hook Form
 function PositionUpdateDialog({
   open,

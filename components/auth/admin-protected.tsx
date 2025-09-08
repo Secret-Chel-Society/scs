@@ -40,46 +40,29 @@ export function AdminProtected({ children }: AdminProtectedProps) {
           return
         }
 
-        // Check if user has admin or management role (Owner, GM, AGM)
+        // Check if user has admin role
         try {
-          const { data: roles, error: rolesError } = await supabase
+          // Check user_roles table for Admin role
+          const { data: adminRole, error: adminError } = await supabase
             .from("user_roles")
             .select("role")
             .eq("user_id", session.user.id)
-            .in("role", ["Admin", "Owner", "GM", "AGM"])
-            .limit(1) // We only need to know if at least one role exists
+            .eq("role", "Admin")
+            .single();
 
-          if (rolesError) {
-            const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
-
-            if (
-              rolesError.message.includes("Rate limit") ||
-              rolesError.message.includes("Too Many") ||
-              rolesError.message.includes("429") ||
-              rolesError.code === "PGRST301"
-            ) {
-              console.error("Rate limit error checking admin status:", rolesError)
-              setError(`Rate limit exceeded. Retrying in ${Math.ceil(retryDelay / 1000)} seconds...`)
-
-              // Auto-retry with exponential backoff
-              setTimeout(() => {
-                setRetryCount((prev) => prev + 1)
-              }, retryDelay)
-              return
-            }
-
+          if (adminError && adminError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+            throw adminError;
           }
           
-          if (!roles || roles.length === 0) {
-            console.log("No admin/management role found in user_roles")
-            router.push("/?error=unauthorized&message=You don't have permission to access this page")
-            return
+          if (adminRole) {
+            setIsAdmin(true);
+            setIsLoading(false);
+          } else {
+            router.push("/unauthorized?message=Admin access required");
           }
-          
-          // User has required role, set isAdmin to true
-          setIsAdmin(true)
         } catch (error: any) {
-          const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000) // Max 30 seconds
+          console.error("Error checking admin status:", error);
+          const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000); // Max 30 seconds
 
           // Handle rate limiting errors
           if (
