@@ -7,11 +7,20 @@ import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Loader2, Save } from "lucide-react"
 
+// Type definitions to prevent TypeScript errors
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
+  }
+}
+
 interface TeamConferenceSelectProps {
   teamId: string
   currentConferenceId: string | null
   conferences: Array<{ id: string; name: string }>
-  onSave?: () => void
+  onSave?: (teamId: string, conferenceId: string | null) => void
 }
 
 export function TeamConferenceSelect({
@@ -31,7 +40,9 @@ export function TeamConferenceSelect({
     setHasChanges(false)
   }, [currentConferenceId])
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); // Prevent form submission if inside a form
+    
     console.log('Saving conference change:', { teamId, selectedConferenceId });
     if (!supabase) {
       console.error('Supabase client not available');
@@ -62,17 +73,21 @@ export function TeamConferenceSelect({
       });
       
       setHasChanges(false);
-      console.log('Calling onSave callback');
-      onSave?.();
+      
+      // Refresh the parent component if onSave is provided
+      if (onSave) {
+        console.log('Calling onSave callback');
+        onSave(teamId, selectedConferenceId);
+      }
     } catch (error: any) {
-      console.error("Error updating team conference:", error)
+      console.error("Error updating team conference:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to update team conference",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
@@ -80,7 +95,7 @@ export function TeamConferenceSelect({
     <div className="flex items-center gap-2">
       <Select
         value={selectedConferenceId}
-        onValueChange={(value) => {
+        onValueChange={(value: string) => {
           setSelectedConferenceId(value)
           setHasChanges(true)
         }}
@@ -98,13 +113,14 @@ export function TeamConferenceSelect({
           ))}
         </SelectContent>
       </Select>
-      
       <Button
+        type="button"
         size="sm"
+        variant="outline"
         onClick={handleSave}
         disabled={!hasChanges || isSaving}
-        className="h-8 w-8 p-0"
-        variant="outline"
+        className="h-8 px-2 min-w-[32px]"
+        aria-label="Save conference changes"
       >
         {isSaving ? (
           <Loader2 className="h-4 w-4 animate-spin" />
