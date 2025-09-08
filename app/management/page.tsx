@@ -575,21 +575,49 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // Check only the players table for manager access
+      // First, check what roles the user has in the players table
+      const { data: allPlayerRoles, error: allPlayerRolesError } = await supabase
+        .from("players")
+        .select("role, team_id, user_id")
+        .eq("user_id", session.user.id)
+      
+      console.log('All player roles for user:', allPlayerRoles)
+      
+      // Then check specifically for manager roles
       const { data: playerRoles, error: playerError } = await supabase
         .from("players")
         .select("role, team_id")
         .eq("user_id", session.user.id)
-        .in("role", ["GM", "AGM", "Owner"])
-
-      // Only check for manager roles, not admin roles
+        .in("role", ["GM", "AGM", "Owner", "owner"]) // Check both cases
+      
+      console.log('Manager role query results:', { playerRoles, playerError })
+      
+      // Check for admin roles in user_roles table
+      const { data: adminRoles, error: adminError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .in("role", ["Admin", "Super Admin"])
+      
+      console.log('Admin role check:', { adminRoles, adminError })
+      
+      // Check if user has any manager or admin roles
       const isManager = !!playerRoles?.length
-      const hasAccess = isManager
+      const isAdmin = !!adminRoles?.length
+      const hasAccess = isManager || isAdmin
       
       // Get the first team ID if user is a manager
       const playerData = playerRoles?.[0]
       
-      console.log('Access check results:', { isManager, playerData })
+      console.log('Access check results:', { 
+        userId: session.user.id, 
+        isManager, 
+        isAdmin, 
+        hasAccess, 
+        playerData, 
+        allPlayerRoles,
+        adminRoles
+      })
       
       // Always update the authorization state
       setIsAuthorized(hasAccess)

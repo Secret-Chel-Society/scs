@@ -1376,15 +1376,15 @@ export default function UsersManagementClient() {
         return
       }
 
-      // First, update the player role (use the first role in the array)
-      let playerRole = rolesList[0]
-
-      // Special handling: If the first role is Admin (which isn't valid for players table),
-      // use "Player" for the players table but keep Admin in user_roles
-      if (playerRole === "Admin" && !VALID_PLAYER_ROLES.includes(playerRole)) {
-        playerRole = "Player"
-        console.log("Using 'Player' role for players table since 'Admin' is not valid for players table")
+      // First, find a valid player role from the selected roles
+      let playerRole = rolesList.find(role => VALID_PLAYER_ROLES.includes(role)) || 'Player'
+      
+      // If we have an Owner role, use that as the player role
+      if (rolesList.includes('Owner')) {
+        playerRole = 'Owner';
       }
+      
+      console.log("Selected player role:", playerRole)
 
       // Check if player record exists
       const { data: playerData, error: playerCheckError } = await supabase
