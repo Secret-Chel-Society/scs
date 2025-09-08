@@ -1326,8 +1326,10 @@ export default function UsersManagementClient() {
       }
 
       if (playerData && playerData.length > 0) {
+        let updateData: any = { role: playerRole }
+
         // Update existing player record
-        const { error: updateError } = await supabase.from("players").update({ role: playerRole }).eq("user_id", userId)
+        const { error: updateError } = await supabase.from("players").update(updateData).eq("user_id", userId)
 
         if (updateError) {
           console.error("Error updating player role:", updateError)
@@ -1336,15 +1338,19 @@ export default function UsersManagementClient() {
 
         console.log("Updated player role to:", playerRole)
       } else {
-        // Create new player record
-        const { error: insertError } = await supabase.from("players").insert({ user_id: userId, role: playerRole })
+        // Create new player record (without team assignment - manual assignment required)
+        const { error: insertError } = await supabase.from("players").insert({ 
+          user_id: userId, 
+          role: playerRole,
+          status: 'active'
+        })
 
         if (insertError) {
           console.error("Error creating player record:", insertError)
           throw insertError
         }
 
-        console.log("Created new player with role:", playerRole)
+        console.log("Created new player with role:", playerRole, "- manual team assignment required")
       }
 
       // Delete all existing user_roles for this user
