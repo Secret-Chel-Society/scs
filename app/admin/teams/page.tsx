@@ -739,12 +739,6 @@ export default function AdminTeamsPage() {
     } finally {
       setLoadingTeams(false);
     }
-        description: error.message || "An unexpected error occurred while loading teams.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoadingStats(false)
-    }
   }
 
   // Apply filters to teams
