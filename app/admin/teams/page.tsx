@@ -693,7 +693,7 @@ export default function AdminTeamsPage() {
         return
       }
 
-      // Try to load teams with conference data using a join
+      // First try with conference_id join
       const { data, error } = await supabase
         .from('teams')
         .select(`
@@ -723,42 +723,17 @@ export default function AdminTeamsPage() {
       console.log('Loaded teams with conferences:', data)
       setTeams(data || [])
       applyFilters(data || [], searchQuery, showInactive)
+    } catch (error: any) {
+      console.error("Error loading teams:", error)
+      setLoadError(`Error: ${error.message}`)
+      toast({
+        title: "Error loading teams",
+        description: error.message || "An unexpected error occurred while loading teams.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingTeams(false)
     }
-
-    try {
-      setIsLoadingStats(true)
-      setLoadError(null)
-      const season = seasonId || selectedSeason || 1
-      
-      // Ensure season is a number
-      const numericSeason = typeof season === 'string' ? parseInt(season, 10) : season
-      if (isNaN(numericSeason)) {
-        console.error("Invalid season ID:", season, "defaulting to 1")
-        const fallbackSeason = 1
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from("teams")
-          .select("*")
-          .eq("season_id", fallbackSeason)
-          .order("name")
-        
-        if (fallbackError) {
-          throw fallbackError
-        }
-        
-        setTeams(fallbackData || [])
-        applyFilters(fallbackData || [], searchQuery, showInactive)
-        return
-      }
-
-      // Load teams with conference data (fallback if conferences table doesn't exist)
-      let { data, error } = await supabase
-        .from("teams")
-        .select(`
-          *,
-          conference:conferences(id, name, description, color)
-        `)
-        .eq("season_id", numericSeason)
-        .order("name")
 
       // If the join fails, try loading teams without conference data
       if (error && (error.message.includes("conferences") || error.message.includes("relation") || error.message.includes("does not exist"))) {
