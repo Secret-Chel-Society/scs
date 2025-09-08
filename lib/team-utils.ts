@@ -1,10 +1,44 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import { calculateStandings } from "./standings-calculator"
+
+// Define types for our data structures
+interface SystemSettings {
+  key: string;
+  value: any;
+  updated_at?: string;
+}
+
+interface TeamStats {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  wins: number;
+  losses: number;
+  otl: number;
+  games_played: number;
+  points: number;
+  goals_for: number;
+  goals_against: number;
+  goal_differential: number;
+  shots_per_game?: number;
+  total_shots?: number;
+  powerplay_goals?: number;
+  powerplay_opportunities?: number;
+  powerplay_percentage?: number;
+  penalty_kill_goals_against?: number;
+  penalty_kill_opportunities?: number;
+  penalty_kill_percentage?: number;
+  division?: string;
+  conference?: string;
+  player_count?: number;
+  total_salary?: number;
+  cap_space?: number;
+}
 
 // Create a Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseKey, {
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
   realtime: {
     params: {
       eventsPerSecond: 10,
@@ -66,7 +100,7 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
 
     if (!eaTeamStatsError && eaTeamStats) {
       // Calculate total shots by team from ea_team_stats
-      eaTeamStats.forEach((stat) => {
+      eaTeamStats.forEach((stat: { team_id: string; shots?: number }) => {
         shotsByTeam[stat.team_id] = (shotsByTeam[stat.team_id] || 0) + (stat.shots || 0)
       })
     } else {
@@ -77,7 +111,7 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
         .not("team_id", "is", null)
 
       if (!playerStatsError && playerStats) {
-        playerStats.forEach((stat) => {
+        playerStats.forEach((stat: { team_id?: string; shots?: number }) => {
           if (stat.team_id) {
             shotsByTeam[stat.team_id] = (shotsByTeam[stat.team_id] || 0) + (stat.shots || 0)
           }
@@ -98,16 +132,23 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
     // Calculate player counts and salaries by team
     const playerCountByTeam: Record<string, number> = {}
     const totalSalaryByTeam: Record<string, number> = {}
+    
+    interface PlayerData {
+      team_id: string;
+      salary: number;
+    }
 
-    playerData?.forEach((player) => {
-      if (player.team_id) {
-        // Increment player count
-        playerCountByTeam[player.team_id] = (playerCountByTeam[player.team_id] || 0) + 1
+    if (playerData) {
+      playerData.forEach((player: PlayerData) => {
+        if (player.team_id) {
+          // Increment player count
+          playerCountByTeam[player.team_id] = (playerCountByTeam[player.team_id] || 0) + 1
 
-        // Add salary
-        totalSalaryByTeam[player.team_id] = (totalSalaryByTeam[player.team_id] || 0) + (player.salary || 0)
-      }
-    })
+          // Add salary
+          totalSalaryByTeam[player.team_id] = (totalSalaryByTeam[player.team_id] || 0) + (player.salary || 0)
+        }
+      })
+    }
 
     // Combine standings with shots data
     return standings.map((team) => {
@@ -161,7 +202,7 @@ export async function getTeamStats(teamId: string, seasonId: number): Promise<Te
     }
 
     // Calculate total salary
-    const totalSalary = playerData?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
+    const totalSalary = playerData?.reduce((sum: number, player: { salary?: number }) => sum + (player.salary || 0), 0) || 0
 
     return {
       ...team,
@@ -222,7 +263,7 @@ export async function getCurrentSeasonId(): Promise<number> {
 export async function getSalaryCap(useCache: boolean = true): Promise<number> {
   // Return cached value if available and cache is enabled
   if (useCache && salaryCapCache !== null) {
-    return salaryCapCache
+    return salaryCapCache;
   }
   
   try {
@@ -230,34 +271,53 @@ export async function getSalaryCap(useCache: boolean = true): Promise<number> {
       .from("system_settings")
       .select("value")
       .eq("key", "salary_cap")
-      .single()
+      .single();
 
     if (error) {
-      console.error("Error fetching salary cap:", error)
-      return 65000000 // Default to $65M if error
+      console.error("Error fetching salary cap:", error);
+      return 65000000; // Default to $65M if error
     }
 
-    const value = data?.value
-    let cap = 65000000 // Default to $65M if invalid
+    if (!data) {
+      console.log("No salary cap setting found, creating default");
+      await updateSalaryCap(65000000);
+      return 65000000;
+    }
 
-    // Ensure we return a number
-    if (typeof value === 'string') {
-      const parsed = parseInt(value, 10)
+    // The value is stored as JSONB, so we need to handle it properly
+    let capValue = data.value;
+    let cap = 65000000; // Default to $65M if invalid
+
+    // Handle different possible value formats
+    if (typeof capValue === 'number') {
+      cap = capValue;
+    } else if (typeof capValue === 'string') {
+      // Try to parse string to number
+      const parsed = parseInt(capValue, 10);
       if (!isNaN(parsed)) {
-        cap = parsed
+        cap = parsed;
       }
-    } else if (typeof value === 'number') {
-      cap = value
-    } else {
-      console.log("Invalid salary cap value, defaulting to 65000000")
+    } else if (capValue && typeof capValue === 'object') {
+      // Handle case where value is stored as { "value": number }
+      const nestedValue = (capValue as any).value;
+      if (typeof nestedValue === 'number') {
+        cap = nestedValue;
+      } else if (typeof nestedValue === 'string') {
+        const parsed = parseInt(nestedValue, 10);
+        if (!isNaN(parsed)) {
+          cap = parsed;
+        }
+      }
     }
     
+    console.log(`Retrieved salary cap: $${(cap / 100).toFixed(2)}`);
+    
     // Update cache
-    salaryCapCache = cap
-    return cap
+    salaryCapCache = cap;
+    return cap;
   } catch (error) {
-    console.error("Error getting salary cap:", error)
-    return 65000000 // Default to $65M if error
+    console.error("Error getting salary cap:", error);
+    return 65000000; // Default to $65M if error
   }
 }
 
@@ -268,36 +328,53 @@ export async function getSalaryCap(useCache: boolean = true): Promise<number> {
  */
 export async function updateSalaryCap(newSalaryCap: number): Promise<boolean> {
   try {
+    // Ensure the value is a number
+    const capValue = typeof newSalaryCap === 'number' ? newSalaryCap : 
+                    (typeof newSalaryCap === 'string' ? parseInt(newSalaryCap, 10) : 65000000);
+    
+    if (isNaN(capValue)) {
+      console.error("Invalid salary cap value:", newSalaryCap);
+      return false;
+    }
+
+    console.log(`Updating salary cap to: $${(capValue / 100).toFixed(2)}`);
+    
     const { error } = await supabase
       .from("system_settings")
       .upsert({
         key: "salary_cap",
-        value: newSalaryCap,
+        value: capValue,
         updated_at: new Date().toISOString()
-      })
+      }, {
+        onConflict: 'key'
+      });
 
     if (error) {
-      console.error("Error updating salary cap:", error)
-      return false
+      console.error("Error updating salary cap:", error);
+      return false;
     }
 
     // Update cache
-    salaryCapCache = newSalaryCap
+    salaryCapCache = capValue;
     
     // Send a notification to all clients
-    await supabase
+    const { error: channelError } = await supabase
       .channel('salary_cap_updates')
       .send({
         type: 'broadcast',
         event: 'SALARY_CAP_UPDATED',
-        payload: { newSalaryCap }
-      })
+        payload: { newSalaryCap: capValue }
+      });
 
-    console.log("Salary cap updated and notifications sent:", newSalaryCap)
-    return true
+    if (channelError) {
+      console.error("Error sending salary cap update notification:", channelError);
+    }
+
+    console.log(`Salary cap updated and notifications sent: $${(capValue / 100).toFixed(2)}`);
+    return true;
   } catch (error) {
-    console.error("Error updating salary cap:", error)
-    return false
+    console.error("Error updating salary cap:", error);
+    return false;
   }
 }
 
@@ -310,7 +387,7 @@ export function subscribeToSalaryCap(callback: (newCap: number) => void) {
   const channel = supabase.channel('salary_cap_updates')
   
   channel
-    .on('broadcast', { event: 'SALARY_CAP_UPDATED' }, (payload) => {
+    .on('broadcast', { event: 'SALARY_CAP_UPDATED' }, (payload: { payload: { newSalaryCap: number } }) => {
       callback(payload.payload.newSalaryCap)
     })
     .subscribe()
@@ -343,7 +420,11 @@ async function calculateTeamStats(teamId: string, seasonId: number): Promise<Tea
     let goalsFor = 0
     let goalsAgainst = 0
 
-    matches?.forEach((match) => {
+    const teamMatches = matches.filter((match: { home_team_id: string; away_team_id: string }) => 
+      match.home_team_id === teamId || match.away_team_id === teamId
+    )
+
+    teamMatches.forEach((match) => {
       const homeTeamId = match.home_team_id
       const awayTeamId = match.away_team_id
       const homeScore = match.home_score
