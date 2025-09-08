@@ -579,32 +579,32 @@ const ManagementPage = () => {
       const { data: managerCheck, error: managerError } = await supabase
         .rpc('check_manager_role', { user_id_param: session.user.id })
       
-      const isManager = managerCheck === true;
-      
       // Get the actual player role and team info if manager
-      const { data: playerInfo, error: playerError } = isManager 
+      const { data: playerInfo, error: playerError } = managerCheck === true 
         ? await supabase
             .from('players')
-            .select('role, team_id')
+            .select('*, teams(*)')
             .eq('user_id', session.user.id)
-            .or('role.ilike.gm,role.ilike.agm,role.ilike.owner')
             .single()
         : { data: null, error: null };
       
-      const playerRoles = isManager && playerInfo ? [playerInfo] : [];
+      // Check if the user has any manager or admin roles
+      const { data: playerRoles, error: rolesError } = await supabase
+        .from('players')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .in('role', ['gm', 'agm', 'owner']);
       
-      console.log('Manager role check:', { 
-        isManager, 
-        playerInfo,
-        managerError: managerError || playerError 
-      });
-      
-      // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id)
-        .in("role", ["Admin", "Super Admin"])
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin');
+      
+      // Check if user has any manager or admin roles
+      const isManager = managerCheck === true || !!playerRoles?.length;
+      const isAdmin = !!adminRoles?.length;
+      const hasAccess = isManager || isAdmin;
       
       // Log the results for debugging
       console.log('Role check results:', {
