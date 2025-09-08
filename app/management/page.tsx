@@ -580,14 +580,7 @@ const ManagementPage = () => {
         .from('players')
         .select('*')
         .eq('user_id', session.user.id)
-        .or(
-          `role.eq.GM,` +
-          `role.eq.AGM,` +
-          `role.eq.Owner,` +
-          `role.ilike.%GM%,` +
-          `role.ilike.%AGM%,` +
-          `role.ilike.%Owner%`
-        )
+        .or('role.eq.GM,role.eq.AGM,role.eq.Owner,role.ilike.%GM%,role.ilike.%AGM%,role.ilike.%Owner%')
       
       // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
