@@ -575,12 +575,12 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // Directly query the players table with a flexible role check
+      // Check for any manager role using in operator
       const { data: playerRoles, error: playerError } = await supabase
         .from('players')
         .select('*')
         .eq('user_id', session.user.id)
-        .or('role.eq.GM,role.eq.AGM,role.eq.Owner,role.ilike.%GM%,role.ilike.%AGM%,role.ilike.%Owner%')
+        .in('role', ['GM', 'AGM', 'Owner', 'owner'])
       
       // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
