@@ -575,22 +575,9 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // First, check what roles the user has in the players table
-      const { data: allPlayerRoles, error: allPlayerRolesError } = await supabase
-        .from("players")
-        .select("role, team_id, user_id")
-        .eq("user_id", session.user.id)
-      
-      console.log('All player roles for user:', allPlayerRoles)
-      
-      // Then check specifically for manager roles with case-insensitive comparison
+      // Use the database function to check manager role
       const { data: playerRoles, error: playerError } = await supabase
-        .from("players")
-        .select("role, team_id")
-        .eq("user_id", session.user.id)
-        .or('role.ilike.GM,role.ilike.AGM,role.ilike.Owner,role.ilike.owner,role.ilike.%GM%,role.ilike.%AGM%,role.ilike.%Owner%')
-      
-      console.log('Manager role query results:', { playerRoles, playerError })
+        .rpc('check_manager_role', { user_id_param: session.user.id })
       
       // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
@@ -598,8 +585,6 @@ const ManagementPage = () => {
         .select("role")
         .eq("user_id", session.user.id)
         .in("role", ["Admin", "Super Admin"])
-      
-      console.log('Admin role check:', { adminRoles, adminError })
       
       // Check if user has any manager or admin roles
       const isManager = !!playerRoles?.length
@@ -609,17 +594,7 @@ const ManagementPage = () => {
       // Get the first team ID if user is a manager
       const playerData = playerRoles?.[0]
       
-      console.log('Access check results:', { 
-        userId: session.user.id, 
-        isManager, 
-        isAdmin, 
-        hasAccess, 
-        playerData, 
-        allPlayerRoles,
-        adminRoles
-      })
-      
-      // Always update the authorization state
+      // Update the authorization state
       setIsAuthorized(hasAccess)
 
       // If no access, redirect to unauthorized
