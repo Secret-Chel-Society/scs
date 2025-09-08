@@ -603,7 +603,7 @@ const ManagementPage = () => {
       
       // Check if user has any manager or admin roles
       const isManager = managerCheck === true || 
-                       playerRoles?.some(role => ['GM', 'AGM', 'Owner'].includes(role.role));
+                       playerRoles?.some(role => ['Owner'].includes(role.role));
       const isAdmin = adminRoles && adminRoles.length > 0;
       const hasAccess = isManager || isAdmin;
       
