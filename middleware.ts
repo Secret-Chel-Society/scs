@@ -1,8 +1,38 @@
+// Midnight Studios INTl - All rights reserved
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { checkRateLimit, checkSuspiciousActivity, isIPBlocked } from "@/lib/security-monitor"
 
 export async function middleware(request: NextRequest) {
+  // Get client IP
+  const ip = request.headers.get('x-forwarded-for') || 
+             request.headers.get('x-real-ip') || 
+             'unknown';
+  
+  const userAgent = request.headers.get('user-agent') || 'unknown';
+  
+  // Check if IP is blocked
+  if (isIPBlocked(ip)) {
+    console.warn('🚫 Blocked IP attempted access:', ip);
+    return new NextResponse('Access Denied', { status: 403 });
+  }
+  
+  // Rate limiting
+  if (!checkRateLimit(ip, 100, 60000)) { // 100 requests per minute
+    console.warn('🚫 Rate limit exceeded for IP:', ip);
+    return new NextResponse('Rate limit exceeded', { status: 429 });
+  }
+  
+  // Check for suspicious activity
+  if (checkSuspiciousActivity(ip, userAgent, {
+    url: request.url,
+    method: request.method,
+    headers: Object.fromEntries(request.headers.entries())
+  })) {
+    console.warn('🚨 Suspicious activity detected from IP:', ip);
+    // Don't block, but log for monitoring
+  }
   // Create a response object that we'll manipulate
   const response = NextResponse.next()
 

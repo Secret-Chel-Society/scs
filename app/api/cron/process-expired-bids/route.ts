@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 

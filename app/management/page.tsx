@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 "use client"
 
 import { useState, useEffect } from "react"

@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
@@ -11,6 +12,7 @@ import SupabaseProvider from "@/lib/supabase/client"
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 import { MobileScalingProvider } from "@/components/mobile-scaling-provider"
+import "@/lib/download-tracker" // Initialize download tracking
 
 // Optimize font loading
 const inter = Inter({

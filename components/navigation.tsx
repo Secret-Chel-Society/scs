@@ -1,6 +1,8 @@
+// Midnight Studios INTl - All rights reserved
 "use client"
 
 import { useState, useEffect } from "react"
+import { trackUserAction, trackEvent } from "@/lib/analytics"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
@@ -233,11 +235,14 @@ export default function Navigation() {
   return (
     <>
       {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 w-12 h-12 rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 mobile-nav-button flex items-center justify-center"
-        aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
-      >
+              <button
+                onClick={() => {
+                  setIsMobileOpen(!isMobileOpen);
+                  trackUserAction('navigation_toggle', isMobileOpen ? 'close' : 'open');
+                }}
+                className="md:hidden fixed top-4 left-4 z-50 w-12 h-12 rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 mobile-nav-button flex items-center justify-center"
+                aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
+              >
         {isMobileOpen ? <X className="h-7 w-7 text-ice-blue-600 dark:text-ice-blue-400" /> : <Menu className="h-7 w-7 text-ice-blue-600 dark:text-ice-blue-400" />}
       </button>
 

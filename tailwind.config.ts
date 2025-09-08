@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 import type { Config } from "tailwindcss"
 
 const config: Config = {

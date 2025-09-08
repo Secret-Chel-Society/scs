@@ -1,3 +1,4 @@
+// Midnight Studios INTl - All rights reserved
 "use server"
 
 import { createAdminClient } from "@/lib/supabase/server"
