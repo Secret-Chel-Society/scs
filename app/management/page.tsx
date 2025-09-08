@@ -600,12 +600,21 @@ const ManagementPage = () => {
       
       console.log('Access check results:', { isManager, isAdmin, playerData, adminRole })
       
+      // Always update the authorization state
       setIsAuthorized(hasAccess)
 
+      // If no access, redirect to unauthorized
       if (!hasAccess) {
         const errorMsg = "You must be a team manager or admin to access this page"
         console.log(errorMsg)
-        router.push('/unauthorized?message=' + encodeURIComponent(errorMsg))
+        // Clear any existing team data since user is no longer authorized
+        setTeamData(null)
+        setTeamPlayers([])
+        setMyBids([])
+        setWaivers([])
+        
+        // Use replace instead of push to prevent going back to the management page
+        router.replace('/unauthorized?message=' + encodeURIComponent(errorMsg))
         return
       }
 
