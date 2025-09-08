@@ -38,29 +38,41 @@ const nextConfig = {
       };
     }
     
-    // Code obfuscation for production builds
+    // Code optimization for production builds
     if (!dev && !isServer) {
-      const TerserPlugin = require('terser-webpack-plugin');
-      config.optimization.minimizer = [
-        new TerserPlugin({
-          terserOptions: {
-            mangle: {
-              // Obfuscate variable names
-              reserved: ['Midnight Studios INTl', 'createClient', 'supabase']
-            },
-            compress: {
-              // Remove console logs in production
-              drop_console: true,
-              drop_debugger: true,
-            },
-            format: {
-              // Remove comments except our studio name
-              comments: /Midnight Studios INTl/i,
-            },
-          },
-          extractComments: false,
-        }),
-      ];
+      // Enable built-in webpack optimizations
+      config.optimization.minimize = true;
+      config.optimization.minimizer = config.optimization.minimizer || [];
+      
+      // Add custom optimization for Midnight Studios INTl
+      config.optimization.minimizer.push({
+        apply: (compiler) => {
+          compiler.hooks.compilation.tap('MidnightStudiosOptimizer', (compilation) => {
+            compilation.hooks.optimizeChunkAssets.tap('MidnightStudiosOptimizer', (chunks) => {
+              chunks.forEach((chunk) => {
+                chunk.files.forEach((filename) => {
+                  if (filename.endsWith('.js')) {
+                    const asset = compilation.assets[filename];
+                    const source = asset.source();
+                    
+                    // Remove console logs but keep Midnight Studios INTl comments
+                    const optimizedSource = source
+                      .replace(/console\.(log|warn|error|info|debug)\([^)]*\);?/g, '')
+                      .replace(/\/\*[\s\S]*?\*\//g, (match) => {
+                        return match.includes('Midnight Studios INTl') ? match : '';
+                      });
+                    
+                    compilation.assets[filename] = {
+                      source: () => optimizedSource,
+                      size: () => optimizedSource.length
+                    };
+                  }
+                });
+              });
+            });
+          });
+        }
+      });
     }
 
     // Add source map tracking

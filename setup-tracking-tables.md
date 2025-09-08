@@ -1,3 +1,10 @@
+# Midnight Studios INTl - Tracking Tables Setup
+
+## 🗄️ Database Tables Setup
+
+Run this SQL in your Supabase SQL Editor to create the tracking tables:
+
+```sql
 -- Midnight Studios INTl - All rights reserved
 -- Create tracking tables for code protection monitoring
 
@@ -143,3 +150,40 @@ CREATE POLICY "Service role can insert analytics events" ON public.analytics_eve
 
 CREATE POLICY "Service role can insert file access logs" ON public.file_access_logs
   FOR INSERT WITH CHECK (true);
+```
+
+## 📊 How to Access Your Tracking Data
+
+### 1. **Security Dashboard**
+- URL: `/admin/security-dashboard`
+- Real-time monitoring interface
+- Visual charts and statistics
+
+### 2. **Supabase Dashboard**
+- Go to your Supabase project
+- Navigate to Table Editor
+- Check these tables:
+  - `code_downloads`
+  - `security_events` 
+  - `analytics_events`
+  - `file_access_logs`
+
+### 3. **Browser Console**
+- Open Developer Tools (F12)
+- Check Console tab for real-time logs
+- Look for emoji indicators: 🔍 📁 📦 🎨 ⚡ 🚨
+
+## 🚨 What Gets Tracked
+
+- **Source Map Access** - High priority (code inspection attempts)
+- **File Downloads** - Medium priority (JS, CSS, assets)
+- **Security Events** - Critical priority (attacks, suspicious activity)
+- **User Analytics** - Low priority (usage patterns)
+
+## ✅ Build Fix Applied
+
+The build error has been resolved by:
+- Removing `require()` calls from ES module
+- Using built-in webpack optimizations
+- Preserving Midnight Studios INTl comments
+- Removing console logs in production
