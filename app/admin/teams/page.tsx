@@ -582,7 +582,7 @@ export default function AdminTeamsPage() {
     }
   }
 
-  // Load teams based on selected season
+  // Load conferences and ensure they're properly associated with teams
   const loadConferences = async () => {
     console.log("🔍 Loading conferences...")
     if (!supabase) {
@@ -592,28 +592,43 @@ export default function AdminTeamsPage() {
 
     try {
       console.log("🔍 Querying conferences table...")
-      const { data, error } = await supabase
+      const { data: conferencesData, error: conferencesError } = await supabase
         .from("conferences")
         .select("*")
         .order("name")
 
-      console.log("Conferences query result:", { data, error })
+      console.log("Conferences query result:", { data: conferencesData, error: conferencesError })
 
-      if (error) {
-        console.error("❌ Error loading conferences:", error)
+      if (conferencesError) {
+        console.error("❌ Error loading conferences:", conferencesError)
         console.error("Conference error details:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
+          message: conferencesError.message,
+          details: conferencesError.details,
+          hint: conferencesError.hint,
+          code: conferencesError.code
         })
         // If conferences table doesn't exist, set empty array
         setConferences([])
         return
       }
 
-      console.log("✅ Conferences loaded successfully:", data?.length || 0, "conferences")
-      setConferences(data || [])
+      console.log("✅ Conferences loaded successfully:", conferencesData?.length || 0, "conferences")
+      
+      // Update conferences state
+      const conferencesList = conferencesData || []
+      setConferences(conferencesList)
+      
+      // If we have teams loaded, ensure they have the latest conference data
+      if (teams.length > 0) {
+        setTeams(prevTeams => 
+          prevTeams.map(team => ({
+            ...team,
+            conference: conferencesList.find(c => c.id === team.conference_id) || null
+          }))
+        )
+      }
+      
+      return conferencesList
     } catch (error) {
       console.error("❌ Exception loading conferences:", error)
       console.error("Conference exception details:", {
@@ -621,8 +636,8 @@ export default function AdminTeamsPage() {
         stack: error.stack,
         name: error.name
       })
-      // If conferences table doesn't exist, set empty array
       setConferences([])
+      return []
     }
   }
 
@@ -1217,7 +1232,11 @@ export default function AdminTeamsPage() {
             <div className="flex items-center justify-between p-6 bg-gradient-to-r from-hockey-silver-500/10 to-hockey-silver-500/10 rounded-xl border border-hockey-silver-200/50 dark:border-hockey-silver-700/50">
               <div>
                 <div className="text-3xl font-bold text-hockey-silver-600 dark:text-hockey-silver-400">
-                  ${salaryCap.toLocaleString()}
+                  {isLoadingSalaryCap ? (
+                    <div className="h-8 w-32 bg-hockey-silver-200 dark:bg-hockey-silver-700 rounded animate-pulse"></div>
+                  ) : (
+                    `$${(salaryCap || 0).toLocaleString()}`
+                  )}
                 </div>
                 <div className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400 font-semibold">Current Salary Cap</div>
               </div>
