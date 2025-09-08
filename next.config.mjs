@@ -42,17 +42,20 @@ const nextConfig = {
     if (!dev && !isServer) {
       // Enable built-in webpack optimizations
       config.optimization.minimize = true;
-      config.optimization.minimizer = config.optimization.minimizer || [];
       
-      // Add custom optimization for Midnight Studios INTl
-      config.optimization.minimizer.push({
+      // Add custom optimization for Midnight Studios INTl using modern webpack hooks
+      config.plugins.push({
         apply: (compiler) => {
           compiler.hooks.compilation.tap('MidnightStudiosOptimizer', (compilation) => {
-            compilation.hooks.optimizeChunkAssets.tap('MidnightStudiosOptimizer', (chunks) => {
-              chunks.forEach((chunk) => {
-                chunk.files.forEach((filename) => {
+            compilation.hooks.processAssets.tap(
+              {
+                name: 'MidnightStudiosOptimizer',
+                stage: compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_SIZE
+              },
+              (assets) => {
+                Object.keys(assets).forEach(filename => {
                   if (filename.endsWith('.js')) {
-                    const asset = compilation.assets[filename];
+                    const asset = assets[filename];
                     const source = asset.source();
                     
                     // Remove console logs but keep Midnight Studios INTl comments
@@ -62,14 +65,14 @@ const nextConfig = {
                         return match.includes('Midnight Studios INTl') ? match : '';
                       });
                     
-                    compilation.assets[filename] = {
+                    assets[filename] = {
                       source: () => optimizedSource,
                       size: () => optimizedSource.length
                     };
                   }
                 });
-              });
-            });
+              }
+            );
           });
         }
       });
