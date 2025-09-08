@@ -415,26 +415,56 @@ export default function AdminTeamsPage() {
 
   // Update team conference
   const updateTeamConference = async (teamId: string, conferenceId: string) => {
+    if (!supabase) {
+      console.error("Supabase client not available")
+      return
+    }
+
     try {
       setIsUpdatingConference(true)
       
       // Handle "none" value by setting to null
       const actualConferenceId = conferenceId === "none" ? null : conferenceId
       
+      // Update the team's conference in the database
       const { error } = await supabase
         .from("teams")
-        .update({ conference_id: actualConferenceId })
+        .update({ 
+          conference_id: actualConferenceId,
+          updated_at: new Date().toISOString()
+        })
         .eq("id", teamId)
   
       if (error) throw error
 
-      // Find the conference data
-      const conference = actualConferenceId ? conferences.find(c => c.id === actualConferenceId) : null
-  
-      // Update local state
+      // Find the conference data from the conferences state
+      const conference = actualConferenceId 
+        ? conferences.find(c => c.id === actualConferenceId) 
+        : null
+
+      // Update the local state to reflect the change
       setTeams(prevTeams => 
         prevTeams.map(team => 
-          team.id === teamId ? { ...team, conference_id: conferenceId, conference } : team
+          team.id === teamId 
+            ? { 
+                ...team, 
+                conference_id: actualConferenceId, // Use actualConferenceId instead of conferenceId
+                conference 
+              } 
+            : team
+        )
+      )
+      
+      // Also update filteredTeams to ensure UI consistency
+      setFilteredTeams(prevFilteredTeams =>
+        prevFilteredTeams.map(team =>
+          team.id === teamId
+            ? {
+                ...team,
+                conference_id: actualConferenceId,
+                conference
+              }
+            : team
         )
       )
   
@@ -442,6 +472,9 @@ export default function AdminTeamsPage() {
         title: "Conference Updated",
         description: `Team conference updated to ${conference?.name || "None"}`,
       })
+      
+      // Refresh the teams list to ensure data consistency
+      loadTeams(selectedSeason)
     } catch (error: any) {
       console.error("Error updating conference:", error)
       toast({
@@ -631,6 +664,65 @@ export default function AdminTeamsPage() {
       console.error("Supabase client not available")
       setLoadError("Database client not available")
       return
+    }
+
+    setLoadingTeams(true)
+    setLoadError(null)
+    
+    try {
+      // First, ensure we have the latest conferences
+      await loadConferences()
+      
+      const season = seasonId || selectedSeason || 1
+      
+      // Ensure season is a number
+      const numericSeason = typeof season === 'string' ? parseInt(season, 10) : season
+      if (isNaN(numericSeason)) {
+        console.error("Invalid season ID:", season, "defaulting to 1")
+        const fallbackSeason = 1
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("season_id", fallbackSeason)
+          .order("name")
+        
+        if (fallbackError) throw fallbackError
+        
+        setTeams(fallbackData || [])
+        applyFilters(fallbackData || [], searchQuery, showInactive)
+        return
+      }
+
+      // Try to load teams with conference data using a join
+      const { data, error } = await supabase
+        .from('teams')
+        .select(`
+          *,
+          conference:conference_id (id, name, description, color)
+        `)
+        .eq('season_id', numericSeason)
+        .order('name')
+
+      if (error) {
+        console.warn("Error loading teams with conferences, trying without join:", error.message)
+        // Fallback to loading teams without conference data if join fails
+        const { data: teamsData, error: teamsError } = await supabase
+          .from("teams")
+          .select("*")
+          .eq("season_id", numericSeason)
+          .order("name")
+          
+        if (teamsError) throw teamsError
+        
+        console.log('Loaded teams without conference data:', teamsData)
+        setTeams(teamsData || [])
+        applyFilters(teamsData || [], searchQuery, showInactive)
+        return
+      }
+
+      console.log('Loaded teams with conferences:', data)
+      setTeams(data || [])
+      applyFilters(data || [], searchQuery, showInactive)
     }
 
     try {
