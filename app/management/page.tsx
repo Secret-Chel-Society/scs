@@ -575,9 +575,19 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // Use the database function to check manager role
+      // Directly query the players table with a flexible role check
       const { data: playerRoles, error: playerError } = await supabase
-        .rpc('check_manager_role', { user_id_param: session.user.id })
+        .from('players')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .or(
+          `role.eq.GM,` +
+          `role.eq.AGM,` +
+          `role.eq.Owner,` +
+          `role.ilike.%GM%,` +
+          `role.ilike.%AGM%,` +
+          `role.ilike.%Owner%`
+        )
       
       // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
@@ -585,6 +595,15 @@ const ManagementPage = () => {
         .select("role")
         .eq("user_id", session.user.id)
         .in("role", ["Admin", "Super Admin"])
+      
+      // Log the results for debugging
+      console.log('Role check results:', {
+        userId: session.user.id,
+        playerRoles,
+        playerError,
+        adminRoles,
+        adminError
+      })
       
       // Check if user has any manager or admin roles
       const isManager = !!playerRoles?.length
