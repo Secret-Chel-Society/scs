@@ -1,8 +1,11 @@
 "use client"
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Newspaper } from "lucide-react"
 import Link from "next/link"
 // import { motion } from "framer-motion" - disabled due to Next.js 15.2.4 compatibility
 import NewsForm from "@/components/news-form"
