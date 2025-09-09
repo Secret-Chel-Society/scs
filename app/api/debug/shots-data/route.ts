@@ -1,30 +1,12 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabase = supabaseUrl && supabaseKey 
-  ? createClient(supabaseUrl, supabaseKey)
-  : null
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET(request: Request) {
   try {
-    if (!supabase) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-
     const { searchParams } = new URL(request.url)
     const seasonId = searchParams.get("seasonId") || "1"
 

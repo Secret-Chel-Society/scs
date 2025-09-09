@@ -1,14 +1,11 @@
 // Midnight Studios INTl - All rights reserved
 "use client"
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from "react"
-import { Card, CardBody, CardHeader } from "@heroui/react"
-import { Tabs, Tab } from "@heroui/react"
-import { Button } from "@heroui/react"
-import { Badge } from "@heroui/react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight } from "lucide-react"
 import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-display"
 import { SalaryProgress } from "@/components/management/salary-progress"
@@ -18,9 +15,9 @@ import Image from "next/image"
 import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/react"
-import { Select, SelectItem } from "@heroui/react"
-import { Input } from "@heroui/react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"

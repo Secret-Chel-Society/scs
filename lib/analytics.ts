@@ -99,17 +99,12 @@ class AnalyticsTracker {
 
   private async sendToAnalytics(event: AnalyticsEvent) {
     try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || !supabaseKey) {
-        console.warn('Supabase environment variables not configured for analytics');
-        return;
-      }
-      
       // Send to Supabase directly
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
 
       const { error } = await supabase
         .from('analytics_events')

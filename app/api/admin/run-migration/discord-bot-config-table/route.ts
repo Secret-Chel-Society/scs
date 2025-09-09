@@ -3,34 +3,18 @@ import { createClient } from "@supabase/supabase-js"
 import fs from "fs"
 import path from "path"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabaseAdmin = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-      },
-    })
-  : null
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  {
+    auth: {
+      persistSession: false,
+    },
+  },
+)
 
 export async function POST() {
   try {
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-
     console.log("Running Discord bot config table migration...")
 
     // Read the migration file

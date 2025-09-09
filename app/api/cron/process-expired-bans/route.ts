@@ -1,35 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabaseAdmin = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    })
-  : null
+const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+})
 
 export async function POST(request: NextRequest) {
   try {
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-
     // Verify cron secret
     const authHeader = request.headers.get("authorization")
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

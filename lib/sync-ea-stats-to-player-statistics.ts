@@ -1,16 +1,9 @@
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabase = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+// Create a Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // Helper function to map EA position to standard position
 function mapEaPositionToStandard(eaPosition: string): string {
@@ -123,11 +116,6 @@ function getHardcodedMapping(eaPlayerId: string): string | null {
 
 export async function syncEaStatsToPlayerStatistics(matchId?: string) {
   try {
-    if (!supabase) {
-      console.error('Supabase not configured')
-      return { success: false, message: 'Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.' }
-    }
-
     console.log(`Starting EA stats sync${matchId ? ` for match: ${matchId}` : " for all matches"}`)
 
     // If a specific match ID is provided, only sync that match

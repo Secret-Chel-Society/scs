@@ -24,7 +24,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     
   /* Hockey-themed custom properties */
   --ice-blue: 217.2 91.2% 59.8%;
@@ -130,6 +130,103 @@
 }
 
 @layer components {
+  /* Hero UI-Inspired Design System */
+  .hero-card {
+    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-2;
+  }
+  
+  .hero-button {
+    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:shadow-ice-blue-500/30 transition-all duration-300 ease-out hover:scale-105 active:scale-95 border border-ice-blue-400/20;
+  }
+  
+  .hero-button-secondary {
+    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 hover:border-ice-blue-300 dark:hover:border-ice-blue-600 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:scale-105 active:scale-95;
+  }
+  
+  .hero-input {
+    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-ice-blue-200 dark:border-ice-blue-700 rounded-xl px-4 py-3 text-base focus:border-ice-blue-500 dark:focus:border-ice-blue-400 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-ice-blue-400/20 transition-all duration-200 hover:border-ice-blue-300 dark:hover:border-ice-blue-600;
+  }
+  
+  .hero-badge {
+    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white font-semibold px-3 py-1.5 rounded-full text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105;
+  }
+  
+  .hero-title {
+    @apply text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent leading-tight tracking-tight;
+  }
+  
+  .hero-subtitle {
+    @apply text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl;
+  }
+  
+  .hero-section {
+    @apply py-20 px-4;
+  }
+  
+  .hero-container {
+    @apply max-w-7xl mx-auto;
+  }
+  
+  .hero-grid {
+    @apply grid gap-8 md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .hero-feature-card {
+    @apply hero-card p-8 text-center group;
+  }
+  
+  .hero-feature-icon {
+    @apply w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300;
+  }
+  
+  .hero-feature-title {
+    @apply text-xl font-bold text-slate-800 dark:text-slate-200 mb-4;
+  }
+  
+  .hero-feature-description {
+    @apply text-slate-600 dark:text-slate-400 leading-relaxed;
+  }
+  
+  .hero-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-6;
+  }
+  
+  .hero-stat-card {
+    @apply hero-card p-6 text-center;
+  }
+  
+  .hero-stat-value {
+    @apply text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2;
+  }
+  
+  .hero-stat-label {
+    @apply text-sm text-slate-600 dark:text-slate-400 font-medium;
+  }
+  
+  .hero-gradient-text {
+    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent;
+  }
+  
+  .hero-divider {
+    @apply h-1 w-24 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto;
+  }
+  
+  .hero-background {
+    @apply bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20;
+  }
+  
+  .hero-glass {
+    @apply bg-white/10 dark:bg-slate-800/10 backdrop-blur-md border border-white/20 dark:border-slate-700/20;
+  }
+  
+  .hero-hover-lift {
+    @apply transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-2 hover:shadow-2xl;
+  }
+  
+  .hero-focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-ice-blue-400/20 focus:border-ice-blue-500 dark:focus:border-ice-blue-400;
+  }
+
   /* Enhanced Hockey-Themed Design System */
   .hockey-card {
     @apply bg-gradient-to-br from-white via-ice-blue-50/30 to-rink-blue-50/20 dark:from-hockey-silver-900 dark:via-ice-blue-900/20 dark:to-rink-blue-900/10;

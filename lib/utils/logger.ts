@@ -5,28 +5,18 @@ type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 
 export class Logger {
   private static instance: Logger;
-  private supabase: any = null;
-
-  private constructor() {
-    // Check if environment variables are available
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (supabaseUrl && supabaseServiceKey) {
-      this.supabase = createClient<Database>(
-        supabaseUrl,
-        supabaseServiceKey,
-        {
-          auth: {
-            autoRefreshToken: false,
-            persistSession: false
-          }
-        }
-      )
-    } else {
-      console.warn('Supabase environment variables not configured for logger')
+  private supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
+  );
+
+  private constructor() {}
 
   public static getInstance(): Logger {
     if (!Logger.instance) {
@@ -41,12 +31,6 @@ export class Logger {
     context: Record<string, any> = {},
     userId?: string
   ) {
-    if (!this.supabase) {
-      // Fallback to console if Supabase is not configured
-      console[level](`[${level.toUpperCase()}] ${message}`, context);
-      return;
-    }
-
     try {
       await this.supabase.from('audit_logs').insert({
         action: `log_${level}`,

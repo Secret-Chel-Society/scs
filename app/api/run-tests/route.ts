@@ -1,10 +1,7 @@
 // Midnight Studios INTl - All rights reserved
 
 import { NextRequest, NextResponse } from 'next/server';
-import { websiteTestSuite } from '../../../lib/test-suite';
-
-// Force Node.js runtime to avoid Edge Runtime compatibility issues
-export const runtime = 'nodejs'
+import { websiteTestSuite } from '@/lib/test-suite';
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,25 +53,25 @@ export async function POST(request: NextRequest) {
     
     switch (testType) {
       case 'api':
-        results = await websiteTestSuite.testAPIEndpoints();
+        await websiteTestSuite['testAPIEndpoints']();
         break;
       case 'database':
-        results = await websiteTestSuite.testDatabaseOperations();
+        await websiteTestSuite['testDatabaseOperations']();
         break;
       case 'tracking':
-        results = await websiteTestSuite.testTrackingSystems();
+        await websiteTestSuite['testTrackingSystems']();
         break;
       case 'auth':
-        results = await websiteTestSuite.testAuthentication();
+        await websiteTestSuite['testAuthentication']();
         break;
       case 'components':
-        results = await websiteTestSuite.testComponents();
+        await websiteTestSuite['testComponents']();
         break;
       case 'security':
-        results = await websiteTestSuite.testSecurityFeatures();
+        await websiteTestSuite['testSecurityFeatures']();
         break;
       case 'performance':
-        results = await websiteTestSuite.testPerformance();
+        await websiteTestSuite['testPerformance']();
         break;
       default:
         results = await websiteTestSuite.runAllTests();
@@ -84,21 +81,23 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: `Test suite completed for: ${testType}`,
+      message: `Test type '${testType}' completed`,
       studio: 'Midnight Studios INTl',
+      testType,
       summary,
-      results,
+      results: websiteTestSuite.getResults(),
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('❌ Test suite failed:', error);
+    console.error(`❌ Test type '${testType}' failed:`, error);
     
     return NextResponse.json({
       success: false,
-      error: 'Test suite failed',
+      error: `Test type '${testType}' failed`,
       message: error instanceof Error ? error.message : 'Unknown error',
       studio: 'Midnight Studios INTl',
+      testType: body?.testType || 'unknown',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

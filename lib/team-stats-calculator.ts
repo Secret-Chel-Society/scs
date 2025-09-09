@@ -1,16 +1,9 @@
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabase = supabaseUrl && supabaseKey 
-  ? createClient(supabaseUrl, supabaseKey)
-  : null
+// Create a Supabase client with service role key for admin operations
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 /**
  * Syncs team statistics for a specific team and season
@@ -20,11 +13,6 @@ const supabase = supabaseUrl && supabaseKey
  */
 export async function syncTeamStats(teamId: string | number, seasonId: number): Promise<boolean> {
   try {
-    if (!supabase) {
-      console.error('Supabase not configured')
-      return false
-    }
-
     console.log(`Syncing stats for team ${teamId} in season ${seasonId}`)
 
     // Get all completed matches for this team in the specified season
@@ -149,11 +137,6 @@ export async function syncTeamStats(teamId: string | number, seasonId: number): 
  */
 export async function syncAllTeamStats(seasonId: number): Promise<boolean> {
   try {
-    if (!supabase) {
-      console.error('Supabase not configured')
-      return false
-    }
-
     console.log(`Syncing all team stats for season ${seasonId}`)
 
     // Get all teams
@@ -188,11 +171,6 @@ export async function syncAllTeamStats(seasonId: number): Promise<boolean> {
  */
 export async function syncTeamsFromMatch(matchId: string): Promise<boolean> {
   try {
-    if (!supabase) {
-      console.error('Supabase not configured')
-      return false
-    }
-
     console.log(`Syncing team stats for match ${matchId}`)
 
     // Get the match details

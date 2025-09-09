@@ -1,6 +1,3 @@
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
-
 import { DatabaseStructureExplorer } from "@/components/admin/database-structure-explorer"
 // import { motion } from "framer-motion"
 import { Database } from "lucide-react"

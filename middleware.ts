@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
-import { checkRateLimit, monitorSuspiciousActivity, isIPBlocked } from "@/lib/security-monitor"
+import { checkRateLimit, checkSuspiciousActivity, isIPBlocked } from "@/lib/security-monitor"
 
 export async function middleware(request: NextRequest) {
   // Get client IP
@@ -25,12 +25,14 @@ export async function middleware(request: NextRequest) {
   }
   
   // Check for suspicious activity
-  monitorSuspiciousActivity(ip, 'request', {
+  if (checkSuspiciousActivity(ip, userAgent, {
     url: request.url,
     method: request.method,
-    userAgent: userAgent,
     headers: Object.fromEntries(request.headers.entries())
-  });
+  })) {
+    console.warn('🚨 Suspicious activity detected from IP:', ip);
+    // Don't block, but log for monitoring
+  }
   // Create a response object that we'll manipulate
   const response = NextResponse.next()
 

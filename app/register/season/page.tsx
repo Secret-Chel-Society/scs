@@ -1,8 +1,5 @@
 "use client"
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
-
 import type React from "react"
 import { useSupabase } from "@/lib/supabase/client"
 import { useState, useEffect } from "react"

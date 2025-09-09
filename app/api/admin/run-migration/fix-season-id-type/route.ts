@@ -1,30 +1,12 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabase = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+// Create a Supabase client with admin privileges
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function POST(request: Request) {
-    if (!supabase) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-
-
   try {
     // Check if the user is an admin
     const authHeader = request.headers.get("authorization")

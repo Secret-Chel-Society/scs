@@ -7,18 +7,9 @@ let supabaseClient: ReturnType<typeof createBrowserClient<Database>> | null = nu
 export function createCustomClient() {
   if (supabaseClient) return supabaseClient
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase environment variables not configured')
-    // Return a mock client that will fail gracefully
-    return null as any
-  }
-
   supabaseClient = createBrowserClient<Database>(
-    supabaseUrl,
-    supabaseAnonKey,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
         persistSession: true,

@@ -337,7 +337,7 @@ export default function SideNavigation() {
                     <ModeToggle />
                 </div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger>
+                  <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex h-auto w-full items-center justify-start gap-3 p-2">
                        <Avatar className="h-9 w-9 border">
                          <AvatarImage
@@ -366,17 +366,17 @@ export default function SideNavigation() {
                             <User className="mr-2 h-4 w-4" /> View My Profile
                         </DropdownMenuItem>
                         {hasManagementRole() && (
-                            <DropdownMenuItem onPress={() => window.location.href = '/management'} className="cursor-pointer">
-                                <Building className="mr-2 h-4 w-4" /> Management
+                            <DropdownMenuItem asChild className="cursor-pointer">
+                                <Link href="/management"><Building className="mr-2 h-4 w-4" /> Management</Link>
                             </DropdownMenuItem>
                         )}
                         {isAdmin && (
-                            <DropdownMenuItem onPress={() => window.location.href = '/admin'} className="cursor-pointer">
-                                <ShieldCheck className="mr-2 h-4 w-4" /> Admin
+                            <DropdownMenuItem asChild className="cursor-pointer">
+                                <Link href="/admin"><ShieldCheck className="mr-2 h-4 w-4" /> Admin</Link>
                             </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem onPress={() => window.location.href = '/settings'} className="cursor-pointer">
-                            <Settings className="mr-2 h-4 w-4" /> Settings
+                        <DropdownMenuItem asChild className="cursor-pointer">
+                            <Link href="/settings"><Settings className="mr-2 h-4 w-4" /> Settings</Link>
                         </DropdownMenuItem>
                      </DropdownMenuGroup>
                      <DropdownMenuSeparator />
@@ -388,8 +388,8 @@ export default function SideNavigation() {
               </div>
             ) : (
                <div className="grid gap-2">
-                 <Button variant="outline" onPress={() => window.location.href = '/login'}>Log in</Button>
-                 <Button onPress={() => window.location.href = '/register'}>Sign up</Button>
+                 <Button variant="outline" asChild><Link href="/login">Log in</Link></Button>
+                 <Button asChild><Link href="/register">Sign up</Link></Button>
                </div>
             )}
           </>

@@ -1,8 +1,5 @@
 "use client"
 
-// Force dynamic rendering for this page
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
@@ -14,60 +11,36 @@ import { Trophy, Award, Star } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import type { TeamAward, PlayerAward, Season, TeamAwardResponse, PlayerAwardResponse } from "@/lib/supabase/types"
 
-// Error boundary component
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error('Error in AwardsPage:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
-          <div className="text-center p-8 max-w-2xl">
-            <div className="text-5xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
-            <p className="mb-6">We're having trouble loading the awards right now. Please try refreshing the page.</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Refresh Page
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
+interface TeamAward {
+  id: string
+  team_id: string
+  team_name: string
+  team_logo: string | null
+  award_type: string
+  season_number: number
+  year: number
+  description: string | null
 }
 
-// Main component with error boundary
-export default function AwardsPage() {
-  return (
-    <ErrorBoundary>
-      <AwardsContent />
-    </ErrorBoundary>
-  );
+interface PlayerAward {
+  id: string
+  player_id: string
+  gamer_tag_id: string
+  team_id: string | null
+  team_name: string | null
+  team_logo: string | null
+  award_type: string
+  season_number: number
+  year: number
+  description: string | null
 }
 
-// Main content component
-function AwardsContent() {
-import Image from "next/image"
-import Link from "next/link"
-import type { TeamAward, PlayerAward, Season, TeamAwardResponse, PlayerAwardResponse } from "@/lib/supabase/types"
+interface Season {
+  id: string | number
+  name: string
+  number?: number
+}
 
 export default function AwardsPage() {
   const { supabase } = useSupabase()
@@ -80,25 +53,13 @@ export default function AwardsPage() {
   const [selectedSeason, setSelectedSeason] = useState<string>("all")
   const [selectedYear, setSelectedYear] = useState<string>("all")
 
-  const availableYears = [
-    ...new Set([
-      ...(teamAwards?.map((award) => award?.year) || []),
-      ...(playerAwards?.map((award) => award?.year) || [])
-    ].filter((year): year is number => year !== undefined && year !== null))
-  ].sort((a, b) => b - a)
+  const availableYears = [...new Set([...teamAwards, ...playerAwards].map((award) => award.year))].sort((a, b) => b - a)
 
   useEffect(() => {
-    if (supabase) {
-      fetchData()
-    }
+    fetchData()
   }, [supabase])
 
   async function fetchData() {
-    if (!supabase) {
-      console.error('Supabase client not available')
-      return
-    }
-
     setLoading(true)
     try {
       // Fetch team awards
@@ -116,12 +77,9 @@ export default function AwardsPage() {
         .order("year", { ascending: false })
         .order("season_number", { ascending: false })
 
-      if (teamAwardsError) {
-        console.error('Error fetching team awards:', teamAwardsError)
-        throw teamAwardsError
-      }
+      if (teamAwardsError) throw teamAwardsError
 
-      const formattedTeamAwards: TeamAward[] = (teamAwardsData || []).map((award: TeamAwardResponse) => ({
+      const formattedTeamAwards = teamAwardsData.map((award) => ({
         id: award.id,
         team_id: award.team_id,
         team_name: award.teams?.name || "Unknown Team",
@@ -140,9 +98,11 @@ export default function AwardsPage() {
         .select(`
           id,
           player_id,
-          players:player_id (gamer_tag_id, avatar_url),
-          team_id,
-          teams:team_id (name, logo_url),
+          players:player_id (
+            users:user_id (gamer_tag_id),
+            team_id,
+            teams:team_id (name, logo_url)
+          ),
           award_type,
           season_number,
           year,
@@ -151,47 +111,78 @@ export default function AwardsPage() {
         .order("year", { ascending: false })
         .order("season_number", { ascending: false })
 
-      if (playerAwardsError) {
-        console.error('Error fetching player awards:', playerAwardsError)
-        throw playerAwardsError
-      }
+      if (playerAwardsError) throw playerAwardsError
 
-      const formattedPlayerAwards: PlayerAward[] = (playerAwardsData || []).map((award: PlayerAwardResponse) => ({
+      const formattedPlayerAwards = playerAwardsData.map((award) => ({
         id: award.id,
         player_id: award.player_id,
-        gamer_tag_id: award.players?.gamer_tag_id || "Unknown Player",
-        team_id: award.team_id,
-        team_name: award.teams?.name || null,
-        team_logo: award.teams?.logo_url || null,
+        gamer_tag_id: award.players?.users?.gamer_tag_id || "Unknown Player",
+        team_id: award.players?.team_id || null,
+        team_name: award.players?.teams?.name || null,
+        team_logo: award.players?.teams?.logo_url || null,
         award_type: award.award_type,
         season_number: award.season_number,
         year: award.year,
         description: award.description,
-        player_avatar: award.players?.avatar_url || null,
       }))
 
       setPlayerAwards(formattedPlayerAwards || [])
 
-      // Extract unique seasons
-      const allSeasons: Season[] = [
-        ...new Set([
-          ...formattedTeamAwards.map((a) => a.season_number),
-          ...formattedPlayerAwards.map((a) => a.season_number),
-        ]),
-      ]
-        .sort((a, b) => b - a)
-        .map((seasonNumber) => ({
-          id: seasonNumber,
-          name: `Season ${seasonNumber}`,
-          number: seasonNumber,
-        }))
+      // Fetch seasons
+      try {
+        const { data: seasonsData, error: seasonsError } = await supabase
+          .from("seasons")
+          .select("id, name, number")
+          .order("name")
 
-      setSeasons(allSeasons)
+        if (seasonsData && !seasonsError) {
+          // Process seasons to ensure they have correct numbers
+          const processedSeasons = seasonsData
+            .map((season) => {
+              // If season already has a number, use it
+              if (season.number !== undefined && season.number !== null) {
+                return season
+              }
+
+              // Otherwise extract number from name
+              const nameMatch = season.name.match(/Season\s+(\d+)/i)
+              const seasonNumber = nameMatch ? Number.parseInt(nameMatch[1], 10) : null
+
+              return {
+                ...season,
+                number: seasonNumber,
+              }
+            })
+            .sort((a, b) => (a.number || 0) - (b.number || 0)) // Sort by number
+
+          console.log("Processed seasons for awards page:", processedSeasons)
+          setSeasons(processedSeasons)
+        } else {
+          // Fallback to default seasons if table doesn't exist
+          const defaultSeasons = [
+            { id: "1", name: "Season 1", number: 1 },
+            { id: "2", name: "Season 2", number: 2 },
+            { id: "3", name: "Season 3", number: 3 },
+          ]
+          console.log("Using default seasons:", defaultSeasons)
+          setSeasons(defaultSeasons)
+        }
+      } catch (error) {
+        console.error("Error fetching seasons:", error)
+        // Fallback to default seasons
+        const defaultSeasons = [
+          { id: "1", name: "Season 1", number: 1 },
+          { id: "2", name: "Season 2", number: 2 },
+          { id: "3", name: "Season 3", number: 3 },
+        ]
+        console.log("Using default seasons due to error:", defaultSeasons)
+        setSeasons(defaultSeasons)
+      }
     } catch (error: any) {
       console.error("Error fetching data:", error)
       toast({
         title: "Error loading awards",
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        description: error.message || "Failed to load awards data",
         variant: "destructive",
       })
     } finally {
@@ -213,30 +204,28 @@ export default function AwardsPage() {
   })
 
   // Group team awards by type
-  const teamAwardsByType = filteredTeamAwards.reduce<Record<string, TeamAward[]>>(
+  const teamAwardsByType = filteredTeamAwards.reduce(
     (acc, award) => {
-      if (!award.award_type) return acc;
       if (!acc[award.award_type]) {
-        acc[award.award_type] = [];
+        acc[award.award_type] = []
       }
-      acc[award.award_type].push(award);
-      return acc;
+      acc[award.award_type].push(award)
+      return acc
     },
-    {}
-  );
+    {} as Record<string, TeamAward[]>,
+  )
 
   // Group player awards by type
-  const playerAwardsByType = filteredPlayerAwards.reduce<Record<string, PlayerAward[]>>(
+  const playerAwardsByType = filteredPlayerAwards.reduce(
     (acc, award) => {
-      if (!award.award_type) return acc;
       if (!acc[award.award_type]) {
-        acc[award.award_type] = [];
+        acc[award.award_type] = []
       }
-      acc[award.award_type].push(award);
-      return acc;
+      acc[award.award_type].push(award)
+      return acc
     },
-    {}
-  );
+    {} as Record<string, PlayerAward[]>,
+  )
 
   // Function to get season name by number
   const getSeasonName = (seasonNumber: number): string => {
@@ -329,61 +318,87 @@ export default function AwardsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Awards</h1>
-            <p className="text-muted-foreground">Recognizing excellence across seasons</p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <div className="w-[180px]">
-              <Select 
-                value={selectedSeason}
-                onValueChange={setSelectedSeason}
-              >
-                <SelectTrigger>
-                  <span>{String(seasons.find(s => String(s.number) === selectedSeason)?.name || 'Select season')}</span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Seasons</SelectItem>
-                  {seasons.map((season) => (
-                    <SelectItem key={season.id} value={String(season.number)}>
-                      {season.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <motion.div 
+        className="container mx-auto px-4 py-12"
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.6, delay: 0.8 }}
+      >
+        {/* Enhanced Filters Section */}
+        <div className="mb-8 clean-card p-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">Awards Gallery</h2>
+              <p className="text-slate-600 dark:text-slate-400">Filter awards by season and year</p>
             </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+              <div className="flex items-center gap-2">
+                <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by season" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Seasons</SelectItem>
+                    {seasons.length > 0
+                      ? seasons.map((season) => (
+                          <SelectItem key={season.id} value={String(season.number)}>
+                            {season.name}
+                          </SelectItem>
+                        ))
+                      : [1, 2, 3, 4, 5].map((num) => (
+                          <SelectItem key={num} value={String(num)}>
+                            Season {num}
+                          </SelectItem>
+                        ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="w-[180px]">
-              <Select 
-                value={selectedYear}
-                onValueChange={setSelectedYear}
-              >
-                <SelectTrigger>
-                  <span>{selectedYear === 'all' ? 'All Years' : selectedYear}</span>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  {availableYears.map((year) => (
-                    <SelectItem key={year} value={String(year)}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={String(year)}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
 
-        <Tabs defaultValue="team">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="team">Team Awards</TabsTrigger>
-            <TabsTrigger value="player">Player Awards</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="team-awards">
+          <div className="flex justify-center mb-8">
+            <TabsList className="grid grid-cols-2 w-full max-w-lg gap-3 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-200 dark:border-slate-700 shadow-xl">
+              <TabsTrigger 
+                value="team-awards" 
+                className="px-8 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Team Awards</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="player-awards" 
+                className="px-8 py-4 rounded-xl data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105 transition-all duration-300 flex items-center gap-3 font-semibold min-h-[60px]"
+              >
+                <div className="p-2 bg-slate-200 dark:bg-slate-600 rounded-lg flex-shrink-0">
+                  <Award className="h-5 w-5" />
+                </div>
+                <span className="flex-1 text-center font-medium text-sm">Player Awards</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="team">
+          <TabsContent value="team-awards">
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -427,14 +442,14 @@ export default function AwardsPage() {
                                     )}
                                   </div>
                                   <h3 className="text-lg font-semibold mb-2 text-hockey-silver-800 dark:text-hockey-silver-200 text-center">
-                                    {String(award.team_name)}
+                                    {award.team_name}
                                   </h3>
-                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-3 text-center">
-                    {String(getSeasonName(award.season_number))} • {String(award.year)}
-                  </div>
+                                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-3 text-center">
+                                    {getSeasonName(award.season_number)} • {award.year}
+                                  </div>
                                   {award.description && (
                                     <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 text-center">
-                                      {String(award.description)}
+                                      {award.description}
                                     </p>
                                   )}
                                 </div>
@@ -455,7 +470,7 @@ export default function AwardsPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="player">
+          <TabsContent value="player-awards">
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -481,7 +496,7 @@ export default function AwardsPage() {
                               <CardContent className="p-6">
                                 <div className="flex flex-col items-center">
                                   <div className="flex items-center gap-3 mb-4">
-                                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{String(award.gamer_tag_id)}</div>
+                                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{award.gamer_tag_id}</div>
                                     {award.team_logo && (
                                       <div className="relative h-8 w-8">
                                         <Image
@@ -494,12 +509,12 @@ export default function AwardsPage() {
                                     )}
                                   </div>
                                   <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">
-                                    {award.team_name && `${String(award.team_name)} • `}
-                                    {String(getSeasonName(award.season_number))} • {String(award.year)}
+                                    {award.team_name && `${award.team_name} • `}
+                                    {getSeasonName(award.season_number)} • {award.year}
                                   </div>
                                   {award.description && (
                                     <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 text-center">
-                                      {String(award.description)}
+                                      {award.description}
                                     </p>
                                   )}
                                 </div>
@@ -520,7 +535,7 @@ export default function AwardsPage() {
             )}
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
     </div>
   )
 }

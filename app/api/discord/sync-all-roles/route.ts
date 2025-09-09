@@ -1,21 +1,15 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabaseAdmin = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-      },
-    })
-  : null
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  {
+    auth: {
+      persistSession: false,
+    },
+  },
+)
 
 // Helper function to delay execution
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -76,16 +70,6 @@ async function makeDiscordRequest(url: string, options: RequestInit, maxRetries 
 
 export async function POST(request: Request) {
   try {
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-
     console.log("=== Starting Discord role sync for all users ===")
 
     // Get bot configuration (handle multiple configs)

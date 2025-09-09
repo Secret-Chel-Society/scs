@@ -8,7 +8,6 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
-import { HeroUIProvider } from "@heroui/react"
 // import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
@@ -24,17 +23,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Secret Chel Society",
   description: "Official website for the NHL 26 Secret Chel Society",
+  viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
-}
-
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -55,29 +50,27 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} hockey-scrollbar`}>
-        <HeroUIProvider>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-            <SupabaseProvider>
-              <MobileScalingProvider>
-                <div className="flex min-h-screen w-full">
-                  <Navigation />
-                  {/* Main content area */}
-                  <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
-                    <Suspense>
-                      <main className="flex-1 p-6 hockey-scrollbar w-full">
-                        {children}
-                      </main>
-                    </Suspense>
-                    <Footer />
-                  </div>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <SupabaseProvider>
+            <MobileScalingProvider>
+              <div className="flex min-h-screen w-full">
+                <Navigation />
+                {/* Main content area */}
+                <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
+                  <Suspense>
+                    <main className="flex-1 p-6 hockey-scrollbar w-full">
+                      {children}
+                    </main>
+                  </Suspense>
+                  <Footer />
                 </div>
-                <Toaster />
-                <BannedUserModal />
-                {/* <Analytics /> */}
-              </MobileScalingProvider>
-            </SupabaseProvider>
-          </ThemeProvider>
-        </HeroUIProvider>
+              </div>
+              <Toaster />
+              <BannedUserModal />
+              {/* <Analytics /> */}
+            </MobileScalingProvider>
+          </SupabaseProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

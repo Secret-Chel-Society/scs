@@ -4,18 +4,7 @@ import { cancelPlayerBids } from "@/lib/bid-cleanup"
 
 export async function POST(request: NextRequest) {
   try {
-    let supabase
-    try {
-      supabase = createAdminClient()
-    } catch (error) {
-      return NextResponse.json(
-        {
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-    
+    const supabase = createAdminClient()
     const now = new Date()
 
     console.log("=== Processing expired waivers ===")

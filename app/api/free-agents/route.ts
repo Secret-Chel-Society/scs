@@ -1,42 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
 // Create admin client to bypass RLS
-const adminClient = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const adminClient = createClient(supabaseUrl, supabaseServiceKey)
 
 // Create regular client for session validation
 const createRouteHandlerClient = () => {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase not configured')
-  }
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 }
 
 export async function GET(request: NextRequest) {
   try {
-    if (!adminClient) {
-      return NextResponse.json(
-        {
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-          debug: {
-            message: "Supabase configuration missing",
-          },
-        },
-        { status: 500 },
-      )
-    }
-
     console.log("Free agents API called")
 
     // Optional authentication - don't require it for public viewing

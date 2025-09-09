@@ -2,17 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { generateAdvancedPlayerSummary, getPerformanceLevel, analyzeGameTrends } from "@/lib/player-analysis-engine"
 
-// Check if environment variables are available
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase environment variables not configured')
-}
-
-const supabase = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
 interface PlayerStats {
   player_name: string
@@ -528,16 +518,6 @@ function getPlayerCallouts(players: PlayerStats[]): {
 
 export async function GET(request: NextRequest) {
   try {
-    if (!supabase) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
-        },
-        { status: 500 },
-      )
-    }
-
     const { searchParams } = new URL(request.url)
     const hoursBack = Number.parseInt(searchParams.get("hours") || "24")
     const generationTimestamp = Date.now()
