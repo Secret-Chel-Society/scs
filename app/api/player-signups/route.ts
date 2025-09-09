@@ -1,16 +1,35 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
+// Check if environment variables are available
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.warn('Supabase environment variables not configured')
+}
+
 // Use service role key to bypass RLS
-const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-})
+const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : null
 
 export async function GET() {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        {
+          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
+        },
+        { status: 500 },
+      )
+    }
+
     console.log("Fetching player signups...")
 
     // Get approved registrations for the current season

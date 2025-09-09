@@ -2,13 +2,30 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { calculateStandings, getCurrentSeasonId } from "@/lib/standings-calculator"
 
+// Check if environment variables are available
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('Supabase environment variables not configured')
+}
+
 // Create a Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    if (!supabase) {
+      return NextResponse.json(
+        {
+          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
+        },
+        { status: 500 },
+      )
+    }
+
     const teamId = params.id
 
     // Check if team exists

@@ -140,7 +140,7 @@ export default function AwardsPage() {
         title: "Error loading awards",
         description: error instanceof Error ? error.message : 'An unknown error occurred',
         variant: "destructive",
-      } as any)
+      })
     } finally {
       setLoading(false)
     }
