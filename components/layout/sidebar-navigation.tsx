@@ -616,7 +616,7 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
                   {teamInfo && (
                     <TooltipProvider>
                       <Tooltip>
-                        <TooltipTrigger asChild>
+                        <TooltipTrigger>
                           <Link 
                             href={`/teams/${teamInfo.id}`} 
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-ice-blue-100/50 hover:to-rink-blue-100/50 dark:hover:from-ice-blue-800/30 dark:hover:to-rink-blue-800/30 transition-all duration-300 group"
@@ -703,7 +703,7 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
                       <ModeToggle />
                     </div>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger>
                         <Button 
                           variant="ghost" 
                           size="icon"
@@ -716,47 +716,35 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
                         <DropdownMenuLabel className="text-hockey-silver-800 dark:text-hockey-silver-200 font-semibold">Account</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-ice-blue-200/50 dark:bg-rink-blue-700/50" />
                         <DropdownMenuGroup>
-                          <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-ice-blue-100 hover:to-rink-blue-100 dark:hover:from-ice-blue-800/30 dark:hover:to-rink-blue-800/30 transition-all duration-200">
-                            <button onClick={navigateToProfile} className="flex items-center w-full text-left">
-                              <Eye className="mr-2 h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                              View My Profile
-                            </button>
+                          <DropdownMenuItem onPress={navigateToProfile} className="hover:bg-gradient-to-r hover:from-ice-blue-100 hover:to-rink-blue-100 dark:hover:from-ice-blue-800/30 dark:hover:to-rink-blue-800/30 transition-all duration-200">
+                            <Eye className="mr-2 h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                            View My Profile
                           </DropdownMenuItem>
                           {hasManagementRole() && (
-                            <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-assist-green-100 hover:to-assist-green-100 dark:hover:from-assist-green-800/30 dark:hover:to-assist-green-800/30 transition-all duration-200">
-                              <Link href="/management" className="flex items-center w-full">
-                                <Shield className="mr-2 h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
-                                Management Panel
-                              </Link>
+                            <DropdownMenuItem onPress={() => window.location.href = '/management'} className="hover:bg-gradient-to-r hover:from-assist-green-100 hover:to-assist-green-100 dark:hover:from-assist-green-800/30 dark:hover:to-assist-green-800/30 transition-all duration-200">
+                              <Shield className="mr-2 h-4 w-4 text-assist-green-600 dark:text-assist-green-400" />
+                              Management Panel
                             </DropdownMenuItem>
                           )}
                           {isAdmin && (
                             <>
-                              <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-goal-red-100 hover:to-goal-red-100 dark:hover:from-goal-red-800/30 dark:hover:to-goal-red-800/30 transition-all duration-200">
-                                <Link href="/admin" className="flex items-center w-full">
-                                  <Crown className="mr-2 h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-                                  Admin Dashboard
-                                </Link>
+                              <DropdownMenuItem onPress={() => window.location.href = '/admin'} className="hover:bg-gradient-to-r hover:from-goal-red-100 hover:to-goal-red-100 dark:hover:from-goal-red-800/30 dark:hover:to-goal-red-800/30 transition-all duration-200">
+                                <Crown className="mr-2 h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
+                                Admin Dashboard
                               </DropdownMenuItem>
-                              <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-rink-blue-100 hover:to-rink-blue-100 dark:hover:from-rink-blue-800/30 dark:hover:to-rink-blue-800/30 transition-all duration-200">
-                                <Link href="/admin/settings" className="flex items-center w-full">
-                                  <Cog className="mr-2 h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
-                                  League Settings
-                                </Link>
+                              <DropdownMenuItem onPress={() => window.location.href = '/admin/settings'} className="hover:bg-gradient-to-r hover:from-rink-blue-100 hover:to-rink-blue-100 dark:hover:from-rink-blue-800/30 dark:hover:to-rink-blue-800/30 transition-all duration-200">
+                                <Cog className="mr-2 h-4 w-4 text-rink-blue-600 dark:text-rink-blue-400" />
+                                League Settings
                               </DropdownMenuItem>
-                              <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-hockey-silver-100 hover:to-hockey-silver-100 dark:hover:from-hockey-silver-800/30 dark:hover:to-hockey-silver-800/30 transition-all duration-200">
-                                <Link href="/admin/player-mappings" className="flex items-center w-full">
-                                  <Database className="mr-2 h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
-                                  Player Mappings
-                                </Link>
+                              <DropdownMenuItem onPress={() => window.location.href = '/admin/player-mappings'} className="hover:bg-gradient-to-r hover:from-hockey-silver-100 hover:to-hockey-silver-100 dark:hover:from-hockey-silver-800/30 dark:hover:to-hockey-silver-800/30 transition-all duration-200">
+                                <Database className="mr-2 h-4 w-4 text-hockey-silver-600 dark:text-hockey-silver-400" />
+                                Player Mappings
                               </DropdownMenuItem>
                             </>
                           )}
-                          <DropdownMenuItem asChild className="hover:bg-gradient-to-r hover:from-ice-blue-100 hover:to-ice-blue-100 dark:hover:from-ice-blue-800/30 dark:hover:to-ice-blue-800/30 transition-all duration-200">
-                            <Link href="/settings" className="flex items-center w-full">
-                              <Settings className="mr-2 h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
-                              Account Settings
-                            </Link>
+                          <DropdownMenuItem onPress={() => window.location.href = '/settings'} className="hover:bg-gradient-to-r hover:from-ice-blue-100 hover:to-ice-blue-100 dark:hover:from-ice-blue-800/30 dark:hover:to-ice-blue-800/30 transition-all duration-200">
+                            <Settings className="mr-2 h-4 w-4 text-ice-blue-600 dark:text-ice-blue-400" />
+                            Account Settings
                           </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator className="bg-ice-blue-200/50 dark:bg-rink-blue-700/50" />
@@ -772,22 +760,18 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
                 <div className="space-y-3">
                   <Button 
                     variant="outline" 
-                    asChild 
+                    onPress={() => { window.location.href = '/login'; onToggle(); }}
                     className="w-full hockey-button border-2 border-ice-blue-300 hover:border-ice-blue-500 hover:bg-gradient-to-r hover:from-ice-blue-500 hover:to-rink-blue-600 hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                   >
-                    <Link href="/login" onClick={onToggle} className="flex items-center justify-center gap-2">
-                      <Lock className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
-                      Log in
-                    </Link>
+                    <Lock className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                    Log in
                   </Button>
                   <Button 
-                    asChild 
+                    onPress={() => { window.location.href = '/register'; onToggle(); }}
                     className="w-full hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                   >
-                    <Link href="/register" onClick={onToggle} className="flex items-center justify-center gap-2">
-                      <UserPlus className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
-                      Sign up
-                    </Link>
+                    <UserPlus className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                    Sign up
                   </Button>
                   <div className="flex justify-center p-2">
                     <ModeToggle />

@@ -110,7 +110,7 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -164,10 +164,8 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
         )}
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <a href="/notifications" className="w-full text-center cursor-pointer">
-            View all notifications
-          </a>
+        <DropdownMenuItem onPress={() => window.location.href = '/notifications'}>
+          View all notifications
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
