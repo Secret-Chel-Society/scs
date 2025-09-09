@@ -46,6 +46,13 @@ const DropdownMenuSubContent = React.forwardRef<HTMLDivElement, React.HTMLAttrib
 )
 DropdownMenuSubContent.displayName = "DropdownMenuSubContent"
 
+const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
+  ({ className, ...props }, ref) => (
+    <DropdownTrigger ref={ref} className={cn(className)} {...props} />
+  ),
+)
+DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
+
 const DropdownMenuContent = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof DropdownMenu>>(
   ({ className, ...props }, ref) => (
     <DropdownMenu ref={ref} className={cn(className)} {...props} />
