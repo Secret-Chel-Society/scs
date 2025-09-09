@@ -35,19 +35,8 @@ import {
   Zap,
   Activity
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, Avatar, Badge, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
 import { ModeToggle } from "@/components/mode-toggle"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -205,12 +194,12 @@ export default function Navigation() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case "Owner": return "bg-gradient-to-r from-goal-red-500 to-goal-red-600 text-white shadow-lg"
-      case "GM": return "bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 text-white shadow-lg"
-      case "AGM": return "bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white shadow-lg"
-      case "Player": return "bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 text-white shadow-lg"
-      case "Admin": return "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg"
-      default: return "bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 text-white shadow-lg"
+      case "Owner": return "danger"
+      case "GM": return "primary"
+      case "AGM": return "success"
+      case "Player": return "secondary"
+      case "Admin": return "warning"
+      default: return "default"
     }
   }
 
@@ -236,16 +225,18 @@ export default function Navigation() {
   return (
     <>
       {/* Mobile Menu Button */}
-              <button
-                onClick={() => {
-                  setIsMobileOpen(!isMobileOpen);
-                  trackUserAction('navigation_toggle', isMobileOpen ? 'close' : 'open');
-                }}
-                className="md:hidden fixed top-4 left-4 z-50 w-12 h-12 rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 mobile-nav-button flex items-center justify-center"
-                aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
-              >
+      <Button
+        isIconOnly
+        variant="ghost"
+        className="md:hidden fixed top-4 left-4 z-50 w-12 h-12 rounded-xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm shadow-xl border border-slate-200/50 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-800 hover:scale-105 transition-all duration-300 mobile-nav-button"
+        aria-label={isMobileOpen ? "Close navigation menu" : "Open navigation menu"}
+        onPress={() => {
+          setIsMobileOpen(!isMobileOpen);
+          trackUserAction('navigation_toggle', isMobileOpen ? 'close' : 'open');
+        }}
+      >
         {isMobileOpen ? <X className="h-7 w-7 text-ice-blue-600 dark:text-ice-blue-400" /> : <Menu className="h-7 w-7 text-ice-blue-600 dark:text-ice-blue-400" />}
-      </button>
+      </Button>
 
       {/* Mobile Overlay */}
       {isMobileOpen && (
@@ -329,10 +320,10 @@ export default function Navigation() {
                     </Link>
                     {hasSubmenu && (
                       <Button
+                        isIconOnly
                         variant="ghost"
-                        size="icon"
                         className="h-12 w-12 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-300 hover:scale-105"
-                        onClick={() => toggleSubmenu(item.name)}
+                        onPress={() => toggleSubmenu(item.name)}
                         aria-label={isExpanded ? `Collapse ${item.name} submenu` : `Expand ${item.name} submenu`}
                       >
                         {isExpanded ? (
@@ -431,7 +422,7 @@ export default function Navigation() {
                       {getUniqueRoleBadges().map((role) => {
                         const RoleIcon = getRoleIcon(role)
                         return (
-                          <Badge key={role} className={`${getRoleBadgeColor(role)} text-white text-xs px-3 py-1 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-1`}>
+                          <Badge key={role} color={getRoleBadgeColor(role)} className="text-white text-xs px-3 py-1 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-1">
                             <RoleIcon className="h-3 w-3" />
                             {role}
                           </Badge>
@@ -442,15 +433,12 @@ export default function Navigation() {
 
                   {/* User Info */}
                   <div className="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-ice-blue-100/30 to-rink-blue-100/30 dark:from-ice-blue-900/10 dark:to-rink-blue-900/10 border border-ice-blue-200/30 dark:border-rink-blue-700/30">
-                    <Avatar className="h-12 w-12 ring-2 ring-ice-blue-200/50 dark:ring-rink-blue-700/50 shadow-lg">
-                      <AvatarImage
-                        src={userProfile?.avatar_url || "/placeholder.svg?height=32&width=32"}
-                        alt={userProfile?.gamer_tag_id || "User"}
-                      />
-                      <AvatarFallback className="bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white font-bold">
-                        {userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Avatar 
+                      src={userProfile?.avatar_url || "/placeholder.svg?height=32&width=32"}
+                      alt={userProfile?.gamer_tag_id || "User"}
+                      className="h-12 w-12 ring-2 ring-ice-blue-200/50 dark:ring-rink-blue-700/50 shadow-lg"
+                      fallback={userProfile?.gamer_tag_id?.substring(0, 2).toUpperCase() || "U"}
+                    />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold leading-none truncate text-slate-800 dark:text-slate-200">
                         {userProfile?.gamer_tag_id || "User"}
@@ -465,75 +453,60 @@ export default function Navigation() {
                   <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100/50 dark:bg-slate-700/50 border border-slate-200/30 dark:border-slate-600/30 mt-4">
                     <div className="flex items-center gap-2">
                       <ModeToggle />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-300 hover:scale-105">
+                      <Dropdown>
+                        <DropdownTrigger>
+                          <Button 
+                            isIconOnly 
+                            variant="ghost" 
+                            className="bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-300 hover:scale-105"
+                          >
                             <Settings className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl">
-                          <DropdownMenuLabel className="text-slate-800 dark:text-slate-200 font-semibold">Account</DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
-                          <DropdownMenuGroup>
-                            <DropdownMenuItem asChild className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
-                              <Link href={`/players/${playerId || session.user.id}`} className="flex items-center gap-3">
-                                <Eye className="h-4 w-4 text-blue-500" />
-                                View Profile
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
-                              <Link href="/dashboard" className="flex items-center gap-3">
-                                <LayoutDashboard className="h-4 w-4 text-green-500" />
-                                Dashboard
-                              </Link>
-                            </DropdownMenuItem>
-                            {isTeamManager && (
-                              <DropdownMenuItem asChild className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
-                                <Link href="/management" className="flex items-center gap-3">
-                                  <Shield className="h-4 w-4 text-emerald-500" />
-                                  Management
-                                </Link>
-                              </DropdownMenuItem>
-                            )}
-                            {isAdmin && (
-                              <DropdownMenuItem asChild className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
-                                <Link href="/admin" className="flex items-center gap-3">
-                                  <Crown className="h-4 w-4 text-amber-500" />
-                                  Admin Dashboard
-                                </Link>
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem asChild className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">
-                              <Link href="/settings" className="flex items-center gap-3">
-                                <Cog className="h-4 w-4 text-slate-500" />
-                                Settings
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuGroup>
-                          <DropdownMenuSeparator className="bg-slate-200 dark:bg-slate-700" />
-                          <DropdownMenuItem onClick={handleSignOut} className="hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 text-red-600 dark:text-red-400">
-                            <LogOut className="mr-3 h-4 w-4" />
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="Account menu">
+                          <DropdownItem key="profile" startContent={<Eye className="h-4 w-4 text-blue-500" />}>
+                            <Link href={`/players/${playerId || session.user.id}`}>View Profile</Link>
+                          </DropdownItem>
+                          <DropdownItem key="dashboard" startContent={<LayoutDashboard className="h-4 w-4 text-green-500" />}>
+                            <Link href="/dashboard">Dashboard</Link>
+                          </DropdownItem>
+                          {isTeamManager && (
+                            <DropdownItem key="management" startContent={<Shield className="h-4 w-4 text-emerald-500" />}>
+                              <Link href="/management">Management</Link>
+                            </DropdownItem>
+                          )}
+                          {isAdmin && (
+                            <DropdownItem key="admin" startContent={<Crown className="h-4 w-4 text-amber-500" />}>
+                              <Link href="/admin">Admin Dashboard</Link>
+                            </DropdownItem>
+                          )}
+                          <DropdownItem key="settings" startContent={<Cog className="h-4 w-4 text-slate-500" />}>
+                            <Link href="/settings">Settings</Link>
+                          </DropdownItem>
+                          <DropdownItem 
+                            key="logout" 
+                            className="text-danger" 
+                            color="danger"
+                            startContent={<LogOut className="h-4 w-4" />}
+                            onPress={handleSignOut}
+                          >
                             Log out
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <Button variant="outline" asChild className="w-full border-ice-blue-300 dark:border-rink-blue-600 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 transition-all duration-200 hover:scale-105">
-                  <Link href="/login" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    Log in
-                  </Link>
+                <Button variant="bordered" as={Link} href="/login" className="w-full border-ice-blue-300 dark:border-rink-blue-600 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 transition-all duration-200 hover:scale-105">
+                  <Lock className="h-4 w-4" />
+                  Log in
                 </Button>
-                <Button asChild className="w-full bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 transition-all duration-200 hover:scale-105">
-                  <Link href="/register" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Sign up
-                  </Link>
+                <Button as={Link} href="/register" className="w-full bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 transition-all duration-200 hover:scale-105">
+                  <UserPlus className="h-4 w-4" />
+                  Sign up
                 </Button>
                 <div className="flex justify-center">
                   <ModeToggle />
