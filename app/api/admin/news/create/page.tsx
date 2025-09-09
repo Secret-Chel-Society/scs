@@ -6,6 +6,9 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import NewsForm from "@/components/news-form"
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 export default function CreateNewsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
