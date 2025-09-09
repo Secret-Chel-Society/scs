@@ -16,6 +16,59 @@ import Image from "next/image"
 import Link from "next/link"
 import type { TeamAward, PlayerAward, Season, TeamAwardResponse, PlayerAwardResponse } from "@/lib/supabase/types"
 
+// Error boundary component
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('Error in AwardsPage:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/30">
+          <div className="text-center p-8 max-w-2xl">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold mb-4">Something went wrong</h1>
+            <p className="mb-6">We're having trouble loading the awards right now. Please try refreshing the page.</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Main component with error boundary
+export default function AwardsPage() {
+  return (
+    <ErrorBoundary>
+      <AwardsContent />
+    </ErrorBoundary>
+  );
+}
+
+// Main content component
+function AwardsContent() {
+import Image from "next/image"
+import Link from "next/link"
+import type { TeamAward, PlayerAward, Season, TeamAwardResponse, PlayerAwardResponse } from "@/lib/supabase/types"
+
 export default function AwardsPage() {
   const { supabase } = useSupabase()
   const { toast } = useToast()
