@@ -1,9 +1,7 @@
 // Midnight Studios INTl - All rights reserved
 "use client"
 
-import React from "react"
-
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import NewsCard from "@/components/news-card"
@@ -306,7 +304,7 @@ export default function Home() {
   }, [supabase, toast])
 
   return (
-    <div className="min-h-screen hero-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
       <BannedUserModal />
       
       {/* Hero Section */}
@@ -316,23 +314,23 @@ export default function Home() {
 
       {/* League Statistics Section */}
       <motion.section
-        className="hero-section"
+        className="py-20 px-4"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="hero-container">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="hero-title mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent leading-tight tracking-tight mb-6">
               League Statistics
             </h2>
-            <p className="hero-subtitle mx-auto">
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto">
               Real-time data from our advanced tracking system
             </p>
-            <div className="hero-divider mt-8"></div>
+            <div className="h-1 w-24 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-8"></div>
           </div>
 
-          <div className="hero-stats-grid">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
             {
               icon: Users,
@@ -361,7 +359,7 @@ export default function Home() {
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
-              className="hero-stat-card hero-hover-lift"
+              className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-2 p-6 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -371,38 +369,39 @@ export default function Home() {
                   <stat.icon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <div className="hero-stat-value">
+                  <div className="text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">
                     <AnimatedCounter end={stat.value} />
                   </div>
-                  <div className="hero-stat-label">{stat.label}</div>
+                  <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">{stat.label}</div>
                 </div>
               </div>
             </motion.div>
           ))}
+          </div>
         </div>
       </motion.section>
 
       {/* Featured Games Section */}
       <motion.section
-        className="hero-section"
+        className="py-20 px-4"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <div className="hero-container">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="hero-title mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent leading-tight tracking-tight mb-6">
               Featured Games
             </h2>
-            <p className="hero-subtitle mx-auto">
+            <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mx-auto">
               Don't miss these highlighted matches from our competitive league
             </p>
-            <div className="hero-divider mt-8"></div>
+            <div className="h-1 w-24 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mt-8"></div>
           </div>
 
         {loading.featured ? (
-          <div className="hero-grid">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="space-y-3">
                 <Skeleton className="w-full h-32 rounded-2xl" />
@@ -412,14 +411,14 @@ export default function Home() {
             ))}
           </div>
         ) : featuredGames.length > 0 ? (
-          <div className="hero-grid">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {featuredGames.map((game, index) => (
               <motion.div
                 key={game.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="hero-hover-lift"
+                className="transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-2 hover:shadow-2xl"
               >
                 <Link href={`/matches/${game.id}`}>
                   <Card className="h-full cursor-pointer">
@@ -512,6 +511,7 @@ export default function Home() {
             </CardContent>
           </Card>
         )}
+        </div>
       </motion.section>
 
       {/* About SCS Section */}
