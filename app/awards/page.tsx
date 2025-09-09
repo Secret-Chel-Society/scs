@@ -272,7 +272,11 @@ export default function AwardsPage() {
               </motion.div>
             </div>
           </motion.div>
-      >
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Awards</h1>
@@ -463,7 +467,7 @@ export default function AwardsPage() {
             )}
           </TabsContent>
         </Tabs>
-      </motion.div>
+      </div>
     </div>
   )
 }
