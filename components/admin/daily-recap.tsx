@@ -148,6 +148,18 @@ export default function DailyRecap() {
           console.warn("⚠️ Save succeeded but verification request failed")
           setSuccess(`✅ ${timeWindow}-hour daily recap saved successfully! It should now appear on the public page.`)
         }
+
+        // Trigger immediate page refresh for public page
+        try {
+          console.log("🔄 Triggering immediate page refresh...")
+          await fetch("/api/revalidate?path=/news/daily-recap", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          })
+          console.log("✅ Page refresh triggered")
+        } catch (refreshError) {
+          console.warn("⚠️ Page refresh failed:", refreshError)
+        }
       } else {
         throw new Error(result.error || "Failed to save recap")
       }

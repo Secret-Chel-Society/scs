@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
+import { logIpFromRequest } from "@/lib/ip-tracking"
 
 export async function POST(request: Request) {
   try {
@@ -190,6 +191,18 @@ export async function POST(request: Request) {
     }
 
     console.log("User record created:", userData.id)
+
+    // Log IP address for registration
+    try {
+      const ipLogResult = await logIpFromRequest(request, userData.id, 'register')
+      if (ipLogResult.success) {
+        console.log("✅ IP address logged for registration")
+      } else {
+        console.warn("⚠️ Failed to log IP address for registration:", ipLogResult.error)
+      }
+    } catch (ipError) {
+      console.warn("⚠️ Exception logging IP address for registration:", ipError)
+    }
 
     // If Discord info is provided, also create discord_users record
     if (discordInfo && discordId) {

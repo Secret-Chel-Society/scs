@@ -92,12 +92,40 @@ export async function POST(request: NextRequest) {
       console.log("🔄 [Save] Triggering page revalidation...")
 
       // Use fetch to trigger the page to refresh its data
-      await fetch(`${baseUrl}/api/revalidate?path=/news/daily-recap`, {
+      const revalidateResponse = await fetch(`${baseUrl}/api/revalidate?path=/news/daily-recap`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-      }).catch((err) => console.warn("⚠️ [Save] Revalidation failed:", err.message))
+      })
+
+      if (revalidateResponse.ok) {
+        console.log("✅ [Save] Page revalidation successful")
+      } else {
+        console.warn("⚠️ [Save] Revalidation failed:", await revalidateResponse.text())
+      }
     } catch (revalidateError) {
       console.warn("⚠️ [Save] Could not trigger revalidation:", revalidateError)
+    }
+
+    // Also trigger revalidation for the saved API endpoint
+    try {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+
+      console.log("🔄 [Save] Triggering API revalidation...")
+
+      const apiRevalidateResponse = await fetch(`${baseUrl}/api/revalidate?path=/api/daily-recap/saved`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (apiRevalidateResponse.ok) {
+        console.log("✅ [Save] API revalidation successful")
+      } else {
+        console.warn("⚠️ [Save] API revalidation failed:", await apiRevalidateResponse.text())
+      }
+    } catch (apiRevalidateError) {
+      console.warn("⚠️ [Save] Could not trigger API revalidation:", apiRevalidateError)
     }
 
     return NextResponse.json({

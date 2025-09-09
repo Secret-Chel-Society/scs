@@ -43,18 +43,25 @@ export async function POST(request: Request) {
     }
 
     // 3. Authorization - Check admin role
-    const { data: userRole } = await supabase
+    const { data: userRole, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", session.user.id)
       .single()
 
-    const isAdmin = userRole?.role?.toLowerCase().includes("admin") || 
-                   userRole?.role?.toLowerCase().includes("superadmin")
+    console.log("User role check:", { userRole, roleError })
+
+    // Check if user has admin role
+    const isAdmin = userRole?.role === "Admin" || 
+                   userRole?.role === "SuperAdmin" ||
+                   userRole?.role?.toLowerCase().includes("admin")
+
+    console.log("Admin check result:", { isAdmin, role: userRole?.role })
 
     if (!isAdmin) {
+      console.log("❌ User is not an admin:", session.user.id)
       return NextResponse.json(
-        { error: "Insufficient permissions" },
+        { error: "Insufficient permissions - Admin role required" },
         { status: 403 }
       )
     }
