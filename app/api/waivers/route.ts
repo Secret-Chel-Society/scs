@@ -201,6 +201,8 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
+    console.log("Waiver insert result:", { waiver, waiverError })
+
     if (waiverError) {
       console.error("❌ Error creating waiver:", waiverError)
       return NextResponse.json({ 
