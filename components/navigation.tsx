@@ -200,6 +200,7 @@ export default function Navigation() {
       ],
     },
     { name: "Forum", href: "/forum", icon: MessageSquare },
+    { name: "HeroUI Demo", href: "/heroui-demo", icon: Zap },
   ]
 
   const getRoleBadgeColor = (role: string) => {

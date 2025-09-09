@@ -8,6 +8,7 @@ import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
+import { HeroUIProvider } from "@heroui/react"
 // import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
 import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
@@ -50,27 +51,29 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} hockey-scrollbar`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <SupabaseProvider>
-            <MobileScalingProvider>
-              <div className="flex min-h-screen w-full">
-                <Navigation />
-                {/* Main content area */}
-                <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
-                  <Suspense>
-                    <main className="flex-1 p-6 hockey-scrollbar w-full">
-                      {children}
-                    </main>
-                  </Suspense>
-                  <Footer />
+        <HeroUIProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <SupabaseProvider>
+              <MobileScalingProvider>
+                <div className="flex min-h-screen w-full">
+                  <Navigation />
+                  {/* Main content area */}
+                  <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
+                    <Suspense>
+                      <main className="flex-1 p-6 hockey-scrollbar w-full">
+                        {children}
+                      </main>
+                    </Suspense>
+                    <Footer />
+                  </div>
                 </div>
-              </div>
-              <Toaster />
-              <BannedUserModal />
-              {/* <Analytics /> */}
-            </MobileScalingProvider>
-          </SupabaseProvider>
-        </ThemeProvider>
+                <Toaster />
+                <BannedUserModal />
+                {/* <Analytics /> */}
+              </MobileScalingProvider>
+            </SupabaseProvider>
+          </ThemeProvider>
+        </HeroUIProvider>
       </body>
     </html>
   )

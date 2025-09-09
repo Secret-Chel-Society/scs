@@ -4,20 +4,20 @@
 import React from "react"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@heroui/react"
 import Link from "next/link"
 import NewsCard from "@/components/news-card"
 import UpcomingGames from "@/components/upcoming-games"
 import CompletedGames from "@/components/completed-games"
 import TeamStandings from "@/components/team-standings"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, Tab } from "@heroui/react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import HeroCarousel from "@/components/hero-carousel"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { RecentTrades } from "@/components/recent-trades"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardBody, CardHeader } from "@heroui/react"
 import {
   Trophy,
   Users,
@@ -420,7 +420,7 @@ export default function Home() {
               >
                 <Link href={`/matches/${game.id}`}>
                   <Card className="h-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer">
-                    <CardContent className="p-6">
+                    <CardBody className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <Star className="h-5 w-5 text-yellow-500" />
@@ -486,7 +486,7 @@ export default function Home() {
                           </span>
                         </div>
                       </div>
-                    </CardContent>
+                    </CardBody>
                   </Card>
                 </Link>
               </motion.div>
@@ -494,7 +494,7 @@ export default function Home() {
           </div>
         ) : (
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-            <CardContent className="p-12 text-center">
+            <CardBody className="p-12 text-center">
               <div className="flex flex-col items-center gap-4">
                 <div className="p-4 bg-slate-100 dark:bg-slate-700 rounded-full">
                   <Star className="h-8 w-8 text-slate-400" />
@@ -506,7 +506,7 @@ export default function Home() {
                   Check back soon for highlighted matches from our competitive league.
                 </p>
               </div>
-            </CardContent>
+            </CardBody>
           </Card>
         )}
       </motion.section>
@@ -536,7 +536,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-              <CardContent className="p-8">
+              <CardBody className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-blue-500 rounded-lg">
                     <GamepadIcon className="h-8 w-8 text-white" />
@@ -557,7 +557,7 @@ export default function Home() {
                     from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
                   </p>
                 </div>
-              </CardContent>
+              </CardBody>
             </Card>
           </motion.div>
 
@@ -568,7 +568,7 @@ export default function Home() {
             viewport={{ once: true }}
           >
             <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-              <CardContent className="p-8">
+              <CardBody className="p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 bg-emerald-500 rounded-lg">
                     <Users className="h-8 w-8 text-white" />
@@ -589,7 +589,7 @@ export default function Home() {
                     fostering an environment where every match is played with sportsmanship and professionalism.
                   </p>
                 </div>
-              </CardContent>
+              </CardBody>
             </Card>
           </motion.div>
         </div>
@@ -603,7 +603,7 @@ export default function Home() {
           viewport={{ once: true }}
         >
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-            <CardContent className="p-12">
+            <CardBody className="p-12">
               <div className="max-w-4xl mx-auto">
                 <div className="p-4 bg-red-500 rounded-full w-fit mx-auto mb-6">
                   <Trophy className="h-12 w-12 text-white" />
@@ -643,7 +643,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-            </CardContent>
+            </CardBody>
           </Card>
         </motion.div>
       </motion.section>
@@ -678,12 +678,12 @@ export default function Home() {
                   <div className="p-3 bg-blue-500 rounded-lg">
                     <BarChart3 className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                  <CardHeader className="text-xl font-bold text-slate-800 dark:text-slate-200">
                     Custom API Statistics
-                  </CardTitle>
+                  </CardHeader>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardBody>
                 <div className="space-y-4">
                   <p className="text-slate-600 dark:text-slate-400">
                     Our proprietary API system provides detailed statistical tracking and analysis for every aspect of NHL 26 gameplay. 
@@ -710,7 +710,7 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-              </CardContent>
+              </CardBody>
             </Card>
           </motion.div>
 
@@ -726,12 +726,12 @@ export default function Home() {
                   <div className="p-3 bg-emerald-500 rounded-lg">
                     <Coins className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                  <CardHeader className="text-xl font-bold text-slate-800 dark:text-slate-200">
                     Token Reward System
-                  </CardTitle>
+                  </CardHeader>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardBody>
                 <div className="space-y-4">
                   <p className="text-slate-600 dark:text-slate-400">
                     Earn SCS tokens completely free by participating in matches, achieving milestones, and contributing
@@ -758,7 +758,7 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-              </CardContent>
+              </CardBody>
             </Card>
           </motion.div>
 
@@ -774,12 +774,12 @@ export default function Home() {
                   <div className="p-3 bg-indigo-500 rounded-lg">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-200">
+                  <CardHeader className="text-xl font-bold text-slate-800 dark:text-slate-200">
                     Professional Management
-                  </CardTitle>
+                  </CardHeader>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardBody>
                 <div className="space-y-4">
                   <p className="text-slate-600 dark:text-slate-400">
                     Complete team management system with salary caps, contract negotiations, trade deadlines, waiver
@@ -806,7 +806,7 @@ export default function Home() {
                     </li>
                   </ul>
                 </div>
-              </CardContent>
+              </CardBody>
             </Card>
           </motion.div>
         </div>
@@ -839,7 +839,7 @@ export default function Home() {
           <UpcomingGames games={upcomingGames} />
         ) : (
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-            <CardContent className="p-12 text-center">
+            <CardBody className="p-12 text-center">
               <div className="p-4 bg-blue-500 rounded-full w-fit mx-auto mb-6">
                 <Calendar className="h-16 w-16 text-white" />
               </div>
@@ -849,7 +849,7 @@ export default function Home() {
               <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md mx-auto">
                 Check back soon for the next round of competitive NHL 26 games with live streaming and real-time statistics!
               </p>
-            </CardContent>
+            </CardBody>
           </Card>
         )}
         </motion.section>
@@ -872,9 +872,9 @@ export default function Home() {
         </div>
         
         <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-          <CardContent className="p-8">
+          <CardBody className="p-8">
             <RecentTrades />
-          </CardContent>
+          </CardBody>
         </Card>
       </motion.section>
 
@@ -895,28 +895,21 @@ export default function Home() {
           </p>
         </div>
 
-        <Tabs defaultValue="completed" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-            <TabsTrigger
-              value="completed"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-blue-500 data-[state=active]:text-white text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2"
-            >
-              <Trophy className="h-4 w-4" />
-              <span>Recent Match Results</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="standings"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-blue-500 data-[state=active]:text-white text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-2"
-            >
-              <Target className="h-4 w-4" />
-              <span>League Standings</span>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs aria-label="Match Results & Standings" className="w-full" defaultSelectedKey="completed">
+          <Tab
+            key="completed"
+            title={
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4" />
+                <span>Recent Match Results</span>
+              </div>
+            }
+          >
 
-          <TabsContent value="completed" className="space-y-6">
+            <div className="space-y-6">
             {loading.games ? (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-                <CardContent className="p-8">
+                <CardBody className="p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[...Array(6)].map((_, i) => (
                       <div key={i} className="space-y-3">
@@ -926,12 +919,12 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
+                </CardBody>
               </Card>
             ) : completedGames.length > 0 ? (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3">
+                  <CardHeader className="flex items-center gap-3">
                     <div className="p-2 bg-blue-500 rounded-lg">
                       <Trophy className="h-6 w-6 text-white" />
                     </div>
@@ -943,15 +936,15 @@ export default function Home() {
                         Latest completed games with final scores and statistics
                       </div>
                     </div>
-                  </CardTitle>
+                  </CardHeader>
                 </CardHeader>
-                <CardContent>
+                <CardBody>
                   <CompletedGames games={completedGames} />
-                </CardContent>
+                </CardBody>
               </Card>
             ) : (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg text-center p-12">
-                <CardContent className="pt-6">
+                <CardBody className="pt-6">
                   <div className="p-4 bg-blue-500/20 rounded-full w-fit mx-auto mb-6">
                     <Trophy className="h-16 w-16 text-blue-600 dark:text-blue-400" />
                   </div>
@@ -961,27 +954,37 @@ export default function Home() {
                   <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
                     Matches will appear here once they're completed. Check back soon for the latest results!
                   </p>
-                </CardContent>
+                </CardBody>
               </Card>
             )}
-          </TabsContent>
-
-          <TabsContent value="standings" className="space-y-6">
+            </div>
+          </Tab>
+          
+          <Tab
+            key="standings"
+            title={
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                <span>League Standings</span>
+              </div>
+            }
+          >
+            <div className="space-y-6">
             {loading.standings ? (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-                <CardContent className="p-8">
+                <CardBody className="p-8">
                   <div className="space-y-4">
                     <Skeleton className="w-full h-12 rounded-lg" />
                     {[...Array(8)].map((_, i) => (
                       <Skeleton key={i} className="w-full h-16 rounded-lg" />
                     ))}
                   </div>
-                </CardContent>
+                </CardBody>
               </Card>
             ) : standings.length > 0 ? (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3">
+                  <CardHeader className="flex items-center gap-3">
                     <div className="p-2 bg-indigo-500 rounded-lg">
                       <Target className="h-6 w-6 text-white" />
                     </div>
@@ -993,9 +996,9 @@ export default function Home() {
                         Current team rankings and playoff race positions
                       </div>
                     </div>
-                  </CardTitle>
+                  </CardHeader>
                 </CardHeader>
-                <CardContent>
+                <CardBody>
                   <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-700">
                     <div className="flex items-center gap-3 mb-3">
                       <div className="p-2 bg-emerald-500 rounded-lg">
@@ -1010,11 +1013,11 @@ export default function Home() {
                     </p>
                   </div>
                   <TeamStandings teams={standings} />
-                </CardContent>
+                </CardBody>
               </Card>
             ) : (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg text-center p-12">
-                <CardContent className="pt-6">
+                <CardBody className="pt-6">
                   <div className="p-4 bg-indigo-500/20 rounded-full w-fit mx-auto mb-6">
                     <Trophy className="h-16 w-16 text-indigo-600 dark:text-indigo-400" />
                   </div>
@@ -1024,10 +1027,11 @@ export default function Home() {
                   <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
                     League standings will appear here once the season begins. Check back soon for current rankings!
                   </p>
-                </CardContent>
+                </CardBody>
               </Card>
             )}
-          </TabsContent>
+            </div>
+          </Tab>
         </Tabs>
       </motion.section>
 
@@ -1040,7 +1044,7 @@ export default function Home() {
         viewport={{ once: true }}
       >
         <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-          <CardContent className="p-16 text-center">
+          <CardBody className="p-16 text-center">
             <div className="p-4 bg-red-500 rounded-full w-fit mx-auto mb-8">
               <Crown className="h-16 w-16 text-white" />
             </div>
@@ -1112,7 +1116,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          </CardContent>
+          </CardBody>
         </Card>
       </motion.section>
 
@@ -1169,7 +1173,7 @@ export default function Home() {
           </div>
         ) : (
           <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg text-center p-16">
-            <CardContent className="pt-6">
+            <CardBody className="pt-6">
               <div className="p-4 bg-red-500 rounded-full w-fit mx-auto mb-8">
                 <Star className="h-16 w-16 text-white" />
               </div>
@@ -1179,7 +1183,7 @@ export default function Home() {
               <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md mx-auto">
                 Check back soon for the latest league updates, player highlights, and community announcements!
               </p>
-            </CardContent>
+            </CardBody>
           </Card>
         )}
       </motion.section>
