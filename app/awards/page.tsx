@@ -207,28 +207,30 @@ export default function AwardsPage() {
   })
 
   // Group team awards by type
-  const teamAwardsByType = filteredTeamAwards.reduce(
+  const teamAwardsByType = filteredTeamAwards.reduce<Record<string, TeamAward[]>>(
     (acc, award) => {
+      if (!award.award_type) return acc;
       if (!acc[award.award_type]) {
-        acc[award.award_type] = []
+        acc[award.award_type] = [];
       }
-      acc[award.award_type].push(award)
-      return acc
+      acc[award.award_type].push(award);
+      return acc;
     },
-    {} as Record<string, TeamAward[]>,
-  )
+    {}
+  );
 
   // Group player awards by type
-  const playerAwardsByType = filteredPlayerAwards.reduce(
+  const playerAwardsByType = filteredPlayerAwards.reduce<Record<string, PlayerAward[]>>(
     (acc, award) => {
+      if (!award.award_type) return acc;
       if (!acc[award.award_type]) {
-        acc[award.award_type] = []
+        acc[award.award_type] = [];
       }
-      acc[award.award_type].push(award)
-      return acc
+      acc[award.award_type].push(award);
+      return acc;
     },
-    {} as Record<string, PlayerAward[]>,
-  )
+    {}
+  );
 
   // Function to get season name by number
   const getSeasonName = (seasonNumber: number): string => {

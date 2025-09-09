@@ -24,13 +24,17 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Secret Chel Society",
   description: "Official website for the NHL 26 Secret Chel Society",
-  viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
