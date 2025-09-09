@@ -223,27 +223,65 @@ export function SeasonsManager() {
   // Set active season
   const setActiveSeason = async (season: Season) => {
     try {
+      console.log("🔄 Setting active season:", season.name)
+      
       // First, set all seasons to inactive
+      console.log("Step 1: Setting all seasons to inactive...")
       const { error: updateAllError } = await supabase
         .from("seasons")
         .update({ is_active: false })
-        .neq("id", "placeholder") // Update all rows
 
-      if (updateAllError) throw updateAllError
+      if (updateAllError) {
+        console.error("❌ Error setting all seasons inactive:", updateAllError)
+        throw updateAllError
+      }
+      console.log("✅ All seasons set to inactive")
 
       // Then set the selected season to active
-      const { error } = await supabase.from("seasons").update({ is_active: true }).eq("id", season.id)
+      console.log("Step 2: Setting target season to active...")
+      const { error: updateTargetError } = await supabase
+        .from("seasons")
+        .update({ is_active: true })
+        .eq("id", season.id)
 
-      if (error) throw error
+      if (updateTargetError) {
+        console.error("❌ Error setting target season active:", updateTargetError)
+        throw updateTargetError
+      }
+      console.log("✅ Target season set to active")
 
-      // Update system_settings if it exists
+      // Update system_settings
+      console.log("Step 3: Updating system settings...")
       try {
-        await supabase
+        const { error: settingsError } = await supabase
           .from("system_settings")
-          .upsert({ key: "current_season", value: season.id })
-          .eq("key", "current_season")
-      } catch (settingsError) {
-        console.log("Could not update system_settings, but season was set active:", settingsError)
+          .upsert({ 
+            key: "current_season", 
+            value: season.id,
+            updated_at: new Date().toISOString()
+          })
+
+        if (settingsError) {
+          console.warn("⚠️ Could not update system_settings:", settingsError)
+        } else {
+          console.log("✅ System settings updated")
+        }
+      } catch (settingsError: any) {
+        console.warn("⚠️ Exception updating system_settings:", settingsError)
+      }
+
+      // Verify the change
+      console.log("Step 4: Verifying season change...")
+      const { data: verifyData, error: verifyError } = await supabase
+        .from("seasons")
+        .select("*")
+        .eq("id", season.id)
+        .single()
+
+      if (verifyError) {
+        console.error("❌ Error verifying season change:", verifyError)
+      } else {
+        console.log("✅ Season change verified:", verifyData)
       }
 
       toast({
@@ -251,9 +289,12 @@ export function SeasonsManager() {
         description: `Season "${season.name}" is now the active season`,
       })
 
-      fetchSeasons()
+      // Refresh the seasons list
+      await fetchSeasons()
+      
+      console.log("🎉 Season switching completed successfully!")
     } catch (error: any) {
-      console.error("Error setting active season:", error)
+      console.error("❌ Error setting active season:", error)
       toast({
         title: "Error",
         description: error.message || "Failed to set active season",

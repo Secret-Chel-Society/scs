@@ -42,21 +42,67 @@ export async function POST(request: Request) {
       )
     }
 
-    // 3. Authorization - Check admin role
-    const { data: userRole, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .single()
+    // 3. Authorization - Check admin role with multiple fallbacks
+    let isAdmin = false
+    let userRole = null
 
-    console.log("User role check:", { userRole, roleError })
+    // Method 1: Check user_roles table
+    try {
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single()
 
-    // Check if user has admin role
-    const isAdmin = userRole?.role === "Admin" || 
-                   userRole?.role === "SuperAdmin" ||
-                   userRole?.role?.toLowerCase().includes("admin")
+      if (!roleError && roleData) {
+        userRole = roleData
+        isAdmin = roleData.role === "Admin" || 
+                 roleData.role === "SuperAdmin" ||
+                 roleData.role?.toLowerCase().includes("admin")
+        console.log("✅ Admin role found via user_roles:", { role: roleData.role, isAdmin })
+      }
+    } catch (error) {
+      console.log("⚠️ user_roles check failed:", error)
+    }
 
-    console.log("Admin check result:", { isAdmin, role: userRole?.role })
+    // Method 2: Check if user is in admin_users table
+    if (!isAdmin) {
+      try {
+        const { data: adminData, error: adminError } = await supabase
+          .from("admin_users")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .single()
+
+        if (!adminError && adminData) {
+          isAdmin = true
+          console.log("✅ Admin role found via admin_users table")
+        }
+      } catch (error) {
+        console.log("⚠️ admin_users check failed:", error)
+      }
+    }
+
+    // Method 3: Check if user email is in admin list (fallback)
+    if (!isAdmin) {
+      const adminEmails = [
+        "zacha@midnightstudios.com",
+        "admin@secretchelsociety.com",
+        "zacha@secretchelsociety.com"
+      ]
+      
+      if (session.user.email && adminEmails.includes(session.user.email.toLowerCase())) {
+        isAdmin = true
+        console.log("✅ Admin role found via email whitelist:", session.user.email)
+      }
+    }
+
+    console.log("Final admin check result:", { 
+      isAdmin, 
+      userId: session.user.id, 
+      email: session.user.email,
+      userRole: userRole?.role 
+    })
 
     if (!isAdmin) {
       console.log("❌ User is not an admin:", session.user.id)
