@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { BiddingSettings } from "@/components/admin/bidding-settings"
+import { BidProcessor } from "@/components/admin/bid-processor"
 import { AdminDiagnostics } from "@/components/admin/admin-diagnostics"
 import { RemoveUserBids } from "@/components/admin/remove-user-bids"
 import { IpTracking } from "@/components/admin/ip-tracking"
@@ -115,13 +116,20 @@ export function AdminSettingsPageClient() {
 
           <Tabs defaultValue="bidding" className="space-y-8">
             <div className="flex justify-center">
-              <TabsList className="grid grid-cols-5 w-full max-w-4xl gap-3 p-2 bg-gradient-to-r from-ice-blue-100/80 to-rink-blue-100/80 dark:from-ice-blue-900/40 dark:to-rink-blue-900/40 rounded-2xl border-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 shadow-xl backdrop-blur-sm">
+              <TabsList className="grid grid-cols-6 w-full max-w-5xl gap-3 p-2 bg-gradient-to-r from-ice-blue-100/80 to-rink-blue-100/80 dark:from-ice-blue-900/40 dark:to-rink-blue-900/40 rounded-2xl border-2 border-ice-blue-200/60 dark:border-rink-blue-700/60 shadow-xl backdrop-blur-sm">
                 <TabsTrigger 
                   value="bidding" 
                   className="px-6 py-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-3 font-semibold text-lg"
                 >
-                  <Trophy className="h-5 w-5" />
+                  <Shield className="h-5 w-5" />
                   Bidding
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="bid-processor" 
+                  className="px-6 py-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600 data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-3 font-semibold text-lg"
+                >
+                  <Trophy className="h-5 w-5" />
+                  Process Bids
                 </TabsTrigger>
                 <TabsTrigger 
                   value="ip-tracking" 
@@ -156,6 +164,10 @@ export function AdminSettingsPageClient() {
 
         <TabsContent value="bidding">
           <BiddingSettings />
+        </TabsContent>
+
+        <TabsContent value="bid-processor">
+          <BidProcessor />
         </TabsContent>
 
         <TabsContent value="ip-tracking">
