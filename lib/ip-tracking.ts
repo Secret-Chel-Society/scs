@@ -57,21 +57,65 @@ export async function logIpAddress(data: IpTrackingData): Promise<{ success: boo
       userAgent: data.userAgent.substring(0, 100) + "...", // Truncate for logging
     })
 
-    // Use the database function to log IP and update user record
-    const { data: logResult, error: logError } = await supabase.rpc('log_ip_address', {
-      p_user_id: data.userId,
-      p_ip_address: data.ip,
-      p_action: data.action,
-      p_user_agent: data.userAgent
-    })
+    // First try to use the database function
+    try {
+      const { data: logResult, error: logError } = await supabase.rpc('log_ip_address', {
+        p_user_id: data.userId,
+        p_ip_address: data.ip,
+        p_action: data.action,
+        p_user_agent: data.userAgent
+      })
 
-    if (logError) {
-      console.error("❌ Error logging IP address:", logError)
-      return { success: false, error: logError.message }
+      if (logError) {
+        console.warn("⚠️ Database function failed, falling back to manual approach:", logError.message)
+        throw logError
+      }
+
+      console.log("✅ IP address logged successfully via function:", logResult)
+      return { success: true }
+    } catch (functionError) {
+      // Fallback: Manual approach if function doesn't exist
+      console.log("🔄 Using manual IP logging approach...")
+      
+      // Insert into ip_logs table
+      const { error: insertError } = await supabase
+        .from("ip_logs")
+        .insert({
+          user_id: data.userId,
+          ip_address: data.ip,
+          action: data.action,
+          user_agent: data.userAgent
+        })
+
+      if (insertError) {
+        console.error("❌ Error inserting into ip_logs:", insertError)
+        return { success: false, error: insertError.message }
+      }
+
+      // Update users table based on action
+      const updateData: any = {}
+      if (data.action === 'register') {
+        updateData.registration_ip = data.ip
+      } else if (data.action === 'login') {
+        updateData.last_login_ip = data.ip
+        updateData.last_login_at = new Date().toISOString()
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await supabase
+          .from("users")
+          .update(updateData)
+          .eq("id", data.userId)
+
+        if (updateError) {
+          console.error("❌ Error updating users table:", updateError)
+          return { success: false, error: updateError.message }
+        }
+      }
+
+      console.log("✅ IP address logged successfully via manual approach")
+      return { success: true }
     }
-
-    console.log("✅ IP address logged successfully:", logResult)
-    return { success: true }
   } catch (error: any) {
     console.error("❌ Exception logging IP address:", error)
     return { success: false, error: error.message }

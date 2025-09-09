@@ -250,14 +250,14 @@ export function SeasonsManager() {
       }
       console.log("✅ Target season set to active")
 
-      // Update system_settings
+      // Update system_settings (value is jsonb, so we need to wrap it)
       console.log("Step 3: Updating system settings...")
       try {
         const { error: settingsError } = await supabase
           .from("system_settings")
           .upsert({ 
             key: "current_season", 
-            value: season.id,
+            value: season.id, // This will be automatically converted to jsonb
             updated_at: new Date().toISOString()
           })
 
