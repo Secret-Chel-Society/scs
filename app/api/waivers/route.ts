@@ -42,8 +42,13 @@ export async function POST(request: NextRequest) {
 
     if (userError || !user) {
       console.error("Error getting user from token:", userError)
-      return NextResponse.json({ error: "Invalid token or user not found" }, { status: 401 })
+      return NextResponse.json({ 
+        error: "Invalid token or user not found", 
+        details: userError?.message 
+      }, { status: 401 })
     }
+
+    console.log("✅ User authenticated for waiver request:", user.id)
 
     const body = await request.json()
     const { playerId } = body
@@ -61,8 +66,13 @@ export async function POST(request: NextRequest) {
 
     if (playerError || !playerData?.team_id) {
       console.error("Team verification error:", playerError)
-      return NextResponse.json({ error: "You must be on a team to waive players" }, { status: 403 })
+      return NextResponse.json({ 
+        error: "You must be on a team to waive players", 
+        details: playerError?.message 
+      }, { status: 403 })
     }
+
+    console.log("✅ User team verified:", playerData.team_id, "Role:", playerData.role)
 
     const teamId = playerData.team_id
 

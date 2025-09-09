@@ -1243,7 +1243,9 @@ const ManagementPage = () => {
       console.log("Waiver response data:", data)
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to waive player")
+        const errorMessage = data.error || "Failed to waive player"
+        const errorDetails = data.details ? ` (${data.details})` : ""
+        throw new Error(`${errorMessage}${errorDetails}`)
       }
 
       toast({

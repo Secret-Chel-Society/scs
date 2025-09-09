@@ -532,6 +532,63 @@ export function IpTracking() {
             >
               Log My IP Now
             </Button>
+            <Button 
+              variant="secondary" 
+              onClick={async () => {
+                try {
+                  const response = await fetch("/api/admin/diagnose-issues")
+                  const data = await response.json()
+                  console.log("🔍 Diagnostic Results:", data)
+                  
+                  if (data.success) {
+                    const failedTests = Object.entries(data.results.tests)
+                      .filter(([_, test]: [string, any]) => !test.success)
+                      .map(([name, test]: [string, any]) => `${name}: ${test.error}`)
+                    
+                    if (failedTests.length === 0) {
+                      toast({ title: "All Systems OK", description: "All diagnostic tests passed!" })
+                    } else {
+                      toast({ 
+                        title: "Issues Found", 
+                        description: `Failed tests: ${failedTests.join(", ")}`,
+                        variant: "destructive"
+                      })
+                    }
+                  } else {
+                    toast({ title: "Diagnostic Failed", description: data.error, variant: "destructive" })
+                  }
+                } catch (error) {
+                  toast({ title: "Diagnostic Error", description: "Failed to run diagnostics", variant: "destructive" })
+                }
+              }}
+              disabled={loading}
+            >
+              Run Diagnostics
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={async () => {
+                try {
+                  const response = await fetch("/api/waivers", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                  })
+                  const data = await response.json()
+                  console.log("🔍 Waivers Test:", data)
+                  
+                  if (response.ok) {
+                    toast({ title: "Waivers API OK", description: `Found ${data.waivers?.length || 0} waivers` })
+                  } else {
+                    toast({ title: "Waivers API Error", description: data.error || "Failed to fetch waivers", variant: "destructive" })
+                  }
+                } catch (error) {
+                  toast({ title: "Waivers Test Error", description: "Failed to test waivers API", variant: "destructive" })
+                }
+              }}
+              disabled={loading}
+            >
+              Test Waivers
+            </Button>
           </div>
 
           <Tabs defaultValue="users" value={activeTab} onValueChange={setActiveTab}>
