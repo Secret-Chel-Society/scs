@@ -125,6 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the player belongs to this team (unless user is admin)
+    console.log("🔍 Looking up player:", playerId)
     const { data: targetPlayer, error: targetPlayerError } = await supabase
       .from("players")
       .select("*")
@@ -132,9 +133,15 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (targetPlayerError || !targetPlayer) {
-      console.error("Player verification error:", targetPlayerError)
-      return NextResponse.json({ error: "Player not found" }, { status: 404 })
+      console.error("❌ Player verification error:", targetPlayerError)
+      return NextResponse.json({ 
+        success: false,
+        error: "Player not found", 
+        details: targetPlayerError?.message 
+      }, { status: 404 })
     }
+
+    console.log("✅ Player found:", targetPlayer.id, "Team:", targetPlayer.team_id)
 
     // Check if admin or if player belongs to user's team
     const { data: adminRoles } = await supabase
@@ -151,15 +158,29 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if player is already on waivers
-    const { data: existingWaiver } = await supabase
+    console.log("🔍 Checking for existing waivers for player:", playerId)
+    const { data: existingWaiver, error: existingWaiverError } = await supabase
       .from("waivers")
       .select("id")
       .eq("player_id", playerId)
       .eq("status", "active")
       .maybeSingle()
 
+    if (existingWaiverError) {
+      console.error("❌ Error checking existing waivers:", existingWaiverError)
+      return NextResponse.json({ 
+        success: false,
+        error: "Database error checking waivers", 
+        details: existingWaiverError.message 
+      }, { status: 500 })
+    }
+
     if (existingWaiver) {
-      return NextResponse.json({ error: "Player is already on waivers" }, { status: 400 })
+      console.log("⚠️ Player already on waivers")
+      return NextResponse.json({ 
+        success: false,
+        error: "Player is already on waivers" 
+      }, { status: 400 })
     }
 
     // Calculate waiver expiry (8 hours from now)
@@ -167,6 +188,7 @@ export async function POST(request: NextRequest) {
     claimDeadline.setHours(claimDeadline.getHours() + 8)
 
     // Create the waiver
+    console.log("🔄 Creating waiver for player:", playerId, "Team:", targetPlayer.team_id)
     const { data: waiver, error: waiverError } = await supabase
       .from("waivers")
       .insert({
@@ -180,9 +202,15 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (waiverError) {
-      console.error("Error creating waiver:", waiverError)
-      return NextResponse.json({ error: "Failed to create waiver: " + waiverError.message }, { status: 500 })
+      console.error("❌ Error creating waiver:", waiverError)
+      return NextResponse.json({ 
+        success: false,
+        error: "Failed to create waiver", 
+        details: waiverError.message 
+      }, { status: 500 })
     }
+
+    console.log("✅ Waiver created successfully:", waiver.id)
 
     // Cancel and finalize all existing bids for this player to prevent cron job conflicts
     const { error: cancelBidsError } = await supabase
