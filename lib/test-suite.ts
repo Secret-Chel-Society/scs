@@ -63,7 +63,7 @@ class WebsiteTestSuite {
     return this.results;
   }
 
-  private async testAPIEndpoints(): Promise<void> {
+  async testAPIEndpoints(): Promise<void> {
     const suite: TestSuite = {
       name: 'API Endpoints',
       tests: [],
@@ -156,7 +156,7 @@ class WebsiteTestSuite {
     }
   }
 
-  private async testDatabaseOperations(): Promise<void> {
+  async testDatabaseOperations(): Promise<void> {
     const suite: TestSuite = {
       name: 'Database Operations',
       tests: [],
@@ -197,11 +197,21 @@ class WebsiteTestSuite {
     const startTime = Date.now();
     
     try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      
+      if (!supabaseUrl || !supabaseKey) {
+        return {
+          name: 'Supabase Connection',
+          status: 'fail',
+          message: '❌ Environment variables not configured',
+          duration: Date.now() - startTime,
+          details: { error: 'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY' }
+        };
+      }
+      
       const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const supabase = createClient(supabaseUrl, supabaseKey);
 
       const { data, error } = await supabase.from('teams').select('count').limit(1);
       
@@ -231,11 +241,22 @@ class WebsiteTestSuite {
       const startTime = Date.now();
       
       try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+          results.push({
+            name: `Table Access: ${table}`,
+            status: 'fail',
+            message: '❌ Environment variables not configured',
+            duration: Date.now() - startTime,
+            details: { error: 'Missing environment variables' }
+          });
+          continue;
+        }
+        
         const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         const { data, error } = await supabase.from(table).select('*').limit(1);
         
@@ -268,11 +289,22 @@ class WebsiteTestSuite {
       const startTime = Date.now();
       
       try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+          results.push({
+            name: `Tracking Table: ${table}`,
+            status: 'skip',
+            message: '⏭️ Environment variables not configured',
+            duration: Date.now() - startTime,
+            details: { error: 'Missing environment variables' }
+          });
+          continue;
+        }
+        
         const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        const supabase = createClient(supabaseUrl, supabaseKey);
 
         const { data, error } = await supabase.from(table).select('*').limit(1);
         
@@ -297,7 +329,7 @@ class WebsiteTestSuite {
     return results;
   }
 
-  private async testTrackingSystems(): Promise<void> {
+  async testTrackingSystems(): Promise<void> {
     const suite: TestSuite = {
       name: 'Tracking Systems',
       tests: [],
@@ -409,7 +441,7 @@ class WebsiteTestSuite {
     }
   }
 
-  private async testAuthentication(): Promise<void> {
+  async testAuthentication(): Promise<void> {
     const suite: TestSuite = {
       name: 'Authentication',
       tests: [],
@@ -443,7 +475,7 @@ class WebsiteTestSuite {
     this.results.push(suite);
   }
 
-  private async testComponents(): Promise<void> {
+  async testComponents(): Promise<void> {
     const suite: TestSuite = {
       name: 'Components',
       tests: [],
@@ -499,7 +531,7 @@ class WebsiteTestSuite {
     this.results.push(suite);
   }
 
-  private async testSecurityFeatures(): Promise<void> {
+  async testSecurityFeatures(): Promise<void> {
     const suite: TestSuite = {
       name: 'Security Features',
       tests: [],
@@ -588,7 +620,7 @@ class WebsiteTestSuite {
     }
   }
 
-  private async testPerformance(): Promise<void> {
+  async testPerformance(): Promise<void> {
     const suite: TestSuite = {
       name: 'Performance',
       tests: [],

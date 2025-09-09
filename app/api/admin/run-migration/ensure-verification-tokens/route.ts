@@ -4,10 +4,21 @@ import fs from "fs"
 import path from "path"
 
 export async function POST(request: Request) {
+    if (!supabase) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.",
+        },
+        { status: 500 },
+      )
+    }
+
+
   try {
     // Create a Supabase admin client
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY || "",
     )
 

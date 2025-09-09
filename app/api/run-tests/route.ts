@@ -56,4 +56,50 @@ export async function POST(request: NextRequest) {
     
     switch (testType) {
       case 'api':
-        await (websiteTestSuite as
+        results = await websiteTestSuite.testAPIEndpoints();
+        break;
+      case 'database':
+        results = await websiteTestSuite.testDatabaseOperations();
+        break;
+      case 'tracking':
+        results = await websiteTestSuite.testTrackingSystems();
+        break;
+      case 'auth':
+        results = await websiteTestSuite.testAuthentication();
+        break;
+      case 'components':
+        results = await websiteTestSuite.testComponents();
+        break;
+      case 'security':
+        results = await websiteTestSuite.testSecurityFeatures();
+        break;
+      case 'performance':
+        results = await websiteTestSuite.testPerformance();
+        break;
+      default:
+        results = await websiteTestSuite.runAllTests();
+    }
+    
+    const summary = websiteTestSuite.getSummary();
+    
+    return NextResponse.json({
+      success: true,
+      message: `Test suite completed for: ${testType}`,
+      studio: 'Midnight Studios INTl',
+      summary,
+      results,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Test suite failed:', error);
+    
+    return NextResponse.json({
+      success: false,
+      error: 'Test suite failed',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      studio: 'Midnight Studios INTl',
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
+  }
+}

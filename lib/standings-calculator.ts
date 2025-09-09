@@ -1,9 +1,22 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient, SupabaseClient } from "@supabase/supabase-js"
 
-// Create a Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-const supabase = createClient(supabaseUrl, supabaseKey)
+// Lazy Supabase client creation
+let supabase: SupabaseClient | null = null
+
+function getSupabaseClient(): SupabaseClient | null {
+  if (!supabase) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn('Supabase environment variables not configured')
+      return null
+    }
+
+    supabase = createClient(supabaseUrl, supabaseKey)
+  }
+  return supabase
+}
 
 export interface TeamStanding {
   id: string
@@ -135,8 +148,13 @@ function calculatePlayoffStatus(standings: TeamStanding[]): TeamStanding[] {
  */
 async function getSeasonName(seasonId: number): Promise<string> {
   try {
+    const client = getSupabaseClient()
+    if (!client) {
+      return `Season ${seasonId}`
+    }
+
     // First try to get the season from the seasons table
-    const { data: seasonData, error: seasonError } = await supabase
+    const { data: seasonData, error: seasonError } = await client
       .from("seasons")
       .select("name")
       .eq("id", seasonId)
@@ -147,7 +165,7 @@ async function getSeasonName(seasonId: number): Promise<string> {
     }
 
     // If that fails, try with system_settings
-    const { data: settingsData, error: settingsError } = await supabase
+    const { data: settingsData, error: settingsError } = await client
       .from("system_settings")
       .select("value")
       .eq("key", "seasons")
