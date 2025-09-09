@@ -97,6 +97,7 @@ export function BiddingSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: JSON.stringify({ enabled: !isBiddingEnabled }),
         credentials: "include",
@@ -139,6 +140,7 @@ export function BiddingSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: JSON.stringify({ durationSeconds: bidDuration }),
         credentials: "include",
@@ -174,6 +176,7 @@ export function BiddingSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: JSON.stringify({ increment: bidIncrement }),
         credentials: "include",
@@ -209,6 +212,7 @@ export function BiddingSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: JSON.stringify({ minSalary }),
         credentials: "include",
@@ -244,6 +248,7 @@ export function BiddingSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
         body: JSON.stringify({ maxSalary }),
         credentials: "include",

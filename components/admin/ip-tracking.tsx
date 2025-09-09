@@ -155,6 +155,7 @@ export function IpTracking() {
       }
 
       console.log(`Fetched ${data?.length || 0} users with IP data`)
+      console.log("Sample user data:", data?.slice(0, 3))
       setUsersWithIp(data || [])
     } catch (error) {
       console.error("Error in fetchUsersWithIp:", error)

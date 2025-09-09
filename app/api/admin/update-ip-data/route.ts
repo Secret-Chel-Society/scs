@@ -1,78 +1,96 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+// Midnight Studios INTl - All rights reserved
 import { NextResponse } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
 
-export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-
+export async function POST() {
   try {
-    // Check if the user is an admin
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .eq("role", "Admin")
-
-    if (roleError || !roleData || roleData.length === 0) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    // Get all users without registration_ip or last_login_ip
+    const supabase = createAdminClient()
+    
+    // Get all users without IP data
     const { data: users, error: usersError } = await supabase
       .from("users")
-      .select("id, email")
+      .select("id, email, gamer_tag_id, registration_ip, last_login_ip")
       .or("registration_ip.is.null,last_login_ip.is.null")
 
     if (usersError) {
-      return NextResponse.json({ error: usersError.message }, { status: 500 })
+      throw usersError
     }
 
-    // Update each user with a placeholder IP
-    const updates = []
-    for (const user of users) {
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({
-          registration_ip: user.registration_ip || "0.0.0.0",
-          last_login_ip: user.last_login_ip || "0.0.0.0",
-          last_login_at: user.last_login_at || new Date().toISOString(),
-        })
-        .eq("id", user.id)
+    if (!users || users.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "All users already have IP data",
+        updatedCount: 0
+      })
+    }
 
-      if (updateError) {
-        console.error(`Error updating user ${user.id}:`, updateError)
-      } else {
-        updates.push(user.id)
+    // Get IP logs for these users
+    const userIds = users.map(u => u.id)
+    const { data: ipLogs, error: logsError } = await supabase
+      .from("ip_logs")
+      .select("user_id, ip_address, action, created_at")
+      .in("user_id", userIds)
+      .order("created_at", { ascending: false })
+
+    if (logsError) {
+      throw logsError
+    }
+
+    // Group logs by user
+    const userLogs = new Map()
+    ipLogs?.forEach(log => {
+      if (!userLogs.has(log.user_id)) {
+        userLogs.set(log.user_id, [])
+      }
+      userLogs.get(log.user_id).push(log)
+    })
+
+    let updatedCount = 0
+
+    // Update users with their IP data
+    for (const user of users) {
+      const logs = userLogs.get(user.id) || []
+      
+      if (logs.length === 0) continue
+
+      // Find registration and login IPs
+      const registrationLog = logs.find(log => log.action === 'register')
+      const loginLog = logs.find(log => log.action === 'login')
+
+      const updateData: any = {}
+      
+      if (registrationLog && !user.registration_ip) {
+        updateData.registration_ip = registrationLog.ip_address
+      }
+      
+      if (loginLog && !user.last_login_ip) {
+        updateData.last_login_ip = loginLog.ip_address
+        updateData.last_login_at = loginLog.created_at
       }
 
-      // Add an entry to the ip_logs table
-      const { error: ipLogError } = await supabase.from("ip_logs").insert({
-        user_id: user.id,
-        ip_address: "0.0.0.0",
-        action: "backfill",
-        user_agent: "System backfill",
-      })
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await supabase
+          .from("users")
+          .update(updateData)
+          .eq("id", user.id)
 
-      if (ipLogError) {
-        console.error(`Error adding IP log for user ${user.id}:`, ipLogError)
+        if (!updateError) {
+          updatedCount++
+        }
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Updated ${updates.length} users with placeholder IP data`,
-      updatedUsers: updates.length,
+      message: `Updated IP data for ${updatedCount} users`,
+      updatedCount
     })
+
   } catch (error: any) {
     console.error("Error updating IP data:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({
+      success: false,
+      error: error.message || "Failed to update IP data"
+    }, { status: 500 })
   }
 }
