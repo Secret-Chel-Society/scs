@@ -60,6 +60,13 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, React.ComponentProp
 )
 DropdownMenuContent.displayName = "DropdownMenuContent"
 
+const DropdownMenuRoot = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof Dropdown>>(
+  ({ className, ...props }, ref) => (
+    <Dropdown ref={ref} className={cn(className)} {...props} />
+  ),
+)
+DropdownMenuRoot.displayName = "DropdownMenuRoot"
+
 const DropdownMenuItem = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof DropdownItem>>(
   ({ className, ...props }, ref) => (
     <DropdownItem ref={ref} className={cn(className)} {...props} />
@@ -103,7 +110,7 @@ const DropdownMenuShortcut = React.forwardRef<HTMLSpanElement, React.HTMLAttribu
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
 
 export {
-  DropdownMenu,
+  DropdownMenuRoot as DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,

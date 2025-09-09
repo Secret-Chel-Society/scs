@@ -35,7 +35,8 @@ import {
   Zap,
   Activity
 } from "lucide-react"
-import { Button, Avatar, Badge, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react"
+import { Button, Avatar, Badge } from "@heroui/react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ModeToggle } from "@/components/mode-toggle"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
@@ -453,8 +454,8 @@ export default function Navigation() {
                   <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100/50 dark:bg-slate-700/50 border border-slate-200/30 dark:border-slate-600/30 mt-4">
                     <div className="flex items-center gap-2">
                       <ModeToggle />
-                      <Dropdown>
-                        <DropdownTrigger>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
                           <Button 
                             isIconOnly 
                             variant="ghost" 
@@ -462,38 +463,38 @@ export default function Navigation() {
                           >
                             <Settings className="h-4 w-4" />
                           </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Account menu">
-                          <DropdownItem key="profile" startContent={<Eye className="h-4 w-4 text-blue-500" />}>
-                            <Link href={`/players/${playerId || session.user.id}`}>View Profile</Link>
-                          </DropdownItem>
-                          <DropdownItem key="dashboard" startContent={<LayoutDashboard className="h-4 w-4 text-green-500" />}>
-                            <Link href="/dashboard">Dashboard</Link>
-                          </DropdownItem>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onPress={() => window.location.href = `/players/${playerId || session.user.id}`}>
+                            <Eye className="h-4 w-4 text-blue-500 mr-2" />
+                            View Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onPress={() => window.location.href = '/dashboard'}>
+                            <LayoutDashboard className="h-4 w-4 text-green-500 mr-2" />
+                            Dashboard
+                          </DropdownMenuItem>
                           {isTeamManager && (
-                            <DropdownItem key="management" startContent={<Shield className="h-4 w-4 text-emerald-500" />}>
-                              <Link href="/management">Management</Link>
-                            </DropdownItem>
+                            <DropdownMenuItem onPress={() => window.location.href = '/management'}>
+                              <Shield className="h-4 w-4 text-emerald-500 mr-2" />
+                              Management
+                            </DropdownMenuItem>
                           )}
                           {isAdmin && (
-                            <DropdownItem key="admin" startContent={<Crown className="h-4 w-4 text-amber-500" />}>
-                              <Link href="/admin">Admin Dashboard</Link>
-                            </DropdownItem>
+                            <DropdownMenuItem onPress={() => window.location.href = '/admin'}>
+                              <Crown className="h-4 w-4 text-amber-500 mr-2" />
+                              Admin Dashboard
+                            </DropdownMenuItem>
                           )}
-                          <DropdownItem key="settings" startContent={<Cog className="h-4 w-4 text-slate-500" />}>
-                            <Link href="/settings">Settings</Link>
-                          </DropdownItem>
-                          <DropdownItem 
-                            key="logout" 
-                            className="text-danger" 
-                            color="danger"
-                            startContent={<LogOut className="h-4 w-4" />}
-                            onPress={handleSignOut}
-                          >
+                          <DropdownMenuItem onPress={() => window.location.href = '/settings'}>
+                            <Cog className="h-4 w-4 text-slate-500 mr-2" />
+                            Settings
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onPress={handleSignOut} className="text-red-600">
+                            <LogOut className="h-4 w-4 mr-2" />
                             Log out
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
