@@ -1,7 +1,10 @@
 // Midnight Studios INTl - All rights reserved
 
 import { NextRequest, NextResponse } from 'next/server';
-import { websiteTestSuite } from '@/lib/test-suite';
+import { websiteTestSuite } from '../../../lib/test-suite';
+
+// Force Node.js runtime to avoid Edge Runtime compatibility issues
+export const runtime = 'nodejs'
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,52 +56,4 @@ export async function POST(request: NextRequest) {
     
     switch (testType) {
       case 'api':
-        await websiteTestSuite['testAPIEndpoints']();
-        break;
-      case 'database':
-        await websiteTestSuite['testDatabaseOperations']();
-        break;
-      case 'tracking':
-        await websiteTestSuite['testTrackingSystems']();
-        break;
-      case 'auth':
-        await websiteTestSuite['testAuthentication']();
-        break;
-      case 'components':
-        await websiteTestSuite['testComponents']();
-        break;
-      case 'security':
-        await websiteTestSuite['testSecurityFeatures']();
-        break;
-      case 'performance':
-        await websiteTestSuite['testPerformance']();
-        break;
-      default:
-        results = await websiteTestSuite.runAllTests();
-    }
-    
-    const summary = websiteTestSuite.getSummary();
-    
-    return NextResponse.json({
-      success: true,
-      message: `Test type '${testType}' completed`,
-      studio: 'Midnight Studios INTl',
-      testType,
-      summary,
-      results: websiteTestSuite.getResults(),
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    console.error(`❌ Test type '${testType}' failed:`, error);
-    
-    return NextResponse.json({
-      success: false,
-      error: `Test type '${testType}' failed`,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      studio: 'Midnight Studios INTl',
-      testType: body?.testType || 'unknown',
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
-  }
-}
+        await (websiteTestSuite as

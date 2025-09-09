@@ -338,7 +338,7 @@ class WebsiteTestSuite {
     const startTime = Date.now();
     
     try {
-      const { trackEvent } = await import('./analytics');
+      const { trackEvent } = await import('../lib/analytics');
       trackEvent('test_event', { studio: 'Midnight Studios INTl', test: true });
       
       return {
@@ -363,7 +363,7 @@ class WebsiteTestSuite {
     const startTime = Date.now();
     
     try {
-      const { trackSourceMapAccess } = await import('./download-tracker');
+      const { trackSourceMapAccess } = await import('../lib/download-tracker');
       trackSourceMapAccess();
       
       return {
@@ -388,7 +388,7 @@ class WebsiteTestSuite {
     const startTime = Date.now();
     
     try {
-      const { checkRateLimit } = await import('./security-monitor');
+      const { checkRateLimit } = await import('../lib/security-monitor');
       const result = checkRateLimit('127.0.0.1', 100, 60000);
       
       return {
@@ -457,20 +457,20 @@ class WebsiteTestSuite {
     const startTime = Date.now();
     console.log('🧩 Testing components...');
 
-    // Test component imports
+    // Test component imports - using relative paths from lib folder
     const components = [
-      'components/navigation',
-      'components/ui/button',
-      'components/ui/card',
-      'components/ui/tabs',
-      'components/theme-provider'
+      '../components/navigation',
+      '../components/ui/button',
+      '../components/ui/card',
+      '../components/ui/tabs',
+      '../components/theme-provider'
     ];
 
     for (const component of components) {
       const startTime = Date.now();
       
       try {
-        await import(`@/${component}`);
+        await import(component);
         
         suite.tests.push({
           name: `Component: ${component}`,
