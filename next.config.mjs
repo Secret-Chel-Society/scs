@@ -1,6 +1,6 @@
 // Midnight Studios INTl - All rights reserved
 /** @type {import('next').NextConfig} */
-const path = require('path');
+import path from 'path';
 
 const nextConfig = {
   reactStrictMode: true,
@@ -19,7 +19,7 @@ const nextConfig = {
     // Add path aliases
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, './'),
+      '@': path.resolve(process.cwd(), './'),
     };
 
     // Fix for @supabase/node-fetch issue
@@ -46,7 +46,7 @@ const nextConfig = {
     ];
   },
   sassOptions: {
-    includePaths: [path.join(__dirname, 'styles')],
+    includePaths: [path.join(process.cwd(), 'styles')],
   },
   async headers() {
     return [
