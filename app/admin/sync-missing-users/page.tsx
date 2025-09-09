@@ -1,3 +1,6 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import { SyncMissingUsers } from "@/components/admin/sync-missing-users"
 // import { motion } from "framer-motion"
 import { Users } from "lucide-react"

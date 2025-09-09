@@ -1,3 +1,6 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from "next"
 import AuthDatabaseSync from "@/components/admin/auth-database-sync"
 // import { motion } from "framer-motion"

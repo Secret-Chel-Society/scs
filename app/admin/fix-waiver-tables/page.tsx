@@ -1,3 +1,6 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import { FixWaiverTablesMigration } from "@/components/admin/fix-waiver-tables-migration"
 // import { motion } from "framer-motion"
 import { Settings } from "lucide-react"

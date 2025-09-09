@@ -1,3 +1,6 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import { Suspense } from "react"
 import FixUserConstraints from "@/components/admin/fix-user-constraints"
 import { Skeleton } from "@/components/ui/skeleton"

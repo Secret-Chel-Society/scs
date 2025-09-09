@@ -1,6 +1,9 @@
 // Midnight Studios INTl - All rights reserved
 "use client"
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import React from "react"
 
 import { useState, useEffect } from "react"

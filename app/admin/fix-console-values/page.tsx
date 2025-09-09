@@ -1,3 +1,6 @@
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import { FixConsoleValues } from "@/components/admin/fix-console-values"
 // import { motion } from "framer-motion"
 import { Wrench } from "lucide-react"

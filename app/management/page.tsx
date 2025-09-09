@@ -1,6 +1,9 @@
 // Midnight Studios INTl - All rights reserved
 "use client"
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from "react"
 import { Card, CardBody, CardHeader } from "@heroui/react"
 import { Tabs, Tab } from "@heroui/react"
