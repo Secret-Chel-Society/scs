@@ -8,9 +8,60 @@ type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+type UserRole = 'admin' | 'user' | 'moderator'
+type ConsoleType = 'ps5' | 'xbox' | 'pc'
+type Position = 'C' | 'LW' | 'RW' | 'LD' | 'RD' | 'G'
+
 export interface Database {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string
+          email: string | null
+          gamer_tag_id: string | null
+          discord_name: string | null
+          primary_position: Position | null
+          secondary_position: Position | null
+          console: ConsoleType | null
+          avatar_url: string | null
+          role: UserRole
+          created_at: string
+          updated_at: string
+          last_login: string | null
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          email?: string | null
+          gamer_tag_id?: string | null
+          discord_name?: string | null
+          primary_position?: Position | null
+          secondary_position?: Position | null
+          console?: ConsoleType | null
+          avatar_url?: string | null
+          role?: UserRole
+          created_at?: string
+          updated_at?: string
+          last_login?: string | null
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          gamer_tag_id?: string | null
+          discord_name?: string | null
+          primary_position?: Position | null
+          secondary_position?: Position | null
+          console?: ConsoleType | null
+          avatar_url?: string | null
+          role?: UserRole
+          created_at?: string
+          updated_at?: string
+          last_login?: string | null
+          is_active?: boolean
+        }
+      },
       player_bidding: {
         Row: {
           id: string

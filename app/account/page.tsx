@@ -1,9 +1,8 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,30 +11,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Loader2, AlertCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { Camera, Loader2, AlertTriangle } from "lucide-react"
+import type { Database } from "@/lib/supabase/database.types"
+
+type UserProfile = Database['public']['Tables']['users']['Row']
+type Position = NonNullable<UserProfile['primary_position']> | ''
+type ConsoleType = NonNullable<UserProfile['console']> | ''
 
 // Prevent static generation for this page
 export const dynamic = "force-dynamic"
 
 export default function AccountPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [user, setUser] = useState<any>(null)
-  const [userProfile, setUserProfile] = useState<any>(null)
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Form state
+  // Form state with proper types
   const [gamerTag, setGamerTag] = useState("")
   const [discordName, setDiscordName] = useState("")
-  const [primaryPosition, setPrimaryPosition] = useState("")
-  const [secondaryPosition, setSecondaryPosition] = useState("")
-  const [console, setConsole] = useState("")
+  const [primaryPosition, setPrimaryPosition] = useState<Position>("")
+  const [secondaryPosition, setSecondaryPosition] = useState<Position>("")
+  const [consoleType, setConsoleType] = useState<ConsoleType>("")
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -45,43 +48,37 @@ export default function AccountPage() {
         setError(null)
 
         // Check if user is authenticated
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError) {
           throw new Error(`Authentication error: ${sessionError.message}`)
         }
 
         if (!session) {
-          // Use Next.js router instead of window.location
           router.push("/login")
           return
         }
 
         setUser(session.user)
 
-        // Fetch user profile
+        // Fetch user profile with type safety
         const { data, error: profileError } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", session.user.id)
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
           .single()
 
-        if (profileError) {
-          throw new Error(`Error fetching profile: ${profileError.message}`)
-        }
+        if (profileError) throw profileError
+        if (!data) throw new Error('No user profile found')
 
-        if (data) {
-          setUserProfile(data)
-          setGamerTag(data.gamer_tag_id || "")
-          setDiscordName(data.discord_name || "")
-          setPrimaryPosition(data.primary_position || "")
-          setSecondaryPosition(data.secondary_position || "")
-          setConsole(data.console || "")
-          setAvatarUrl(data.avatar_url || null)
-        }
+        // Update form state with user data
+        setUserProfile(data as UserProfile)
+        setGamerTag(data.gamer_tag_id || '')
+        setDiscordName(data.discord_name || '')
+        setPrimaryPosition((data.primary_position as Position) || '')
+        setSecondaryPosition((data.secondary_position as Position) || '')
+        setConsoleType((data.console as ConsoleType) || '')
+        setAvatarUrl(data.avatar_url)
       } catch (err: any) {
         console.error("Account page error:", err)
         setError(err.message || "An error occurred while loading your account")
@@ -100,37 +97,44 @@ export default function AccountPage() {
 
     try {
       if (!user) {
-        throw new Error("User not authenticated")
+        throw new Error("You must be logged in to update your profile")
       }
 
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({
-          gamer_tag_id: gamerTag,
-          discord_name: discordName,
-          primary_position: primaryPosition,
-          secondary_position: secondaryPosition,
-          console: console,
-          updated_at: new Date().toISOString(),
+      const updates: Partial<Database['public']['Tables']['users']['Update']> = {
+        gamer_tag_id: gamerTag || null,
+        discord_name: discordName || null,
+        primary_position: primaryPosition || null,
+        secondary_position: secondaryPosition || null,
+        console: consoleType || null,
+        updated_at: new Date().toISOString(),
+      }
+
+      const { error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', user.id)
+
+      if (error) throw error
+
+      // Update local state
+      setUserProfile(prev => prev ? { ...prev, ...updates } : null)
+
+      toast({
+        title: "Success",
+        description: "Your profile has been updated successfully!",
+        variant: "success",
+      })
+    } catch (error: any) {
+      console.error('Error updating profile:', error)
+      const handleError = (message: string) => {
+        setError(message)
+        toast({
+          title: "Error",
+          description: message,
+          variant: "error",
         })
-        .eq("id", user.id)
-
-      if (updateError) {
-        throw new Error(`Error updating settings: ${updateError.message}`)
       }
-
-      toast({
-        title: "Settings updated",
-        description: "Your profile settings have been updated successfully.",
-      })
-    } catch (err: any) {
-      console.error("Error saving settings:", err)
-      setError(err.message || "An error occurred while saving your settings")
-      toast({
-        title: "Error updating settings",
-        description: err.message || "An error occurred while saving your settings",
-        variant: "destructive",
-      })
+      handleError(error.message)
     } finally {
       setIsSaving(false)
     }
@@ -211,9 +215,27 @@ export default function AccountPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Skeleton className="h-8 w-64 mb-6" />
-          <Skeleton className="h-64 w-full rounded-lg" />
+        <div className="max-w-2xl mx-auto space-y-6">
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96 max-w-full mb-8" />
+          
+          <div className="flex flex-col items-center space-y-4 mb-8">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          
+          <div className="space-y-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ))}
+            
+            <div className="pt-4">
+              <Skeleton className="h-10 w-32 ml-auto" />
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -228,7 +250,7 @@ export default function AccountPage() {
           <Card className="mb-6 border-red-200">
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 text-red-600 mb-2">
-                <AlertCircle className="h-5 w-5" />
+                <AlertTriangle className="h-5 w-5" />
                 <p className="font-medium">Error</p>
               </div>
               <p className="text-sm text-muted-foreground">{error}</p>
@@ -251,8 +273,14 @@ export default function AccountPage() {
               <CardContent className="flex flex-col items-center">
                 <div className="relative cursor-pointer group" onClick={handleAvatarClick}>
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={avatarUrl || "/placeholder.svg?height=96&width=96"} alt={gamerTag || "User"} />
-                    <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
+                    <AvatarImage 
+                      src={avatarUrl || "/default-avatar.svg"} 
+                      alt={gamerTag || "User"} 
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-2xl bg-gray-200">
+                      {getInitials()}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     {isUploading ? (
@@ -313,9 +341,13 @@ export default function AccountPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="primaryPosition">Primary Position</Label>
-                      <Select value={primaryPosition} onValueChange={setPrimaryPosition} required>
+                      <Select
+                        value={primaryPosition}
+                        onValueChange={value => setPrimaryPosition(value as Position)}
+                        required
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select position" />
+                          <SelectValue placeholder="Select primary position" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="C">Center (C)</SelectItem>
@@ -330,9 +362,12 @@ export default function AccountPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="secondaryPosition">Secondary Position</Label>
-                      <Select value={secondaryPosition} onValueChange={setSecondaryPosition}>
+                      <Select
+                        value={secondaryPosition}
+                        onValueChange={value => setSecondaryPosition(value as Position)}
+                      >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select position" />
+                          <SelectValue placeholder="Select secondary position (optional)" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
@@ -349,13 +384,17 @@ export default function AccountPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="console">Console</Label>
-                    <Select value={console} onValueChange={setConsole} required>
+                    <Select
+                      value={consoleType}
+                      onValueChange={value => setConsoleType(value as ConsoleType)}
+                      required
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select console" />
+                        <SelectValue placeholder="Select your console" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Xbox">Xbox</SelectItem>
-                        <SelectItem value="PS5">PS5</SelectItem>
+                        <SelectItem value="ps5">PS5</SelectItem>
+                        <SelectItem value="xbox">Xbox</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
