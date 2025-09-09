@@ -290,7 +290,7 @@ export default function AwardsPage() {
                 onValueChange={setSelectedSeason}
               >
                 <SelectTrigger>
-                  <span>{seasons.find(s => String(s.number) === selectedSeason)?.name || 'Select season'}</span>
+                  <span>{String(seasons.find(s => String(s.number) === selectedSeason)?.name || 'Select season')}</span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Seasons</SelectItem>
@@ -374,14 +374,14 @@ export default function AwardsPage() {
                                     )}
                                   </div>
                                   <h3 className="text-lg font-semibold mb-2 text-hockey-silver-800 dark:text-hockey-silver-200 text-center">
-                                    {award.team_name}
+                                    {String(award.team_name)}
                                   </h3>
-                                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-3 text-center">
-                                    {getSeasonName(award.season_number)} • {award.year}
-                                  </div>
+                  <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-3 text-center">
+                    {String(getSeasonName(award.season_number))} • {String(award.year)}
+                  </div>
                                   {award.description && (
                                     <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 text-center">
-                                      {award.description}
+                                      {String(award.description)}
                                     </p>
                                   )}
                                 </div>
@@ -428,7 +428,7 @@ export default function AwardsPage() {
                               <CardContent className="p-6">
                                 <div className="flex flex-col items-center">
                                   <div className="flex items-center gap-3 mb-4">
-                                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{award.gamer_tag_id}</div>
+                                    <div className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">{String(award.gamer_tag_id)}</div>
                                     {award.team_logo && (
                                       <div className="relative h-8 w-8">
                                         <Image
@@ -441,12 +441,12 @@ export default function AwardsPage() {
                                     )}
                                   </div>
                                   <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">
-                                    {award.team_name && `${award.team_name} • `}
-                                    {getSeasonName(award.season_number)} • {award.year}
+                                    {award.team_name && `${String(award.team_name)} • `}
+                                    {String(getSeasonName(award.season_number))} • {String(award.year)}
                                   </div>
                                   {award.description && (
                                     <p className="text-sm text-hockey-silver-500 dark:text-hockey-silver-400 text-center">
-                                      {award.description}
+                                      {String(award.description)}
                                     </p>
                                   )}
                                 </div>

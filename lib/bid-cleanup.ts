@@ -1,8 +1,16 @@
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Check if environment variables are available
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.warn('Supabase environment variables not configured')
+}
+
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
 
 /**
  * Cancels all active bids for a specific player
@@ -11,6 +19,11 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
  */
 export async function cancelPlayerBids(playerId: string): Promise<boolean> {
   try {
+    if (!supabase) {
+      console.error('Supabase client not available for bid cleanup')
+      return false
+    }
+
     console.log(`Cancelling all bids for player ${playerId}`)
 
     // Update all active bids for this player to cancelled status
@@ -42,6 +55,11 @@ export async function cancelPlayerBids(playerId: string): Promise<boolean> {
  */
 export async function cleanupExpiredBids(): Promise<number> {
   try {
+    if (!supabase) {
+      console.error('Supabase client not available for bid cleanup')
+      return 0
+    }
+
     console.log("Cleaning up expired bids...")
 
     const now = new Date().toISOString()
