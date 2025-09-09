@@ -13,6 +13,9 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const trackLogin = async () => {
       try {
+        // Wait a bit for the session to be fully established
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
         // Track IP address for login
         const response = await fetch("/api/auth/track-login", {
           method: "POST",
@@ -24,7 +27,8 @@ export default function AuthCallbackPage() {
         if (response.ok) {
           console.log("✅ Login IP tracked successfully")
         } else {
-          console.warn("⚠️ Failed to track login IP")
+          const errorData = await response.json()
+          console.warn("⚠️ Failed to track login IP:", errorData)
         }
       } catch (error) {
         console.warn("⚠️ Error tracking login IP:", error)

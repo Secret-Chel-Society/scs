@@ -509,6 +509,28 @@ export function IpTracking() {
             <Button variant="secondary" onClick={populateTestData} disabled={loading}>
               Populate Test Data
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={async () => {
+                try {
+                  const response = await fetch("/api/auth/track-login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                  })
+                  if (response.ok) {
+                    toast({ title: "Success", description: "IP logged for current user" })
+                    fetchData()
+                  } else {
+                    toast({ title: "Error", description: "Failed to log IP", variant: "destructive" })
+                  }
+                } catch (error) {
+                  toast({ title: "Error", description: "Failed to log IP", variant: "destructive" })
+                }
+              }}
+              disabled={loading}
+            >
+              Log My IP Now
+            </Button>
           </div>
 
           <Tabs defaultValue="users" value={activeTab} onValueChange={setActiveTab}>
