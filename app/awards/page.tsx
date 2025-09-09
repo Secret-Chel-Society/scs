@@ -287,7 +287,7 @@ export default function AwardsPage() {
             <div className="w-[180px]">
               <Select 
                 value={selectedSeason}
-                onValueChange={setSelectedSeason as (value: string) => void}
+                onValueChange={setSelectedSeason}
               >
                 <SelectTrigger>
                   <span>{seasons.find(s => String(s.number) === selectedSeason)?.name || 'Select season'}</span>
@@ -306,7 +306,7 @@ export default function AwardsPage() {
             <div className="w-[180px]">
               <Select 
                 value={selectedYear}
-                onValueChange={setSelectedYear as (value: string) => void}
+                onValueChange={setSelectedYear}
               >
                 <SelectTrigger>
                   <span>{selectedYear === 'all' ? 'All Years' : selectedYear}</span>
