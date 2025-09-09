@@ -238,7 +238,11 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: any) {
     console.error("Error creating waiver:", error)
-    return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 })
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || "An error occurred",
+      details: error.stack || "No additional details available"
+    }, { status: 500 })
   }
 }
 

@@ -1239,12 +1239,20 @@ const ManagementPage = () => {
 
       console.log("Waiver response status:", response.status)
 
-      const data = await response.json()
-      console.log("Waiver response data:", data)
+      let data
+      try {
+        data = await response.json()
+        console.log("Waiver response data:", data)
+      } catch (jsonError) {
+        console.error("Failed to parse JSON response:", jsonError)
+        const textResponse = await response.text()
+        console.error("Raw response:", textResponse)
+        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
+      }
 
       if (!response.ok) {
-        const errorMessage = data.error || "Failed to waive player"
-        const errorDetails = data.details ? ` (${data.details})` : ""
+        const errorMessage = data?.error || "Failed to waive player"
+        const errorDetails = data?.details ? ` (${data.details})` : ""
         throw new Error(`${errorMessage}${errorDetails}`)
       }
 
