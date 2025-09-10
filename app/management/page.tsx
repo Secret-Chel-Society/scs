@@ -2848,6 +2848,29 @@ const ManagementPage = () => {
                                       throw notificationError
                                     }
 
+                                    // Create trade record in trades table
+                                    const { data: newTrade, error: tradeError } = await supabase
+                                      .from("trades")
+                                      .insert([
+                                        {
+                                          team1_id: teamData.id,
+                                          team2_id: selectedTeamForTrade,
+                                          team1_players: JSON.stringify(fromPlayers),
+                                          team2_players: JSON.stringify(toPlayers),
+                                          trade_message: tradeMessage,
+                                          status: "pending",
+                                        },
+                                      ])
+                                      .select("*")
+                                      .single()
+
+                                    if (tradeError) {
+                                      console.error("Error creating trade record:", tradeError)
+                                      // Don't fail the entire operation, just log the error
+                                    } else {
+                                      console.log("Trade record created:", newTrade.id)
+                                    }
+
                                     setTradeSuccess("Trade proposal sent successfully!")
 
                                     // Reset selections

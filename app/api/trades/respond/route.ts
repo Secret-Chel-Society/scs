@@ -73,24 +73,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Proposing team not found" }, { status: 404 })
     }
 
-    // Create a new trade record
-    const { data: newTrade, error: newTradeError } = await supabase
+    // Find existing trade record by team IDs and recent timestamp
+    const { data: existingTrade, error: findTradeError } = await supabase
       .from("trades")
-      .insert([
-        {
-          team1_id: proposingTeam.id,
-          team2_id: respondingTeamId,
-          team1_players: JSON.stringify(tradeData.fromPlayers),
-          team2_players: JSON.stringify(tradeData.toPlayers),
-          status: accept ? "accepted" : "rejected", // Set status based on accept
-        },
-      ])
+      .select("*")
+      .eq("team1_id", proposingTeam.id)
+      .eq("team2_id", respondingTeamId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single()
+
+    if (findTradeError || !existingTrade) {
+      console.error("Error finding existing trade:", findTradeError)
+      return NextResponse.json({ error: "Trade not found" }, { status: 404 })
+    }
+
+    // Update the existing trade record
+    const { data: updatedTrade, error: updateTradeError } = await supabase
+      .from("trades")
+      .update({
+        status: accept ? "accepted" : "rejected",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", existingTrade.id)
       .select("*")
       .single()
 
-    if (newTradeError || !newTrade) {
-      console.error("Error creating trade:", newTradeError)
-      return NextResponse.json({ error: "Failed to create trade" }, { status: 500 })
+    if (updateTradeError || !updatedTrade) {
+      console.error("Error updating trade:", updateTradeError)
+      return NextResponse.json({ error: "Failed to update trade" }, { status: 500 })
     }
 
     // Update the notification status
@@ -161,16 +173,16 @@ export async function POST(request: NextRequest) {
         }
 
         // Update trade status to completed
-        const { error: updateTradeError } = await supabase
+        const { error: completeTradeError } = await supabase
           .from("trades")
           .update({ 
             status: "completed",
             updated_at: new Date().toISOString()
           })
-          .eq("id", newTrade.id)
+          .eq("id", updatedTrade.id)
 
-        if (updateTradeError) {
-          console.error("Error updating trade status to completed:", updateTradeError)
+        if (completeTradeError) {
+          console.error("Error updating trade status to completed:", completeTradeError)
         }
       } catch (playerError) {
         console.error("Error updating player assignments:", playerError)
@@ -182,7 +194,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Trade ${accept ? "accepted" : "rejected"} successfully`,
       trade: {
-        id: newTrade.id,
+        id: updatedTrade.id,
         status: newStatus,
       },
     })
