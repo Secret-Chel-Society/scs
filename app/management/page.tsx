@@ -1241,25 +1241,14 @@ const ManagementPage = () => {
 
       let data
       if (!response.ok) {
-        // If response is not ok, try to get error message
-        try {
-          const errorData = await response.json()
-          throw new Error(errorData.error || `Server error: ${response.status} ${response.statusText}`)
-        } catch (jsonError) {
-          // If JSON parsing fails, get text response
-          const textResponse = await response.text()
-          console.error("Raw error response:", textResponse)
-          throw new Error(`Server error: ${response.status} ${response.statusText}`)
-        }
+        // If response is not ok, get error message
+        const errorText = await response.text()
+        console.error("Error response:", errorText)
+        throw new Error(`Server error: ${response.status} ${response.statusText}`)
       }
 
-      try {
-        data = await response.json()
-        console.log("Waiver response data:", data)
-      } catch (jsonError) {
-        console.error("Failed to parse JSON response:", jsonError)
-        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
-      }
+      data = await response.json()
+      console.log("Waiver response data:", data)
 
 
       toast({

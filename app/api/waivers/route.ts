@@ -354,6 +354,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all waivers with player and team information
+    console.log("🔍 Fetching waivers with status:", status)
+    
     const { data: waivers, error } = await supabase
       .from("waivers")
       .select(`
@@ -361,7 +363,6 @@ export async function GET(request: NextRequest) {
           players:player_id (
             id,
             salary,
-            role,
             users:user_id (
               id,
               gamer_tag_id,
@@ -375,30 +376,53 @@ export async function GET(request: NextRequest) {
             id,
             name,
             logo_url
-          ),
-          waiver_claims (
-            id,
-            claiming_team_id,
-            priority_at_claim,
-            status,
-            teams:claiming_team_id (
-              name,
-              logo_url
-            )
           )
         `)
       .eq("status", status)
       .order("claim_deadline", { ascending: true })
 
     if (error) {
-      console.error("Error fetching waivers:", error)
-      return NextResponse.json({ error: "Failed to fetch waivers" }, { status: 500 })
+      console.error("❌ Waivers fetch error:", error)
+      return NextResponse.json({ 
+        error: "Failed to fetch waivers", 
+        details: error.message 
+      }, { status: 500 })
     }
 
-    console.log(`Found ${waivers?.length || 0} waivers with status ${status}`)
+    // Get waiver claims separately to avoid complex joins
+    let waiverClaims: any[] = []
+    if (waivers && waivers.length > 0) {
+      const waiverIds = waivers.map(w => w.id)
+      const { data: claims, error: claimsError } = await supabase
+        .from("waiver_claims")
+        .select(`
+          id,
+          waiver_id,
+          claiming_team_id,
+          priority_at_claim,
+          status,
+          teams:claiming_team_id (
+            name,
+            logo_url
+          )
+        `)
+        .in("waiver_id", waiverIds)
+
+      if (!claimsError) {
+        waiverClaims = claims || []
+      }
+    }
+
+    // Combine waivers with their claims
+    const waiversWithClaims = waivers?.map(waiver => ({
+      ...waiver,
+      waiver_claims: waiverClaims.filter(claim => claim.waiver_id === waiver.id)
+    })) || []
+
+    console.log(`Found ${waiversWithClaims?.length || 0} waivers with status ${status}`)
 
     // Filter out any waivers with null players (shouldn't happen, but just in case)
-    const validWaivers = waivers?.filter((w) => w.players) || []
+    const validWaivers = waiversWithClaims?.filter((w) => w.players) || []
 
     return NextResponse.json({ waivers: validWaivers })
   } catch (error: any) {
