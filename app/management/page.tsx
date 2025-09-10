@@ -3149,13 +3149,30 @@ const ManagementPage = () => {
                                               throw updateError
                                             }
 
+                                            // Update the trade record in the trades table
+                                            const { error: tradeUpdateError } = await supabase
+                                              .from("trades")
+                                              .update({
+                                                status: "cancelled",
+                                                updated_at: new Date().toISOString()
+                                              })
+                                              .eq("team1_id", teamData.id)
+                                              .eq("team2_id", otherTeam.id)
+                                              .eq("status", "pending")
+                                              .order("created_at", { ascending: false })
+                                              .limit(1)
+
+                                            if (tradeUpdateError) {
+                                              console.error("Error updating trade record:", tradeUpdateError)
+                                              // Don't throw here - the notification cancellation still worked
+                                            }
+
                                             // Update corresponding incoming notifications for the other team
                                             if (otherTeamManagers && otherTeamManagers.length > 0) {
-                                              const { error: incomingUpdateError } = await supabase
+                                              // First, get the existing notifications to update them
+                                              const { data: incomingNotifications, error: fetchError } = await supabase
                                                 .from("notifications")
-                                                .update({
-                                                  message: supabase.raw(`message || '\n\nSTATUS: CANCELLED'`),
-                                                })
+                                                .select("id, message")
                                                 .in(
                                                   "user_id",
                                                   otherTeamManagers.map((m) => m.user_id),
@@ -3166,12 +3183,22 @@ const ManagementPage = () => {
                                                   new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
                                                 ) // Only recent proposals
 
-                                              if (incomingUpdateError) {
-                                                console.error(
-                                                  "Error updating incoming notifications:",
-                                                  incomingUpdateError,
-                                                )
-                                                // Don't throw here - the outgoing cancellation still worked
+                                              if (fetchError) {
+                                                console.error("Error fetching incoming notifications:", fetchError)
+                                              } else if (incomingNotifications && incomingNotifications.length > 0) {
+                                                // Update each notification individually
+                                                for (const notification of incomingNotifications) {
+                                                  const { error: updateError } = await supabase
+                                                    .from("notifications")
+                                                    .update({
+                                                      message: notification.message + "\n\nSTATUS: CANCELLED",
+                                                    })
+                                                    .eq("id", notification.id)
+
+                                                  if (updateError) {
+                                                    console.error("Error updating notification:", updateError)
+                                                  }
+                                                }
                                               }
                                             }
 
