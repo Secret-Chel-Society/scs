@@ -135,14 +135,50 @@ export async function POST(request: NextRequest) {
             continue
           }
 
-          // Update waiver status
+          // Update waiver status and winning team
           await supabase
             .from("waivers")
             .update({
               status: "claimed",
+              winning_team_id: winningClaim.claiming_team_id,
               processed_at: now.toISOString(),
             })
             .eq("id", waiver.id)
+
+          // Update the winning claim to approved
+          await supabase
+            .from("waiver_claims")
+            .update({
+              status: "approved",
+            })
+            .eq("id", winningClaim.id)
+
+          // Update all other claims to rejected
+          await supabase
+            .from("waiver_claims")
+            .update({
+              status: "rejected",
+            })
+            .eq("waiver_id", waiver.id)
+            .neq("id", winningClaim.id)
+
+          // Update the winning team's priority to the lowest
+          const { data: maxPriorityData } = await supabase
+            .from("waiver_priority")
+            .select("priority")
+            .order("priority", { ascending: false })
+            .limit(1)
+            .single()
+
+          const newPriority = (maxPriorityData?.priority || 0) + 1
+
+          await supabase
+            .from("waiver_priority")
+            .update({
+              priority: newPriority,
+              last_used: now.toISOString(),
+            })
+            .eq("team_id", winningClaim.claiming_team_id)
 
           // Sync Discord roles for the claimed player
           if (waiver.players.user_id) {

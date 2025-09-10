@@ -22,3 +22,4 @@ ALTER COLUMN user_id SET NOT NULL;
 ALTER TABLE player_bidding 
 ADD CONSTRAINT player_bidding_user_id_fkey 
 FOREIGN KEY (user_id) REFERENCES auth.users(id);
+

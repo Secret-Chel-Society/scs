@@ -130,6 +130,7 @@ export async function POST(request: Request) {
     }
 
     // Get team's current waiver priority
+    let priority: number
     const { data: priorityData, error: priorityError } = await supabase
       .from("waiver_priority")
       .select("priority")
@@ -138,7 +139,32 @@ export async function POST(request: Request) {
 
     if (priorityError) {
       console.error("Error getting waiver priority:", priorityError)
-      return NextResponse.json({ error: "Could not determine waiver priority" }, { status: 500 })
+      // If no priority found, create one with a high number (low priority)
+      const { data: maxPriorityData } = await supabase
+        .from("waiver_priority")
+        .select("priority")
+        .order("priority", { ascending: false })
+        .limit(1)
+        .single()
+
+      const newPriority = (maxPriorityData?.priority || 0) + 1
+
+      const { error: insertError } = await supabase
+        .from("waiver_priority")
+        .insert({
+          team_id: teamId,
+          priority: newPriority,
+        })
+
+      if (insertError) {
+        console.error("Error creating waiver priority:", insertError)
+        return NextResponse.json({ error: "Could not determine waiver priority" }, { status: 500 })
+      }
+
+      // Use the newly created priority
+      priority = newPriority
+    } else {
+      priority = priorityData.priority
     }
 
     // Create the waiver claim
@@ -147,7 +173,7 @@ export async function POST(request: Request) {
       .insert({
         waiver_id: waiverId,
         claiming_team_id: teamId,
-        priority_at_claim: priorityData.priority,
+        priority_at_claim: priority,
         claimed_at: new Date().toISOString(),
         status: "pending",
       })
