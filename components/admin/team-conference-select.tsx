@@ -23,12 +23,12 @@ export function TeamConferenceSelect({
 }: TeamConferenceSelectProps) {
   const { supabase } = useSupabase()
   const { toast } = useToast()
-  const [selectedConferenceId, setSelectedConferenceId] = useState<string>(currentConferenceId || "")
+  const [selectedConferenceId, setSelectedConferenceId] = useState<string>(currentConferenceId || "none")
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
   useEffect(() => {
-    setSelectedConferenceId(currentConferenceId || "")
+    setSelectedConferenceId(currentConferenceId || "none")
     setHasChanges(false)
   }, [currentConferenceId])
 
@@ -51,7 +51,7 @@ export function TeamConferenceSelect({
       const { error } = await supabase
         .from("teams")
         .update({ 
-          conference_id: selectedConferenceId || null,
+          conference_id: selectedConferenceId === "none" ? null : selectedConferenceId,
           updated_at: new Date().toISOString()
         })
         .eq("id", teamId);
@@ -66,7 +66,7 @@ export function TeamConferenceSelect({
       });
       
       if (onSave) {
-        await onSave(teamId, selectedConferenceId || null);
+        await onSave(teamId, selectedConferenceId === "none" ? null : selectedConferenceId);
       }
     } catch (error) {
       console.error("Error updating team conference:", error);
@@ -94,7 +94,7 @@ export function TeamConferenceSelect({
           <SelectValue placeholder="Select conference" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">No Conference</SelectItem>
+          <SelectItem value="none">No Conference</SelectItem>
           {conferences.map((conference) => (
             <SelectItem key={conference.id} value={conference.id}>
               {conference.name}
