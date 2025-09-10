@@ -189,19 +189,34 @@ export async function POST(request: NextRequest) {
 
     // Create the waiver
     console.log("🔄 Creating waiver for player:", playerId, "Team:", targetPlayer.team_id)
+    console.log("Claim deadline:", claimDeadline.toISOString())
+    
+    const waiverData = {
+      player_id: playerId,
+      waiving_team_id: targetPlayer.team_id,
+      status: "active",
+      claim_deadline: claimDeadline.toISOString(),
+      waived_at: new Date().toISOString(),
+    }
+    
+    console.log("Waiver data to insert:", waiverData)
+    
     const { data: waiver, error: waiverError } = await supabase
       .from("waivers")
-      .insert({
-        player_id: playerId,
-        waiving_team_id: targetPlayer.team_id,
-        status: "active",
-        claim_deadline: claimDeadline.toISOString(),
-        waived_at: new Date().toISOString(),
-      })
+      .insert(waiverData)
       .select()
       .single()
 
     console.log("Waiver insert result:", { waiver, waiverError })
+    
+    if (waiverError) {
+      console.error("❌ Detailed waiver error:", {
+        message: waiverError.message,
+        details: waiverError.details,
+        hint: waiverError.hint,
+        code: waiverError.code
+      })
+    }
 
     if (waiverError) {
       console.error("❌ Error creating waiver:", waiverError)
