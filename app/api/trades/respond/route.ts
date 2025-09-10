@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Trade data not found in notification" }, { status: 400 })
     }
 
-    // Validate that the user responding is a manager of the team receiving the trade
+    // Validate that the user responding is a manager of a team
     const { data: player, error: playerError } = await supabase
       .from("players")
-      .select("team_id")
+      .select("team_id, role")
       .eq("user_id", userId)
       .in("role", ["GM", "AGM", "Owner"])
       .single()
@@ -115,30 +115,40 @@ export async function POST(request: NextRequest) {
         const team1Players = tradeData.fromPlayers || []
         const team2Players = tradeData.toPlayers || []
 
+        console.log("Processing trade with players:", { team1Players, team2Players })
+
         // Update player team assignments
         const playerUpdates = []
 
-        // Move team1 players to team2
+        // Move team1 players (from proposing team) to team2 (responding team)
         for (const player of team1Players) {
           const playerId = player.id
           if (playerId) {
+            console.log(`Moving player ${playerId} from team ${proposingTeam.id} to team ${respondingTeamId}`)
             playerUpdates.push(
               supabase
                 .from("players")
-                .update({ team_id: respondingTeamId }) // Assign to responding team
+                .update({ 
+                  team_id: respondingTeamId,
+                  updated_at: new Date().toISOString()
+                })
                 .eq("id", playerId),
             )
           }
         }
 
-        // Move team2 players to team1
+        // Move team2 players (from responding team) to team1 (proposing team)
         for (const player of team2Players) {
           const playerId = player.id
           if (playerId) {
+            console.log(`Moving player ${playerId} from team ${respondingTeamId} to team ${proposingTeam.id}`)
             playerUpdates.push(
               supabase
                 .from("players")
-                .update({ team_id: proposingTeam.id }) // Assign to proposing team
+                .update({ 
+                  team_id: proposingTeam.id,
+                  updated_at: new Date().toISOString()
+                })
                 .eq("id", playerId),
             )
           }
@@ -146,7 +156,21 @@ export async function POST(request: NextRequest) {
 
         // Execute all player updates
         if (playerUpdates.length > 0) {
-          await Promise.all(playerUpdates)
+          const updateResults = await Promise.all(playerUpdates)
+          console.log("Player update results:", updateResults)
+        }
+
+        // Update trade status to completed
+        const { error: updateTradeError } = await supabase
+          .from("trades")
+          .update({ 
+            status: "completed",
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", newTrade.id)
+
+        if (updateTradeError) {
+          console.error("Error updating trade status to completed:", updateTradeError)
         }
       } catch (playerError) {
         console.error("Error updating player assignments:", playerError)
