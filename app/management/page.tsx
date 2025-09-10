@@ -1241,10 +1241,16 @@ const ManagementPage = () => {
 
       let data
       if (!response.ok) {
-        // If response is not ok, get error message
-        const errorText = await response.text()
-        console.error("Error response:", errorText)
-        throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        // Try to get JSON error first, fallback to text
+        try {
+          const errorData = await response.json()
+          console.error("Error response:", errorData)
+          throw new Error(errorData.error || `Server error: ${response.status}`)
+        } catch (jsonError) {
+          const errorText = await response.text()
+          console.error("Error response (text):", errorText)
+          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        }
       }
 
       data = await response.json()
@@ -1335,12 +1341,22 @@ const ManagementPage = () => {
 
       console.log("Claim response status:", response.status)
 
-      const data = await response.json()
-      console.log("Claim response data:", data)
-
+      let data
       if (!response.ok) {
-        throw new Error(data.error || "Failed to claim waiver")
+        // Try to get JSON error first, fallback to text
+        try {
+          data = await response.json()
+          console.error("Error response:", data)
+          throw new Error(data.error || `Server error: ${response.status}`)
+        } catch (jsonError) {
+          const errorText = await response.text()
+          console.error("Error response (text):", errorText)
+          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        }
       }
+
+      data = await response.json()
+      console.log("Claim response data:", data)
 
       toast({
         title: "Claim submitted",
