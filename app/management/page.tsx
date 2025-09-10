@@ -2561,11 +2561,12 @@ const ManagementPage = () => {
                           {/* Team Selection */}
                           <div className="space-y-2">
                             <Label htmlFor="tradeTeam">Select Team to Trade With</Label>
-                            <Select value={selectedTeamForTrade || ""} onValueChange={setSelectedTeamForTrade}>
+                            <Select value={selectedTeamForTrade || "none"} onValueChange={setSelectedTeamForTrade}>
                               <SelectTrigger id="tradeTeam">
                                 <SelectValue placeholder="Select a team" />
                               </SelectTrigger>
                               <SelectContent>
+                                <SelectItem value="none">Select a team</SelectItem>
                                 {allTeams.map((team) => (
                                   <SelectItem key={team.id} value={team.id}>
                                     {team.name}
@@ -2575,7 +2576,7 @@ const ManagementPage = () => {
                             </Select>
                           </div>
 
-                          {selectedTeamForTrade && (
+                          {selectedTeamForTrade && selectedTeamForTrade !== "none" && (
                             <>
                               {/* Trade Message */}
                               <div className="space-y-2">

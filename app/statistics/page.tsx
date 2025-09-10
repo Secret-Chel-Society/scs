@@ -1873,11 +1873,12 @@ export default function StatisticsPage() {
                   <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
                     Season
                   </label>
-                  <Select value={selectedSeason?.id?.toString() || ""} onValueChange={handleSeasonChange}>
+                  <Select value={selectedSeason?.id?.toString() || "all"} onValueChange={handleSeasonChange}>
                     <SelectTrigger className="border-slate-300 dark:border-slate-600">
                       <SelectValue placeholder="Select season" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="all">All Seasons</SelectItem>
                       {seasons.map((season) => (
                         <SelectItem key={season.id} value={season.id.toString()}>
                           {season.name || `Season ${season.number || season.id}`}

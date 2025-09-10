@@ -180,11 +180,12 @@ export default function UpdateCurrentSeasonPage() {
               <Trophy className="h-4 w-4 text-rink-blue-500" />
               Select New Season
             </label>
-            <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
+            <Select value={selectedSeason || "none"} onValueChange={setSelectedSeason}>
               <SelectTrigger className="hockey-search">
                 <SelectValue placeholder="Select a season" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">Select a season</SelectItem>
                 {seasons.map((season) => (
                   <SelectItem key={season.id} value={season.id}>
                     {season.name} ({season.id})
@@ -195,7 +196,7 @@ export default function UpdateCurrentSeasonPage() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleUpdateSeason} disabled={isUpdating || !selectedSeason} className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white">
+          <Button onClick={handleUpdateSeason} disabled={isUpdating || !selectedSeason || selectedSeason === "none"} className="w-full hockey-button-enhanced bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white">
             {isUpdating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

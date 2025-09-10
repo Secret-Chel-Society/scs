@@ -931,15 +931,16 @@ export default function AdminAwardsPage() {
                       <div className="grid gap-2">
                         <Label htmlFor="team">Team</Label>
                         <Select
-                          value={editingTeamAward?.team_id || ""}
+                          value={editingTeamAward?.team_id || "none"}
                           onValueChange={(value) =>
-                            setEditingTeamAward((prev) => (prev ? { ...prev, team_id: value } : null))
+                            setEditingTeamAward((prev) => (prev ? { ...prev, team_id: value === "none" ? "" : value } : null))
                           }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select team" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="none">Select a team</SelectItem>
                             {teams.map((team) => (
                               <SelectItem key={team.id} value={team.id}>
                                 {team.name}
@@ -952,15 +953,16 @@ export default function AdminAwardsPage() {
                       <div className="grid gap-2">
                         <Label htmlFor="award-type">Award Type</Label>
                         <Select
-                          value={editingTeamAward?.award_type || ""}
+                          value={editingTeamAward?.award_type || "none"}
                           onValueChange={(value) =>
-                            setEditingTeamAward((prev) => (prev ? { ...prev, award_type: value } : null))
+                            setEditingTeamAward((prev) => (prev ? { ...prev, award_type: value === "none" ? "" : value } : null))
                           }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select award type" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="none">Select award type</SelectItem>
                             {teamAwardTypes.map((type) => (
                               <SelectItem key={type} value={type}>
                                 {type}
@@ -1227,9 +1229,9 @@ export default function AdminAwardsPage() {
                       <div className="grid gap-2">
                         <Label htmlFor="player">Player</Label>
                         <Select
-                          value={editingPlayerAward?.player_id || ""}
+                          value={editingPlayerAward?.player_id || "none"}
                           onValueChange={(value) =>
-                            setEditingPlayerAward((prev) => (prev ? { ...prev, player_id: value } : null))
+                            setEditingPlayerAward((prev) => (prev ? { ...prev, player_id: value === "none" ? "" : value } : null))
                           }
                         >
                           <SelectTrigger>
@@ -1248,15 +1250,16 @@ export default function AdminAwardsPage() {
                       <div className="grid gap-2">
                         <Label htmlFor="award-type">Award Type</Label>
                         <Select
-                          value={editingPlayerAward?.award_type || ""}
+                          value={editingPlayerAward?.award_type || "none"}
                           onValueChange={(value) =>
-                            setEditingPlayerAward((prev) => (prev ? { ...prev, award_type: value } : null))
+                            setEditingPlayerAward((prev) => (prev ? { ...prev, award_type: value === "none" ? "" : value } : null))
                           }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select award type" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="none">Select award type</SelectItem>
                             {playerAwardTypes.map((type) => (
                               <SelectItem key={type} value={type}>
                                 {type}

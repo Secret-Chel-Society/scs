@@ -1185,14 +1185,15 @@ export default function AdminStatisticsPage() {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Select
-              value={selectedSeason?.toString() || ""}
-              onValueChange={(value) => setSelectedSeason(Number.parseInt(value))}
+              value={selectedSeason?.toString() || "all"}
+              onValueChange={(value) => setSelectedSeason(value === "all" ? undefined : Number.parseInt(value))}
               disabled={loadingSeasons}
             >
               <SelectTrigger className="w-[200px] hockey-input border-2 focus:border-ice-blue-500 dark:focus:border-rink-blue-500 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20 transition-all duration-300">
                 <SelectValue placeholder={loadingSeasons ? "Loading..." : "Select Season"} />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Seasons</SelectItem>
                 {seasons.map((season) => (
                   <SelectItem key={season.id} value={season.id.toString()}>
                     {season.name} {season.is_active ? "(Active)" : ""}
@@ -1929,11 +1930,12 @@ export default function AdminStatisticsPage() {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="space-y-2">
               <div className="font-medium">Player</div>
-              <Select value={selectedPlayerId || ""} onValueChange={setSelectedPlayerId}>
+              <Select value={selectedPlayerId || "all"} onValueChange={setSelectedPlayerId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select player" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Players</SelectItem>
                   {availablePlayers.map((player) => (
                     <SelectItem key={player.id} value={player.id}>
                       {player.gamer_tag} {player.team_name ? `(${player.team_name})` : "(Free Agent)"}
