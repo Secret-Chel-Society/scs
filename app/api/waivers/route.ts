@@ -392,24 +392,34 @@ export async function GET(request: NextRequest) {
     // Get waiver claims separately to avoid complex joins
     let waiverClaims: any[] = []
     if (waivers && waivers.length > 0) {
-      const waiverIds = waivers.map(w => w.id)
-      const { data: claims, error: claimsError } = await supabase
-        .from("waiver_claims")
-        .select(`
-          id,
-          waiver_id,
-          claiming_team_id,
-          priority_at_claim,
-          status,
-          teams:claiming_team_id (
-            name,
-            logo_url
-          )
-        `)
-        .in("waiver_id", waiverIds)
+      try {
+        const waiverIds = waivers.map(w => w.id)
+        const { data: claims, error: claimsError } = await supabase
+          .from("waiver_claims")
+          .select(`
+            id,
+            waiver_id,
+            claiming_team_id,
+            priority_at_claim,
+            status,
+            created_at,
+            updated_at,
+            claimed_at,
+            teams:claiming_team_id (
+              id,
+              name,
+              logo_url
+            )
+          `)
+          .in("waiver_id", waiverIds)
 
-      if (!claimsError) {
-        waiverClaims = claims || []
+        if (!claimsError) {
+          waiverClaims = claims || []
+        } else {
+          console.log("Waiver claims table not available yet, skipping claims")
+        }
+      } catch (claimsError) {
+        console.log("Waiver claims query failed, continuing without claims:", claimsError)
       }
     }
 

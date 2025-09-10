@@ -15,6 +15,19 @@ CREATE TABLE IF NOT EXISTS public.waivers (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 1b. Create waiver_claims table ONLY if it doesn't exist
+CREATE TABLE IF NOT EXISTS public.waiver_claims (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    waiver_id UUID NOT NULL REFERENCES public.waivers(id) ON DELETE CASCADE,
+    claiming_team_id UUID NOT NULL REFERENCES public.teams(id) ON DELETE CASCADE,
+    priority_at_claim INTEGER,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    claimed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(waiver_id, claiming_team_id)
+);
+
 -- 2. Add missing columns ONLY if they don't exist
 DO $$
 BEGIN
