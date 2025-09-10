@@ -286,7 +286,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: false,
       error: error.message || "An error occurred",
-      details: error.stack || "No additional details available"
+      details: error.details || "No additional details available"
     }, { status: 500 })
   }
 }
@@ -427,6 +427,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ waivers: validWaivers })
   } catch (error: any) {
     console.error("Error in waivers GET:", error)
-    return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 })
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || "An error occurred",
+      details: error.details || "No additional details"
+    }, { status: 500 })
   }
 }

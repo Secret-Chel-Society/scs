@@ -54,6 +54,10 @@ export async function POST() {
     })
   } catch (error: any) {
     console.error("Error checking expired waivers:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || "An error occurred",
+      details: error.details || "No additional details"
+    }, { status: 500 })
   }
 }
