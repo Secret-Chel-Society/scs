@@ -1,10 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createAdminClient } from "@/lib/supabase/server"
+import { createServerClient } from "@supabase/ssr"
+import type { Database } from "@/lib/types/database"
 import { cancelPlayerBids } from "@/lib/bid-cleanup"
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createAdminClient()
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get() { return undefined },
+          set() {},
+          remove() {},
+        },
+      },
+    )
     const now = new Date()
 
     console.log("=== Processing expired waivers ===")
