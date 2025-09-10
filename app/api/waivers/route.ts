@@ -353,31 +353,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get all waivers with player and team information
+    // Get all waivers with basic information first
     console.log("🔍 Fetching waivers with status:", status)
     
     const { data: waivers, error } = await supabase
       .from("waivers")
-      .select(`
-          *,
-          players:player_id (
-            id,
-            salary,
-            users:user_id (
-              id,
-              gamer_tag_id,
-              primary_position,
-              secondary_position,
-              console,
-              avatar_url
-            )
-          ),
-          waiving_team:waiving_team_id (
-            id,
-            name,
-            logo_url
-          )
-        `)
+      .select("*")
       .eq("status", status)
       .order("claim_deadline", { ascending: true })
 
@@ -389,50 +370,79 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Get waiver claims separately to avoid complex joins
-    let waiverClaims: any[] = []
+    // Get player and team data separately to avoid complex joins
+    let waiversWithData: any[] = []
     if (waivers && waivers.length > 0) {
-      try {
-        const waiverIds = waivers.map(w => w.id)
-        const { data: claims, error: claimsError } = await supabase
-          .from("waiver_claims")
-          .select(`
-            id,
-            waiver_id,
-            claiming_team_id,
-            priority_at_claim,
-            status,
-            created_at,
-            updated_at,
-            claimed_at,
-            teams:claiming_team_id (
+      for (const waiver of waivers) {
+        try {
+          // Get player data
+          const { data: player, error: playerError } = await supabase
+            .from("players")
+            .select(`
               id,
-              name,
-              logo_url
-            )
-          `)
-          .in("waiver_id", waiverIds)
+              salary,
+              users:user_id (
+                id,
+                gamer_tag_id,
+                primary_position,
+                secondary_position,
+                console,
+                avatar_url
+              )
+            `)
+            .eq("id", waiver.player_id)
+            .single()
 
-        if (!claimsError) {
-          waiverClaims = claims || []
-        } else {
-          console.log("Waiver claims table not available yet, skipping claims")
+          // Get team data
+          const { data: team, error: teamError } = await supabase
+            .from("teams")
+            .select("id, name, logo_url")
+            .eq("id", waiver.waiving_team_id)
+            .single()
+
+          // Get waiver claims
+          const { data: claims, error: claimsError } = await supabase
+            .from("waiver_claims")
+            .select(`
+              id,
+              waiver_id,
+              claiming_team_id,
+              priority_at_claim,
+              status,
+              created_at,
+              updated_at,
+              claimed_at,
+              teams:claiming_team_id (
+                id,
+                name,
+                logo_url
+              )
+            `)
+            .eq("waiver_id", waiver.id)
+
+          waiversWithData.push({
+            ...waiver,
+            players: player,
+            waiving_team: team,
+            waiver_claims: claims || []
+          })
+        } catch (error) {
+          console.log("Error fetching data for waiver:", waiver.id, error)
+          // Add waiver without additional data
+          waiversWithData.push({
+            ...waiver,
+            players: null,
+            waiving_team: null,
+            waiver_claims: []
+          })
         }
-      } catch (claimsError) {
-        console.log("Waiver claims query failed, continuing without claims:", claimsError)
       }
     }
 
-    // Combine waivers with their claims
-    const waiversWithClaims = waivers?.map(waiver => ({
-      ...waiver,
-      waiver_claims: waiverClaims.filter(claim => claim.waiver_id === waiver.id)
-    })) || []
-
-    console.log(`Found ${waiversWithClaims?.length || 0} waivers with status ${status}`)
+    console.log(`Found ${waiversWithData?.length || 0} waivers with status ${status}`)
 
     // Filter out any waivers with null players (shouldn't happen, but just in case)
-    const validWaivers = waiversWithClaims?.filter((w) => w.players) || []
+    const validWaivers = waiversWithData?.filter((w) => w.players) || []
 
     return NextResponse.json({ waivers: validWaivers })
   } catch (error: any) {
