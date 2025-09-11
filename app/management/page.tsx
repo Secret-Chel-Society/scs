@@ -1243,18 +1243,24 @@ const ManagementPage = () => {
       if (!response.ok) {
         // Try to get JSON error first, fallback to text
         try {
-          const errorData = await response.json()
-          console.error("Error response:", errorData)
-          throw new Error(errorData.error || `Server error: ${response.status}`)
+          data = await response.json()
+          console.error("Error response:", data)
+          throw new Error(data.error || `Server error: ${response.status}`)
         } catch (jsonError) {
-          const errorText = await response.text()
-          console.error("Error response (text):", errorText)
-          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+          // If JSON parsing failed, try to get text, but only if we haven't already consumed the body
+          try {
+            const errorText = await response.text()
+            console.error("Error response (text):", errorText)
+            throw new Error(`Server error: ${response.status} ${response.statusText}`)
+          } catch (textError) {
+            // If both JSON and text fail, just use the status
+            throw new Error(`Server error: ${response.status} ${response.statusText}`)
+          }
         }
+      } else {
+        data = await response.json()
+        console.log("Waiver response data:", data)
       }
-
-      data = await response.json()
-      console.log("Waiver response data:", data)
 
 
       toast({

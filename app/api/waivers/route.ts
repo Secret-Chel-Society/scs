@@ -49,8 +49,113 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Player ID is required" }, { status: 400 })
     }
 
-    // Rest of your existing POST handler code...
-    return NextResponse.json({ error: "Not implemented" }, { status: 501 })
+    // Get the player and verify they exist
+    const { data: player, error: playerError } = await supabase
+      .from("players")
+      .select(`
+        id,
+        user_id,
+        team_id,
+        salary,
+        role,
+        status,
+        teams:team_id (
+          id,
+          name
+        )
+      `)
+      .eq("id", playerId)
+      .single()
+
+    if (playerError || !player) {
+      console.error("Error fetching player:", playerError)
+      return NextResponse.json({ error: "Player not found" }, { status: 404 })
+    }
+
+    // Check if player is already on a team
+    if (!player.team_id) {
+      return NextResponse.json({ error: "Player is not on a team" }, { status: 400 })
+    }
+
+    // Verify the user has permission to waive this player
+    // They must be a team manager (Owner, GM, or AGM) of the player's current team
+    const { data: userPlayer, error: userPlayerError } = await supabase
+      .from("players")
+      .select("id, role, team_id")
+      .eq("user_id", user.id)
+      .eq("team_id", player.team_id)
+      .in("role", ["Owner", "GM", "AGM"])
+      .single()
+
+    if (userPlayerError || !userPlayer) {
+      console.error("User permission check failed:", userPlayerError)
+      return NextResponse.json({ 
+        error: "You don't have permission to waive this player. Only team managers can waive players." 
+      }, { status: 403 })
+    }
+
+    // Check if player is already on waivers
+    const { data: existingWaiver, error: waiverCheckError } = await supabase
+      .from("waivers")
+      .select("id, status")
+      .eq("player_id", playerId)
+      .eq("status", "active")
+      .single()
+
+    if (waiverCheckError && waiverCheckError.code !== "PGRST116") {
+      console.error("Error checking existing waivers:", waiverCheckError)
+      return NextResponse.json({ error: "Error checking existing waivers" }, { status: 500 })
+    }
+
+    if (existingWaiver) {
+      return NextResponse.json({ error: "Player is already on waivers" }, { status: 400 })
+    }
+
+    // Calculate claim deadline (8 hours from now)
+    const claimDeadline = new Date()
+    claimDeadline.setHours(claimDeadline.getHours() + 8)
+
+    // Create the waiver record
+    const { data: waiver, error: waiverError } = await supabase
+      .from("waivers")
+      .insert({
+        player_id: playerId,
+        waiving_team_id: player.team_id,
+        claim_deadline: claimDeadline.toISOString(),
+        status: "active"
+      })
+      .select()
+      .single()
+
+    if (waiverError) {
+      console.error("Error creating waiver:", waiverError)
+      return NextResponse.json({ error: "Failed to create waiver" }, { status: 500 })
+    }
+
+    // Update player status to indicate they're on waivers
+    const { error: updateError } = await supabase
+      .from("players")
+      .update({
+        status: "on_waivers"
+      })
+      .eq("id", playerId)
+
+    if (updateError) {
+      console.error("Error updating player status:", updateError)
+      // Don't fail the request, but log the error
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Player successfully placed on waivers",
+      waiver: {
+        id: waiver.id,
+        player_id: playerId,
+        waiving_team: player.teams,
+        claim_deadline: waiver.claim_deadline,
+        status: waiver.status
+      }
+    })
 
   } catch (error: any) {
     console.error("Error in waivers POST:", error)
