@@ -62,4 +62,3 @@ GRANT USAGE ON SCHEMA public TO authenticated;
 
 -- Test the policies
 SELECT 'Policies created successfully' as status;
-

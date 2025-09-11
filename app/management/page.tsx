@@ -1031,16 +1031,21 @@ const ManagementPage = () => {
 
       console.log("Free agents API response status:", response.status)
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Failed to fetch free agents: ${response.status}`)
+      let data
+      try {
+        data = await response.json()
+        console.log("Free agents API response:", {
+          freeAgentsCount: data.freeAgents?.length || 0,
+          debug: data.debug,
+        })
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError)
+        throw new Error(`Failed to fetch free agents: ${response.status}`)
       }
 
-      const data = await response.json()
-      console.log("Free agents API response:", {
-        freeAgentsCount: data.freeAgents?.length || 0,
-        debug: data.debug,
-      })
+      if (!response.ok) {
+        throw new Error(data.error || `Failed to fetch free agents: ${response.status}`)
+      }
 
       const freeAgentsList = data.freeAgents || []
       setFreeAgents(freeAgentsList)
@@ -1240,26 +1245,19 @@ const ManagementPage = () => {
       console.log("Waiver response status:", response.status)
 
       let data
-      if (!response.ok) {
-        // Try to get JSON error first, fallback to text
-        try {
-          data = await response.json()
-          console.error("Error response:", data)
-          throw new Error(data.error || `Server error: ${response.status}`)
-        } catch (jsonError) {
-          // If JSON parsing failed, try to get text, but only if we haven't already consumed the body
-          try {
-            const errorText = await response.text()
-            console.error("Error response (text):", errorText)
-            throw new Error(`Server error: ${response.status} ${response.statusText}`)
-          } catch (textError) {
-            // If both JSON and text fail, just use the status
-            throw new Error(`Server error: ${response.status} ${response.statusText}`)
-          }
-        }
-      } else {
+      try {
         data = await response.json()
         console.log("Waiver response data:", data)
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError)
+        const errorText = await response.text()
+        console.error("Error response (text):", errorText)
+        throw new Error(`Server error: ${response.status} ${response.statusText}`)
+      }
+
+      if (!response.ok) {
+        console.error("Error response:", data)
+        throw new Error(data.error || `Server error: ${response.status}`)
       }
 
 
@@ -1348,21 +1346,20 @@ const ManagementPage = () => {
       console.log("Claim response status:", response.status)
 
       let data
-      if (!response.ok) {
-        // Try to get JSON error first, fallback to text
-        try {
-          data = await response.json()
-          console.error("Error response:", data)
-          throw new Error(data.error || `Server error: ${response.status}`)
-        } catch (jsonError) {
-          const errorText = await response.text()
-          console.error("Error response (text):", errorText)
-          throw new Error(`Server error: ${response.status} ${response.statusText}`)
-        }
+      try {
+        data = await response.json()
+        console.log("Claim response data:", data)
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError)
+        const errorText = await response.text()
+        console.error("Error response (text):", errorText)
+        throw new Error(`Server error: ${response.status} ${response.statusText}`)
       }
 
-      data = await response.json()
-      console.log("Claim response data:", data)
+      if (!response.ok) {
+        console.error("Error response:", data)
+        throw new Error(data.error || `Server error: ${response.status}`)
+      }
 
       toast({
         title: "Claim submitted",
@@ -1471,14 +1468,19 @@ const ManagementPage = () => {
 
       console.log("Trade response status:", response.status)
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Trade response error:", errorData)
-        throw new Error(errorData.error || `Failed to ${accept ? "accept" : "reject"} trade`)
+      let data
+      try {
+        data = await response.json()
+        console.log("Trade response data:", data)
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError)
+        throw new Error(`Failed to ${accept ? "accept" : "reject"} trade: ${response.status}`)
       }
 
-      const data = await response.json()
-      console.log("Trade response data:", data)
+      if (!response.ok) {
+        console.error("Trade response error:", data)
+        throw new Error(data.error || `Failed to ${accept ? "accept" : "reject"} trade`)
+      }
 
       toast({
         title: accept ? "Trade Accepted" : "Trade Rejected",

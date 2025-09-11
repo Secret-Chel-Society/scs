@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiver System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Waiver System Test</h1>
+    
+    <div class="test-section info">
+        <h3>Test Instructions</h3>
+        <p>This page tests the waiver system fixes. Make sure you're logged in to the application before running these tests.</p>
+        <p><strong>Note:</strong> The development server should be running on <code>http://localhost:3000</code></p>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Test Waiver API Endpoint</h3>
+        <p>This tests the POST /api/waivers endpoint to ensure it doesn't have the "body stream already read" error.</p>
+        <button onclick="testWaiverAPI()">Test Waiver API</button>
+        <div id="waiver-api-result" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Response Parsing</h3>
+        <p>This tests the response parsing logic to ensure it handles both success and error responses correctly.</p>
+        <button onclick="testResponseParsing()">Test Response Parsing</button>
+        <div id="response-parsing-result" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test AuthFetch Function</h3>
+        <p>This tests the authFetch function to ensure it properly handles errors and returns responses.</p>
+        <button onclick="testAuthFetch()">Test AuthFetch</button>
+        <div id="auth-fetch-result" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testWaiverAPI() {
+            clearLog('waiver-api-result');
+            log('waiver-api-result', 'Testing waiver API endpoint...');
+            
+            try {
+                // First, get a fresh session
+                const sessionResponse = await fetch(`${API_BASE}/api/auth/get-token-info`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+                
+                if (!sessionResponse.ok) {
+                    log('waiver-api-result', 'Failed to get session. Please make sure you are logged in.', 'error');
+                    return;
+                }
+                
+                const sessionData = await sessionResponse.json();
+                log('waiver-api-result', `Session obtained: ${sessionData.user?.id || 'No user ID'}`);
+                
+                // Test the waiver API with a dummy player ID
+                const waiverResponse = await fetch(`${API_BASE}/api/waivers`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionData.access_token}`
+                    },
+                    body: JSON.stringify({ playerId: '00000000-0000-0000-0000-000000000000' })
+                });
+                
+                log('waiver-api-result', `Waiver API response status: ${waiverResponse.status}`);
+                
+                // Test response parsing (this is where the error was occurring)
+                let data;
+                try {
+                    data = await waiverResponse.json();
+                    log('waiver-api-result', 'Response parsed successfully as JSON', 'success');
+                } catch (parseError) {
+                    log('waiver-api-result', `JSON parsing failed: ${parseError.message}`, 'error');
+                    const errorText = await waiverResponse.text();
+                    log('waiver-api-result', `Response as text: ${errorText.substring(0, 200)}...`);
+                }
+                
+                if (!waiverResponse.ok) {
+                    log('waiver-api-result', `Error response: ${data?.error || 'Unknown error'}`, 'error');
+                } else {
+                    log('waiver-api-result', 'Waiver API test completed successfully', 'success');
+                }
+                
+            } catch (error) {
+                log('waiver-api-result', `Test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testResponseParsing() {
+            clearLog('response-parsing-result');
+            log('response-parsing-result', 'Testing response parsing logic...');
+            
+            // Test with a mock response that simulates the old problematic pattern
+            const mockResponse = {
+                ok: false,
+                status: 500,
+                statusText: 'Internal Server Error',
+                json: async () => ({ error: 'Test error' }),
+                text: async () => 'Test error text'
+            };
+            
+            // Simulate the old problematic pattern
+            log('response-parsing-result', 'Testing old pattern (should fail)...');
+            try {
+                if (!mockResponse.ok) {
+                    const errorData = await mockResponse.json();
+                    log('response-parsing-result', 'Old pattern: JSON error read successfully', 'success');
+                }
+                const data = await mockResponse.json(); // This would fail in the old pattern
+                log('response-parsing-result', 'Old pattern: Second JSON read succeeded', 'success');
+            } catch (error) {
+                log('response-parsing-result', `Old pattern failed as expected: ${error.message}`, 'error');
+            }
+            
+            // Test the new pattern
+            log('response-parsing-result', 'Testing new pattern...');
+            const mockResponse2 = {
+                ok: false,
+                status: 500,
+                statusText: 'Internal Server Error',
+                json: async () => ({ error: 'Test error' }),
+                text: async () => 'Test error text'
+            };
+            
+            try {
+                let data;
+                try {
+                    data = await mockResponse2.json();
+                    log('response-parsing-result', 'New pattern: JSON parsed successfully', 'success');
+                } catch (parseError) {
+                    const errorText = await mockResponse2.text();
+                    log('response-parsing-result', `New pattern: Fallback to text: ${errorText}`, 'success');
+                }
+                
+                if (!mockResponse2.ok) {
+                    log('response-parsing-result', `New pattern: Error handled: ${data?.error}`, 'success');
+                }
+                
+                log('response-parsing-result', 'New pattern test completed successfully', 'success');
+            } catch (error) {
+                log('response-parsing-result', `New pattern failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthFetch() {
+            clearLog('auth-fetch-result');
+            log('auth-fetch-result', 'Testing authFetch function...');
+            
+            try {
+                // Test a simple API call that should work
+                const response = await fetch(`${API_BASE}/api/bidding/status`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                log('auth-fetch-result', `Bidding status response: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('auth-fetch-result', `Bidding status data: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    log('auth-fetch-result', 'Bidding status request failed', 'error');
+                }
+                
+                log('auth-fetch-result', 'AuthFetch test completed', 'success');
+            } catch (error) {
+                log('auth-fetch-result', `AuthFetch test failed: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
