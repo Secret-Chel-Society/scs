@@ -43,10 +43,17 @@ export async function makeAuthenticatedRequest(url: string, options: RequestInit
     headers,
   })
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: "Unknown error" }))
-    throw new Error(errorData.error || `HTTP ${response.status}`)
+  let data
+  try {
+    data = await response.json()
+  } catch (parseError) {
+    console.error("Error parsing response:", parseError)
+    throw new Error(`Invalid response format: ${response.status}`)
   }
 
-  return response.json()
+  if (!response.ok) {
+    throw new Error(data.error || `HTTP ${response.status}`)
+  }
+
+  return data
 }
