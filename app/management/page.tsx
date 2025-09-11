@@ -1031,21 +1031,16 @@ const ManagementPage = () => {
 
       console.log("Free agents API response status:", response.status)
 
-      let data
-      try {
-        data = await response.json()
-        console.log("Free agents API response:", {
-          freeAgentsCount: data.freeAgents?.length || 0,
-          debug: data.debug,
-        })
-      } catch (parseError) {
-        console.error("Error parsing response:", parseError)
-        throw new Error(`Failed to fetch free agents: ${response.status}`)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Failed to fetch free agents: ${response.status}`)
       }
 
-      if (!response.ok) {
-        throw new Error(data.error || `Failed to fetch free agents: ${response.status}`)
-      }
+      const data = await response.json()
+      console.log("Free agents API response:", {
+        freeAgentsCount: data.freeAgents?.length || 0,
+        debug: data.debug,
+      })
 
       const freeAgentsList = data.freeAgents || []
       setFreeAgents(freeAgentsList)
@@ -1245,20 +1240,21 @@ const ManagementPage = () => {
       console.log("Waiver response status:", response.status)
 
       let data
-      try {
-        data = await response.json()
-        console.log("Waiver response data:", data)
-      } catch (parseError) {
-        console.error("Error parsing response:", parseError)
-        const errorText = await response.text()
-        console.error("Error response (text):", errorText)
-        throw new Error(`Server error: ${response.status} ${response.statusText}`)
+      if (!response.ok) {
+        // Try to get JSON error first, fallback to text
+        try {
+          const errorData = await response.json()
+          console.error("Error response:", errorData)
+          throw new Error(errorData.error || `Server error: ${response.status}`)
+        } catch (jsonError) {
+          const errorText = await response.text()
+          console.error("Error response (text):", errorText)
+          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        }
       }
 
-      if (!response.ok) {
-        console.error("Error response:", data)
-        throw new Error(data.error || `Server error: ${response.status}`)
-      }
+      data = await response.json()
+      console.log("Waiver response data:", data)
 
 
       toast({
@@ -1346,20 +1342,21 @@ const ManagementPage = () => {
       console.log("Claim response status:", response.status)
 
       let data
-      try {
-        data = await response.json()
-        console.log("Claim response data:", data)
-      } catch (parseError) {
-        console.error("Error parsing response:", parseError)
-        const errorText = await response.text()
-        console.error("Error response (text):", errorText)
-        throw new Error(`Server error: ${response.status} ${response.statusText}`)
+      if (!response.ok) {
+        // Try to get JSON error first, fallback to text
+        try {
+          data = await response.json()
+          console.error("Error response:", data)
+          throw new Error(data.error || `Server error: ${response.status}`)
+        } catch (jsonError) {
+          const errorText = await response.text()
+          console.error("Error response (text):", errorText)
+          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        }
       }
 
-      if (!response.ok) {
-        console.error("Error response:", data)
-        throw new Error(data.error || `Server error: ${response.status}`)
-      }
+      data = await response.json()
+      console.log("Claim response data:", data)
 
       toast({
         title: "Claim submitted",
@@ -1468,19 +1465,14 @@ const ManagementPage = () => {
 
       console.log("Trade response status:", response.status)
 
-      let data
-      try {
-        data = await response.json()
-        console.log("Trade response data:", data)
-      } catch (parseError) {
-        console.error("Error parsing response:", parseError)
-        throw new Error(`Failed to ${accept ? "accept" : "reject"} trade: ${response.status}`)
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("Trade response error:", errorData)
+        throw new Error(errorData.error || `Failed to ${accept ? "accept" : "reject"} trade`)
       }
 
-      if (!response.ok) {
-        console.error("Trade response error:", data)
-        throw new Error(data.error || `Failed to ${accept ? "accept" : "reject"} trade`)
-      }
+      const data = await response.json()
+      console.log("Trade response data:", data)
 
       toast({
         title: accept ? "Trade Accepted" : "Trade Rejected",

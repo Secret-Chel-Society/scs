@@ -4,15 +4,10 @@ import type { Database } from "@/lib/types/database"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("=== WAIVER API DEBUG START ===")
-    console.log("Request received at:", new Date().toISOString())
-    
     // Get the authorization header
     const authHeader = request.headers.get("Authorization")
-    console.log("Auth header present:", !!authHeader)
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("❌ No valid authorization header")
       return NextResponse.json({ error: "No authorization header" }, { status: 401 })
     }
 
@@ -63,17 +58,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user's team and role
-    console.log("🔍 Looking up player data for user:", user.id)
     const { data: playerData, error: playerError } = await supabase
       .from("players")
       .select("team_id, role")
       .eq("user_id", user.id)
       .single()
 
-    console.log("Player data result:", { playerData, playerError })
-
     if (playerError || !playerData?.team_id) {
-      console.error("❌ Team verification error:", playerError)
+      console.error("Team verification error:", playerError)
       return NextResponse.json({ 
         error: "You must be on a team to waive players", 
         details: playerError?.message 
@@ -209,13 +201,12 @@ export async function POST(request: NextRequest) {
     
     console.log("Waiver data to insert:", waiverData)
     
-    console.log("🔍 Attempting to insert waiver into database...")
     const { data: waiver, error: waiverError } = await supabase
       .from("waivers")
       .insert(waiverData)
       .select()
       .single()
-    
+
     console.log("Waiver insert result:", { waiver, waiverError })
     
     if (waiverError) {
@@ -291,11 +282,7 @@ export async function POST(request: NextRequest) {
       team_name: team?.name,
     })
   } catch (error: any) {
-    console.error("=== WAIVER API ERROR ===")
     console.error("Error creating waiver:", error)
-    console.error("Error stack:", error.stack)
-    console.error("Error details:", error.details)
-    console.error("=== END WAIVER API ERROR ===")
     return NextResponse.json({ 
       success: false,
       error: error.message || "An error occurred",
