@@ -1,38 +1,38 @@
 "use client"
 
 import { toast } from "sonner"
-import { authPost, authGet } from "@/lib/auth-fetch"
+import { authPost } from "@/lib/auth-fetch"
 
-/**
- * Places a player on waivers
- * @param playerId The ID of the player to place on waivers
- * @returns Promise with the result of the waiver operation
- */
 export async function placePlayerOnWaivers(playerId: string) {
   try {
-    const { response, data } = await authPost("/api/waivers", { playerId })
+    const { response, data } = await authPost(
+      "/api/waivers", 
+      { playerId },
+      { showErrorToast: true, handleAuthError: true }
+    )
 
     if (!response.ok) {
-      throw new Error(data.error || "Failed to place player on waivers")
+      const error = data?.error || "Failed to place player on waivers"
+      throw new Error(error)
     }
 
     toast.success("Player successfully placed on waivers")
     return data
   } catch (error: any) {
-    // Error handling is done in authPost, just re-throw
+    if (error.status === 401) {
+      toast.error("Authentication failed. Please try again.")
+    } else {
+      console.error("Error placing player on waivers:", error)
+      toast.error(error.message || "Failed to place player on waivers")
+    }
     throw error
   }
 }
 
-/**
- * Fetches the current waivers list
- * @param status Filter by waiver status (default: 'active')
- * @returns Promise with the waivers data
- */
 export async function fetchWaivers(status = "active") {
   try {
     const { response, data } = await authGet(`/api/waivers?status=${status}`, {
-      showErrorToast: false, // Don't show toast for fetch errors
+      showErrorToast: false,
     })
 
     if (!response.ok) {
