@@ -1233,7 +1233,7 @@ const ManagementPage = () => {
         teamId: teamData.id
       })
 
-      const response = await fetch("/api/waivers/simple", {
+      const response = await fetch("/api/waivers/v2", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
