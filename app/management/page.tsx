@@ -1109,7 +1109,7 @@ const ManagementPage = () => {
       // First, process any expired waivers with better error handling
       try {
         console.log("Processing expired waivers...")
-        const processResponse = await fetch("/api/waivers/check-expired", {
+        const processResponse = await fetch("/api/waivers/process", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1141,7 +1141,7 @@ const ManagementPage = () => {
 
       // Then fetch current active waivers (should exclude processed ones)
       console.log("Fetching active waivers...")
-      const response = await fetch("/api/waivers?status=active", {
+      const response = await fetch("/api/waivers/v2?status=active", {
         headers: {
           "Content-Type": "application/json",
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
@@ -1233,7 +1233,7 @@ const ManagementPage = () => {
         teamId: teamData.id
       })
 
-      const response = await fetch("/api/waivers/working", {
+      const response = await fetch("/api/waivers/v2", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1334,7 +1334,7 @@ const ManagementPage = () => {
 
       console.log("Making claim request with fresh session")
 
-      const response = await fetch(`/api/waivers/claim`, {
+      const response = await fetch(`/api/waivers/v2`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1342,6 +1342,7 @@ const ManagementPage = () => {
           Authorization: `Bearer ${freshSession.access_token}`,
         },
         body: JSON.stringify({
+          action: 'claim',
           waiverId,
           teamId: teamData.id,
         }),
