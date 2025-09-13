@@ -240,7 +240,7 @@ export function EaMatchImportModal({
         } catch (e) {
           // If not JSON, get as text
           try {
-            errorText = await response.text()
+            errorText = await response.clone().text()
             // Limit the error text length
             if (errorText.length > 100) {
               errorText = errorText.substring(0, 100) + "..."
@@ -265,7 +265,7 @@ export function EaMatchImportModal({
       // Check content type to ensure we're getting JSON
       const contentType = response.headers.get("content-type")
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text()
+        const text = await response.clone().text()
         console.error(`Received non-JSON response: ${text.substring(0, 100)}...`)
         throw new Error(`Expected JSON response but got: ${contentType || "unknown content type"}`)
       }
@@ -390,7 +390,7 @@ export function EaMatchImportModal({
         // Check content type to ensure we're getting JSON
         const contentType = response.headers.get("content-type")
         if (!contentType || !contentType.includes("application/json")) {
-          const text = await response.text()
+          const text = await response.clone().text()
           console.error(`Received non-JSON response: ${text.substring(0, 100)}...`)
           throw new Error(`Expected JSON response but got: ${contentType || "unknown content type"}`)
         }
