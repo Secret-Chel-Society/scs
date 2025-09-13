@@ -1235,7 +1235,11 @@ const ManagementPage = () => {
           // Use the fresh session access token
           Authorization: `Bearer ${freshSession.access_token}`,
         },
-        body: JSON.stringify({ playerId }),
+        body: JSON.stringify({ 
+          action: 'waive',
+          playerId,
+          teamId: teamData.id
+        }),
       })
 
       console.log("Waiver response status:", response.status)

@@ -6,11 +6,16 @@ import { authPost, authGet } from "@/lib/auth-fetch"
 /**
  * Places a player on waivers
  * @param playerId The ID of the player to place on waivers
+ * @param teamId The ID of the team waiving the player
  * @returns Promise with the result of the waiver operation
  */
-export async function placePlayerOnWaivers(playerId: string) {
+export async function placePlayerOnWaivers(playerId: string, teamId: string) {
   try {
-    const { response, data } = await authPost("/api/waivers", { playerId })
+    const { response, data } = await authPost("/api/waivers", { 
+      action: 'waive',
+      playerId,
+      teamId
+    })
 
     if (!response.ok) {
       throw new Error(data.error || "Failed to place player on waivers")
