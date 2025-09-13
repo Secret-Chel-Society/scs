@@ -1247,7 +1247,7 @@ const ManagementPage = () => {
           console.error("Error response:", errorData)
           throw new Error(errorData.error || `Server error: ${response.status}`)
         } catch (jsonError) {
-          const errorText = await response.text()
+          const errorText = await response.clone().text()
           console.error("Error response (text):", errorText)
           throw new Error(`Server error: ${response.status} ${response.statusText}`)
         }
@@ -1349,7 +1349,7 @@ const ManagementPage = () => {
           console.error("Error response:", data)
           throw new Error(data.error || `Server error: ${response.status}`)
         } catch (jsonError) {
-          const errorText = await response.text()
+          const errorText = await response.clone().text()
           console.error("Error response (text):", errorText)
           throw new Error(`Server error: ${response.status} ${response.statusText}`)
         }
