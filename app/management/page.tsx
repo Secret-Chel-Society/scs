@@ -28,6 +28,7 @@ import { XCircle, CheckCircle2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Home, Gavel } from "lucide-react"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
+import { ManagementNav } from "@/components/management/management-nav"
 
 interface Player {
   id: string
@@ -1539,6 +1540,11 @@ const ManagementPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20">
       <div className="container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          {/* Navigation */}
+          <div className="mb-8">
+            <ManagementNav />
+          </div>
+          
           {/* Enhanced Hockey-Themed Header */}
           <div className="hockey-header p-8 mb-8 rounded-3xl">
             <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
