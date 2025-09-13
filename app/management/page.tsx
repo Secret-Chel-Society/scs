@@ -1035,9 +1035,9 @@ const ManagementPage = () => {
       if (!response.ok) {
         data = await response.json()
         throw new Error(data.error || `Failed to fetch free agents: ${response.status}`)
+      } else {
+        data = await response.json()
       }
-
-      data = await response.json()
       console.log("Free agents API response:", {
         freeAgentsCount: data.freeAgents?.length || 0,
         debug: data.debug,
@@ -1471,9 +1471,9 @@ const ManagementPage = () => {
         data = await response.json()
         console.error("Trade response error:", data)
         throw new Error(data.error || `Failed to ${accept ? "accept" : "reject"} trade`)
+      } else {
+        data = await response.json()
       }
-
-      data = await response.json()
       console.log("Trade response data:", data)
 
       toast({

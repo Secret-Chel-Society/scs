@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Waiver POST error:', error)
-      return NextResponse.json({ 
+    return NextResponse.json({ 
       error: 'Failed to process waiver action',
       message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
