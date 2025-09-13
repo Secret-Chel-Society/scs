@@ -74,13 +74,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('🔍 Waiver API POST received body:', body)
     const { action, waiverId, teamId, playerId } = body
 
     if (!action) {
+      console.log('❌ No action provided in request')
       return NextResponse.json({
         error: 'Action is required'
       }, { status: 400 })
     }
+
+    console.log('🔍 Extracted values:', { action, waiverId, teamId, playerId })
 
     switch (action) {
       case 'claim':
@@ -97,6 +101,11 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Waiver POST error:', error)
+    console.error('❌ Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    })
     return NextResponse.json({ 
       error: 'Failed to process waiver action',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -185,6 +194,8 @@ async function handleWaiverClaim(waiverId: string, teamId: string) {
 
 async function handleWaivePlayer(playerId: string, teamId: string) {
   try {
+    console.log('🔍 handleWaivePlayer called with:', { playerId, teamId })
+    
     // Check if player exists and is on the team
     const { data: player, error: playerError } = await supabase
       .from('players')
@@ -192,6 +203,8 @@ async function handleWaivePlayer(playerId: string, teamId: string) {
       .eq('id', playerId)
       .eq('team_id', teamId)
       .single()
+
+    console.log('🔍 Player query result:', { player, playerError })
 
     if (playerError || !player) {
       return NextResponse.json({ 
