@@ -1227,6 +1227,11 @@ const ManagementPage = () => {
       }
 
       console.log("Making waiver request with fresh session")
+      console.log("Request data:", { 
+        action: 'waive',
+        playerId,
+        teamId: teamData.id
+      })
 
       const response = await fetch("/api/waivers", {
         method: "POST",

@@ -6,6 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Debug environment variables
+console.log('🔍 Environment check:', {
+  hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+  hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 20) + '...',
+  serviceRoleKeyLength: process.env.SUPABASE_SERVICE_ROLE_KEY?.length || 0
+})
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -73,6 +81,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 Waiver API POST endpoint called')
+    
     const body = await request.json()
     console.log('🔍 Waiver API POST received body:', body)
     const { action, waiverId, teamId, playerId } = body
@@ -85,6 +95,23 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Extracted values:', { action, waiverId, teamId, playerId })
+
+    // Test database connection
+    console.log('🔍 Testing database connection...')
+    const { data: testData, error: testError } = await supabase
+      .from('players')
+      .select('id')
+      .limit(1)
+    
+    if (testError) {
+      console.error('❌ Database connection test failed:', testError)
+      return NextResponse.json({
+        error: 'Database connection failed',
+        details: testError.message
+      }, { status: 500 })
+    }
+    
+    console.log('✅ Database connection test passed')
 
     switch (action) {
       case 'claim':
