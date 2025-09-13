@@ -1,186 +1,171 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
-import type { Database } from "@/lib/types/database"
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET(request: NextRequest) {
+// Create a fresh Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+export async function POST(request: NextRequest) {
+  console.log('🚀 SIMPLE WAIVER API CALLED')
+  
   try {
-    console.log("🔍 Simple waivers fetch test")
+    // Parse the request body
+    const body = await request.json()
+    console.log('📦 Request body:', body)
     
-    // Get the authorization header
-    const authHeader = request.headers.get("Authorization")
-
-    // Create Supabase client
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name) {
-            return request.cookies.get(name)?.value
-          },
-          set() {},
-          remove() {},
-        },
-        global: authHeader
-          ? {
-              headers: {
-                Authorization: authHeader,
-              },
-            }
-          : undefined,
-      },
-    )
-
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status") || "active"
-
-    console.log("Fetching waivers with status:", status)
-
-    // Test 1: Simple waivers query
-    console.log("Test 1: Basic waivers query")
-    const { data: basicWaivers, error: basicError } = await supabase
-      .from("waivers")
-      .select("*")
-      .eq("status", status)
-      .order("claim_deadline", { ascending: true })
-
-    if (basicError) {
-      console.error("❌ Basic waivers error:", basicError)
-      return NextResponse.json({ 
-        error: "Basic waivers query failed", 
-        details: basicError.message,
-        code: basicError.code 
-      }, { status: 500 })
+    const { action, playerId, teamId } = body
+    
+    // Validate required fields
+    if (!action) {
+      console.log('❌ No action provided')
+      return NextResponse.json({ error: 'Action is required' }, { status: 400 })
     }
-
-    console.log(`✅ Basic waivers query successful: ${basicWaivers?.length || 0} waivers`)
-
-    // Test 2: Waivers with players
-    console.log("Test 2: Waivers with players")
-    const { data: waiversWithPlayers, error: playersError } = await supabase
-      .from("waivers")
-      .select(`
-        *,
-        players:player_id (
-          id,
-          salary,
-          role
-        )
-      `)
-      .eq("status", status)
-      .order("claim_deadline", { ascending: true })
-
-    if (playersError) {
-      console.error("❌ Waivers with players error:", playersError)
-      return NextResponse.json({ 
-        error: "Waivers with players query failed", 
-        details: playersError.message,
-        code: playersError.code 
-      }, { status: 500 })
+    
+    if (!playerId) {
+      console.log('❌ No playerId provided')
+      return NextResponse.json({ error: 'Player ID is required' }, { status: 400 })
     }
-
-    console.log(`✅ Waivers with players query successful: ${waiversWithPlayers?.length || 0} waivers`)
-
-    // Test 3: Waivers with players and users
-    console.log("Test 3: Waivers with players and users")
-    const { data: waiversWithUsers, error: usersError } = await supabase
-      .from("waivers")
-      .select(`
-        *,
-        players:player_id (
-          id,
-          salary,
-          role,
-          users:user_id (
-            id,
-            gamer_tag_id,
-            primary_position,
-            secondary_position,
-            console,
-            avatar_url
-          )
-        )
-      `)
-      .eq("status", status)
-      .order("claim_deadline", { ascending: true })
-
-    if (usersError) {
-      console.error("❌ Waivers with users error:", usersError)
-      return NextResponse.json({ 
-        error: "Waivers with users query failed", 
-        details: usersError.message,
-        code: usersError.code 
-      }, { status: 500 })
+    
+    if (!teamId) {
+      console.log('❌ No teamId provided')
+      return NextResponse.json({ error: 'Team ID is required' }, { status: 400 })
     }
-
-    console.log(`✅ Waivers with users query successful: ${waiversWithUsers?.length || 0} waivers`)
-
-    // Test 4: Full query
-    console.log("Test 4: Full query with all joins")
-    const { data: fullWaivers, error: fullError } = await supabase
-      .from("waivers")
-      .select(`
-          *,
-          players:player_id (
-            id,
-            salary,
-            role,
-            users:user_id (
-              id,
-              gamer_tag_id,
-              primary_position,
-              secondary_position,
-              console,
-              avatar_url
-            )
-          ),
-          waiving_team:waiving_team_id (
-            id,
-            name,
-            logo_url
-          ),
-          waiver_claims (
-            id,
-            claiming_team_id,
-            priority_at_claim,
-            status,
-            teams:claiming_team_id (
-              name,
-              logo_url
-            )
-          )
-        `)
-      .eq("status", status)
-      .order("claim_deadline", { ascending: true })
-
-    if (fullError) {
-      console.error("❌ Full waivers error:", fullError)
-      return NextResponse.json({ 
-        error: "Full waivers query failed", 
-        details: fullError.message,
-        code: fullError.code 
-      }, { status: 500 })
+    
+    console.log('✅ All required fields present:', { action, playerId, teamId })
+    
+    if (action === 'waive') {
+      return await handleSimpleWaive(playerId, teamId)
     }
-
-    console.log(`✅ Full waivers query successful: ${fullWaivers?.length || 0} waivers`)
-
-    // Filter out any waivers with null players
-    const validWaivers = fullWaivers?.filter((w) => w.players) || []
-
+    
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+    
+  } catch (error) {
+    console.error('💥 SIMPLE WAIVER API ERROR:', error)
     return NextResponse.json({ 
-      waivers: validWaivers,
-      tests: {
-        basic: basicWaivers?.length || 0,
-        withPlayers: waiversWithPlayers?.length || 0,
-        withUsers: waiversWithUsers?.length || 0,
-        full: fullWaivers?.length || 0
-      }
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}
+
+async function handleSimpleWaive(playerId: string, teamId: string) {
+  console.log('🔄 Starting simple waive process:', { playerId, teamId })
+  
+  try {
+    // Step 1: Check if player exists
+    console.log('🔍 Step 1: Checking if player exists...')
+    const { data: player, error: playerError } = await supabase
+      .from('players')
+      .select('id, user_id, team_id, salary, role')
+      .eq('id', playerId)
+      .single()
+    
+    if (playerError) {
+      console.error('❌ Player query failed:', playerError)
+      return NextResponse.json({ 
+        error: 'Player not found',
+        details: playerError.message 
+      }, { status: 404 })
+    }
+    
+    if (!player) {
+      console.log('❌ Player not found')
+      return NextResponse.json({ error: 'Player not found' }, { status: 404 })
+    }
+    
+    console.log('✅ Player found:', player)
+    
+    // Step 2: Check if player is on the correct team
+    if (player.team_id !== teamId) {
+      console.log('❌ Player not on team:', { playerTeamId: player.team_id, requestedTeamId: teamId })
+      return NextResponse.json({ 
+        error: 'Player is not on the specified team' 
+      }, { status: 400 })
+    }
+    
+    console.log('✅ Player is on correct team')
+    
+    // Step 3: Check if player is already on waivers
+    console.log('🔍 Step 3: Checking for existing waivers...')
+    const { data: existingWaiver, error: waiverCheckError } = await supabase
+      .from('waivers')
+      .select('id, status')
+      .eq('player_id', playerId)
+      .eq('status', 'active')
+      .single()
+    
+    if (waiverCheckError && waiverCheckError.code !== 'PGRST116') {
+      console.error('❌ Waiver check failed:', waiverCheckError)
+      return NextResponse.json({ 
+        error: 'Failed to check existing waivers',
+        details: waiverCheckError.message 
+      }, { status: 500 })
+    }
+    
+    if (existingWaiver) {
+      console.log('❌ Player already on waivers')
+      return NextResponse.json({ 
+        error: 'Player is already on waivers' 
+      }, { status: 409 })
+    }
+    
+    console.log('✅ No existing waivers found')
+    
+    // Step 4: Create waiver
+    console.log('🔍 Step 4: Creating waiver...')
+    const claimDeadline = new Date()
+    claimDeadline.setHours(claimDeadline.getHours() + 48)
+    
+    const { data: waiver, error: waiverError } = await supabase
+      .from('waivers')
+      .insert({
+        player_id: playerId,
+        waiving_team_id: teamId,
+        claim_deadline: claimDeadline.toISOString(),
+        status: 'active'
+      })
+      .select()
+      .single()
+    
+    if (waiverError) {
+      console.error('❌ Waiver creation failed:', waiverError)
+      return NextResponse.json({ 
+        error: 'Failed to create waiver',
+        details: waiverError.message 
+      }, { status: 500 })
+    }
+    
+    console.log('✅ Waiver created:', waiver)
+    
+    // Step 5: Update player team_id to null
+    console.log('🔍 Step 5: Updating player team...')
+    const { error: updateError } = await supabase
+      .from('players')
+      .update({ team_id: null })
+      .eq('id', playerId)
+    
+    if (updateError) {
+      console.error('❌ Player update failed:', updateError)
+      // Don't fail the whole operation, just log the error
+      console.log('⚠️ Continuing despite player update failure')
+    } else {
+      console.log('✅ Player team updated to null')
+    }
+    
+    console.log('🎉 SIMPLE WAIVE SUCCESS!')
+    return NextResponse.json({
+      success: true,
+      message: 'Player placed on waivers successfully',
+      waiver: waiver
     })
-  } catch (error: any) {
-    console.error("❌ Error in simple waivers GET:", error)
+    
+  } catch (error) {
+    console.error('💥 SIMPLE WAIVE ERROR:', error)
     return NextResponse.json({ 
-      error: error.message || "An error occurred",
-      stack: error.stack 
+      error: 'Failed to waive player',
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
