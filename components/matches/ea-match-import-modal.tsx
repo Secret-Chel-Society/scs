@@ -238,16 +238,8 @@ export function EaMatchImportModal({
           const errorData = await response.json()
           errorText = errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`
         } catch (e) {
-          // If not JSON, get as text
-          try {
-            errorText = await response.clone().text()
-            // Limit the error text length
-            if (errorText.length > 100) {
-              errorText = errorText.substring(0, 100) + "..."
-            }
-          } catch (textError) {
-            errorText = `Error ${response.status}: ${response.statusText}`
-          }
+          // Response body already consumed, can't clone
+          errorText = `Error ${response.status}: ${response.statusText}`
         }
 
         console.error(`Error response from past-matches API: ${errorText}`)
@@ -265,8 +257,7 @@ export function EaMatchImportModal({
       // Check content type to ensure we're getting JSON
       const contentType = response.headers.get("content-type")
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.clone().text()
-        console.error(`Received non-JSON response: ${text.substring(0, 100)}...`)
+        console.error(`Received non-JSON response with content type: ${contentType || "unknown"}`)
         throw new Error(`Expected JSON response but got: ${contentType || "unknown content type"}`)
       }
 
@@ -390,8 +381,7 @@ export function EaMatchImportModal({
         // Check content type to ensure we're getting JSON
         const contentType = response.headers.get("content-type")
         if (!contentType || !contentType.includes("application/json")) {
-          const text = await response.clone().text()
-          console.error(`Received non-JSON response: ${text.substring(0, 100)}...`)
+          console.error(`Received non-JSON response with content type: ${contentType || "unknown"}`)
           throw new Error(`Expected JSON response but got: ${contentType || "unknown content type"}`)
         }
 

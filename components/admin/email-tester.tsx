@@ -53,13 +53,16 @@ export function EmailTester() {
       let responseText = ""
 
       try {
-        // First try to get the raw text for debugging
-        responseText = await response.clone().text()
-        // Then try to parse as JSON
+        // Parse as JSON
         data = await response.json()
       } catch (parseError) {
         console.error("Error parsing response:", parseError)
-        console.log("Raw response:", responseText)
+        // Try to get text for debugging (response body already consumed)
+        try {
+          responseText = "Response body already consumed"
+        } catch (textError) {
+          responseText = "Unable to read response text"
+        }
         throw new Error(`Server returned invalid JSON response: ${responseText || "Unable to read response text"}`)
       }
 
