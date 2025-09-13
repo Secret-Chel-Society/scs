@@ -1251,14 +1251,12 @@ const ManagementPage = () => {
 
       let data
       if (!response.ok) {
-        // Try to get JSON error first, fallback to text
         try {
-          const errorData = await response.json()
-          console.error("Error response:", errorData)
-          throw new Error(errorData.error || `Server error: ${response.status}`)
+          data = await response.json()
+          console.error("Error response:", data)
+          throw new Error(data.error || `Server error: ${response.status}`)
         } catch (jsonError) {
-          // Response body already consumed, can't clone
-          console.error("Error response (text):", "Response body already consumed")
+          console.error("Error parsing response:", jsonError)
           throw new Error(`Server error: ${response.status} ${response.statusText}`)
         }
       } else {
@@ -1353,14 +1351,12 @@ const ManagementPage = () => {
 
       let data
       if (!response.ok) {
-        // Try to get JSON error first, fallback to text
         try {
           data = await response.json()
           console.error("Error response:", data)
           throw new Error(data.error || `Server error: ${response.status}`)
         } catch (jsonError) {
-          // Response body already consumed, can't clone
-          console.error("Error response (text):", "Response body already consumed")
+          console.error("Error parsing response:", jsonError)
           throw new Error(`Server error: ${response.status} ${response.statusText}`)
         }
       } else {
