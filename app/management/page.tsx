@@ -1552,6 +1552,48 @@ const ManagementPage = () => {
                 <Gavel className="h-12 w-12 text-white" />
                   </div>
               <div className="text-center md:text-left">
+                <h1 className="hockey-gradient-text text-4xl md:text-5xl font-black mb-2">
+                  Team Management
+                </h1>
+                <p className="text-xl text-hockey-silver-200 dark:text-hockey-silver-300">
+                  Complete control over your team's operations
+                </p>
+              </div>
+            </div>
+            
+            {/* Quick Access Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <Link href="/management/waivers" className="group">
+                <Card className="hockey-card hover:scale-105 transition-all duration-300 cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <Gavel className="h-8 w-8 text-blue-500 mx-auto mb-2 group-hover:text-blue-400 transition-colors" />
+                    <h3 className="font-semibold text-lg mb-1">Waiver System</h3>
+                    <p className="text-sm text-muted-foreground">Manage player waivers and claims</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              
+              <Link href="/management/lineups" className="group">
+                <Card className="hockey-card hover:scale-105 transition-all duration-300 cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <Users className="h-8 w-8 text-green-500 mx-auto mb-2 group-hover:text-green-400 transition-colors" />
+                    <h3 className="font-semibold text-lg mb-1">Lineups</h3>
+                    <p className="text-sm text-muted-foreground">Set your team lineups</p>
+                  </CardContent>
+                </Card>
+              </Link>
+              
+              <Link href="/management/bids" className="group">
+                <Card className="hockey-card hover:scale-105 transition-all duration-300 cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <DollarSign className="h-8 w-8 text-yellow-500 mx-auto mb-2 group-hover:text-yellow-400 transition-colors" />
+                    <h3 className="font-semibold text-lg mb-1">Bidding</h3>
+                    <p className="text-sm text-muted-foreground">Manage player bids</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
+          </div>
                 <h1 className="hockey-title mb-4">Team Management</h1>
             {teamData && (
                     <div className="flex items-center justify-center md:justify-start gap-3">
