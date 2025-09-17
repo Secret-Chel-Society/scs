@@ -28,16 +28,40 @@ export default function ManagementLayout({
           return
         }
 
-        // Check if user has a team (GM, AGM, or Owner role)
+        // Check if user has a team with management role (level 30+)
         const { data: playerData, error: playerError } = await supabase
           .from("players")
-          .select("role, team_id")
+          .select(`
+            role,
+            team_id,
+            user_roles (
+              role_id,
+              roles (
+                id,
+                name,
+                display_name,
+                level,
+                is_system_role
+              )
+            )
+          `)
           .eq("user_id", session.user.id)
-          .in("role", ["GM", "AGM", "Owner"])
+          .not("team_id", "is", null)
           .single()
 
         if (playerError || !playerData) {
           setError("You don't have permission to access the management area")
+          setIsAuthorized(false)
+          return
+        }
+
+        // Check if user has a management role (level 30 or higher)
+        const hasManagementRole = playerData.user_roles?.some((userRole: any) => 
+          userRole.roles && userRole.roles.level >= 30
+        )
+
+        if (!hasManagementRole) {
+          setError("You need a management role (Captain, Coach, GM, or Owner) to access this area")
           setIsAuthorized(false)
           return
         }

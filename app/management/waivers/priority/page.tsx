@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
+import { canManagePriority, UserRole } from "@/lib/role-utils"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { 
@@ -42,14 +43,58 @@ const WaiverPriorityPage = () => {
   
   // State
   const [waiverPriority, setWaiverPriority] = useState<WaiverPriority[]>([])
+  const [userRoles, setUserRoles] = useState<UserRole[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [resetting, setResetting] = useState(false)
 
   // Load waiver priority
   useEffect(() => {
-    loadWaiverPriority()
+    loadUserRoles()
   }, [])
+
+  const loadUserRoles = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setError('User not authenticated')
+        return
+      }
+
+      const { data: player } = await supabase
+        .from('players')
+        .select(`
+          user_roles (
+            id,
+            role_id,
+            roles (
+              id,
+              name,
+              display_name,
+              level,
+              is_system_role
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .single()
+
+      if (player?.user_roles) {
+        setUserRoles(player.user_roles)
+        
+        // Check if user can manage priority
+        if (!canManagePriority(player.user_roles)) {
+          setError('You do not have permission to manage waiver priority. You need at least a General Manager role.')
+          return
+        }
+      }
+
+      await loadWaiverPriority()
+    } catch (error) {
+      console.error('Error loading user roles:', error)
+      setError('Failed to load user permissions')
+    }
+  }
 
   const loadWaiverPriority = async () => {
     try {
