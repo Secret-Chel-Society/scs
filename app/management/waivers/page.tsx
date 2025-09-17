@@ -15,7 +15,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
-import { getRolePermissions, canManageWaivers, canManagePriority, UserRole } from "@/lib/role-utils"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { 
@@ -101,8 +100,6 @@ const WaiversPage = () => {
   const [teamPlayers, setTeamPlayers] = useState<Player[]>([])
   const [waiverPriority, setWaiverPriority] = useState<WaiverPriority[]>([])
   const [teamData, setTeamData] = useState<Team | null>(null)
-  const [userRoles, setUserRoles] = useState<UserRole[]>([])
-  const [permissions, setPermissions] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [loadingWaivers, setLoadingWaivers] = useState(false)
   const [loadingPlayers, setLoadingPlayers] = useState(false)
@@ -147,17 +144,6 @@ const WaiversPage = () => {
             id,
             name,
             logo_url
-          ),
-          user_roles (
-            id,
-            role_id,
-            roles (
-              id,
-              name,
-              display_name,
-              level,
-              is_system_role
-            )
           )
         `)
         .eq('user_id', user.id)
@@ -165,15 +151,6 @@ const WaiversPage = () => {
 
       if (player?.team_id) {
         setTeamData(player.teams)
-        setUserRoles(player.user_roles || [])
-        setPermissions(getRolePermissions(player.user_roles || []))
-        
-        // Check if user can manage waivers
-        if (!canManageWaivers(player.user_roles || [])) {
-          setError('You do not have permission to manage waivers. You need at least a Captain role.')
-          return
-        }
-        
         await Promise.all([
           loadTeamPlayers(player.team_id),
           loadWaiverPriority()
@@ -508,16 +485,6 @@ const WaiversPage = () => {
               <Users className="h-5 w-5" />
               {teamData.name}
             </CardTitle>
-            {permissions && (
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">
-                  {permissions.canManagePriority ? 'Full Access' : 'Limited Access'}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Role: {permissions.canManagePriority ? 'Management' : 'Captain'}
-                </span>
-              </div>
-            )}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
