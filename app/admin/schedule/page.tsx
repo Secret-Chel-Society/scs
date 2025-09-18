@@ -1054,25 +1054,36 @@ export default function AdminSchedulePage() {
 
   // Parse CSV file
   const parseCSV = (text: string): CSVMatch[] => {
+    console.log("Parsing CSV with text length:", text.length)
+    
     // Split by lines and remove empty lines
     const lines = text.split("\n").filter((line) => line.trim() !== "")
+    console.log("CSV lines found:", lines.length)
+    
     if (lines.length < 2) {
       throw new Error("CSV file must contain a header row and at least one data row")
     }
 
-    // Parse header
-    const header = lines[0].split(",").map((h) => h.trim().toLowerCase())
+    // Parse header - handle different line endings and encodings
+    const headerLine = lines[0].replace(/\r/g, '').trim()
+    const header = headerLine.split(",").map((h) => h.trim().toLowerCase().replace(/"/g, ''))
+    console.log("CSV headers:", header)
+    
     const requiredColumns = ["date", "time", "home team", "away team"]
     const missingColumns = requiredColumns.filter((col) => !header.includes(col))
     if (missingColumns.length > 0) {
-      throw new Error(`CSV is missing required columns: ${missingColumns.join(", ")}`)
+      throw new Error(`CSV is missing required columns: ${missingColumns.join(", ")}. Found columns: ${header.join(", ")}`)
     }
 
     // Parse data rows
     const matches: CSVMatch[] = []
     for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].replace(/\r/g, '').trim()
+      if (!line) continue // Skip empty lines
+      
+      console.log(`Processing line ${i}:`, line)
+      
       // Handle quoted fields with commas
-      const line = lines[i]
       const fields: string[] = []
       let inQuotes = false
       let currentField = ""
@@ -1089,6 +1100,8 @@ export default function AdminSchedulePage() {
         }
       }
       fields.push(currentField) // Add the last field
+      
+      console.log(`Parsed fields for line ${i}:`, fields)
 
       // Clean up quoted fields
       const cleanFields = fields.map((field) => {
@@ -1150,12 +1163,17 @@ export default function AdminSchedulePage() {
       const text = await csvFile.text()
       console.log("CSV content preview:", text.substring(0, 500))
       
+      // Validate file content
+      if (!text || text.trim().length === 0) {
+        throw new Error("CSV file is empty or could not be read")
+      }
+      
       const matches = parseCSV(text)
       console.log("Parsed matches:", matches.length, "matches found")
-
-      // Validate matches
+      
+      // Validate parsed matches
       if (matches.length === 0) {
-        throw new Error("No valid matches found in the CSV file")
+        throw new Error("No valid matches found in CSV. Please check the format and try again.")
       }
 
       // Log team information for debugging
@@ -1334,18 +1352,30 @@ export default function AdminSchedulePage() {
       }
 
       setUploadResults(results)
-      toast({
-        title: "Upload complete",
-        description: `Successfully imported ${results.success} of ${results.total} matches`,
-      })
+      
+      // Show results toast
+      if (results.success > 0) {
+        toast({
+          title: "Upload complete",
+          description: `Successfully imported ${results.success} of ${results.total} matches`,
+        })
+      } else {
+        toast({
+          title: "Upload failed",
+          description: `No matches were imported. Check the errors below.`,
+          variant: "destructive",
+        })
+      }
 
       // Refresh matches
       fetchMatches()
-      setIsUploadDialogOpen(false)
-      setCsvFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""
-      }
+      
+      // Don't close dialog immediately - let user see results
+      // setIsUploadDialogOpen(false)
+      // setCsvFile(null)
+      // if (fileInputRef.current) {
+      //   fileInputRef.current.value = ""
+      // }
     } catch (error: any) {
       console.error("Error uploading CSV:", error)
       toast({
@@ -2143,19 +2173,28 @@ export default function AdminSchedulePage() {
             </div>
             <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
               <Button 
-                onClick={() => setIsUploadDialogOpen(false)} 
+                onClick={() => {
+                  setIsUploadDialogOpen(false)
+                  setCsvFile(null)
+                  setUploadResults(null)
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = ""
+                  }
+                }} 
                 disabled={isUploading}
                 className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
               >
-                Cancel
+                {uploadResults ? "Close" : "Cancel"}
               </Button>
-              <Button 
-                onClick={uploadMatchesFromCSV} 
-                disabled={!csvFile || isUploading}
-                className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-              >
-                {isUploading ? "Uploading..." : "Upload"}
-              </Button>
+              {!uploadResults && (
+                <Button 
+                  onClick={uploadMatchesFromCSV} 
+                  disabled={!csvFile || isUploading}
+                  className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                >
+                  {isUploading ? "Uploading..." : "Upload"}
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
