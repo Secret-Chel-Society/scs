@@ -1112,15 +1112,26 @@ export default function AdminSchedulePage() {
         return field
       })
 
-      // Map fields to match object
+      // Map fields to match object - handle different column orders
       const match: CSVMatch = {
         date: cleanFields[header.indexOf("date")],
         time: cleanFields[header.indexOf("time")],
         homeTeam: cleanFields[header.indexOf("home team")],
         awayTeam: cleanFields[header.indexOf("away team")],
       }
+      
+      // Validate that we found the required fields
+      if (!match.date || !match.time || !match.homeTeam || !match.awayTeam) {
+        console.error(`Missing required fields in row ${i}:`, {
+          date: match.date,
+          time: match.time,
+          homeTeam: match.homeTeam,
+          awayTeam: match.awayTeam
+        })
+        throw new Error(`Row ${i}: Missing required fields (Date, Time, Home Team, Away Team)`)
+      }
 
-      // Add optional fields if they exist
+      // Add optional fields if they exist - handle different column orders
       if (header.includes("home score")) {
         match.homeScore = cleanFields[header.indexOf("home score")]
       }
@@ -1133,6 +1144,8 @@ export default function AdminSchedulePage() {
       if (header.includes("season")) {
         match.season = cleanFields[header.indexOf("season")]
       }
+      
+      console.log(`Parsed match ${i}:`, match)
 
       matches.push(match)
     }
@@ -2083,9 +2096,10 @@ export default function AdminSchedulePage() {
                 <br />
                 <strong>Optional columns:</strong> Home Score, Away Score, Status, Season
                 <br /><br />
-                <strong>Format examples:</strong>
+                <strong>Supported formats:</strong>
                 <br />• Date: 2024-01-15 or 01/15/2024
                 <br />• Time: 19:00 or 19:00:00
+                <br />• Column order: Date, Time, Away Team, Home Team, Away Score, Home Score, Status, Season
                 <br />• Team names must exactly match your team names in the database
               </DialogDescription>
             </DialogHeader>
