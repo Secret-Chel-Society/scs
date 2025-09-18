@@ -38,6 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { PlayerStats } from "@/lib/statistics"
 import { useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { getCurrentSeasonId } from "@/lib/team-utils"
 
 // Week definitions for Season 1 - 7 weeks total
 const SEASON_1_WEEKS = [
@@ -634,22 +635,24 @@ export default function StatisticsPage() {
             })
           }
         } else {
-          // Default to season 1 if nothing else works
+          // Default to current season if nothing else works
+          const currentSeasonId = await getCurrentSeasonId()
           setSelectedSeason({
-            id: "1",
-            number: 1,
-            name: "Season 1",
+            id: currentSeasonId.toString(),
+            number: currentSeasonId,
+            name: `Season ${currentSeasonId}`,
             is_active: true,
           })
         }
       } catch (error: any) {
         console.error("Error fetching current season from settings:", error)
         setError(`Error fetching current season: ${error.message}`)
-        // Default to season 1 as last resort
+        // Default to current season as last resort
+        const currentSeasonId = await getCurrentSeasonId()
         setSelectedSeason({
-          id: "1",
-          number: 1,
-          name: "Season 1",
+          id: currentSeasonId.toString(),
+          number: currentSeasonId,
+          name: `Season ${currentSeasonId}`,
           is_active: true,
         })
       }

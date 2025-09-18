@@ -11,6 +11,7 @@ import { Trophy, Award, Star } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
+import { getCurrentSeasonId } from "@/lib/team-utils"
 
 interface TeamAward {
   id: string
@@ -158,24 +159,22 @@ export default function AwardsPage() {
           console.log("Processed seasons for awards page:", processedSeasons)
           setSeasons(processedSeasons)
         } else {
-          // Fallback to default seasons if table doesn't exist
+          // Fallback to current season if table doesn't exist
+          const currentSeasonId = await getCurrentSeasonId()
           const defaultSeasons = [
-            { id: "1", name: "Season 1", number: 1 },
-            { id: "2", name: "Season 2", number: 2 },
-            { id: "3", name: "Season 3", number: 3 },
+            { id: currentSeasonId.toString(), name: `Season ${currentSeasonId}`, number: currentSeasonId },
           ]
-          console.log("Using default seasons:", defaultSeasons)
+          console.log("Using current season as default:", defaultSeasons)
           setSeasons(defaultSeasons)
         }
       } catch (error) {
         console.error("Error fetching seasons:", error)
-        // Fallback to default seasons
+        // Fallback to current season
+        const currentSeasonId = await getCurrentSeasonId()
         const defaultSeasons = [
-          { id: "1", name: "Season 1", number: 1 },
-          { id: "2", name: "Season 2", number: 2 },
-          { id: "3", name: "Season 3", number: 3 },
+          { id: currentSeasonId.toString(), name: `Season ${currentSeasonId}`, number: currentSeasonId },
         ]
-        console.log("Using default seasons due to error:", defaultSeasons)
+        console.log("Using current season due to error:", defaultSeasons)
         setSeasons(defaultSeasons)
       }
     } catch (error: any) {

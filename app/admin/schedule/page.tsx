@@ -1143,14 +1143,23 @@ export default function AdminSchedulePage() {
     setUploadResults(null)
 
     try {
+      console.log("Starting CSV upload process...")
+      console.log("CSV file:", csvFile.name, "Size:", csvFile.size, "bytes")
+      
       // Read file
       const text = await csvFile.text()
+      console.log("CSV content preview:", text.substring(0, 500))
+      
       const matches = parseCSV(text)
+      console.log("Parsed matches:", matches.length, "matches found")
 
       // Validate matches
       if (matches.length === 0) {
         throw new Error("No valid matches found in the CSV file")
       }
+
+      // Log team information for debugging
+      console.log("Available teams:", teams.map(t => ({ id: t.id, name: t.name })))
 
       // Create a map of team names to IDs
       const teamMap = new Map<string, string>()
@@ -1180,11 +1189,15 @@ export default function AdminSchedulePage() {
           const awayTeamId = teamMap.get(match.awayTeam.toLowerCase())
 
           if (!homeTeamId) {
-            throw new Error(`Home team "${match.homeTeam}" not found`)
+            const availableTeams = Array.from(teamMap.keys()).join(", ")
+            throw new Error(`Home team "${match.homeTeam}" not found. Available teams: ${availableTeams}`)
           }
           if (!awayTeamId) {
-            throw new Error(`Away team "${match.awayTeam}" not found`)
+            const availableTeams = Array.from(teamMap.keys()).join(", ")
+            throw new Error(`Away team "${match.awayTeam}" not found. Available teams: ${availableTeams}`)
           }
+
+          console.log(`Processing match: ${match.homeTeam} vs ${match.awayTeam}`)
 
           // Parse date and time
           let dateTime: Date
@@ -1272,22 +1285,44 @@ export default function AdminSchedulePage() {
           }
 
           // Insert match
+          console.log("Inserting match data:", matchData)
           const { error } = await supabase.from("matches").insert(matchData)
 
           if (error) {
+            console.error("Database insert error:", error)
+            
             // Handle season_id type mismatch
             if (error.message.includes("invalid input syntax for type")) {
+              console.log("Removing season_id due to type mismatch")
               delete matchData.season_id
               const { error: retryError } = await supabase.from("matches").insert(matchData)
-              if (retryError) throw retryError
+              if (retryError) {
+                console.error("Retry insert error:", retryError)
+                throw retryError
+              }
             }
             // Handle season_name not existing
             else if (error.message.includes("season_name") && error.message.includes("does not exist")) {
+              console.log("Removing season_name due to column not existing")
               delete matchData.season_name
               const { error: retryError } = await supabase.from("matches").insert(matchData)
-              if (retryError) throw retryError
-            } else {
-              throw error
+              if (retryError) {
+                console.error("Retry insert error:", retryError)
+                throw retryError
+              }
+            }
+            // Handle RLS policy violations
+            else if (error.message.includes("new row violates row-level security policy")) {
+              throw new Error("Permission denied: You don't have permission to create matches. Please contact an administrator.")
+            }
+            // Handle foreign key violations
+            else if (error.message.includes("violates foreign key constraint")) {
+              throw new Error("Invalid team ID: One or both teams don't exist in the database.")
+            }
+            // Handle other database errors
+            else {
+              console.error("Unhandled database error:", error)
+              throw new Error(`Database error: ${error.message}`)
             }
           }
 
@@ -2013,6 +2048,15 @@ export default function AdminSchedulePage() {
               </DialogTitle>
               <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
                 Upload a CSV file with match data. The file must include columns for Date, Time, Home Team, and Away Team.
+                <br /><br />
+                <strong>Required columns:</strong> Date, Time, Home Team, Away Team
+                <br />
+                <strong>Optional columns:</strong> Home Score, Away Score, Status, Season
+                <br /><br />
+                <strong>Format examples:</strong>
+                <br />• Date: 2024-01-15 or 01/15/2024
+                <br />• Time: 19:00 or 19:00:00
+                <br />• Team names must exactly match your team names in the database
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-6 py-6">

@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import HeroCarousel from "@/components/hero-carousel"
+import { getCurrentSeasonId } from "@/lib/team-utils"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { RecentTrades } from "@/components/recent-trades"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -114,6 +115,8 @@ export default function Home() {
     standings: true,
     featured: true,
   })
+  const [currentSeasonId, setCurrentSeasonId] = useState<number>(1)
+  const [currentSeasonName, setCurrentSeasonName] = useState<string>("Season 1")
   const [heroImages, setHeroImages] = useState([
     {
       url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png?height=600&width=1200",
@@ -135,6 +138,29 @@ export default function Home() {
   const { scrollY } = useScroll()
   const y1 = useTransform(scrollY, [0, 300], [0, 50])
   const y2 = useTransform(scrollY, [0, 300], [0, -50])
+
+  // Load current season
+  useEffect(() => {
+    async function loadCurrentSeason() {
+      try {
+        const seasonId = await getCurrentSeasonId()
+        setCurrentSeasonId(seasonId)
+        setCurrentSeasonName(`Season ${seasonId}`)
+        
+        // Update hero images with current season
+        setHeroImages(prev => prev.map(img => 
+          img.title.includes("Registration Open") 
+            ? { ...img, title: `${currentSeasonName} Registration Open` }
+            : img
+        ))
+      } catch (error) {
+        console.error("Error loading current season:", error)
+        // Keep default values
+      }
+    }
+
+    loadCurrentSeason()
+  }, [])
 
   useEffect(() => {
     async function fetchData() {
@@ -1070,7 +1096,7 @@ export default function Home() {
               >
                 <Link href="/register" className="flex items-center gap-3">
                   <Zap className="h-6 w-6" />
-                  Register for Season 1
+                  Register for {currentSeasonName}
                 </Link>
               </Button>
 
