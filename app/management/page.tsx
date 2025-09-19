@@ -980,7 +980,7 @@ const ManagementPage = () => {
                 <Home className="h-5 w-5" />
                 Return to Home
               </Link>
-        </Button>
+            </Button>
           </CardContent>
         </Card>
       </div>
