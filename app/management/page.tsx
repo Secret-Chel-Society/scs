@@ -205,6 +205,57 @@ const enhancePlayersWithRoleInfo = async (players: any[], supabase: any) => {
   }
 }
 
+// Function to refresh season-specific data
+const refreshSeasonData = async (teamData: any, selectedSeason: any, supabase: any, setTeamData: any, setTeamMatches: any) => {
+  if (!teamData || !selectedSeason) return
+
+  try {
+    console.log("Refreshing data for season:", selectedSeason.name)
+    
+    // Get calculated team stats for the selected season
+    const calculatedTeamStats = await getTeamStats(teamData.id, selectedSeason.id)
+    console.log("Calculated team stats for season:", calculatedTeamStats)
+
+    if (calculatedTeamStats) {
+      // Update team data with new stats
+      const updatedTeamData = {
+        ...teamData,
+        wins: calculatedTeamStats.wins,
+        losses: calculatedTeamStats.losses,
+        otl: calculatedTeamStats.otl,
+        points: calculatedTeamStats.points,
+        games_played: calculatedTeamStats.games_played,
+        goals_for: calculatedTeamStats.goals_for,
+        goals_against: calculatedTeamStats.goals_against,
+        goal_differential: calculatedTeamStats.goal_differential,
+      }
+      setTeamData(updatedTeamData)
+    }
+
+    // Fetch season-specific matches
+    const { data: matches, error: matchesError } = await supabase
+      .from("matches")
+      .select(`
+        *,
+        home_team:home_team_id(id, name, logo_url),
+        away_team:away_team_id(id, name, logo_url)
+      `)
+      .or(`home_team_id.eq.${teamData.id},away_team_id.eq.${teamData.id}`)
+      .eq("season_id", selectedSeason.id)
+      .order("match_date", { ascending: true })
+
+    if (matchesError) {
+      console.error("Error fetching season matches:", matchesError)
+    } else {
+      setTeamMatches(matches || [])
+      console.log(`Loaded ${matches?.length || 0} matches for ${selectedSeason.name}`)
+    }
+    
+  } catch (error) {
+    console.error("Error refreshing season data:", error)
+  }
+}
+
 const ManagementPage = () => {
   const { supabase, session } = useSupabase()
   const { toast } = useToast()
@@ -248,6 +299,8 @@ const ManagementPage = () => {
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $65M salary cap
   const [isBiddingEnabled, setIsBiddingEnabled] = useState(true)
+  const [seasons, setSeasons] = useState<any[]>([])
+  const [selectedSeason, setSelectedSeason] = useState<any>(null)
 
   // Update current time every second for countdown
   useEffect(() => {
@@ -433,12 +486,29 @@ const ManagementPage = () => {
         return
       }
 
-      // Get current season ID for team stats calculation
-      const currentSeasonId = await getCurrentSeasonId()
-      console.log("Current season ID:", currentSeasonId)
+      // Fetch all seasons
+      const { data: allSeasons, error: seasonsError } = await supabase
+        .from("seasons")
+        .select("*")
+        .order("season_number", { ascending: false })
+
+      if (seasonsError) {
+        console.error("Error fetching seasons:", seasonsError)
+      } else {
+        setSeasons(allSeasons || [])
+        // Set the active season as default, or first season if no active season
+        const activeSeason = allSeasons?.find(s => s.is_active) || allSeasons?.[0]
+        setSelectedSeason(activeSeason)
+        console.log("Available seasons:", allSeasons?.length || 0)
+        console.log("Selected season:", activeSeason?.name)
+      }
+
+      // Get current season ID for team stats calculation (use selected season or current)
+      const seasonId = selectedSeason?.id || await getCurrentSeasonId()
+      console.log("Using season ID for stats:", seasonId)
 
       // Get calculated team stats (this will give us the actual record)
-      const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonId)
+      const calculatedTeamStats = await getTeamStats(playerData.team_id, seasonId)
       console.log("Calculated team stats:", calculatedTeamStats)
 
       if (!calculatedTeamStats) {
@@ -673,8 +743,8 @@ const ManagementPage = () => {
       const totalSalary = enhancedPlayersWithRoles?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
       setCurrentTeamSalary(totalSalary)
 
-      // Fetch team matches with lineups - Fixed the query structure
-      const { data: matches, error: matchesError } = await supabase
+      // Fetch team matches with lineups - Filter by selected season
+      let matchesQuery = supabase
         .from("matches")
         .select(`
           *,
@@ -682,7 +752,13 @@ const ManagementPage = () => {
           away_team:away_team_id(id, name, logo_url)
         `)
         .or(`home_team_id.eq.${playerData.team_id},away_team_id.eq.${playerData.team_id}`)
-        .order("match_date", { ascending: true })
+
+      // Filter by season if one is selected
+      if (selectedSeason) {
+        matchesQuery = matchesQuery.eq("season_id", selectedSeason.id)
+      }
+
+      const { data: matches, error: matchesError } = await matchesQuery.order("match_date", { ascending: true })
 
       if (matchesError) throw matchesError
       setTeamMatches(matches || [])
@@ -854,6 +930,15 @@ const ManagementPage = () => {
     fetchData()
   }, [supabase, session, toast])
 
+  // Refresh data when selected season changes
+  useEffect(() => {
+    if (selectedSeason && teamData) {
+      console.log("Season changed to:", selectedSeason.name, "refreshing data...")
+      // Refresh team stats and other season-specific data
+      refreshSeasonData(teamData, selectedSeason, supabase, setTeamData, setTeamMatches)
+    }
+  }, [selectedSeason, teamData, supabase])
+
   // Effect to reload free agents when switching to free-agents tab
   useEffect(() => {
     if (activeTab === "free-agents" && teamData?.id) {
@@ -929,8 +1014,53 @@ const ManagementPage = () => {
                 {teamData.name}
               </p>
                     </div>
-            )}
+                  )}
+              </div>
+            </div>
+            
+            {/* Season Selector */}
+            {seasons.length > 0 && (
+              <div className="flex justify-center mb-4">
+                <div className="hockey-card p-4 max-w-md w-full">
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-ice-blue-500" />
+                    <span className="text-sm font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
+                      Season:
+                    </span>
+                    <Select 
+                      value={selectedSeason?.id || ""} 
+                      onValueChange={(seasonId) => {
+                        const season = seasons.find(s => s.id === seasonId)
+                        setSelectedSeason(season)
+                      }}
+                    >
+                      <SelectTrigger className="w-full max-w-xs">
+                        <SelectValue placeholder="Select season" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {seasons.map((season) => (
+                          <SelectItem key={season.id} value={season.id}>
+                            <div className="flex items-center gap-2">
+                              <span>{season.name}</span>
+                              {season.is_active && (
+                                <Badge variant="default" className="text-xs">
+                                  Active
+                                </Badge>
+                              )}
+                              {season.is_playoffs && (
+                                <Badge variant="outline" className="text-xs">
+                                  Playoffs
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
+              </div>
+            )}
               </div>
             <div className="hockey-divider" />
         </div>
