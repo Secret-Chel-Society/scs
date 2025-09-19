@@ -804,6 +804,20 @@ const ManagementPage = () => {
       setFreeAgents(freeAgentsList)
       setFilteredFreeAgents(freeAgentsList)
 
+      // Log debug information to help diagnose the issue
+      if (data.debug) {
+        console.log("Free agents debug info:", data.debug)
+        if (data.debug.allRegistrations) {
+          console.log("All registrations:", data.debug.allRegistrations)
+        }
+        if (data.debug.allPlayers) {
+          console.log("All players:", data.debug.allPlayers)
+        }
+        if (data.debug.allUsers) {
+          console.log("All users:", data.debug.allUsers)
+        }
+      }
+
       // Fetch bids for all players
       await fetchPlayerBids()
 
@@ -1535,8 +1549,13 @@ const ManagementPage = () => {
                     ) : (
                       <div className="text-center py-8 text-muted-foreground text-sm md:text-base">
                         {freeAgents.length === 0
-                          ? "No free agents available."
+                          ? "No free agents available. Check the console for debug information."
                           : "No players match your filter criteria."}
+                        {freeAgentsError && (
+                          <div className="mt-4 text-red-500 text-xs">
+                            Error: {freeAgentsError}
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>
