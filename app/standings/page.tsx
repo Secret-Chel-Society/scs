@@ -642,12 +642,95 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
   const [standings, setStandings] = useState<TeamStanding[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentSeason, setCurrentSeason] = useState<any>(null)
+
+  // Fetch current season
+  useEffect(() => {
+    async function fetchCurrentSeason() {
+      try {
+        console.log("Fetching current season for standings...")
+        // First try to get active season from seasons table
+        const { data: seasonData, error: seasonError } = await supabase
+          .from("seasons")
+          .select("id, name, season_number")
+          .eq("is_active", true)
+          .maybeSingle()
+
+        if (!seasonError && seasonData) {
+          console.log("Found active season for standings:", seasonData)
+          setCurrentSeason(seasonData)
+        } else {
+          // Fallback: try to get from system_settings
+          const { data: settingsData, error: settingsError } = await supabase
+            .from("system_settings")
+            .select("value")
+            .eq("key", "current_season")
+            .single()
+
+          if (!settingsError && settingsData?.value) {
+            const seasonNumber = parseInt(settingsData.value.toString(), 10)
+            if (!isNaN(seasonNumber)) {
+              const season = {
+                id: seasonNumber.toString(),
+                name: `Season ${seasonNumber}`,
+                season_number: seasonNumber,
+                is_active: true,
+              }
+              console.log("Using season from system_settings for standings:", season)
+              setCurrentSeason(season)
+            }
+          } else {
+            // Final fallback: get first season
+            const { data: firstSeason, error: firstSeasonError } = await supabase
+              .from("seasons")
+              .select("id, name, season_number")
+              .order("id")
+              .limit(1)
+              .maybeSingle()
+
+            if (!firstSeasonError && firstSeason) {
+              console.log("Using first season as fallback for standings:", firstSeason)
+              setCurrentSeason(firstSeason)
+            } else {
+              // Default to Season 1
+              const defaultSeason = {
+                id: "1",
+                name: "Season 1",
+                season_number: 1,
+                is_active: true,
+              }
+              console.log("Using default season for standings:", defaultSeason)
+              setCurrentSeason(defaultSeason)
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching current season for standings:", error)
+        // Set default season on error
+        setCurrentSeason({
+          id: "1",
+          name: "Season 1",
+          season_number: 1,
+          is_active: true,
+        })
+      }
+    }
+
+    fetchCurrentSeason()
+  }, [supabase])
 
   useEffect(() => {
     async function fetchStandings() {
+      if (!currentSeason) {
+        console.log("No current season available yet, skipping standings fetch")
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
+
+        console.log(`Fetching standings for season: ${currentSeason.name} (ID: ${currentSeason.id})`)
 
         // Get all teams with conference information
         const { data: teamsData, error: teamsError } = await supabase
@@ -669,11 +752,19 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         }
 
         // Get all matches for the current season
-        const { data: matchesData, error: matchesError } = await supabase
+        let matchesQuery = supabase
           .from("matches")
           .select("*")
-          .eq("season_name", "Season 1")
           .eq("status", "completed")
+
+        // Filter by current season - try both season_id and season_name
+        if (currentSeason.id) {
+          matchesQuery = matchesQuery.eq("season_id", currentSeason.id)
+        } else {
+          matchesQuery = matchesQuery.eq("season_name", currentSeason.name)
+        }
+
+        const { data: matchesData, error: matchesError } = await matchesQuery
 
         if (matchesError) {
           console.error("Error fetching matches:", matchesError)
@@ -762,7 +853,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
     }
 
     fetchStandings()
-  }, [supabase])
+  }, [supabase, currentSeason])
 
   if (loading) {
     return (

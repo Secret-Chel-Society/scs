@@ -162,6 +162,49 @@ const tabs = [
   { id: "availability", label: "Availability", icon: Calendar },
 ]
 
+// Function to enhance players with role information from roles table
+const enhancePlayersWithRoleInfo = async (players: any[], supabase: any) => {
+  if (!players || players.length === 0) return players
+
+  try {
+    // Get all unique role names from players
+    const roleNames = [...new Set(players.map(p => p.role).filter(Boolean))]
+    
+    if (roleNames.length === 0) return players
+
+    // Fetch role information from roles table
+    const { data: rolesData, error: rolesError } = await supabase
+      .from("roles")
+      .select("name, display_name, level, description")
+      .in("name", roleNames)
+
+    if (rolesError) {
+      console.error("Error fetching roles:", rolesError)
+      return players // Return original players if roles fetch fails
+    }
+
+    // Create a map of role name to role info
+    const roleMap = new Map()
+    rolesData?.forEach(role => {
+      roleMap.set(role.name, role)
+    })
+
+    // Enhance players with role information
+    return players.map(player => ({
+      ...player,
+      roleInfo: roleMap.get(player.role) || {
+        name: player.role,
+        display_name: player.role,
+        level: 0,
+        description: null
+      }
+    }))
+  } catch (error) {
+    console.error("Error enhancing players with role info:", error)
+    return players // Return original players if enhancement fails
+  }
+}
+
 const ManagementPage = () => {
   const { supabase, session } = useSupabase()
   const { toast } = useToast()
@@ -333,12 +376,21 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // Check for any manager role using in operator
+      // First, get management roles from the roles table
+      const { data: managementRoles, error: rolesError } = await supabase
+        .from('roles')
+        .select('name')
+        .in('name', ['GM', 'AGM', 'Owner', 'General Manager', 'Assistant General Manager'])
+        .or('name.ilike.%manager%,name.ilike.%owner%')
+
+      const managementRoleNames = managementRoles?.map(r => r.name) || ['GM', 'AGM', 'Owner', 'owner']
+
+      // Check for any manager role using the dynamic list
       const { data: playerRoles, error: playerError } = await supabase
         .from('players')
         .select('*')
         .eq('user_id', session.user.id)
-        .in('role', ['GM', 'AGM', 'Owner', 'owner'])
+        .in('role', managementRoleNames)
       
       // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
@@ -369,7 +421,7 @@ const ManagementPage = () => {
 
       // If no access, redirect to unauthorized
       if (!hasAccess) {
-        const errorMsg = "You must be a team manager (GM, AGM, or Owner) to access this page"
+        const errorMsg = "You must be a team manager to access this page"
         console.log(errorMsg)
         // Clear any existing team data since user is no longer authorized
         setTeamData(null)
@@ -417,7 +469,7 @@ const ManagementPage = () => {
       console.log("Final team data with calculated stats:", teamWithStats)
       setTeamData(teamWithStats)
 
-      // Fetch team players with comprehensive position data fetching
+      // Fetch team players with comprehensive position data fetching and role information
       const { data: players, error: playersError } = await supabase
         .from("players")
         .select(`
@@ -613,8 +665,12 @@ const ManagementPage = () => {
         }
       }
 
+      // Enhance players with role information from roles table
+      const enhancedPlayersWithRoles = await enhancePlayersWithRoleInfo(players || teamPlayers, supabase)
+      setTeamPlayers(enhancedPlayersWithRoles)
+
       // Calculate current team salary
-      const totalSalary = (players || teamPlayers)?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
+      const totalSalary = enhancedPlayersWithRoles?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
       setCurrentTeamSalary(totalSalary)
 
       // Fetch team matches with lineups - Fixed the query structure
@@ -830,7 +886,7 @@ const ManagementPage = () => {
         </div>
             <CardTitle className="hockey-gradient-text-red text-3xl font-black mb-4">Access Denied</CardTitle>
             <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-              You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
+              You must be a Team Manager to access the management panel.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
@@ -963,41 +1019,41 @@ const ManagementPage = () => {
 
           {/* Clean Professional Tabs */}
           <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 mb-8 h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
+            <TabsList className="flex flex-col md:grid w-full md:grid-cols-5 mb-8 md:h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1 space-y-1 md:space-y-0">
               <TabsTrigger 
                 value="roster" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
               >
+                <span className="md:hidden">Team Roster</span>
                 <span className="hidden md:inline">Team Roster</span>
-                <span className="md:hidden">Roster</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="availability" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
               >
+                <span className="md:hidden">Team Availability</span>
                 <span className="hidden md:inline">Team Avail</span>
-                <span className="md:hidden">Avail</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="schedule" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
               >
+                <span className="md:hidden">Team Schedule</span>
                 <span className="hidden md:inline">Team Schedule</span>
-                <span className="md:hidden">Schedule</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="free-agents" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
               >
-                <span className="hidden md:inline">Free Agents</span>
                 <span className="md:hidden">Free Agents</span>
+                <span className="hidden md:inline">Free Agents</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="my-bids" 
-                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
               >
+                <span className="md:hidden">My Bids</span>
                 <span className="hidden md:inline">My Bids</span>
-                <span className="md:hidden">Bids</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1051,8 +1107,8 @@ const ManagementPage = () => {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    <Badge variant={player.role === "Owner" ? "default" : "outline"}>
-                                      {player.role}
+                                    <Badge variant={player.roleInfo?.level > 0 ? "default" : "outline"}>
+                                      {player.roleInfo?.display_name || player.role}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
@@ -1092,8 +1148,8 @@ const ManagementPage = () => {
                                     )}
                                   </div>
                                 </div>
-                                <Badge variant={player.role === "Owner" ? "default" : "outline"} className="text-xs">
-                                  {player.role}
+                                <Badge variant={player.roleInfo?.level > 0 ? "default" : "outline"} className="text-xs">
+                                  {player.roleInfo?.display_name || player.role}
                                 </Badge>
                               </div>
                               <div className="flex justify-between items-center text-sm text-muted-foreground">
