@@ -751,6 +751,9 @@ const ManagementPage = () => {
           setOutbidCount(outbidBids.length)
         }
       }
+
+      // Load free agents data
+      await loadFreeAgents()
     } catch (error: any) {
       console.error("Error fetching management data:", error)
       toast({
