@@ -968,7 +968,7 @@ const ManagementPage = () => {
           <CardHeader className="text-center pb-6">
             <div className="hockey-icon-container-red mx-auto mb-6 w-fit">
               <XCircle className="h-12 w-12 text-white" />
-        </div>
+            </div>
             <CardTitle className="hockey-gradient-text-red text-3xl font-black mb-4">Access Denied</CardTitle>
             <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
               You must be a Team Manager to access the management panel.
@@ -996,7 +996,7 @@ const ManagementPage = () => {
             <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
               <div className="hockey-icon-container">
                 <Gavel className="h-12 w-12 text-white" />
-                  </div>
+              </div>
               <div className="text-center md:text-left">
                 <h1 className="hockey-title mb-4">Team Management</h1>
             {teamData && (
@@ -1790,6 +1790,7 @@ const ManagementPage = () => {
           projectedRosterSize={projectedRosterSize}
         />
       )}
+      </div>
     </div>
   )
 }
