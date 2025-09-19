@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search } from "lucide-react"
+import { Users, Calendar, Clock, Trophy, DollarSign, Filter, History, Search, ArrowLeftRight } from "lucide-react"
+import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-display"
 import { SalaryProgress } from "@/components/management/salary-progress"
 import { RosterProgress } from "@/components/management/roster-progress"
 import { TeamAvailabilityTab } from "@/components/management/team-availability-tab"
@@ -20,8 +21,11 @@ import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TeamLogos } from "@/components/management/team-logos"
 import { BidPlayerModal } from "@/components/management/bid-player-modal"
-import { XCircle } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { XCircle, CheckCircle2 } from "lucide-react"
+import { Label } from "@/components/ui/label"
 import { Home, Gavel } from "lucide-react"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
 
@@ -104,6 +108,42 @@ interface Bid {
   }
 }
 
+interface Waiver {
+  id: string
+  player_id: string
+  waiving_team_id: string
+  waived_at: string
+  claim_deadline: string
+  status: string
+  players: {
+    id: string
+    salary: number
+    users: {
+      id: string
+      gamer_tag_id: string
+      primary_position: string
+      secondary_position?: string
+      console: string
+      avatar_url?: string
+    }
+  }
+  waiving_team: {
+    id: string
+    name: string
+    logo_url?: string
+  }
+  waiver_claims?: Array<{
+    id: string
+    claiming_team_id: string
+    priority_at_claim: number
+    teams: {
+      name: string
+      logo_url?: string
+    }
+  }>
+  hasTeamClaimed?: boolean
+}
+
 // Update the getPositionAbbreviation function to handle both full names and abbreviations
 const getPositionAbbreviation = (position: string): string => {
   if (!position) return "?"
@@ -162,49 +202,6 @@ const tabs = [
   { id: "availability", label: "Availability", icon: Calendar },
 ]
 
-// Function to enhance players with role information from roles table
-const enhancePlayersWithRoleInfo = async (players: any[], supabase: any) => {
-  if (!players || players.length === 0) return players
-
-  try {
-    // Get all unique role names from players
-    const roleNames = [...new Set(players.map(p => p.role).filter(Boolean))]
-    
-    if (roleNames.length === 0) return players
-
-    // Fetch role information from roles table
-    const { data: rolesData, error: rolesError } = await supabase
-      .from("roles")
-      .select("name, display_name, level, description")
-      .in("name", roleNames)
-
-    if (rolesError) {
-      console.error("Error fetching roles:", rolesError)
-      return players // Return original players if roles fetch fails
-    }
-
-    // Create a map of role name to role info
-    const roleMap = new Map()
-    rolesData?.forEach(role => {
-      roleMap.set(role.name, role)
-    })
-
-    // Enhance players with role information
-    return players.map(player => ({
-      ...player,
-      roleInfo: roleMap.get(player.role) || {
-        name: player.role,
-        display_name: player.role,
-        level: 0,
-        description: null
-      }
-    }))
-  } catch (error) {
-    console.error("Error enhancing players with role info:", error)
-    return players // Return original players if enhancement fails
-  }
-}
-
 const ManagementPage = () => {
   const { supabase, session } = useSupabase()
   const { toast } = useToast()
@@ -237,17 +234,48 @@ const ManagementPage = () => {
   // Get active tab from search params or default to "roster"
   const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "roster")
 
+  // Trade state
+  const [allTeams, setAllTeams] = useState<any[]>([])
+  const [selectedTeamForTrade, setSelectedTeamForTrade] = useState<string | null>(null)
+  const [selectedTeamPlayers, setSelectedTeamPlayers] = useState<any[]>([])
+  const [selectedMyPlayers, setSelectedMyPlayers] = useState<any[]>([])
+  const [selectedOtherPlayers, setSelectedOtherPlayers] = useState<any[]>([])
+  const [tradeError, setTradeError] = useState<string | null>(null)
+  const [tradeSuccess, setTradeSuccess] = useState<string | null>(null)
+  const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $65M salary cap
+  const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
+  const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
+  const [otherTeamSalary, setOtherTeamSalary] = useState(0)
+  const [projectedOtherTeamSalary, setProjectedOtherTeamSalary] = useState(0)
+  const [tradeMessage, setTradeMessage] = useState("")
+  const [isBiddingEnabled, setIsBiddingEnabled] = useState(true)
+
+  // Trade proposals
+  const [incomingTradeProposals, setIncomingTradeProposals] = useState<any[]>([])
+  const [outgoingTradeProposals, setOutgoingTradeProposals] = useState<any[]>([])
+  const [selectedTradeProposal, setSelectedTradeProposal] = useState<any>(null)
+  const [isTradeDetailsOpen, setIsTradeDetailsOpen] = useState(false)
+  const [isProcessingTradeResponse, setIsProcessingTradeResponse] = useState(false)
+  const [cancellingTrades, setCancellingTrades] = useState<Set<string>>(new Set())
+
   // Add these state variables after the existing useState declarations
   const [projectedSalary, setProjectedSalary] = useState(0)
   const [projectedRosterSize, setProjectedRosterSize] = useState(0)
+
+  // Waiver state
+  const [waivers, setWaivers] = useState<any[]>([])
+  const [loadingWaivers, setLoadingWaivers] = useState(false)
+  const [waiverError, setWaiverError] = useState<string | null>(null)
+  const [waivingPlayers, setWaivingPlayers] = useState<Set<string>>(new Set())
+  const [claimingWaivers, setClaimingWaivers] = useState<Set<string>>(new Set())
 
   // Add this state variable near the top with other useState declarations
   const [userRole, setUserRole] = useState<string | null>(null)
   const [bidModalOpen, setBidModalOpen] = useState(false)
 
-  const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $65M salary cap
-  const [isBiddingEnabled, setIsBiddingEnabled] = useState(true)
+  // Add state for cap space withholding
+  const [capSpaceWithholding, setCapSpaceWithholding] = useState<{ [playerId: string]: number }>({})
 
   // Update current time every second for countdown
   useEffect(() => {
@@ -328,6 +356,177 @@ const ManagementPage = () => {
     checkBiddingStatus()
   }, [])
 
+  // Add this useEffect after the existing useEffects
+  useEffect(() => {
+    const loadOtherTeamPlayers = async () => {
+      if (!selectedTeamForTrade) {
+        setSelectedTeamPlayers([])
+        setOtherTeamSalary(0)
+        setProjectedOtherTeamSalary(0)
+        return
+      }
+
+      console.log("Loading players for team:", selectedTeamForTrade) // Debug log
+
+      try {
+        // Fetch other team's players
+        const { data: otherPlayers, error: otherPlayersError } = await supabase
+          .from("players")
+          .select(`
+          id,
+          role,
+          salary,
+          user_id
+        `)
+          .eq("team_id", selectedTeamForTrade)
+          .order("role", { ascending: false })
+
+        if (otherPlayersError) {
+          console.error("Error fetching other team players:", otherPlayersError)
+          throw otherPlayersError
+        }
+
+        console.log("Fetched other team players:", otherPlayers?.length) // Debug log
+
+        // Get the active season for position data
+        const { data: activeSeason, error: seasonError } = await supabase
+          .from("seasons")
+          .select("id")
+          .eq("is_active", true)
+          .single()
+
+        if (seasonError) {
+          console.error("Error fetching active season:", seasonError)
+        }
+
+        // Get position data from season_registrations and user data
+        const userIds = otherPlayers?.map((player) => player.user_id) || []
+        let enhancedOtherPlayers = otherPlayers || []
+
+        if (userIds.length > 0) {
+          // Get user data
+          const { data: users, error: usersError } = await supabase
+            .from("users")
+            .select(`
+            id,
+            email,
+            gamer_tag_id,
+            console,
+            avatar_url
+          `)
+            .in("id", userIds)
+
+          if (usersError) {
+            console.error("Error fetching users:", usersError)
+          }
+
+          // Get registration data for positions if we have an active season
+          let registrations = []
+          if (activeSeason) {
+            const { data: regData, error: regError } = await supabase
+              .from("season_registrations")
+              .select(`
+              user_id,
+              primary_position,
+              secondary_position,
+              gamer_tag,
+              console
+            `)
+              .in("user_id", userIds)
+              .eq("season_id", activeSeason.id)
+              .eq("status", "Approved")
+
+            if (regError) {
+              console.error("Error fetching player registrations:", regError)
+            } else {
+              registrations = regData || []
+            }
+          }
+
+          // Combine all data
+          enhancedOtherPlayers =
+            otherPlayers?.map((player) => {
+              const user = users?.find((u) => u.id === player.user_id)
+              const registration = registrations?.find((reg) => reg.user_id === player.user_id)
+
+              return {
+                ...player,
+                users: {
+                  id: user?.id || player.user_id,
+                  email: user?.email,
+                  gamer_tag_id: registration?.gamer_tag || user?.gamer_tag_id || "Unknown Player",
+                  primary_position: registration?.primary_position || "Unknown",
+                  secondary_position: registration?.secondary_position || null,
+                  console: registration?.console || user?.console,
+                  avatar_url: user?.avatar_url,
+                },
+              }
+            }) || []
+        }
+
+        console.log("Enhanced other team players:", enhancedOtherPlayers?.length) // Debug log
+        setSelectedTeamPlayers(enhancedOtherPlayers)
+
+        // Calculate other team's current salary
+        const otherTeamCurrentSalary = otherPlayers?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
+        setOtherTeamSalary(otherTeamCurrentSalary)
+        setProjectedOtherTeamSalary(otherTeamCurrentSalary)
+      } catch (error) {
+        console.error("Error loading other team players:", error)
+        // Set empty state on error
+        setSelectedTeamPlayers([])
+        setOtherTeamSalary(0)
+        setProjectedOtherTeamSalary(0)
+      }
+    }
+
+    loadOtherTeamPlayers()
+  }, [selectedTeamForTrade, supabase])
+
+  // Add useEffect to calculate projected trade salaries
+  useEffect(() => {
+    if (!selectedTeamForTrade || !teamData) {
+      setProjectedTeamSalary(currentTeamSalary)
+      setProjectedOtherTeamSalary(otherTeamSalary)
+      return
+    }
+
+    // Calculate salary changes for my team
+    const myPlayersToTrade = teamPlayers.filter((p) => selectedMyPlayers.includes(p.id))
+    const otherPlayersToReceive = selectedTeamPlayers.filter((p) => selectedOtherPlayers.includes(p.id))
+
+    const myPlayersSalaryOut = myPlayersToTrade.reduce((sum, player) => {
+      const withholding = capSpaceWithholding[player.id] || 0
+      return sum + (player.salary - withholding)
+    }, 0)
+
+    const otherPlayersSalaryIn = otherPlayersToReceive.reduce((sum, player) => sum + (player.salary || 0), 0)
+
+    const newProjectedTeamSalary = currentTeamSalary - myPlayersSalaryOut + otherPlayersSalaryIn
+
+    // Calculate salary changes for other team
+    const otherPlayersSalaryOut = otherPlayersToReceive.reduce((sum, player) => sum + (player.salary || 0), 0)
+    const myPlayersSalaryIn = myPlayersToTrade.reduce((sum, player) => {
+      const withholding = capSpaceWithholding[player.id] || 0
+      return sum + (player.salary - withholding)
+    }, 0)
+
+    const newProjectedOtherTeamSalary = otherTeamSalary - otherPlayersSalaryOut + myPlayersSalaryIn
+
+    setProjectedTeamSalary(newProjectedTeamSalary)
+    setProjectedOtherTeamSalary(newProjectedOtherTeamSalary)
+  }, [
+    selectedMyPlayers,
+    selectedOtherPlayers,
+    teamPlayers,
+    selectedTeamPlayers,
+    currentTeamSalary,
+    otherTeamSalary,
+    capSpaceWithholding,
+    selectedTeamForTrade,
+    teamData,
+  ])
+
   // Handle tab change
   const handleTabChange = (value: string) => {
     try {
@@ -376,21 +575,12 @@ const ManagementPage = () => {
     try {
       console.log('Checking team manager access for user:', session.user.id)
       
-      // First, get management roles from the roles table
-      const { data: managementRoles, error: rolesError } = await supabase
-        .from('roles')
-        .select('name')
-        .in('name', ['GM', 'AGM', 'Owner', 'General Manager', 'Assistant General Manager'])
-        .or('name.ilike.%manager%,name.ilike.%owner%')
-
-      const managementRoleNames = managementRoles?.map(r => r.name) || ['GM', 'AGM', 'Owner', 'owner']
-
-      // Check for any manager role using the dynamic list
+      // Check for any manager role using in operator
       const { data: playerRoles, error: playerError } = await supabase
         .from('players')
         .select('*')
         .eq('user_id', session.user.id)
-        .in('role', managementRoleNames)
+        .in('role', ['GM', 'AGM', 'Owner', 'owner'])
       
       // Check for admin roles in user_roles table
       const { data: adminRoles, error: adminError } = await supabase
@@ -421,12 +611,13 @@ const ManagementPage = () => {
 
       // If no access, redirect to unauthorized
       if (!hasAccess) {
-        const errorMsg = "You must be a team manager to access this page"
+        const errorMsg = "You must be a team manager (GM, AGM, or Owner) to access this page"
         console.log(errorMsg)
         // Clear any existing team data since user is no longer authorized
         setTeamData(null)
         setTeamPlayers([])
         setMyBids([])
+        setWaivers([])
         
         // Use replace instead of push to prevent going back to the management page
         router.replace('/unauthorized?message=' + encodeURIComponent(errorMsg))
@@ -469,7 +660,10 @@ const ManagementPage = () => {
       console.log("Final team data with calculated stats:", teamWithStats)
       setTeamData(teamWithStats)
 
-      // Fetch team players with comprehensive position data fetching and role information
+      // Fetch trade proposals
+      await fetchTradeProposals(playerData.team_id, basicTeamData.name)
+
+      // Fetch team players with comprehensive position data fetching
       const { data: players, error: playersError } = await supabase
         .from("players")
         .select(`
@@ -665,13 +859,23 @@ const ManagementPage = () => {
         }
       }
 
-      // Enhance players with role information from roles table
-      const enhancedPlayersWithRoles = await enhancePlayersWithRoleInfo(players || teamPlayers, supabase)
-      setTeamPlayers(enhancedPlayersWithRoles)
-
       // Calculate current team salary
-      const totalSalary = enhancedPlayersWithRoles?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
+      const totalSalary = (players || teamPlayers)?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
       setCurrentTeamSalary(totalSalary)
+      setProjectedTeamSalary(totalSalary)
+
+      // Fetch all teams for trade functionality
+      const { data: allTeamsData, error: allTeamsError } = await supabase
+        .from("teams")
+        .select("*")
+        .neq("id", playerData.team_id)
+        .order("name", { ascending: true })
+
+      if (allTeamsError) {
+        console.error("Error fetching teams:", allTeamsError)
+      } else {
+        setAllTeams(allTeamsData || [])
+      }
 
       // Fetch team matches with lineups - Fixed the query structure
       const { data: matches, error: matchesError } = await supabase
@@ -686,6 +890,9 @@ const ManagementPage = () => {
 
       if (matchesError) throw matchesError
       setTeamMatches(matches || [])
+
+      // Load free agents - this will be called separately when needed
+      // await loadFreeAgents()
 
       // Fetch my team's bids with enhanced status tracking
       const { data: myTeamBids, error: bidsError } = await supabase
@@ -751,9 +958,6 @@ const ManagementPage = () => {
           setOutbidCount(outbidBids.length)
         }
       }
-
-      // Load free agents data
-      await loadFreeAgents()
     } catch (error: any) {
       console.error("Error fetching management data:", error)
       toast({
@@ -763,6 +967,45 @@ const ManagementPage = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Fetch trade proposals
+  const fetchTradeProposals = async (teamId: string, teamName: string) => {
+    try {
+      // Fetch incoming trade proposals (exclude processed ones)
+      const { data: incoming, error: incomingError } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", session?.user.id)
+        .like("title", `Trade Proposal from %`)
+        .not("message", "like", "%STATUS:%")
+        .order("created_at", { ascending: false })
+
+      if (incomingError) {
+        console.error("Error fetching incoming trade proposals:", incomingError)
+      } else {
+        console.log("Fetched incoming trade proposals:", incoming?.length || 0)
+        setIncomingTradeProposals(incoming || [])
+      }
+
+      // Fetch outgoing trade proposals (exclude processed ones)
+      const { data: outgoing, error: outgoingError } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", session?.user.id)
+        .like("title", `Trade Proposal to %`)
+        .not("message", "like", "%STATUS:%")
+        .order("created_at", { ascending: false })
+
+      if (outgoingError) {
+        console.error("Error fetching outgoing trade proposals:", outgoingError)
+      } else {
+        console.log("Fetched outgoing trade proposals:", outgoing?.length || 0)
+        setOutgoingTradeProposals(outgoing || [])
+      }
+    } catch (error) {
+      console.error("Error fetching trade proposals:", error)
     }
   }
 
@@ -803,20 +1046,6 @@ const ManagementPage = () => {
       const freeAgentsList = data.freeAgents || []
       setFreeAgents(freeAgentsList)
       setFilteredFreeAgents(freeAgentsList)
-
-      // Log debug information to help diagnose the issue
-      if (data.debug) {
-        console.log("Free agents debug info:", data.debug)
-        if (data.debug.allRegistrations) {
-          console.log("All registrations:", data.debug.allRegistrations)
-        }
-        if (data.debug.allPlayers) {
-          console.log("All players:", data.debug.allPlayers)
-        }
-        if (data.debug.allUsers) {
-          console.log("All users:", data.debug.allUsers)
-        }
-      }
 
       // Fetch bids for all players
       await fetchPlayerBids()
@@ -867,9 +1096,308 @@ const ManagementPage = () => {
     }
   }
 
+  // Find the loadWaiversData function and update it to handle expired waivers better
+
+  // Replace the loadWaiversData function with this improved version:
+  const loadWaiversData = async () => {
+    setLoadingWaivers(true)
+    setWaiverError(null)
+
+    try {
+      console.log("Loading waivers data...")
+
+      // First, process any expired waivers with better error handling
+      try {
+        console.log("Processing expired waivers...")
+        const processResponse = await fetch("/api/waivers/check-expired", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        if (processResponse.ok) {
+          const processResult = await processResponse.json()
+          console.log("Waiver processing result:", processResult)
+
+          if (processResult.expiredCount > 0) {
+            toast({
+              title: "Waivers Processed",
+              description: `${processResult.expiredCount} expired waivers have been processed.`,
+            })
+
+            // Refresh team data since players may have been assigned
+            await fetchData()
+          }
+        } else {
+          console.warn("Failed to process expired waivers:", processResponse.status)
+          const errorData = await processResponse.json()
+          console.warn("Process error details:", errorData)
+        }
+      } catch (processError) {
+        console.error("Error processing waivers:", processError)
+        // Don't fail the whole operation if processing fails
+      }
+
+      // Then fetch current active waivers (should exclude processed ones)
+      console.log("Fetching active waivers...")
+      const response = await fetch("/api/waivers?status=active", {
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch waivers: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Fetched active waivers:", data.waivers?.length || 0)
+
+      // Filter out any waivers that are expired but still showing as active
+      const now = new Date()
+      const filteredWaivers = (data.waivers || []).filter((waiver) => {
+        const deadline = new Date(waiver.claim_deadline)
+        return deadline > now
+      })
+
+      console.log(`Filtered out ${(data.waivers || []).length - filteredWaivers.length} expired waivers`)
+
+      // Process the waivers to add the hasTeamClaimed property
+      const waiversWithClaims = await Promise.all(
+        filteredWaivers.map(async (waiver) => {
+          // Check if the current team has claimed this waiver
+          const { data: teamClaim, error: teamClaimError } = await supabase
+            .from("waiver_claims")
+            .select("id")
+            .eq("waiver_id", waiver.id)
+            .eq("claiming_team_id", teamData?.id)
+            .eq("status", "pending")
+            .maybeSingle()
+
+          const hasTeamClaimed = !!teamClaim
+
+          return {
+            ...waiver,
+            hasTeamClaimed,
+          }
+        }),
+      )
+
+      console.log("Final waivers to display:", waiversWithClaims.length)
+      setWaivers(waiversWithClaims)
+    } catch (error) {
+      console.error("Error loading waivers:", error)
+      setWaiverError(error.message || "Failed to load waivers")
+    } finally {
+      setLoadingWaivers(false)
+    }
+  }
+
+  // Enhanced waive player function with better error handling and session validation
+  const handleWaivePlayerAction = async (playerId: string) => {
+    if (waivingPlayers.has(playerId)) return // Prevent double-clicks
+
+    console.log("Attempting to waive player:", playerId)
+    console.log("Current session:", session)
+    console.log("Team data:", teamData)
+
+    try {
+      setWaivingPlayers((prev) => new Set(prev).add(playerId))
+
+      // Validate session before making request
+      if (!session?.user?.id) {
+        throw new Error("No valid session found")
+      }
+
+      if (!teamData?.id) {
+        throw new Error("No team data found")
+      }
+
+      // Get fresh session to ensure we have valid tokens
+      const {
+        data: { session: freshSession },
+        error: sessionError,
+      } = await supabase.auth.getSession()
+
+      if (sessionError || !freshSession) {
+        console.error("Session error:", sessionError)
+        throw new Error("Authentication session expired. Please refresh the page.")
+      }
+
+      console.log("Making waiver request with fresh session")
+      console.log("Request data:", { 
+        action: 'waive',
+        playerId,
+        teamId: teamData.id
+      })
+
+      const response = await fetch("/api/waivers/working", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Use the fresh session access token
+          Authorization: `Bearer ${freshSession.access_token}`,
+        },
+        body: JSON.stringify({ 
+          action: 'waive',
+          playerId,
+          teamId: teamData.id
+        }),
+      })
+
+      console.log("Waiver response status:", response.status)
+
+      let data
+      if (!response.ok) {
+        try {
+          data = await response.json()
+          console.error("Error response:", data)
+          throw new Error(data.error || `Server error: ${response.status}`)
+        } catch (jsonError) {
+          console.error("Error parsing response:", jsonError)
+          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        }
+      } else {
+        data = await response.json()
+      }
+      console.log("Waiver response data:", data)
+
+
+      toast({
+        title: "Player waived",
+        description: "Player has been placed on waivers for 8 hours.",
+      })
+
+      // Refresh data
+      console.log("Refreshing data after waiving player...")
+      await fetchData()
+      await loadWaiversData()
+
+      // Switch to the available tab to show the newly waived player
+      console.log("Switching to available tab...")
+      handleTabChange("waivers")
+
+      // Force a re-render by updating the URL
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href)
+        url.searchParams.set("tab", "waivers")
+        window.history.replaceState({}, "", url.toString())
+      }
+    } catch (error: any) {
+      console.error("Error waiving player:", error)
+      toast({
+        title: "Error waiving player",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setWaivingPlayers((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(playerId)
+        return newSet
+      })
+    }
+  }
+
+  // Enhanced claim player function with better error handling and session validation
+  const handleClaimPlayer = async (waiverId: string) => {
+    if (claimingWaivers.has(waiverId)) return // Prevent double-clicks
+
+    console.log("Attempting to claim waiver:", waiverId)
+    console.log("Current session:", session)
+    console.log("Team data:", teamData)
+
+    try {
+      setClaimingWaivers((prev) => new Set(prev).add(waiverId))
+
+      // Validate session before making request
+      if (!session?.user?.id) {
+        throw new Error("No valid session found")
+      }
+
+      if (!teamData?.id) {
+        throw new Error("No team data found")
+      }
+
+      // Get fresh session to ensure we have valid tokens
+      const {
+        data: { session: freshSession },
+        error: sessionError,
+      } = await supabase.auth.getSession()
+
+      if (sessionError || !freshSession) {
+        console.error("Session error:", sessionError)
+        throw new Error("Authentication session expired. Please refresh the page.")
+      }
+
+      console.log("Making claim request with fresh session")
+
+      const response = await fetch(`/api/waivers/claim`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Use the fresh session access token
+          Authorization: `Bearer ${freshSession.access_token}`,
+        },
+        body: JSON.stringify({
+          waiverId,
+          teamId: teamData.id,
+        }),
+      })
+
+      console.log("Claim response status:", response.status)
+
+      let data
+      if (!response.ok) {
+        try {
+          data = await response.json()
+          console.error("Error response:", data)
+          throw new Error(data.error || `Server error: ${response.status}`)
+        } catch (jsonError) {
+          console.error("Error parsing response:", jsonError)
+          throw new Error(`Server error: ${response.status} ${response.statusText}`)
+        }
+      } else {
+        data = await response.json()
+      }
+      console.log("Claim response data:", data)
+
+      toast({
+        title: "Claim submitted",
+        description: "Your waiver claim has been submitted. You'll be notified when the waiver period ends.",
+      })
+
+      // Refresh waivers to show the updated claim
+      await loadWaiversData()
+    } catch (error: any) {
+      console.error("Error claiming player:", error)
+      toast({
+        title: "Error claiming player",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setClaimingWaivers((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(waiverId)
+        return newSet
+      })
+    }
+  }
+
   useEffect(() => {
     fetchData()
   }, [supabase, session, toast])
+
+  // Add this effect to load waivers when the tab changes to "waivers"
+  useEffect(() => {
+    if (activeTab === "waivers" && teamData?.id) {
+      console.log("Loading waivers data...")
+      loadWaiversData()
+    }
+  }, [activeTab, teamData?.id])
 
   // Effect to reload free agents when switching to free-agents tab
   useEffect(() => {
@@ -893,6 +1421,93 @@ const ManagementPage = () => {
     setIsHistoryModalOpen(true)
   }
 
+  // Add function to calculate salary after withholding
+  const calculatePostTradePlayerSalary = (player: any, withholding = 0): number => {
+    const originalSalary = player.salary || 0
+    const postTradeSalary = originalSalary - withholding
+    return Math.max(postTradeSalary, 750000) // Minimum $750k
+  }
+
+  // Add function to get validwithholding amounts
+  const getValidWithholdingAmounts = (playerSalary: number): number[] => {
+    const maxWithholding = Math.floor((playerSalary * 0.25) / 250000) * 250000 // 25% in $250k increments
+    const amounts = []
+    for (let i = 0; i <= maxWithholding; i += 250000) {
+      if (playerSalary - i >= 750000) {
+        // Ensure minimum salary
+        amounts.push(i)
+      }
+    }
+    return amounts
+  }
+
+  // Enhanced trade response handler with better error handling
+  const handleTradeResponse = async (proposalId: string, accept: boolean) => {
+    try {
+      setIsProcessingTradeResponse(true)
+
+      console.log("Processing trade response:", { proposalId, accept, userId: session?.user?.id })
+
+      // Validate session before making request
+      if (!session?.user?.id) {
+        throw new Error("No valid session found")
+      }
+
+      if (!teamData?.id) {
+        throw new Error("No team data found")
+      }
+
+      const response = await fetch("/api/trades/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          notificationId: proposalId,
+          accept: accept,
+          userId: session.user.id,
+        }),
+      })
+
+      console.log("Trade response status:", response.status)
+
+      let data
+      if (!response.ok) {
+        data = await response.json()
+        console.error("Trade response error:", data)
+        throw new Error(data.error || `Failed to ${accept ? "accept" : "reject"} trade`)
+      } else {
+        data = await response.json()
+      }
+      console.log("Trade response data:", data)
+
+      toast({
+        title: accept ? "Trade Accepted" : "Trade Rejected",
+        description: accept ? "The trade has been completed successfully." : "The trade proposal has been rejected.",
+      })
+
+      // Refresh data and trade proposals
+      console.log("Refreshing data after trade response...")
+      await fetchData()
+      if (teamData?.id && teamData?.name) {
+        await fetchTradeProposals(teamData.id, teamData.name)
+      }
+
+      // Close any open modals
+      setIsTradeDetailsOpen(false)
+      setSelectedTradeProposal(null)
+    } catch (error: any) {
+      console.error(`Error ${accept ? "accepting" : "rejecting"} trade:`, error)
+      toast({
+        title: "Error",
+        description: error.message || `Failed to ${accept ? "accept" : "reject"} trade`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsProcessingTradeResponse(false)
+    }
+  }
+
   if (!isAuthorized && !loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20 flex items-center justify-center p-6">
@@ -903,7 +1518,7 @@ const ManagementPage = () => {
         </div>
             <CardTitle className="hockey-gradient-text-red text-3xl font-black mb-4">Access Denied</CardTitle>
             <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
-              You must be a Team Manager to access the management panel.
+              You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
@@ -1036,41 +1651,60 @@ const ManagementPage = () => {
 
           {/* Clean Professional Tabs */}
           <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="flex flex-col md:grid w-full md:grid-cols-5 mb-8 md:h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1 space-y-1 md:space-y-0">
+            <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-8 h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
               <TabsTrigger 
                 value="roster" 
-                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
               >
-                <span className="md:hidden">Team Roster</span>
                 <span className="hidden md:inline">Team Roster</span>
+                <span className="md:hidden">Roster</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="availability" 
-                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
               >
-                <span className="md:hidden">Team Availability</span>
                 <span className="hidden md:inline">Team Avail</span>
+                <span className="md:hidden">Avail</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="schedule" 
-                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
               >
-                <span className="md:hidden">Team Schedule</span>
                 <span className="hidden md:inline">Team Schedule</span>
+                <span className="md:hidden">Schedule</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="free-agents" 
-                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
               >
-                <span className="md:hidden">Free Agents</span>
                 <span className="hidden md:inline">Free Agents</span>
+                <span className="md:hidden">Free Agents</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="my-bids" 
-                className="text-sm font-medium px-4 py-3 md:py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white w-full md:w-auto"
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
               >
-                <span className="md:hidden">My Bids</span>
                 <span className="hidden md:inline">My Bids</span>
+                <span className="md:hidden">Bids</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="waivers" 
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+              >
+                <span className="hidden md:inline">Waivers</span>
+                <span className="md:hidden">Waivers</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="trades" 
+                className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white relative"
+              >
+                <span className="hidden md:inline">Trades</span>
+                <span className="md:hidden">Trades</span>
+                {incomingTradeProposals.length > 0 && (
+                  <span className="ml-2 bg-goal-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                    {incomingTradeProposals.length}
+                  </span>
+                )}
               </TabsTrigger>
             </TabsList>
 
@@ -1124,8 +1758,8 @@ const ManagementPage = () => {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-center">
-                                    <Badge variant={player.roleInfo?.level > 0 ? "default" : "outline"}>
-                                      {player.roleInfo?.display_name || player.role}
+                                    <Badge variant={player.role === "Owner" ? "default" : "outline"}>
+                                      {player.role}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
@@ -1165,8 +1799,8 @@ const ManagementPage = () => {
                                     )}
                                   </div>
                                 </div>
-                                <Badge variant={player.roleInfo?.level > 0 ? "default" : "outline"} className="text-xs">
-                                  {player.roleInfo?.display_name || player.role}
+                                <Badge variant={player.role === "Owner" ? "default" : "outline"} className="text-xs">
+                                  {player.role}
                                 </Badge>
                               </div>
                               <div className="flex justify-between items-center text-sm text-muted-foreground">
@@ -1549,13 +2183,8 @@ const ManagementPage = () => {
                     ) : (
                       <div className="text-center py-8 text-muted-foreground text-sm md:text-base">
                         {freeAgents.length === 0
-                          ? "No free agents available. Check the console for debug information."
+                          ? "No free agents available."
                           : "No players match your filter criteria."}
-                        {freeAgentsError && (
-                          <div className="mt-4 text-red-500 text-xs">
-                            Error: {freeAgentsError}
-                          </div>
-                        )}
                       </div>
                     )}
                   </CardContent>
@@ -1655,6 +2284,984 @@ const ManagementPage = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              {/* Waivers Tab Content */}
+              <TabsContent value="waivers">
+                <Card className="hockey-card">
+                  <CardHeader className="text-center pb-6">
+                    <div className="hockey-icon-container-red mx-auto mb-4 w-fit">
+                      <ArrowLeftRight className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Waiver Wire</CardTitle>
+                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                      Waive players from your roster or claim players from other teams. Claims are processed based on
+                      waiver priority. Waivers are automatically processed when they expire.
+                    </CardDescription>
+                    <div className="hockey-divider mt-4" />
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="available" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 mb-4 h-10 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
+                        <TabsTrigger 
+                          value="available"
+                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                        >
+                          Available Players
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="waive"
+                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                        >
+                          Waive Player
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="available">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                          <div className="lg:col-span-2">
+                            {loadingWaivers ? (
+                              <div className="space-y-4">
+                                {Array(3)
+                                  .fill(0)
+                                  .map((_, i) => (
+                                    <div
+                                      key={i}
+                                      className="h-20 w-full bg-hockey-silver-200 dark:bg-hockey-silver-800 animate-pulse rounded-lg"
+                                    />
+                                  ))}
+                              </div>
+                            ) : waiverError ? (
+                              <div className="text-center py-8">
+                                <p className="text-red-500">{waiverError}</p>
+                                <Button onClick={loadWaiversData} className="mt-4">
+                                  Try Again
+                                </Button>
+                              </div>
+                            ) : waivers.length === 0 ? (
+                              <div className="text-center py-8 text-muted-foreground">
+                                No players currently on waivers
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {waivers.map((waiver) => {
+                                  const timeRemaining = new Date(waiver.claim_deadline).getTime() - now.getTime()
+                                  const hoursRemaining = Math.max(0, Math.floor(timeRemaining / (1000 * 60 * 60)))
+                                  const minutesRemaining = Math.max(
+                                    0,
+                                    Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)),
+                                  )
+                                  const isExpired = timeRemaining <= 0
+                                  const isClaimingThisWaiver = claimingWaivers.has(waiver.id)
+
+                                  // Check if current team has already claimed this waiver
+                                  const hasAlreadyClaimed = waiver.hasTeamClaimed
+
+                                  return (
+                                    <div
+                                      key={waiver.id}
+                                      className="border border-ice-blue-200 dark:border-ice-blue-700 rounded-lg p-4 shadow-sm"
+                                    >
+                                      <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                          <h3 className="font-medium">
+                                            {waiver.players?.users?.gamer_tag_id || "Unknown Player"}
+                                          </h3>
+                                          <div className="flex items-center gap-1 mt-1">
+                                            <span className={getPositionColor(waiver.players?.users?.primary_position)}>
+                                              {getPositionAbbreviation(waiver.players?.users?.primary_position)}
+                                            </span>
+                                            {waiver.players?.users?.secondary_position && (
+                                              <>
+                                                {" / "}
+                                                <span
+                                                  className={getPositionColor(
+                                                    waiver.players?.users?.secondary_position,
+                                                  )}
+                                                >
+                                                  {getPositionAbbreviation(waiver.players?.users?.secondary_position)}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                          <p className="text-sm text-muted-foreground mt-1">
+                                            Waived by {waiver.waiving_team?.name} • Salary: $
+                                            {waiver.players?.salary?.toLocaleString()}
+                                          </p>
+                                        </div>
+                                        <div className="text-right">
+                                          <div className="flex items-center">
+                                            <Clock
+                                              className={`h-4 w-4 mr-1 ${isExpired ? "text-red-500" : "text-muted-foreground"}`}
+                                            />
+                                            <span
+                                              className={`text-sm ${isExpired ? "text-red-500" : "text-muted-foreground"}`}
+                                            >
+                                              {isExpired ? "Processing..." : `${hoursRemaining}h ${minutesRemaining}m`}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Display Claiming Teams */}
+                                      {waiver.waiver_claims && waiver.waiver_claims.length > 0 && (
+                                        <div className="mb-3 p-2 bg-muted rounded-md">
+                                          <h4 className="text-sm font-medium mb-2">
+                                            Claiming Teams ({waiver.waiver_claims.length}):
+                                          </h4>
+                                          <TeamLogos teams={waiver.waiver_claims.map((claim: any) => claim.teams)} />
+                                        </div>
+                                      )}
+
+                                      <div className="flex gap-2">
+                                        <Button
+                                          onClick={() => handleClaimPlayer(waiver.id)}
+                                          className="flex-1"
+                                          size="sm"
+                                          disabled={
+                                            isExpired ||
+                                            isClaimingThisWaiver ||
+                                            hasAlreadyClaimed ||
+                                            waiver.waiving_team_id === teamData?.id
+                                          }
+                                        >
+                                          {isClaimingThisWaiver
+                                            ? "Claiming..."
+                                            : hasAlreadyClaimed
+                                              ? "Claim Submitted"
+                                              : waiver.waiving_team_id === teamData?.id
+                                                ? "Your Waiver"
+                                                : isExpired
+                                                  ? "Processing..."
+                                                  : "Claim Player"}
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Add the WaiverPriorityDisplay component here */}
+                          <div className="lg:col-span-1">
+                            {teamData && <WaiverPriorityDisplay teamId={teamData.id} />}
+                          </div>
+                        </div>
+                        <div className="mt-4 text-center">
+                          <Button variant="outline" size="sm" onClick={loadWaiversData} disabled={loadingWaivers}>
+                            {loadingWaivers ? "Loading..." : "Refresh Waivers"}
+                          </Button>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="waive">
+                        <div className="space-y-4">
+                          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                            <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                              Waiver Process
+                            </h3>
+                            <ul className="text-sm text-yellow-600 dark:text-yellow-300 space-y-1">
+                              <li>• Players are placed on waivers for 8 hours</li>
+                              <li>• You can cancel within 30 minutes of waiving</li>
+                              <li>
+                                • Teams can claim players based on waiver priority (worst record gets first priority)
+                              </li>
+                              <li>• If multiple teams claim, highest priority wins</li>
+                              <li>• Winning team moves to bottom of waiver priority</li>
+                              <li>• Unclaimed players become free agents</li>
+                              <li>• Waivers are automatically processed when they expire</li>
+                            </ul>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {teamPlayers
+                              .filter((player) => !["Owner", "GM", "AGM"].includes(player.role))
+                              .map((player) => {
+                                const isWaivingThisPlayer = waivingPlayers.has(player.id)
+
+                                return (
+                                  <div key={player.id} className="border border-ice-blue-200 dark:border-ice-blue-700 rounded-lg p-4 shadow-sm">
+                                    <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                        <h3 className="font-medium">
+                                          {player.users?.gamer_tag_id || "Unknown Player"}
+                                        </h3>
+                                        <div className="flex items-center gap-1 mt-1">
+                                          <span className={getPositionColor(player.users?.primary_position)}>
+                                            {getPositionAbbreviation(player.users?.primary_position)}
+                                          </span>
+                                          {player.users?.secondary_position && (
+                                            <>
+                                              {" / "}
+                                              <span className={getPositionColor(player.users?.secondary_position)}>
+                                                {getPositionAbbreviation(player.users?.secondary_position)}
+                                              </span>
+                                            </>
+                                          )}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                          ${player.salary?.toLocaleString()}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">{player.users?.console}</p>
+                                      </div>
+                                      <Badge variant="outline">{player.role}</Badge>
+                                    </div>
+                                    <Button
+                                      onClick={() => handleWaivePlayerAction(player.id)}
+                                      variant="destructive"
+                                      size="sm"
+                                      className="w-full"
+                                      disabled={isWaivingThisPlayer}
+                                    >
+                                      {isWaivingThisPlayer ? "Waiving..." : "Waive Player"}
+                                    </Button>
+                                  </div>
+                                )
+                              })}
+                          </div>
+
+                          {teamPlayers.filter((player) => !["Owner", "GM", "AGM"].includes(player.role)).length ===
+                            0 && (
+                            <div className="text-center py-8 text-muted-foreground">
+                              No players available to waive (management roles cannot be waived)
+                            </div>
+                          )}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Trades Tab Content */}
+              <TabsContent value="trades">
+                <Card className="hockey-card">
+                  <CardHeader className="text-center pb-6">
+                    <div className="hockey-icon-container mx-auto mb-4 w-fit">
+                      <ArrowLeftRight className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle className="hockey-gradient-text text-2xl md:text-3xl font-black mb-2">Trade Center</CardTitle>
+                    <CardDescription className="text-lg text-hockey-silver-600 dark:text-hockey-silver-400">
+                      Propose trades with other teams and manage trade proposals
+                    </CardDescription>
+                    <div className="hockey-divider mt-4" />
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="propose" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3 mb-4 h-10 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
+                        <TabsTrigger 
+                          value="propose"
+                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                        >
+                          Propose Trade
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="incoming"
+                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white relative"
+                        >
+                          Incoming Proposals
+                          {incomingTradeProposals.length > 0 && (
+                            <span className="ml-1 bg-goal-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                              {incomingTradeProposals.length}
+                            </span>
+                          )}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="outgoing"
+                          className="text-sm font-medium px-3 py-1 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
+                        >
+                          Outgoing Proposals
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="propose">
+                        <div className="space-y-6">
+                          {/* Team Selection */}
+                          <div className="space-y-2">
+                            <Label htmlFor="tradeTeam">Select Team to Trade With</Label>
+                            <Select value={selectedTeamForTrade || "none"} onValueChange={setSelectedTeamForTrade}>
+                              <SelectTrigger id="tradeTeam">
+                                <SelectValue placeholder="Select a team" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Select a team</SelectItem>
+                                {allTeams.map((team) => (
+                                  <SelectItem key={team.id} value={team.id}>
+                                    {team.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {selectedTeamForTrade && selectedTeamForTrade !== "none" && (
+                            <>
+                              {/* Trade Message */}
+                              <div className="space-y-2">
+                                <Label htmlFor="tradeMessage">Trade Message (Optional)</Label>
+                                <Textarea
+                                  id="tradeMessage"
+                                  placeholder="Add a message to the other team..."
+                                  value={tradeMessage}
+                                  onChange={(e) => setTradeMessage(e.target.value)}
+                                  className="resize-none"
+                                  rows={2}
+                                />
+                              </div>
+
+                              {/* Trade Players Selection */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Your Team */}
+                                <div className="space-y-4">
+                                  <div className="flex justify-between items-center">
+                                    <h3 className="font-medium">Your Players</h3>
+                                    <Badge variant="outline">
+                                      ${(currentTeamSalary / 1000000).toFixed(2)}M → $
+                                      {(projectedTeamSalary / 1000000).toFixed(2)}M
+                                    </Badge>
+                                  </div>
+                                  <div className="border rounded-lg divide-y max-h-[400px] overflow-y-auto">
+                                    {teamPlayers.map((player) => (
+                                      <div
+                                        key={player.id}
+                                        className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer ${
+                                          selectedMyPlayers.includes(player.id) ? "bg-ice-blue-100 dark:bg-ice-blue-900/30" : ""
+                                        }`}
+                                        onClick={() => {
+                                          if (selectedMyPlayers.includes(player.id)) {
+                                            setSelectedMyPlayers(selectedMyPlayers.filter((id) => id !== player.id))
+                                            // Reset withholding when deselected
+                                            setCapSpaceWithholding((prev) => {
+                                              const updated = { ...prev }
+                                              delete updated[player.id]
+                                              return updated
+                                            })
+                                          } else {
+                                            setSelectedMyPlayers([...selectedMyPlayers, player.id])
+                                          }
+                                        }}
+                                      >
+                                        <div>
+                                          <div className="font-medium">
+                                            {player.users?.gamer_tag_id || "Unknown Player"}
+                                          </div>
+                                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                            <span className={getPositionColor(player.users?.primary_position)}>
+                                              {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                            </span>
+                                            {player.users?.secondary_position && (
+                                              <>
+                                                {" / "}
+                                                <span className={getPositionColor(player.users?.secondary_position)}>
+                                                  {getPositionAbbreviation(player.users?.secondary_position)}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <div className="font-mono">${(player.salary / 1000000).toFixed(2)}M</div>
+                                          {selectedMyPlayers.includes(player.id) && (
+                                            <Select
+                                              value={String(capSpaceWithholding[player.id] || 0)}
+                                              onValueChange={(value) => {
+                                                setCapSpaceWithholding({
+                                                  ...capSpaceWithholding,
+                                                  [player.id]: Number(value),
+                                                })
+                                              }}
+                                            >
+                                              <SelectTrigger className="h-7 text-xs w-24">
+                                                <SelectValue placeholder="Retain" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {getValidWithholdingAmounts(player.salary).map((amount) => (
+                                                  <SelectItem key={amount} value={String(amount)}>
+                                                    Retain ${(amount / 1000000).toFixed(2)}M
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Other Team */}
+                                <div className="space-y-4">
+                                  <div className="flex justify-between items-center">
+                                    <h3 className="font-medium">
+                                      {allTeams.find((team) => team.id === selectedTeamForTrade)?.name || "Other Team"}{" "}
+                                      Players
+                                    </h3>
+                                    <Badge variant="outline">
+                                      ${(otherTeamSalary / 1000000).toFixed(2)}M → $
+                                      {(projectedOtherTeamSalary / 1000000).toFixed(2)}M
+                                    </Badge>
+                                  </div>
+                                  <div className="border rounded-lg divide-y max-h-[400px] overflow-y-auto">
+                                    {selectedTeamPlayers.map((player) => (
+                                      <div
+                                        key={player.id}
+                                        className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer ${
+                                          selectedOtherPlayers.includes(player.id) ? "bg-rink-blue-100 dark:bg-rink-blue-900/30" : ""
+                                        }`}
+                                        onClick={() => {
+                                          if (selectedOtherPlayers.includes(player.id)) {
+                                            setSelectedOtherPlayers(
+                                              selectedOtherPlayers.filter((id) => id !== player.id),
+                                            )
+                                          } else {
+                                            setSelectedOtherPlayers([...selectedOtherPlayers, player.id])
+                                          }
+                                        }}
+                                      >
+                                        <div>
+                                          <div className="font-medium">
+                                            {player.users?.gamer_tag_id || "Unknown Player"}
+                                          </div>
+                                          <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                            <span className={getPositionColor(player.users?.primary_position)}>
+                                              {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                            </span>
+                                            {player.users?.secondary_position && (
+                                              <>
+                                                {" / "}
+                                                <span className={getPositionColor(player.users?.secondary_position)}>
+                                                  {getPositionAbbreviation(player.users?.secondary_position)}
+                                                </span>
+                                              </>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <div className="text-right font-mono">
+                                          ${(player.salary / 1000000).toFixed(2)}M
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Trade Validation */}
+                              {(tradeError || tradeSuccess) && (
+                                <div
+                                  className={`p-3 rounded-md ${
+                                    tradeError
+                                      ? "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                                      : "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                                  }`}
+                                >
+                                  {tradeError || tradeSuccess}
+                                </div>
+                              )}
+
+                              {/* Submit Trade Button */}
+                              <Button
+                                className="w-full"
+                                disabled={
+                                  isSubmittingTrade ||
+                                  (selectedMyPlayers.length === 0 && selectedOtherPlayers.length === 0) ||
+                                  projectedTeamSalary > currentSalaryCap ||
+                                  projectedOtherTeamSalary > currentSalaryCap
+                                }
+                                onClick={async () => {
+                                  try {
+                                    setIsSubmittingTrade(true)
+                                    setTradeError(null)
+                                    setTradeSuccess(null)
+
+                                    // Validate trade
+                                    if (selectedMyPlayers.length === 0 && selectedOtherPlayers.length === 0) {
+                                      setTradeError("Please select at least one player to trade")
+                                      return
+                                    }
+
+                                    if (projectedTeamSalary > currentSalaryCap) {
+                                      setTradeError("This trade would put your team over the salary cap")
+                                      return
+                                    }
+
+                                    if (projectedOtherTeamSalary > currentSalaryCap) {
+                                      setTradeError("This trade would put the other team over the salary cap")
+                                      return
+                                    }
+
+                                    // Get player details for the trade
+                                    const myPlayersToTrade = teamPlayers.filter((p) => selectedMyPlayers.includes(p.id))
+                                    const otherPlayersToReceive = selectedTeamPlayers.filter((p) =>
+                                      selectedOtherPlayers.includes(p.id),
+                                    )
+
+                                    // Format player data for notification
+                                    const fromPlayers = myPlayersToTrade.map((p) => ({
+                                      id: p.id,
+                                      name: p.users?.gamer_tag_id || "Unknown Player",
+                                      position: p.users?.primary_position,
+                                      salary: p.salary,
+                                      withholding: capSpaceWithholding[p.id] || 0,
+                                    }))
+
+                                    const toPlayers = otherPlayersToReceive.map((p) => ({
+                                      id: p.id,
+                                      name: p.users?.gamer_tag_id || "Unknown Player",
+                                      position: p.users?.primary_position,
+                                      salary: p.salary,
+                                    }))
+
+                                    // Get other team's managers
+                                    const { data: otherTeamManagers } = await supabase
+                                      .from("players")
+                                      .select("user_id")
+                                      .eq("team_id", selectedTeamForTrade)
+                                      .in("role", ["GM", "AGM", "Owner"])
+
+                                    if (!otherTeamManagers || otherTeamManagers.length === 0) {
+                                      setTradeError("Could not find managers for the selected team")
+                                      return
+                                    }
+
+                                    // Get other team name
+                                    const otherTeam = allTeams.find((team) => team.id === selectedTeamForTrade)
+                                    if (!otherTeam) {
+                                      setTradeError("Could not find the selected team")
+                                      return
+                                    }
+
+                                    // Create trade data object
+                                    const tradeData = {
+                                      fromTeam: teamData.name,
+                                      toTeam: otherTeam.name,
+                                      fromPlayers,
+                                      toPlayers,
+                                      message: tradeMessage,
+                                    }
+
+                                    // Send notifications to other team's managers
+                                    const notifications = otherTeamManagers.map((manager) => ({
+                                      user_id: manager.user_id,
+                                      title: `Trade Proposal from ${teamData.name}`,
+                                      message: `${teamData.name} wants to trade ${fromPlayers.map((p) => p.name).join(", ") || "players"} for ${toPlayers.map((p) => p.name).join(", ") || "players"}. ${tradeMessage ? `Message: ${tradeMessage}` : ""}\n\nTRADE_DATA:${JSON.stringify(tradeData)}`,
+                                      link: "/management?tab=trades",
+                                      read: false,
+                                    }))
+
+                                    // Send notification to self for tracking
+                                    const selfNotification = {
+                                      user_id: session.user.id,
+                                      title: `Trade Proposal to ${otherTeam.name}`,
+                                      message: `You proposed to trade ${fromPlayers.map((p) => p.name).join(", ") || "players"} for ${toPlayers.map((p) => p.name).join(", ") || "players"}. Waiting for response.\n\nTRADE_DATA:${JSON.stringify(tradeData)}`,
+                                      link: "/management?tab=trades",
+                                      read: false,
+                                    }
+
+                                    // Insert all notifications
+                                    const { error: notificationError } = await supabase
+                                      .from("notifications")
+                                      .insert([...notifications, selfNotification])
+
+                                    if (notificationError) {
+                                      throw notificationError
+                                    }
+
+                                    // Create trade record in trades table
+                                    const { data: newTrade, error: tradeError } = await supabase
+                                      .from("trades")
+                                      .insert([
+                                        {
+                                          team1_id: teamData.id,
+                                          team2_id: selectedTeamForTrade,
+                                          team1_players: JSON.stringify(fromPlayers),
+                                          team2_players: JSON.stringify(toPlayers),
+                                          trade_message: tradeMessage,
+                                          status: "pending",
+                                        },
+                                      ])
+                                      .select("*")
+                                      .single()
+
+                                    if (tradeError) {
+                                      console.error("Error creating trade record:", tradeError)
+                                      // Don't fail the entire operation, just log the error
+                                    } else {
+                                      console.log("Trade record created:", newTrade.id)
+                                    }
+
+                                    setTradeSuccess("Trade proposal sent successfully!")
+
+                                    // Reset selections
+                                    setSelectedMyPlayers([])
+                                    setSelectedOtherPlayers([])
+                                    setTradeMessage("")
+                                    setCapSpaceWithholding({})
+
+                                    // Refresh trade proposals
+                                    await fetchTradeProposals(teamData.id, teamData.name)
+
+                                    // Switch to outgoing tab
+                                    const tabsElement = document.querySelector('[data-value="outgoing"]')
+                                    if (tabsElement) {
+                                      tabsElement.click()
+                                    }
+                                  } catch (error: any) {
+                                    console.error("Error submitting trade:", error)
+                                    setTradeError(`Failed to submit trade: ${error.message}`)
+                                  } finally {
+                                    setIsSubmittingTrade(false)
+                                  }
+                                }}
+                              >
+                                {isSubmittingTrade ? "Submitting..." : "Propose Trade"}
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="incoming">
+                        <div className="space-y-4">
+                          {incomingTradeProposals.length > 0 ? (
+                            incomingTradeProposals.map((proposal) => {
+                              // Extract trade data from message
+                              let tradeData = null
+                              try {
+                                const tradeDataMatch = proposal.message.match(/TRADE_DATA:(.+)$/)
+                                if (tradeDataMatch) {
+                                  tradeData = JSON.parse(tradeDataMatch[1])
+                                }
+                              } catch (e) {
+                                console.error("Failed to parse trade data:", e)
+                              }
+
+                              return (
+                                <Card key={proposal.id} className="overflow-hidden">
+                                  <CardHeader className="bg-muted/50 pb-3">
+                                    <div className="flex justify-between items-center">
+                                      <CardTitle className="text-lg">
+                                        Trade from {tradeData?.fromTeam || "Unknown Team"}
+                                      </CardTitle>
+                                      <CardDescription>
+                                        {new Date(proposal.created_at).toLocaleDateString()} at{" "}
+                                        {new Date(proposal.created_at).toLocaleTimeString()}
+                                      </CardDescription>
+                                    </div>
+                                  </CardHeader>
+                                  <CardContent className="pt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
+                                      {/* They Offer - Fixed: Show fromPlayers (what they're giving up) */}
+                                      <div className="md:col-span-3">
+                                        <h3 className="font-medium mb-2">They Offer:</h3>
+                                        {tradeData?.fromPlayers && tradeData.fromPlayers.length > 0 ? (
+                                          <ul className="space-y-2">
+                                            {tradeData.fromPlayers.map((player: any, index: number) => (
+                                              <li key={index} className="flex justify-between items-center">
+                                                <span>{player.name}</span>
+                                                <div className="text-sm text-muted-foreground">
+                                                  <span>${(player.salary / 1000000).toFixed(2)}M</span>
+                                                  {player.withholding > 0 && (
+                                                    <span className="ml-1 text-orange-600">
+                                                      (Retain ${(player.withholding / 1000000).toFixed(2)}M)
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : (
+                                          <p className="text-muted-foreground">No players</p>
+                                        )}
+                                      </div>
+
+                                      {/* Trade Arrow */}
+                                      <div className="md:col-span-1 flex justify-center">
+                                        <ArrowLeftRight className="h-6 w-6 text-muted-foreground" />
+                                      </div>
+
+                                      {/* They Want - Fixed: Show toPlayers (what they want from us) */}
+                                      <div className="md:col-span-3">
+                                        <h3 className="font-medium mb-2">They Want:</h3>
+                                        {tradeData?.toPlayers && tradeData.toPlayers.length > 0 ? (
+                                          <ul className="space-y-2">
+                                            {tradeData.toPlayers.map((player: any, index: number) => (
+                                              <li key={index} className="flex justify-between items-center">
+                                                <span>{player.name}</span>
+                                                <span className="text-sm text-muted-foreground">
+                                                  ${(player.salary / 1000000).toFixed(2)}M
+                                                </span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : (
+                                          <p className="text-muted-foreground">No players</p>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {tradeData?.message && (
+                                      <div className="mt-4 p-3 bg-muted rounded-md">
+                                        <h4 className="font-medium mb-1">Message:</h4>
+                                        <p className="text-sm">{tradeData.message}</p>
+                                      </div>
+                                    )}
+
+                                    <div className="flex gap-2 mt-4">
+                                      <Button
+                                        onClick={() => handleTradeResponse(proposal.id, true)}
+                                        disabled={isProcessingTradeResponse}
+                                        className="flex-1"
+                                      >
+                                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                                        Accept Trade
+                                      </Button>
+                                      <Button
+                                        variant="destructive"
+                                        onClick={() => handleTradeResponse(proposal.id, false)}
+                                        disabled={isProcessingTradeResponse}
+                                        className="flex-1"
+                                      >
+                                        <XCircle className="h-4 w-4 mr-2" />
+                                        Reject Trade
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )
+                            })
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground">No incoming trade proposals</div>
+                          )}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="outgoing">
+                        <div className="space-y-4">
+                          {outgoingTradeProposals.length > 0 ? (
+                            outgoingTradeProposals.map((proposal) => {
+                              // Extract trade data from message
+                              let tradeData = null
+                              try {
+                                const tradeDataMatch = proposal.message.match(/TRADE_DATA:(.+)$/)
+                                if (tradeDataMatch) {
+                                  tradeData = JSON.parse(tradeDataMatch[1])
+                                }
+                              } catch (e) {
+                                console.error("Failed to parse trade data:", e)
+                              }
+
+                              const isCancelling = cancellingTrades.has(proposal.id)
+
+                              return (
+                                <Card key={proposal.id} className="overflow-hidden">
+                                  <CardHeader className="bg-muted/50 pb-3">
+                                    <div className="flex justify-between items-center">
+                                      <CardTitle className="text-lg">
+                                        Trade to {tradeData?.toTeam || "Unknown Team"}
+                                      </CardTitle>
+                                      <CardDescription>
+                                        {new Date(proposal.created_at).toLocaleDateString()} at{" "}
+                                        {new Date(proposal.created_at).toLocaleTimeString()}
+                                      </CardDescription>
+                                    </div>
+                                  </CardHeader>
+                                  <CardContent className="pt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
+                                      {/* You Offer */}
+                                      <div className="md:col-span-3">
+                                        <h3 className="font-medium mb-2">You Offer:</h3>
+                                        {tradeData?.fromPlayers && tradeData.fromPlayers.length > 0 ? (
+                                          <ul className="space-y-2">
+                                            {tradeData.fromPlayers.map((player: any, index: number) => (
+                                              <li key={index} className="flex justify-between items-center">
+                                                <span>{player.name}</span>
+                                                <div className="text-sm text-muted-foreground">
+                                                  <span>${(player.salary / 1000000).toFixed(2)}M</span>
+                                                  {player.withholding > 0 && (
+                                                    <span className="ml-1 text-orange-600">
+                                                      (Retain ${(player.withholding / 1000000).toFixed(2)}M)
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : (
+                                          <p className="text-muted-foreground">No players</p>
+                                        )}
+                                      </div>
+
+                                      {/* Trade Arrow */}
+                                      <div className="md:col-span-1 flex justify-center">
+                                        <ArrowLeftRight className="h-6 w-6 text-muted-foreground" />
+                                      </div>
+
+                                      {/* You Want */}
+                                      <div className="md:col-span-3">
+                                        <h3 className="font-medium mb-2">You Want:</h3>
+                                        {tradeData?.toPlayers && tradeData.toPlayers.length > 0 ? (
+                                          <ul className="space-y-2">
+                                            {tradeData.toPlayers.map((player: any, index: number) => (
+                                              <li key={index} className="flex justify-between items-center">
+                                                <span>{player.name}</span>
+                                                <span className="text-sm text-muted-foreground">
+                                                  ${(player.salary / 1000000).toFixed(2)}M
+                                                </span>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : (
+                                          <p className="text-muted-foreground">No players</p>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {tradeData?.message && (
+                                      <div className="mt-4 p-3 bg-muted rounded-md">
+                                        <h4 className="font-medium mb-1">Message:</h4>
+                                        <p className="text-sm">{tradeData.message}</p>
+                                      </div>
+                                    )}
+
+                                    <div className="flex gap-2 mt-4">
+                                      <Button
+                                        variant="destructive"
+                                        onClick={async () => {
+                                          try {
+                                            setCancellingTrades((prev) => new Set(prev).add(proposal.id))
+
+                                            // Extract trade data to find the other team
+                                            const otherTeamName = tradeData?.toTeam
+                                            if (!otherTeamName) {
+                                              throw new Error("Could not determine other team")
+                                            }
+
+                                            // Find the other team's ID
+                                            const otherTeam = allTeams.find((team) => team.name === otherTeamName)
+                                            if (!otherTeam) {
+                                              throw new Error("Could not find other team")
+                                            }
+
+                                            // Get other team's managers
+                                            const { data: otherTeamManagers, error: managersError } = await supabase
+                                              .from("players")
+                                              .select("user_id")
+                                              .eq("team_id", otherTeam.id)
+                                              .in("role", ["GM", "AGM", "Owner"])
+
+                                            if (managersError) {
+                                              console.error("Error fetching other team managers:", managersError)
+                                              throw managersError
+                                            }
+
+                                            // Mark the outgoing notification as cancelled
+                                            const { error: updateError } = await supabase
+                                              .from("notifications")
+                                              .update({
+                                                message: proposal.message + "\n\nSTATUS: CANCELLED",
+                                              })
+                                              .eq("id", proposal.id)
+
+                                            if (updateError) {
+                                              console.error("Error updating outgoing notification:", updateError)
+                                              throw updateError
+                                            }
+
+                                            // Update the trade record in the trades table
+                                            const { error: tradeUpdateError } = await supabase
+                                              .from("trades")
+                                              .update({
+                                                status: "cancelled",
+                                                updated_at: new Date().toISOString()
+                                              })
+                                              .eq("team1_id", teamData.id)
+                                              .eq("team2_id", otherTeam.id)
+                                              .eq("status", "pending")
+                                              .order("created_at", { ascending: false })
+                                              .limit(1)
+
+                                            if (tradeUpdateError) {
+                                              console.error("Error updating trade record:", tradeUpdateError)
+                                              // Don't throw here - the notification cancellation still worked
+                                            }
+
+                                            // Update corresponding incoming notifications for the other team
+                                            if (otherTeamManagers && otherTeamManagers.length > 0) {
+                                              // First, get the existing notifications to update them
+                                              const { data: incomingNotifications, error: fetchError } = await supabase
+                                                .from("notifications")
+                                                .select("id, message")
+                                                .in(
+                                                  "user_id",
+                                                  otherTeamManagers.map((m) => m.user_id),
+                                                )
+                                                .like("title", `Trade Proposal from ${teamData.name}`)
+                                                .gte(
+                                                  "created_at",
+                                                  new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+                                                ) // Only recent proposals
+
+                                              if (fetchError) {
+                                                console.error("Error fetching incoming notifications:", fetchError)
+                                              } else if (incomingNotifications && incomingNotifications.length > 0) {
+                                                // Update each notification individually
+                                                for (const notification of incomingNotifications) {
+                                                  const { error: updateError } = await supabase
+                                                    .from("notifications")
+                                                    .update({
+                                                      message: notification.message + "\n\nSTATUS: CANCELLED",
+                                                    })
+                                                    .eq("id", notification.id)
+
+                                                  if (updateError) {
+                                                    console.error("Error updating notification:", updateError)
+                                                  }
+                                                }
+                                              }
+                                            }
+
+                                            toast({
+                                              title: "Trade Cancelled",
+                                              description: "Your trade proposal has been cancelled.",
+                                            })
+
+                                            // Refresh trade proposals
+                                            await fetchTradeProposals(teamData.id, teamData.name)
+                                          } catch (error: any) {
+                                            console.error("Error cancelling trade:", error)
+                                            toast({
+                                              title: "Error",
+                                              description: "Failed to cancel trade: " + error.message,
+                                              variant: "destructive",
+                                            })
+                                          } finally {
+                                            setCancellingTrades((prev) => {
+                                              const newSet = new Set(prev)
+                                              newSet.delete(proposal.id)
+                                              return newSet
+                                            })
+                                          }
+                                        }}
+                                        disabled={isCancelling}
+                                        className="flex-1"
+                                      >
+                                        <XCircle className="h-4 w-4 mr-2" />
+                                        {isCancelling ? "Cancelling..." : "Cancel Trade"}
+                                      </Button>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              )
+                            })
+                          ) : (
+                            <div className="text-center py-8 text-muted-foreground">No outgoing trade proposals</div>
+                          )}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
           </>
         )}
@@ -1678,7 +3285,7 @@ const ManagementPage = () => {
           teamData={teamData}
           currentBid={playerBids[selectedPlayer.id]}
           projectedSalary={projectedSalary}
-          salaryCap={teamData.salary_cap}
+          salaryCap={currentSalaryCap}
           projectedRosterSize={projectedRosterSize}
         />
       )}

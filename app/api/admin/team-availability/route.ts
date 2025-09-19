@@ -177,9 +177,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // If still no matches, try "Season 1" as season_name (final fallback)
+    // If still no matches, try "Season 1" as season_name
     if (!matches || matches.length === 0) {
-      console.log(`Still no matches found, trying with season_name: "Season 1" as final fallback`)
+      console.log(`Still no matches found, trying with season_name: "Season 1"`)
 
       const { data: matchesSeason1, error: matchesSeason1Error } = await supabase
         .from("matches")
@@ -198,10 +198,10 @@ export async function GET(request: NextRequest) {
         .order("match_date")
 
       if (matchesSeason1Error) {
-        console.error("Error fetching matches with Season 1 fallback:", matchesSeason1Error)
+        console.error("Error fetching matches with Season 1:", matchesSeason1Error)
       } else {
         matches = matchesSeason1
-        console.log(`Found ${matches?.length || 0} matches using "Season 1" fallback`)
+        console.log(`Found ${matches?.length || 0} matches using "Season 1"`)
       }
     }
 
