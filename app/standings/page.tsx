@@ -26,7 +26,6 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { getCurrentSeasonId } from "@/lib/team-utils"
 
 interface StandingsPageProps {
   searchParams: { season?: string }
@@ -643,30 +642,9 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
   const [standings, setStandings] = useState<TeamStanding[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [currentSeasonId, setCurrentSeasonId] = useState<number>(1)
-  const [currentSeasonName, setCurrentSeasonName] = useState<string>("Season 1")
-
-  // Load current season
-  useEffect(() => {
-    async function loadCurrentSeason() {
-      try {
-        const seasonId = await getCurrentSeasonId()
-        setCurrentSeasonId(seasonId)
-        setCurrentSeasonName(`Season ${seasonId}`)
-        console.log(`Loaded current season: ${seasonId}`)
-      } catch (error) {
-        console.error("Error loading current season:", error)
-        // Keep default values
-      }
-    }
-
-    loadCurrentSeason()
-  }, [])
 
   useEffect(() => {
     async function fetchStandings() {
-      if (!currentSeasonName) return // Wait for season to load
-      
       try {
         setLoading(true)
         setError(null)
@@ -694,7 +672,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         const { data: matchesData, error: matchesError } = await supabase
           .from("matches")
           .select("*")
-          .eq("season_name", currentSeasonName)
+          .eq("season_name", "Season 1")
           .eq("status", "completed")
 
         if (matchesError) {
@@ -784,7 +762,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
     }
 
     fetchStandings()
-  }, [supabase, currentSeasonName])
+  }, [supabase])
 
   if (loading) {
     return (
@@ -885,7 +863,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
               <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
-              <span className="text-ice-blue-800 dark:text-ice-blue-200 font-semibold text-lg">{currentSeasonName}</span>
+              <span className="text-ice-blue-800 dark:text-ice-blue-200 font-semibold text-lg">Season 1</span>
             </div>
 
             {/* Main Title */}

@@ -13,7 +13,6 @@ import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, Chevron
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { TeamLogo } from "@/components/team-logo"
-import { getCurrentSeasonId } from "@/lib/team-utils"
 
 export default function MatchesPage() {
   const router = useRouter()
@@ -25,8 +24,6 @@ export default function MatchesPage() {
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [currentSeasonId, setCurrentSeasonId] = useState<number>(1)
-  const [currentSeasonName, setCurrentSeasonName] = useState<string>("Season 1")
 
   // Pagination and filtering state
   const [currentWeek, setCurrentWeek] = useState(1)
@@ -42,23 +39,6 @@ export default function MatchesPage() {
     if (week) setCurrentWeek(Number.parseInt(week))
     if (team) setSelectedTeam(team)
   }, [searchParams])
-
-  // Load current season
-  useEffect(() => {
-    async function loadCurrentSeason() {
-      try {
-        const seasonId = await getCurrentSeasonId()
-        setCurrentSeasonId(seasonId)
-        setCurrentSeasonName(`Season ${seasonId}`)
-        console.log(`Loaded current season: ${seasonId}`)
-      } catch (error) {
-        console.error("Error loading current season:", error)
-        // Keep default values
-      }
-    }
-
-    loadCurrentSeason()
-  }, [])
 
   // Fetch teams for filter
   useEffect(() => {
@@ -79,8 +59,6 @@ export default function MatchesPage() {
   // Fetch all matches
   useEffect(() => {
     async function fetchMatches() {
-      if (!currentSeasonName) return // Wait for season to load
-      
       try {
         setLoading(true)
         setError(null)
@@ -102,7 +80,7 @@ export default function MatchesPage() {
             away_team:teams!away_team_id(id, name, logo_url)
           `,
           )
-          .eq("season_name", currentSeasonName)
+          .eq("season_name", "Season 1")
 
         // Apply team filter if selected
         if (selectedTeam !== "all") {
@@ -113,7 +91,7 @@ export default function MatchesPage() {
 
         if (error) throw error
 
-        console.log(`Found ${data?.length || 0} matches for ${currentSeasonName}`)
+        console.log(`Found ${data?.length || 0} matches for Season 1`)
         setMatches(data || [])
 
         // Calculate weeks based on matches
@@ -136,7 +114,7 @@ export default function MatchesPage() {
     }
 
     fetchMatches()
-  }, [supabase, toast, selectedTeam, currentSeasonName])
+  }, [supabase, toast, selectedTeam])
 
   // Calculate weeks from matches
   const calculateWeeks = (matchesData: any[]) => {
@@ -500,7 +478,7 @@ export default function MatchesPage() {
               <div className="flex items-center gap-2">
                 <Badge className="hockey-badge text-base py-2 px-4">
                   <Trophy className="h-4 w-4 mr-2" />
-                  {currentSeasonName}
+                  Season 1
                 </Badge>
               </div>
             </div>

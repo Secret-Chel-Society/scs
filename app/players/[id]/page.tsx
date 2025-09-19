@@ -16,7 +16,6 @@ import { PlayerAwards } from "@/components/players/player-awards"
 import { PlayerAwardsDebug } from "@/components/players/player-awards-debug"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { getCurrentSeasonId } from "@/lib/team-utils"
 
 interface PlayerProfileProps {
   params: {
@@ -108,28 +107,26 @@ export default function PlayerDetailPage() {
               setCurrentSeason(season)
             }
           } else {
-            // Default to current season
-            const currentSeasonId = await getCurrentSeasonId()
+            // Default to season 1
             const defaultSeason = {
-              id: currentSeasonId.toString(),
-              number: currentSeasonId,
-              name: `Season ${currentSeasonId}`,
+              id: "1",
+              number: 1,
+              name: "Season 1",
               is_active: true,
             }
-            console.log("Using current season as default:", defaultSeason)
+            console.log("Using default season:", defaultSeason)
             setCurrentSeason(defaultSeason)
           }
         }
       } catch (error) {
         console.error("Error fetching current season:", error)
-        const currentSeasonId = await getCurrentSeasonId()
         const defaultSeason = {
-          id: currentSeasonId.toString(),
-          number: currentSeasonId,
-          name: `Season ${currentSeasonId}`,
+          id: "1",
+          number: 1,
+          name: "Season 1",
           is_active: true,
         }
-        console.log("Error fallback to current season:", defaultSeason)
+        console.log("Error fallback to default season:", defaultSeason)
         setCurrentSeason(defaultSeason)
       }
     }

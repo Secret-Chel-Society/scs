@@ -1054,36 +1054,25 @@ export default function AdminSchedulePage() {
 
   // Parse CSV file
   const parseCSV = (text: string): CSVMatch[] => {
-    console.log("Parsing CSV with text length:", text.length)
-    
     // Split by lines and remove empty lines
     const lines = text.split("\n").filter((line) => line.trim() !== "")
-    console.log("CSV lines found:", lines.length)
-    
     if (lines.length < 2) {
       throw new Error("CSV file must contain a header row and at least one data row")
     }
 
-    // Parse header - handle different line endings and encodings
-    const headerLine = lines[0].replace(/\r/g, '').trim()
-    const header = headerLine.split(",").map((h) => h.trim().toLowerCase().replace(/"/g, ''))
-    console.log("CSV headers:", header)
-    
+    // Parse header
+    const header = lines[0].split(",").map((h) => h.trim().toLowerCase())
     const requiredColumns = ["date", "time", "home team", "away team"]
     const missingColumns = requiredColumns.filter((col) => !header.includes(col))
     if (missingColumns.length > 0) {
-      throw new Error(`CSV is missing required columns: ${missingColumns.join(", ")}. Found columns: ${header.join(", ")}`)
+      throw new Error(`CSV is missing required columns: ${missingColumns.join(", ")}`)
     }
 
     // Parse data rows
     const matches: CSVMatch[] = []
     for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].replace(/\r/g, '').trim()
-      if (!line) continue // Skip empty lines
-      
-      console.log(`Processing line ${i}:`, line)
-      
       // Handle quoted fields with commas
+      const line = lines[i]
       const fields: string[] = []
       let inQuotes = false
       let currentField = ""
@@ -1100,8 +1089,6 @@ export default function AdminSchedulePage() {
         }
       }
       fields.push(currentField) // Add the last field
-      
-      console.log(`Parsed fields for line ${i}:`, fields)
 
       // Clean up quoted fields
       const cleanFields = fields.map((field) => {
@@ -1112,26 +1099,15 @@ export default function AdminSchedulePage() {
         return field
       })
 
-      // Map fields to match object - handle different column orders
+      // Map fields to match object
       const match: CSVMatch = {
         date: cleanFields[header.indexOf("date")],
         time: cleanFields[header.indexOf("time")],
         homeTeam: cleanFields[header.indexOf("home team")],
         awayTeam: cleanFields[header.indexOf("away team")],
       }
-      
-      // Validate that we found the required fields
-      if (!match.date || !match.time || !match.homeTeam || !match.awayTeam) {
-        console.error(`Missing required fields in row ${i}:`, {
-          date: match.date,
-          time: match.time,
-          homeTeam: match.homeTeam,
-          awayTeam: match.awayTeam
-        })
-        throw new Error(`Row ${i}: Missing required fields (Date, Time, Home Team, Away Team)`)
-      }
 
-      // Add optional fields if they exist - handle different column orders
+      // Add optional fields if they exist
       if (header.includes("home score")) {
         match.homeScore = cleanFields[header.indexOf("home score")]
       }
@@ -1144,8 +1120,6 @@ export default function AdminSchedulePage() {
       if (header.includes("season")) {
         match.season = cleanFields[header.indexOf("season")]
       }
-      
-      console.log(`Parsed match ${i}:`, match)
 
       matches.push(match)
     }
@@ -1169,28 +1143,14 @@ export default function AdminSchedulePage() {
     setUploadResults(null)
 
     try {
-      console.log("Starting CSV upload process...")
-      console.log("CSV file:", csvFile.name, "Size:", csvFile.size, "bytes")
-      
       // Read file
       const text = await csvFile.text()
-      console.log("CSV content preview:", text.substring(0, 500))
-      
-      // Validate file content
-      if (!text || text.trim().length === 0) {
-        throw new Error("CSV file is empty or could not be read")
-      }
-      
       const matches = parseCSV(text)
-      console.log("Parsed matches:", matches.length, "matches found")
-      
-      // Validate parsed matches
-      if (matches.length === 0) {
-        throw new Error("No valid matches found in CSV. Please check the format and try again.")
-      }
 
-      // Log team information for debugging
-      console.log("Available teams:", teams.map(t => ({ id: t.id, name: t.name })))
+      // Validate matches
+      if (matches.length === 0) {
+        throw new Error("No valid matches found in the CSV file")
+      }
 
       // Create a map of team names to IDs
       const teamMap = new Map<string, string>()
@@ -1220,15 +1180,11 @@ export default function AdminSchedulePage() {
           const awayTeamId = teamMap.get(match.awayTeam.toLowerCase())
 
           if (!homeTeamId) {
-            const availableTeams = Array.from(teamMap.keys()).join(", ")
-            throw new Error(`Home team "${match.homeTeam}" not found. Available teams: ${availableTeams}`)
+            throw new Error(`Home team "${match.homeTeam}" not found`)
           }
           if (!awayTeamId) {
-            const availableTeams = Array.from(teamMap.keys()).join(", ")
-            throw new Error(`Away team "${match.awayTeam}" not found. Available teams: ${availableTeams}`)
+            throw new Error(`Away team "${match.awayTeam}" not found`)
           }
-
-          console.log(`Processing match: ${match.homeTeam} vs ${match.awayTeam}`)
 
           // Parse date and time
           let dateTime: Date
@@ -1316,44 +1272,22 @@ export default function AdminSchedulePage() {
           }
 
           // Insert match
-          console.log("Inserting match data:", matchData)
           const { error } = await supabase.from("matches").insert(matchData)
 
           if (error) {
-            console.error("Database insert error:", error)
-            
             // Handle season_id type mismatch
             if (error.message.includes("invalid input syntax for type")) {
-              console.log("Removing season_id due to type mismatch")
               delete matchData.season_id
               const { error: retryError } = await supabase.from("matches").insert(matchData)
-              if (retryError) {
-                console.error("Retry insert error:", retryError)
-                throw retryError
-              }
+              if (retryError) throw retryError
             }
             // Handle season_name not existing
             else if (error.message.includes("season_name") && error.message.includes("does not exist")) {
-              console.log("Removing season_name due to column not existing")
               delete matchData.season_name
               const { error: retryError } = await supabase.from("matches").insert(matchData)
-              if (retryError) {
-                console.error("Retry insert error:", retryError)
-                throw retryError
-              }
-            }
-            // Handle RLS policy violations
-            else if (error.message.includes("new row violates row-level security policy")) {
-              throw new Error("Permission denied: You don't have permission to create matches. Please contact an administrator.")
-            }
-            // Handle foreign key violations
-            else if (error.message.includes("violates foreign key constraint")) {
-              throw new Error("Invalid team ID: One or both teams don't exist in the database.")
-            }
-            // Handle other database errors
-            else {
-              console.error("Unhandled database error:", error)
-              throw new Error(`Database error: ${error.message}`)
+              if (retryError) throw retryError
+            } else {
+              throw error
             }
           }
 
@@ -1365,30 +1299,18 @@ export default function AdminSchedulePage() {
       }
 
       setUploadResults(results)
-      
-      // Show results toast
-      if (results.success > 0) {
-        toast({
-          title: "Upload complete",
-          description: `Successfully imported ${results.success} of ${results.total} matches`,
-        })
-      } else {
-        toast({
-          title: "Upload failed",
-          description: `No matches were imported. Check the errors below.`,
-          variant: "destructive",
-        })
-      }
+      toast({
+        title: "Upload complete",
+        description: `Successfully imported ${results.success} of ${results.total} matches`,
+      })
 
       // Refresh matches
       fetchMatches()
-      
-      // Don't close dialog immediately - let user see results
-      // setIsUploadDialogOpen(false)
-      // setCsvFile(null)
-      // if (fileInputRef.current) {
-      //   fileInputRef.current.value = ""
-      // }
+      setIsUploadDialogOpen(false)
+      setCsvFile(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
     } catch (error: any) {
       console.error("Error uploading CSV:", error)
       toast({
@@ -2091,16 +2013,6 @@ export default function AdminSchedulePage() {
               </DialogTitle>
               <DialogDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base">
                 Upload a CSV file with match data. The file must include columns for Date, Time, Home Team, and Away Team.
-                <br /><br />
-                <strong>Required columns:</strong> Date, Time, Home Team, Away Team
-                <br />
-                <strong>Optional columns:</strong> Home Score, Away Score, Status, Season
-                <br /><br />
-                <strong>Supported formats:</strong>
-                <br />• Date: 2024-01-15 or 01/15/2024
-                <br />• Time: 19:00 or 19:00:00
-                <br />• Column order: Date, Time, Away Team, Home Team, Away Score, Home Score, Status, Season
-                <br />• Team names must exactly match your team names in the database
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-6 py-6">
@@ -2187,28 +2099,19 @@ export default function AdminSchedulePage() {
             </div>
             <DialogFooter className="pt-4 border-t-2 border-ice-blue-200/50 dark:border-rink-blue-700/50">
               <Button 
-                onClick={() => {
-                  setIsUploadDialogOpen(false)
-                  setCsvFile(null)
-                  setUploadResults(null)
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = ""
-                  }
-                }} 
+                onClick={() => setIsUploadDialogOpen(false)} 
                 disabled={isUploading}
                 className="hockey-button bg-gradient-to-r from-hockey-silver-500 to-hockey-silver-600 hover:from-hockey-silver-600 hover:to-hockey-silver-700 text-white border-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
               >
-                {uploadResults ? "Close" : "Cancel"}
+                Cancel
               </Button>
-              {!uploadResults && (
-                <Button 
-                  onClick={uploadMatchesFromCSV} 
-                  disabled={!csvFile || isUploading}
-                  className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-                >
-                  {isUploading ? "Uploading..." : "Upload"}
-                </Button>
-              )}
+              <Button 
+                onClick={uploadMatchesFromCSV} 
+                disabled={!csvFile || isUploading}
+                className="hockey-button bg-gradient-to-r from-assist-green-500 to-assist-green-600 hover:from-assist-green-600 hover:to-assist-green-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+              >
+                {isUploading ? "Uploading..." : "Upload"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
