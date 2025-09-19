@@ -28,7 +28,6 @@ import { XCircle, CheckCircle2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Home, Gavel } from "lucide-react"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
-import { ManagementNav } from "@/components/management/management-nav"
 
 interface Player {
   id: string
@@ -1110,7 +1109,7 @@ const ManagementPage = () => {
       // First, process any expired waivers with better error handling
       try {
         console.log("Processing expired waivers...")
-        const processResponse = await fetch("/api/waivers/process", {
+        const processResponse = await fetch("/api/waivers/check-expired", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1142,7 +1141,7 @@ const ManagementPage = () => {
 
       // Then fetch current active waivers (should exclude processed ones)
       console.log("Fetching active waivers...")
-      const response = await fetch("/api/waivers/v2?status=active", {
+      const response = await fetch("/api/waivers?status=active", {
         headers: {
           "Content-Type": "application/json",
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
@@ -1234,7 +1233,7 @@ const ManagementPage = () => {
         teamId: teamData.id
       })
 
-      const response = await fetch("/api/waivers/v2", {
+      const response = await fetch("/api/waivers/working", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1335,7 +1334,7 @@ const ManagementPage = () => {
 
       console.log("Making claim request with fresh session")
 
-      const response = await fetch(`/api/waivers/v2`, {
+      const response = await fetch(`/api/waivers/claim`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1343,7 +1342,6 @@ const ManagementPage = () => {
           Authorization: `Bearer ${freshSession.access_token}`,
         },
         body: JSON.stringify({
-          action: 'claim',
           waiverId,
           teamId: teamData.id,
         }),
@@ -1540,11 +1538,6 @@ const ManagementPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/20">
       <div className="container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* Navigation */}
-          <div className="mb-8">
-            <ManagementNav />
-          </div>
-          
           {/* Enhanced Hockey-Themed Header */}
           <div className="hockey-header p-8 mb-8 rounded-3xl">
             <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
