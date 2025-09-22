@@ -38,12 +38,14 @@ export default function ResetPasswordPage() {
         const refreshToken = searchParams.get("refresh_token")
         const type = searchParams.get("type")
         const tokenHash = searchParams.get("token_hash")
+        const code = searchParams.get("code")
 
         console.log("Reset password URL params:", {
           accessToken: !!accessToken,
           refreshToken: !!refreshToken,
           type,
           tokenHash: !!tokenHash,
+          code: !!code,
           allParams: Object.fromEntries(searchParams.entries()),
         })
 
@@ -65,6 +67,25 @@ export default function ResetPasswordPage() {
           }
 
           console.log("Session set successfully, user can reset password")
+          setIsLoading(false)
+          return
+        }
+
+        // If we have a code parameter, try to exchange it for a session
+        if (code) {
+          console.log("Found code parameter, attempting to exchange for session")
+
+          const supabase = createClient()
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (error) {
+            console.error("Error exchanging code for session:", error)
+            setError("Invalid or expired reset link")
+            setIsLoading(false)
+            return
+          }
+
+          console.log("Code exchanged successfully, user can reset password")
           setIsLoading(false)
           return
         }
