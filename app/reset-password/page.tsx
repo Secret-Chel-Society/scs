@@ -71,55 +71,61 @@ export default function ResetPasswordPage() {
           return
         }
 
-        // If we have a code parameter, try to exchange it for a session
+        // If we have a code parameter, handle it as a password reset token
         if (code) {
-          console.log("Found code parameter, attempting to exchange for session")
+          console.log("Found code parameter, handling as password reset token")
           console.log("Code value:", code)
+          console.log("Current URL:", window.location.href)
 
           const supabase = createClient()
           
-          // Try different methods to exchange the code
-          let { data, error } = await supabase.auth.exchangeCodeForSession(code)
-
-          if (error) {
-            console.error("First attempt failed:", error)
+          try {
+            // For password reset, we need to use the code to get a session
+            // The code from Supabase password reset emails is typically used differently
             
-            // Try with additional parameters
-            const { data: data2, error: error2 } = await supabase.auth.exchangeCodeForSession(code, {
-              redirectTo: `${window.location.origin}/reset-password`
+            // First, try to get the current session to see if we're already authenticated
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+            
+            if (sessionError) {
+              console.error("Error getting session:", sessionError)
+            }
+            
+            if (session) {
+              console.log("User already has a session, can reset password")
+              setIsLoading(false)
+              return
+            }
+            
+            // If no session, try to use the code to authenticate
+            // The code might be a one-time password for recovery
+            console.log("No existing session, trying to use code for authentication...")
+            
+            // Try to verify the code as a recovery token
+            const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+              token_hash: code,
+              type: "recovery"
             })
             
-            if (error2) {
-              console.error("Second attempt failed:", error2)
+            if (verifyError) {
+              console.error("Code verification failed:", verifyError)
+              console.error("Error details:", JSON.stringify(verifyError, null, 2))
               
-              // Try using the code as a recovery token
-              console.log("Trying code as recovery token...")
-              const { data: data3, error: error3 } = await supabase.auth.verifyOtp({
-                token_hash: code,
-                type: "recovery"
-              })
-              
-              if (error3) {
-                console.error("Third attempt failed:", error3)
-                console.error("Full error details:", JSON.stringify(error3, null, 2))
-                setError(`Invalid or expired reset link: ${error3.message}`)
-                setIsLoading(false)
-                return
-              } else {
-                data = data3
-                error = error3
-                console.log("Code worked as recovery token!")
-              }
+              // If verification fails, the code might be expired or invalid
+              setError(`Invalid or expired reset link. Please request a new password reset.`)
+              setIsLoading(false)
+              return
             } else {
-              data = data2
-              error = error2
+              console.log("Code verification successful!")
+              console.log("Verify data:", verifyData)
+              setIsLoading(false)
+              return
             }
+          } catch (exchangeError) {
+            console.error("Unexpected error during code handling:", exchangeError)
+            setError(`Unexpected error: ${exchangeError instanceof Error ? exchangeError.message : 'Unknown error'}`)
+            setIsLoading(false)
+            return
           }
-
-          console.log("Code exchanged successfully, user can reset password")
-          console.log("Session data:", data)
-          setIsLoading(false)
-          return
         }
 
         // If we have a token_hash, try to verify the OTP
