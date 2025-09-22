@@ -102,14 +102,60 @@ export async function POST(request: Request) {
       }
 
       console.log(`Found user in public.users, but not in auth.users. User ID: ${publicUser.id}`)
-      return NextResponse.json({ 
-        error: "User exists in public.users but not in auth.users. User needs to register through normal flow first.",
-        details: {
-          publicUserId: publicUser.id,
-          email: publicUser.email,
-          suggestion: "User should register through /register or /login page first"
+      
+      // Try to create the user in auth.users
+      console.log("Attempting to create user in auth system...")
+      const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: normalizedEmail,
+        password: password, // Use the provided password
+        email_confirm: true, // Auto-confirm the email
+        user_metadata: {
+          public_user_id: publicUser.id,
+          gamer_tag: publicUser.gamer_tag,
+          primary_position: publicUser.primary_position,
+          console: publicUser.console
         }
-      }, { status: 400 })
+      })
+
+      if (createError) {
+        console.error("Error creating user in auth system:", createError)
+        return NextResponse.json({ 
+          error: "Failed to create user in auth system",
+          details: {
+            publicUserId: publicUser.id,
+            email: publicUser.email,
+            authError: createError.message,
+            suggestion: "User should register through /register or /login page first"
+          }
+        }, { status: 400 })
+      }
+
+      console.log(`Successfully created user in auth system: ${newAuthUser.user?.id}`)
+      
+      // Update the public.users table to link to the auth user
+      const { error: updatePublicError } = await supabaseAdmin
+        .from('users')
+        .update({ 
+          id: newAuthUser.user?.id, // Update the ID to match auth.users
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', publicUser.id)
+
+      if (updatePublicError) {
+        console.error("Error updating public.users with auth user ID:", updatePublicError)
+        // Continue anyway since the auth user was created
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: "User created in auth system and password set successfully",
+        user: {
+          id: newAuthUser.user?.id,
+          email: newAuthUser.user?.email,
+          publicUserId: publicUser.id,
+          action: "created_and_password_set"
+        },
+      })
     }
 
     // Update the user's password
