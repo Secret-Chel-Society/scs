@@ -103,9 +103,23 @@ export async function POST(request: Request) {
 
       console.log(`Found user in public.users, but not in auth.users. User ID: ${publicUser.id}`)
       
-      // Try to create the user in auth.users
-      console.log("Attempting to create user in auth system...")
-      const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      // Double-check if user exists in auth.users (maybe the search missed them)
+      console.log("Double-checking if user exists in auth.users...")
+      const { data: doubleCheckUsers, error: doubleCheckError } = await supabaseAdmin.auth.admin.listUsers()
+      
+      if (!doubleCheckError) {
+        const existingUser = doubleCheckUsers?.users?.find((u) => u.email?.toLowerCase() === normalizedEmail)
+        if (existingUser) {
+          console.log(`User actually exists in auth.users! ID: ${existingUser.id}`)
+          // Use the existing user
+          user = existingUser
+        }
+      }
+      
+      // If still no user found, create them
+      if (!user) {
+        console.log("Attempting to create user in auth system...")
+        const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         email: normalizedEmail,
         password: password, // Use the provided password
         email_confirm: true, // Auto-confirm the email
@@ -119,13 +133,16 @@ export async function POST(request: Request) {
 
       if (createError) {
         console.error("Error creating user in auth system:", createError)
+        console.error("Full error details:", JSON.stringify(createError, null, 2))
         return NextResponse.json({ 
-          error: "Failed to create user in auth system",
+          error: `Failed to create user in auth system: ${createError.message}`,
           details: {
             publicUserId: publicUser.id,
             email: publicUser.email,
             authError: createError.message,
-            suggestion: "User should register through /register or /login page first"
+            errorCode: createError.status,
+            fullError: createError,
+            suggestion: "Check if user already exists or if there are validation issues"
           }
         }, { status: 400 })
       }
@@ -146,16 +163,43 @@ export async function POST(request: Request) {
         // Continue anyway since the auth user was created
       }
 
-      return NextResponse.json({
-        success: true,
-        message: "User created in auth system and password set successfully",
-        user: {
-          id: newAuthUser.user?.id,
-          email: newAuthUser.user?.email,
-          publicUserId: publicUser.id,
-          action: "created_and_password_set"
-        },
-      })
+        return NextResponse.json({
+          success: true,
+          message: "User created in auth system and password set successfully",
+          user: {
+            id: newAuthUser.user?.id,
+            email: newAuthUser.user?.email,
+            publicUserId: publicUser.id,
+            action: "created_and_password_set"
+          },
+        })
+      } else {
+        // User was found in double-check, just update their password
+        console.log("User found in double-check, updating password...")
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, { password })
+        
+        if (updateError) {
+          console.error("Error updating user password:", updateError)
+          return NextResponse.json({ 
+            error: `Failed to update password: ${updateError.message}`,
+            details: {
+              userId: user.id,
+              email: user.email,
+              authError: updateError.message
+            }
+          }, { status: 500 })
+        }
+        
+        return NextResponse.json({
+          success: true,
+          message: "User password updated successfully",
+          user: {
+            id: user.id,
+            email: user.email,
+            action: "password_updated"
+          },
+        })
+      }
     }
 
     // Update the user's password
