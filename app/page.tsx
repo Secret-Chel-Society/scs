@@ -16,6 +16,7 @@ import HeroCarousel from "@/components/hero-carousel"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { RecentTrades } from "@/components/recent-trades"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSearchParams, useRouter } from "next/navigation"
 import {
   Trophy,
   Users,
@@ -97,6 +98,26 @@ function FloatingParticles() {
 export default function Home() {
   const { supabase } = useSupabase()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  // Handle password reset redirects
+  useEffect(() => {
+    const code = searchParams.get("code")
+    const type = searchParams.get("type")
+    
+    if (code && type === "recovery") {
+      // Redirect to reset password page with the code
+      router.push(`/reset-password?code=${code}&type=${type}`)
+      return
+    }
+    
+    if (code) {
+      // If there's a code but no type, assume it's a password reset
+      router.push(`/reset-password?code=${code}`)
+      return
+    }
+  }, [searchParams, router])
   const [news, setNews] = useState([])
   const [upcomingGames, setUpcomingGames] = useState([])
   const [completedGames, setCompletedGames] = useState([])
