@@ -74,18 +74,50 @@ export default function ResetPasswordPage() {
         // If we have a code parameter, try to exchange it for a session
         if (code) {
           console.log("Found code parameter, attempting to exchange for session")
+          console.log("Code value:", code)
 
           const supabase = createClient()
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          
+          // Try different methods to exchange the code
+          let { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
           if (error) {
-            console.error("Error exchanging code for session:", error)
-            setError("Invalid or expired reset link")
-            setIsLoading(false)
-            return
+            console.error("First attempt failed:", error)
+            
+            // Try with additional parameters
+            const { data: data2, error: error2 } = await supabase.auth.exchangeCodeForSession(code, {
+              redirectTo: `${window.location.origin}/reset-password`
+            })
+            
+            if (error2) {
+              console.error("Second attempt failed:", error2)
+              
+              // Try using the code as a recovery token
+              console.log("Trying code as recovery token...")
+              const { data: data3, error: error3 } = await supabase.auth.verifyOtp({
+                token_hash: code,
+                type: "recovery"
+              })
+              
+              if (error3) {
+                console.error("Third attempt failed:", error3)
+                console.error("Full error details:", JSON.stringify(error3, null, 2))
+                setError(`Invalid or expired reset link: ${error3.message}`)
+                setIsLoading(false)
+                return
+              } else {
+                data = data3
+                error = error3
+                console.log("Code worked as recovery token!")
+              }
+            } else {
+              data = data2
+              error = error2
+            }
           }
 
           console.log("Code exchanged successfully, user can reset password")
+          console.log("Session data:", data)
           setIsLoading(false)
           return
         }
