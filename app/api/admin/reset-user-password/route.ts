@@ -40,10 +40,12 @@ export async function POST(request: Request) {
       },
     )
 
-    // Look up the user in auth system - try both filtered and unfiltered approaches
+    // Look up the user in auth system - try multiple approaches
     let user = null
     let listError = null
 
+    console.log("Searching for user in auth system...")
+    
     // First try with email filter
     const { data: filteredUsers, error: filterError } = await supabaseAdmin.auth.admin.listUsers({
       filter: {
@@ -56,6 +58,10 @@ export async function POST(request: Request) {
       listError = filterError
     } else {
       user = filteredUsers?.users?.find((u) => u.email?.toLowerCase() === normalizedEmail)
+      console.log(`Filtered search found user: ${user ? 'YES' : 'NO'}`)
+      if (user) {
+        console.log(`Found user via filter: ${user.email} (ID: ${user.id})`)
+      }
     }
 
     // If not found with filter, try getting all users and search manually
@@ -67,10 +73,17 @@ export async function POST(request: Request) {
         console.error("Error listing all users:", allUsersError)
         listError = allUsersError
       } else {
+        console.log(`Total users in auth system: ${allUsers?.users?.length || 0}`)
         user = allUsers?.users?.find((u) => u.email?.toLowerCase() === normalizedEmail)
         console.log(`Manual search found user: ${user ? 'YES' : 'NO'}`)
         if (user) {
-          console.log(`Found user: ${user.email} (ID: ${user.id})`)
+          console.log(`Found user via manual search: ${user.email} (ID: ${user.id})`)
+        } else {
+          // Log all emails for debugging
+          console.log("All user emails in auth system:")
+          allUsers?.users?.forEach((u, index) => {
+            console.log(`${index + 1}. ${u.email} (ID: ${u.id})`)
+          })
         }
       }
     }
@@ -78,6 +91,23 @@ export async function POST(request: Request) {
     if (listError) {
       console.error("Error listing users:", listError)
       return NextResponse.json({ error: `Auth error: ${listError.message}` }, { status: 500 })
+    }
+
+    if (!user) {
+      console.log(`User not found in auth system, trying direct email lookup...`)
+      
+      // Try one more approach - get user by email directly
+      try {
+        const { data: directUser, error: directError } = await supabaseAdmin.auth.admin.getUserByEmail(normalizedEmail)
+        if (!directError && directUser?.user) {
+          console.log(`Found user via direct email lookup: ${directUser.user.email} (ID: ${directUser.user.id})`)
+          user = directUser.user
+        } else {
+          console.log(`Direct email lookup failed: ${directError?.message || 'No user found'}`)
+        }
+      } catch (directLookupError) {
+        console.log(`Direct email lookup error: ${directLookupError}`)
+      }
     }
 
     if (!user) {
