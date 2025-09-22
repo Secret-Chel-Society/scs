@@ -110,8 +110,12 @@ export default function ResetPasswordPage() {
               console.error("Code verification failed:", verifyError)
               console.error("Error details:", JSON.stringify(verifyError, null, 2))
               
-              // If verification fails, the code might be expired or invalid
-              setError(`Invalid or expired reset link. Please request a new password reset.`)
+              // Check if it's an expired link
+              if (verifyError.message.includes("expired") || verifyError.message.includes("invalid")) {
+                setError(`Your reset link has expired. Password reset links are only valid for 1 hour. Please request a new password reset.`)
+              } else {
+                setError(`Invalid reset link: ${verifyError.message}. Please request a new password reset.`)
+              }
               setIsLoading(false)
               return
             } else {
@@ -369,6 +373,12 @@ export default function ResetPasswordPage() {
                         Contact Support
                       </Button>
                     </Link>
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-ice-blue-50 dark:bg-ice-blue-900/20 rounded-lg border border-ice-blue-200 dark:border-ice-blue-700">
+                    <p className="text-sm text-ice-blue-700 dark:text-ice-blue-300">
+                      <strong>Tip:</strong> Password reset links expire after 1 hour for security. If you need to reset your password, please request a new link.
+                    </p>
                   </div>
                 </div>
               </div>
