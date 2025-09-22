@@ -101,17 +101,17 @@ export default function ResetPasswordPage() {
             console.log("No existing session, trying to use code for authentication...")
             
             // Try to exchange the code for a session
-            const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+            const { data: sessionData, error: codeExchangeError } = await supabase.auth.exchangeCodeForSession(code)
             
-            if (sessionError) {
-              console.error("Code exchange failed:", sessionError)
-              console.error("Error details:", JSON.stringify(sessionError, null, 2))
+            if (codeExchangeError) {
+              console.error("Code exchange failed:", codeExchangeError)
+              console.error("Error details:", JSON.stringify(codeExchangeError, null, 2))
               
               // Check if it's an expired link
-              if (sessionError.message.includes("expired") || sessionError.message.includes("invalid")) {
+              if (codeExchangeError.message.includes("expired") || codeExchangeError.message.includes("invalid")) {
                 setError(`Your reset link has expired. Password reset links are only valid for 1 hour. Please request a new password reset.`)
               } else {
-                setError(`Invalid reset link: ${sessionError.message}. Please request a new password reset.`)
+                setError(`Invalid reset link: ${codeExchangeError.message}. Please request a new password reset.`)
               }
               setIsLoading(false)
               return
