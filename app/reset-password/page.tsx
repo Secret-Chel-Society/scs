@@ -100,30 +100,74 @@ export default function ResetPasswordPage() {
             // The code might be a one-time password for recovery
             console.log("No existing session, trying to use code for authentication...")
             
-            // Try to verify the code as a recovery token
-            const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-              token_hash: code,
-              type: "recovery"
-            })
+            // Try multiple verification methods for the code
+            let verificationSuccessful = false
             
-            if (verifyError) {
-              console.error("Code verification failed:", verifyError)
-              console.error("Error details:", JSON.stringify(verifyError, null, 2))
+            // Method 1: Try verifyOtp with token_hash
+            try {
+              const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+                token_hash: code,
+                type: "recovery"
+              })
               
-              // Check if it's an expired link
-              if (verifyError.message.includes("expired") || verifyError.message.includes("invalid")) {
-                setError(`Your reset link has expired. Password reset links are only valid for 1 hour. Please request a new password reset.`)
+              if (!verifyError && verifyData) {
+                console.log("Code verification successful with token_hash method!")
+                console.log("Verify data:", verifyData)
+                verificationSuccessful = true
               } else {
-                setError(`Invalid reset link: ${verifyError.message}. Please request a new password reset.`)
+                console.log("Token hash method failed:", verifyError?.message)
               }
-              setIsLoading(false)
-              return
-            } else {
-              console.log("Code verification successful!")
-              console.log("Verify data:", verifyData)
+            } catch (tokenHashError) {
+              console.log("Token hash method error:", tokenHashError)
+            }
+            
+            // Method 2: Try verifyOtp with token (direct code)
+            if (!verificationSuccessful) {
+              try {
+                const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+                  token: code,
+                  type: "recovery"
+                })
+                
+                if (!verifyError && verifyData) {
+                  console.log("Code verification successful with token method!")
+                  console.log("Verify data:", verifyData)
+                  verificationSuccessful = true
+                } else {
+                  console.log("Token method failed:", verifyError?.message)
+                }
+              } catch (tokenError) {
+                console.log("Token method error:", tokenError)
+              }
+            }
+            
+            // Method 3: Try exchangeCodeForSession (PKCE flow)
+            if (!verificationSuccessful) {
+              try {
+                const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+                
+                if (!sessionError && sessionData?.session) {
+                  console.log("Code exchange successful!")
+                  console.log("Session data:", sessionData)
+                  verificationSuccessful = true
+                } else {
+                  console.log("Code exchange failed:", sessionError?.message)
+                }
+              } catch (exchangeError) {
+                console.log("Code exchange error:", exchangeError)
+              }
+            }
+            
+            if (!verificationSuccessful) {
+              console.error("All verification methods failed")
+              setError(`Your reset link has expired or is invalid. Password reset links are only valid for 1 hour. Please request a new password reset.`)
               setIsLoading(false)
               return
             }
+            
+            console.log("Password reset verification successful!")
+            setIsLoading(false)
+            return
           } catch (exchangeError) {
             console.error("Unexpected error during code handling:", exchangeError)
             setError(`Unexpected error: ${exchangeError instanceof Error ? exchangeError.message : 'Unknown error'}`)

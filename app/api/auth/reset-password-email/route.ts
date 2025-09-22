@@ -23,7 +23,8 @@ export async function POST(request: Request) {
     const supabase = createAdminClient()
 
     // Use Supabase's built-in password reset functionality with the correct redirect URL
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL || "http://localhost:3000"
+    // Always use production URL for password resets to ensure links work correctly
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL || "https://www.secretchelsociety.com"
     const redirectUrl = `${siteUrl}/reset-password`
     
     console.log("Using redirect URL:", redirectUrl)
