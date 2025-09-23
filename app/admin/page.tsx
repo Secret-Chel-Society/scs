@@ -370,6 +370,14 @@ export default function AdminDashboardPage() {
       color: "hockey-silver"
     },
     {
+      title: "Role Sync Fix",
+      description: "Fix role synchronization between user_roles and players tables",
+      icon: <Shield className="h-6 w-6" />,
+      href: "/admin/role-sync",
+      category: "system",
+      color: "hockey-silver"
+    },
+    {
       title: "Discord Debug",
       description: "Debug Discord bot integration and role assignments",
       icon: <Bot className="h-6 w-6" />,
