@@ -96,6 +96,11 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`Found ${playersWithoutTeams?.length || 0} free agent players`)
+    
+    // Debug: Log some sample players to see what we're getting
+    if (playersWithoutTeams && playersWithoutTeams.length > 0) {
+      console.log("Sample free agent players:", playersWithoutTeams.slice(0, 5))
+    }
 
     if (!playersWithoutTeams || playersWithoutTeams.length === 0) {
       return NextResponse.json({
@@ -157,6 +162,23 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => (b?.salary || 0) - (a?.salary || 0))
 
     console.log(`Final enhanced free agents count: ${enhancedFreeAgents.length}`)
+    
+    // Debug: Count positions to see what we have
+    const positionCounts = enhancedFreeAgents.reduce((acc, player) => {
+      const position = player.users?.primary_position?.toLowerCase() || 'unknown'
+      acc[position] = (acc[position] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    
+    console.log("Position counts:", positionCounts)
+    
+    // Debug: Count goalies specifically
+    const goalies = enhancedFreeAgents.filter(player => 
+      player.users?.primary_position?.toLowerCase().includes('goalie') || 
+      player.users?.primary_position?.toLowerCase().includes('goalkeeper') ||
+      player.users?.primary_position?.toLowerCase() === 'g'
+    )
+    console.log(`Goalies found: ${goalies.length}`)
 
     return NextResponse.json({
       freeAgents: enhancedFreeAgents,

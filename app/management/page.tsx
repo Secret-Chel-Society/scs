@@ -237,7 +237,23 @@ const ManagementPage = () => {
       filtered = filtered.filter((player) => {
         const primaryPosition = player.users?.primary_position?.toLowerCase()
         const secondaryPosition = player.users?.secondary_position?.toLowerCase()
-        return primaryPosition === positionFilter || secondaryPosition === positionFilter
+        
+        // Handle different position formats and variations
+        const positionVariations = {
+          'goalie': ['goalie', 'goalkeeper', 'g'],
+          'center': ['center', 'c'],
+          'left wing': ['left wing', 'lw', 'leftwing'],
+          'right wing': ['right wing', 'rw', 'rightwing'],
+          'left defense': ['left defense', 'ld', 'leftdefense', 'left d'],
+          'right defense': ['right defense', 'rd', 'rightdefense', 'right d']
+        }
+        
+        const variations = positionVariations[positionFilter as keyof typeof positionVariations] || [positionFilter]
+        
+        return variations.some(variation => 
+          primaryPosition?.includes(variation) || 
+          secondaryPosition?.includes(variation)
+        )
       })
     }
 
@@ -439,6 +455,23 @@ const ManagementPage = () => {
       })
 
       const freeAgentsList = data.freeAgents || []
+      
+      // Count goalies for debugging
+      const goalies = freeAgentsList.filter((player: any) => 
+        player.primary_position?.toLowerCase().includes('goalie') || 
+        player.primary_position?.toLowerCase().includes('goalkeeper')
+      )
+      console.log(`Total free agents: ${freeAgentsList.length}`)
+      console.log(`Goalies found: ${goalies.length}`)
+      console.log("Goalies:", goalies.map((g: any) => ({ name: g.gamer_tag_id, position: g.primary_position })))
+      
+      // Log some sample players to see what we're getting
+      console.log("Sample free agents:", freeAgentsList.slice(0, 5).map((p: any) => ({
+        name: p.gamer_tag_id,
+        position: p.primary_position,
+        salary: p.salary
+      })))
+      
       setFreeAgents(freeAgentsList)
       setFilteredFreeAgents(freeAgentsList)
 
