@@ -78,38 +78,46 @@ export async function GET(request: NextRequest) {
 
     if (registrationsError) {
       console.error("Error fetching approved registrations:", registrationsError)
-      // Continue without registrations filter
+      throw registrationsError
     }
 
     console.log(`Found ${approvedRegistrations?.length || 0} approved registrations`)
 
-    // Get ALL players without teams (not just those with approved registrations)
+    if (!approvedRegistrations || approvedRegistrations.length === 0) {
+      return NextResponse.json({
+        freeAgents: [],
+        authenticated: !!authenticatedUser,
+        debug: {
+          message: "No approved registrations found for active season",
+          seasonId: activeSeason.id,
+        },
+      })
+    }
+
+    // Get the user IDs from approved registrations
+    const approvedUserIds = approvedRegistrations.map((reg) => reg.user_id)
+
+    // Get players without teams who have approved registrations
     const { data: playersWithoutTeams, error: playersError } = await adminClient
       .from("players")
       .select("id, salary, user_id")
       .is("team_id", null)
-      .eq("role", "Player")
+      .in("user_id", approvedUserIds)
 
     if (playersError) {
       console.error("Error fetching players without teams:", playersError)
       throw playersError
     }
 
-    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players`)
-    
-    // Debug: Log some sample players to see what we're getting
-    if (playersWithoutTeams && playersWithoutTeams.length > 0) {
-      console.log("Sample free agent players:", playersWithoutTeams.slice(0, 5))
-    }
+    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players with approved registrations`)
 
     if (!playersWithoutTeams || playersWithoutTeams.length === 0) {
       return NextResponse.json({
         freeAgents: [],
         authenticated: !!authenticatedUser,
         debug: {
-          message: "No free agent players found",
-          approvedRegistrations: approvedRegistrations?.length || 0,
-          seasonId: activeSeason.id,
+          message: "No free agent players found with approved registrations",
+          approvedRegistrations: approvedRegistrations.length,
         },
       })
     }
@@ -135,14 +143,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`Found ${users?.length || 0} user records`)
 
-    // Combine the data, using registration data if available, otherwise user data
+    // Combine the data, prioritizing registration data over user data
     const enhancedFreeAgents = playersWithoutTeams
       .map((player) => {
         const user = users?.find((u) => u.id === player.user_id)
         const registration = approvedRegistrations?.find((reg) => reg.user_id === player.user_id)
 
-        if (!user) {
-          console.log(`Missing user data for player ${player.id}`)
+        if (!user || !registration) {
+          console.log(`Missing data for player ${player.id}: user=${!!user}, registration=${!!registration}`)
           return null
         }
 
@@ -150,10 +158,10 @@ export async function GET(request: NextRequest) {
           ...player,
           users: {
             id: user.id,
-            gamer_tag_id: registration?.gamer_tag || user.gamer_tag_id || "Unknown Player",
-            primary_position: registration?.primary_position || user.primary_position || "Unknown",
-            secondary_position: registration?.secondary_position || user.secondary_position,
-            console: registration?.console || user.console || "Unknown",
+            gamer_tag_id: registration.gamer_tag || user.gamer_tag_id || "Unknown Player",
+            primary_position: registration.primary_position || user.primary_position || "Unknown",
+            secondary_position: registration.secondary_position || user.secondary_position,
+            console: registration.console || user.console || "Unknown",
             avatar_url: user.avatar_url,
           },
         }
@@ -184,9 +192,9 @@ export async function GET(request: NextRequest) {
       freeAgents: enhancedFreeAgents,
       authenticated: !!authenticatedUser,
       debug: {
-        message: "Successfully fetched free agents",
+        message: "Successfully fetched approved free agents",
         seasonId: activeSeason.id,
-        approvedRegistrations: approvedRegistrations?.length || 0,
+        approvedRegistrations: approvedRegistrations.length,
         playersWithoutTeams: playersWithoutTeams.length,
         usersCount: users?.length || 0,
         finalCount: enhancedFreeAgents.length,
