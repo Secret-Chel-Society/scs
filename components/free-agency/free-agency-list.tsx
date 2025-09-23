@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { History, Clock, Search } from "lucide-react"
 import { useSearchParams } from "next/navigation"
-import Image from "next/image"
+// import Image from "next/image" // Removed since we're using regular img tags
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
