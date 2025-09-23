@@ -401,17 +401,17 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       
       // Count goalies for debugging
       const goalies = freeAgentsList.filter((player: any) => 
-        player.primary_position?.toLowerCase().includes('goalie') || 
-        player.primary_position?.toLowerCase().includes('goalkeeper')
+        player.users?.primary_position?.toLowerCase().includes('goalie') || 
+        player.users?.primary_position?.toLowerCase().includes('goalkeeper')
       )
       console.log(`Total free agents: ${freeAgentsList.length}`)
       console.log(`Goalies found: ${goalies.length}`)
-      console.log("Goalies:", goalies.map((g: any) => ({ name: g.gamer_tag_id, position: g.primary_position })))
+      console.log("Goalies:", goalies.map((g: any) => ({ name: g.users?.gamer_tag_id, position: g.users?.primary_position })))
       
       // Log some sample players to see what we're getting
       console.log("Sample free agents:", freeAgentsList.slice(0, 5).map((p: any) => ({
-        name: p.gamer_tag_id,
-        position: p.primary_position,
+        name: p.users?.gamer_tag_id,
+        position: p.users?.primary_position,
         salary: p.salary
       })))
       
@@ -852,6 +852,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
           player={selectedPlayer}
           onSubmit={handleBidSubmit}
           currentSalary={selectedPlayer.salary || 0}
+          userTeam={userTeam}
         />
       )}
 
