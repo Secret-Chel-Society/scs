@@ -664,6 +664,10 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
                     width={40}
                     height={40}
                     className="rounded-full flex-shrink-0"
+                    onError={(e) => {
+                      console.warn('Failed to load avatar for', player.users?.gamer_tag_id, ':', player.users?.avatar_url)
+                      e.currentTarget.style.display = 'none'
+                    }}
                   />
                 )}
                 <div className="flex-1 min-w-0">
