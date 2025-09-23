@@ -370,14 +370,6 @@ export default function AdminDashboardPage() {
       color: "hockey-silver"
     },
     {
-      title: "Fix Waiver Tables",
-      description: "Fix waiver priority and claims tables structure",
-      icon: <Database className="h-6 w-6" />,
-      href: "/admin/fix-waiver-tables",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
       title: "Discord Debug",
       description: "Debug Discord bot integration and role assignments",
       icon: <Bot className="h-6 w-6" />,

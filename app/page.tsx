@@ -14,7 +14,6 @@ import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import HeroCarousel from "@/components/hero-carousel"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
-import { RecentTrades } from "@/components/recent-trades"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSearchParams, useRouter } from "next/navigation"
 import {
@@ -127,7 +126,6 @@ export default function Home() {
     totalPlayers: 0,
     totalTeams: 0,
     totalMatches: 0,
-    completedTrades: 0,
   })
   const [loading, setLoading] = useState({
     news: true,
@@ -181,37 +179,21 @@ export default function Home() {
           console.error("Error fetching carousel images:", carouselError)
         }
 
-        // Fetch stats - Updated to count completed trades instead of pending
+        // Fetch stats
         try {
-          const [playersRes, teamsRes, matchesRes, tradesRes] = await Promise.all([
+          const [playersRes, teamsRes, matchesRes] = await Promise.all([
             supabase.from("users").select("id", { count: "exact" }),
             supabase
               .from("teams")
               .select("id", { count: "exact" })
               .eq("is_active", true), // Only active teams
             supabase.from("matches").select("id", { count: "exact" }),
-            // Check if trades table exists and get completed trades
-            supabase
-              .from("trades")
-              .select("id", { count: "exact" })
-              .eq("status", "completed")
-              .then(
-                (result) => result,
-                (error) => {
-                  // If trades table doesn't exist, return 0
-                  if (error.message.includes("relation") && error.message.includes("does not exist")) {
-                    return { count: 0, error: null }
-                  }
-                  return { count: 0, error }
-                },
-              ),
           ])
 
           setStats({
             totalPlayers: playersRes.count || 0,
             totalTeams: teamsRes.count || 0,
             totalMatches: matchesRes.count || 0,
-            completedTrades: tradesRes.count || 0,
           })
         } catch (error) {
           console.error("Error fetching stats:", error)
@@ -373,8 +355,6 @@ export default function Home() {
             },
             {
               icon: TrendingUp,
-              label: "Trades",
-              value: stats.completedTrades,
               color: "bg-red-500",
             },
           ].map((stat, index) => (
@@ -578,7 +558,7 @@ export default function Home() {
                   <p className="text-slate-600 dark:text-slate-400">
                     We provide a comprehensive hockey experience with multiple divisions and in-depth team management. 
                     Players can engage in a full range of league activities, 
-                    from trades and free agency to a complete statistical system that tracks every detail of on-ice performance.
+                    from free agency to a complete statistical system that tracks every detail of on-ice performance.
                   </p>
                 </div>
               </CardContent>
@@ -806,7 +786,7 @@ export default function Home() {
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-slate-600 dark:text-slate-400">
-                    Complete team management system with salary caps, contract negotiations, trade deadlines, waiver
+                    Complete team management system with salary caps, contract negotiations, and
                     claims, and draft systems that create an authentic NHL franchise experience.
                   </p>
                   <ul className="text-slate-600 dark:text-slate-400 space-y-3">
@@ -814,7 +794,7 @@ export default function Home() {
                       <div className="p-1 bg-indigo-500/20 rounded-md">
                         <TrendingUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                       </div>
-                      Trade & waiver system
+                      Advanced team management
                     </li>
                     <li className="flex items-center gap-3">
                       <div className="p-1 bg-indigo-500/20 rounded-md">
@@ -878,29 +858,6 @@ export default function Home() {
         )}
         </motion.section>
 
-      {/* Recent Player Trades Section */}
-      <motion.section
-        className="container mx-auto px-4 py-16"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-      >
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-200 mb-4">
-            Recent Player Trades
-          </h2>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Live transaction feed from our professional trade system with real-time updates
-          </p>
-        </div>
-        
-        <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
-          <CardContent className="p-8">
-            <RecentTrades />
-          </CardContent>
-        </Card>
-      </motion.section>
 
       {/* Match Results & Standings Section */}
       <motion.section
