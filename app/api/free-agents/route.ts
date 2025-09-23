@@ -78,31 +78,24 @@ export async function GET(request: NextRequest) {
 
     if (registrationsError) {
       console.error("Error fetching approved registrations:", registrationsError)
-      throw registrationsError
+      // Continue without registrations filter
     }
 
     console.log(`Found ${approvedRegistrations?.length || 0} approved registrations`)
 
-    if (!approvedRegistrations || approvedRegistrations.length === 0) {
-      return NextResponse.json({
-        freeAgents: [],
-        authenticated: !!authenticatedUser,
-        debug: {
-          message: "No approved registrations found for active season",
-          seasonId: activeSeason.id,
-        },
-      })
-    }
-
-    // Get the user IDs from approved registrations
-    const approvedUserIds = approvedRegistrations.map((reg) => reg.user_id)
-
-    // Get players without teams who have approved registrations
-    const { data: playersWithoutTeams, error: playersError } = await adminClient
+    // Get players without teams - if we have approved registrations, filter by them, otherwise get all
+    let playersQuery = adminClient
       .from("players")
       .select("id, salary, user_id")
       .is("team_id", null)
-      .in("user_id", approvedUserIds)
+      .eq("role", "Player")
+
+    if (approvedRegistrations && approvedRegistrations.length > 0) {
+      const approvedUserIds = approvedRegistrations.map((reg) => reg.user_id)
+      playersQuery = playersQuery.in("user_id", approvedUserIds)
+    }
+
+    const { data: playersWithoutTeams, error: playersError } = await playersQuery
 
     if (playersError) {
       console.error("Error fetching players without teams:", playersError)
@@ -116,8 +109,9 @@ export async function GET(request: NextRequest) {
         freeAgents: [],
         authenticated: !!authenticatedUser,
         debug: {
-          message: "No free agent players found with approved registrations",
-          approvedRegistrations: approvedRegistrations.length,
+          message: "No free agent players found",
+          approvedRegistrations: approvedRegistrations?.length || 0,
+          seasonId: activeSeason.id,
         },
       })
     }

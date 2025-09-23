@@ -42,7 +42,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Update reply count on post
-    await supabase.rpc("increment_reply_count", { post_id_param: post_id })
+    try {
+      await supabase.rpc("increment_reply_count", { post_id_param: post_id })
+    } catch (rpcError) {
+      console.log("RPC function not available, skipping reply count update:", rpcError)
+      // Manually update reply count
+      const { data: replies } = await supabase
+        .from("forum_replies")
+        .select("id")
+        .eq("post_id", post_id)
+      
+      await supabase
+        .from("forum_posts")
+        .update({ reply_count: replies?.length || 0 })
+        .eq("id", post_id)
+    }
 
     return NextResponse.json({ reply })
   } catch (error) {

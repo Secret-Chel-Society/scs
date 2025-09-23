@@ -668,11 +668,28 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
           return
         }
 
+        // Get current season first
+        let currentSeasonName = "Season 1" // Default fallback
+        
+        try {
+          const { data: activeSeason } = await supabase
+            .from("seasons")
+            .select("name")
+            .eq("is_active", true)
+            .single()
+          
+          if (activeSeason?.name) {
+            currentSeasonName = activeSeason.name
+          }
+        } catch (seasonError) {
+          console.log("Could not fetch active season, using default:", seasonError)
+        }
+
         // Get all matches for the current season
         const { data: matchesData, error: matchesError } = await supabase
           .from("matches")
           .select("*")
-          .eq("season_name", "Season 1")
+          .eq("season_name", currentSeasonName)
           .eq("status", "completed")
 
         if (matchesError) {
