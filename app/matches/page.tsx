@@ -24,6 +24,7 @@ export default function MatchesPage() {
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentSeason, setCurrentSeason] = useState<any>(null)
 
   // Pagination and filtering state
   const [currentWeek, setCurrentWeek] = useState(1)
@@ -39,6 +40,76 @@ export default function MatchesPage() {
     if (week) setCurrentWeek(Number.parseInt(week))
     if (team) setSelectedTeam(team)
   }, [searchParams])
+
+  // Fetch current season
+  useEffect(() => {
+    async function fetchCurrentSeason() {
+      try {
+        console.log("Fetching current season...")
+        // First try to get seasons from the seasons table
+        const { data: seasonsData, error: seasonsError } = await supabase
+          .from("seasons")
+          .select("*")
+          .order("created_at", { ascending: false })
+
+        if (!seasonsError && seasonsData && seasonsData.length > 0) {
+          // Find active season
+          const activeSeason = seasonsData.find((s) => s.is_active === true)
+          if (activeSeason) {
+            console.log("Found active season:", activeSeason)
+            setCurrentSeason(activeSeason)
+          } else {
+            // Default to first season
+            console.log("No active season, using first season:", seasonsData[0])
+            setCurrentSeason(seasonsData[0])
+          }
+        } else {
+          // Try to get current season from system_settings
+          const { data, error } = await supabase
+            .from("system_settings")
+            .select("value")
+            .eq("key", "current_season")
+            .single()
+
+          if (!error && data && data.value) {
+            const seasonNumber = Number.parseInt(data.value.toString(), 10)
+            if (!isNaN(seasonNumber)) {
+              const season = {
+                id: seasonNumber.toString(),
+                number: seasonNumber,
+                name: `Season ${seasonNumber}`,
+                is_active: true,
+              }
+              console.log("Using season from system_settings:", season)
+              setCurrentSeason(season)
+            }
+          } else {
+            // Default to season 1
+            const defaultSeason = {
+              id: "1",
+              number: 1,
+              name: "Season 1",
+              is_active: true,
+            }
+            console.log("Using default season:", defaultSeason)
+            setCurrentSeason(defaultSeason)
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching current season:", error)
+        // Default to season 1
+        const defaultSeason = {
+          id: "1",
+          number: 1,
+          name: "Season 1",
+          is_active: true,
+        }
+        setCurrentSeason(defaultSeason)
+      }
+    }
+
+    fetchCurrentSeason()
+  }, [supabase])
 
   // Fetch teams for filter
   useEffect(() => {
@@ -59,6 +130,8 @@ export default function MatchesPage() {
   // Fetch all matches
   useEffect(() => {
     async function fetchMatches() {
+      if (!currentSeason) return
+
       try {
         setLoading(true)
         setError(null)
@@ -80,7 +153,7 @@ export default function MatchesPage() {
             away_team:teams!away_team_id(id, name, logo_url)
           `,
           )
-          .eq("season_name", "Season 1")
+          .eq("season_name", currentSeason.name)
 
         // Apply team filter if selected
         if (selectedTeam !== "all") {
@@ -91,7 +164,7 @@ export default function MatchesPage() {
 
         if (error) throw error
 
-        console.log(`Found ${data?.length || 0} matches for Season 1`)
+        console.log(`Found ${data?.length || 0} matches for ${currentSeason.name}`)
         setMatches(data || [])
 
         // Calculate weeks based on matches
@@ -114,7 +187,7 @@ export default function MatchesPage() {
     }
 
     fetchMatches()
-  }, [supabase, toast, selectedTeam])
+  }, [supabase, toast, selectedTeam, currentSeason])
 
   // Calculate weeks from matches
   const calculateWeeks = (matchesData: any[]) => {
@@ -478,7 +551,7 @@ export default function MatchesPage() {
               <div className="flex items-center gap-2">
                 <Badge className="hockey-badge text-base py-2 px-4">
                   <Trophy className="h-4 w-4 mr-2" />
-                  Season 1
+                  {currentSeason?.name || "Loading..."}
                 </Badge>
               </div>
             </div>
