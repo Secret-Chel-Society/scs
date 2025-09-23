@@ -9,7 +9,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['localhost', 'xsgames.co', 'via.placeholder.com'],
+    domains: ['localhost', 'xsgames.co', 'via.placeholder.com', 'kudmtqjzuxakngbrqxzp.supabase.co'],
     unoptimized: true,
   },
   async headers() {
