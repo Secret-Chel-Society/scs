@@ -6,27 +6,67 @@ import { BidPlayerModal as BidModal } from "@/components/management/bid-player-m
 import { BidHistoryModal } from "@/components/free-agency/bid-history-modal"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { History, Clock } from "lucide-react"
+import { History, Clock, Search } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface FreeAgencyListProps {
   userId?: string
   searchParams?: { [key: string]: string | string[] | undefined }
 }
 
-// Position abbreviation mapping function
-function getPositionAbbreviation(position: string): string {
+// Update the getPositionAbbreviation function to handle both full names and abbreviations
+const getPositionAbbreviation = (position: string): string => {
+  if (!position) return "?"
+
+  const trimmedPosition = position.trim().toLowerCase()
+
+  // Position mapping that handles both full names and abbreviations
   const positionMap: Record<string, string> = {
-    Goalie: "G",
-    "Right Wing": "RW",
-    "Left Wing": "LW",
-    "Left Defense": "LD",
-    "Right Defense": "RD",
-    Center: "C",
+    goalie: "G",
+    g: "G",
+    center: "C",
+    c: "C",
+    "left wing": "LW",
+    lw: "LW",
+    "right wing": "RW",
+    rw: "RW",
+    "left defense": "LD",
+    ld: "LD",
+    "right defense": "RD",
+    rd: "RD",
   }
 
-  return positionMap[position] || position
+  return positionMap[trimmedPosition] || position.toUpperCase()
+}
+
+// Function to get position color
+const getPositionColor = (position: string): string => {
+  switch (position) {
+    case "Goalie":
+    case "G":
+      return "text-purple-400"
+    case "Center":
+    case "C":
+      return "text-red-400"
+    case "Left Wing":
+    case "LW":
+      return "text-green-400"
+    case "Right Wing":
+    case "RW":
+      return "text-ice-blue-400"
+    case "Left Defense":
+    case "LD":
+      return "text-cyan-400"
+    case "Right Defense":
+    case "RD":
+      return "text-yellow-400"
+    default:
+      return "text-hockey-silver-400"
+  }
 }
 
 // Simple logging function that only logs in development
@@ -63,9 +103,14 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [freeAgents, setFreeAgents] = useState<any[]>([])
+  const [filteredFreeAgents, setFilteredFreeAgents] = useState<any[]>([])
+  const [positionFilter, setPositionFilter] = useState<string>("all")
+  const [nameFilter, setNameFilter] = useState<string>("")
   const [mounted, setMounted] = useState(false)
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null)
   const [myActiveBids, setMyActiveBids] = useState<any[]>([])
+  const [freeAgentsLoading, setFreeAgentsLoading] = useState(false)
+  const [freeAgentsError, setFreeAgentsError] = useState<string | null>(null)
 
   // Use useSearchParams hook for better client-side URL parameter handling
   const urlSearchParams = useSearchParams()
@@ -95,6 +140,51 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     setMounted(true)
   }, [])
 
+  // Update the position filter logic in the useEffect
+  useEffect(() => {
+    console.log("=== Filtering free agents ===")
+    console.log("freeAgents length:", freeAgents?.length || 0)
+    console.log("nameFilter:", nameFilter)
+    console.log("positionFilter:", positionFilter)
+    
+    const agents = freeAgents || []
+    let filtered = agents
+
+    // Apply name filter if provided
+    if (nameFilter.trim() !== "") {
+      const searchTerm = nameFilter.toLowerCase().trim()
+      filtered = filtered.filter((player) => player.users?.gamer_tag_id?.toLowerCase().includes(searchTerm))
+    }
+
+    // Apply position filter if not "all"
+    if (positionFilter !== "all") {
+      filtered = filtered.filter((player) => {
+        const primaryPosition = player.users?.primary_position?.toLowerCase()
+        const secondaryPosition = player.users?.secondary_position?.toLowerCase()
+        
+        // Handle different position formats and variations
+        const positionVariations = {
+          'goalie': ['goalie', 'goalkeeper', 'g'],
+          'center': ['center', 'c'],
+          'left wing': ['left wing', 'lw', 'leftwing'],
+          'right wing': ['right wing', 'rw', 'rightwing'],
+          'left defense': ['left defense', 'ld', 'leftdefense', 'left d'],
+          'right defense': ['right defense', 'rd', 'rightdefense', 'right d']
+        }
+        
+        const variations = positionVariations[positionFilter as keyof typeof positionVariations] || [positionFilter]
+        
+        return variations.some(variation => 
+          primaryPosition?.includes(variation) || 
+          secondaryPosition?.includes(variation)
+        )
+      })
+    }
+
+    console.log("filtered length:", filtered.length)
+    setFilteredFreeAgents(filtered)
+  }, [freeAgents, nameFilter, positionFilter])
+
   // Update current time every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -118,7 +208,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
       // Refresh the free agents list if any bids were processed
       if (expiredBids.length > 0) {
-        await loadFreeAgents()
+        await fetchFreeAgents()
       }
     }
   }
@@ -275,45 +365,72 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     }
   }, [supabase, userTeam?.id, now])
 
-  // Load free agents using API endpoint to bypass RLS
-  const loadFreeAgents = useCallback(
-    async (teamId?: string) => {
-      setLoading(true)
-      setError(null)
+  // Fetch free agents using API endpoint
+  const fetchFreeAgents = async () => {
+    console.log("=== fetchFreeAgents called ===")
+    try {
+      setFreeAgentsLoading(true)
+      setFreeAgentsError(null)
 
-      try {
-        console.log("=== DEBUG: Starting loadFreeAgents via API ===")
+      console.log("Loading free agents via API...")
+      console.log("Current session:", !!supabase)
+      console.log("Team data:", userTeam?.name)
 
-        // Use API endpoint to get free agents (bypasses RLS issues)
-        const response = await fetch("/api/free-agents?approved_only=true")
+      const response = await fetch("/api/free-agents?approved_only=true", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || "Failed to fetch free agents")
-        }
+      console.log("Free agents API response status:", response.status)
 
-        const data = await response.json()
-        console.log("Free agents from API:", data.freeAgents?.length || 0)
-
-        const freeAgentsList = data.freeAgents || []
-
-        setFreeAgents(freeAgentsList)
-        setPlayers(freeAgentsList)
-
-        // Fetch bids for all players
-        await fetchPlayerBids()
-
-        console.log("=== DEBUG: End loadFreeAgents via API ===")
-      } catch (error: any) {
-        console.error("Error loading free agents:", error)
-        setError(`Failed to load free agents: ${error.message}`)
-      } finally {
-        setLoading(false)
-        setRefreshing(false)
+      let data
+      if (!response.ok) {
+        data = await response.json()
+        throw new Error(data.error || `Failed to fetch free agents: ${response.status}`)
+      } else {
+        data = await response.json()
       }
-    },
-    [fetchPlayerBids],
-  )
+      console.log("Free agents API response:", {
+        freeAgentsCount: data.freeAgents?.length || 0,
+        debug: data.debug,
+      })
+
+      const freeAgentsList = data.freeAgents || []
+      
+      // Count goalies for debugging
+      const goalies = freeAgentsList.filter((player: any) => 
+        player.primary_position?.toLowerCase().includes('goalie') || 
+        player.primary_position?.toLowerCase().includes('goalkeeper')
+      )
+      console.log(`Total free agents: ${freeAgentsList.length}`)
+      console.log(`Goalies found: ${goalies.length}`)
+      console.log("Goalies:", goalies.map((g: any) => ({ name: g.gamer_tag_id, position: g.primary_position })))
+      
+      // Log some sample players to see what we're getting
+      console.log("Sample free agents:", freeAgentsList.slice(0, 5).map((p: any) => ({
+        name: p.gamer_tag_id,
+        position: p.primary_position,
+        salary: p.salary
+      })))
+      
+      setFreeAgents(freeAgentsList)
+      setFilteredFreeAgents(freeAgentsList)
+
+      console.log("Successfully loaded free agents:", freeAgentsList.length)
+    } catch (error: any) {
+      console.error("Error loading free agents:", error)
+      setFreeAgentsError(`Failed to load free agents: ${error.message}`)
+      toast({
+        title: "Error",
+        description: "Failed to load free agents: " + error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setFreeAgentsLoading(false)
+    }
+  }
 
   // Fetch team stats
   const fetchTeamStats = useCallback(async () => {
@@ -440,10 +557,10 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
   // Initial load
   useEffect(() => {
     if (mounted) {
-      loadFreeAgents()
+      fetchFreeAgents()
       fetchUserTeam()
     }
-  }, [mounted, loadFreeAgents, fetchUserTeam])
+  }, [mounted, fetchUserTeam])
 
   // Load team stats when user team changes
   useEffect(() => {
@@ -574,7 +691,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       setIsModalOpen(false)
 
       // Refresh bids
-      await loadFreeAgents()
+      await fetchFreeAgents()
     } catch (error: any) {
       toast({
         title: "Error placing bid",
@@ -610,7 +727,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
   const handleRefresh = useCallback(async () => {
     setRefreshing(true)
     try {
-      await loadFreeAgents()
+      await fetchFreeAgents()
       await fetchPlayerBids()
     } catch (error) {
       safeLog("Error refreshing:", error)
@@ -618,7 +735,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     } finally {
       setRefreshing(false)
     }
-  }, [loadFreeAgents, fetchPlayerBids])
+  }, [fetchPlayerBids])
 
   // Calculate potential stats for display
   const potentialStats = calculatePotentialStats()
@@ -645,215 +762,86 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
   }
 
   return (
-    <>
-      {/* Team Summary Stats with Potential Stats */}
-      {userTeam && teamStats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
-          {/* Team Salary */}
-          <div className="bg-hockey-silver-800 border border-hockey-silver-700 rounded-lg p-4">
-            <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Team Salary</h3>
-            <div className="space-y-2">
-              <div>
-                <p className="text-white text-lg font-bold">
-                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $65M
-                </p>
-                <div className="w-full bg-hockey-silver-700 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.current_salary / 65000000) * 100}%` }}
-                  />
-                </div>
-              </div>
-              {potentialStats && potentialStats.potentialSalary !== teamStats.current_salary && (
-                <div className="text-hockey-silver-400 text-sm">
-                  <p>Potential: ${(potentialStats.potentialSalary / 1000000).toFixed(1)}M</p>
-                  <div className="w-full bg-gray-700 rounded-full h-1">
-                    <div
-                      className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialSalary / 65000000) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select value={positionFilter} onValueChange={setPositionFilter}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder="Filter by position" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Positions</SelectItem>
+            <SelectItem value="goalie">Goalie</SelectItem>
+            <SelectItem value="center">Center</SelectItem>
+            <SelectItem value="left wing">Left Wing</SelectItem>
+            <SelectItem value="right wing">Right Wing</SelectItem>
+            <SelectItem value="left defense">Left Defense</SelectItem>
+            <SelectItem value="right defense">Right Defense</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          placeholder="Search by name..."
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+          className="flex-1"
+        />
+      </div>
 
-          {/* Roster Size */}
-          <div className="bg-hockey-silver-800 border border-hockey-silver-700 rounded-lg p-4">
-            <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Roster Size</h3>
-            <div className="space-y-2">
-              <div>
-                <p className="text-white text-lg font-bold">{teamStats.roster_size} / 15 players</p>
-                <div className="w-full bg-hockey-silver-700 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.roster_size / 15) * 100}%` }}
-                  />
-                </div>
-              </div>
-              {potentialStats && potentialStats.potentialRosterSize !== teamStats.roster_size && (
-                <div className="text-hockey-silver-400 text-sm">
-                  <p>Potential: {potentialStats.potentialRosterSize} players</p>
-                  <div className="w-full bg-gray-700 rounded-full h-1">
-                    <div
-                      className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialRosterSize / 15) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Position Breakdown */}
-          <div className="bg-hockey-silver-800 border border-hockey-silver-700 rounded-lg p-4">
-            <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Position Breakdown</h3>
-            <div className="space-y-2">
-              <div className="grid grid-cols-3 gap-2 text-xs md:text-sm">
-                {Object.entries(teamStats.positions).map(([pos, count]) => (
-                  <div key={pos} className="flex justify-between">
-                    <span className="text-gray-300">{getPositionAbbreviation(pos)}:</span>
-                    <span className="text-white">{count}</span>
-                  </div>
-                ))}
-              </div>
-              {potentialStats && (
-                <div className="text-gray-400 text-xs border-t border-gray-600 pt-2">
-                  <p className="mb-1">Potential:</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {Object.entries(potentialStats.potentialPositions).map(([pos, count]) => (
-                      <div key={pos} className="flex justify-between">
-                        <span>{getPositionAbbreviation(pos)}:</span>
-                        <span>{count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+      {freeAgentsLoading ? (
+        <div className="space-y-4">
+          {Array(3).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
         </div>
-      )}
-
-      {filteredPlayers.length === 0 ? (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-semibold">No free agents available</h3>
-          <p className="text-muted-foreground mt-2">
-            {freeAgents.length > 0
-              ? "No players match your filter criteria. Try adjusting your filters."
-              : "Check back later for available players"}
-          </p>
-          <Button onClick={handleRefresh} className="mt-4" disabled={refreshing}>
-            {refreshing ? "Refreshing..." : "Refresh"}
-          </Button>
+      ) : freeAgentsError ? (
+        <div className="text-center py-8 text-red-500">
+          {freeAgentsError}
+        </div>
+      ) : (filteredFreeAgents?.length || 0) === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          No free agents available
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedPlayers.map((player) => {
-            // Skip players with null users
-            if (!player.users) return null
-
-            const currentBid = playerBids[player.id]
-            const hasTeam = !!userTeam
-            const canBid = hasTeam && (!currentBid || currentBid.team_id !== userTeam.id)
-            const bidExpiring = currentBid && new Date(currentBid.bid_expires_at).getTime() - now.getTime() < 3600000 // 1 hour
-
-            return (
-              <div key={player.id} className="bg-card border border-border rounded-lg p-6 shadow-sm">
-                <div className="flex items-start gap-4 mb-4">
-                  {/* Player Avatar */}
-                  <div className="flex-shrink-0">
-                    <Image
-                      src={player.users.avatar_url || "/placeholder.svg?height=60&width=60"}
-                      alt={player.users.gamer_tag_id || "Player"}
-                      width={60}
-                      height={60}
-                      className="rounded-full object-cover"
-                    />
-                  </div>
-
-                  {/* Player Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg truncate">{player.users.gamer_tag_id || "Unknown Player"}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-orange-400 font-medium">
-                        ({getPositionAbbreviation(player.users.primary_position || "N/A")})
-                      </span>
-                      {player.users.secondary_position && (
-                        <>
-                          <span className="text-muted-foreground">/</span>
-                          <span className="text-blue-400 font-medium">
-                            ({getPositionAbbreviation(player.users.secondary_position)})
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Console and Salary */}
-                <div className="mb-4 space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Console:</span>
-                    <span>{player.users.console || "N/A"}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Salary:</span>
-                    <span>${(player.salary || 0).toLocaleString()}</span>
-                  </div>
-                </div>
-
-                {currentBid && (
-                  <div className="mb-4 p-3 bg-muted rounded-md">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-muted-foreground text-sm">Current Bid:</span>
-                      <span className="font-bold">${currentBid.bid_amount.toLocaleString()}</span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <span className="text-muted-foreground text-sm mr-2">By:</span>
-                        {currentBid.teams?.logo_url ? (
-                          <Image
-                            src={currentBid.teams.logo_url || "/placeholder.svg"}
-                            alt={currentBid.teams.name || "Team"}
-                            width={16}
-                            height={16}
-                            className="mr-1 object-contain"
-                          />
-                        ) : null}
-                        <span className="text-sm font-medium">{currentBid.teams?.name || "Unknown Team"}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className={`h-3 w-3 mr-1 ${bidExpiring ? "text-red-400" : "text-muted-foreground"}`} />
-                        <span
-                          className={`text-xs font-medium ${bidExpiring ? "text-red-400" : "text-muted-foreground"}`}
-                        >
-                          {formatTimeRemaining(currentBid.bid_expires_at)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+        <div className="space-y-4">
+          {(filteredFreeAgents || []).map((player) => (
+            <div
+              key={player.id}
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer gap-3"
+              onClick={() => handleBidClick(player)}
+            >
+              <div className="flex items-center gap-4 flex-1">
+                {player.users?.avatar_url && (
+                  <Image
+                    src={player.users.avatar_url}
+                    alt={player.users.gamer_tag_id}
+                    width={40}
+                    height={40}
+                    className="rounded-full flex-shrink-0"
+                  />
                 )}
-
-                <div className="flex gap-2">
-                  {userTeam && (
-                    <Button onClick={() => handleBidClick(player)} className="flex-1">
-                      {currentBid && currentBid.team_id === userTeam.id ? "Extend Bid" : "Place Bid"}
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleHistoryClick(player)}
-                    title="View Bid History"
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium truncate">{player.users?.gamer_tag_id}</h3>
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                    <span className={getPositionColor(player.users?.primary_position)}>
+                      {getPositionAbbreviation(player.users?.primary_position)}
+                    </span>
+                    {player.users?.secondary_position && (
+                      <>
+                        <span>•</span>
+                        <span className={getPositionColor(player.users?.secondary_position)}>
+                          {getPositionAbbreviation(player.users?.secondary_position)}
+                        </span>
+                      </>
+                    )}
+                    <span>•</span>
+                    <span className="truncate">{player.users?.console}</span>
+                    <span>•</span>
+                    <span className="font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
+                  </div>
                 </div>
               </div>
-            )
-          })}
+              <Button size="sm" variant="outline" className="w-full sm:w-auto">Bid</Button>
+            </div>
+          ))}
         </div>
       )}
 
@@ -875,6 +863,6 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
           playerName={historyPlayer.users?.gamer_tag_id || "Unknown Player"}
         />
       )}
-    </>
+    </div>
   )
 }
