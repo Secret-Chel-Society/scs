@@ -182,8 +182,8 @@ const ManagementPage = () => {
   const [myBids, setMyBids] = useState<any[]>([])
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
-  const [isModalOpen, setIsModalOpen] = useState<any>(false)
-  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<any>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false)
   const [historyPlayer, setHistoryPlayer] = useState<any>(null)
   const [now, setNow] = useState(new Date())
   const [activeBidsCount, setActiveBidsCount] = useState(0)
@@ -197,6 +197,7 @@ const ManagementPage = () => {
   // Add these state variables after the existing useState declarations
   const [projectedSalary, setProjectedSalary] = useState(0)
   const [projectedRosterSize, setProjectedRosterSize] = useState(0)
+  const [currentTeamSalary, setCurrentTeamSalary] = useState<number>(0)
   const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $65M salary cap
   const [isBiddingEnabled, setIsBiddingEnabled] = useState(true)
 
@@ -218,7 +219,8 @@ const ManagementPage = () => {
 
   // Update the position filter logic in the useEffect
   useEffect(() => {
-    let filtered = freeAgents
+    const agents = freeAgents || []
+    let filtered = agents
 
     // Apply name filter if provided
     if (nameFilter.trim() !== "") {
@@ -240,24 +242,32 @@ const ManagementPage = () => {
 
   // Calculate projected salary and roster size
   useEffect(() => {
-    if (teamPlayers.length > 0) {
-      const totalSalary = teamPlayers.reduce((sum, player) => sum + (player.salary || 0), 0)
-      setProjectedSalary(totalSalary)
-      setProjectedRosterSize(teamPlayers.length)
+    const players = teamPlayers || []
+    if (Array.isArray(players)) {
+      if (players.length > 0) {
+        const totalSalary = players.reduce((sum, player) => sum + (player.salary || 0), 0)
+        setCurrentTeamSalary(totalSalary)
+        setProjectedSalary(totalSalary)
+        setProjectedRosterSize(players.length)
+      } else {
+        setCurrentTeamSalary(0)
+        setProjectedSalary(0)
+        setProjectedRosterSize(0)
+      }
     }
   }, [teamPlayers])
 
   // Fetch data function
   const fetchData = async () => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id || !supabase) return
 
     try {
       setLoading(true)
 
       // Get user's team
       const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select(`
+          .from("players")
+          .select(`
           id,
           team_id,
           role,
@@ -281,8 +291,8 @@ const ManagementPage = () => {
           description: "Failed to load your team data. Please try again.",
           variant: "destructive",
         })
-        return
-      }
+      return
+    }
 
       if (!playerData?.team_id) {
         toast({
@@ -396,9 +406,11 @@ const ManagementPage = () => {
 
   // Fetch free agents
   const fetchFreeAgents = async () => {
+    if (!supabase) return
+    
     try {
-      setFreeAgentsLoading(true)
-      setFreeAgentsError(null)
+    setFreeAgentsLoading(true)
+    setFreeAgentsError(null)
 
       const { data, error } = await supabase
         .from("users")
@@ -445,7 +457,7 @@ const ManagementPage = () => {
 
   // Fetch player bids
   const fetchPlayerBids = async () => {
-    if (!teamData?.id) return
+    if (!teamData?.id || !supabase) return
 
     try {
       const { data: bidsData, error } = await supabase
@@ -503,7 +515,7 @@ const ManagementPage = () => {
   // Handle tab change
   const handleTabChange = (tab: string) => {
     setActiveTab(tab)
-    const url = new URL(window.location.href)
+        const url = new URL(window.location.href)
     url.searchParams.set("tab", tab)
     router.push(url.pathname + url.search)
   }
@@ -516,10 +528,11 @@ const ManagementPage = () => {
 
   // Load data on component mount
   useEffect(() => {
-    if (session?.user?.id) {
-      fetchData()
+    if (session?.user?.id && supabase) {
+    fetchData()
     }
-  }, [session?.user?.id])
+  }, [session?.user?.id, supabase])
+
 
   if (loading) {
     return (
@@ -564,7 +577,7 @@ const ManagementPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -573,10 +586,10 @@ const ManagementPage = () => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            {teamData.logo_url && (
-              <Image
+                {teamData.logo_url && (
+                  <Image
                 src={teamData.logo_url}
-                alt={teamData.name}
+                    alt={teamData.name}
                 width={64}
                 height={64}
                 className="rounded-lg"
@@ -585,8 +598,8 @@ const ManagementPage = () => {
             <div>
               <h1 className="text-3xl font-bold">{teamData.name}</h1>
               <p className="text-muted-foreground">Team Management</p>
-            </div>
-          </div>
+                    </div>
+                </div>
         </div>
 
         {/* Stats Cards */}
@@ -597,14 +610,14 @@ const ManagementPage = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Roster Size</p>
                   <p className="text-2xl font-bold">
-                    {teamPlayers.length}
-                    {projectedRosterSize !== teamPlayers.length && (
-                      <span className="text-lg text-ice-blue-500 ml-1">→ {projectedRosterSize}</span>
+                    {teamPlayers?.length || 0}
+                    {(projectedRosterSize || 0) !== (teamPlayers?.length || 0) && (
+                      <span className="text-lg text-ice-blue-500 ml-1">→ {projectedRosterSize || 0}</span>
                     )}
                   </p>
-                </div>
+          </div>
                 <Users className="h-8 w-8 text-muted-foreground" />
-              </div>
+                  </div>
             </CardContent>
           </Card>
 
@@ -614,16 +627,16 @@ const ManagementPage = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Salary Cap</p>
                   <p className="text-2xl font-bold">
-                    ${(currentTeamSalary / 1000000).toFixed(1)}M
-                    {projectedSalary !== currentTeamSalary && (
+                    ${((currentTeamSalary || 0) / 1000000).toFixed(1)}M
+                    {projectedSalary !== (currentTeamSalary || 0) && (
                       <span className="text-lg text-assist-green-500 ml-1">
                         → ${(projectedSalary / 1000000).toFixed(1)}M
                       </span>
                     )}
                   </p>
-                </div>
+                    </div>
                 <DollarSign className="h-8 w-8 text-muted-foreground" />
-              </div>
+                  </div>
             </CardContent>
           </Card>
 
@@ -635,9 +648,9 @@ const ManagementPage = () => {
                   <p className="text-2xl font-bold">
                     {teamData.wins}-{teamData.losses}-{teamData.otl}
                   </p>
-                </div>
+                  </div>
                 <Trophy className="h-8 w-8 text-muted-foreground" />
-              </div>
+                    </div>
             </CardContent>
           </Card>
 
@@ -647,12 +660,12 @@ const ManagementPage = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">Points</p>
                   <p className="text-2xl font-bold">{teamData.points}</p>
-                </div>
+                  </div>
                 <Trophy className="h-8 w-8 text-muted-foreground" />
-              </div>
+                    </div>
             </CardContent>
           </Card>
-        </div>
+            </div>
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
@@ -661,19 +674,19 @@ const ManagementPage = () => {
             <TabsTrigger value="free-agents">Free Agents</TabsTrigger>
             <TabsTrigger value="my-bids">My Bids</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          </TabsList>
+            </TabsList>
 
-          {/* Roster Tab Content */}
-          <TabsContent value="roster">
+              {/* Roster Tab Content */}
+              <TabsContent value="roster">
             <Card>
               <CardHeader>
                 <CardTitle>Team Roster</CardTitle>
                 <CardDescription>Manage your team's players and roles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {teamPlayers.length > 0 ? (
+                  </CardHeader>
+                  <CardContent>
+                {(teamPlayers?.length || 0) > 0 ? (
                   <div className="space-y-4">
-                    {teamPlayers.map((player) => (
+                    {(teamPlayers || []).map((player) => (
                       <div
                         key={player.id}
                         className="flex items-center justify-between p-4 border rounded-lg"
@@ -691,88 +704,88 @@ const ManagementPage = () => {
                           <div>
                             <h3 className="font-medium">{player.users?.gamer_tag_id}</h3>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <span className={getPositionColor(player.users?.primary_position)}>
+                                      <span className={getPositionColor(player.users?.primary_position)}>
                                 {getPositionAbbreviation(player.users?.primary_position)}
-                              </span>
-                              {player.users?.secondary_position && (
-                                <>
+                                      </span>
+                                      {player.users?.secondary_position && (
+                                        <>
                                   <span>•</span>
-                                  <span className={getPositionColor(player.users?.secondary_position)}>
-                                    {getPositionAbbreviation(player.users?.secondary_position)}
-                                  </span>
-                                </>
-                              )}
+                                          <span className={getPositionColor(player.users?.secondary_position)}>
+                                            {getPositionAbbreviation(player.users?.secondary_position)}
+                                          </span>
+                                        </>
+                                      )}
                               <span>•</span>
                               <span>{player.users?.console}</span>
                               <span>•</span>
                               <span>${(player.salary / 1000000).toFixed(2)}M</span>
-                            </div>
-                          </div>
+                                    </div>
                         </div>
+                                  </div>
                         <Badge variant="outline">{player.role}</Badge>
-                      </div>
-                    ))}
-                  </div>
+                            </div>
+                          ))}
+                        </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     No players on this team
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-          {/* Free Agents Tab Content */}
-          <TabsContent value="free-agents">
+              {/* Free Agents Tab Content */}
+              <TabsContent value="free-agents">
             <Card>
               <CardHeader>
                 <CardTitle>Free Agents</CardTitle>
                 <CardDescription>Browse and bid on available players</CardDescription>
-              </CardHeader>
-              <CardContent>
+                  </CardHeader>
+                  <CardContent>
                 <div className="space-y-4">
                   <div className="flex gap-4">
-                    <Select value={positionFilter} onValueChange={setPositionFilter}>
+                        <Select value={positionFilter} onValueChange={setPositionFilter}>
                       <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filter by position" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Positions</SelectItem>
+                            <SelectValue placeholder="Filter by position" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Positions</SelectItem>
                         <SelectItem value="goalie">Goalie</SelectItem>
                         <SelectItem value="center">Center</SelectItem>
                         <SelectItem value="left wing">Left Wing</SelectItem>
                         <SelectItem value="right wing">Right Wing</SelectItem>
                         <SelectItem value="left defense">Left Defense</SelectItem>
                         <SelectItem value="right defense">Right Defense</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      placeholder="Search by name..."
-                      value={nameFilter}
-                      onChange={(e) => setNameFilter(e.target.value)}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          placeholder="Search by name..."
+                          value={nameFilter}
+                          onChange={(e) => setNameFilter(e.target.value)}
                       className="flex-1"
-                    />
-                  </div>
+                        />
+                    </div>
 
-                  {freeAgentsLoading ? (
+                    {freeAgentsLoading ? (
                     <div className="space-y-4">
                       {Array(3).fill(0).map((_, i) => (
                         <Skeleton key={i} className="h-20 w-full" />
                       ))}
-                    </div>
-                  ) : freeAgentsError ? (
+                      </div>
+                    ) : freeAgentsError ? (
                     <div className="text-center py-8 text-red-500">
                       {freeAgentsError}
-                    </div>
-                  ) : filteredFreeAgents.length === 0 ? (
+                      </div>
+                  ) : (filteredFreeAgents?.length || 0) === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       No free agents available
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {filteredFreeAgents.map((player) => (
-                        <div
-                          key={player.id}
+                      {(filteredFreeAgents || []).map((player) => (
+                              <div
+                                key={player.id}
                           className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
                           onClick={() => handlePlayerSelect(player)}
                         >
@@ -786,48 +799,48 @@ const ManagementPage = () => {
                                 className="rounded-full"
                               />
                             )}
-                            <div>
+                                  <div>
                               <h3 className="font-medium">{player.users?.gamer_tag_id}</h3>
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <span className={getPositionColor(player.users?.primary_position)}>
                                   {getPositionAbbreviation(player.users?.primary_position)}
-                                </span>
-                                {player.users?.secondary_position && (
-                                  <>
+                                      </span>
+                                      {player.users?.secondary_position && (
+                                        <>
                                     <span>•</span>
                                     <span className={getPositionColor(player.users?.secondary_position)}>
-                                      {getPositionAbbreviation(player.users?.secondary_position)}
-                                    </span>
-                                  </>
-                                )}
+                                            {getPositionAbbreviation(player.users?.secondary_position)}
+                                          </span>
+                                        </>
+                                      )}
                                 <span>•</span>
                                 <span>{player.users?.console}</span>
                                 <span>•</span>
                                 <span>${(player.salary / 1000000).toFixed(2)}M</span>
-                              </div>
-                            </div>
-                          </div>
+                                    </div>
+                                  </div>
+                                </div>
                           <Button size="sm">Bid</Button>
-                        </div>
+                                    </div>
                       ))}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                                  </div>
+                                )}
+                                </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-          {/* My Bids Tab Content */}
-          <TabsContent value="my-bids">
+              {/* My Bids Tab Content */}
+              <TabsContent value="my-bids">
             <Card>
               <CardHeader>
                 <CardTitle>My Bids</CardTitle>
                 <CardDescription>Track your active bids on players</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {myBids.length > 0 ? (
-                  <div className="space-y-4">
-                    {myBids.map((bid) => (
+                  </CardHeader>
+                  <CardContent>
+                {(myBids?.length || 0) > 0 ? (
+                      <div className="space-y-4">
+                    {(myBids || []).map((bid) => (
                       <div
                         key={bid.id}
                         className="flex items-center justify-between p-4 border rounded-lg"
@@ -842,31 +855,31 @@ const ManagementPage = () => {
                               className="rounded-full"
                             />
                           )}
-                          <div>
+                                      <div>
                             <h3 className="font-medium">{bid.players?.users?.gamer_tag_id}</h3>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span className={getPositionColor(bid.players?.users?.primary_position)}>
                                 {getPositionAbbreviation(bid.players?.users?.primary_position)}
-                              </span>
+                                          </span>
                               <span>•</span>
                               <span>${(bid.amount / 1000000).toFixed(2)}M</span>
                               <span>•</span>
                               <span>Expires: {new Date(bid.expires_at).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-                        </div>
+                                        </div>
+                                      </div>
+                                    </div>
                         <Badge variant="outline">{bid.status}</Badge>
-                      </div>
+                                  </div>
                     ))}
-                  </div>
+                          </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
+                            <div className="text-center py-8 text-muted-foreground">
                     No bids placed yet
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                            </div>
+                          )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
           {/* Schedule Tab Content */}
           <TabsContent value="schedule">
@@ -874,11 +887,11 @@ const ManagementPage = () => {
               <CardHeader>
                 <CardTitle>Team Schedule</CardTitle>
                 <CardDescription>Upcoming and recent matches</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {teamMatches.length > 0 ? (
-                  <div className="space-y-4">
-                    {teamMatches.map((match) => (
+                  </CardHeader>
+                  <CardContent>
+                {(teamMatches?.length || 0) > 0 ? (
+                                <div className="space-y-4">
+                    {(teamMatches || []).map((match) => (
                       <div
                         key={match.id}
                         className="flex items-center justify-between p-4 border rounded-lg"
@@ -894,16 +907,16 @@ const ManagementPage = () => {
                                 height={32}
                                 className="mx-auto mt-1"
                               />
-                            )}
-                          </div>
+                                            )}
+                                          </div>
                           <div className="text-center">
                             <div className="text-2xl font-bold">
                               {match.home_score !== null ? `${match.home_score} - ${match.away_score}` : "vs"}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
+                                        </div>
+                                                <div className="text-sm text-muted-foreground">
                               {new Date(match.scheduled_time).toLocaleDateString()}
-                            </div>
-                          </div>
+                                                </div>
+                                      </div>
                           <div className="text-center">
                             <div className="font-medium">{match.away_team.name}</div>
                             {match.away_team.logo_url && (
@@ -914,42 +927,44 @@ const ManagementPage = () => {
                                 height={32}
                                 className="mx-auto mt-1"
                               />
-                            )}
-                          </div>
-                        </div>
+                                        )}
+                                      </div>
+                                    </div>
                         <Badge variant="outline">{match.status}</Badge>
-                      </div>
+                                      </div>
                     ))}
-                  </div>
+                                      </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     No matches scheduled
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                                      </div>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                      </TabsContent>
+                    </Tabs>
 
-        {/* Bid Modal */}
-        {selectedPlayer && (
-          <BidPlayerModal
-            player={selectedPlayer}
-            isOpen={isModalOpen}
-            onClose={() => {
-              setIsModalOpen(false)
-              setSelectedPlayer(null)
+      {/* Bid Modal */}
+        {selectedPlayer && teamData && (
+        <BidPlayerModal
+            player={selectedPlayer || null}
+            isOpen={!!isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedPlayer(null)
+          }}
+          onBidPlaced={() => {
+            // Refresh bids and free agents
+              if (fetchPlayerBids) fetchPlayerBids()
+              if (fetchData) fetchData()
             }}
-            onBidPlaced={() => {
-              // Refresh bids and free agents
-              fetchPlayerBids()
-              fetchData()
-            }}
-            teamData={teamData}
-            currentBid={playerBids[selectedPlayer.id]}
-            projectedSalary={projectedSalary}
-            salaryCap={currentSalaryCap}
-            projectedRosterSize={projectedRosterSize}
+            teamData={teamData || null}
+            currentBid={playerBids?.[selectedPlayer.id]}
+            currentTeamSalary={currentTeamSalary || 0}
+            projectedSalary={projectedSalary || 0}
+            salaryCap={currentSalaryCap || 65000000}
+            projectedRosterSize={projectedRosterSize || 0}
+            teamPlayers={teamPlayers || []}
           />
         )}
       </motion.div>
