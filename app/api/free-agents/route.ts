@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     console.log("Active season ID:", activeSeason.id)
 
-    // Get approved season registrations for the active season
+    // Get approved season registrations for the active season (for enhanced data)
     const { data: approvedRegistrations, error: registrationsError } = await adminClient
       .from("season_registrations")
       .select(`
@@ -83,26 +83,19 @@ export async function GET(request: NextRequest) {
 
     console.log(`Found ${approvedRegistrations?.length || 0} approved registrations`)
 
-    // Get players without teams - if we have approved registrations, filter by them, otherwise get all
-    let playersQuery = adminClient
+    // Get ALL players without teams (not just those with approved registrations)
+    const { data: playersWithoutTeams, error: playersError } = await adminClient
       .from("players")
       .select("id, salary, user_id")
       .is("team_id", null)
       .eq("role", "Player")
-
-    if (approvedRegistrations && approvedRegistrations.length > 0) {
-      const approvedUserIds = approvedRegistrations.map((reg) => reg.user_id)
-      playersQuery = playersQuery.in("user_id", approvedUserIds)
-    }
-
-    const { data: playersWithoutTeams, error: playersError } = await playersQuery
 
     if (playersError) {
       console.error("Error fetching players without teams:", playersError)
       throw playersError
     }
 
-    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players with approved registrations`)
+    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players`)
 
     if (!playersWithoutTeams || playersWithoutTeams.length === 0) {
       return NextResponse.json({
@@ -137,14 +130,14 @@ export async function GET(request: NextRequest) {
 
     console.log(`Found ${users?.length || 0} user records`)
 
-    // Combine the data, prioritizing registration data over user data
+    // Combine the data, using registration data if available, otherwise user data
     const enhancedFreeAgents = playersWithoutTeams
       .map((player) => {
         const user = users?.find((u) => u.id === player.user_id)
         const registration = approvedRegistrations?.find((reg) => reg.user_id === player.user_id)
 
-        if (!user || !registration) {
-          console.log(`Missing data for player ${player.id}: user=${!!user}, registration=${!!registration}`)
+        if (!user) {
+          console.log(`Missing user data for player ${player.id}`)
           return null
         }
 
@@ -152,10 +145,10 @@ export async function GET(request: NextRequest) {
           ...player,
           users: {
             id: user.id,
-            gamer_tag_id: registration.gamer_tag || user.gamer_tag_id || "Unknown Player",
-            primary_position: registration.primary_position || user.primary_position || "Unknown",
-            secondary_position: registration.secondary_position || user.secondary_position,
-            console: registration.console || user.console || "Unknown",
+            gamer_tag_id: registration?.gamer_tag || user.gamer_tag_id || "Unknown Player",
+            primary_position: registration?.primary_position || user.primary_position || "Unknown",
+            secondary_position: registration?.secondary_position || user.secondary_position,
+            console: registration?.console || user.console || "Unknown",
             avatar_url: user.avatar_url,
           },
         }
@@ -169,9 +162,9 @@ export async function GET(request: NextRequest) {
       freeAgents: enhancedFreeAgents,
       authenticated: !!authenticatedUser,
       debug: {
-        message: "Successfully fetched approved free agents",
+        message: "Successfully fetched free agents",
         seasonId: activeSeason.id,
-        approvedRegistrations: approvedRegistrations.length,
+        approvedRegistrations: approvedRegistrations?.length || 0,
         playersWithoutTeams: playersWithoutTeams.length,
         usersCount: users?.length || 0,
         finalCount: enhancedFreeAgents.length,

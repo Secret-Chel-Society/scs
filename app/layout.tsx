@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { MantineProviderWrapper } from "@/components/providers/mantine-provider"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
@@ -51,8 +52,9 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} hockey-scrollbar`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <SupabaseProvider>
-            <MobileScalingProvider>
+          <MantineProviderWrapper>
+            <SupabaseProvider>
+              <MobileScalingProvider>
               <div className="flex min-h-screen w-full">
                 <Navigation />
                 {/* Main content area */}
@@ -68,8 +70,9 @@ export default function RootLayout({
               <Toaster />
               <BannedUserModal />
               {/* <Analytics /> */}
-            </MobileScalingProvider>
-          </SupabaseProvider>
+              </MobileScalingProvider>
+            </SupabaseProvider>
+          </MantineProviderWrapper>
         </ThemeProvider>
       </body>
     </html>

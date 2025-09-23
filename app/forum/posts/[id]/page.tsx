@@ -136,6 +136,7 @@ export default function ForumPostPage() {
 
   const fetchUserRole = useCallback(async () => {
     if (!session?.user?.id) {
+      setUserRole(null)
       setIsRoleLoading(false)
       return
     }
@@ -146,10 +147,14 @@ export default function ForumPostPage() {
       if (response.ok) {
         const data = await response.json()
         setUserRole(data.role)
-        console.log("User role:", data.role) // Debug log
+        console.log("User role:", data.role, "All roles:", data.roles) // Debug log
+      } else {
+        console.error("Failed to fetch user role:", response.status)
+        setUserRole(null)
       }
     } catch (error) {
       console.error("Error fetching user role:", error)
+      setUserRole(null)
     } finally {
       setIsRoleLoading(false)
     }
@@ -202,7 +207,7 @@ export default function ForumPostPage() {
   }
 
   const handleSubmitReply = async () => {
-    if (!session) {
+    if (!canPostReply()) {
       router.push("/login")
       return
     }
@@ -444,7 +449,7 @@ export default function ForumPostPage() {
     }
 
     const isOwner = post.author.id === session.user.id
-    const isAdmin = userRole === "admin"
+    const isAdmin = userRole === "Admin"
 
     console.log("Edit permissions:", {
       isOwner,
@@ -464,7 +469,7 @@ export default function ForumPostPage() {
     }
 
     const isOwner = post.author.id === session.user.id
-    const isAdmin = userRole === "admin"
+    const isAdmin = userRole === "Admin"
 
     console.log("Delete permissions:", {
       isOwner,
@@ -478,7 +483,12 @@ export default function ForumPostPage() {
   }
 
   const canPinPost = () => {
-    return userRole === "admin"
+    return userRole === "Admin"
+  }
+
+  // Any authenticated user can post replies
+  const canPostReply = () => {
+    return !!session?.user?.id
   }
 
   if (isLoading) {
@@ -702,7 +712,7 @@ export default function ForumPostPage() {
         </CardHeader>
         <CardContent>
           {/* Add Reply Form */}
-          {session ? (
+          {canPostReply() ? (
             <div className="mb-6">
               <RichTextEditor content={newReply} onChange={setNewReply} placeholder="Write a reply..." />
               <div className="mt-3">

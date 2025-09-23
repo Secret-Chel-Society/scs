@@ -22,25 +22,27 @@ export async function GET() {
       )
     }
 
-    // Check for Admin role
-    const { data: adminRoleData, error: adminRoleError } = await supabase
+    // Check for all user roles
+    const { data: userRolesData, error: userRolesError } = await supabase
       .from("user_roles")
-      .select("*")
+      .select("role")
       .eq("user_id", session.user.id)
-      .eq("role", "Admin")
 
-    if (adminRoleError) {
+    if (userRolesError) {
       return NextResponse.json(
         {
           authenticated: true,
           isAdmin: false,
-          error: adminRoleError.message,
+          role: null,
+          error: userRolesError.message,
         },
         { status: 500 },
       )
     }
 
-    const isAdmin = adminRoleData && adminRoleData.length > 0
+    const roles = userRolesData?.map(r => r.role) || []
+    const isAdmin = roles.includes("Admin")
+    const primaryRole = roles.length > 0 ? roles[0] : null
 
     // Get user details
     const { data: userData, error: userError } = await supabase
@@ -63,9 +65,10 @@ export async function GET() {
     return NextResponse.json({
       authenticated: true,
       isAdmin,
+      role: primaryRole,
+      roles: roles,
       userId: session.user.id,
       email: userData?.email,
-      adminRoles: adminRoleData,
     })
   } catch (error: any) {
     console.error("Error checking admin status:", error)
