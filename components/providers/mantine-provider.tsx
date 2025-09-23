@@ -7,6 +7,7 @@ import { DatesProvider } from '@mantine/dates'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import '@mantine/dates/styles.css'
+import '@mantine/modals/styles.css'
 
 // Custom theme that integrates with your existing CSS variables
 const theme = {
