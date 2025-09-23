@@ -1,19 +1,5 @@
 // Midnight Studios INTl - All rights reserved
 /** @type {import('next').NextConfig} */
-
-// Common domains that might be used
-const allowedDomains = [
-  'localhost', 
-  'xsgames.co', 
-  'via.placeholder.com',
-  'www.secretchelsociety.com', // Your production domain
-  'secretchelsociety.com', // Your production domain without www
-  'kudmtqjzuxakngbrqxzp.supabase.co', // Your specific Supabase domain from the error
-  'supabase.co',
-  'supabase.com'
-]
-
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   eslint: {
@@ -23,45 +9,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: allowedDomains,
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co',
-        port: '',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.supabase.com',
-        port: '',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'supabase.co',
-        port: '',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'supabase.com',
-        port: '',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.secretchelsociety.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'secretchelsociety.com',
-        port: '',
-        pathname: '/**',
-      }
-    ],
+    domains: ['localhost', 'xsgames.co', 'via.placeholder.com'],
     unoptimized: true,
   },
   async headers() {

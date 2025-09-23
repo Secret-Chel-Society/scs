@@ -71,7 +71,6 @@
     "cmdk": "latest",
     "crypto": "latest",
     "date-fns": "latest",
-    "dayjs": "^1.11.18",
     "dompurify": "latest",
     "embla-carousel-react": "latest",
     "framer-motion": "latest",

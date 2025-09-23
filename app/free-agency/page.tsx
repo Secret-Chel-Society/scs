@@ -1,8 +1,11 @@
+import { Suspense } from "react"
 import { FreeAgencyList } from "@/components/free-agency/free-agency-list"
+import { FreeAgencyFilters } from "@/components/free-agency/free-agency-filters"
+import { PositionCountsClient } from "@/components/free-agency/position-counts-client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlayerSignupsList } from "@/components/free-agency/player-signups-list"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, FileText } from "lucide-react"
+import { Users, Target, FileText, Clock, TrendingUp, Award, Star, Zap } from "lucide-react"
 
 // Force dynamic rendering and disable caching
 export const dynamic = "force-dynamic"
@@ -108,11 +111,73 @@ export default function FreeAgencyPage({
             </TabsList>
 
             <TabsContent value="free-agents" className="space-y-6 mt-6">
+              {/* Position Counts Section */}
+              <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg">
+                      <TrendingUp className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Available Players by Position
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Real-time count of free agents in each position
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Suspense fallback={
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ice-blue-600 mx-auto mb-4"></div>
+                      <p className="text-hockey-silver-600 dark:text-hockey-silver-400">Loading position counts...</p>
+                    </div>
+                  }>
+                    <PositionCountsClient />
+                  </Suspense>
+                </CardContent>
+              </Card>
+
+              {/* Filters Section */}
+              <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-rink-blue-500 to-rink-blue-600 rounded-lg">
+                      <Target className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Search & Filters
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Narrow down available players by position, console, and salary
+                      </div>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FreeAgencyFilters initialParams={searchParams} />
+                </CardContent>
+              </Card>
+
               {/* Free Agency List Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Free Agents</CardTitle>
-                  <CardDescription>Browse and bid on available players</CardDescription>
+              <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
+                      <Award className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Available Players
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        Browse and submit bids on free agents
+                      </div>
+                    </div>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <FreeAgencyList searchParams={searchParams} />
@@ -121,10 +186,21 @@ export default function FreeAgencyPage({
             </TabsContent>
 
             <TabsContent value="player-signups" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Player Signups</CardTitle>
-                  <CardDescription>New players looking to join the league</CardDescription>
+              <Card className="hockey-card border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg">
+                      <Star className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                        Player Signups
+                      </div>
+                      <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
+                        New players looking to join the league
+                      </div>
+                    </div>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PlayerSignupsList />

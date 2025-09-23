@@ -3,10 +3,10 @@
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { ModalsProvider } from '@mantine/modals'
-// import { DatesProvider } from '@mantine/dates'
+import { DatesProvider } from '@mantine/dates'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
-// import '@mantine/dates/styles.css'
+import '@mantine/dates/styles.css'
 
 // Custom theme that integrates with your existing CSS variables
 const theme = {
@@ -68,12 +68,12 @@ interface MantineProviderWrapperProps {
 export function MantineProviderWrapper({ children }: MantineProviderWrapperProps) {
   return (
     <MantineProvider theme={theme}>
-      {/* <DatesProvider settings={{ firstDayOfWeek: 0 }}> */}
+      <DatesProvider settings={{ firstDayOfWeek: 0 }}>
         <ModalsProvider>
           <Notifications position="top-right" />
           {children}
         </ModalsProvider>
-      {/* </DatesProvider> */}
+      </DatesProvider>
     </MantineProvider>
   )
 }

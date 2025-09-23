@@ -166,7 +166,7 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Get user data for the free agent players (only active users)
+    // Get user data for the free agent players
     const playerUserIds = playersWithoutTeams.map((p) => p.user_id)
     const { data: users, error: usersError } = await adminClient
       .from("users")
@@ -179,7 +179,6 @@ export async function GET(request: NextRequest) {
         avatar_url
       `)
       .in("id", playerUserIds)
-      .eq("is_active", true)
 
     if (usersError) {
       console.error("Error fetching users:", usersError)
@@ -189,7 +188,6 @@ export async function GET(request: NextRequest) {
     console.log(`Found ${users?.length || 0} user records`)
 
     // Combine the data, prioritizing registration data over user data
-    // Only include players whose users are active
     const enhancedFreeAgents = playersWithoutTeams
       .map((player) => {
         const user = users?.find((u) => u.id === player.user_id)
