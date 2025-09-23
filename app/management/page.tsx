@@ -669,11 +669,23 @@ const ManagementPage = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="roster">Roster</TabsTrigger>
-            <TabsTrigger value="free-agents">Free Agents</TabsTrigger>
-            <TabsTrigger value="my-bids">My Bids</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 h-auto">
+            <TabsTrigger value="roster" className="text-xs md:text-sm py-2 px-1">
+              <Users className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Roster</span>
+            </TabsTrigger>
+            <TabsTrigger value="free-agents" className="text-xs md:text-sm py-2 px-1">
+              <Search className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Free Agents</span>
+            </TabsTrigger>
+            <TabsTrigger value="my-bids" className="text-xs md:text-sm py-2 px-1">
+              <History className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">My Bids</span>
+            </TabsTrigger>
+            <TabsTrigger value="schedule" className="text-xs md:text-sm py-2 px-1">
+              <Calendar className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Schedule</span>
+            </TabsTrigger>
             </TabsList>
 
               {/* Roster Tab Content */}
@@ -689,21 +701,21 @@ const ManagementPage = () => {
                     {(teamPlayers || []).map((player) => (
                       <div
                         key={player.id}
-                        className="flex items-center justify-between p-4 border rounded-lg"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3"
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 flex-1">
                           {player.users?.avatar_url && (
                             <Image
                               src={player.users.avatar_url}
                               alt={player.users.gamer_tag_id}
                               width={40}
                               height={40}
-                              className="rounded-full"
+                              className="rounded-full flex-shrink-0"
                             />
                           )}
-                          <div>
-                            <h3 className="font-medium">{player.users?.gamer_tag_id}</h3>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate">{player.users?.gamer_tag_id}</h3>
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                                       <span className={getPositionColor(player.users?.primary_position)}>
                                 {getPositionAbbreviation(player.users?.primary_position)}
                                       </span>
@@ -716,13 +728,13 @@ const ManagementPage = () => {
                                         </>
                                       )}
                               <span>•</span>
-                              <span>{player.users?.console}</span>
+                              <span className="truncate">{player.users?.console}</span>
                               <span>•</span>
-                              <span>${(player.salary / 1000000).toFixed(2)}M</span>
+                              <span className="font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
                                     </div>
                         </div>
                                   </div>
-                        <Badge variant="outline">{player.role}</Badge>
+                        <Badge variant="outline" className="w-fit">{player.role}</Badge>
                             </div>
                           ))}
                         </div>
@@ -744,9 +756,9 @@ const ManagementPage = () => {
                   </CardHeader>
                   <CardContent>
                 <div className="space-y-4">
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
                         <Select value={positionFilter} onValueChange={setPositionFilter}>
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className="w-full sm:w-48">
                             <SelectValue placeholder="Filter by position" />
                           </SelectTrigger>
                           <SelectContent>
@@ -786,22 +798,22 @@ const ManagementPage = () => {
                       {(filteredFreeAgents || []).map((player) => (
                               <div
                                 key={player.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer gap-3"
                           onClick={() => handlePlayerSelect(player)}
                         >
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-4 flex-1">
                             {player.users?.avatar_url && (
                               <Image
                                 src={player.users.avatar_url}
                                 alt={player.users.gamer_tag_id}
                                 width={40}
                                 height={40}
-                                className="rounded-full"
+                                className="rounded-full flex-shrink-0"
                               />
                             )}
-                                  <div>
-                              <h3 className="font-medium">{player.users?.gamer_tag_id}</h3>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <div className="flex-1 min-w-0">
+                              <h3 className="font-medium truncate">{player.users?.gamer_tag_id}</h3>
+                              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                                 <span className={getPositionColor(player.users?.primary_position)}>
                                   {getPositionAbbreviation(player.users?.primary_position)}
                                       </span>
@@ -814,13 +826,13 @@ const ManagementPage = () => {
                                         </>
                                       )}
                                 <span>•</span>
-                                <span>{player.users?.console}</span>
+                                <span className="truncate">{player.users?.console}</span>
                                 <span>•</span>
-                                <span>${(player.salary / 1000000).toFixed(2)}M</span>
+                                <span className="font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
                                     </div>
                                   </div>
                                 </div>
-                          <Button size="sm">Bid</Button>
+                          <Button size="sm" variant="outline" className="w-full sm:w-auto">Bid</Button>
                                     </div>
                       ))}
                                   </div>
