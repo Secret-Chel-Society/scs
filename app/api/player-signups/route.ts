@@ -13,7 +13,21 @@ export async function GET() {
   try {
     console.log("Fetching player signups...")
 
-    // Get approved registrations for the current season
+    // First, get the active season
+    const { data: activeSeason, error: seasonError } = await supabaseAdmin
+      .from("seasons")
+      .select("id")
+      .eq("is_active", true)
+      .single()
+
+    if (seasonError || !activeSeason) {
+      console.error("Error fetching active season:", seasonError)
+      return NextResponse.json({ error: "No active season found" }, { status: 500 })
+    }
+
+    console.log("Active season ID:", activeSeason.id)
+
+    // Get approved registrations for the active season
     const { data: registrations, error } = await supabaseAdmin
       .from("season_registrations")
       .select(`
@@ -26,6 +40,7 @@ export async function GET() {
         status,
         season_id
       `)
+      .eq("season_id", activeSeason.id)
       .eq("status", "Approved")
       .order("gamer_tag")
 
@@ -41,6 +56,7 @@ export async function GET() {
       const { data: allRegs, error: allError } = await supabaseAdmin
         .from("season_registrations")
         .select("status, count(*)")
+        .eq("season_id", activeSeason.id)
         .group("status")
 
       console.log("Registration status breakdown:", allRegs, allError)
@@ -59,6 +75,7 @@ export async function GET() {
             status,
             season_id
           `)
+          .eq("season_id", activeSeason.id)
           .order("gamer_tag")
 
         if (!devError && devRegs) {
