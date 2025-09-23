@@ -18,7 +18,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TeamLogos } from "@/components/management/team-logos"
 import { BidPlayerModal } from "@/components/management/bid-player-modal"
@@ -583,11 +582,7 @@ const ManagementPage = () => {
 
   return (
       <div className="container mx-auto px-4 py-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div>
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
@@ -972,7 +967,7 @@ const ManagementPage = () => {
             teamPlayers={teamPlayers || []}
           />
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }
