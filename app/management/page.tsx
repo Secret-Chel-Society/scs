@@ -433,7 +433,7 @@ const ManagementPage = () => {
       console.log("Current session:", !!session)
       console.log("Team data:", teamData?.name)
 
-      const response = await fetch("/api/free-agents", {
+      const response = await fetch("/api/free-agents?approved_only=true", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

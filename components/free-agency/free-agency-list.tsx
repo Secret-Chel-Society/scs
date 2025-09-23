@@ -285,7 +285,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
         console.log("=== DEBUG: Starting loadFreeAgents via API ===")
 
         // Use API endpoint to get free agents (bypasses RLS issues)
-        const response = await fetch("/api/free-agents")
+        const response = await fetch("/api/free-agents?approved_only=true")
 
         if (!response.ok) {
           const errorData = await response.json()

@@ -2,18 +2,54 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
 // Create admin client to bypass RLS
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const adminClient = createClient(supabaseUrl, supabaseServiceKey)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error("Missing Supabase environment variables")
+  console.error("NEXT_PUBLIC_SUPABASE_URL:", !!supabaseUrl)
+  console.error("SUPABASE_SERVICE_ROLE_KEY:", !!supabaseServiceKey)
+}
+
+const adminClient = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null
 
 // Create regular client for session validation
 const createRouteHandlerClient = () => {
-  return createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !anonKey) {
+    throw new Error("Missing Supabase environment variables for client creation")
+  }
+  return createClient(supabaseUrl, anonKey)
 }
 
 export async function GET(request: NextRequest) {
   try {
     console.log("Free agents API called")
+
+    // Get query parameters to determine if we should filter by approval status
+    const { searchParams } = new URL(request.url)
+    const approvedOnly = searchParams.get('approved_only') === 'true'
+    
+    console.log("Approved only filter:", approvedOnly)
+
+    // Check if admin client is available
+    if (!adminClient) {
+      console.error("Admin client not available - missing environment variables")
+      return NextResponse.json(
+        {
+          freeAgents: [],
+          error: "Server configuration error - missing environment variables",
+          debug: {
+            message: "Admin client not available",
+            hasSupabaseUrl: !!supabaseUrl,
+            hasServiceKey: !!supabaseServiceKey,
+          },
+        },
+        { status: 500 }
+      )
+    }
 
     // Optional authentication - don't require it for public viewing
     let authenticatedUser = null
@@ -63,61 +99,69 @@ export async function GET(request: NextRequest) {
 
     console.log("Active season ID:", activeSeason.id)
 
-    // Get approved season registrations for the active season (for enhanced data)
-    const { data: approvedRegistrations, error: registrationsError } = await adminClient
+    // Get season registrations for the active season (for enhanced data)
+    // Filter by approval status if requested
+    let registrationsQuery = adminClient
       .from("season_registrations")
       .select(`
         user_id,
         primary_position,
         secondary_position,
         gamer_tag,
-        console
+        console,
+        status
       `)
       .eq("season_id", activeSeason.id)
-      .eq("status", "Approved")
+    
+    if (approvedOnly) {
+      registrationsQuery = registrationsQuery.eq("status", "Approved")
+    }
+    
+    const { data: allRegistrations, error: registrationsError } = await registrationsQuery
 
     if (registrationsError) {
-      console.error("Error fetching approved registrations:", registrationsError)
+      console.error("Error fetching season registrations:", registrationsError)
       throw registrationsError
     }
 
-    console.log(`Found ${approvedRegistrations?.length || 0} approved registrations`)
+    console.log(`Found ${allRegistrations?.length || 0} season registrations${approvedOnly ? ' (approved only)' : ''}`)
 
-    if (!approvedRegistrations || approvedRegistrations.length === 0) {
+    if (!allRegistrations || allRegistrations.length === 0) {
       return NextResponse.json({
         freeAgents: [],
         authenticated: !!authenticatedUser,
         debug: {
-          message: "No approved registrations found for active season",
+          message: approvedOnly ? "No approved registrations found for active season" : "No season registrations found for active season",
           seasonId: activeSeason.id,
+          approvedOnly,
         },
       })
     }
 
-    // Get the user IDs from approved registrations
-    const approvedUserIds = approvedRegistrations.map((reg) => reg.user_id)
+    // Get the user IDs from all registrations
+    const registeredUserIds = allRegistrations.map((reg) => reg.user_id)
 
-    // Get players without teams who have approved registrations
+    // Get players without teams who have season registrations
     const { data: playersWithoutTeams, error: playersError } = await adminClient
       .from("players")
       .select("id, salary, user_id")
       .is("team_id", null)
-      .in("user_id", approvedUserIds)
+      .in("user_id", registeredUserIds)
 
     if (playersError) {
       console.error("Error fetching players without teams:", playersError)
       throw playersError
     }
 
-    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players with approved registrations`)
+    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players with season registrations`)
 
     if (!playersWithoutTeams || playersWithoutTeams.length === 0) {
       return NextResponse.json({
         freeAgents: [],
         authenticated: !!authenticatedUser,
         debug: {
-          message: "No free agent players found with approved registrations",
-          approvedRegistrations: approvedRegistrations.length,
+          message: "No free agent players found with season registrations",
+          totalRegistrations: allRegistrations.length,
         },
       })
     }
@@ -147,7 +191,7 @@ export async function GET(request: NextRequest) {
     const enhancedFreeAgents = playersWithoutTeams
       .map((player) => {
         const user = users?.find((u) => u.id === player.user_id)
-        const registration = approvedRegistrations?.find((reg) => reg.user_id === player.user_id)
+        const registration = allRegistrations?.find((reg) => reg.user_id === player.user_id)
 
         if (!user || !registration) {
           console.log(`Missing data for player ${player.id}: user=${!!user}, registration=${!!registration}`)
@@ -164,6 +208,7 @@ export async function GET(request: NextRequest) {
             console: registration.console || user.console || "Unknown",
             avatar_url: user.avatar_url,
           },
+          registration_status: registration.status, // Include registration status
         }
       })
       .filter(Boolean)
@@ -192,12 +237,13 @@ export async function GET(request: NextRequest) {
       freeAgents: enhancedFreeAgents,
       authenticated: !!authenticatedUser,
       debug: {
-        message: "Successfully fetched approved free agents",
+        message: approvedOnly ? "Successfully fetched approved free agents" : "Successfully fetched free agents with season registrations",
         seasonId: activeSeason.id,
-        approvedRegistrations: approvedRegistrations.length,
+        totalRegistrations: allRegistrations.length,
         playersWithoutTeams: playersWithoutTeams.length,
         usersCount: users?.length || 0,
         finalCount: enhancedFreeAgents.length,
+        approvedOnly,
       },
     })
   } catch (error: any) {
