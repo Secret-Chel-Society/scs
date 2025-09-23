@@ -1,27 +1,17 @@
 // Midnight Studios INTl - All rights reserved
 /** @type {import('next').NextConfig} */
 
-// Extract Supabase domain from environment variable
-const getSupabaseDomain = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!supabaseUrl) return null
-  
-  try {
-    const url = new URL(supabaseUrl)
-    return url.hostname
-  } catch {
-    return null
-  }
-}
-
-const supabaseDomain = getSupabaseDomain()
-
-// Debug logging for Supabase domain
-if (supabaseDomain) {
-  console.log('🔧 Next.js Config: Supabase domain detected:', supabaseDomain)
-} else {
-  console.log('⚠️ Next.js Config: No Supabase domain found in NEXT_PUBLIC_SUPABASE_URL')
-}
+// Common domains that might be used
+const allowedDomains = [
+  'localhost', 
+  'xsgames.co', 
+  'via.placeholder.com',
+  'www.secretchelsociety.com', // Your production domain
+  'secretchelsociety.com', // Your production domain without www
+  'kudmtqjzuxakngbrqxzp.supabase.co', // Your specific Supabase domain from the error
+  'supabase.co',
+  'supabase.com'
+]
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -33,13 +23,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: [
-      'localhost', 
-      'xsgames.co', 
-      'via.placeholder.com',
-      // Add the actual Supabase domain from environment
-      ...(supabaseDomain ? [supabaseDomain] : [])
-    ],
+    domains: allowedDomains,
     remotePatterns: [
       {
         protocol: 'https',
@@ -52,6 +36,30 @@ const nextConfig = {
         hostname: '*.supabase.com',
         port: '',
         pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'supabase.com',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.secretchelsociety.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'secretchelsociety.com',
+        port: '',
+        pathname: '/**',
       }
     ],
     unoptimized: true,

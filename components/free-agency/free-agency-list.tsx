@@ -658,15 +658,18 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             >
               <div className="flex items-center gap-4 flex-1">
                 {player.users?.avatar_url && (
-                  <Image
+                  <img
                     src={player.users.avatar_url}
                     alt={player.users.gamer_tag_id}
                     width={40}
                     height={40}
-                    className="rounded-full flex-shrink-0"
+                    className="rounded-full flex-shrink-0 w-10 h-10 object-cover"
                     onError={(e) => {
                       console.warn('Failed to load avatar for', player.users?.gamer_tag_id, ':', player.users?.avatar_url)
                       e.currentTarget.style.display = 'none'
+                    }}
+                    onLoad={() => {
+                      console.log('Successfully loaded avatar for', player.users?.gamer_tag_id)
                     }}
                   />
                 )}
