@@ -172,19 +172,19 @@ const ManagementPage = () => {
 
   const [loading, setLoading] = useState(true)
   const [teamData, setTeamData] = useState<Team | null>(null)
-  const [teamPlayers, setTeamPlayers] = useState<any[]>([])
-  const [teamMatches, setTeamMatches] = useState<any[]>([])
-  const [freeAgents, setFreeAgents] = useState<any[]>([])
-  const [filteredFreeAgents, setFilteredFreeAgents] = useState<any[]>([])
+  const [teamPlayers, setTeamPlayers] = useState<Player[]>([])
+  const [teamMatches, setTeamMatches] = useState<Match[]>([])
+  const [freeAgents, setFreeAgents] = useState<FreeAgent[]>([])
+  const [filteredFreeAgents, setFilteredFreeAgents] = useState<FreeAgent[]>([])
   const [positionFilter, setPositionFilter] = useState<string>("all")
   const [nameFilter, setNameFilter] = useState<string>("")
   const [playerBids, setPlayerBids] = useState<Record<string, any>>({})
-  const [myBids, setMyBids] = useState<any[]>([])
+  const [myBids, setMyBids] = useState<Bid[]>([])
   const [isAuthorized, setIsAuthorized] = useState(false)
-  const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
+  const [selectedPlayer, setSelectedPlayer] = useState<FreeAgent | null>(null)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false)
-  const [historyPlayer, setHistoryPlayer] = useState<any>(null)
+  const [historyPlayer, setHistoryPlayer] = useState<FreeAgent | null>(null)
   const [now, setNow] = useState(new Date())
   const [activeBidsCount, setActiveBidsCount] = useState(0)
   const [outbidCount, setOutbidCount] = useState(0)
@@ -282,7 +282,7 @@ const ManagementPage = () => {
           )
         `)
         .eq("user_id", session.user.id)
-        .single()
+        .single() as { data: any; error: any }
 
       if (playerError) {
         console.error("Error fetching player data:", playerError)
@@ -404,52 +404,51 @@ const ManagementPage = () => {
     }
   }
 
-  // Fetch free agents
+  // Fetch free agents using API endpoint
   const fetchFreeAgents = async () => {
-    if (!supabase) return
-    
     try {
-    setFreeAgentsLoading(true)
-    setFreeAgentsError(null)
+      setFreeAgentsLoading(true)
+      setFreeAgentsError(null)
 
-      const { data, error } = await supabase
-        .from("users")
-        .select(`
-          id,
-          gamer_tag_id,
-          primary_position,
-          secondary_position,
-          console,
-          avatar_url,
-          players!inner (
-            id,
-            salary
-          )
-        `)
-        .is("players.team_id", null)
-        .eq("players.role", "Player")
+      console.log("Loading free agents via API...")
+      console.log("Current session:", !!session)
+      console.log("Team data:", teamData?.name)
 
-      if (error) {
-        throw error
-      }
-
-      const freeAgentsData = data?.map((user) => ({
-        id: user.players[0].id,
-        salary: user.players[0].salary,
-        users: {
-          id: user.id,
-          gamer_tag_id: user.gamer_tag_id,
-          primary_position: user.primary_position,
-          secondary_position: user.secondary_position,
-          console: user.console,
-          avatar_url: user.avatar_url,
+      const response = await fetch("/api/free-agents", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // Include authorization header if we have a session
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
-      })) || []
+      })
 
-      setFreeAgents(freeAgentsData)
+      console.log("Free agents API response status:", response.status)
+
+      let data
+      if (!response.ok) {
+        data = await response.json()
+        throw new Error(data.error || `Failed to fetch free agents: ${response.status}`)
+      } else {
+        data = await response.json()
+      }
+      console.log("Free agents API response:", {
+        freeAgentsCount: data.freeAgents?.length || 0,
+        debug: data.debug,
+      })
+
+      const freeAgentsList = data.freeAgents || []
+      setFreeAgents(freeAgentsList)
+
+      console.log("Successfully loaded free agents:", freeAgentsList.length)
     } catch (error: any) {
-      console.error("Error fetching free agents:", error)
-      setFreeAgentsError(error.message || "Failed to load free agents")
+      console.error("Error loading free agents:", error)
+      setFreeAgentsError(`Failed to load free agents: ${error.message}`)
+      toast({
+        title: "Error",
+        description: "Failed to load free agents: " + error.message,
+        variant: "destructive",
+      })
     } finally {
       setFreeAgentsLoading(false)
     }
@@ -475,12 +474,13 @@ const ManagementPage = () => {
               gamer_tag_id,
               primary_position,
               secondary_position,
-              console
+              console,
+              avatar_url
             )
           )
         `)
         .eq("team_id", teamData.id)
-        .eq("status", "active")
+        .eq("status", "active") as { data: any[]; error: any }
 
       if (error) {
         console.error("Error fetching bids:", error)
@@ -846,9 +846,9 @@ const ManagementPage = () => {
                         className="flex items-center justify-between p-4 border rounded-lg"
                       >
                         <div className="flex items-center gap-4">
-                          {bid.players?.users?.avatar_url && (
+                          {(bid.players?.users as any)?.avatar_url && (
                             <Image
-                              src={bid.players.users.avatar_url}
+                              src={(bid.players.users as any).avatar_url}
                               alt={bid.players.users.gamer_tag_id}
                               width={40}
                               height={40}
