@@ -219,6 +219,11 @@ const ManagementPage = () => {
 
   // Update the position filter logic in the useEffect
   useEffect(() => {
+    console.log("=== Filtering free agents ===")
+    console.log("freeAgents length:", freeAgents?.length || 0)
+    console.log("nameFilter:", nameFilter)
+    console.log("positionFilter:", positionFilter)
+    
     const agents = freeAgents || []
     let filtered = agents
 
@@ -237,6 +242,7 @@ const ManagementPage = () => {
       })
     }
 
+    console.log("filtered length:", filtered.length)
     setFilteredFreeAgents(filtered)
   }, [freeAgents, nameFilter, positionFilter])
 
@@ -386,9 +392,6 @@ const ManagementPage = () => {
 
       setTeamMatches(matchesData || [])
 
-      // Fetch free agents
-      await fetchFreeAgents()
-
       // Fetch player bids
       await fetchPlayerBids()
 
@@ -406,6 +409,7 @@ const ManagementPage = () => {
 
   // Fetch free agents using API endpoint
   const fetchFreeAgents = async () => {
+    console.log("=== fetchFreeAgents called ===")
     try {
       setFreeAgentsLoading(true)
       setFreeAgentsError(null)
@@ -418,8 +422,6 @@ const ManagementPage = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // Include authorization header if we have a session
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
       })
 
@@ -439,6 +441,7 @@ const ManagementPage = () => {
 
       const freeAgentsList = data.freeAgents || []
       setFreeAgents(freeAgentsList)
+      setFilteredFreeAgents(freeAgentsList)
 
       console.log("Successfully loaded free agents:", freeAgentsList.length)
     } catch (error: any) {
@@ -529,8 +532,10 @@ const ManagementPage = () => {
   // Load data on component mount
   useEffect(() => {
     if (session?.user?.id && supabase) {
-    fetchData()
+      fetchData()
     }
+    // Load free agents independently of authentication
+    fetchFreeAgents()
   }, [session?.user?.id, supabase])
 
 
