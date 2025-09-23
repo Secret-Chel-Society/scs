@@ -452,7 +452,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
       // Calculate position breakdown
       const positions: { [key: string]: number } = {}
-      players.forEach((player) => {
+      players.forEach((player: any) => {
         const pos = player.users?.primary_position || "Unknown"
         positions[pos] = (positions[pos] || 0) + 1
       })
@@ -508,51 +508,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     }
   }
 
-  // Apply filters based on URL parameters
-  const filteredPlayers = useMemo(() => {
-    if (!mounted || freeAgents.length === 0) {
-      return []
-    }
-
-    let filtered = [...freeAgents]
-
-    // Apply name filter
-    if (filters.name) {
-      const searchTerm = filters.name.toLowerCase().trim()
-      filtered = filtered.filter((player) => player.users?.gamer_tag_id?.toLowerCase().includes(searchTerm))
-    }
-
-    // Apply position filter
-    if (filters.position && filters.position !== "all") {
-      filtered = filtered.filter((player) => {
-        const primaryPos = getPositionAbbreviation(player.users?.primary_position || "")
-        const secondaryPos = getPositionAbbreviation(player.users?.secondary_position || "")
-        return primaryPos === filters.position || secondaryPos === filters.position
-      })
-    }
-
-    // Apply console filter
-    if (filters.console && filters.console !== "all") {
-      filtered = filtered.filter((player) => player.users?.console === filters.console)
-    }
-
-    // Apply salary filters
-    if (filters.minSalary) {
-      const minSal = Number.parseInt(filters.minSalary)
-      if (!isNaN(minSal)) {
-        filtered = filtered.filter((player) => (player.salary || 0) >= minSal)
-      }
-    }
-
-    if (filters.maxSalary) {
-      const maxSal = Number.parseInt(filters.maxSalary)
-      if (!isNaN(maxSal)) {
-        filtered = filtered.filter((player) => (player.salary || 0) <= maxSal)
-      }
-    }
-
-    return filtered
-  }, [freeAgents, filters, mounted])
+  // This filtering is now handled by the useEffect above
 
   // Initial load
   useEffect(() => {
@@ -591,119 +547,11 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     return `${hours}h ${minutes}m`
   }
 
-  // Update the handleBidSubmit function to enforce minimum bid increment
-  const handleBidSubmit = async (amount: number) => {
-    if (!userTeam || !selectedPlayer) return
-
-    try {
-      // Check team's available cap space
-      const { data: teamPlayers, error: teamError } = await supabase
-        .from("players")
-        .select("salary")
-        .eq("team_id", userTeam.id)
-
-      if (teamError) throw new Error(teamError.message)
-
-      const currentSalaryTotal = teamPlayers.reduce((sum, player) => sum + (player.salary || 0), 0)
-      const salaryCap = 65000000 // $65M salary cap
-
-      if (currentSalaryTotal + amount > salaryCap) {
-        toast({
-          title: "Exceeds salary cap",
-          description: "This bid would put your team over the salary cap.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Check if this team already has the highest bid
-      const currentBid = playerBids[selectedPlayer.id]
-      if (currentBid && currentBid.team_id === userTeam.id) {
-        // Allow rebidding to extend the timer
-        // No additional checks needed since we want to allow extending the timer
-      }
-
-      // Check if the bid meets the minimum increment requirement
-      if (currentBid && amount < currentBid.bid_amount + 2000000) {
-        toast({
-          title: "Bid too low",
-          description: "New bids must be at least $2,000,000 higher than the current highest bid.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Get the current bidding duration from system settings
-      const { data: durationSetting } = await supabase
-        .from("system_settings")
-        .select("value")
-        .eq("key", "bidding_duration")
-        .single()
-
-      // Default to 14400 seconds (4 hours) if setting not found
-      const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
-      const bidExpirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
-
-      const { error: bidError } = await supabase.from("player_bidding").insert({
-        player_id: selectedPlayer.id,
-        team_id: userTeam.id,
-        bid_amount: amount,
-        bid_expires_at: bidExpirationTime,
-      })
-
-      if (bidError) throw new Error(bidError.message)
-
-      // Send notification to the player
-      await supabase.from("notifications").insert({
-        user_id: selectedPlayer.user_id,
-        title: "New Bid Received",
-        message: `${userTeam.name} has placed a bid of $${amount.toLocaleString()} for you.`,
-        link: "/free-agency",
-      })
-
-      // If there was a previous highest bidder and it's not the current team, notify them
-      if (currentBid && currentBid.team_id !== userTeam.id) {
-        // Get the GM/AGM/Owner of the outbid team
-        const { data: teamManagers } = await supabase
-          .from("players")
-          .select("user_id")
-          .eq("team_id", currentBid.team_id)
-          .in("role", ["GM", "AGM", "Owner"])
-
-        if (teamManagers && teamManagers.length > 0) {
-          // Send notification to each team manager
-          const notifications = teamManagers.map((manager) => ({
-            user_id: manager.user_id,
-            title: "Your Bid Was Outbid",
-            message: `Your bid on ${selectedPlayer.users?.gamer_tag_id || "a player"} has been outbid by ${userTeam.name} with $${amount.toLocaleString()}.`,
-            link: "/management",
-          }))
-
-          await supabase.from("notifications").insert(notifications)
-        }
-      }
-
-      toast({
-        title: "Bid placed successfully",
-        description: `Your bid of $${amount.toLocaleString()} has been placed.`,
-      })
-
-      setIsModalOpen(false)
-
-      // Refresh bids
-      await fetchFreeAgents()
-    } catch (error: any) {
-      toast({
-        title: "Error placing bid",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  }
+  // Bid submission is now handled by the BidModal component
 
   // Sort players by bid expiration time
   const sortedPlayers = useMemo(() => {
-    return [...filteredPlayers].sort((a, b) => {
+    return [...filteredFreeAgents].sort((a, b) => {
       const bidA = playerBids[a.id]
       const bidB = playerBids[b.id]
 
@@ -721,7 +569,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       // If neither has a bid, sort by name
       return (a.users?.gamer_tag_id || "").localeCompare(b.users?.gamer_tag_id || "")
     })
-  }, [filteredPlayers, playerBids])
+  }, [filteredFreeAgents, playerBids])
 
   // Add a refresh function for manual refresh
   const handleRefresh = useCallback(async () => {
@@ -850,9 +698,11 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           player={selectedPlayer}
-          onSubmit={handleBidSubmit}
-          currentSalary={selectedPlayer.salary || 0}
           userTeam={userTeam}
+          onBidPlaced={() => {
+            setIsModalOpen(false)
+            fetchFreeAgents()
+          }}
         />
       )}
 
