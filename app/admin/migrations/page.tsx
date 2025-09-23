@@ -1,5 +1,4 @@
 "use client"
-import { TradesTableMigration } from "@/components/admin/trades-table-migration"
 import { CreateColumnExistsMigration } from "@/components/admin/create-column-exists-migration"
 import { AddSeasonNumberMigration } from "@/components/admin/add-season-number-migration"
 import { EnsureSeasonNumberMigration } from "@/components/admin/ensure-season-number-migration"
@@ -16,7 +15,6 @@ export default function MigrationsPage() {
       </div>
 
       <div className="grid gap-6">
-        <TradesTableMigration />
         <CreateColumnExistsMigration />
         <AddSeasonNumberMigration />
         <EnsureSeasonNumberMigration />
