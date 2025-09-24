@@ -149,8 +149,8 @@ export function BidPlayerModal({
       const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
       const expirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
 
-      // Place bid using the simple API for testing
-      const response = await fetch("/api/bids/simple", {
+      // Place bid using the production API
+      const response = await fetch("/api/bids", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,8 +7,15 @@ export async function POST(request: Request) {
     // Get Supabase client
     const supabase = createRouteHandlerClient({ cookies })
 
+    // Check authentication
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError || !session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     // Parse request body
     const { playerId, teamId, bidAmount } = await request.json()
+    console.log("Bid request:", { playerId, teamId, bidAmount, userId: session.user.id })
 
     // Validate input
     if (!playerId || !teamId || !bidAmount) {
@@ -23,6 +30,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Minimum bid amount is $500,000" }, { status: 400 })
     }
 
+    // Verify user owns this team
+    const { data: team, error: teamError } = await supabase
+      .from("teams")
+      .select("id, owner_id")
+      .eq("id", teamId)
+      .eq("owner_id", session.user.id)
+      .single()
+
+    if (teamError || !team) {
+      return NextResponse.json({ error: "You can only bid for your own team" }, { status: 403 })
+    }
+
     // Check if team already has a bid for this player
     const { data: existingBid, error: existingBidError } = await supabase
       .from("player_bidding")
@@ -31,6 +50,12 @@ export async function POST(request: Request) {
       .eq("team_id", teamId)
       .in("status", ["Active", null])
       .single()
+
+    // Handle the case where no existing bid is found (this is normal)
+    if (existingBidError && existingBidError.code !== "PGRST116") {
+      console.error("Error checking existing bid:", existingBidError)
+      return NextResponse.json({ error: "Failed to check existing bids" }, { status: 500 })
+    }
 
     // If team has existing bid, they must bid higher
     if (existingBid && bidAmount <= existingBid.bid_amount) {
@@ -46,23 +71,30 @@ export async function POST(request: Request) {
 
     if (existingBid) {
       // Update existing bid
+      console.log("Updating existing bid:", existingBid.id)
       const { data, error } = await supabase
         .from("player_bidding")
         .update({
           bid_amount: bidAmount,
           bid_expires_at: expirationTime,
           updated_at: new Date().toISOString(),
+          status: "Active",
         })
         .eq("id", existingBid.id)
         .select()
 
       if (error) {
-        return NextResponse.json({ error: "Failed to update bid" }, { status: 500 })
+        console.error("Error updating bid:", error)
+        return NextResponse.json({ 
+          error: "Failed to update bid",
+          details: error.message 
+        }, { status: 500 })
       }
 
       result = { data, updated: true }
     } else {
       // Create new bid
+      console.log("Creating new bid")
       const { data, error } = await supabase
         .from("player_bidding")
         .insert({
@@ -75,7 +107,11 @@ export async function POST(request: Request) {
         .select()
 
       if (error) {
-        return NextResponse.json({ error: "Failed to create bid" }, { status: 500 })
+        console.error("Error creating bid:", error)
+        return NextResponse.json({ 
+          error: "Failed to create bid",
+          details: error.message 
+        }, { status: 500 })
       }
 
       result = { data, updated: false }
