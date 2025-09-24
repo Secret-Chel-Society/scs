@@ -38,6 +38,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Minimum bid amount is $500,000" }, { status: 400 })
     }
 
+    // Get current active season
+    console.log("Getting current season...")
+    const { data: seasonSetting, error: seasonError } = await supabase
+      .from("system_settings")
+      .select("value")
+      .eq("key", "current_season")
+      .single()
+
+    let currentSeasonId = 1 // Default fallback
+    if (!seasonError && seasonSetting?.value) {
+      currentSeasonId = Number.parseInt(seasonSetting.value.toString(), 10)
+      if (isNaN(currentSeasonId)) currentSeasonId = 1
+    }
+    console.log("Current season ID:", currentSeasonId)
+
     // Verify user owns this team
     const { data: team, error: teamError } = await supabase
       .from("teams")
@@ -49,6 +64,19 @@ export async function POST(request: Request) {
     if (teamError || !team) {
       return NextResponse.json({ error: "You can only bid for your own team" }, { status: 403 })
     }
+
+    // Verify the player exists and is available for bidding
+    console.log("Checking player availability...")
+    const { data: player, error: playerError } = await supabase
+      .from("players")
+      .select("id, user_id, gamer_tag_id")
+      .eq("id", playerId)
+      .single()
+
+    if (playerError || !player) {
+      return NextResponse.json({ error: "Player not found" }, { status: 404 })
+    }
+    console.log("Player found:", player.gamer_tag_id)
 
     // Check if team already has a bid for this player
     const { data: existingBid, error: existingBidError } = await supabase
@@ -111,6 +139,7 @@ export async function POST(request: Request) {
           bid_amount: bidAmount,
           bid_expires_at: expirationTime,
           status: "Active",
+          user_id: session.user.id, // Add user_id for proper tracking
         })
         .select()
 

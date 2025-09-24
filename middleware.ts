@@ -80,7 +80,7 @@ export const config = {
     "/api/trades/:path*",
     "/api/lineups/:path*",
     "/api/management/:path*",
-    // "/api/bids/:path*", // Temporarily disabled to test bidding system
+    "/api/bids/:path*",
     "/api/admin/ban-user/:path*",
     "/api/admin/unban-user/:path*",
   ],
