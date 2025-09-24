@@ -58,7 +58,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     let replies = []
     try {
       const { data: repliesData } = await supabase
-        .from("forum_replies")
+        .from("forum_comments")
         .select("*")
         .eq("post_id", postId)
         .order("created_at", { ascending: true })
@@ -267,7 +267,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       await supabase.from("forum_votes").delete().eq("post_id", postId)
 
       // Delete replies
-      await supabase.from("forum_replies").delete().eq("post_id", postId)
+      await supabase.from("forum_comments").delete().eq("post_id", postId)
     } catch (cleanupError) {
       console.log("Error cleaning up related data:", cleanupError)
       // Continue with post deletion even if cleanup fails

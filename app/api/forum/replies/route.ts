@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Create reply
     const { data: reply, error: replyError } = await supabase
-      .from("forum_replies")
+      .from("forum_comments")
       .insert({
         post_id,
         content,
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       console.log("RPC function not available, skipping reply count update:", rpcError)
       // Manually update reply count
       const { data: replies } = await supabase
-        .from("forum_replies")
+        .from("forum_comments")
         .select("id")
         .eq("post_id", post_id)
       
