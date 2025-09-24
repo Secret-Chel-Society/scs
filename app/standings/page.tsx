@@ -880,7 +880,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
               <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Trophy className="h-6 w-6 text-white" />
               </div>
-              <span className="text-ice-blue-800 dark:text-ice-blue-200 font-semibold text-lg">Season 1</span>
+               <span className="text-ice-blue-800 dark:text-ice-blue-200 font-semibold text-lg">SCSHL Season 1</span>
             </div>
 
             {/* Main Title */}

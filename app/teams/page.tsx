@@ -112,9 +112,9 @@ export default function TeamsPage() {
                 </h1>
                 {currentSeason && (
                   <div className="mt-2">
-                    <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-4 py-2 text-lg font-semibold">
-                      Season {currentSeason}
-                    </Badge>
+                     <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-4 py-2 text-lg font-semibold">
+                       SCSHL Season 1
+                     </Badge>
                   </div>
                 )}
               </div>
