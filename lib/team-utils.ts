@@ -86,6 +86,21 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
     // Get salary cap from system settings
     const salaryCap = await getSalaryCap()
     
+    // Get the season UUID from the season number
+    const { data: seasonData, error: seasonError } = await supabase
+      .from("seasons")
+      .select("id")
+      .eq("season_number", seasonId)
+      .single()
+    
+    if (seasonError || !seasonData) {
+      console.error("Error getting season UUID:", seasonError)
+      return []
+    }
+    
+    const seasonUuid = seasonData.id
+    console.log(`Using season UUID ${seasonUuid} for season number ${seasonId}`)
+    
     // Calculate standings to get accurate stats
     const standings = await calculateStandings(seasonId)
 
@@ -93,7 +108,7 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
     const { data: eaTeamStats, error: eaTeamStatsError } = await supabase
       .from("ea_team_stats")
       .select("match_id, team_id, shots")
-      .eq("season_id", seasonId) // if season_id exists in ea_team_stats
+      .eq("season_id", seasonUuid) // Use the season UUID
 
     if (eaTeamStatsError) {
       console.log("EA team stats query failed:", eaTeamStatsError.message)
@@ -267,20 +282,40 @@ export async function getCurrentSeasonId(): Promise<number> {
     const value = data?.value
     console.log("Current season value from database:", value, "type:", typeof value)
     
-    // Handle JSONB values from system_settings
-    let seasonNumber = null
+    // Handle different value types from system_settings
     if (typeof value === 'string') {
-      seasonNumber = parseInt(value, 10)
+      // Check if it's a UUID (contains hyphens)
+      if (value.includes('-')) {
+        console.log("Found UUID season ID, looking up season number:", value)
+        // It's a UUID, we need to find the corresponding season_number
+        const { data: seasonData, error: seasonError } = await supabase
+          .from("seasons")
+          .select("season_number")
+          .eq("id", value)
+          .single()
+        
+        if (!seasonError && seasonData && seasonData.season_number) {
+          console.log("Found season number for UUID:", seasonData.season_number)
+          return seasonData.season_number
+        }
+      } else {
+        // It's a numeric string
+        const seasonNumber = parseInt(value, 10)
+        if (!isNaN(seasonNumber) && seasonNumber > 0) {
+          console.log("Using season from system_settings:", seasonNumber)
+          return seasonNumber
+        }
+      }
     } else if (typeof value === 'number') {
-      seasonNumber = value
+      console.log("Using season from system_settings:", value)
+      return value
     } else if (value && typeof value === 'object') {
       // Handle JSONB object - try to extract the value
-      seasonNumber = parseInt(String(value), 10)
-    }
-    
-    if (!isNaN(seasonNumber) && seasonNumber > 0) {
-      console.log("Using season from system_settings:", seasonNumber)
-      return seasonNumber
+      const seasonNumber = parseInt(String(value), 10)
+      if (!isNaN(seasonNumber) && seasonNumber > 0) {
+        console.log("Using season from system_settings:", seasonNumber)
+        return seasonNumber
+      }
     }
     
     console.log("Invalid current_season value, defaulting to 1")

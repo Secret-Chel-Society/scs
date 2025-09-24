@@ -422,6 +422,21 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
   try {
     console.log(`Calculating standings for season ${seasonId}`)
 
+    // Get the season UUID from the season number
+    const { data: seasonData, error: seasonError } = await supabase
+      .from("seasons")
+      .select("id")
+      .eq("season_number", seasonId)
+      .single()
+    
+    if (seasonError || !seasonData) {
+      console.error("Error getting season UUID for standings:", seasonError)
+      return []
+    }
+    
+    const seasonUuid = seasonData.id
+    console.log(`Using season UUID ${seasonUuid} for season number ${seasonId}`)
+
     // Get the season name first - this is more reliable than using the ID directly
     const seasonName = await getSeasonName(seasonId)
     console.log(`Using season name: "${seasonName}" for calculations`)
@@ -446,7 +461,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         ${hasDivisionColumn ? ", division" : ""}
       `)
       .eq("is_active", true)
-      .eq("season_id", seasonId)
+      .eq("season_id", seasonUuid)
 
     // If basic query fails, try without season_id filter
     if (teamsError) {
