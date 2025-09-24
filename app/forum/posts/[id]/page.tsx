@@ -180,6 +180,7 @@ export default function ForumPostPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           [isReply ? "reply_id" : "post_id"]: targetId,
           vote_type: type,
@@ -229,6 +230,7 @@ export default function ForumPostPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           post_id: params.id,
           content: newReply.trim(),
@@ -275,6 +277,7 @@ export default function ForumPostPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           title: editTitle.trim(),
           content: editContent,
@@ -315,6 +318,7 @@ export default function ForumPostPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           pinned: !post.pinned,
         }),
@@ -355,6 +359,7 @@ export default function ForumPostPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       })
 
       if (response.ok) {
