@@ -3,18 +3,19 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-
-  // Check if user is authenticated
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
   try {
+    const supabase = createRouteHandlerClient({ cookies })
+
+    // Check if user is authenticated
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { playerId, teamId, bidAmount } = await request.json()
+    console.log("Bid request received:", { playerId, teamId, bidAmount })
 
     if (!playerId || !teamId || !bidAmount) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     }
 
     // Check if this team already has an active bid for this player
+    console.log("Checking for existing bid...")
     const { data: existingBid, error: existingBidError } = await supabase
       .from("player_bidding")
       .select("id, bid_amount, status")
@@ -39,8 +41,11 @@ export async function POST(request: Request) {
       .single()
 
     if (existingBidError && existingBidError.code !== "PGRST116") {
+      console.error("Error checking existing bid:", existingBidError)
       throw existingBidError
     }
+
+    console.log("Existing bid check result:", { existingBid, existingBidError })
 
     // If team already has an active bid, they must bid higher
     if (existingBid && bidAmount <= existingBid.bid_amount) {
@@ -64,6 +69,7 @@ export async function POST(request: Request) {
 
     // If team already has a bid, update it instead of creating a new one
     if (existingBid) {
+      console.log("Updating existing bid...")
       const { data, error } = await supabase
         .from("player_bidding")
         .update({
@@ -75,34 +81,17 @@ export async function POST(request: Request) {
         .select()
 
       if (error) {
+        console.error("Error updating bid:", error)
         throw error
       }
 
-      // Get player details for notification (simplified query)
-      const { data: playerData } = await supabase
-        .from("players")
-        .select("user_id")
-        .eq("id", playerId)
-        .single()
-
-      // Send notification to the player about the updated bid
-      if (playerData?.user_id) {
-        try {
-          await supabase.from("notifications").insert({
-            user_id: playerData.user_id,
-            title: "Bid Updated",
-            message: `Your bid has been updated to $${bidAmount.toLocaleString()}.`,
-            link: "/free-agency",
-          })
-        } catch (notificationError) {
-          console.error("Notification error:", notificationError)
-          // Don't fail the bid if notification fails
-        }
-      }
+      // Skip notifications for now to avoid database errors
+      console.log("Bid updated successfully:", data)
 
       return NextResponse.json({ success: true, data, updated: true })
     } else {
       // Create new bid
+      console.log("Creating new bid...")
       const { data, error } = await supabase
         .from("player_bidding")
         .insert({
@@ -115,72 +104,12 @@ export async function POST(request: Request) {
         .select()
 
       if (error) {
+        console.error("Error creating bid:", error)
         throw error
       }
 
-      // Get player and team details for notifications (simplified queries)
-      const { data: playerData } = await supabase
-        .from("players")
-        .select("user_id")
-        .eq("id", playerId)
-        .single()
-
-      const { data: teamData } = await supabase
-        .from("teams")
-        .select("name")
-        .eq("id", teamId)
-        .single()
-
-      // Send notification to the player
-      if (playerData?.user_id) {
-        try {
-          await supabase.from("notifications").insert({
-            user_id: playerData.user_id,
-            title: "New Bid Received",
-            message: `${teamData?.name || "A team"} has placed a bid of $${bidAmount.toLocaleString()} for you.`,
-            link: "/free-agency",
-          })
-        } catch (notificationError) {
-          console.error("Player notification error:", notificationError)
-          // Don't fail the bid if notification fails
-        }
-      }
-
-      // Check if there are other teams with bids on this player and notify them they're outbid
-      try {
-        const { data: otherBids } = await supabase
-          .from("player_bidding")
-          .select("id, team_id, bid_amount")
-          .eq("player_id", playerId)
-          .neq("team_id", teamId)
-          .in("status", ["Active", null])
-          .lt("bid_amount", bidAmount)
-
-        // Notify outbid teams (simplified approach)
-        if (otherBids && otherBids.length > 0) {
-          // Get team managers for outbid teams
-          const teamIds = otherBids.map(bid => bid.team_id)
-          const { data: teamManagers } = await supabase
-            .from("players")
-            .select("user_id, team_id")
-            .in("team_id", teamIds)
-            .in("role", ["GM", "AGM", "Owner"])
-
-          if (teamManagers && teamManagers.length > 0) {
-            const outbidNotifications = teamManagers.map(manager => ({
-              user_id: manager.user_id,
-              title: "You've Been Outbid",
-              message: `Your bid has been outbid by ${teamData?.name || "another team"} with $${bidAmount.toLocaleString()}.`,
-              link: "/management",
-            }))
-
-            await supabase.from("notifications").insert(outbidNotifications)
-          }
-        }
-      } catch (outbidError) {
-        console.error("Outbid notification error:", outbidError)
-        // Don't fail the bid if outbid notifications fail
-      }
+      // Skip notifications for now to avoid database errors
+      console.log("Bid created successfully:", data)
 
       return NextResponse.json({ success: true, data, updated: false })
     }
