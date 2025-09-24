@@ -351,6 +351,8 @@ export default function Home() {
             return
           }
 
+          console.log(`Found ${teamsData.length} teams:`, teamsData.slice(0, 2))
+
           // Get current season name (same as standings page)
           let currentSeasonName = "Season 1" // Default fallback
           
@@ -377,6 +379,11 @@ export default function Home() {
 
           if (matchesError) {
             console.error("Error fetching matches:", matchesError)
+          } else {
+            console.log(`Found ${matchesData?.length || 0} completed matches for season: ${currentSeasonName}`)
+            if (matchesData && matchesData.length > 0) {
+              console.log("Sample match data:", matchesData.slice(0, 2))
+            }
           }
 
           // Calculate standings manually (same logic as standings page)
@@ -451,6 +458,7 @@ export default function Home() {
           })
 
           console.log(`Calculated standings for ${calculatedStandings.length} teams`)
+          console.log("Sample standings data:", calculatedStandings.slice(0, 2))
           setStandings(calculatedStandings)
           setLoading((prev) => ({ ...prev, standings: false }))
         } catch (error) {
@@ -1114,6 +1122,7 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="standings" className="space-y-6">
+            {console.log("Rendering standings tab - loading:", loading.standings, "standings count:", standings.length, "standings data:", standings.slice(0, 2))}
             {loading.standings ? (
               <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg">
                 <CardContent className="p-8">
