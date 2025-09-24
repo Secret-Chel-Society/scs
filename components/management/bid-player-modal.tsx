@@ -149,8 +149,8 @@ export function BidPlayerModal({
       const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
       const expirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
 
-      // Use the test API route for testing
-      const response = await fetch("/api/bids/test", {
+      // Place bid using the API
+      const response = await fetch("/api/bids", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,13 +165,8 @@ export function BidPlayerModal({
       const result = await response.json()
 
       if (!response.ok) {
-        console.error("Error placing bid:", result.error)
         throw new Error(result.error || "Failed to place bid")
       }
-
-      console.log("Bid placed successfully:", result.data)
-
-      // Notifications are now handled by the API route
 
       toast({
         title: "Bid placed successfully",

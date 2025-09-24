@@ -534,8 +534,8 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
       const bidExpirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
 
-      // Use the test API route for testing
-      const response = await fetch("/api/bids/test", {
+      // Place bid using the API
+      const response = await fetch("/api/bids", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -552,8 +552,6 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       if (!response.ok) {
         throw new Error(result.error || "Failed to place bid")
       }
-
-      // Notifications are now handled by the API route
 
       toast({
         title: "Bid placed successfully",

@@ -4,24 +4,17 @@ import { cookies } from "next/headers"
 
 export async function POST(request: Request) {
   try {
+    // Get Supabase client
     const supabase = createRouteHandlerClient({ cookies })
 
-    // Check if user is authenticated
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
+    // Parse request body
     const { playerId, teamId, bidAmount } = await request.json()
-    console.log("Bid request received:", { playerId, teamId, bidAmount })
 
+    // Validate input
     if (!playerId || !teamId || !bidAmount) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Validate bid amount
     if (bidAmount <= 0) {
       return NextResponse.json({ error: "Bid amount must be positive" }, { status: 400 })
     }
@@ -30,46 +23,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Minimum bid amount is $500,000" }, { status: 400 })
     }
 
-    // Check if this team already has an active bid for this player
-    console.log("Checking for existing bid...")
+    // Check if team already has a bid for this player
     const { data: existingBid, error: existingBidError } = await supabase
       .from("player_bidding")
-      .select("id, bid_amount, status")
+      .select("id, bid_amount")
       .eq("player_id", playerId)
       .eq("team_id", teamId)
       .in("status", ["Active", null])
       .single()
 
-    if (existingBidError && existingBidError.code !== "PGRST116") {
-      console.error("Error checking existing bid:", existingBidError)
-      throw existingBidError
-    }
-
-    console.log("Existing bid check result:", { existingBid, existingBidError })
-
-    // If team already has an active bid, they must bid higher
+    // If team has existing bid, they must bid higher
     if (existingBid && bidAmount <= existingBid.bid_amount) {
       return NextResponse.json({ 
         error: `You must bid higher than your current bid of $${existingBid.bid_amount.toLocaleString()}` 
       }, { status: 400 })
     }
 
-    // Get the current bidding duration from system settings
-    const { data: durationSetting, error: durationError } = await supabase
-      .from("system_settings")
-      .select("value")
-      .eq("key", "bidding_duration")
-      .single()
+    // Set bid expiration (4 hours from now)
+    const expirationTime = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()
 
-    // Default to 14400 seconds (4 hours) if setting not found
-    const bidDurationSeconds = durationSetting?.value || 14400
+    let result
 
-    // Set expiration time based on system setting
-    const expirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
-
-    // If team already has a bid, update it instead of creating a new one
     if (existingBid) {
-      console.log("Updating existing bid...")
+      // Update existing bid
       const { data, error } = await supabase
         .from("player_bidding")
         .update({
@@ -81,17 +57,12 @@ export async function POST(request: Request) {
         .select()
 
       if (error) {
-        console.error("Error updating bid:", error)
-        throw error
+        return NextResponse.json({ error: "Failed to update bid" }, { status: 500 })
       }
 
-      // Skip notifications for now to avoid database errors
-      console.log("Bid updated successfully:", data)
-
-      return NextResponse.json({ success: true, data, updated: true })
+      result = { data, updated: true }
     } else {
       // Create new bid
-      console.log("Creating new bid...")
       const { data, error } = await supabase
         .from("player_bidding")
         .insert({
@@ -104,26 +75,21 @@ export async function POST(request: Request) {
         .select()
 
       if (error) {
-        console.error("Error creating bid:", error)
-        throw error
+        return NextResponse.json({ error: "Failed to create bid" }, { status: 500 })
       }
 
-      // Skip notifications for now to avoid database errors
-      console.log("Bid created successfully:", data)
-
-      return NextResponse.json({ success: true, data, updated: false })
+      result = { data, updated: false }
     }
-  } catch (error: any) {
-    console.error("API /bids error:", error)
-    console.error("Error details:", {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint
-    })
+
     return NextResponse.json({ 
-      error: error.message || "Internal server error",
-      details: process.env.NODE_ENV === 'development' ? error : undefined
+      success: true, 
+      ...result 
+    })
+
+  } catch (error: any) {
+    return NextResponse.json({ 
+      error: "Internal server error",
+      message: error.message 
     }, { status: 500 })
   }
 }

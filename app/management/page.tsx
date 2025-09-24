@@ -515,7 +515,8 @@ const ManagementPage = () => {
           )
         `)
         .eq("team_id", teamData.id)
-        .in("status", ["Active", null]) as { data: any[]; error: any }
+        .in("status", ["Active", null])
+        .order("bid_expires_at", { ascending: true })
 
       if (error) {
         console.error("Error fetching bids:", error)
@@ -532,16 +533,8 @@ const ManagementPage = () => {
 
       setPlayerBids(bidsMap)
       setMyBids(myBidsList)
-
-      // Count active bids and outbid status
-      const activeCount = myBidsList.length
-      const outbidCount = myBidsList.filter((bid) => {
-        // Check if there are higher bids for the same player
-        return false // Simplified for now
-      }).length
-
-      setActiveBidsCount(activeCount)
-      setOutbidCount(outbidCount)
+      setActiveBidsCount(myBidsList.length)
+      setOutbidCount(0) // Simplified for now
     } catch (error) {
       console.error("Error in fetchPlayerBids:", error)
     }
