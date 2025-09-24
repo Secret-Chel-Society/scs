@@ -211,7 +211,60 @@ export default function Home() {
         setNews(newsData || [])
         setLoading((prev) => ({ ...prev, news: false }))
 
-        // Fetch upcoming games
+        // Get current season (same logic as matches page)
+        let currentSeason = null
+        
+        // Try to get active season from seasons table
+        const { data: seasonsData, error: seasonsError } = await supabase
+          .from("seasons")
+          .select("*")
+          .order("created_at", { ascending: false })
+
+        if (!seasonsError && seasonsData && seasonsData.length > 0) {
+          // Find active season
+          const activeSeason = seasonsData.find((s) => s.is_active === true)
+          if (activeSeason) {
+            console.log("Found active season for home page:", activeSeason)
+            currentSeason = activeSeason
+          } else {
+            // Default to first season
+            console.log("No active season, using first season for home page:", seasonsData[0])
+            currentSeason = seasonsData[0]
+          }
+        } else {
+          // Try to get current season from system_settings
+          const { data, error } = await supabase
+            .from("system_settings")
+            .select("value")
+            .eq("key", "current_season")
+            .single()
+
+          if (!error && data && data.value) {
+            const seasonNumber = Number.parseInt(data.value.toString(), 10)
+            if (!isNaN(seasonNumber)) {
+              currentSeason = {
+                id: seasonNumber.toString(),
+                number: seasonNumber,
+                name: `Season ${seasonNumber}`,
+                is_active: true,
+              }
+              console.log("Using season from system_settings for home page:", currentSeason)
+            }
+          }
+        }
+
+        if (!currentSeason) {
+          // Default to season 1
+          currentSeason = {
+            id: "1",
+            number: 1,
+            name: "Season 1",
+            is_active: true,
+          }
+          console.log("Using default season for home page:", currentSeason)
+        }
+
+        // Fetch upcoming games using current season (like matches page)
         const { data: upcomingData, error: upcomingError } = await supabase
           .from("matches")
           .select(`
@@ -221,6 +274,7 @@ export default function Home() {
             home_team:home_team_id(id, name, logo_url),
             away_team:away_team_id(id, name, logo_url)
           `)
+          .eq("season_name", currentSeason.name)
           .eq("status", "Scheduled")
           .gte("match_date", new Date().toISOString())
           .order("match_date", { ascending: true })
@@ -229,7 +283,7 @@ export default function Home() {
         if (upcomingError) throw upcomingError
         setUpcomingGames(upcomingData || [])
 
-        // Fetch completed games
+        // Fetch completed games using current season (like matches page)
         const { data: completedData, error: completedError } = await supabase
           .from("matches")
           .select(`
@@ -241,6 +295,7 @@ export default function Home() {
             home_team:home_team_id(id, name, logo_url),
             away_team:away_team_id(id, name, logo_url)
           `)
+          .eq("season_name", currentSeason.name)
           .eq("status", "Completed")
           .order("match_date", { ascending: false })
           .limit(10)
@@ -271,106 +326,132 @@ export default function Home() {
 
         setLoading((prev) => ({ ...prev, games: false }))
 
-        // Fetch team standings using the same approach as matches page
+        // Fetch team standings using the same logic as standings page
         try {
-          console.log("Fetching standings using matches page approach...")
+          console.log("Fetching standings using standings page approach...")
           
-          // First get the current season (same logic as matches page)
-          let currentSeason = null
-          
-          // Try to get active season from seasons table
-          const { data: seasonsData, error: seasonsError } = await supabase
-            .from("seasons")
-            .select("*")
-            .order("created_at", { ascending: false })
-
-          if (!seasonsError && seasonsData && seasonsData.length > 0) {
-            // Find active season
-            const activeSeason = seasonsData.find((s) => s.is_active === true)
-            if (activeSeason) {
-              console.log("Found active season for standings:", activeSeason)
-              currentSeason = activeSeason
-            } else {
-              // Default to first season
-              console.log("No active season, using first season for standings:", seasonsData[0])
-              currentSeason = seasonsData[0]
-            }
-          } else {
-            // Try to get current season from system_settings
-            const { data, error } = await supabase
-              .from("system_settings")
-              .select("value")
-              .eq("key", "current_season")
-              .single()
-
-            if (!error && data && data.value) {
-              const seasonNumber = Number.parseInt(data.value.toString(), 10)
-              if (!isNaN(seasonNumber)) {
-                currentSeason = {
-                  id: seasonNumber.toString(),
-                  number: seasonNumber,
-                  name: `Season ${seasonNumber}`,
-                  is_active: true,
-                }
-                console.log("Using season from system_settings for standings:", currentSeason)
-              }
-            }
-          }
-
-          if (!currentSeason) {
-            // Default to season 1
-            currentSeason = {
-              id: "1",
-              number: 1,
-              name: "Season 1",
-              is_active: true,
-            }
-            console.log("Using default season for standings:", currentSeason)
-          }
-
-          // Now fetch standings using the current season
-          console.log(`Fetching standings for season: ${currentSeason.name}`)
-          
-          // Get teams for the current season
+          // Get all teams with conference information (same as standings page)
           const { data: teamsData, error: teamsError } = await supabase
             .from("teams")
             .select(`
-              id,
-              name,
-              logo_url,
-              conference_id
+              *,
+              conferences!left(name)
             `)
             .eq("is_active", true)
-            .eq("season_id", currentSeason.id)
+            .order("name")
 
           if (teamsError) {
-            console.log("Teams query failed, trying without season filter:", teamsError.message)
-            // Fallback: get all active teams
-            const { data: fallbackTeams } = await supabase
-              .from("teams")
-              .select(`
-                id,
-                name,
-                logo_url,
-                conference_id
-              `)
-              .eq("is_active", true)
-            
-            if (fallbackTeams && fallbackTeams.length > 0) {
-              console.log(`Found ${fallbackTeams.length} teams (fallback)`)
-              setStandings(fallbackTeams)
-            } else {
-              console.log("No teams found")
-              setStandings([])
-            }
-          } else if (teamsData && teamsData.length > 0) {
-            console.log(`Found ${teamsData.length} teams for season ${currentSeason.name}`)
-            setStandings(teamsData)
-          } else {
-            console.log("No teams found for current season")
-            setStandings([])
+            throw teamsError
           }
+
+          if (!teamsData || teamsData.length === 0) {
+            console.log("No teams found")
+            setStandings([])
+            setLoading((prev) => ({ ...prev, standings: false }))
+            return
+          }
+
+          // Get current season name (same as standings page)
+          let currentSeasonName = "Season 1" // Default fallback
           
+          try {
+            const { data: activeSeason } = await supabase
+              .from("seasons")
+              .select("name")
+              .eq("is_active", true)
+              .single()
+            
+            if (activeSeason?.name) {
+              currentSeasonName = activeSeason.name
+            }
+          } catch (seasonError) {
+            console.log("Could not fetch active season, using default:", seasonError)
+          }
+
+          // Get all matches for the current season (same as standings page)
+          const { data: matchesData, error: matchesError } = await supabase
+            .from("matches")
+            .select("*")
+            .eq("season_name", currentSeasonName)
+            .eq("status", "completed")
+
+          if (matchesError) {
+            console.error("Error fetching matches:", matchesError)
+          }
+
+          // Calculate standings manually (same logic as standings page)
+          const calculatedStandings = teamsData.map((team, index) => {
+            let wins = 0
+            let losses = 0
+            let otl = 0
+            let goalsFor = 0
+            let goalsAgainst = 0
+
+            // Calculate stats from matches
+            matchesData?.forEach((match) => {
+              if (match.home_team_id === team.id) {
+                goalsFor += match.home_score || 0
+                goalsAgainst += match.away_score || 0
+
+                if (match.home_score > match.away_score) {
+                  wins++
+                } else if (match.home_score < match.away_score) {
+                  if (match.overtime || match.has_overtime) {
+                    otl++
+                  } else {
+                    losses++
+                  }
+                } else {
+                  losses++ // Tie counts as loss
+                }
+              } else if (match.away_team_id === team.id) {
+                goalsFor += match.away_score || 0
+                goalsAgainst += match.home_score || 0
+
+                if (match.away_score > match.home_score) {
+                  wins++
+                } else if (match.away_score < match.home_score) {
+                  if (match.overtime || match.has_overtime) {
+                    otl++
+                  } else {
+                    losses++
+                  }
+                } else {
+                  losses++ // Tie counts as loss
+                }
+              }
+            })
+
+            const gamesPlayed = wins + losses + otl
+            const points = wins * 2 + otl * 1 // 2 points for win, 1 for OTL
+            const goalDifferential = goalsFor - goalsAgainst
+
+            return {
+              id: team.id,
+              name: team.name,
+              logo_url: team.logo_url,
+              wins,
+              losses,
+              otl,
+              games_played: gamesPlayed,
+              points,
+              goals_for: goalsFor,
+              goals_against: goalsAgainst,
+              goal_differential: goalDifferential,
+              conference: team.conferences?.name || "Unknown",
+              conference_id: team.conference_id,
+            }
+          })
+
+          // Sort by points (descending), then by wins (descending), then by goal differential (descending)
+          calculatedStandings.sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points
+            if (b.wins !== a.wins) return b.wins - a.wins
+            return b.goal_differential - a.goal_differential
+          })
+
+          console.log(`Calculated standings for ${calculatedStandings.length} teams`)
+          setStandings(calculatedStandings)
           setLoading((prev) => ({ ...prev, standings: false }))
         } catch (error) {
           console.error("Error fetching standings:", error)
