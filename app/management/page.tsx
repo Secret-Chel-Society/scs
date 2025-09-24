@@ -92,7 +92,7 @@ interface FreeAgent {
 interface Bid {
   id: string
   amount: number
-  expires_at: string
+  bid_expires_at: string
   status: string
   players: {
     id: string
@@ -566,8 +566,8 @@ const ManagementPage = () => {
   async function fetchData() {
     if (!session?.user) {
       setIsAuthorized(false)
-      return
-    }
+        return
+      }
 
     setLoading(true)
     try {
@@ -978,8 +978,8 @@ const ManagementPage = () => {
 
   // Enhanced loadFreeAgents function with better error handling for team managers
   const loadFreeAgents = async () => {
-    setFreeAgentsLoading(true)
-    setFreeAgentsError(null)
+      setFreeAgentsLoading(true)
+      setFreeAgentsError(null)
 
     try {
       console.log("Loading free agents via API...")
@@ -1032,8 +1032,47 @@ const ManagementPage = () => {
 
   // Fetch current bids for all players
   const fetchPlayerBids = async () => {
+    if (!teamData?.id) return
+
     try {
-      const { data: bids, error } = await supabase
+      // Fetch my team's bids
+      const { data: myBids, error: myBidsError } = await supabase
+        .from("player_bidding")
+        .select(`
+          *,
+          players:player_id (
+            id,
+            salary,
+            users:user_id (
+              id,
+              gamer_tag_id,
+              primary_position,
+              secondary_position,
+              console,
+              avatar_url
+            )
+          )
+        `)
+        .eq("team_id", teamData.id)
+        .in("status", ["Active", null])
+        .order("bid_expires_at", { ascending: true })
+
+      if (myBidsError) {
+        console.error("Error fetching my team's bids:", myBidsError)
+        return
+      }
+
+      // Create a map of player_id to bid for easy lookup
+      const bidsMap: Record<string, any> = {}
+      const myBidsList: any[] = []
+
+      myBids?.forEach((bid) => {
+        bidsMap[bid.players.id] = bid
+        myBidsList.push(bid)
+      })
+
+      // Also fetch all bids to show highest bids for each player
+      const { data: allBids, error: allBidsError } = await supabase
         .from("player_bidding")
         .select(`
           *,
@@ -1043,20 +1082,43 @@ const ManagementPage = () => {
             logo_url
           )
         `)
+        .in("status", ["Active", null])
         .order("bid_amount", { ascending: false })
 
-      if (error) throw error
+      if (!allBidsError && allBids) {
+        // Group all bids by player_id to find highest bid for each player
+        const highestBidsByPlayer: Record<string, any> = {}
+        allBids.forEach((bid) => {
+          if (!highestBidsByPlayer[bid.player_id] || bid.bid_amount > highestBidsByPlayer[bid.player_id].bid_amount) {
+            highestBidsByPlayer[bid.player_id] = bid
+          }
+        })
+        setPlayerBids(highestBidsByPlayer)
 
-      // Group bids by player_id and keep only the highest bid for each player
-      const highestBids: Record<string, any> = {}
+        // Enhance my bids with status information
+        const enhancedBids = myBidsList.map((bid) => {
+          const highestBid = highestBidsByPlayer[bid.player_id]
+          const isHighestBidder = highestBid && highestBid.id === bid.id
+          const isExpired = new Date(bid.bid_expires_at) <= new Date()
 
-      bids?.forEach((bid) => {
-        if (!highestBids[bid.player_id] || bid.bid_amount > highestBids[bid.player_id].bid_amount) {
-          highestBids[bid.player_id] = bid
-        }
-      })
+          return {
+            ...bid,
+            isHighestBidder,
+            highestBid: !isHighestBidder ? highestBid : null,
+            isExpired,
+            status: isExpired ? "expired" : isHighestBidder ? "winning" : "outbid",
+          }
+        })
 
-      setPlayerBids(highestBids)
+        setMyBids(enhancedBids)
+
+        // Count active and outbid bids
+        const activeBids = enhancedBids.filter((bid) => !bid.isExpired && bid.isHighestBidder)
+        const outbidBids = enhancedBids.filter((bid) => !bid.isExpired && !bid.isHighestBidder)
+
+        setActiveBidsCount(activeBids.length)
+        setOutbidCount(outbidBids.length)
+      }
     } catch (error) {
       console.log("Error fetching player bids:", error)
     }
@@ -1328,8 +1390,15 @@ const ManagementPage = () => {
   }
 
   useEffect(() => {
-    fetchData()
+      fetchData()
   }, [supabase, session, toast])
+
+  // Fetch player bids when teamData is available
+  useEffect(() => {
+    if (teamData?.id) {
+      fetchPlayerBids()
+    }
+  }, [teamData?.id])
 
   // Add this effect to load waivers when the tab changes to "waivers"
   useEffect(() => {
@@ -1344,6 +1413,14 @@ const ManagementPage = () => {
     if (activeTab === "free-agents" && teamData?.id) {
       console.log("Switching to free-agents tab, reloading free agents") // Debug log
       loadFreeAgents()
+    }
+  }, [activeTab, teamData?.id])
+
+  // Effect to reload bids when switching to my-bids tab
+  useEffect(() => {
+    if (activeTab === "my-bids" && teamData?.id) {
+      console.log("Switching to my-bids tab, reloading bids") // Debug log
+      fetchPlayerBids()
     }
   }, [activeTab, teamData?.id])
 
@@ -1462,11 +1539,11 @@ const ManagementPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         {/* Update the main title section to be more mobile-friendly: */}
         <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
-          <div>
+      <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
             {teamData && (
               <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
@@ -1482,7 +1559,7 @@ const ManagementPage = () => {
                 {teamData.name}
               </p>
             )}
-          </div>
+                </div>
         </div>
 
         {loading ? (
@@ -1494,54 +1571,54 @@ const ManagementPage = () => {
           <>
             {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
-              <Card>
+          <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Users className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
+                <div>
                     <div className="text-sm text-muted-foreground">Team Size</div>
                     <div className="text-2xl font-bold">
                       {teamPlayers.length}
                       {projectedRosterSize !== teamPlayers.length && (
                         <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
                       )}
-                    </div>
+          </div>
                   </div>
-                </CardContent>
-              </Card>
-              <Card>
+            </CardContent>
+          </Card>
+          <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Calendar className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
+                <div>
                     <div className="text-sm text-muted-foreground">Upcoming Matches</div>
                     <div className="text-2xl font-bold">
                       {teamMatches.filter((m) => m.status === "Scheduled").length}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-              <Card>
+            </CardContent>
+          </Card>
+          <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Trophy className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
+                <div>
                     <div className="text-sm text-muted-foreground">Record</div>
                     <div className="text-2xl font-bold">
                       {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
-              <Card>
+                    </div>
+            </CardContent>
+          </Card>
+          <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <DollarSign className="h-6 w-6 text-primary" />
                   </div>
-                  <div>
+                <div>
                     <div className="text-sm text-muted-foreground">Salary Cap</div>
                     <div className="text-2xl font-bold">
                       ${(currentTeamSalary / 1000000).toFixed(1)}M
@@ -1550,11 +1627,63 @@ const ManagementPage = () => {
                           → ${(projectedSalary / 1000000).toFixed(1)}M
                         </span>
                       )}
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                    </div>
+            </CardContent>
+          </Card>
             </div>
+
+            {/* Future Team Projections */}
+            {projectedSalary !== currentTeamSalary || projectedRosterSize !== teamPlayers.length ? (
+              <div className="mb-6 md:mb-8">
+                <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <span className="text-blue-400">🔮</span>
+                      Future Team Projection
+                    </CardTitle>
+                    <CardDescription>
+                      Impact of your winning bids on team composition
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-white/5 rounded-lg">
+                        <div className="text-3xl font-bold text-white mb-1">
+                          ${(projectedSalary / 1000000).toFixed(1)}M
+                        </div>
+                        <div className="text-sm text-gray-300 mb-1">Future Salary</div>
+                        <div className="text-xs text-green-400">
+                          +${((projectedSalary - currentTeamSalary) / 1000000).toFixed(1)}M from bids
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-white/5 rounded-lg">
+                        <div className="text-3xl font-bold text-white mb-1">
+                          {projectedRosterSize}
+                        </div>
+                        <div className="text-sm text-gray-300 mb-1">Future Roster</div>
+                        <div className="text-xs text-green-400">
+                          +{projectedRosterSize - teamPlayers.length} new players
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-white/5 rounded-lg">
+                        <div className={`text-3xl font-bold mb-1 ${
+                          currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          ${((currentSalaryCap - projectedSalary) / 1000000).toFixed(1)}M
+                        </div>
+                        <div className="text-sm text-gray-300 mb-1">Remaining Cap</div>
+                        <div className={`text-xs ${
+                          currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          {currentSalaryCap - projectedSalary > 0 ? 'Under cap' : 'Over cap'}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
 
             {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
@@ -1562,7 +1691,7 @@ const ManagementPage = () => {
                 <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Avail</span>
                   <span className="md:hidden">Avail</span>
@@ -1572,13 +1701,13 @@ const ManagementPage = () => {
                   <span className="md:hidden">Schedule</span>
                 </TabsTrigger>
                 <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Free Agents</span>
+              <span className="hidden md:inline">Free Agents</span>
                   <span className="md:hidden">Free Agents</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">My Bids</span>
+              <span className="hidden md:inline">My Bids</span>
                   <span className="md:hidden">Bids</span>
-                </TabsTrigger>
+            </TabsTrigger>
                 <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Waivers</span>
                   <span className="md:hidden">Waivers</span>
@@ -1591,13 +1720,13 @@ const ManagementPage = () => {
                       {incomingTradeProposals.length}
                     </span>
                   )}
-                </TabsTrigger>
-              </TabsList>
+            </TabsTrigger>
+            </TabsList>
 
               {/* Roster Tab Content */}
               <TabsContent value="roster">
-                <Card>
-                  <CardHeader>
+            <Card>
+              <CardHeader>
                     <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
                     <CardDescription className="text-sm md:text-base">
                       Manage your team's players and roles
@@ -1742,7 +1871,7 @@ const ManagementPage = () => {
                                   <div className="text-sm text-muted-foreground">{matchDate.toLocaleDateString()}</div>
                                   <div className="text-xs text-muted-foreground">
                                     {matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                  </div>
+                      </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline" className="text-xs">
@@ -1798,8 +1927,8 @@ const ManagementPage = () => {
 
               {/* Free Agents Tab Content */}
               <TabsContent value="free-agents">
-                <Card>
-                  <CardHeader>
+            <Card>
+              <CardHeader>
                     <CardTitle className="text-lg md:text-xl">Free Agents</CardTitle>
                     <CardDescription className="text-sm md:text-base">
                       Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
@@ -1824,8 +1953,53 @@ const ManagementPage = () => {
                         <CardContent className="p-3 md:p-4">
                           <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
                           <RosterProgress current={teamPlayers.length} max={15} projected={projectedRosterSize} />
+                          {projectedRosterSize !== teamPlayers.length && (
+                            <div className="mt-2 text-xs text-blue-400">
+                              +{projectedRosterSize - teamPlayers.length} from winning bids
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
+
+                      {/* Future Team Projections */}
+                      {projectedSalary !== currentTeamSalary || projectedRosterSize !== teamPlayers.length ? (
+                        <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30">
+                          <CardContent className="p-3 md:p-4">
+                            <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base flex items-center gap-2">
+                              <span className="text-blue-400">🔮</span>
+                              Future Team Projection
+                            </h3>
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-300 text-xs">Future Salary:</span>
+                                <span className="text-white font-medium text-sm">
+                                  ${(projectedSalary / 1000000).toFixed(1)}M
+                                  <span className="text-green-400 ml-1">
+                                    (+${((projectedSalary - currentTeamSalary) / 1000000).toFixed(1)}M)
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-300 text-xs">Future Roster:</span>
+                                <span className="text-white font-medium text-sm">
+                                  {projectedRosterSize} players
+                                  <span className="text-green-400 ml-1">
+                                    (+{projectedRosterSize - teamPlayers.length})
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-300 text-xs">Cap Space:</span>
+                                <span className={`font-medium text-sm ${
+                                  currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
+                                }`}>
+                                  ${((currentSalaryCap - projectedSalary) / 1000000).toFixed(1)}M remaining
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ) : null}
 
                       {/* Position Breakdown */}
                       <Card className="bg-slate-800 border-slate-700">
@@ -1890,7 +2064,7 @@ const ManagementPage = () => {
                       <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4" />
                         <Select value={positionFilter} onValueChange={setPositionFilter}>
-                          <SelectTrigger className="w-full sm:w-48">
+                      <SelectTrigger className="w-full sm:w-48">
                             <SelectValue placeholder="Filter by position" />
                           </SelectTrigger>
                           <SelectContent>
@@ -2038,14 +2212,45 @@ const ManagementPage = () => {
 
               {/* My Bids Tab Content */}
               <TabsContent value="my-bids">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>My Bids</CardTitle>
+            <Card>
+              <CardHeader>
+                <CardTitle>My Bids</CardTitle>
                     <CardDescription>
                       Bids placed by {teamData?.name}. Active: {activeBidsCount} | Outbid: {outbidCount}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
+                    {/* Future Team Impact Summary */}
+                    {projectedSalary !== currentTeamSalary || projectedRosterSize !== teamPlayers.length ? (
+                      <div className="mb-6 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
+                        <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                          <span className="text-blue-400">🔮</span>
+                          Future Team Impact from Winning Bids
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-white">
+                              ${((projectedSalary - currentTeamSalary) / 1000000).toFixed(1)}M
+                            </div>
+                            <div className="text-xs text-gray-300">Additional Salary</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-white">
+                              +{projectedRosterSize - teamPlayers.length}
+                            </div>
+                            <div className="text-xs text-gray-300">New Players</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`text-2xl font-bold ${
+                              currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
+                            }`}>
+                              ${((currentSalaryCap - projectedSalary) / 1000000).toFixed(1)}M
+                            </div>
+                            <div className="text-xs text-gray-300">Remaining Cap</div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                     {myBids.length > 0 ? (
                       <div className="space-y-4">
                         {myBids.map((bid) => {
@@ -2094,6 +2299,16 @@ const ManagementPage = () => {
                                   <p className="text-sm text-muted-foreground mt-1">
                                     Your bid: ${bid.bid_amount.toLocaleString()}
                                   </p>
+                                  {isWinning && (
+                                    <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">🔮</span>
+                                        <span className="text-blue-600 dark:text-blue-400 text-xs">
+                                          Will add ${(bid.bid_amount / 1000000).toFixed(1)}M to future salary
+                                        </span>
+                                      </div>
+                                    </div>
+                                  )}
                                   {!bid.isHighestBidder && bid.highestBid && (
                                     <p className="text-sm text-red-600 dark:text-red-400 font-bold">
                                       Outbid by {bid.highestBid.teams?.name}: $
@@ -2362,8 +2577,8 @@ const ManagementPage = () => {
 
               {/* Trades Tab Content */}
               <TabsContent value="trades">
-                <Card>
-                  <CardHeader>
+            <Card>
+              <CardHeader>
                     <CardTitle>Trade Center</CardTitle>
                     <CardDescription>Propose trades with other teams and manage trade proposals</CardDescription>
                   </CardHeader>
