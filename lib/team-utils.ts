@@ -96,6 +96,10 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
       .eq("season_id", seasonId) // if season_id exists in ea_team_stats
       .or("status.eq.completed,status.eq.Completed")
 
+    if (eaTeamStatsError) {
+      console.log("EA team stats query failed:", eaTeamStatsError.message)
+    }
+
     const shotsByTeam: Record<string, number> = {}
 
     if (!eaTeamStatsError && eaTeamStats) {

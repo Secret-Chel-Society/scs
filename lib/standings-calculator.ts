@@ -135,15 +135,30 @@ function calculatePlayoffStatus(standings: TeamStanding[]): TeamStanding[] {
  */
 async function getSeasonName(seasonId: number): Promise<string> {
   try {
-    // First try to get the season from the seasons table
+    console.log(`Getting season name for ID: ${seasonId} (type: ${typeof seasonId})`)
+    
+    // First try to get the season from the seasons table by season_number
     const { data: seasonData, error: seasonError } = await supabase
       .from("seasons")
-      .select("name")
-      .eq("id", seasonId)
+      .select("name, season_number")
+      .eq("season_number", seasonId)
       .maybeSingle()
 
     if (!seasonError && seasonData) {
+      console.log(`Found season by number: ${seasonData.name}`)
       return seasonData.name
+    }
+
+    // If that fails, try by ID (in case it's a UUID)
+    const { data: seasonDataById, error: seasonErrorById } = await supabase
+      .from("seasons")
+      .select("name, season_number")
+      .eq("id", seasonId.toString())
+      .maybeSingle()
+
+    if (!seasonErrorById && seasonDataById) {
+      console.log(`Found season by ID: ${seasonDataById.name}`)
+      return seasonDataById.name
     }
 
     // If that fails, try with system_settings
@@ -155,13 +170,15 @@ async function getSeasonName(seasonId: number): Promise<string> {
 
     if (!settingsError && settingsData) {
       const seasons = settingsData.value || []
-      const season = seasons.find((s: any) => s.id === seasonId)
+      const season = seasons.find((s: any) => s.id === seasonId || s.season_number === seasonId)
       if (season) {
+        console.log(`Found season in system_settings: ${season.name}`)
         return season.name
       }
     }
 
     // If all else fails, return a default name
+    console.log(`No season found, using default: Season ${seasonId}`)
     return `Season ${seasonId}`
   } catch (error) {
     console.error("Error getting season name:", error)
@@ -418,23 +435,22 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
       hasDivisionColumn = false
     }
 
-    // Get all teams for the season with conference data (fallback to basic query if conference join fails)
+    // Get all teams for the season - start with basic query to avoid join issues
     let { data: teams, error: teamsError } = await supabase
       .from("teams")
       .select(`
         id, 
         name, 
         logo_url,
-        conference_id,
-        conference:conferences(id, name, color)
+        conference_id
         ${hasDivisionColumn ? ", division" : ""}
       `)
       .eq("is_active", true)
       .eq("season_id", seasonId)
 
-    // If conference join fails, try without conference data
-    if (teamsError && teamsError.message.includes("conferences")) {
-      console.log("Conference table not found, loading teams without conference data")
+    // If basic query fails, try without season_id filter
+    if (teamsError) {
+      console.log("Teams query failed, trying without season filter:", teamsError.message)
       const fallbackResult = await supabase
         .from("teams")
         .select(`
@@ -445,10 +461,27 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           ${hasDivisionColumn ? ", division" : ""}
         `)
         .eq("is_active", true)
-        .eq("season_id", seasonId)
       
       teams = fallbackResult.data
       teamsError = fallbackResult.error
+    }
+
+    // Try to get conference data separately if teams were found
+    let conferenceData: Record<string, any> = {}
+    if (!teamsError && teams && teams.length > 0) {
+      try {
+        const { data: conferences, error: confError } = await supabase
+          .from("conferences")
+          .select("id, name, color")
+        
+        if (!confError && conferences) {
+          conferences.forEach(conf => {
+            conferenceData[conf.id] = conf
+          })
+        }
+      } catch (e) {
+        console.log("Could not fetch conference data:", e)
+      }
     }
 
     if (teamsError) {
@@ -707,12 +740,13 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         }
 
         // Use conference data from database if available, otherwise fall back to string
-        const conferenceName = team.conference?.name || conference || "Unassigned"
+        const conferenceInfo = conferenceData[team.conference_id]
+        const conferenceName = conferenceInfo?.name || conference || "Unassigned"
         const conferenceId = team.conference_id
-        const conferenceData = team.conference ? {
-          id: team.conference.id,
-          name: team.conference.name,
-          color: team.conference.color
+        const conferenceDataObj = conferenceInfo ? {
+          id: conferenceInfo.id,
+          name: conferenceInfo.name,
+          color: conferenceInfo.color
         } : null
 
         return {
@@ -738,7 +772,7 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
           division,
           conference: conferenceName,
           conference_id: conferenceId,
-          conference_data: conferenceData,
+          conference_data: conferenceDataObj,
           last_10: last10Record,
           current_streak: currentStreak,
           playoff_status: "active" as const, // Will be calculated below
