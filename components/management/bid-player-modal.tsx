@@ -149,63 +149,29 @@ export function BidPlayerModal({
       const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
       const expirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
 
-      // Insert the bid directly using Supabase client
-      const { data: bidData, error: bidError } = await supabase
-        .from("player_bidding")
-        .insert({
-          player_id: player.id,
-          team_id: team.id,
-          bid_amount: amount,
-          bid_expires_at: expirationTime,
-        })
-        .select()
-
-      if (bidError) {
-        console.error("Error inserting bid:", bidError)
-        throw new Error(bidError.message || "Failed to place bid")
-      }
-
-      console.log("Bid inserted successfully:", bidData)
-
-      // Send notification to the player
-      const { error: notificationError } = await supabase.from("notifications").insert({
-        user_id: player.user_id,
-        title: "New Bid Received",
-        message: `${team.name} has placed a bid of $${amount.toLocaleString()} for you.`,
-        link: "/free-agency",
+      // Use the API route instead of direct database insertion to ensure validation
+      const response = await fetch("/api/bids", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          playerId: player.id,
+          teamId: team.id,
+          bidAmount: amount,
+        }),
       })
 
-      if (notificationError) {
-        console.error("Error sending notification:", notificationError)
-        // Don't fail the bid if notification fails
+      const result = await response.json()
+
+      if (!response.ok) {
+        console.error("Error placing bid:", result.error)
+        throw new Error(result.error || "Failed to place bid")
       }
 
-      // If there was a previous highest bidder and it's not the current team, notify them
-      if (currentBid && currentBid.team_id !== team.id) {
-        // Get the GM/AGM/Owner of the outbid team
-        const { data: teamManagers } = await supabase
-          .from("players")
-          .select("user_id")
-          .eq("team_id", currentBid.team_id)
-          .in("role", ["GM", "AGM", "Owner"])
+      console.log("Bid placed successfully:", result.data)
 
-        if (teamManagers && teamManagers.length > 0) {
-          // Send notification to each team manager
-          const notifications = teamManagers.map((manager) => ({
-            user_id: manager.user_id,
-            title: "Your Bid Was Outbid",
-            message: `Your bid on ${player.users?.gamer_tag_id || "a player"} has been outbid by ${team.name} with $${amount.toLocaleString()}.`,
-            link: "/management",
-          }))
-
-          const { error: outbidNotificationError } = await supabase.from("notifications").insert(notifications)
-
-          if (outbidNotificationError) {
-            console.error("Error sending outbid notifications:", outbidNotificationError)
-            // Don't fail the bid if notification fails
-          }
-        }
-      }
+      // Notifications are now handled by the API route
 
       toast({
         title: "Bid placed successfully",

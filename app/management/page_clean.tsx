@@ -468,7 +468,7 @@ const ManagementPage = () => {
           )
         `)
         .eq("team_id", teamData.id)
-        .eq("status", "active")
+        .in("status", ["active", null])
 
       if (error) {
         console.error("Error fetching bids:", error)

@@ -78,6 +78,23 @@ export async function POST(request: Request) {
         throw error
       }
 
+      // Get player details for notification
+      const { data: playerData } = await supabase
+        .from("players")
+        .select("user_id, users!inner(gamer_tag_id)")
+        .eq("id", playerId)
+        .single()
+
+      // Send notification to the player about the updated bid
+      if (playerData?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: playerData.user_id,
+          title: "Bid Updated",
+          message: `Your bid has been updated to $${bidAmount.toLocaleString()}.`,
+          link: "/free-agency",
+        })
+      }
+
       return NextResponse.json({ success: true, data, updated: true })
     } else {
       // Create new bid
@@ -94,6 +111,56 @@ export async function POST(request: Request) {
 
       if (error) {
         throw error
+      }
+
+      // Get player and team details for notifications
+      const { data: playerData } = await supabase
+        .from("players")
+        .select("user_id, users!inner(gamer_tag_id)")
+        .eq("id", playerId)
+        .single()
+
+      const { data: teamData } = await supabase
+        .from("teams")
+        .select("name")
+        .eq("id", teamId)
+        .single()
+
+      // Send notification to the player
+      if (playerData?.user_id) {
+        await supabase.from("notifications").insert({
+          user_id: playerData.user_id,
+          title: "New Bid Received",
+          message: `${teamData?.name || "A team"} has placed a bid of $${bidAmount.toLocaleString()} for you.`,
+          link: "/free-agency",
+        })
+      }
+
+      // Check if there are other teams with bids on this player and notify them they're outbid
+      const { data: otherBids } = await supabase
+        .from("player_bidding")
+        .select(`
+          id,
+          team_id,
+          bid_amount,
+          teams!inner(name),
+          players!inner(user_id)
+        `)
+        .eq("player_id", playerId)
+        .neq("team_id", teamId)
+        .in("status", ["active", null])
+        .lt("bid_amount", bidAmount)
+
+      // Notify outbid teams
+      if (otherBids && otherBids.length > 0) {
+        const outbidNotifications = otherBids.map(bid => ({
+          user_id: bid.players.user_id,
+          title: "You've Been Outbid",
+          message: `Your bid on ${playerData?.users?.gamer_tag_id || "a player"} has been outbid by ${teamData?.name || "another team"} with $${bidAmount.toLocaleString()}.`,
+          link: "/management",
+        }))
+
+        await supabase.from("notifications").insert(outbidNotifications)
       }
 
       return NextResponse.json({ success: true, data, updated: false })
