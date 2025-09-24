@@ -537,12 +537,17 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       if (bidError) throw new Error(bidError.message)
 
       // Send notification to the player
-      await supabase.from("notifications").insert({
+      const { error: notificationError } = await supabase.from("notifications").insert({
         user_id: selectedPlayer.user_id,
         title: "New Bid Received",
         message: `${userTeam.name} has placed a bid of $${amount.toLocaleString()} for you.`,
         link: "/free-agency",
       })
+
+      if (notificationError) {
+        console.error("Error sending notification to player:", notificationError)
+        // Don't fail the bid if notification fails
+      }
 
       // If there was a previous highest bidder and it's not the current team, notify them
       if (currentBid && currentBid.team_id !== userTeam.id) {
@@ -562,7 +567,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             link: "/management",
           }))
 
-          await supabase.from("notifications").insert(notifications)
+          const { error: outbidNotificationError } = await supabase.from("notifications").insert(notifications)
+
+          if (outbidNotificationError) {
+            console.error("Error sending outbid notifications:", outbidNotificationError)
+            // Don't fail the bid if notification fails
+          }
         }
       }
 
