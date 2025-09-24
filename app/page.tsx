@@ -161,6 +161,7 @@ export default function Home() {
         console.log("=== HOME PAGE DATA FETCHING STARTED ===")
         // Fetch carousel images
         try {
+          console.log("Fetching carousel images...")
           const { data: carouselData, error: carouselError } = await supabase
             .from("carousel_images")
             .select("*")
@@ -182,6 +183,7 @@ export default function Home() {
 
         // Fetch stats
         try {
+          console.log("Fetching stats...")
           const [playersRes, teamsRes, matchesRes] = await Promise.all([
             supabase.from("users").select("id", { count: "exact" }),
             supabase
@@ -201,6 +203,7 @@ export default function Home() {
         }
 
         // Fetch latest news
+        console.log("Fetching news...")
         const { data: newsData, error: newsError } = await supabase
           .from("news")
           .select("*")
@@ -304,25 +307,59 @@ export default function Home() {
         if (completedError) throw completedError
         setCompletedGames(completedData || [])
 
-        // Fetch featured games
-        const { data: featuredData, error: featuredError } = await supabase
-          .from("matches")
-          .select(`
-            id, 
-            match_date, 
-            status,
-            home_score,
-            away_score,
-            featured,
-            home_team:home_team_id(id, name, logo_url),
-            away_team:away_team_id(id, name, logo_url)
-          `)
-          .eq("featured", true)
-          .order("match_date", { ascending: false })
-          .limit(6)
+        // Fetch featured games (with error handling)
+        console.log("Fetching featured games...")
+        try {
+          const { data: featuredData, error: featuredError } = await supabase
+            .from("matches")
+            .select(`
+              id, 
+              match_date, 
+              status,
+              home_score,
+              away_score,
+              featured,
+              home_team:home_team_id(id, name, logo_url),
+              away_team:away_team_id(id, name, logo_url)
+            `)
+            .eq("featured", true)
+            .order("match_date", { ascending: false })
+            .limit(6)
 
-        if (featuredError) throw featuredError
-        setFeaturedGames(featuredData || [])
+          if (featuredError) {
+            console.error("Error fetching featured games:", featuredError)
+            // If featured column doesn't exist, try without it
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from("matches")
+              .select(`
+                id, 
+                match_date, 
+                status,
+                home_score,
+                away_score,
+                home_team:home_team_id(id, name, logo_url),
+                away_team:away_team_id(id, name, logo_url)
+              `)
+              .eq("status", "Completed")
+              .order("match_date", { ascending: false })
+              .limit(6)
+            
+            if (fallbackError) {
+              console.error("Fallback featured games query also failed:", fallbackError)
+              setFeaturedGames([])
+            } else {
+              console.log("Using fallback featured games data")
+              setFeaturedGames(fallbackData || [])
+            }
+          } else {
+            console.log("Featured games fetched successfully")
+            setFeaturedGames(featuredData || [])
+          }
+        } catch (featuredError) {
+          console.error("Exception in featured games fetch:", featuredError)
+          setFeaturedGames([])
+        }
+        
         setLoading((prev) => ({ ...prev, featured: false }))
 
         setLoading((prev) => ({ ...prev, games: false }))
