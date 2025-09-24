@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient({ cookies })
     const postId = params.id
 
     if (!postId) {
@@ -147,14 +148,16 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient({ cookies })
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    if (!user) {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const user = session.user
 
     const postId = params.id
     const { title, content } = await request.json()
@@ -205,18 +208,20 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const supabase = createClient()
+    const supabase = createRouteHandlerClient({ cookies })
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
 
     console.log("DELETE request received for post:", params.id)
-    console.log("User:", user?.id)
 
-    if (!user) {
-      console.log("No user found in request")
+    if (!session) {
+      console.log("No session found in request")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const user = session.user
+    console.log("User:", user?.id)
 
     const postId = params.id
 
