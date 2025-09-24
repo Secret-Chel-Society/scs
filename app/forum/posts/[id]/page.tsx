@@ -111,7 +111,9 @@ export default function ForumPostPage() {
     setError(null)
 
     try {
-      const response = await fetch(`/api/forum/posts/${params.id}`)
+      const response = await fetch(`/api/forum/posts/${params.id}`, {
+        credentials: "include"
+      })
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)

@@ -158,6 +158,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
+        console.log("=== HOME PAGE DATA FETCHING STARTED ===")
         // Fetch carousel images
         try {
           const { data: carouselData, error: carouselError } = await supabase
@@ -328,6 +329,7 @@ export default function Home() {
 
         // Fetch team standings using the same logic as standings page
         try {
+          console.log("=== STARTING STANDINGS FETCH ===")
           console.log("Fetching standings using standings page approach...")
           
           // Get all teams with conference information (same as standings page)
@@ -468,7 +470,10 @@ export default function Home() {
           setStandings([]) // Set empty array so component doesn't break
           setLoading((prev) => ({ ...prev, standings: false }))
         }
+        
+        console.log("=== HOME PAGE DATA FETCHING COMPLETED ===")
       } catch (error) {
+        console.error("=== ERROR IN HOME PAGE DATA FETCHING ===", error)
         toast({
           title: "Error loading data",
           description: error.message || "Failed to load content. Please try again.",
