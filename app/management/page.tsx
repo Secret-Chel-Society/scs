@@ -242,7 +242,7 @@ const ManagementPage = () => {
   const [tradeError, setTradeError] = useState<string | null>(null)
   const [tradeSuccess, setTradeSuccess] = useState<string | null>(null)
   const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(30000000) // $30M salary cap
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(60000000) // $60M salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
@@ -1365,15 +1365,15 @@ const ManagementPage = () => {
   const calculatePostTradePlayerSalary = (player: any, withholding = 0): number => {
     const originalSalary = player.salary || 0
     const postTradeSalary = originalSalary - withholding
-    return Math.max(postTradeSalary, 750000) // Minimum $750k
+    return Math.max(postTradeSalary, 2000000) // Minimum $2M
   }
 
   // Add function to get validwithholding amounts
   const getValidWithholdingAmounts = (playerSalary: number): number[] => {
-    const maxWithholding = Math.floor((playerSalary * 0.25) / 250000) * 250000 // 25% in $250k increments
+    const maxWithholding = Math.floor((playerSalary * 0.25) / 2000000) * 2000000 // 25% in $2M increments
     const amounts = []
-    for (let i = 0; i <= maxWithholding; i += 250000) {
-      if (playerSalary - i >= 750000) {
+    for (let i = 0; i <= maxWithholding; i += 2000000) {
+      if (playerSalary - i >= 2000000) {
         // Ensure minimum salary
         amounts.push(i)
       }

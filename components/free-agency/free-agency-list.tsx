@@ -488,7 +488,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       if (teamError) throw new Error(teamError.message)
 
       const currentSalaryTotal = teamPlayers.reduce((sum, player) => sum + (player.salary || 0), 0)
-      const salaryCap = 75000000 // $75M salary cap
+      const salaryCap = 60000000 // $60M salary cap
 
       if (currentSalaryTotal + amount > salaryCap) {
         toast({
@@ -507,10 +507,10 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       }
 
       // Check if the bid meets the minimum increment requirement
-      if (currentBid && amount < currentBid.bid_amount + 250000) {
+      if (currentBid && amount < currentBid.bid_amount + 2000000) {
         toast({
           title: "Bid too low",
-          description: "New bids must be at least $250,000 higher than the current highest bid.",
+          description: "New bids must be at least $2,000,000 higher than the current highest bid.",
           variant: "destructive",
         })
         return
@@ -655,12 +655,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             <div className="space-y-2">
               <div>
                 <p className="text-white text-lg font-bold">
-                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $75M
+                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $60M
                 </p>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
                     className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.current_salary / 75000000) * 100}%` }}
+                    style={{ width: `${(teamStats.current_salary / 60000000) * 100}%` }}
                   />
                 </div>
               </div>
@@ -670,7 +670,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
                   <div className="w-full bg-gray-700 rounded-full h-1">
                     <div
                       className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialSalary / 75000000) * 100}%` }}
+                      style={{ width: `${(potentialStats.potentialSalary / 60000000) * 100}%` }}
                     />
                   </div>
                 </div>
