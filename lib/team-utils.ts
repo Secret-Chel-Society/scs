@@ -222,11 +222,41 @@ export async function getTeamStats(teamId: string, seasonId: number): Promise<Te
  */
 export async function getCurrentSeasonId(): Promise<number> {
   try {
+    // First try to get from system_settings
     const { data, error } = await supabase.from("system_settings").select("value").eq("key", "current_season").single()
 
     if (error) {
-      console.error("Error fetching current season:", error)
-      return 1 // Default to season 1 if not found
+      console.log("System settings approach failed, trying seasons table:", error.message)
+      
+      // Fallback: Get active season from seasons table
+      const { data: seasonData, error: seasonError } = await supabase
+        .from("seasons")
+        .select("id, name, season_number")
+        .eq("is_active", true)
+        .single()
+
+      if (seasonError) {
+        console.log("Active season not found, trying first season:", seasonError.message)
+        
+        // Final fallback: Get first season
+        const { data: firstSeason, error: firstSeasonError } = await supabase
+          .from("seasons")
+          .select("id, name, season_number")
+          .order("id")
+          .limit(1)
+          .single()
+
+        if (firstSeasonError) {
+          console.error("No seasons found, defaulting to 1:", firstSeasonError.message)
+          return 1
+        }
+
+        console.log("Using first season:", firstSeason)
+        return firstSeason.id
+      }
+
+      console.log("Using active season:", seasonData)
+      return seasonData.id
     }
 
     const value = data?.value
@@ -242,8 +272,8 @@ export async function getCurrentSeasonId(): Promise<number> {
       return value
     }
     
-    console.log("Invalid season value, defaulting to 1")
-    return 1 // Default to season 1 if invalid
+    console.log("Invalid current_season value, defaulting to 1")
+    return 1
   } catch (error) {
     console.error("Error getting current season:", error)
     return 1 // Default to season 1 if error
