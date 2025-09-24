@@ -32,7 +32,7 @@ export function TeamBids({ teamId }: TeamBidsProps) {
           player_id,
           team_id,
           bid_amount,
-          expires_at,
+          bid_expires_at,
           created_at,
           status,
           players:player_id (
@@ -53,7 +53,7 @@ export function TeamBids({ teamId }: TeamBidsProps) {
         `,
         )
         .eq("team_id", teamId)
-        .order("expires_at", { ascending: true })
+        .order("bid_expires_at", { ascending: true })
 
       if (error) {
         throw error
@@ -143,7 +143,7 @@ export function TeamBids({ teamId }: TeamBidsProps) {
           <CardContent>
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-sm text-muted-foreground">Expires: {new Date(bid.expires_at).toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">Expires: {new Date(bid.bid_expires_at).toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground">Status: {bid.status}</p>
               </div>
               <Button onClick={() => extendBid(bid.id)} variant="outline" size="sm">

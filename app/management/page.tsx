@@ -495,11 +495,11 @@ const ManagementPage = () => {
 
     try {
       const { data: bidsData, error } = await supabase
-        .from("bids")
+        .from("player_bidding")
         .select(`
           id,
-          amount,
-          expires_at,
+          bid_amount,
+          bid_expires_at,
           status,
           players!inner (
             id,
@@ -907,9 +907,9 @@ const ManagementPage = () => {
                                 {getPositionAbbreviation(bid.players?.users?.primary_position)}
                                           </span>
                               <span>•</span>
-                              <span>${(bid.amount / 1000000).toFixed(2)}M</span>
+                              <span>${(bid.bid_amount / 1000000).toFixed(2)}M</span>
                               <span>•</span>
-                              <span>Expires: {new Date(bid.expires_at).toLocaleDateString()}</span>
+                              <span>Expires: {new Date(bid.bid_expires_at).toLocaleDateString()}</span>
                                         </div>
                                       </div>
                                     </div>
