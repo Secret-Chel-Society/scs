@@ -843,7 +843,7 @@ const ManagementPage = () => {
         setAllTeams(allTeamsData || [])
       }
 
-      // Fetch team matches with lineups - Fixed the query structure
+      // Fetch team matches with lineups - Fixed the query structure and added season filtering
       const { data: matches, error: matchesError } = await supabase
         .from("matches")
         .select(`
@@ -852,6 +852,7 @@ const ManagementPage = () => {
           away_team:away_team_id(id, name, logo_url)
         `)
         .or(`home_team_id.eq.${playerData.team_id},away_team_id.eq.${playerData.team_id}`)
+        .eq("season_id", currentSeasonId) // Filter by active season
         .order("match_date", { ascending: true })
 
       if (matchesError) throw matchesError
