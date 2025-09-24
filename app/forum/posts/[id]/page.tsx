@@ -143,7 +143,9 @@ export default function ForumPostPage() {
 
     setIsRoleLoading(true)
     try {
-      const response = await fetch(`/api/admin/check-admin-status`)
+      const response = await fetch(`/api/admin/check-admin-status`, {
+        credentials: "include"
+      })
       if (response.ok) {
         const data = await response.json()
         setUserRole(data.role)
