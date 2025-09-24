@@ -104,11 +104,12 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
         shotsByTeam[stat.team_id] = (shotsByTeam[stat.team_id] || 0) + (stat.shots || 0)
       })
     } else {
-      // Fallback: try to get from ea_player_stats
+      // Fallback: try to get from ea_player_stats - filter by teams that belong to the current season
       const { data: playerStats, error: playerStatsError } = await supabase
         .from("ea_player_stats")
         .select("team_id, shots")
         .not("team_id", "is", null)
+        .in("team_id", standings.map(team => team.id))
 
       if (!playerStatsError && playerStats) {
         playerStats.forEach((stat: { team_id?: string; shots?: number }) => {
@@ -119,11 +120,12 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
       }
     }
 
-    // Get player counts and salaries
+    // Get player counts and salaries - filter by teams that belong to the current season
     const { data: playerData, error: playerError } = await supabase
       .from("players")
       .select("team_id, salary")
       .not("team_id", "is", null)
+      .in("team_id", standings.map(team => team.id))
 
     if (playerError) {
       console.error("Error fetching player data:", playerError)
