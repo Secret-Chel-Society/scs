@@ -53,7 +53,7 @@ export function TeamBids({ teamId }: TeamBidsProps) {
         `,
         )
         .eq("team_id", teamId)
-        .in("status", ["active", null])
+        .in("status", ["Active", null])
         .order("bid_expires_at", { ascending: true })
 
       if (error) {
