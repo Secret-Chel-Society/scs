@@ -9,8 +9,16 @@ export async function POST(request: Request) {
 
     // Check authentication
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (sessionError || !session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    console.log("Session check:", { session: !!session, sessionError, userId: session?.user?.id })
+    
+    if (sessionError) {
+      console.error("Session error:", sessionError)
+      return NextResponse.json({ error: "Session error", details: sessionError.message }, { status: 401 })
+    }
+    
+    if (!session) {
+      console.log("No session found")
+      return NextResponse.json({ error: "No active session" }, { status: 401 })
     }
 
     // Parse request body
