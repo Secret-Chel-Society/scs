@@ -40,6 +40,7 @@ export default function TeamsPage() {
   const [teams, setTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentSeason, setCurrentSeason] = useState<number | null>(null)
 
   useEffect(() => {
     async function fetchTeams() {
@@ -48,6 +49,7 @@ export default function TeamsPage() {
 
         // Get current season ID
         const seasonId = await getCurrentSeasonId()
+        setCurrentSeason(seasonId)
 
         // Get team stats
         const teamStats = await getAllTeamStats(seasonId)
@@ -104,9 +106,18 @@ export default function TeamsPage() {
               <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
                 <Trophy className="h-10 w-10 text-white" />
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
-                Elite Team Directory
-              </h1>
+              <div className="text-center">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
+                  Elite Team Directory
+                </h1>
+                {currentSeason && (
+                  <div className="mt-2">
+                    <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-4 py-2 text-lg font-semibold">
+                      Season {currentSeason}
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-8" />
             <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
