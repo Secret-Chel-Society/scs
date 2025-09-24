@@ -1,63 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("=== FORUM REPLIES API DEBUG ===")
-    console.log("Forum replies POST request received")
-    
-    // Debug cookies
-    const cookieHeader = request.headers.get('cookie')
-    console.log("Cookie header:", cookieHeader ? "Present" : "Missing")
-    
-    const supabase = createRouteHandlerClient({ cookies })
-    
-    // Try multiple session retrieval methods
-    console.log("Attempting to get session...")
+    const supabase = createClient()
     const {
-      data: { session },
-      error: sessionError
-    } = await supabase.auth.getSession()
-
-    console.log("Session error:", sessionError)
-    console.log("Session check:", { 
-      hasSession: !!session, 
-      userId: session?.user?.id,
-      userEmail: session?.user?.email,
-      sessionExpiry: session?.expires_at
-    })
-
-    // Also try getUser method
-    const {
-      data: { user: directUser },
-      error: userError
+      data: { user },
     } = await supabase.auth.getUser()
-    
-    console.log("Direct user check:", {
-      hasUser: !!directUser,
-      userId: directUser?.id,
-      userEmail: directUser?.email,
-      userError: userError
-    })
-
-    if (!session && !directUser) {
-      console.log("No session or user found, returning 401")
-      return NextResponse.json({ 
-        error: "Unauthorized - No valid session found",
-        debug: {
-          sessionError,
-          userError,
-          hasCookie: !!cookieHeader
-        }
-      }, { status: 401 })
-    }
-
-    const user = session?.user || directUser
 
     if (!user) {
-      console.log("No user found in session, returning 401")
-      return NextResponse.json({ error: "Unauthorized - No user in session" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { post_id, content } = await request.json()
@@ -75,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Create reply
     const { data: reply, error: replyError } = await supabase
-      .from("forum_comments")
+      .from("forum_replies")
       .insert({
         post_id,
         content,
@@ -90,21 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update reply count on post
-    try {
-      await supabase.rpc("increment_reply_count", { post_id_param: post_id })
-    } catch (rpcError) {
-      console.log("RPC function not available, skipping reply count update:", rpcError)
-      // Manually update reply count
-      const { data: replies } = await supabase
-        .from("forum_comments")
-        .select("id")
-        .eq("post_id", post_id)
-      
-      await supabase
-        .from("forum_posts")
-        .update({ reply_count: replies?.length || 0 })
-        .eq("id", post_id)
-    }
+    await supabase.rpc("increment_reply_count", { post_id_param: post_id })
 
     return NextResponse.json({ reply })
   } catch (error) {
