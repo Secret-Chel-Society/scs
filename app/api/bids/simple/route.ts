@@ -4,11 +4,18 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     
-    // Just return the data we received
+    // Simulate a successful bid without database
     return NextResponse.json({ 
       success: true, 
-      message: "Simple endpoint working",
-      received: body
+      message: "Bid placed successfully (simulated)",
+      data: {
+        id: "simulated-bid-" + Date.now(),
+        player_id: body.playerId,
+        team_id: body.teamId,
+        bid_amount: body.bidAmount,
+        bid_expires_at: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+        status: "Active"
+      }
     })
   } catch (error: any) {
     return NextResponse.json({ 
