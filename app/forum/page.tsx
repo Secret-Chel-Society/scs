@@ -338,26 +338,19 @@ export default function ForumPage() {
           <Card className="clean-card">
             <CardContent className="p-6">
               <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-                <TabsList className="flex flex-wrap w-full gap-2 sm:gap-3 p-2">
-                  <TabsTrigger 
-                    value="all" 
-                    className="flex items-center gap-2 sm:gap-3 px-4 py-3 rounded-lg min-h-[60px] sm:min-h-[70px] flex-1 min-w-0"
-                  >
-                    <div className="p-2 bg-white/20 dark:bg-slate-600/30 rounded-lg flex-shrink-0 backdrop-blur-sm">
-                      <Target className="h-5 w-5 text-current" />
-                    </div>
-                    <span className="font-medium text-sm truncate">All Posts</span>
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 mb-6 md:mb-8 h-auto">
+                  <TabsTrigger value="all" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                    <span className="hidden md:inline">All Posts</span>
+                    <span className="md:hidden">All</span>
                   </TabsTrigger>
                   {categories.map((category) => (
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id}
-                      className="flex items-center gap-2 sm:gap-3 px-4 py-3 rounded-lg min-h-[60px] sm:min-h-[70px] flex-1 min-w-0"
+                      className="text-xs md:text-sm px-2 md:px-4 py-2"
                     >
-                      <div className="p-2 bg-white/20 dark:bg-slate-600/30 rounded-lg flex-shrink-0 backdrop-blur-sm">
-                        <div className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: category.color }} />
-                      </div>
-                      <span className="font-medium text-sm truncate">{category.name}</span>
+                      <span className="hidden md:inline">{category.name}</span>
+                      <span className="md:hidden">{category.name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
