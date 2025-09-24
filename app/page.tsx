@@ -307,10 +307,11 @@ export default function Home() {
         if (completedError) throw completedError
         setCompletedGames(completedData || [])
 
-        // Fetch featured games (with error handling)
+        // Fetch featured games - get recent completed matches with high scores or close games
         console.log("Fetching featured games...")
         try {
-          const { data: featuredData, error: featuredError } = await supabase
+          // Get recent completed matches and pick the most interesting ones
+          const { data: recentMatches, error: recentError } = await supabase
             .from("matches")
             .select(`
               id, 
@@ -318,42 +319,35 @@ export default function Home() {
               status,
               home_score,
               away_score,
-              featured,
               home_team:home_team_id(id, name, logo_url),
               away_team:away_team_id(id, name, logo_url)
             `)
-            .eq("featured", true)
+            .eq("status", "Completed")
             .order("match_date", { ascending: false })
-            .limit(6)
+            .limit(20) // Get more matches to pick the best ones
 
-          if (featuredError) {
-            console.error("Error fetching featured games:", featuredError)
-            // If featured column doesn't exist, try without it
-            const { data: fallbackData, error: fallbackError } = await supabase
-              .from("matches")
-              .select(`
-                id, 
-                match_date, 
-                status,
-                home_score,
-                away_score,
-                home_team:home_team_id(id, name, logo_url),
-                away_team:away_team_id(id, name, logo_url)
-              `)
-              .eq("status", "Completed")
-              .order("match_date", { ascending: false })
-              .limit(6)
+          if (recentError) {
+            console.error("Error fetching recent matches for featured games:", recentError)
+            setFeaturedGames([])
+          } else if (recentMatches && recentMatches.length > 0) {
+            // Filter and select the most interesting matches
+            const featuredMatches = recentMatches
+              .filter(match => {
+                const homeScore = match.home_score || 0
+                const awayScore = match.away_score || 0
+                const totalGoals = homeScore + awayScore
+                const goalDiff = Math.abs(homeScore - awayScore)
+                
+                // Prioritize: high-scoring games, close games, or games with good scores
+                return totalGoals >= 4 || goalDiff <= 2 || totalGoals >= 6
+              })
+              .slice(0, 6) // Take the top 6 most interesting matches
             
-            if (fallbackError) {
-              console.error("Fallback featured games query also failed:", fallbackError)
-              setFeaturedGames([])
-            } else {
-              console.log("Using fallback featured games data")
-              setFeaturedGames(fallbackData || [])
-            }
+            console.log(`Selected ${featuredMatches.length} featured matches from ${recentMatches.length} recent matches`)
+            setFeaturedGames(featuredMatches)
           } else {
-            console.log("Featured games fetched successfully")
-            setFeaturedGames(featuredData || [])
+            console.log("No recent matches found for featured games")
+            setFeaturedGames([])
           }
         } catch (featuredError) {
           console.error("Exception in featured games fetch:", featuredError)
