@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Create reply
     const { data: reply, error: replyError } = await supabase
-      .from("forum_replies")
+      .from("forum_comments")
       .insert({
         post_id,
         content,
