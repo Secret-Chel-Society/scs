@@ -95,12 +95,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     setMounted(true)
   }, [])
 
-  // Update current time every 30 seconds
+  // Update current time every 15 minutes
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date())
       checkExpiredBids()
-    }, 30000)
+    }, 900000)
 
     return () => clearInterval(interval)
   }, [playerBids])

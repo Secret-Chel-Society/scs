@@ -276,11 +276,11 @@ const ManagementPage = () => {
   // Add state for cap space withholding
   const [capSpaceWithholding, setCapSpaceWithholding] = useState<{ [playerId: string]: number }>({})
 
-  // Update current time every second for countdown
+  // Update current time every 15 minutes for countdown
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date())
-    }, 1000)
+    }, 900000)
 
     return () => clearInterval(interval)
   }, [])

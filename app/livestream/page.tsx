@@ -286,8 +286,8 @@ export default function LiveStreamPage() {
 
   useEffect(() => {
     fetchLiveStreamData()
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchLiveStreamData, 30000)
+    // Refresh data every 15 minutes
+    const interval = setInterval(fetchLiveStreamData, 900000)
     return () => clearInterval(interval)
   }, [])
 

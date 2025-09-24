@@ -551,15 +551,15 @@ export default function UsersManagementClient() {
         return
       }
 
-      // Set up the main refresh interval (30 seconds)
+      // Set up the main refresh interval (15 minutes)
       refreshInterval = setInterval(() => {
         if (!refreshing) {
           // Use the auto-refresh version that doesn't require admin key verification
           autoRefreshUsers()
           setLastRefreshTime(new Date())
-          setNextRefreshCountdown(30)
+          setNextRefreshCountdown(900)
         }
-      }, 30000)
+      }, 900000)
 
       // Set up countdown timer (updates every second)
       countdownInterval = setInterval(() => {

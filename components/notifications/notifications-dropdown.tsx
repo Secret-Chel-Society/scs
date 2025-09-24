@@ -63,7 +63,7 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
     fetchNotifications()
 
     // Set up polling instead of WebSocket
-    const interval = setInterval(fetchNotifications, 30000) // Poll every 30 seconds
+    const interval = setInterval(fetchNotifications, 900000) // Poll every 15 minutes
     setPollingInterval(interval)
 
     return () => {
