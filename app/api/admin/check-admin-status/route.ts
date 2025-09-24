@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 
 export async function GET() {
   try {
+    console.log("Admin check request received")
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
@@ -12,7 +13,10 @@ export async function GET() {
       data: { session },
     } = await supabase.auth.getSession()
 
+    console.log("Admin check session:", { hasSession: !!session, userId: session?.user?.id })
+
     if (!session) {
+      console.log("No session found in admin check, returning 401")
       return NextResponse.json(
         {
           authenticated: false,

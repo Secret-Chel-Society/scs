@@ -4,12 +4,16 @@ import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Forum replies POST request received")
     const supabase = createRouteHandlerClient({ cookies })
     const {
       data: { session },
     } = await supabase.auth.getSession()
 
+    console.log("Session check:", { hasSession: !!session, userId: session?.user?.id })
+
     if (!session) {
+      console.log("No session found, returning 401")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
