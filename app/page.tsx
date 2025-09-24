@@ -271,15 +271,106 @@ export default function Home() {
 
         setLoading((prev) => ({ ...prev, games: false }))
 
-        // Fetch team standings
+        // Fetch team standings using the same approach as matches page
         try {
-          const response = await fetch("/api/standings")
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch standings`)
+          console.log("Fetching standings using matches page approach...")
+          
+          // First get the current season (same logic as matches page)
+          let currentSeason = null
+          
+          // Try to get active season from seasons table
+          const { data: seasonsData, error: seasonsError } = await supabase
+            .from("seasons")
+            .select("*")
+            .order("created_at", { ascending: false })
+
+          if (!seasonsError && seasonsData && seasonsData.length > 0) {
+            // Find active season
+            const activeSeason = seasonsData.find((s) => s.is_active === true)
+            if (activeSeason) {
+              console.log("Found active season for standings:", activeSeason)
+              currentSeason = activeSeason
+            } else {
+              // Default to first season
+              console.log("No active season, using first season for standings:", seasonsData[0])
+              currentSeason = seasonsData[0]
+            }
+          } else {
+            // Try to get current season from system_settings
+            const { data, error } = await supabase
+              .from("system_settings")
+              .select("value")
+              .eq("key", "current_season")
+              .single()
+
+            if (!error && data && data.value) {
+              const seasonNumber = Number.parseInt(data.value.toString(), 10)
+              if (!isNaN(seasonNumber)) {
+                currentSeason = {
+                  id: seasonNumber.toString(),
+                  number: seasonNumber,
+                  name: `Season ${seasonNumber}`,
+                  is_active: true,
+                }
+                console.log("Using season from system_settings for standings:", currentSeason)
+              }
+            }
           }
-          const data = await response.json()
-          setStandings(data.standings || [])
+
+          if (!currentSeason) {
+            // Default to season 1
+            currentSeason = {
+              id: "1",
+              number: 1,
+              name: "Season 1",
+              is_active: true,
+            }
+            console.log("Using default season for standings:", currentSeason)
+          }
+
+          // Now fetch standings using the current season
+          console.log(`Fetching standings for season: ${currentSeason.name}`)
+          
+          // Get teams for the current season
+          const { data: teamsData, error: teamsError } = await supabase
+            .from("teams")
+            .select(`
+              id,
+              name,
+              logo_url,
+              conference_id
+            `)
+            .eq("is_active", true)
+            .eq("season_id", currentSeason.id)
+
+          if (teamsError) {
+            console.log("Teams query failed, trying without season filter:", teamsError.message)
+            // Fallback: get all active teams
+            const { data: fallbackTeams } = await supabase
+              .from("teams")
+              .select(`
+                id,
+                name,
+                logo_url,
+                conference_id
+              `)
+              .eq("is_active", true)
+            
+            if (fallbackTeams && fallbackTeams.length > 0) {
+              console.log(`Found ${fallbackTeams.length} teams (fallback)`)
+              setStandings(fallbackTeams)
+            } else {
+              console.log("No teams found")
+              setStandings([])
+            }
+          } else if (teamsData && teamsData.length > 0) {
+            console.log(`Found ${teamsData.length} teams for season ${currentSeason.name}`)
+            setStandings(teamsData)
+          } else {
+            console.log("No teams found for current season")
+            setStandings([])
+          }
+          
           setLoading((prev) => ({ ...prev, standings: false }))
         } catch (error) {
           console.error("Error fetching standings:", error)
