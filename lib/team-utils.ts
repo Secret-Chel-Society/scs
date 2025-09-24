@@ -94,7 +94,6 @@ export async function getAllTeamStats(seasonId: number): Promise<TeamStats[]> {
       .from("ea_team_stats")
       .select("match_id, team_id, shots")
       .eq("season_id", seasonId) // if season_id exists in ea_team_stats
-      .or("status.eq.completed,status.eq.Completed")
 
     if (eaTeamStatsError) {
       console.log("EA team stats query failed:", eaTeamStatsError.message)
@@ -268,14 +267,20 @@ export async function getCurrentSeasonId(): Promise<number> {
     const value = data?.value
     console.log("Current season value from database:", value, "type:", typeof value)
     
-    // Ensure we return a number
+    // Handle JSONB values from system_settings
+    let seasonNumber = null
     if (typeof value === 'string') {
-      const parsed = parseInt(value, 10)
-      if (!isNaN(parsed)) {
-        return parsed
-      }
+      seasonNumber = parseInt(value, 10)
     } else if (typeof value === 'number') {
-      return value
+      seasonNumber = value
+    } else if (value && typeof value === 'object') {
+      // Handle JSONB object - try to extract the value
+      seasonNumber = parseInt(String(value), 10)
+    }
+    
+    if (!isNaN(seasonNumber) && seasonNumber > 0) {
+      console.log("Using season from system_settings:", seasonNumber)
+      return seasonNumber
     }
     
     console.log("Invalid current_season value, defaulting to 1")
