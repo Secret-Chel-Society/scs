@@ -534,8 +534,8 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
       const bidExpirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
 
-      // Use the minimal API route for testing
-      const response = await fetch("/api/bids/minimal", {
+      // Use the test API route for testing
+      const response = await fetch("/api/bids/test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
