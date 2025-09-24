@@ -502,18 +502,25 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       // Check if this team already has the highest bid
       const currentBid = playerBids[selectedPlayer.id]
       if (currentBid && currentBid.team_id === userTeam.id) {
-        // Allow rebidding to extend the timer
-        // No additional checks needed since we want to allow extending the timer
-      }
-
-      // Check if the bid meets the minimum increment requirement
-      if (currentBid && amount < currentBid.bid_amount + 2000000) {
-        toast({
-          title: "Bid too low",
-          description: "New bids must be at least $2,000,000 higher than the current highest bid.",
-          variant: "destructive",
-        })
-        return
+        // If this team already has the highest bid, they must bid higher to extend the timer
+        if (amount <= currentBid.bid_amount) {
+          toast({
+            title: "Bid too low",
+            description: "To extend your bid timer, you must bid higher than your current bid.",
+            variant: "destructive",
+          })
+          return
+        }
+      } else {
+        // Check if the bid meets the minimum increment requirement for new bids
+        if (currentBid && amount < currentBid.bid_amount + 2000000) {
+          toast({
+            title: "Bid too low",
+            description: "New bids must be at least $2,000,000 higher than the current highest bid.",
+            variant: "destructive",
+          })
+          return
+        }
       }
 
       // Get the current bidding duration from system settings
