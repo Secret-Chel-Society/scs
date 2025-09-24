@@ -4,23 +4,60 @@ import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("=== FORUM REPLIES API DEBUG ===")
     console.log("Forum replies POST request received")
+    
+    // Debug cookies
+    const cookieHeader = request.headers.get('cookie')
+    console.log("Cookie header:", cookieHeader ? "Present" : "Missing")
+    
     const supabase = createRouteHandlerClient({ cookies })
+    
+    // Try multiple session retrieval methods
+    console.log("Attempting to get session...")
     const {
       data: { session },
+      error: sessionError
     } = await supabase.auth.getSession()
 
-    console.log("Session check:", { hasSession: !!session, userId: session?.user?.id })
+    console.log("Session error:", sessionError)
+    console.log("Session check:", { 
+      hasSession: !!session, 
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      sessionExpiry: session?.expires_at
+    })
 
-    if (!session) {
-      console.log("No session found, returning 401")
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Also try getUser method
+    const {
+      data: { user: directUser },
+      error: userError
+    } = await supabase.auth.getUser()
+    
+    console.log("Direct user check:", {
+      hasUser: !!directUser,
+      userId: directUser?.id,
+      userEmail: directUser?.email,
+      userError: userError
+    })
+
+    if (!session && !directUser) {
+      console.log("No session or user found, returning 401")
+      return NextResponse.json({ 
+        error: "Unauthorized - No valid session found",
+        debug: {
+          sessionError,
+          userError,
+          hasCookie: !!cookieHeader
+        }
+      }, { status: 401 })
     }
 
-    const user = session.user
+    const user = session?.user || directUser
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      console.log("No user found in session, returning 401")
+      return NextResponse.json({ error: "Unauthorized - No user in session" }, { status: 401 })
     }
 
     const { post_id, content } = await request.json()
