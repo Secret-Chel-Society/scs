@@ -591,11 +591,12 @@ const ManagementPage = () => {
       }
 
       // Get current season ID for team stats calculation
-      const currentSeasonId = await getCurrentSeasonId()
+      const currentSeasonId = 'fc808734-ff25-4f4b-9644-855ea0ea4b93' // Hardcoded SCSHL Season 1 UUID
+      const currentSeasonNumber = 2 // Hardcoded SCSHL Season 1 number
       console.log("Current season ID:", currentSeasonId)
 
       // Get calculated team stats (this will give us the actual record)
-      const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonId)
+      const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonNumber)
       console.log("Calculated team stats:", calculatedTeamStats)
 
       if (!calculatedTeamStats) {

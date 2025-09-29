@@ -241,89 +241,9 @@ export async function getTeamStats(teamId: string, seasonId: number): Promise<Te
  * @returns The current season ID
  */
 export async function getCurrentSeasonId(): Promise<number> {
-  try {
-    // First try to get from system_settings
-    const { data, error } = await supabase.from("system_settings").select("value").eq("key", "current_season").single()
-
-    if (error) {
-      console.log("System settings approach failed, trying seasons table:", error.message)
-      
-      // Fallback: Get active season from seasons table
-      const { data: seasonData, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, name, season_number")
-        .eq("is_active", true)
-        .single()
-
-      if (seasonError) {
-        console.log("Active season not found, trying first season:", seasonError.message)
-        
-        // Final fallback: Get first season
-        const { data: firstSeason, error: firstSeasonError } = await supabase
-          .from("seasons")
-          .select("id, name, season_number")
-          .order("id")
-          .limit(1)
-          .single()
-
-        if (firstSeasonError) {
-          console.error("No seasons found, defaulting to 1:", firstSeasonError.message)
-          return 1
-        }
-
-        console.log("Using first season:", firstSeason)
-        return firstSeason.id
-      }
-
-      console.log("Using active season:", seasonData)
-      return seasonData.id
-    }
-
-    const value = data?.value
-    console.log("Current season value from database:", value, "type:", typeof value)
-    
-    // Handle different value types from system_settings
-    if (typeof value === 'string') {
-      // Check if it's a UUID (contains hyphens)
-      if (value.includes('-')) {
-        console.log("Found UUID season ID, looking up season number:", value)
-        // It's a UUID, we need to find the corresponding season_number
-        const { data: seasonData, error: seasonError } = await supabase
-          .from("seasons")
-          .select("season_number")
-          .eq("id", value)
-          .single()
-        
-        if (!seasonError && seasonData && seasonData.season_number) {
-          console.log("Found season number for UUID:", seasonData.season_number)
-          return seasonData.season_number
-        }
-      } else {
-        // It's a numeric string
-        const seasonNumber = parseInt(value, 10)
-        if (!isNaN(seasonNumber) && seasonNumber > 0) {
-          console.log("Using season from system_settings:", seasonNumber)
-          return seasonNumber
-        }
-      }
-    } else if (typeof value === 'number') {
-      console.log("Using season from system_settings:", value)
-      return value
-    } else if (value && typeof value === 'object') {
-      // Handle JSONB object - try to extract the value
-      const seasonNumber = parseInt(String(value), 10)
-      if (!isNaN(seasonNumber) && seasonNumber > 0) {
-        console.log("Using season from system_settings:", seasonNumber)
-        return seasonNumber
-      }
-    }
-    
-    console.log("Invalid current_season value, defaulting to 1")
-    return 1
-  } catch (error) {
-    console.error("Error getting current season:", error)
-    return 1 // Default to season 1 if error
-  }
+  // Hardcoded to return season number 2 for SCSHL Season 1
+  console.log("Using hardcoded season number: 2")
+  return 2
 }
 
 /**
