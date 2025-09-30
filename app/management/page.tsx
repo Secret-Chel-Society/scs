@@ -220,6 +220,7 @@ const ManagementPage = () => {
   const [playerBids, setPlayerBids] = useState<Record<string, any>>({})
   const [myBids, setMyBids] = useState<any[]>([])
   const [isAuthorized, setIsAuthorized] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState<any>(false)
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<any>(false)
@@ -585,6 +586,17 @@ const ManagementPage = () => {
 
       const isManager = ["GM", "AGM", "Owner"].includes(playerData.role)
       setIsAuthorized(isManager)
+
+      // Check if user is admin by fetching from users table
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", session.user.id)
+        .single()
+
+      if (!userError && userData) {
+        setIsAdmin(userData.role === "admin")
+      }
 
       if (!isManager || !playerData.team_id) {
         throw new Error("You must be a team manager to access this page")
@@ -1688,7 +1700,7 @@ const ManagementPage = () => {
 
             {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-8 mb-6 md:mb-8 h-auto">
                 <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
@@ -1721,7 +1733,13 @@ const ManagementPage = () => {
                       {incomingTradeProposals.length}
                     </span>
                   )}
-            </TabsTrigger>
+                </TabsTrigger>
+                {isAuthorized && (
+                  <TabsTrigger value="match-stats" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                    <span className="hidden md:inline">Match Stats</span>
+                    <span className="md:hidden">Stats</span>
+                  </TabsTrigger>
+                )}
             </TabsList>
 
               {/* Roster Tab Content */}
@@ -3235,6 +3253,134 @@ const ManagementPage = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              {/* Match Stats Tab Content - Team Managers Only */}
+              {isAuthorized && (
+                <TabsContent value="match-stats">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Trophy className="h-5 w-5" />
+                        Match Statistics Management
+                      </CardTitle>
+                      <CardDescription>
+                        Upload and manage match statistics using EA API or manual entry for your team's matches
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* Recent Matches Section */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">Recent Matches</h3>
+                          <div className="space-y-4">
+                            {teamMatches
+                              .filter((match) => match.status === "Completed")
+                              .slice(0, 5)
+                              .map((match) => (
+                                <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">{match.home_team.name}</span>
+                                      <span className="text-muted-foreground">vs</span>
+                                      <span className="font-medium">{match.away_team.name}</span>
+                                    </div>
+                                    <Badge variant="outline">
+                                      {match.home_score} - {match.away_score}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      asChild
+                                    >
+                                      <Link href={`/matches/${match.id}`}>
+                                        View Details
+                                      </Link>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        // Open EA import modal for this match
+                                        window.open(`/matches/${match.id}`, '_blank');
+                                      }}
+                                    >
+                                      Import EA Stats
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-base">EA API Import</CardTitle>
+                                <CardDescription>
+                                  Import match statistics from EA Sports NHL API
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full"
+                                  onClick={() => {
+                                    // Navigate to admin EA matches page
+                                    window.open('/admin/ea-matches', '_blank');
+                                  }}
+                                >
+                                  <Trophy className="h-4 w-4 mr-2" />
+                                  EA Matches Dashboard
+                                </Button>
+                              </CardContent>
+                            </Card>
+
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-base">Manual Entry</CardTitle>
+                                <CardDescription>
+                                  Manually enter match statistics and scores
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full"
+                                  onClick={() => {
+                                    // Navigate to admin statistics page
+                                    window.open('/admin/statistics', '_blank');
+                                  }}
+                                >
+                                  <Trophy className="h-4 w-4 mr-2" />
+                                  Statistics Dashboard
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
+                          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                            How to Upload Match Stats for Your Team:
+                          </h4>
+                          <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                            <li>• <strong>EA API Import:</strong> Use the EA Matches Dashboard to import stats from EA Sports NHL</li>
+                            <li>• <strong>Manual Entry:</strong> Use the Statistics Dashboard to manually enter player and team stats</li>
+                            <li>• <strong>Individual Matches:</strong> Click "View Details" to access match-specific upload options</li>
+                            <li>• <strong>Team-Specific:</strong> All stats uploads will be associated with your team's matches</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
             </Tabs>
           </>
         )}
