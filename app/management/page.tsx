@@ -3314,37 +3314,36 @@ const ManagementPage = () => {
                           </div>
                         </div>
 
-                        {/* Quick Actions */}
+                        {/* Team Match Management */}
                         <div>
-                          <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+                          <h3 className="text-lg font-semibold mb-4">Team Match Management</h3>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Card>
                               <CardHeader>
-                                <CardTitle className="text-base">EA API Import</CardTitle>
+                                <CardTitle className="text-base">All Team Matches</CardTitle>
                                 <CardDescription>
-                                  Import match statistics from EA Sports NHL API
+                                  View and manage all matches for your team
                                 </CardDescription>
                               </CardHeader>
                               <CardContent>
                                 <Button 
                                   variant="outline" 
                                   className="w-full"
-                                  onClick={() => {
-                                    // Navigate to admin EA matches page
-                                    window.open('/admin/ea-matches', '_blank');
-                                  }}
+                                  asChild
                                 >
-                                  <Trophy className="h-4 w-4 mr-2" />
-                                  EA Matches Dashboard
+                                  <Link href="/matches">
+                                    <Trophy className="h-4 w-4 mr-2" />
+                                    View All Matches
+                                  </Link>
                                 </Button>
                               </CardContent>
                             </Card>
 
                             <Card>
                               <CardHeader>
-                                <CardTitle className="text-base">Manual Entry</CardTitle>
+                                <CardTitle className="text-base">Team Schedule</CardTitle>
                                 <CardDescription>
-                                  Manually enter match statistics and scores
+                                  View your team's upcoming and past games
                                 </CardDescription>
                               </CardHeader>
                               <CardContent>
@@ -3352,12 +3351,12 @@ const ManagementPage = () => {
                                   variant="outline" 
                                   className="w-full"
                                   onClick={() => {
-                                    // Navigate to admin statistics page
-                                    window.open('/admin/statistics', '_blank');
+                                    // Switch to schedule tab
+                                    setActiveTab('schedule');
                                   }}
                                 >
-                                  <Trophy className="h-4 w-4 mr-2" />
-                                  Statistics Dashboard
+                                  <Calendar className="h-4 w-4 mr-2" />
+                                  Team Schedule
                                 </Button>
                               </CardContent>
                             </Card>
@@ -3367,13 +3366,14 @@ const ManagementPage = () => {
                         {/* Instructions */}
                         <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
                           <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                            How to Upload Match Stats for Your Team:
+                            How to Manage Match Stats for Your Team:
                           </h4>
                           <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                            <li>• <strong>EA API Import:</strong> Use the EA Matches Dashboard to import stats from EA Sports NHL</li>
-                            <li>• <strong>Manual Entry:</strong> Use the Statistics Dashboard to manually enter player and team stats</li>
-                            <li>• <strong>Individual Matches:</strong> Click "View Details" to access match-specific upload options</li>
-                            <li>• <strong>Team-Specific:</strong> All stats uploads will be associated with your team's matches</li>
+                            <li>• <strong>Individual Matches:</strong> Click "View Details" on any match to access stats upload options</li>
+                            <li>• <strong>All Matches:</strong> Use "View All Matches" to see all league matches and find your team's games</li>
+                            <li>• <strong>Team Schedule:</strong> Use "Team Schedule" to see only your team's upcoming and past games</li>
+                            <li>• <strong>Stats Upload:</strong> On individual match pages, you can upload EA API stats or manually enter statistics</li>
+                            <li>• <strong>Admin Access:</strong> For bulk operations and EA API management, contact an admin</li>
                           </ul>
                         </div>
                       </div>
