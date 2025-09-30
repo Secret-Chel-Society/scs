@@ -24,7 +24,6 @@ export async function GET(request: NextRequest) {
         reason,
         created_at,
         updated_at,
-        users(id, gamer_tag_id, email),
         teams(id, name, logo_url)
       `)
 
@@ -53,7 +52,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ data: injuryReserves || [] })
+    // Fetch user data separately since injury_reserves.user_id references auth.users
+    const enrichedReserves = await Promise.all(
+      (injuryReserves || []).map(async (reserve) => {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("id, gamer_tag_id, email")
+          .eq("id", reserve.user_id)
+          .single()
+        
+        return {
+          ...reserve,
+          users: userData
+        }
+      })
+    )
+
+    return NextResponse.json({ data: enrichedReserves })
   } catch (error: any) {
     console.error("Error in injury reserves GET:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -176,7 +191,6 @@ export async function POST(request: NextRequest) {
         reason,
         created_at,
         updated_at,
-        users(id, gamer_tag_id, email),
         teams(id, name, logo_url)
       `)
       .single()
@@ -184,6 +198,18 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error("Error creating injury reserve:", insertError)
       return NextResponse.json({ error: insertError.message }, { status: 500 })
+    }
+
+    // Fetch user data for the response
+    const { data: userData } = await supabase
+      .from("users")
+      .select("id, gamer_tag_id, email")
+      .eq("id", newReserve.user_id)
+      .single()
+
+    const enrichedReserve = {
+      ...newReserve,
+      users: userData
     }
 
     // Now mark the player as unavailable for all games in this week
@@ -227,8 +253,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: newReserve,
-        injuryReserve: newReserve, // For backward compatibility
+        data: enrichedReserve,
+        injuryReserve: enrichedReserve, // For backward compatibility
       },
       { status: 201 },
     )
@@ -328,7 +354,6 @@ export async function PUT(request: NextRequest) {
         reason,
         created_at,
         updated_at,
-        users(id, gamer_tag_id, email),
         teams(id, name, logo_url)
       `)
       .single()
