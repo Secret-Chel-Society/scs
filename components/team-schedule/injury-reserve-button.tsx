@@ -34,8 +34,6 @@ interface InjuryReserve {
   id: string
   week_start_date: string
   week_end_date: string
-  week_number: number
-  reason: string | null
   status: string
 }
 
@@ -87,10 +85,9 @@ export function InjuryReserveButton({ teamId, isUserOnTeam, matches, currentSeas
           .select("*")
           .eq("user_id", session.user.id)
           .eq("team_id", teamId)
-          .eq("season_id", currentSeasonId.toString())
           .eq("status", "active")
-          .gte("week_end_date", weekDates.weekStart.toISOString().split("T")[0])
           .lte("week_start_date", weekDates.weekEnd.toISOString().split("T")[0])
+          .gte("week_end_date", weekDates.weekStart.toISOString().split("T")[0])
           .maybeSingle()
 
         if (error && error.code !== "PGRST116") {
@@ -139,10 +136,9 @@ export function InjuryReserveButton({ teamId, isUserOnTeam, matches, currentSeas
         .eq("team_id", teamId)
         .maybeSingle()
 
-      // Calculate week number (simple calculation based on week start date)
-      const weekNumber = Math.ceil(
-        (weekDates.weekStart.getTime() - new Date(2024, 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000),
-      )
+      if (playerError) {
+        console.error("Error getting player data:", playerError)
+      }
 
       const response = await fetch("/api/injury-reserves", {
         method: "POST",
@@ -151,12 +147,10 @@ export function InjuryReserveButton({ teamId, isUserOnTeam, matches, currentSeas
         },
         body: JSON.stringify({
           user_id: session.user.id,
+          player_id: playerData?.id || null,
           team_id: teamId,
-          season_id: currentSeasonId.toString(),
           week_start_date: weekDates.weekStart.toISOString().split("T")[0],
           week_end_date: weekDates.weekEnd.toISOString().split("T")[0],
-          week_number: weekNumber,
-          reason: reason.trim() || null,
         }),
       })
 

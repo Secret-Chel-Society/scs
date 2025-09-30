@@ -10,10 +10,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: "IR ID is required" }, { status: 400 })
     }
 
-    // Update the status to cancelled instead of deleting
+    // Update the status to inactive instead of cancelled
     const { data, error } = await supabase
       .from("injury_reserves")
-      .update({ status: "cancelled" })
+      .update({ status: "inactive" })
       .eq("id", id)
       .select()
       .single()
