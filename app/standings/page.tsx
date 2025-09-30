@@ -669,7 +669,7 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         }
 
         // Get current season first
-        let currentSeasonName = "Season 1" // Default fallback
+        let currentSeasonName = "SCSHL Season 1" // Hardcoded to correct season
         
         try {
           const { data: activeSeason } = await supabase

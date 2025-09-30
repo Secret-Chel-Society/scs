@@ -16,12 +16,10 @@ export async function GET(request: NextRequest) {
         id,
         user_id,
         team_id,
-        season_id,
+        player_id,
         week_start_date,
         week_end_date,
-        week_number,
         status,
-        reason,
         created_at,
         updated_at,
         teams(id, name, logo_url)
@@ -83,26 +81,22 @@ export async function POST(request: NextRequest) {
     const {
       user_id,
       userId,
+      player_id,
+      playerId,
       team_id,
       teamId,
-      season_id,
-      seasonId,
       week_start_date,
       weekStartDate,
       week_end_date,
       weekEndDate,
-      week_number,
-      weekNumber,
-      reason,
     } = body
 
     // Handle both camelCase and snake_case field names
     const finalUserId = user_id || userId
+    const finalPlayerId = player_id || playerId
     const finalTeamId = team_id || teamId
-    const finalSeasonId = season_id || seasonId
     const finalWeekStartDate = week_start_date || weekStartDate
     const finalWeekEndDate = week_end_date || weekEndDate
-    const finalWeekNumber = week_number || weekNumber
 
     if (!finalUserId || !finalTeamId || !finalWeekStartDate || !finalWeekEndDate) {
       return NextResponse.json(
@@ -171,24 +165,20 @@ export async function POST(request: NextRequest) {
       .from("injury_reserves")
       .insert({
         user_id: finalUserId,
+        player_id: finalPlayerId,
         team_id: finalTeamId,
-        season_id: finalSeasonId,
         week_start_date: finalWeekStartDate,
         week_end_date: finalWeekEndDate,
-        week_number: finalWeekNumber,
-        reason: reason || null,
         status: "active",
       })
       .select(`
         id,
         user_id,
         team_id,
-        season_id,
+        player_id,
         week_start_date,
         week_end_date,
-        week_number,
         status,
-        reason,
         created_at,
         updated_at,
         teams(id, name, logo_url)
@@ -269,7 +259,7 @@ export async function PUT(request: NextRequest) {
     const supabase = createAdminClient()
     const body = await request.json()
 
-    const { id, week_start_date, week_end_date, reason, status } = body
+    const { id, week_start_date, week_end_date, status } = body
 
     if (!id) {
       return NextResponse.json({ error: "Injury reserve ID is required" }, { status: 400 })
@@ -334,7 +324,6 @@ export async function PUT(request: NextRequest) {
 
     if (week_start_date) updateData.week_start_date = week_start_date
     if (week_end_date) updateData.week_end_date = week_end_date
-    if (reason !== undefined) updateData.reason = reason
     if (status) updateData.status = status
 
     // Update the injury reserve
@@ -346,12 +335,10 @@ export async function PUT(request: NextRequest) {
         id,
         user_id,
         team_id,
-        season_id,
+        player_id,
         week_start_date,
         week_end_date,
-        week_number,
         status,
-        reason,
         created_at,
         updated_at,
         teams(id, name, logo_url)

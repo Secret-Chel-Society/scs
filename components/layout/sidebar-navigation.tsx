@@ -413,7 +413,7 @@ export function SidebarNavigation({ isOpen: externalIsOpen, onToggle: externalOn
     {
       name: "News",
       href: "/news",
-      icon: Newspaper,
+      icon: NewspaperIcon,
       color: "rink-blue",
       description: "Latest league updates and stories",
       submenu: [

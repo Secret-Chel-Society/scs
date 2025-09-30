@@ -86,9 +86,9 @@ export default function MatchesPage() {
           } else {
             // Default to season 1
             const defaultSeason = {
-              id: "1",
-              number: 1,
-              name: "Season 1",
+              id: "fc808734-ff25-4f4b-9644-855ea0ea4b93",
+              number: 2,
+              name: "SCSHL Season 1",
               is_active: true,
             }
             console.log("Using default season:", defaultSeason)
@@ -99,9 +99,9 @@ export default function MatchesPage() {
         console.error("Error fetching current season:", error)
         // Default to season 1
         const defaultSeason = {
-          id: "1",
-          number: 1,
-          name: "Season 1",
+          id: "fc808734-ff25-4f4b-9644-855ea0ea4b93",
+          number: 2,
+          name: "SCSHL Season 1",
           is_active: true,
         }
         setCurrentSeason(defaultSeason)

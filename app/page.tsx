@@ -394,7 +394,7 @@ export default function Home() {
           console.log(`Found ${teamsData.length} teams:`, teamsData.slice(0, 2))
 
           // Get current season name (same as standings page)
-          let currentSeasonName = "Season 1" // Default fallback
+          let currentSeasonName = "SCSHL Season 1" // Hardcoded to correct season
           
           try {
             const { data: activeSeason } = await supabase
