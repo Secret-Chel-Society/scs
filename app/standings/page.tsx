@@ -690,7 +690,9 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
           .from("matches")
           .select("*")
           .eq("season_name", currentSeasonName)
-          .eq("status", "completed")
+          .in("status", ["completed", "Completed", "COMPLETED"])
+          .not("home_score", "is", null)
+          .not("away_score", "is", null)
 
         if (matchesError) {
           console.error("Error fetching matches:", matchesError)
