@@ -210,7 +210,21 @@ const getTeamColors = async (teamName: string, logoUrl: string | null): Promise<
   
   // Fallback to hardcoded colors if extraction fails
   const teamColorMap: { [key: string]: TeamColors } = {
+    // Current SCSHL Teams
     Wranglers: { primary: "bg-orange-600", secondary: "bg-orange-700", accent: "border-orange-500" },
+    "Ottawa Firestorm": { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
+    "Danglin Desperatos": { primary: "bg-yellow-600", secondary: "bg-yellow-700", accent: "border-yellow-500" },
+    "Smiths Falls Bears": { primary: "bg-amber-800", secondary: "bg-amber-900", accent: "border-amber-700" },
+    Northmen: { primary: "bg-blue-800", secondary: "bg-blue-900", accent: "border-blue-700" },
+    "Mozambique Whale Sharks": { primary: "bg-teal-600", secondary: "bg-teal-700", accent: "border-teal-500" },
+    Phantoms: { primary: "bg-purple-600", secondary: "bg-purple-700", accent: "border-purple-500" },
+    "Central Park Snipers": { primary: "bg-green-600", secondary: "bg-green-700", accent: "border-green-500" },
+    "Saginaw Spartans": { primary: "bg-red-700", secondary: "bg-red-800", accent: "border-red-600" },
+    "Backyard Bulldogs": { primary: "bg-gray-700", secondary: "bg-gray-800", accent: "border-gray-600" },
+    "North Stars": { primary: "bg-indigo-600", secondary: "bg-indigo-700", accent: "border-indigo-500" },
+    "Broad Street Bullies": { primary: "bg-orange-500", secondary: "bg-orange-600", accent: "border-orange-400" },
+    
+    // Legacy NHL Teams (keeping for compatibility)
     Firebirds: { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
     Bruins: { primary: "bg-yellow-500", secondary: "bg-yellow-600", accent: "border-yellow-400" },
     Rangers: { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
@@ -565,13 +579,13 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           </span>
           <div className="flex-1 h-2 bg-hockey-silver-700 dark:bg-hockey-silver-600 rounded-full overflow-hidden">
             <div
-              className={`h-full ${homeColors.primary} transition-all duration-300`}
+              className="h-full bg-blue-600 transition-all duration-300"
               style={{ width: `${homePercentage}%` }}
             />
           </div>
           <div className="flex-1 h-2 bg-hockey-silver-700 dark:bg-hockey-silver-600 rounded-full overflow-hidden">
             <div
-              className={`h-full ${awayColors.primary} transition-all duration-300 ml-auto`}
+              className="h-full bg-blue-600 transition-all duration-300 ml-auto"
               style={{ width: `${awayPercentage}%` }}
             />
           </div>
