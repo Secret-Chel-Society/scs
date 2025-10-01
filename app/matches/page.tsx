@@ -2,17 +2,26 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
-import { Clock, Home, ExternalLink, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, Filter, Calendar, Trophy, Zap, Target, Users, TrendingUp } from "lucide-react"
+import {
+  Clock,
+  Home,
+  ExternalLink,
+  AlertCircle,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Calendar,
+  Trophy,
+} from "lucide-react"
 import Image from "next/image"
-import { motion } from "framer-motion"
-import { TeamLogo } from "@/components/team-logo"
 
 export default function MatchesPage() {
   const router = useRouter()
@@ -26,13 +35,11 @@ export default function MatchesPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentSeason, setCurrentSeason] = useState<any>(null)
 
-  // Pagination and filtering state
   const [currentWeek, setCurrentWeek] = useState(1)
   const [totalWeeks, setTotalWeeks] = useState(1)
   const [selectedTeam, setSelectedTeam] = useState<string>("all")
   const [weekMatches, setWeekMatches] = useState<any[]>([])
 
-  // Get initial filters from URL params
   useEffect(() => {
     const week = searchParams.get("week")
     const team = searchParams.get("team")
@@ -41,77 +48,44 @@ export default function MatchesPage() {
     if (team) setSelectedTeam(team)
   }, [searchParams])
 
-  // Fetch current season
   useEffect(() => {
     async function fetchCurrentSeason() {
       try {
-        console.log("Fetching current season...")
-        // First try to get seasons from the seasons table
-        const { data: seasonsData, error: seasonsError } = await supabase
-          .from("seasons")
-          .select("*")
-          .order("created_at", { ascending: false })
+        const { data: settingsData, error: settingsError } = await supabase
+          .from("system_settings")
+          .select("value")
+          .eq("key", "current_season")
+          .single()
 
-        if (!seasonsError && seasonsData && seasonsData.length > 0) {
-          // Find active season
-          const activeSeason = seasonsData.find((s) => s.is_active === true)
-          if (activeSeason) {
-            console.log("Found active season:", activeSeason)
-            setCurrentSeason(activeSeason)
-          } else {
-            // Default to first season
-            console.log("No active season, using first season:", seasonsData[0])
-            setCurrentSeason(seasonsData[0])
-          }
-        } else {
-          // Try to get current season from system_settings
-          const { data, error } = await supabase
-            .from("system_settings")
-            .select("value")
-            .eq("key", "current_season")
+        if (settingsError) throw settingsError
+
+        if (settingsData?.value) {
+          const { data: seasonData, error: seasonError } = await supabase
+            .from("seasons")
+            .select("id, name, is_active")
+            .eq("id", settingsData.value)
             .single()
 
-          if (!error && data && data.value) {
-            const seasonNumber = Number.parseInt(data.value.toString(), 10)
-            if (!isNaN(seasonNumber)) {
-              const season = {
-                id: seasonNumber.toString(),
-                number: seasonNumber,
-                name: `Season ${seasonNumber}`,
-                is_active: true,
-              }
-              console.log("Using season from system_settings:", season)
-              setCurrentSeason(season)
-            }
-          } else {
-            // Default to season 1
-            const defaultSeason = {
-              id: "fc808734-ff25-4f4b-9644-855ea0ea4b93",
-              number: 2,
-              name: "SCSHL Season 1",
-              is_active: true,
-            }
-            console.log("Using default season:", defaultSeason)
-            setCurrentSeason(defaultSeason)
-          }
+          if (seasonError) throw seasonError
+          setCurrentSeason(seasonData)
         }
       } catch (error) {
         console.error("Error fetching current season:", error)
-        // Default to season 1
-        const defaultSeason = {
-          id: "fc808734-ff25-4f4b-9644-855ea0ea4b93",
-          number: 2,
-          name: "SCSHL Season 1",
-          is_active: true,
+        const { data: fallbackSeason } = await supabase
+          .from("seasons")
+          .select("id, name, is_active")
+          .eq("name", "SCSHL Season 1")
+          .single()
+
+        if (fallbackSeason) {
+          setCurrentSeason(fallbackSeason)
         }
-        setCurrentSeason(defaultSeason)
       }
     }
 
     fetchCurrentSeason()
   }, [supabase])
 
-  // Fetch teams for filter
   useEffect(() => {
     async function fetchTeams() {
       try {
@@ -127,7 +101,6 @@ export default function MatchesPage() {
     fetchTeams()
   }, [supabase])
 
-  // Fetch all matches
   useEffect(() => {
     async function fetchMatches() {
       if (!currentSeason) return
@@ -155,7 +128,6 @@ export default function MatchesPage() {
           )
           .eq("season_name", currentSeason.name)
 
-        // Apply team filter if selected
         if (selectedTeam !== "all") {
           query = query.or(`home_team_id.eq.${selectedTeam},away_team_id.eq.${selectedTeam}`)
         }
@@ -167,7 +139,6 @@ export default function MatchesPage() {
         console.log(`Found ${data?.length || 0} matches for ${currentSeason.name}`)
         setMatches(data || [])
 
-        // Calculate weeks based on matches
         if (data && data.length > 0) {
           const weeks = calculateWeeks(data)
           setTotalWeeks(weeks)
@@ -189,22 +160,18 @@ export default function MatchesPage() {
     fetchMatches()
   }, [supabase, toast, selectedTeam, currentSeason])
 
-  // Calculate weeks from matches
   const calculateWeeks = (matchesData: any[]) => {
     if (!matchesData.length) return 1
 
-    // Group matches by week (7-day periods starting from first match)
     const firstMatchDate = new Date(matchesData[0].match_date)
     const lastMatchDate = new Date(matchesData[matchesData.length - 1].match_date)
 
-    // Calculate the difference in weeks
     const timeDiff = lastMatchDate.getTime() - firstMatchDate.getTime()
     const weeksDiff = Math.ceil(timeDiff / (7 * 24 * 60 * 60 * 1000))
 
     return Math.max(1, weeksDiff + 1)
   }
 
-  // Get matches for current week
   useEffect(() => {
     if (matches.length === 0) {
       setWeekMatches([])
@@ -227,7 +194,6 @@ export default function MatchesPage() {
     setWeekMatches(filteredMatches)
   }, [matches, currentWeek])
 
-  // Update URL when filters change
   const updateURL = (week: number, team: string) => {
     const params = new URLSearchParams()
     if (week > 1) params.set("week", week.toString())
@@ -237,20 +203,17 @@ export default function MatchesPage() {
     router.replace(newURL, { scroll: false })
   }
 
-  // Handle week navigation
   const goToWeek = (week: number) => {
     setCurrentWeek(week)
     updateURL(week, selectedTeam)
   }
 
-  // Handle team filter change
   const handleTeamFilter = (team: string) => {
     setSelectedTeam(team)
-    setCurrentWeek(1) // Reset to first week when changing team filter
+    setCurrentWeek(1)
     updateURL(1, team)
   }
 
-  // Group matches by date
   const groupMatchesByDate = (matches: any[]) => {
     const groups: Record<string, any[]> = {}
 
@@ -271,7 +234,6 @@ export default function MatchesPage() {
     return groups
   }
 
-  // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return {
@@ -288,7 +250,6 @@ export default function MatchesPage() {
     }
   }
 
-  // Get status badge variant
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case "Scheduled":
@@ -302,9 +263,30 @@ export default function MatchesPage() {
     }
   }
 
+  const renderTeamLogo = (team: any) => {
+    if (!team) return null
 
+    if (team.logo_url) {
+      return (
+        <div className="relative w-10 h-10 rounded-full overflow-hidden bg-background border">
+          <Image
+            src={team.logo_url || "/placeholder.svg"}
+            alt={team.name}
+            width={40}
+            height={40}
+            className="object-contain"
+          />
+        </div>
+      )
+    }
 
-  // Get week date range for display
+    return (
+      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold">
+        {team.name.substring(0, 2)}
+      </div>
+    )
+  }
+
   const getWeekDateRange = () => {
     if (matches.length === 0) return ""
 
@@ -325,45 +307,38 @@ export default function MatchesPage() {
     })}`
   }
 
-  // Calculate match statistics
-  const getMatchStats = () => {
-    const totalMatches = matches.length
-    const completedMatches = matches.filter(m => m.status === "Completed").length
-    const scheduledMatches = matches.filter(m => m.status === "Scheduled").length
-    const inProgressMatches = matches.filter(m => m.status === "In Progress").length
-
-    return { totalMatches, completedMatches, scheduledMatches, inProgressMatches }
-  }
-
-  const matchStats = getMatchStats()
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-8">
-          <div className="hockey-header relative py-16 px-4 mb-12">
-            <div className="container mx-auto text-center">
-              <Skeleton className="h-12 w-96 mx-auto mb-6" />
-              <Skeleton className="h-6 w-80 mx-auto" />
+      <div className="min-h-screen relative">
+        <div
+          className="fixed inset-0 opacity-5 bg-no-repeat bg-center bg-contain pointer-events-none"
+          style={{
+            backgroundImage:
+              "url('https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/team-logos/69ECC8EB-551A-4F62-B3A4-BAFE00F05DC7-removebg-preview%20(1).png')",
+          }}
+        />
+
+        <div className="relative z-10 container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <Trophy className="h-8 w-8 text-primary" />
+              <h1 className="text-4xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                MGHL Matches
+              </h1>
+              <Trophy className="h-8 w-8 text-primary" />
             </div>
+            <p className="text-muted-foreground text-lg">Follow all the action from your favorite teams</p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-24 w-full rounded-xl" />
-            ))}
+
+          <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <Skeleton className="h-12 w-64" />
+            <Skeleton className="h-12 w-48" />
+            <Skeleton className="h-12 w-32" />
           </div>
-          
-          <div className="space-y-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i}>
-                <Skeleton className="h-8 w-48 mb-4" />
-                <div className="grid gap-6 md:grid-cols-2">
-                  {[1, 2].map((j) => (
-                    <Skeleton key={j} className="h-40 w-full rounded-xl" />
-                  ))}
-                </div>
-              </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-48 w-full rounded-xl" />
             ))}
           </div>
         </div>
@@ -371,33 +346,39 @@ export default function MatchesPage() {
     )
   }
 
-  // Add a fallback UI for connection errors
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-8">
-          <div className="hockey-header relative py-16 px-4 mb-12">
-            <div className="container mx-auto text-center">
-              <h1 className="hockey-title mb-6">Match Schedule</h1>
-              <p className="hockey-subtitle">Track all games and results</p>
+      <div className="min-h-screen relative">
+        <div
+          className="fixed inset-0 opacity-5 bg-no-repeat bg-center bg-contain pointer-events-none"
+          style={{
+            backgroundImage:
+              "url('https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/team-logos/69ECC8EB-551A-4F62-B3A4-BAFE00F05DC7-removebg-preview%20(1).png')",
+          }}
+        />
+
+        <div className="relative z-10 container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <Trophy className="h-8 w-8 text-primary" />
+              <h1 className="text-4xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                SCS Matches
+              </h1>
+              <Trophy className="h-8 w-8 text-primary" />
             </div>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <div className="hockey-card p-8 text-center">
-              <AlertCircle className="h-16 w-16 text-goal-red-500 mx-auto mb-6" />
-              <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-4">
-                Error Loading Matches
-              </h2>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400 mb-2">{error}</p>
-              <p className="text-hockey-silver-500 dark:text-hockey-silver-500 mb-8">
-                There was a problem connecting to the database. This could be due to a type mismatch or server issue.
-              </p>
-              <Button onClick={() => window.location.reload()} className="hockey-button">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh Page
-              </Button>
-            </div>
+          <div className="max-w-md mx-auto bg-card border border-destructive/20 rounded-xl p-8 text-center">
+            <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Unable to Load Matches</h2>
+            <p className="text-muted-foreground mb-2">{error}</p>
+            <p className="text-muted-foreground mb-6">
+              There was a problem connecting to the database. Please try refreshing the page.
+            </p>
+            <Button onClick={() => window.location.reload()} className="bg-primary hover:bg-primary/90">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Page
+            </Button>
           </div>
         </div>
       </div>
@@ -407,457 +388,263 @@ export default function MatchesPage() {
   const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Hero Header Section */}
-      <div className="hockey-header relative py-16 px-4">
-        <div className="container mx-auto text-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            <h1 className="hockey-title mb-6">
-              Match Schedule
+    <div className="min-h-screen relative">
+      <div
+        className="fixed inset-0 opacity-5 bg-no-repeat bg-center bg-contain pointer-events-none"
+        style={{
+          backgroundImage:
+            "url('https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/team-logos/69ECC8EB-551A-4F62-B3A4-BAFE00F05DC7-removebg-preview%20(1).png')",
+        }}
+      />
+
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-4">
+            <Trophy className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              SCS Matches
             </h1>
-            <p className="hockey-subtitle mb-8">
-              Track all games, results, and upcoming matches in the Secret Chel Society
-            </p>
-            
-            {/* Match Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="hockey-stat-item"
-              >
-                <div className="flex items-center justify-center mb-2">
-                  <Target className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
-                </div>
-                <div className="text-2xl font-bold text-ice-blue-700 dark:text-ice-blue-300">
-                  {matchStats.totalMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Total Matches
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="hockey-stat-item"
-              >
-                <div className="flex items-center justify-center mb-2">
-                  <Trophy className="h-8 w-8 text-assist-green-600 dark:text-assist-green-400" />
-                </div>
-                <div className="text-2xl font-bold text-assist-green-700 dark:text-assist-green-300">
-                  {matchStats.completedMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Completed
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.6 }}
-                className="hockey-stat-item"
-              >
-                <div className="flex items-center justify-center mb-2">
-                  <Clock className="h-8 w-8 text-rink-blue-600 dark:text-rink-blue-400" />
-                </div>
-                <div className="text-2xl font-bold text-rink-blue-700 dark:text-rink-blue-300">
-                  {matchStats.scheduledMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Scheduled
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }} 
-                animate={{ opacity: 1, scale: 1 }} 
-                transition={{ duration: 0.6, delay: 0.8 }}
-                className="hockey-stat-item"
-              >
-                <div className="flex items-center justify-center mb-2">
-                  <TrendingUp className="h-8 w-8 text-goal-red-600 dark:text-goal-red-400" />
-                </div>
-                <div className="text-2xl font-bold text-goal-red-700 dark:text-goal-red-300">
-                  {matchStats.inProgressMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  In Progress
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
+            <Trophy className="h-8 w-8 text-primary" />
+          </div>
+          <p className="text-muted-foreground text-lg">Follow all the action from your favorite teams</p>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.6, delay: 1.0 }}
-        >
-          {/* Enhanced Filters and Controls */}
-          <div className="mb-8 flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200 mb-2">
-                Match Schedule
-              </h2>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                Filter and navigate through the season schedule with advanced viewing options
-              </p>
+        <Card className="mb-8 border-2 border-primary/10 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Filter className="h-5 w-5" />
+              <h3 className="font-semibold">Filter Matches</h3>
             </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 items-center">
+                <div className="flex items-center gap-2">
+                  <Select value={selectedTeam} onValueChange={handleTeamFilter}>
+                    <SelectTrigger className="w-64 border-primary/20 focus:border-primary">
+                      <SelectValue placeholder="Filter by team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">🏒 All Teams</SelectItem>
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-              {/* Team Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-hockey-silver-500" />
-                <Select value={selectedTeam} onValueChange={handleTeamFilter}>
-                  <SelectTrigger className="hockey-input w-48">
-                    <SelectValue placeholder="Filter by team" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Teams</SelectItem>
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {totalWeeks > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
+                      <SelectTrigger className="w-48 border-primary/20 focus:border-primary">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
+                          <SelectItem key={week} value={week.toString()}>
+                            📅 Week {week}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
-              {/* View Options */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hockey-button"
-                  onClick={() => {/* Add compact view toggle */}}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Compact View
-                </Button>
-              </div>
-
-              {/* Season Badge */}
-              <div className="flex items-center gap-2">
-                <Badge className="hockey-badge text-base py-2 px-4">
-                  <Trophy className="h-4 w-4 mr-2" />
-                  {currentSeason?.name || "Loading..."}
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="text-base py-2 px-4 border-primary/30 bg-primary/5">
+                  🏆 {currentSeason?.name || "Loading..."}
                 </Badge>
               </div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Enhanced Match Statistics Bar */}
-          <div className="mb-8 hockey-card p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-ice-blue-600 dark:text-ice-blue-400 mb-1">
-                  {matchStats.totalMatches}
+        {totalWeeks > 1 && (
+          <Card className="mb-8 border-accent/20 bg-accent/5">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => goToWeek(currentWeek - 1)}
+                  disabled={currentWeek === 1}
+                  className="border-primary/30 hover:bg-primary/10"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous Week
+                </Button>
+
+                <div className="text-center">
+                  <div className="font-bold text-lg text-primary">
+                    Week {currentWeek} of {totalWeeks}
+                  </div>
+                  <div className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {getWeekDateRange()}
+                  </div>
                 </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Total Matches
-                </div>
+
+                <Button
+                  variant="outline"
+                  onClick={() => goToWeek(currentWeek + 1)}
+                  disabled={currentWeek === totalWeeks}
+                  className="border-primary/30 hover:bg-primary/10"
+                >
+                  Next Week
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-assist-green-600 dark:text-assist-green-400 mb-1">
-                  {matchStats.completedMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Completed
-                </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {weekMatches.length === 0 && (
+          <Card className="border-2 border-dashed border-muted-foreground/20">
+            <CardContent className="py-16 text-center">
+              <div className="text-6xl mb-4">🏒</div>
+              <h3 className="text-xl font-semibold mb-2">No Matches Found</h3>
+              <p className="text-muted-foreground">
+                {selectedTeam === "all"
+                  ? `No matches scheduled for Week ${currentWeek}.`
+                  : `No matches found for the selected team in Week ${currentWeek}.`}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="space-y-10">
+          {Object.entries(matchesByDate).map(([date, dateMatches]) => (
+            <div key={date}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px bg-gradient-to-r from-transparent via-primary to-transparent flex-1" />
+                <h2 className="text-2xl font-bold text-primary bg-background px-4">{date}</h2>
+                <div className="h-px bg-gradient-to-r from-primary via-transparent to-transparent flex-1" />
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-rink-blue-600 dark:text-rink-blue-400 mb-1">
-                  {matchStats.scheduledMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  Scheduled
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-goal-red-600 dark:text-goal-red-400 mb-1">
-                  {matchStats.inProgressMatches}
-                </div>
-                <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                  In Progress
-                </div>
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {dateMatches.map((match) => {
+                  const formattedDate = formatDate(match.match_date)
+                  const isCompleted = match.status === "Completed"
+
+                  return (
+                    <Card
+                      key={match.id}
+                      className="group overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer border-2 hover:border-primary/30 bg-card/80 backdrop-blur-sm"
+                      onClick={() => router.push(`/matches/${match.id}`)}
+                    >
+                      <CardContent className="p-0">
+                        <div className="p-6">
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span className="font-medium">{formattedDate.time}</span>
+                            </div>
+                            <Badge
+                              variant={getStatusBadgeVariant(match.status)}
+                              className={`${match.status === "Completed" ? "bg-accent text-accent-foreground" : ""}`}
+                            >
+                              {match.status}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex flex-col items-center gap-3 w-2/5">
+                              <div className="relative">
+                                {renderTeamLogo(match.home_team)}
+                                <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1">
+                                  <Home className="h-3 w-3" />
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <span className="font-bold text-sm">{match.home_team.name}</span>
+                                <div className="text-xs text-muted-foreground">Home</div>
+                                {isCompleted && (
+                                  <div className="text-2xl font-black tabular-nums text-primary mt-1">
+                                    {match.home_score}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-center justify-center w-1/5">
+                              <div className="text-2xl font-bold text-muted-foreground">VS</div>
+                            </div>
+
+                            <div className="flex flex-col items-center gap-3 w-2/5">
+                              <div className="relative">
+                                {renderTeamLogo(match.away_team)}
+                                <div className="absolute -bottom-1 -right-1 bg-accent text-accent-foreground rounded-full p-1">
+                                  <ExternalLink className="h-3 w-3" />
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <span className="font-bold text-sm">{match.away_team.name}</span>
+                                <div className="text-xs text-muted-foreground">Away</div>
+                                {isCompleted && (
+                                  <div className="text-2xl font-black tabular-nums text-primary mt-1">
+                                    {match.away_score}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 p-3 flex justify-center group-hover:from-primary/10 group-hover:via-accent/10 group-hover:to-primary/10 transition-all duration-300">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary"
+                          >
+                            View Match Details →
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
               </div>
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Week Navigation */}
-          {totalWeeks > 1 && (
-            <div className="mb-8 hockey-week-nav">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+        {totalWeeks > 1 && (
+          <Card className="mt-12 border-primary/20 bg-primary/5">
+            <CardContent className="py-6">
+              <div className="flex justify-center">
                 <div className="flex items-center gap-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => goToWeek(currentWeek - 1)} 
+                  <Button
+                    variant="outline"
+                    onClick={() => goToWeek(currentWeek - 1)}
                     disabled={currentWeek === 1}
-                    className="hockey-button"
+                    className="border-primary/30 hover:bg-primary hover:text-primary-foreground"
                   >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous Week
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Previous
                   </Button>
 
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
+                  <div className="px-6 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                    <span className="font-bold text-primary">
                       Week {currentWeek} of {totalWeeks}
-                    </div>
-                    <div className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400 flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {getWeekDateRange()}
-                    </div>
+                    </span>
                   </div>
 
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => goToWeek(currentWeek + 1)}
                     disabled={currentWeek === totalWeeks}
-                    className="hockey-button"
+                    className="border-primary/30 hover:bg-primary hover:text-primary-foreground"
                   >
-                    Next Week
-                    <ChevronRight className="h-4 w-4" />
+                    Next
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </div>
-
-                {/* Week selector for quick navigation */}
-                <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
-                  <SelectTrigger className="hockey-search w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: totalWeeks }, (_, i) => i + 1).map((week) => (
-                      <SelectItem key={week} value={week.toString()}>
-                        Week {week}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
-            </div>
-          )}
-
-          {/* No matches message */}
-          {weekMatches.length === 0 && (
-            <div className="text-center py-16">
-              <div className="max-w-md mx-auto">
-                <Target className="h-16 w-16 text-hockey-silver-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-hockey-silver-700 dark:text-hockey-silver-300 mb-2">
-                  No matches found
-                </h3>
-                <p className="text-hockey-silver-500 dark:text-hockey-silver-500">
-                  {selectedTeam === "all"
-                    ? `No matches scheduled for Week ${currentWeek}.`
-                    : `No matches found for the selected team in Week ${currentWeek}.`}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Matches by date */}
-          <div className="space-y-8">
-            {Object.entries(matchesByDate).map(([date, dateMatches]) => (
-              <motion.div 
-                key={date}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <div className="hockey-date-header">
-                  <div className="hockey-date-indicator"></div>
-                  <h2 className="text-2xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                    {date}
-                  </h2>
-                </div>
-                
-                <div className="hockey-match-grid">
-                  {dateMatches.map((match, index) => {
-                    const formattedDate = formatDate(match.match_date)
-                    const isCompleted = match.status === "Completed"
-
-                    return (
-                      <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, delay: index * 0.1 }}
-                        whileHover={{ y: -4, scale: 1.02 }}
-                        className="group cursor-pointer"
-                        onClick={() => router.push(`/matches/${match.id}`)}
-                      >
-                        <Card className="hockey-match-card hockey-match-card-hover h-full overflow-hidden">
-                          <CardContent className="p-0">
-                            {/* Match Header */}
-                            <div className="hockey-match-content">
-                              <div className="hockey-match-header">
-                                <div className="flex items-center gap-2 text-sm text-hockey-silver-600 dark:text-hockey-silver-400">
-                                  <Clock className="h-4 w-4" />
-                                  <span className="font-medium">{formattedDate.time}</span>
-                                </div>
-                                <Badge 
-                                  variant={getStatusBadgeVariant(match.status)}
-                                  className={`${
-                                    match.status === "Completed" 
-                                      ? "bg-gradient-to-r from-assist-green-100 to-assist-green-200 text-assist-green-800 border-assist-green-300 dark:from-assist-green-900/30 dark:to-assist-green-800/30 dark:text-assist-green-200 dark:border-assist-green-600"
-                                      : match.status === "In Progress"
-                                      ? "bg-gradient-to-r from-goal-red-100 to-goal-red-200 text-goal-red-800 border-goal-red-300 dark:from-goal-red-900/30 dark:to-goal-red-800/30 dark:text-goal-red-200 dark:border-goal-red-600"
-                                      : "hockey-badge"
-                                  }`}
-                                >
-                                  {match.status}
-                                </Badge>
-                              </div>
-
-                              {/* Teams and Score */}
-                              <div className="hockey-match-teams">
-                                {/* Home Team */}
-                                <div className="hockey-team-section">
-                                                                     <div className="hockey-team-logo">
-                                     {match.home_team.logo_url ? (
-                                       <Image
-                                         src={match.home_team.logo_url || "/placeholder.svg"}
-                                         alt={match.home_team.name}
-                                         width={80}
-                                         height={80}
-                                         className="object-contain"
-                                       />
-                                     ) : (
-                                       <TeamLogo 
-                                         teamName={match.home_team.name}
-                                         logoUrl={match.home_team.logo_url}
-                                         size="lg"
-                                       />
-                                     )}
-                                   </div>
-                                  <div className="flex flex-col items-center">
-                                    <span className="hockey-team-name">
-                                      {match.home_team.name}
-                                    </span>
-                                    <Badge className="hockey-team-badge hockey-home-badge">
-                                      <Home className="h-3 w-3" />
-                                      Home
-                                    </Badge>
-                                  </div>
-                                </div>
-
-                                {/* Score */}
-                                <div className="hockey-score-section">
-                                  {isCompleted ? (
-                                    <div className="hockey-score-display">
-                                      <div className="hockey-score-number">
-                                        {match.home_score}
-                                      </div>
-                                      <div className="hockey-score-separator">
-                                        -
-                                      </div>
-                                      <div className="hockey-score-number">
-                                        {match.away_score}
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="hockey-score-display">
-                                      <div className="hockey-vs-text">
-                                        VS
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Away Team */}
-                                <div className="hockey-team-section">
-                                                                     <div className="hockey-team-logo">
-                                     {match.away_team.logo_url ? (
-                                       <Image
-                                         src={match.away_team.logo_url || "/placeholder.svg"}
-                                         alt={match.away_team.name}
-                                         width={80}
-                                         height={80}
-                                         className="object-contain"
-                                       />
-                                     ) : (
-                                       <TeamLogo 
-                                         teamName={match.away_team.name}
-                                         logoUrl={match.away_team.logo_url}
-                                         size="lg"
-                                       />
-                                     )}
-                                   </div>
-                                  <div className="flex flex-col items-center">
-                                    <span className="hockey-team-name">
-                                      {match.away_team.name}
-                                    </span>
-                                    <Badge className="hockey-team-badge hockey-away-badge">
-                                      <ExternalLink className="h-3 w-3" />
-                                      Away
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Action Button */}
-                            <div className="hockey-match-action">
-                              <div className="inline-flex items-center gap-2 text-ice-blue-600 dark:text-ice-blue-400 font-medium group-hover:text-ice-blue-700 dark:group-hover:text-ice-blue-300 transition-colors duration-200">
-                                <span>View Details</span>
-                                <Zap className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Bottom pagination for convenience */}
-          {totalWeeks > 1 && (
-            <div className="mt-12 flex justify-center">
-              <div className="flex items-center gap-4">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => goToWeek(currentWeek - 1)} 
-                  disabled={currentWeek === 1}
-                  className="hockey-button"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-
-                <span className="px-6 py-2 text-lg font-medium text-hockey-silver-700 dark:text-hockey-silver-300">
-                  Week {currentWeek} of {totalWeeks}
-                </span>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => goToWeek(currentWeek + 1)}
-                  disabled={currentWeek === totalWeeks}
-                  className="hockey-button"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </motion.div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )
