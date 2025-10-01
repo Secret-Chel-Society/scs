@@ -101,7 +101,7 @@ const getTeamColors = (teamName: string) => {
     "Maple Leafs": { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
   }
 
-  return teamColorMap[teamName] || { primary: "bg-slate-600", secondary: "bg-slate-700", accent: "border-slate-500" }
+  return teamColorMap[teamName] || { primary: "bg-ice-blue-600", secondary: "bg-ice-blue-700", accent: "border-ice-blue-500" }
 }
 
 export function ComprehensiveMatchView({ match, isAdmin = false }: ComprehensiveMatchViewProps) {
@@ -423,19 +423,19 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-center text-sm">
-          <span className="text-slate-300">{label}</span>
+          <span className="text-hockey-silver-300">{label}</span>
         </div>
         <div className="flex items-center space-x-2 text-xs">
           <span className="text-white font-semibold w-12 text-right">
             {isPercentage ? `${homeValue.toFixed(1)}%` : homeValue}
           </span>
-          <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-hockey-silver-700 dark:bg-hockey-silver-600 rounded-full overflow-hidden">
             <div
               className={`h-full ${homeColors.primary} transition-all duration-300`}
               style={{ width: `${homePercentage}%` }}
             />
           </div>
-          <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-hockey-silver-700 dark:bg-hockey-silver-600 rounded-full overflow-hidden">
             <div
               className={`h-full ${awayColors.primary} transition-all duration-300 ml-auto`}
               style={{ width: `${awayPercentage}%` }}
@@ -445,7 +445,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             {isPercentage ? `${awayValue.toFixed(1)}%` : awayValue}
           </span>
         </div>
-        <div className="flex justify-between text-xs text-slate-400">
+        <div className="flex justify-between text-xs text-hockey-silver-400">
           <span>{homeTeam}</span>
           <span>{awayTeam}</span>
         </div>
@@ -521,7 +521,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           </div>
 
           {/* Center Score Section */}
-          <div className="bg-slate-800 px-4 md:px-8 py-4 md:py-8 flex flex-col items-center justify-center md:min-w-[300px] relative z-20">
+          <div className="bg-ice-blue-800/90 dark:bg-ice-blue-900/90 backdrop-blur-sm px-4 md:px-8 py-4 md:py-8 flex flex-col items-center justify-center md:min-w-[300px] relative z-20 border-y border-ice-blue-600/50">
             <Badge
               variant={match.status === "completed" || match.status === "Completed" ? "default" : "secondary"}
               className="mb-2 md:mb-4 text-sm md:text-lg px-3 md:px-4 py-1 md:py-2"
@@ -613,11 +613,11 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           <div className="lg:col-span-1 space-y-6">
             {/* Period Stats */}
             {periodScores.length > 0 && (
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
                 <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-4 text-white">Period Stats</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-ice-blue-100">Period Stats</h3>
                   <div className="space-y-2">
-                    <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-slate-300 border-b border-slate-600 pb-2">
+                    <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-hockey-silver-300 border-b border-ice-blue-600/50 pb-2">
                       <span>Team</span>
                       <span className="text-center">1</span>
                       <span className="text-center">2</span>
@@ -649,9 +649,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             )}
 
             {/* Team Stats with Comparison Bars */}
-            <Card className="bg-slate-800 border-slate-700">
+            <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
               <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-4 text-white">Team Stats</h3>
+                <h3 className="text-lg font-semibold mb-4 text-ice-blue-100">Team Stats</h3>
                 {homeTeamStats && awayTeamStats && (
                   <div className="space-y-6">
                     <StatComparisonBar
@@ -704,9 +704,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             </Card>
 
             {/* Season Info */}
-            <Card className="bg-slate-800 border-slate-700">
+            <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
               <CardContent className="p-4 text-center">
-                <p className="text-slate-300">
+                <p className="text-hockey-silver-300">
                   {seasonInfo ? `Week ${seasonInfo.week} of ${seasonInfo.season}` : "Loading..."}
                 </p>
               </CardContent>
@@ -718,7 +718,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             {/* Three Stars */}
             {playerStats.length > 0 && (
               <div>
-                <h3 className="text-xl font-semibold mb-4 text-white">Three Stars</h3>
+                <h3 className="text-xl font-semibold mb-4 text-ice-blue-100">Three Stars</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {(() => {
                     const allPlayers = [
@@ -734,7 +734,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       return (
                         <Card
                           key={player.player_id}
-                          className="border-none relative overflow-hidden bg-slate-800"
+                          className="border-none relative overflow-hidden bg-ice-blue-900/80 backdrop-blur-sm shadow-hockey-glow"
                           style={{
                             backgroundImage: teamData.logo_url ? `url(${teamData.logo_url})` : "none",
                             backgroundSize: "cover",
@@ -786,9 +786,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             )}
 
             {/* Player Stats */}
-            <Card className="bg-slate-800 border-slate-700">
+            <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4 text-white">Player Stats</h3>
+                <h3 className="text-xl font-semibold mb-4 text-ice-blue-100">Player Stats</h3>
                 {playerStats.length > 0 ? (
                   <div className="space-y-8">
                     {/* Home Team */}
@@ -807,7 +807,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
+                            <tr className="border-b border-ice-blue-600/50 text-hockey-silver-300 bg-ice-blue-800/50">
                               <th className="text-left py-2 px-2">Player</th>
                               <th className="text-center py-2 px-1">Pos</th>
                               <th className="text-center py-2 px-1">G</th>
@@ -837,7 +837,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                               .map((player, index) => (
                                 <tr
                                   key={player.player_id}
-                                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
+                                  className="border-b border-ice-blue-700/30 hover:bg-ice-blue-800/20"
                                 >
                                   <td className="py-2 px-2 text-white font-medium">
                                     <div className="flex items-center">
@@ -910,7 +910,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
+                            <tr className="border-b border-ice-blue-600/50 text-hockey-silver-300 bg-ice-blue-800/50">
                               <th className="text-left py-2 px-2">Player</th>
                               <th className="text-center py-2 px-1">Pos</th>
                               <th className="text-center py-2 px-1">G</th>
@@ -940,7 +940,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                               .map((player, index) => (
                                 <tr
                                   key={player.player_id}
-                                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
+                                  className="border-b border-ice-blue-700/30 hover:bg-ice-blue-800/20"
                                 >
                                   <td className="py-2 px-2 text-white font-medium">
                                     <div className="flex items-center">
@@ -1005,7 +1005,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
+                            <tr className="border-b border-ice-blue-600/50 text-hockey-silver-300 bg-ice-blue-800/50">
                               <th className="text-left py-2 px-2">Player</th>
                               <th className="text-center py-2 px-2">TOI</th>
                               <th className="text-center py-2 px-2">SV%</th>
@@ -1077,16 +1077,16 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-slate-400">No player statistics available for this match.</div>
+                  <div className="text-center py-8 text-hockey-silver-400">No player statistics available for this match.</div>
                 )}
               </CardContent>
             </Card>
 
             {/* Lineups Section */}
             {lineups.length > 0 && (
-              <Card className="bg-slate-800 border-slate-700">
+              <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-6 text-white">Lineups</h3>
+                  <h3 className="text-xl font-semibold mb-6 text-ice-blue-100">Lineups</h3>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Home Team Lineups */}
