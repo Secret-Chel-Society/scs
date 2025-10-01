@@ -265,7 +265,14 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
             </div>
             {canManageMatch && (
               <div className="flex gap-2">
-                <UploadMatchButton match={match} onMatchUploaded={fetchMatchData} />
+                <UploadMatchButton
+                  match={match}
+                  teamId={match.home_team_id}
+                  homeTeamEaClubId={match.home_team?.ea_club_id}
+                  awayTeamEaClubId={match.away_team?.ea_club_id}
+                  isAdmin={isAdmin}
+                  onImportSuccess={fetchMatchData}
+                />
 
                 {isAdmin && (
                   <Button
