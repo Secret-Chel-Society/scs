@@ -120,4 +120,3 @@ export default function MatchDetailPage() {
     </div>
   )
 }
-}
