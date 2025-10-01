@@ -521,7 +521,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           </div>
 
           {/* Center Score Section */}
-          <div className="bg-ice-blue-800/90 dark:bg-ice-blue-900/90 backdrop-blur-sm px-4 md:px-8 py-4 md:py-8 flex flex-col items-center justify-center md:min-w-[300px] relative z-20 border-y border-ice-blue-600/50">
+          <div className="bg-slate-800 px-4 md:px-8 py-4 md:py-8 flex flex-col items-center justify-center md:min-w-[300px] relative z-20">
             <Badge
               variant={match.status === "completed" || match.status === "Completed" ? "default" : "secondary"}
               className="mb-2 md:mb-4 text-sm md:text-lg px-3 md:px-4 py-1 md:py-2"
