@@ -497,12 +497,14 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
             <div className="relative z-10 p-4 md:p-8 h-full flex items-center justify-between">
               <div className="flex items-center space-x-3 md:space-x-6">
-                <TeamLogo
-                  teamName={match.home_team.name}
-                  logoUrl={match.home_team.logo_url}
-                  size="lg"
-                  className="md:size-xl"
-                />
+                <div className="bg-black/80 rounded-lg p-2 md:p-3">
+                  <TeamLogo
+                    teamName={match.home_team.name}
+                    logoUrl={match.home_team.logo_url}
+                    size="lg"
+                    className="md:size-xl"
+                  />
+                </div>
                 <div>
                   <h2 className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{match.home_team.name}</h2>
                   <p className="text-white/90 text-sm md:text-lg font-semibold drop-shadow-md">
@@ -594,12 +596,14 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                         : "0-0-0"}
                   </p>
                 </div>
-                <TeamLogo
-                  teamName={match.away_team.name}
-                  logoUrl={match.away_team.logo_url}
-                  size="lg"
-                  className="md:size-xl"
-                />
+                <div className="bg-black/80 rounded-lg p-2 md:p-3">
+                  <TeamLogo
+                    teamName={match.away_team.name}
+                    logoUrl={match.away_team.logo_url}
+                    size="lg"
+                    className="md:size-xl"
+                  />
+                </div>
               </div>
             </div>
           </div>
