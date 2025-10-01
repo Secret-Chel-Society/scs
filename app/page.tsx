@@ -15,6 +15,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import HeroCarousel from "@/components/hero-carousel"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { TeamLogo } from "@/components/team-logo"
 import { useSearchParams, useRouter } from "next/navigation"
 import {
   Trophy,
@@ -662,35 +663,39 @@ export default function Home() {
                       <div className="space-y-4">
                         {/* Home Team */}
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">
-                              {game.home_team?.name?.charAt(0) || "H"}
-                            </span>
+                          <div className="w-8 h-8">
+                            <TeamLogo
+                              teamName={game.home_team?.name || "Home Team"}
+                              logoUrl={game.home_team?.logo_url}
+                              size="sm"
+                            />
                           </div>
                           <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
                             {game.home_team?.name || "Home Team"}
                           </span>
-                          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
                             {game.home_score || 0}
                           </span>
                         </div>
 
                         {/* VS */}
                         <div className="text-center">
-                          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">VS</span>
+                          <span className="text-sm font-medium text-hockey-silver-500 dark:text-hockey-silver-400">VS</span>
                         </div>
 
                         {/* Away Team */}
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">
-                              {game.away_team?.name?.charAt(0) || "A"}
-                            </span>
+                          <div className="w-8 h-8">
+                            <TeamLogo
+                              teamName={game.away_team?.name || "Away Team"}
+                              logoUrl={game.away_team?.logo_url}
+                              size="sm"
+                            />
                           </div>
                           <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
                             {game.away_team?.name || "Away Team"}
                           </span>
-                          <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+                          <span className="text-2xl font-bold text-goal-red-600 dark:text-goal-red-400">
                             {game.away_score || 0}
                           </span>
                         </div>
