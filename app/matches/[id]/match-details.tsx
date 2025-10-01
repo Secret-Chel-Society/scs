@@ -15,6 +15,7 @@ import { EaDirectMatchStats } from "@/components/matches/ea-direct-match-stats"
 import { MatchStatsVisualization } from "@/components/matches/match-stats-visualization"
 import { MatchHighlightsWrapper } from "@/components/matches/match-highlights-wrapper"
 import { EditScoreModal } from "@/components/matches/edit-score-modal"
+import { ManualStatsEntryModal } from "@/components/matches/manual-stats-entry-modal"
 import { EaMatchImportModal } from "@/components/matches/ea-match-import-modal"
 import { SyncMatchStatsButton } from "@/components/matches/sync-match-stats-button"
 import { SyncPlayerStatsButton } from "@/components/matches/sync-player-stats-button"
@@ -37,6 +38,7 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [isEditScoreModalOpen, setIsEditScoreModalOpen] = useState(false)
+  const [isManualStatsModalOpen, setIsManualStatsModalOpen] = useState(false)
   const [debugInfo, setDebugInfo] = useState<any>(null)
 
   // Separate function to check authentication and permissions
@@ -394,9 +396,12 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
         <TabsContent value="overview">
           <div className="space-y-6">
             {canManageMatch && (
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsEditScoreModalOpen(true)} className="mb-2">
                   Edit Box Score
+                </Button>
+                <Button variant="outline" onClick={() => setIsManualStatsModalOpen(true)} className="mb-2">
+                  Manual Stats Entry
                 </Button>
               </div>
             )}
@@ -499,6 +504,15 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
             setMatch(updatedMatch)
             fetchMatchData() // Refresh data after update
           }}
+        />
+      )}
+
+      {canManageMatch && (
+        <ManualStatsEntryModal
+          open={isManualStatsModalOpen}
+          onOpenChange={setIsManualStatsModalOpen}
+          match={match}
+          onStatsUpdated={() => fetchMatchData()} // Refresh data after update
         />
       )}
     </div>
