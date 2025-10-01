@@ -257,13 +257,19 @@ export default function StandingsPage({ searchParams }: StandingsPageProps) {
         setError(null)
 
         // Use the standings API instead of manual calculation
-        const response = await fetch('/api/standings')
+        // Use the correct season number for SCSHL Season 1
+        const seasonParam = '?seasonId=2' // SCSHL Season 1 has season_number: 2
+        
+        const response = await fetch(`/api/standings${seasonParam}`)
         
         if (!response.ok) {
           throw new Error(`Failed to fetch standings: ${response.status}`)
         }
 
         const data = await response.json()
+        
+        // Log what season was used
+        console.log('Standings API response:', { seasonId: data.seasonId, standingsCount: data.standings?.length })
         
         if (data.standings && Array.isArray(data.standings)) {
           setStandings(data.standings)
