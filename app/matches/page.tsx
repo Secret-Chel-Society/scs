@@ -353,7 +353,7 @@ export default function MatchesPage() {
           className="fixed inset-0 opacity-5 bg-no-repeat bg-center bg-contain pointer-events-none"
           style={{
             backgroundImage:
-              "url('https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/team-logos/69ECC8EB-551A-4F62-B3A4-BAFE00F05DC7-removebg-preview%20(1).png')",
+              "url('https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png')",
           }}
         />
 
@@ -393,7 +393,7 @@ export default function MatchesPage() {
         className="fixed inset-0 opacity-5 bg-no-repeat bg-center bg-contain pointer-events-none"
         style={{
           backgroundImage:
-            "url('https://scexchiemhvhtjarnrrx.supabase.co/storage/v1/object/public/media/team-logos/69ECC8EB-551A-4F62-B3A4-BAFE00F05DC7-removebg-preview%20(1).png')",
+            "url('https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png')",
         }}
       />
       <div className="absolute inset-0 bg-hockey-pattern opacity-10" />
