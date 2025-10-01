@@ -657,10 +657,10 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
         let goalsFor = 0
         let goalsAgainst = 0
         let totalShots = 0
-        const powerplayGoals = 0
-        const powerplayOpportunities = 0
-        const penaltyKillGoalsAgainst = 0
-        const penaltyKillOpportunities = 0
+        let powerplayGoals = 0
+        let powerplayOpportunities = 0
+        let penaltyKillGoalsAgainst = 0
+        let penaltyKillOpportunities = 0
 
         teamMatches.forEach((match) => {
           const isHomeTeam = match.home_team_id === team.id
@@ -716,6 +716,44 @@ export async function calculateStandings(seasonId: number): Promise<TeamStanding
             }
           }
         })
+
+        // Get powerplay and penalty kill stats from EA player stats
+        try {
+          const { data: playerStats, error: playerStatsError } = await supabase
+            .from("ea_player_stats")
+            .select("ppg, pim, penalties_drawn")
+            .eq("team_id", team.id)
+            .in("match_id", teamMatches.map(m => m.id))
+
+          if (!playerStatsError && playerStats) {
+            playerStats.forEach((stat) => {
+              powerplayGoals += stat.ppg || 0
+              // PIM can be used to estimate penalty kill opportunities for opponents
+              const playerPenalties = Math.floor((stat.pim || 0) / 2) // Rough estimate: 2 PIM = 1 penalty
+              penaltyKillOpportunities += playerPenalties
+            })
+          }
+
+          // Get opponent penalties to calculate powerplay opportunities
+          const opponentTeamIds = teamMatches.map(match => 
+            match.home_team_id === team.id ? match.away_team_id : match.home_team_id
+          )
+          
+          const { data: opponentStats, error: opponentStatsError } = await supabase
+            .from("ea_player_stats")
+            .select("pim")
+            .in("team_id", opponentTeamIds)
+            .in("match_id", teamMatches.map(m => m.id))
+
+          if (!opponentStatsError && opponentStats) {
+            opponentStats.forEach((stat) => {
+              const opponentPenalties = Math.floor((stat.pim || 0) / 2) // Rough estimate
+              powerplayOpportunities += opponentPenalties
+            })
+          }
+        } catch (error) {
+          console.log(`Could not fetch player stats for team ${team.name}:`, error)
+        }
 
         // Calculate points and other stats
         const points = wins * 2 + otl
