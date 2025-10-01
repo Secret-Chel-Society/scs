@@ -189,14 +189,14 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-6 w-48" />
+      <div className="space-y-4 bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950 min-h-screen p-6">
+        <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
+          <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
+            <Skeleton className="h-8 w-64 bg-ice-blue-200/50 dark:bg-ice-blue-800/50" />
+            <Skeleton className="h-6 w-48 bg-hockey-silver-200/50 dark:bg-hockey-silver-800/50" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-48 w-full bg-rink-blue-200/50 dark:bg-rink-blue-800/50" />
           </CardContent>
         </Card>
       </div>
@@ -205,17 +205,19 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
   if (error || !match) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Match Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error || "Match not found"}</AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+      <div className="bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950 min-h-screen p-6">
+        <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
+          <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
+            <CardTitle className="text-ice-blue-700 dark:text-ice-blue-300">Match Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="destructive" className="border-goal-red-300/50 dark:border-goal-red-600/50 bg-goal-red-50/30 dark:bg-goal-red-900/20">
+              <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
+              <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">{error || "Match not found"}</AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
@@ -272,6 +274,7 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
                     variant="outline"
                     onClick={() => setIsImportModalOpen(true)}
                     title={eaClubIdMissingMessage || "Import EA Match"}
+                    className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white"
                   >
                     {hasEaClubIds ? "Import EA Match" : eaClubIdMissingMessage}
                   </Button>
@@ -357,24 +360,24 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
       {/* Debug information */}
       {debugInfo && canManageMatch && (
-        <details className="text-xs border p-2 rounded">
-          <summary className="font-medium cursor-pointer">Debug Information</summary>
-          <div className="mt-2 overflow-auto max-h-[200px]">
+        <details className="text-xs border border-ice-blue-200/50 dark:border-rink-blue-700/50 p-2 rounded bg-ice-blue-50/30 dark:bg-ice-blue-900/20">
+          <summary className="font-medium cursor-pointer text-ice-blue-700 dark:text-ice-blue-300">Debug Information</summary>
+          <div className="mt-2 overflow-auto max-h-[200px] text-hockey-silver-600 dark:text-hockey-silver-400">
             <p>
-              <strong>Home Team EA Club ID:</strong> {debugInfo.homeTeamEaClubId || "Not found"}
+              <strong className="text-ice-blue-600 dark:text-ice-blue-400">Home Team EA Club ID:</strong> {debugInfo.homeTeamEaClubId || "Not found"}
             </p>
             <p>
-              <strong>Away Team EA Club ID:</strong> {debugInfo.awayTeamEaClubId || "Not found"}
+              <strong className="text-ice-blue-600 dark:text-ice-blue-400">Away Team EA Club ID:</strong> {debugInfo.awayTeamEaClubId || "Not found"}
             </p>
-            <pre>{JSON.stringify(debugInfo.matchData, null, 2)}</pre>
+            <pre className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">{JSON.stringify(debugInfo.matchData, null, 2)}</pre>
           </div>
         </details>
       )}
 
       {canManageMatch && !hasEaClubIds && (
-        <Alert variant="warning" className="mt-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert variant="warning" className="mt-4 border-goal-red-300/50 dark:border-goal-red-600/50 bg-goal-red-50/30 dark:bg-goal-red-900/20">
+          <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
+          <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">
             {eaClubIdMissingMessage}. Please set it in the team settings to enable EA match imports.
           </AlertDescription>
         </Alert>
