@@ -88,20 +88,27 @@ interface TeamStanding {
   points: number
 }
 
+interface TeamColors {
+  primary: string
+  secondary: string
+  accent: string
+}
+
 // Team color mappings
 const getTeamColors = (teamName: string) => {
-  const teamColorMap: { [key: string]: { primary: string; secondary: string; accent: string } } = {
+  const teamColorMap: { [key: string]: TeamColors } = {
+    Wranglers: { primary: "bg-orange-600", secondary: "bg-orange-700", accent: "border-orange-500" },
     Firebirds: { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
     Bruins: { primary: "bg-yellow-500", secondary: "bg-yellow-600", accent: "border-yellow-400" },
-    Rangers: { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
+    Rangers: { primary: "bg-black", secondary: "bg-black", accent: "border-black" },
     Penguins: { primary: "bg-yellow-400", secondary: "bg-black", accent: "border-yellow-300" },
     Capitals: { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
-    Lightning: { primary: "bg-blue-500", secondary: "bg-blue-600", accent: "border-blue-400" },
-    Panthers: { primary: "bg-red-500", secondary: "bg-blue-800", accent: "border-red-400" },
-    "Maple Leafs": { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
+    Lightning: { primary: "bg-black", secondary: "bg-black", accent: "border-black" },
+    Panthers: { primary: "bg-red-500", secondary: "bg-black", accent: "border-red-400" },
+    "Maple Leafs": { primary: "bg-black", secondary: "bg-black", accent: "border-black" },
   }
 
-  return teamColorMap[teamName] || { primary: "bg-ice-blue-600", secondary: "bg-ice-blue-700", accent: "border-ice-blue-500" }
+  return teamColorMap[teamName] || { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
 }
 
 export function ComprehensiveMatchView({ match, isAdmin = false }: ComprehensiveMatchViewProps) {
