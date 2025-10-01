@@ -94,10 +94,12 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-      <div className="container py-6">
-        <Skeleton className="h-12 w-3/4 mb-6" />
-        <div className="grid gap-6">
-          <Skeleton className="h-[400px] w-full" />
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
+        <div className="container py-6">
+          <Skeleton className="h-12 w-3/4 mb-6 bg-ice-blue-200/50 dark:bg-ice-blue-800/50" />
+          <div className="grid gap-6">
+            <Skeleton className="h-[400px] w-full bg-hockey-silver-200/50 dark:bg-hockey-silver-800/50" />
+          </div>
         </div>
       </div>
     )
@@ -105,17 +107,19 @@ export default function MatchDetailPage() {
 
   if (error || !match) {
     return (
-      <div className="container py-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error || "Match not found"}</AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
+        <div className="container py-6">
+          <Alert variant="destructive" className="border-goal-red-300/50 dark:border-goal-red-600/50 bg-goal-red-50/30 dark:bg-goal-red-900/20">
+            <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
+            <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">{error || "Match not found"}</AlertDescription>
+          </Alert>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
       <ComprehensiveMatchView match={match} isAdmin={isAdmin} />
     </div>
   )
