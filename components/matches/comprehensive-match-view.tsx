@@ -94,18 +94,131 @@ interface TeamColors {
   accent: string
 }
 
-// Team color mappings
-const getTeamColors = (teamName: string) => {
+// Extract dominant color from logo URL
+const extractColorsFromLogo = async (logoUrl: string | null): Promise<TeamColors> => {
+  if (!logoUrl) {
+    return { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
+  }
+
+  try {
+    // Create a canvas to analyze the image
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
+    
+    return new Promise((resolve) => {
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx?.drawImage(img, 0, 0)
+        
+        try {
+          const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height)
+          if (!imageData) {
+            resolve({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
+            return
+          }
+          
+          // Analyze pixels to find dominant colors
+          const colorCounts: { [key: string]: number } = {}
+          const data = imageData.data
+          
+          // Sample every 10th pixel for performance
+          for (let i = 0; i < data.length; i += 40) {
+            const r = data[i]
+            const g = data[i + 1]
+            const b = data[i + 2]
+            const a = data[i + 3]
+            
+            // Skip transparent or very light pixels
+            if (a < 128 || (r > 240 && g > 240 && b > 240)) continue
+            
+            // Group similar colors
+            const colorKey = `${Math.floor(r/32)*32}-${Math.floor(g/32)*32}-${Math.floor(b/32)*32}`
+            colorCounts[colorKey] = (colorCounts[colorKey] || 0) + 1
+          }
+          
+          // Find the most common color
+          let dominantColor = 'black'
+          let maxCount = 0
+          
+          for (const [color, count] of Object.entries(colorCounts)) {
+            if (count > maxCount) {
+              maxCount = count
+              const [r, g, b] = color.split('-').map(Number)
+              
+              // Convert to CSS color class based on dominant hue
+              if (r > g && r > b) {
+                dominantColor = r > 150 ? 'red-600' : 'red-800'
+              } else if (g > r && g > b) {
+                dominantColor = g > 150 ? 'green-600' : 'green-800'
+              } else if (b > r && b > g) {
+                dominantColor = b > 150 ? 'blue-600' : 'blue-800'
+              } else if (r > 100 && g > 100 && b < 100) {
+                dominantColor = 'yellow-600'
+              } else if (r > 100 && g < 100 && b > 100) {
+                dominantColor = 'purple-600'
+              } else if (r < 100 && g > 100 && b > 100) {
+                dominantColor = 'cyan-600'
+              } else if (r > 150 && g > 100 && b < 100) {
+                dominantColor = 'orange-600'
+              } else {
+                dominantColor = (r + g + b) / 3 > 128 ? 'gray-600' : 'black'
+              }
+            }
+          }
+          
+          const primaryClass = dominantColor === 'black' ? 'bg-black' : `bg-${dominantColor}`
+          const secondaryClass = dominantColor === 'black' ? 'bg-black' : `bg-${dominantColor.replace('600', '700')}`
+          const accentClass = dominantColor === 'black' ? 'border-black' : `border-${dominantColor.replace('600', '500')}`
+          
+          resolve({
+            primary: primaryClass,
+            secondary: secondaryClass,
+            accent: accentClass
+          })
+        } catch (error) {
+          console.error('Error analyzing logo colors:', error)
+          resolve({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
+        }
+      }
+      
+      img.onerror = () => {
+        resolve({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
+      }
+      
+      img.src = logoUrl
+    })
+  } catch (error) {
+    console.error('Error loading logo for color extraction:', error)
+    return { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
+  }
+}
+
+// Team color mappings with logo-based color extraction
+const getTeamColors = async (teamName: string, logoUrl: string | null): Promise<TeamColors> => {
+  // Try to extract colors from logo first
+  if (logoUrl) {
+    try {
+      const extractedColors = await extractColorsFromLogo(logoUrl)
+      return extractedColors
+    } catch (error) {
+      console.error('Failed to extract colors from logo:', error)
+    }
+  }
+  
+  // Fallback to hardcoded colors if extraction fails
   const teamColorMap: { [key: string]: TeamColors } = {
     Wranglers: { primary: "bg-orange-600", secondary: "bg-orange-700", accent: "border-orange-500" },
     Firebirds: { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
     Bruins: { primary: "bg-yellow-500", secondary: "bg-yellow-600", accent: "border-yellow-400" },
-    Rangers: { primary: "bg-black", secondary: "bg-black", accent: "border-black" },
+    Rangers: { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
     Penguins: { primary: "bg-yellow-400", secondary: "bg-black", accent: "border-yellow-300" },
     Capitals: { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
-    Lightning: { primary: "bg-black", secondary: "bg-black", accent: "border-black" },
-    Panthers: { primary: "bg-red-500", secondary: "bg-black", accent: "border-red-400" },
-    "Maple Leafs": { primary: "bg-black", secondary: "bg-black", accent: "border-black" },
+    Lightning: { primary: "bg-blue-500", secondary: "bg-blue-600", accent: "border-blue-400" },
+    Panthers: { primary: "bg-red-500", secondary: "bg-blue-800", accent: "border-red-400" },
+    "Maple Leafs": { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
   }
 
   return teamColorMap[teamName] || { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
@@ -121,13 +234,30 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
   const [loading, setLoading] = useState(true)
   const [standingsLoading, setStandingsLoading] = useState(true)
   const [seasonInfo, setSeasonInfo] = useState<{ week: number; season: string } | null>(null)
+  const [homeColors, setHomeColors] = useState<TeamColors>({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
+  const [awayColors, setAwayColors] = useState<TeamColors>({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
 
   useEffect(() => {
     fetchMatchStats()
     fetchTeamStandings()
     fetchSeasonInfo()
     fetchLineups()
+    loadTeamColors()
   }, [match.id])
+
+  const loadTeamColors = async () => {
+    try {
+      const [homeTeamColors, awayTeamColors] = await Promise.all([
+        getTeamColors(match.home_team.name, match.home_team.logo_url),
+        getTeamColors(match.away_team.name, match.away_team.logo_url)
+      ])
+      setHomeColors(homeTeamColors)
+      setAwayColors(awayTeamColors)
+    } catch (error) {
+      console.error('Error loading team colors:', error)
+      // Keep default black colors on error
+    }
+  }
 
   const fetchLineups = async () => {
     try {
@@ -372,13 +502,10 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
   const homeTeamStats = teamStats.find((t) => t.team_id === match.home_team_id)
   const awayTeamStats = teamStats.find((t) => t.team_id === match.away_team_id)
-  const homeColors = getTeamColors(match.home_team.name)
-  const awayColors = getTeamColors(match.away_team.name)
 
-  // Get team standings
+  // Get team Standings
   const homeStanding = teamStandings[match.home_team_id]
   const awayStanding = teamStandings[match.away_team_id]
-
   // Use match_date or date field
   const matchDate = match.match_date || match.date
 
