@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { fetchEAJson } from "@/lib/ea-api"
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,66 +58,15 @@ export async function GET(request: NextRequest) {
       let matches: any[] = []
       let retryCount = 0
       const maxRetries = 3
-      let useProxy = false
       let lastError: Error | null = null
 
       while (retryCount < maxRetries && matches.length === 0) {
         try {
-          console.log(
-            `Fetching matches for ${isHome ? "home" : "away"} club ID ${clubId} (attempt ${retryCount + 1}${useProxy ? ", using proxy" : ""})`,
-          )
+          console.log(`Fetching matches for ${isHome ? "home" : "away"} club ID ${clubId} (attempt ${retryCount + 1})`)
 
           const endpoint = `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${clubId}`
+          const data = await fetchEAJson(endpoint)
 
-          let response
-
-          if (useProxy) {
-            // Use our proxy endpoint
-            const proxyUrl = `/api/ea/proxy?url=${encodeURIComponent(endpoint)}`
-            console.log(`Using proxy endpoint: ${proxyUrl}`)
-
-            response = await fetch(proxyUrl, {
-              next: { revalidate: 0 },
-              signal: AbortSignal.timeout(25000), // 25 second timeout
-            })
-          } else {
-            // Direct fetch
-            console.log(`Using direct endpoint: ${endpoint}`)
-
-            response = await fetch(endpoint, {
-              headers: {
-                "User-Agent":
-                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-                Accept: "application/json",
-                "Cache-Control": "no-cache",
-              },
-              next: { revalidate: 0 },
-              signal: AbortSignal.timeout(20000), // 20 second timeout
-            })
-          }
-
-          // Check for rate limiting or other error status codes
-          if (response.status === 429) {
-            throw new Error("Rate limited: Too Many Requests from EA API. Please try again later.")
-          }
-
-          if (!response.ok) {
-            console.error(
-              `Failed to fetch matches for ${isHome ? "home" : "away"} club ID ${clubId}: ${response.statusText} (${response.status})`,
-            )
-            throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`)
-          }
-
-          // Check content type to ensure we're getting JSON
-          const contentType = response.headers.get("content-type")
-          if (!contentType || !contentType.includes("application/json")) {
-            // Try to get the response text for better error reporting
-            const text = await response.text()
-            console.error(`Received non-JSON response: ${text.substring(0, 100)}...`)
-            throw new Error(`Expected JSON response but got: ${contentType || "unknown content type"}`)
-          }
-
-          const data = await response.json()
           console.log(
             `Got ${Array.isArray(data) ? data.length : "unknown"} matches for ${isHome ? "home" : "away"} club ID ${clubId}`,
           )
@@ -160,11 +110,7 @@ export async function GET(request: NextRequest) {
           )
           retryCount++
 
-          // If direct fetch failed, try proxy on next attempt
-          if (!useProxy && retryCount === 1) {
-            useProxy = true
-            console.log(`Switching to proxy for next attempt`)
-          } else if (retryCount < maxRetries) {
+          if (retryCount < maxRetries) {
             // Wait before retrying (exponential backoff)
             const backoffTime = 1000 * Math.pow(2, retryCount)
             console.log(`Waiting ${backoffTime}ms before retry ${retryCount + 1}`)
@@ -205,7 +151,6 @@ export async function GET(request: NextRequest) {
     if (allMatches.length === 0) {
       try {
         console.log("Using fallback endpoint to fetch matches")
-        // Try a different endpoint or approach as fallback
         const fallbackEndpoint = `https://proclubs.ea.com/api/nhl/clubs/matches?platform=${platform}&matchType=${matchType}`
 
         // Add club IDs if available
@@ -216,69 +161,30 @@ export async function GET(request: NextRequest) {
         const fullFallbackUrl = `${fallbackEndpoint}${clubParams.length ? "&" + clubParams.join("&") : ""}`
         console.log(`Fallback URL: ${fullFallbackUrl}`)
 
-        // Try direct fetch first
-        let response
-        try {
-          response = await fetch(fullFallbackUrl, {
-            headers: {
-              "User-Agent":
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-              Accept: "application/json",
-              "Cache-Control": "no-cache",
-            },
-            next: { revalidate: 0 },
-            signal: AbortSignal.timeout(20000),
-          })
-        } catch (err) {
-          console.log("Direct fallback failed, trying proxy")
-          // If direct fetch fails, try proxy
-          const proxyUrl = `/api/ea/proxy?url=${encodeURIComponent(fullFallbackUrl)}`
-          response = await fetch(proxyUrl, {
-            next: { revalidate: 0 },
-            signal: AbortSignal.timeout(25000),
-          })
-        }
+        const matches = await fetchEAJson(fullFallbackUrl)
+        console.log(`Fallback endpoint returned ${Array.isArray(matches) ? matches.length : "unknown"} matches`)
 
-        // Check for rate limiting
-        if (response.status === 429) {
-          console.error("Rate limited by EA API during fallback attempt")
-          // Continue with any matches we might have
-        } else if (response.ok) {
-          // Check content type to ensure we're getting JSON
-          const contentType = response.headers.get("content-type")
-          if (contentType && contentType.includes("application/json")) {
-            const matches = await response.json()
-            console.log(`Fallback endpoint returned ${Array.isArray(matches) ? matches.length : "unknown"} matches`)
-
-            if (Array.isArray(matches) && matches.length > 0) {
-              // Process matches based on the available club IDs
-              for (const match of matches) {
-                if (match.timestamp >= twoWeeksAgoTimestamp && !processedMatchIds.has(match.matchId)) {
-                  // If we have both home and away IDs, check if the match involves both
-                  if (homeId && awayId) {
-                    if (matchInvolvesClub(match, homeId) && matchInvolvesClub(match, awayId)) {
-                      processedMatchIds.add(match.matchId)
-                      allMatches.push(match)
-                    }
-                  }
-                  // If we only have one ID, check if the match involves that club
-                  else if (homeId || awayId) {
-                    const targetId = homeId || awayId
-                    if (matchInvolvesClub(match, targetId!)) {
-                      processedMatchIds.add(match.matchId)
-                      allMatches.push(match)
-                    }
-                  }
+        if (Array.isArray(matches) && matches.length > 0) {
+          // Process matches based on the available club IDs
+          for (const match of matches) {
+            if (match.timestamp >= twoWeeksAgoTimestamp && !processedMatchIds.has(match.matchId)) {
+              // If we have both home and away IDs, check if the match involves both
+              if (homeId && awayId) {
+                if (matchInvolvesClub(match, homeId) && matchInvolvesClub(match, awayId)) {
+                  processedMatchIds.add(match.matchId)
+                  allMatches.push(match)
+                }
+              }
+              // If we only have one ID, check if the match involves that club
+              else if (homeId || awayId) {
+                const targetId = homeId || awayId
+                if (matchInvolvesClub(match, targetId!)) {
+                  processedMatchIds.add(match.matchId)
+                  allMatches.push(match)
                 }
               }
             }
-          } else {
-            // Handle non-JSON response
-            const text = await response.text()
-            console.error(`Fallback endpoint returned non-JSON response: ${text.substring(0, 100)}...`)
           }
-        } else {
-          console.error(`Fallback endpoint failed: ${response.statusText} (${response.status})`)
         }
       } catch (error) {
         console.error("Error using fallback endpoint:", error)
