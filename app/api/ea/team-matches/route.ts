@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { fetchEAJson } from "@/lib/ea-api"
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,48 +22,8 @@ export async function GET(request: NextRequest) {
     console.log(`Fetching EA matches for club ${clubId}, matchType: ${matchType}, platform: ${platform}`)
 
     try {
-      // Call EA API to get team matches with improved error handling
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-
-      const response = await fetch(
-        `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${clubId}`,
-        {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            Accept: "application/json",
-            "Cache-Control": "no-cache",
-          },
-          next: { revalidate: 0 }, // Disable caching
-          signal: controller.signal,
-        },
-      )
-
-      clearTimeout(timeoutId)
-
-      // Check if response is ok
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`EA API error (${response.status}): ${errorText}`)
-
-        // If EA API returns an error, fall back to mock data
-        console.log("EA API returned an error, using mock data as fallback")
-        return NextResponse.json(getMockEaMatches(clubId))
-      }
-
-      // Try to parse JSON response
-      let data
-      try {
-        const text = await response.text()
-        data = JSON.parse(text)
-      } catch (parseError: any) {
-        console.error("Error parsing EA API response:", parseError)
-
-        // If parsing fails, fall back to mock data
-        console.log("Failed to parse EA API response, using mock data as fallback")
-        return NextResponse.json(getMockEaMatches(clubId))
-      }
+      const url = `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${clubId}`
+      const data = await fetchEAJson(url)
 
       // Return mock data for testing if the API is down
       if (!data || !Array.isArray(data)) {
