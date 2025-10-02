@@ -2,45 +2,59 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const rawUrl = request.nextUrl.searchParams.get("url")
+    const url = request.nextUrl.searchParams.get("url")
 
-    if (!rawUrl || !rawUrl.startsWith("https://proclubs.ea.com")) {
-      return NextResponse.json({ error: "Invalid or missing EA API URL" }, { status: 400 })
+    if (!url) {
+      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 })
     }
 
-    const decodedUrl = decodeURIComponent(rawUrl)
-    console.log("Proxying to EA URL:", decodedUrl)
+    const scraperApiKey = process.env.SCRAPER_API_KEY
 
-    const response = await fetch(decodedUrl, {
+    if (!scraperApiKey) {
+      console.error("SCRAPER_API_KEY environment variable is not set")
+      return NextResponse.json({ error: "ScraperAPI is not configured" }, { status: 500 })
+    }
+
+    // Build ScraperAPI URL with the target URL encoded
+    const scraperApiUrl = `https://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(url)}`
+
+    console.log(`[v0] Original EA API URL: ${url}`)
+    console.log(`[v0] Encoded URL parameter: ${encodeURIComponent(url)}`)
+    console.log(`[v0] Full ScraperAPI URL: ${scraperApiUrl.replace(scraperApiKey, "API_KEY_HIDDEN")}`)
+
+    const response = await fetch(scraperApiUrl, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/javascript, */*; q=0.01",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://www.ea.com/",
-        "Origin": "https://www.ea.com",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-        "Connection": "keep-alive",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "cross-site",
+        Accept: "application/json",
       },
       next: { revalidate: 0 },
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(30000), // 30 second timeout
     })
 
+    console.log(`[v0] ScraperAPI response status: ${response.status} ${response.statusText}`)
+
+    // Check for rate limiting
     if (response.status === 429) {
-      console.error("Rate limited by EA API")
+      console.error("[v0] Rate limited by ScraperAPI or EA API")
       return NextResponse.json(
-        { error: "Rate limited by EA API", message: "Too many requests. Please try again later." },
+        {
+          error: "Rate limited",
+          message: "Too many requests. Please try again later.",
+        },
         { status: 429 },
       )
     }
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`Proxy fetch failed [${response.status}]:`, errorText.substring(0, 150))
+      console.error(`[v0] Proxy request failed: ${response.status} ${response.statusText}`)
+
+      // Try to get the response text for better error reporting
+      let errorText
+      try {
+        errorText = await response.text()
+      } catch (e) {
+        errorText = "Could not read error response"
+      }
+
       return NextResponse.json(
         {
           error: `Proxy request failed: ${response.status} ${response.statusText}`,
@@ -50,29 +64,32 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const contentType = response.headers.get("content-type") ?? "application/json"
-
-    if (!contentType.includes("application/json")) {
+    // Check content type to ensure we're getting JSON
+    const contentType = response.headers.get("content-type")
+    if (!contentType || !contentType.includes("application/json")) {
+      // Try to get the response text for better error reporting
       const text = await response.text()
-      console.error("Unexpected content-type:", contentType, "Preview:", text.substring(0, 100))
+      console.error(`[v0] Received non-JSON response: ${text.substring(0, 100)}...`)
+
       return NextResponse.json(
         {
-          error: "Expected JSON but received different content",
-          contentType,
+          error: "Expected JSON response but got non-JSON content",
+          contentType: contentType || "unknown",
           preview: text.substring(0, 500),
         },
         { status: 500 },
       )
     }
 
-    const json = await response.json()
-    return NextResponse.json(json)
+    const data = await response.json()
+    console.log(`[v0] Successfully fetched data through ScraperAPI`)
+    return NextResponse.json(data)
   } catch (error: any) {
-    console.error("Proxy error:", error.message || error)
+    console.error("[v0] Proxy error:", error.message || error)
     return NextResponse.json(
       {
-        error: "Proxy request failed",
-        message: error.message || "Failed to connect to EA API.",
+        error: error.message || "Proxy request failed",
+        message: "There was an error connecting to the EA Sports API through ScraperAPI.",
       },
       { status: 500 },
     )
