@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { fetchEAJson } from "@/lib/ea-api"
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,21 +10,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Club name is required" }, { status: 400 })
     }
 
-    // Call EA API to search for teams
-    const response = await fetch(
-      `https://proclubs.ea.com/api/nhl/clubs/search?platform=common-gen5&clubName=${clubName}`,
-      {
-        headers: {
-          "User-Agent": "SCS-Website/1.0",
-        },
-      },
-    )
+    const url = `https://proclubs.ea.com/api/nhl/clubs/search?platform=common-gen5&clubName=${clubName}`
+    const data = await fetchEAJson(url)
 
-    if (!response.ok) {
-      throw new Error(`EA API error: ${response.statusText}`)
-    }
-
-    const data = await response.json()
     return NextResponse.json(data)
   } catch (error: any) {
     console.error("Error searching EA teams:", error)
