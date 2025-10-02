@@ -2,15 +2,16 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const url = request.nextUrl.searchParams.get("url")
+    const rawUrl = request.nextUrl.searchParams.get("url")
 
-    if (!url) {
-      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 })
+    if (!rawUrl || !rawUrl.startsWith("https://proclubs.ea.com")) {
+      return NextResponse.json({ error: "Invalid or missing EA API URL" }, { status: 400 })
     }
 
-    console.log(`Proxying request to: ${url}`)
+    const decodedUrl = decodeURIComponent(rawUrl)
+    console.log("Proxying to EA URL:", decodedUrl)
 
-    const response = await fetch(url, {
+    const response = await fetch(decodedUrl, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -18,32 +19,20 @@ export async function GET(request: NextRequest) {
         "Cache-Control": "no-cache",
       },
       next: { revalidate: 0 },
-      signal: AbortSignal.timeout(30000), // 30 second timeout
+      signal: AbortSignal.timeout(30000),
     })
 
-    // Check for rate limiting
     if (response.status === 429) {
       console.error("Rate limited by EA API")
       return NextResponse.json(
-        {
-          error: "Rate limited by EA API",
-          message: "Too many requests to EA API. Please try again later.",
-        },
+        { error: "Rate limited by EA API", message: "Too many requests. Please try again later." },
         { status: 429 },
       )
     }
 
     if (!response.ok) {
-      console.error(`Proxy request failed: ${response.status} ${response.statusText}`)
-
-      // Try to get the response text for better error reporting
-      let errorText
-      try {
-        errorText = await response.text()
-      } catch (e) {
-        errorText = "Could not read error response"
-      }
-
+      const errorText = await response.text()
+      console.error(`Proxy fetch failed [${response.status}]:`, errorText.substring(0, 150))
       return NextResponse.json(
         {
           error: `Proxy request failed: ${response.status} ${response.statusText}`,
@@ -53,31 +42,29 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check content type to ensure we're getting JSON
-    const contentType = response.headers.get("content-type")
-    if (!contentType || !contentType.includes("application/json")) {
-      // Try to get the response text for better error reporting
-      const text = await response.text()
-      console.error(`Received non-JSON response: ${text.substring(0, 100)}...`)
+    const contentType = response.headers.get("content-type") ?? "application/json"
 
+    if (!contentType.includes("application/json")) {
+      const text = await response.text()
+      console.error("Unexpected content-type:", contentType, "Preview:", text.substring(0, 100))
       return NextResponse.json(
         {
-          error: "Expected JSON response but got non-JSON content",
-          contentType: contentType || "unknown",
+          error: "Expected JSON but received different content",
+          contentType,
           preview: text.substring(0, 500),
         },
         { status: 500 },
       )
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    const json = await response.json()
+    return NextResponse.json(json)
   } catch (error: any) {
     console.error("Proxy error:", error.message || error)
     return NextResponse.json(
       {
-        error: error.message || "Proxy request failed",
-        message: "There was an error connecting to the EA Sports API through the proxy.",
+        error: "Proxy request failed",
+        message: error.message || "Failed to connect to EA API.",
       },
       { status: 500 },
     )
