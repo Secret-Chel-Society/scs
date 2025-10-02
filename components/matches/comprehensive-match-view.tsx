@@ -88,143 +88,9 @@ interface TeamStanding {
   points: number
 }
 
-interface TeamColors {
-  primary: string
-  secondary: string
-  accent: string
-}
-
-// Extract dominant color from logo URL
-const extractColorsFromLogo = async (logoUrl: string | null): Promise<TeamColors> => {
-  if (!logoUrl) {
-    return { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
-  }
-
-  try {
-    // Create a canvas to analyze the image
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    const img = new Image()
-    
-    return new Promise((resolve) => {
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        canvas.width = img.width
-        canvas.height = img.height
-        ctx?.drawImage(img, 0, 0)
-        
-        try {
-          const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height)
-          if (!imageData) {
-            resolve({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
-            return
-          }
-          
-          // Analyze pixels to find dominant colors
-          const colorCounts: { [key: string]: number } = {}
-          const data = imageData.data
-          
-          // Sample every 10th pixel for performance
-          for (let i = 0; i < data.length; i += 40) {
-            const r = data[i]
-            const g = data[i + 1]
-            const b = data[i + 2]
-            const a = data[i + 3]
-            
-            // Skip transparent or very light pixels
-            if (a < 128 || (r > 240 && g > 240 && b > 240)) continue
-            
-            // Group similar colors
-            const colorKey = `${Math.floor(r/32)*32}-${Math.floor(g/32)*32}-${Math.floor(b/32)*32}`
-            colorCounts[colorKey] = (colorCounts[colorKey] || 0) + 1
-          }
-          
-          // Find the most common color
-          let dominantColor = 'black'
-          let maxCount = 0
-          
-          for (const [color, count] of Object.entries(colorCounts)) {
-            if (count > maxCount) {
-              maxCount = count
-              const [r, g, b] = color.split('-').map(Number)
-              
-              // Convert to CSS color class based on dominant hue
-              if (r > g && r > b) {
-                dominantColor = r > 150 ? 'red-600' : 'red-800'
-              } else if (g > r && g > b) {
-                dominantColor = g > 150 ? 'green-600' : 'green-800'
-              } else if (b > r && b > g) {
-                dominantColor = b > 150 ? 'blue-600' : 'blue-800'
-              } else if (r > 100 && g > 100 && b < 100) {
-                dominantColor = 'yellow-600'
-              } else if (r > 100 && g < 100 && b > 100) {
-                dominantColor = 'purple-600'
-              } else if (r < 100 && g > 100 && b > 100) {
-                dominantColor = 'cyan-600'
-              } else if (r > 150 && g > 100 && b < 100) {
-                dominantColor = 'orange-600'
-              } else {
-                dominantColor = (r + g + b) / 3 > 128 ? 'gray-600' : 'black'
-              }
-            }
-          }
-          
-          const primaryClass = dominantColor === 'black' ? 'bg-black' : `bg-${dominantColor}`
-          const secondaryClass = dominantColor === 'black' ? 'bg-black' : `bg-${dominantColor.replace('600', '700')}`
-          const accentClass = dominantColor === 'black' ? 'border-black' : `border-${dominantColor.replace('600', '500')}`
-          
-          resolve({
-            primary: primaryClass,
-            secondary: secondaryClass,
-            accent: accentClass
-          })
-        } catch (error) {
-          console.error('Error analyzing logo colors:', error)
-          resolve({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
-        }
-      }
-      
-      img.onerror = () => {
-        resolve({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
-      }
-      
-      img.src = logoUrl
-    })
-  } catch (error) {
-    console.error('Error loading logo for color extraction:', error)
-    return { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
-  }
-}
-
-// Team color mappings with logo-based color extraction
-const getTeamColors = async (teamName: string, logoUrl: string | null): Promise<TeamColors> => {
-  // Try to extract colors from logo first
-  if (logoUrl) {
-    try {
-      const extractedColors = await extractColorsFromLogo(logoUrl)
-      return extractedColors
-    } catch (error) {
-      console.error('Failed to extract colors from logo:', error)
-    }
-  }
-  
-  // Fallback to hardcoded colors if extraction fails
-  const teamColorMap: { [key: string]: TeamColors } = {
-    // Current SCSHL Teams
-    Wranglers: { primary: "bg-orange-600", secondary: "bg-orange-700", accent: "border-orange-500" },
-    "Ottawa Firestorm": { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
-    "Danglin Desperatos": { primary: "bg-yellow-600", secondary: "bg-yellow-700", accent: "border-yellow-500" },
-    "Smiths Falls Bears": { primary: "bg-amber-800", secondary: "bg-amber-900", accent: "border-amber-700" },
-    Northmen: { primary: "bg-blue-800", secondary: "bg-blue-900", accent: "border-blue-700" },
-    "Mozambique Whale Sharks": { primary: "bg-teal-600", secondary: "bg-teal-700", accent: "border-teal-500" },
-    Phantoms: { primary: "bg-purple-600", secondary: "bg-purple-700", accent: "border-purple-500" },
-    "Central Park Snipers": { primary: "bg-green-600", secondary: "bg-green-700", accent: "border-green-500" },
-    "Saginaw Spartans": { primary: "bg-red-700", secondary: "bg-red-800", accent: "border-red-600" },
-    "Backyard Bulldogs": { primary: "bg-gray-700", secondary: "bg-gray-800", accent: "border-gray-600" },
-    "North Stars": { primary: "bg-indigo-600", secondary: "bg-indigo-700", accent: "border-indigo-500" },
-    "Broad Street Bullies": { primary: "bg-orange-500", secondary: "bg-orange-600", accent: "border-orange-400" },
-    
-    // Legacy NHL Teams (keeping for compatibility)
+// Team color mappings
+const getTeamColors = (teamName: string) => {
+  const teamColorMap: { [key: string]: { primary: string; secondary: string; accent: string } } = {
     Firebirds: { primary: "bg-red-600", secondary: "bg-red-700", accent: "border-red-500" },
     Bruins: { primary: "bg-yellow-500", secondary: "bg-yellow-600", accent: "border-yellow-400" },
     Rangers: { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
@@ -235,7 +101,7 @@ const getTeamColors = async (teamName: string, logoUrl: string | null): Promise<
     "Maple Leafs": { primary: "bg-blue-600", secondary: "bg-blue-700", accent: "border-blue-500" },
   }
 
-  return teamColorMap[teamName] || { primary: "bg-black", secondary: "bg-black", accent: "border-black" }
+  return teamColorMap[teamName] || { primary: "bg-slate-600", secondary: "bg-slate-700", accent: "border-slate-500" }
 }
 
 export function ComprehensiveMatchView({ match, isAdmin = false }: ComprehensiveMatchViewProps) {
@@ -248,30 +114,13 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
   const [loading, setLoading] = useState(true)
   const [standingsLoading, setStandingsLoading] = useState(true)
   const [seasonInfo, setSeasonInfo] = useState<{ week: number; season: string } | null>(null)
-  const [homeColors, setHomeColors] = useState<TeamColors>({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
-  const [awayColors, setAwayColors] = useState<TeamColors>({ primary: "bg-black", secondary: "bg-black", accent: "border-black" })
 
   useEffect(() => {
     fetchMatchStats()
     fetchTeamStandings()
     fetchSeasonInfo()
     fetchLineups()
-    loadTeamColors()
   }, [match.id])
-
-  const loadTeamColors = async () => {
-    try {
-      const [homeTeamColors, awayTeamColors] = await Promise.all([
-        getTeamColors(match.home_team.name, match.home_team.logo_url),
-        getTeamColors(match.away_team.name, match.away_team.logo_url)
-      ])
-      setHomeColors(homeTeamColors)
-      setAwayColors(awayTeamColors)
-    } catch (error) {
-      console.error('Error loading team colors:', error)
-      // Keep default black colors on error
-    }
-  }
 
   const fetchLineups = async () => {
     try {
@@ -516,10 +365,13 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
   const homeTeamStats = teamStats.find((t) => t.team_id === match.home_team_id)
   const awayTeamStats = teamStats.find((t) => t.team_id === match.away_team_id)
+  const homeColors = getTeamColors(match.home_team.name)
+  const awayColors = getTeamColors(match.away_team.name)
 
-  // Get team Standings
+  // Get team standings
   const homeStanding = teamStandings[match.home_team_id]
   const awayStanding = teamStandings[match.away_team_id]
+
   // Use match_date or date field
   const matchDate = match.match_date || match.date
 
@@ -571,21 +423,21 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
     return (
       <div className="space-y-2">
         <div className="flex justify-between items-center text-sm">
-          <span className="text-hockey-silver-300">{label}</span>
+          <span className="text-slate-300">{label}</span>
         </div>
         <div className="flex items-center space-x-2 text-xs">
           <span className="text-white font-semibold w-12 text-right">
             {isPercentage ? `${homeValue.toFixed(1)}%` : homeValue}
           </span>
-          <div className="flex-1 h-2 bg-hockey-silver-700 dark:bg-hockey-silver-600 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 transition-all duration-300"
+              className={`h-full ${homeColors.primary} transition-all duration-300`}
               style={{ width: `${homePercentage}%` }}
             />
           </div>
-          <div className="flex-1 h-2 bg-hockey-silver-700 dark:bg-hockey-silver-600 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 transition-all duration-300 ml-auto"
+              className={`h-full ${awayColors.primary} transition-all duration-300 ml-auto`}
               style={{ width: `${awayPercentage}%` }}
             />
           </div>
@@ -593,7 +445,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             {isPercentage ? `${awayValue.toFixed(1)}%` : awayValue}
           </span>
         </div>
-        <div className="flex justify-between text-xs text-hockey-silver-400">
+        <div className="flex justify-between text-xs text-slate-400">
           <span>{homeTeam}</span>
           <span>{awayTeam}</span>
         </div>
@@ -645,14 +497,12 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
 
             <div className="relative z-10 p-4 md:p-8 h-full flex items-center justify-between">
               <div className="flex items-center space-x-3 md:space-x-6">
-                <div className="bg-black/80 rounded-lg p-2 md:p-3">
-                  <TeamLogo
-                    teamName={match.home_team.name}
-                    logoUrl={match.home_team.logo_url}
-                    size="lg"
-                    className="md:size-xl"
-                  />
-                </div>
+                <TeamLogo
+                  teamName={match.home_team.name}
+                  logoUrl={match.home_team.logo_url}
+                  size="lg"
+                  className="md:size-xl"
+                />
                 <div>
                   <h2 className="text-xl md:text-3xl font-bold text-white drop-shadow-lg">{match.home_team.name}</h2>
                   <p className="text-white/90 text-sm md:text-lg font-semibold drop-shadow-md">
@@ -744,14 +594,12 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                         : "0-0-0"}
                   </p>
                 </div>
-                <div className="bg-black/80 rounded-lg p-2 md:p-3">
-                  <TeamLogo
-                    teamName={match.away_team.name}
-                    logoUrl={match.away_team.logo_url}
-                    size="lg"
-                    className="md:size-xl"
-                  />
-                </div>
+                <TeamLogo
+                  teamName={match.away_team.name}
+                  logoUrl={match.away_team.logo_url}
+                  size="lg"
+                  className="md:size-xl"
+                />
               </div>
             </div>
           </div>
@@ -765,11 +613,11 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
           <div className="lg:col-span-1 space-y-6">
             {/* Period Stats */}
             {periodScores.length > 0 && (
-              <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
+              <Card className="bg-slate-800 border-slate-700">
                 <CardContent className="p-4">
-                  <h3 className="text-lg font-semibold mb-4 text-ice-blue-100">Period Stats</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">Period Stats</h3>
                   <div className="space-y-2">
-                    <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-hockey-silver-300 border-b border-ice-blue-600/50 pb-2">
+                    <div className="grid grid-cols-4 gap-2 text-sm font-semibold text-slate-300 border-b border-slate-600 pb-2">
                       <span>Team</span>
                       <span className="text-center">1</span>
                       <span className="text-center">2</span>
@@ -801,9 +649,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             )}
 
             {/* Team Stats with Comparison Bars */}
-            <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
+            <Card className="bg-slate-800 border-slate-700">
               <CardContent className="p-4">
-                <h3 className="text-lg font-semibold mb-4 text-ice-blue-100">Team Stats</h3>
+                <h3 className="text-lg font-semibold mb-4 text-white">Team Stats</h3>
                 {homeTeamStats && awayTeamStats && (
                   <div className="space-y-6">
                     <StatComparisonBar
@@ -856,9 +704,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             </Card>
 
             {/* Season Info */}
-            <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
+            <Card className="bg-slate-800 border-slate-700">
               <CardContent className="p-4 text-center">
-                <p className="text-hockey-silver-300">
+                <p className="text-slate-300">
                   {seasonInfo ? `Week ${seasonInfo.week} of ${seasonInfo.season}` : "Loading..."}
                 </p>
               </CardContent>
@@ -870,7 +718,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             {/* Three Stars */}
             {playerStats.length > 0 && (
               <div>
-                <h3 className="text-xl font-semibold mb-4 text-ice-blue-100">Three Stars</h3>
+                <h3 className="text-xl font-semibold mb-4 text-white">Three Stars</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {(() => {
                     const allPlayers = [
@@ -886,7 +734,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       return (
                         <Card
                           key={player.player_id}
-                          className="border-none relative overflow-hidden bg-ice-blue-900/80 backdrop-blur-sm shadow-hockey-glow"
+                          className="border-none relative overflow-hidden bg-slate-800"
                           style={{
                             backgroundImage: teamData.logo_url ? `url(${teamData.logo_url})` : "none",
                             backgroundSize: "cover",
@@ -938,9 +786,9 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
             )}
 
             {/* Player Stats */}
-            <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
+            <Card className="bg-slate-800 border-slate-700">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4 text-ice-blue-100">Player Stats</h3>
+                <h3 className="text-xl font-semibold mb-4 text-white">Player Stats</h3>
                 {playerStats.length > 0 ? (
                   <div className="space-y-8">
                     {/* Home Team */}
@@ -959,7 +807,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-ice-blue-600/50 text-hockey-silver-300 bg-ice-blue-800/50">
+                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
                               <th className="text-left py-2 px-2">Player</th>
                               <th className="text-center py-2 px-1">Pos</th>
                               <th className="text-center py-2 px-1">G</th>
@@ -989,7 +837,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                               .map((player, index) => (
                                 <tr
                                   key={player.player_id}
-                                  className="border-b border-ice-blue-700/30 hover:bg-ice-blue-800/20"
+                                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
                                 >
                                   <td className="py-2 px-2 text-white font-medium">
                                     <div className="flex items-center">
@@ -1062,7 +910,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-ice-blue-600/50 text-hockey-silver-300 bg-ice-blue-800/50">
+                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
                               <th className="text-left py-2 px-2">Player</th>
                               <th className="text-center py-2 px-1">Pos</th>
                               <th className="text-center py-2 px-1">G</th>
@@ -1092,7 +940,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                               .map((player, index) => (
                                 <tr
                                   key={player.player_id}
-                                  className="border-b border-ice-blue-700/30 hover:bg-ice-blue-800/20"
+                                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
                                 >
                                   <td className="py-2 px-2 text-white font-medium">
                                     <div className="flex items-center">
@@ -1157,7 +1005,7 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-ice-blue-600/50 text-hockey-silver-300 bg-ice-blue-800/50">
+                            <tr className="border-b border-slate-600 text-slate-300 bg-slate-700">
                               <th className="text-left py-2 px-2">Player</th>
                               <th className="text-center py-2 px-2">TOI</th>
                               <th className="text-center py-2 px-2">SV%</th>
@@ -1229,16 +1077,16 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-hockey-silver-400">No player statistics available for this match.</div>
+                  <div className="text-center py-8 text-slate-400">No player statistics available for this match.</div>
                 )}
               </CardContent>
             </Card>
 
             {/* Lineups Section */}
             {lineups.length > 0 && (
-              <Card className="bg-ice-blue-900/80 dark:bg-ice-blue-950/80 border-ice-blue-600/50 backdrop-blur-sm shadow-hockey-glow">
+              <Card className="bg-slate-800 border-slate-700">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-6 text-ice-blue-100">Lineups</h3>
+                  <h3 className="text-xl font-semibold mb-6 text-white">Lineups</h3>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Home Team Lineups */}
