@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper function to fetch a match from club matches
+// Helper function to fetch a match from club matches using ScraperAPI
 async function fetchMatchFromClubMatches(
   matchId: string,
   homeClubId: string,
@@ -113,25 +113,27 @@ async function fetchMatchFromClubMatches(
     throw new Error("At least one club ID is required to fetch matches")
   }
 
+  const scraperApiKey = process.env.SCRAPER_API_KEY
+
+  if (!scraperApiKey) {
+    throw new Error("ScraperAPI key is not configured")
+  }
+
   // Try home club first if available
   if (homeClubId) {
     try {
-      console.log(`Fetching matches for home club ${homeClubId}`)
-      const endpoint = `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${homeClubId}`
+      console.log(`Fetching matches for home club ${homeClubId} via ScraperAPI`)
+      const eaApiUrl = `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${homeClubId}`
+      const scraperApiUrl = `https://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(eaApiUrl)}`
 
-      const response = await fetch(endpoint, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-          Accept: "application/json",
-          "Cache-Control": "no-cache",
-        },
-        next: { revalidate: 0 },
-        signal: AbortSignal.timeout(20000), // 20 second timeout
+      console.log(`[v0] Fetching from ScraperAPI: ${eaApiUrl}`)
+
+      const response = await fetch(scraperApiUrl, {
+        signal: AbortSignal.timeout(30000), // 30 second timeout
       })
 
       if (!response.ok) {
-        console.log(`Failed to fetch home club matches: ${response.status}`)
+        console.log(`Failed to fetch home club matches via ScraperAPI: ${response.status}`)
         throw new Error(`Failed to fetch home club matches: ${response.statusText}`)
       }
 
@@ -154,22 +156,18 @@ async function fetchMatchFromClubMatches(
   // Try away club if available and different from home club
   if (awayClubId && awayClubId !== homeClubId) {
     try {
-      console.log(`Fetching matches for away club ${awayClubId}`)
-      const endpoint = `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${awayClubId}`
+      console.log(`Fetching matches for away club ${awayClubId} via ScraperAPI`)
+      const eaApiUrl = `https://proclubs.ea.com/api/nhl/clubs/matches?matchType=${matchType}&platform=${platform}&clubIds=${awayClubId}`
+      const scraperApiUrl = `https://api.scraperapi.com/?api_key=${scraperApiKey}&url=${encodeURIComponent(eaApiUrl)}`
 
-      const response = await fetch(endpoint, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-          Accept: "application/json",
-          "Cache-Control": "no-cache",
-        },
-        next: { revalidate: 0 },
-        signal: AbortSignal.timeout(20000), // 20 second timeout
+      console.log(`[v0] Fetching from ScraperAPI: ${eaApiUrl}`)
+
+      const response = await fetch(scraperApiUrl, {
+        signal: AbortSignal.timeout(30000), // 30 second timeout
       })
 
       if (!response.ok) {
-        console.log(`Failed to fetch away club matches: ${response.status}`)
+        console.log(`Failed to fetch away club matches via ScraperAPI: ${response.status}`)
         throw new Error(`Failed to fetch away club matches: ${response.statusText}`)
       }
 
