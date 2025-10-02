@@ -38,43 +38,43 @@ export function MatchStatsVisualization({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Match Statistics</CardTitle>
+    <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
+      <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
+        <CardTitle className="text-ice-blue-700 dark:text-ice-blue-300">Match Statistics</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b">
-                <th className="py-2 px-4 text-left">Team</th>
-                <th className="py-2 px-4 text-center">P1</th>
-                <th className="py-2 px-4 text-center">P2</th>
-                <th className="py-2 px-4 text-center">P3</th>
-                {formattedPeriodScores.length > 3 && <th className="py-2 px-4 text-center">OT</th>}
-                <th className="py-2 px-4 text-center font-bold">Final</th>
+              <tr className="border-b border-ice-blue-200/50 dark:border-rink-blue-700/50">
+                <th className="py-2 px-4 text-left text-ice-blue-600 dark:text-ice-blue-400">Team</th>
+                <th className="py-2 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">P1</th>
+                <th className="py-2 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">P2</th>
+                <th className="py-2 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">P3</th>
+                {formattedPeriodScores.length > 3 && <th className="py-2 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">OT</th>}
+                <th className="py-2 px-4 text-center font-bold text-ice-blue-700 dark:text-ice-blue-300">Final</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b">
-                <td className="py-3 px-4 font-medium">{homeTeam?.name || "Home Team"}</td>
-                <td className="py-3 px-4 text-center">{formattedPeriodScores[0]?.home || 0}</td>
-                <td className="py-3 px-4 text-center">{formattedPeriodScores[1]?.home || 0}</td>
-                <td className="py-3 px-4 text-center">{formattedPeriodScores[2]?.home || 0}</td>
+              <tr className="border-b border-ice-blue-200/30 dark:border-rink-blue-700/30 hover:bg-ice-blue-50/30 dark:hover:bg-ice-blue-900/20">
+                <td className="py-3 px-4 font-medium text-hockey-silver-700 dark:text-hockey-silver-300">{homeTeam?.name || "Home Team"}</td>
+                <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[0]?.home || 0}</td>
+                <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[1]?.home || 0}</td>
+                <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[2]?.home || 0}</td>
                 {formattedPeriodScores.length > 3 && (
-                  <td className="py-3 px-4 text-center">{formattedPeriodScores[3]?.home || 0}</td>
+                  <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[3]?.home || 0}</td>
                 )}
-                <td className="py-3 px-4 text-center font-bold">{homeScore || 0}</td>
+                <td className="py-3 px-4 text-center font-bold text-ice-blue-700 dark:text-ice-blue-300 text-lg">{homeScore || 0}</td>
               </tr>
-              <tr>
-                <td className="py-3 px-4 font-medium">{awayTeam?.name || "Away Team"}</td>
-                <td className="py-3 px-4 text-center">{formattedPeriodScores[0]?.away || 0}</td>
-                <td className="py-3 px-4 text-center">{formattedPeriodScores[1]?.away || 0}</td>
-                <td className="py-3 px-4 text-center">{formattedPeriodScores[2]?.away || 0}</td>
+              <tr className="hover:bg-ice-blue-50/30 dark:hover:bg-ice-blue-900/20">
+                <td className="py-3 px-4 font-medium text-hockey-silver-700 dark:text-hockey-silver-300">{awayTeam?.name || "Away Team"}</td>
+                <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[0]?.away || 0}</td>
+                <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[1]?.away || 0}</td>
+                <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[2]?.away || 0}</td>
                 {formattedPeriodScores.length > 3 && (
-                  <td className="py-3 px-4 text-center">{formattedPeriodScores[3]?.away || 0}</td>
+                  <td className="py-3 px-4 text-center text-ice-blue-600 dark:text-ice-blue-400">{formattedPeriodScores[3]?.away || 0}</td>
                 )}
-                <td className="py-3 px-4 text-center font-bold">{awayScore || 0}</td>
+                <td className="py-3 px-4 text-center font-bold text-ice-blue-700 dark:text-ice-blue-300 text-lg">{awayScore || 0}</td>
               </tr>
             </tbody>
           </table>
