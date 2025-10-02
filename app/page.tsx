@@ -15,7 +15,6 @@ import { useSupabase } from "@/lib/supabase/client"
 import HeroCarousel from "@/components/hero-carousel"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TeamLogo } from "@/components/team-logo"
 import { useSearchParams, useRouter } from "next/navigation"
 import {
   Trophy,
@@ -366,28 +365,141 @@ export default function Home() {
 
         setLoading((prev) => ({ ...prev, games: false }))
 
-        // Fetch team standings using the standings API (same as standings page)
+        // Fetch team standings using the same logic as standings page
         try {
           console.log("=== STARTING STANDINGS FETCH ===")
-          console.log("Fetching standings using standings API...")
+          console.log("Fetching standings using standings page approach...")
           
-          // Use the standings API with correct season ID (SCSHL Season 1 = season_number: 2)
-          const response = await fetch('/api/standings?seasonId=2')
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch standings: ${response.status}`)
+          // Get all teams with conference information (same as standings page)
+          const { data: teamsData, error: teamsError } = await supabase
+            .from("teams")
+            .select(`
+              *,
+              conferences!left(name)
+            `)
+            .eq("is_active", true)
+            .order("name")
+
+          if (teamsError) {
+            throw teamsError
           }
 
-          const data = await response.json()
-          
-          console.log('Home page standings API response:', { seasonId: data.seasonId, standingsCount: data.standings?.length })
-          
-          if (data.standings && Array.isArray(data.standings)) {
-            setStandings(data.standings)
-          } else {
-            throw new Error('Invalid standings data format')
+          if (!teamsData || teamsData.length === 0) {
+            console.log("No teams found")
+            setStandings([])
+            setLoading((prev) => ({ ...prev, standings: false }))
+            return
           }
+
+          console.log(`Found ${teamsData.length} teams:`, teamsData.slice(0, 2))
+
+          // Get current season name (same as standings page)
+          let currentSeasonName = "SCSHL Season 1" // Hardcoded to correct season
           
+          try {
+            const { data: activeSeason } = await supabase
+              .from("seasons")
+              .select("name")
+              .eq("is_active", true)
+              .single()
+            
+            if (activeSeason?.name) {
+              currentSeasonName = activeSeason.name
+            }
+          } catch (seasonError) {
+            console.log("Could not fetch active season, using default:", seasonError)
+          }
+
+          // Get all matches for the current season (same as standings page)
+          const { data: matchesData, error: matchesError } = await supabase
+            .from("matches")
+            .select("*")
+            .eq("season_name", currentSeasonName)
+            .eq("status", "completed")
+
+          if (matchesError) {
+            console.error("Error fetching matches:", matchesError)
+          } else {
+            console.log(`Found ${matchesData?.length || 0} completed matches for season: ${currentSeasonName}`)
+            if (matchesData && matchesData.length > 0) {
+              console.log("Sample match data:", matchesData.slice(0, 2))
+            }
+          }
+
+          // Calculate standings manually (same logic as standings page)
+          const calculatedStandings = teamsData.map((team, index) => {
+            let wins = 0
+            let losses = 0
+            let otl = 0
+            let goalsFor = 0
+            let goalsAgainst = 0
+
+            // Calculate stats from matches
+            matchesData?.forEach((match) => {
+              if (match.home_team_id === team.id) {
+                goalsFor += match.home_score || 0
+                goalsAgainst += match.away_score || 0
+
+                if (match.home_score > match.away_score) {
+                  wins++
+                } else if (match.home_score < match.away_score) {
+                  if (match.overtime || match.has_overtime) {
+                    otl++
+                  } else {
+                    losses++
+                  }
+                } else {
+                  losses++ // Tie counts as loss
+                }
+              } else if (match.away_team_id === team.id) {
+                goalsFor += match.away_score || 0
+                goalsAgainst += match.home_score || 0
+
+                if (match.away_score > match.home_score) {
+                  wins++
+                } else if (match.away_score < match.home_score) {
+                  if (match.overtime || match.has_overtime) {
+                    otl++
+                  } else {
+                    losses++
+                  }
+                } else {
+                  losses++ // Tie counts as loss
+                }
+              }
+            })
+
+            const gamesPlayed = wins + losses + otl
+            const points = wins * 2 + otl * 1 // 2 points for win, 1 for OTL
+            const goalDifferential = goalsFor - goalsAgainst
+
+            return {
+              id: team.id,
+              name: team.name,
+              logo_url: team.logo_url,
+              wins,
+              losses,
+              otl,
+              games_played: gamesPlayed,
+              points,
+              goals_for: goalsFor,
+              goals_against: goalsAgainst,
+              goal_differential: goalDifferential,
+              conference: team.conferences?.name || "Unknown",
+              conference_id: team.conference_id,
+            }
+          })
+
+          // Sort by points (descending), then by wins (descending), then by goal differential (descending)
+          calculatedStandings.sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points
+            if (b.wins !== a.wins) return b.wins - a.wins
+            return b.goal_differential - a.goal_differential
+          })
+
+          console.log(`Calculated standings for ${calculatedStandings.length} teams`)
+          console.log("Sample standings data:", calculatedStandings.slice(0, 2))
+          setStandings(calculatedStandings)
           setLoading((prev) => ({ ...prev, standings: false }))
         } catch (error) {
           console.error("Error fetching standings:", error)
@@ -550,39 +662,35 @@ export default function Home() {
                       <div className="space-y-4">
                         {/* Home Team */}
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8">
-                            <TeamLogo
-                              teamName={game.home_team?.name || "Home Team"}
-                              logoUrl={game.home_team?.logo_url}
-                              size="sm"
-                            />
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                              {game.home_team?.name?.charAt(0) || "H"}
+                            </span>
                           </div>
                           <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
                             {game.home_team?.name || "Home Team"}
                           </span>
-                          <span className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400">
+                          <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                             {game.home_score || 0}
                           </span>
                         </div>
 
                         {/* VS */}
                         <div className="text-center">
-                          <span className="text-sm font-medium text-hockey-silver-500 dark:text-hockey-silver-400">VS</span>
+                          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">VS</span>
                         </div>
 
                         {/* Away Team */}
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8">
-                            <TeamLogo
-                              teamName={game.away_team?.name || "Away Team"}
-                              logoUrl={game.away_team?.logo_url}
-                              size="sm"
-                            />
+                          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                              {game.away_team?.name?.charAt(0) || "A"}
+                            </span>
                           </div>
                           <span className="font-semibold text-slate-800 dark:text-slate-200 flex-1">
                             {game.away_team?.name || "Away Team"}
                           </span>
-                          <span className="text-2xl font-bold text-goal-red-600 dark:text-goal-red-400">
+                          <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                             {game.away_score || 0}
                           </span>
                         </div>

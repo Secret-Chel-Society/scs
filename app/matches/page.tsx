@@ -388,7 +388,7 @@ export default function MatchesPage() {
   const matchesByDate = groupMatchesByDate(weekMatches)
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
+    <div className="min-h-screen relative">
       <div
         className="fixed inset-0 opacity-5 bg-no-repeat bg-center bg-contain pointer-events-none"
         style={{
@@ -396,23 +396,22 @@ export default function MatchesPage() {
             "url('https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png')",
         }}
       />
-      <div className="absolute inset-0 bg-hockey-pattern opacity-10" />
 
       <div className="relative z-10 container mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-4">
-            <Trophy className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
-            <h1 className="text-4xl font-black bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-600 bg-clip-text text-transparent">
+            <Trophy className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               SCS Matches
             </h1>
-            <Trophy className="h-8 w-8 text-ice-blue-600 dark:text-ice-blue-400" />
+            <Trophy className="h-8 w-8 text-primary" />
           </div>
-          <p className="text-hockey-silver-600 dark:text-hockey-silver-400 text-lg">Follow all the action from your favorite teams</p>
+          <p className="text-muted-foreground text-lg">Follow all the action from your favorite teams</p>
         </div>
 
-        <Card className="mb-8 border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-card/90 backdrop-blur-sm shadow-hockey-glow">
+        <Card className="mb-8 border-2 border-primary/10 bg-card/80 backdrop-blur-sm">
           <CardHeader className="pb-4">
-            <div className="flex items-center gap-2 text-ice-blue-600 dark:text-ice-blue-400">
+            <div className="flex items-center gap-2 text-primary">
               <Filter className="h-5 w-5" />
               <h3 className="font-semibold">Filter Matches</h3>
             </div>
@@ -422,7 +421,7 @@ export default function MatchesPage() {
               <div className="flex flex-col sm:flex-row gap-4 items-center">
                 <div className="flex items-center gap-2">
                   <Select value={selectedTeam} onValueChange={handleTeamFilter}>
-                    <SelectTrigger className="w-64 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-ice-blue-400">
+                    <SelectTrigger className="w-64 border-primary/20 focus:border-primary">
                       <SelectValue placeholder="Filter by team" />
                     </SelectTrigger>
                     <SelectContent>
@@ -439,7 +438,7 @@ export default function MatchesPage() {
                 {totalWeeks > 1 && (
                   <div className="flex items-center gap-2">
                     <Select value={currentWeek.toString()} onValueChange={(value) => goToWeek(Number.parseInt(value))}>
-                      <SelectTrigger className="w-48 border-ice-blue-200/50 dark:border-rink-blue-700/50 focus:border-ice-blue-500 dark:focus:border-ice-blue-400">
+                      <SelectTrigger className="w-48 border-primary/20 focus:border-primary">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -455,7 +454,7 @@ export default function MatchesPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Badge variant="outline" className="text-base py-2 px-4 border-ice-blue-300/50 dark:border-ice-blue-600/50 bg-ice-blue-50/80 dark:bg-ice-blue-900/30 text-ice-blue-700 dark:text-ice-blue-300">
+                <Badge variant="outline" className="text-base py-2 px-4 border-primary/30 bg-primary/5">
                   🏆 {currentSeason?.name || "Loading..."}
                 </Badge>
               </div>
@@ -464,21 +463,21 @@ export default function MatchesPage() {
         </Card>
 
         {totalWeeks > 1 && (
-          <Card className="mb-8 border-rink-blue-200/50 dark:border-rink-blue-700/50 bg-rink-blue-50/30 dark:bg-rink-blue-900/20">
+          <Card className="mb-8 border-accent/20 bg-accent/5">
             <CardContent className="py-4">
               <div className="flex items-center justify-between">
                 <Button
                   variant="outline"
                   onClick={() => goToWeek(currentWeek - 1)}
                   disabled={currentWeek === 1}
-                  className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:text-ice-blue-700 dark:hover:text-ice-blue-300"
+                  className="border-primary/30 hover:bg-primary/10"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Previous Week
                 </Button>
 
                 <div className="text-center">
-                  <div className="font-bold text-lg text-ice-blue-600 dark:text-ice-blue-400">
+                  <div className="font-bold text-lg text-primary">
                     Week {currentWeek} of {totalWeeks}
                   </div>
                   <div className="text-sm text-muted-foreground flex items-center gap-1">
@@ -491,7 +490,7 @@ export default function MatchesPage() {
                   variant="outline"
                   onClick={() => goToWeek(currentWeek + 1)}
                   disabled={currentWeek === totalWeeks}
-                  className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-100 dark:hover:bg-ice-blue-900/30 hover:text-ice-blue-700 dark:hover:text-ice-blue-300"
+                  className="border-primary/30 hover:bg-primary/10"
                 >
                   Next Week
                   <ChevronRight className="h-4 w-4 ml-1" />
@@ -519,9 +518,9 @@ export default function MatchesPage() {
           {Object.entries(matchesByDate).map(([date, dateMatches]) => (
             <div key={date}>
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-px bg-gradient-to-r from-transparent via-ice-blue-500 dark:via-ice-blue-400 to-transparent flex-1" />
-                <h2 className="text-2xl font-bold text-ice-blue-600 dark:text-ice-blue-400 bg-background px-4">{date}</h2>
-                <div className="h-px bg-gradient-to-r from-ice-blue-500 dark:from-ice-blue-400 via-transparent to-transparent flex-1" />
+                <div className="h-px bg-gradient-to-r from-transparent via-primary to-transparent flex-1" />
+                <h2 className="text-2xl font-bold text-primary bg-background px-4">{date}</h2>
+                <div className="h-px bg-gradient-to-r from-primary via-transparent to-transparent flex-1" />
               </div>
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -532,7 +531,7 @@ export default function MatchesPage() {
                   return (
                     <Card
                       key={match.id}
-                      className="group overflow-hidden hover:shadow-hockey-glow transition-all duration-300 cursor-pointer border-2 border-ice-blue-200/30 dark:border-rink-blue-700/30 hover:border-ice-blue-400/50 dark:hover:border-ice-blue-500/50 bg-card/90 backdrop-blur-sm"
+                      className="group overflow-hidden hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 cursor-pointer border-2 hover:border-primary/30 bg-card/80 backdrop-blur-sm"
                       onClick={() => router.push(`/matches/${match.id}`)}
                     >
                       <CardContent className="p-0">
@@ -544,7 +543,7 @@ export default function MatchesPage() {
                             </div>
                             <Badge
                               variant={getStatusBadgeVariant(match.status)}
-                              className={`${match.status === "Completed" ? "bg-assist-green-100 dark:bg-assist-green-900/30 text-assist-green-700 dark:text-assist-green-300 border-assist-green-300 dark:border-assist-green-600" : "bg-hockey-silver-100 dark:bg-hockey-silver-800 text-hockey-silver-700 dark:text-hockey-silver-300"}`}
+                              className={`${match.status === "Completed" ? "bg-accent text-accent-foreground" : ""}`}
                             >
                               {match.status}
                             </Badge>
@@ -554,7 +553,7 @@ export default function MatchesPage() {
                             <div className="flex flex-col items-center gap-3 w-2/5">
                               <div className="relative">
                                 {renderTeamLogo(match.home_team)}
-                                <div className="absolute -bottom-1 -right-1 bg-ice-blue-500 dark:bg-ice-blue-600 text-white rounded-full p-1">
+                                <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1">
                                   <Home className="h-3 w-3" />
                                 </div>
                               </div>
@@ -562,7 +561,7 @@ export default function MatchesPage() {
                                 <span className="font-bold text-sm">{match.home_team.name}</span>
                                 <div className="text-xs text-muted-foreground">Home</div>
                                 {isCompleted && (
-                                  <div className="text-2xl font-black tabular-nums text-ice-blue-600 dark:text-ice-blue-400 mt-1">
+                                  <div className="text-2xl font-black tabular-nums text-primary mt-1">
                                     {match.home_score}
                                   </div>
                                 )}
@@ -576,7 +575,7 @@ export default function MatchesPage() {
                             <div className="flex flex-col items-center gap-3 w-2/5">
                               <div className="relative">
                                 {renderTeamLogo(match.away_team)}
-                                <div className="absolute -bottom-1 -right-1 bg-rink-blue-500 dark:bg-rink-blue-600 text-white rounded-full p-1">
+                                <div className="absolute -bottom-1 -right-1 bg-accent text-accent-foreground rounded-full p-1">
                                   <ExternalLink className="h-3 w-3" />
                                 </div>
                               </div>
@@ -584,7 +583,7 @@ export default function MatchesPage() {
                                 <span className="font-bold text-sm">{match.away_team.name}</span>
                                 <div className="text-xs text-muted-foreground">Away</div>
                                 {isCompleted && (
-                                  <div className="text-2xl font-black tabular-nums text-ice-blue-600 dark:text-ice-blue-400 mt-1">
+                                  <div className="text-2xl font-black tabular-nums text-primary mt-1">
                                     {match.away_score}
                                   </div>
                                 )}
@@ -593,11 +592,11 @@ export default function MatchesPage() {
                           </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-ice-blue-50/50 via-rink-blue-50/50 to-ice-blue-50/50 dark:from-ice-blue-900/20 dark:via-rink-blue-900/20 dark:to-ice-blue-900/20 p-3 flex justify-center group-hover:from-ice-blue-100/70 group-hover:via-rink-blue-100/70 group-hover:to-ice-blue-100/70 dark:group-hover:from-ice-blue-800/30 dark:group-hover:via-rink-blue-800/30 dark:group-hover:to-ice-blue-800/30 transition-all duration-300">
+                        <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 p-3 flex justify-center group-hover:from-primary/10 group-hover:via-accent/10 group-hover:to-primary/10 transition-all duration-300">
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-sm font-medium text-ice-blue-600 dark:text-ice-blue-400 hover:text-white hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500"
+                            className="text-sm font-medium text-primary hover:text-primary-foreground hover:bg-primary"
                           >
                             View Match Details →
                           </Button>
@@ -612,7 +611,7 @@ export default function MatchesPage() {
         </div>
 
         {totalWeeks > 1 && (
-          <Card className="mt-12 border-ice-blue-200/50 dark:border-rink-blue-700/50 bg-ice-blue-50/30 dark:bg-ice-blue-900/20">
+          <Card className="mt-12 border-primary/20 bg-primary/5">
             <CardContent className="py-6">
               <div className="flex justify-center">
                 <div className="flex items-center gap-4">
@@ -620,14 +619,14 @@ export default function MatchesPage() {
                     variant="outline"
                     onClick={() => goToWeek(currentWeek - 1)}
                     disabled={currentWeek === 1}
-                    className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white"
+                    className="border-primary/30 hover:bg-primary hover:text-primary-foreground"
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Previous
                   </Button>
 
-                  <div className="px-6 py-2 bg-ice-blue-100/70 dark:bg-ice-blue-900/40 rounded-lg border border-ice-blue-200/50 dark:border-ice-blue-700/50">
-                    <span className="font-bold text-ice-blue-700 dark:text-ice-blue-300">
+                  <div className="px-6 py-2 bg-primary/10 rounded-lg border border-primary/20">
+                    <span className="font-bold text-primary">
                       Week {currentWeek} of {totalWeeks}
                     </span>
                   </div>
@@ -636,7 +635,7 @@ export default function MatchesPage() {
                     variant="outline"
                     onClick={() => goToWeek(currentWeek + 1)}
                     disabled={currentWeek === totalWeeks}
-                    className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white"
+                    className="border-primary/30 hover:bg-primary hover:text-primary-foreground"
                   >
                     Next
                     <ChevronRight className="h-4 w-4 ml-1" />

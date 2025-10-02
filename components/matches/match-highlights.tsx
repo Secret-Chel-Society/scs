@@ -196,15 +196,15 @@ export function MatchHighlights({ matchId, canEdit, className }: MatchHighlights
   }
 
   return (
-    <Card className={`border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow overflow-hidden ${className}`}>
-      <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20 border-b border-ice-blue-200/50 dark:border-rink-blue-700/50">
+    <Card className={`hockey-card border-2 border-ice-blue-200 dark:border-ice-blue-700 overflow-hidden ${className}`}>
+      <CardHeader className="bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/30 dark:to-assist-green-900/30 border-b border-ice-blue-200 dark:border-ice-blue-700">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-goal-red-500 to-assist-green-600 rounded-lg flex items-center justify-center">
               <Video className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle className="text-xl text-ice-blue-700 dark:text-ice-blue-300 flex items-center">
+              <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200 flex items-center">
                 Match Highlights
               </CardTitle>
               <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
@@ -214,8 +214,7 @@ export function MatchHighlights({ matchId, canEdit, className }: MatchHighlights
           </div>
           {canEdit && !adding && (
             <Button 
-              className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white hover:scale-105 transition-all duration-200" 
-              variant="outline"
+              className="hockey-button hover:scale-105 transition-all duration-200" 
               onClick={() => setAdding(true)}
             >
               <Plus className="mr-2 h-4 w-4" />
