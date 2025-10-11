@@ -9,10 +9,13 @@ import { Edit } from "lucide-react"
 import { EditScoreModal } from "./edit-score-modal"
 import { TeamLogo } from "@/components/team-logo"
 import { UploadMatchButton } from "./upload-match-button"
+import { ManualStatsModal } from "./manual-stats-modal"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface ComprehensiveMatchViewProps {
   match: any
-  isAdmin?: boolean
+  userRole?: string | null
+  league?: "NHL" | "AHL"
 }
 
 interface PlayerStat {
@@ -104,9 +107,11 @@ const getTeamColors = (teamName: string) => {
   return teamColorMap[teamName] || { primary: "bg-slate-600", secondary: "bg-slate-700", accent: "border-slate-500" }
 }
 
-export function ComprehensiveMatchView({ match, isAdmin = false }: ComprehensiveMatchViewProps) {
+export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" }: ComprehensiveMatchViewProps) {
   const { supabase } = useSupabase()
   const [openScoreModal, setOpenScoreModal] = useState(false)
+  const [openManualStatsModal, setOpenManualStatsModal] = useState(false)
+  const [showManualStats, setShowManualStats] = useState(false)
   const [playerStats, setPlayerStats] = useState<PlayerStat[]>([])
   const [teamStats, setTeamStats] = useState<TeamStats[]>([])
   const [teamStandings, setTeamStandings] = useState<{ [key: string]: TeamStanding }>({})
@@ -234,8 +239,10 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
     try {
       setLoading(true)
 
+      const playerStatsTable = league === "AHL" ? "ea_player_stats_ahl" : "ea_player_stats"
+
       // Fetch EA player stats
-      const { data: statsData } = await supabase.from("ea_player_stats").select("*").eq("match_id", match.id)
+      const { data: statsData } = await supabase.from(playerStatsTable).select("*").eq("match_id", match.id)
 
       if (statsData && statsData.length > 0) {
         setPlayerStats(statsData)
@@ -375,8 +382,24 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
   // Use match_date or date field
   const matchDate = match.match_date || match.date
 
-  // Show edit button only for "in progress" games
-  const showEditButton = isAdmin && (match.status === "in progress" || match.status === "In Progress")
+  // Admin can edit both "Completed" and "In Progress" games
+  // Owner/GM/AGM can only edit "In Progress" games
+  // Player role has no access
+  const isAdmin = userRole === "Admin"
+  const isManagement = userRole === "Owner" || userRole === "GM" || userRole === "AGM"
+  const isPlayer = userRole === "Player"
+
+  const matchStatus = match.status?.toLowerCase()
+  const isCompleted = matchStatus === "completed"
+  const isInProgress = matchStatus === "in progress"
+
+  // Determine if user can edit based on role and match status
+  const canEditMatch =
+    (isAdmin && (isCompleted || isInProgress)) || // Admin can edit both
+    (isManagement && isInProgress) // Management can only edit In Progress
+
+  // Player role has no access to any editing functions
+  const showEditButton = canEditMatch && !isPlayer
 
   // Get period scores from match data
   const getPeriodScores = () => {
@@ -558,8 +581,29 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
                   homeTeamEaClubId={match.home_team?.ea_club_id}
                   awayTeamEaClubId={match.away_team?.ea_club_id}
                   onImportSuccess={() => window.location.reload()}
-                  isAdmin={isAdmin}
+                  isAdmin={showEditButton}
+                  league={league}
                 />
+              </div>
+            )}
+            {showEditButton && (
+              <div className="mt-2 flex items-center space-x-2">
+                <Checkbox
+                  id="manual-stats"
+                  checked={showManualStats}
+                  onCheckedChange={(checked) => {
+                    setShowManualStats(checked as boolean)
+                    if (checked) {
+                      setOpenManualStatsModal(true)
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="manual-stats"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-white cursor-pointer"
+                >
+                  Add Manual Stats
+                </label>
               </div>
             )}
           </div>
@@ -1175,10 +1219,26 @@ export function ComprehensiveMatchView({ match, isAdmin = false }: Comprehensive
         open={openScoreModal}
         onOpenChange={setOpenScoreModal}
         match={match}
-        canEdit={isAdmin}
+        canEdit={showEditButton}
+        league={league}
         onUpdate={() => {
-          // Refresh match data
           window.location.reload()
+        }}
+      />
+
+      <ManualStatsModal
+        open={openManualStatsModal}
+        onOpenChange={(open) => {
+          setOpenManualStatsModal(open)
+          if (!open) {
+            setShowManualStats(false)
+          }
+        }}
+        match={match}
+        league={league}
+        onSave={() => {
+          console.log("[v0] Manual stats saved, refreshing match stats...")
+          fetchMatchStats()
         }}
       />
     </div>
