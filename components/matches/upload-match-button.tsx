@@ -1,8 +1,8 @@
-"use client"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { EaMatchImportModal } from "./ea-match-import-modal"
+import { AhlEaMatchImportModal } from "./ahl-ea-match-import-modal"
 import { useSupabase } from "@/lib/supabase/client"
 import { Upload } from "lucide-react"
 
@@ -14,6 +14,7 @@ interface UploadMatchButtonProps {
   awayTeamEaClubId?: string | null
   onImportSuccess?: () => void
   isAdmin?: boolean
+  league?: "NHL" | "AHL"
 }
 
 export function UploadMatchButton({
@@ -24,6 +25,7 @@ export function UploadMatchButton({
   awayTeamEaClubId,
   onImportSuccess,
   isAdmin = false,
+  league = "NHL",
 }: UploadMatchButtonProps) {
   const { supabase } = useSupabase()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -155,6 +157,7 @@ export function UploadMatchButton({
       homeTeamEaClubId,
       awayTeamEaClubId,
       isAdmin,
+      league,
     })
     setIsModalOpen(true)
   }
@@ -166,23 +169,36 @@ export function UploadMatchButton({
         size="sm"
         onClick={handleOpenModal}
         disabled={isLoading}
-        className="flex items-center gap-1"
+        className="flex items-center gap-1 bg-transparent"
       >
         <Upload className="h-4 w-4" />
         Update Match Data
       </Button>
 
-      <EaMatchImportModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        match={match}
-        teamId={teamId}
-        eaClubId={eaClubId}
-        homeTeamEaClubId={homeTeamEaClubId}
-        awayTeamEaClubId={awayTeamEaClubId}
-        onImportSuccess={onImportSuccess}
-        isAdmin={isAdmin}
-      />
+      {league === "AHL" ? (
+        <AhlEaMatchImportModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          match={match}
+          teamId={teamId}
+          eaClubId={eaClubId}
+          homeTeamEaClubId={homeTeamEaClubId}
+          awayTeamEaClubId={awayTeamEaClubId}
+          onImportSuccess={onImportSuccess}
+        />
+      ) : (
+        <EaMatchImportModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          match={match}
+          teamId={teamId}
+          eaClubId={eaClubId}
+          homeTeamEaClubId={homeTeamEaClubId}
+          awayTeamEaClubId={awayTeamEaClubId}
+          onImportSuccess={onImportSuccess}
+          isAdmin={isAdmin}
+        />
+      )}
     </>
   )
 }
