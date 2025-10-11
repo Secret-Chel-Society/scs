@@ -281,121 +281,145 @@ export function ManualStatsModal({ open, onOpenChange, match, league = "NHL", on
   }
 
   const handleSave = async () => {
-    try {
-      setSaving(true)
+  try {
+    setSaving(true)
 
-      const playerStatsTable = league === "AHL" ? "ea_player_stats_ahl" : "ea_player_stats"
-      const eaMatchId: string = match.ea_match_id || match.ea_game_id || `manual-${match.id}-${Date.now()}`
-      const season_id = toInt(seasonNumber) ?? toInt(match.season_id) ?? 1 // ensure integer
+    const playerStatsTable = league === "AHL" ? "ea_player_stats_ahl" : "ea_player_stats"
+    const eaMatchId: string = match.ea_match_id || match.ea_game_id || `manual-${match.id}-${Date.now()}`
+    const season_id = toInt(seasonNumber) ?? toInt(match.season_id) ?? 1 // ensure integer
 
-      // SKATERS
-      const skaterRows = skaterStats
-        .filter((s) => (s.player_name || "").trim().length > 0)
-        .map((s) => {
-          const pct = Number.isFinite(Number(s.faceoff_pct)) ? Number(s.faceoff_pct) : 0
-          const fow = toInt(s.faceoffs_won) ?? 0
-          const faceoffsTaken = pct > 0 ? Math.round(fow / (pct / 100)) : 0
-          return {
-            match_id: match.id,
-            ea_match_id: eaMatchId,
-            season_id,
-            player_name: s.player_name.trim(),
-            player_id: s.player_id ? String(s.player_id) : null, // TEXT in schema
-            team_id: s.team_id,
-            position: s.position,
-            goals: toInt(s.goals) ?? 0,
-            assists: toInt(s.assists) ?? 0,
-            plus_minus: toInt(s.plus_minus) ?? 0,
-            time_with_puck: toInt(s.time_with_puck) ?? 0,
-            shots: toInt(s.shots) ?? 0,
-            blocks: toInt(s.blocks) ?? 0,
-            giveaways: toInt(s.giveaways) ?? 0,
-            takeaways: toInt(s.takeaways) ?? 0,
-            interceptions: toInt(s.interceptions) ?? 0,
-            faceoffs_won: fow,
-            faceoffs_taken: faceoffsTaken,
-            faceoff_pct: pct,
-            pass_complete: toInt(s.pass_complete) ?? 0,
-            pass_attempts: toInt(s.pass_attempts) ?? 0,
-            passing_pct: (toInt(s.pass_attempts) ?? 0) > 0 ? ((toInt(s.pass_complete) ?? 0) / (toInt(s.pass_attempts) ?? 1)) * 100 : 0,
-            skpenaltiesdrawn: toInt(s.penalties_drawn) ?? 0,
-            ppg: toInt(s.ppg) ?? 0,
-            pim: toInt(s.pim) ?? 0,
-            toi: s.toi || "0:00",
-            shot_attempts: toInt(s.shots) ?? 0,
-            shot_pct: 0,
-            shg: 0,
-          }
+    // SKATERS
+    const skaterRows = skaterStats
+      .filter((s) => (s.player_name || "").trim().length > 0)
+      .map((s) => {
+        const pct = Number.isFinite(Number(s.faceoff_pct)) ? Number(s.faceoff_pct) : 0
+        const fow = toInt(s.faceoffs_won) ?? 0
+        const faceoffsTaken = pct > 0 ? Math.round(fow / (pct / 100)) : 0
+
+        return {
+          match_id: match.id,                  // UUID FK to matches.id
+          ea_match_id: eaMatchId,              // EA string
+          season_id,                           // integer
+          player_name: s.player_name.trim(),
+          player_id: s.player_id && String(s.player_id).trim() !== "" ? String(s.player_id).trim() : null, // TEXT
+          team_id: s.team_id,
+          position: s.position,
+          goals: toInt(s.goals) ?? 0,
+          assists: toInt(s.assists) ?? 0,
+          plus_minus: toInt(s.plus_minus) ?? 0,
+          time_with_puck: toInt(s.time_with_puck) ?? 0,
+          shots: toInt(s.shots) ?? 0,
+          blocks: toInt(s.blocks) ?? 0,
+          giveaways: toInt(s.giveaways) ?? 0,
+          takeaways: toInt(s.takeaways) ?? 0,
+          interceptions: toInt(s.interceptions) ?? 0,
+          faceoffs_won: fow,
+          faceoffs_taken: faceoffsTaken,
+          faceoff_pct: pct,
+          pass_complete: toInt(s.pass_complete) ?? 0,
+          pass_attempts: toInt(s.pass_attempts) ?? 0,
+          passing_pct:
+            (toInt(s.pass_attempts) ?? 0) > 0
+              ? ((toInt(s.pass_complete) ?? 0) / (toInt(s.pass_attempts) ?? 1)) * 100
+              : 0,
+          skpenaltiesdrawn: toInt(s.penalties_drawn) ?? 0,
+          ppg: toInt(s.ppg) ?? 0,
+          pim: toInt(s.pim) ?? 0,
+          toi: s.toi || "0:00",
+          shot_attempts: toInt(s.shots) ?? 0,
+          shot_pct: 0,
+          shg: 0,
+        }
+      })
+
+    // GOALIES
+    const goalieRows = goalieStats
+      .filter((g) => (g.player_name || "").trim().length > 0)
+      .map((g) => ({
+        match_id: match.id,
+        ea_match_id: eaMatchId,
+        season_id,
+        player_name: g.player_name.trim(),
+        player_id: g.player_id && String(g.player_id).trim() !== "" ? String(g.player_id).trim() : null, // TEXT
+        team_id: g.team_id,
+        position: "G",
+        toi: g.toi || "60:00",
+        save_pct: Number.isFinite(Number(g.save_pct)) ? Number(g.save_pct) : 0,
+        goals_against: toInt(g.goals_against) ?? 0,
+        saves: toInt(g.saves) ?? 0,
+        goals: 0,
+        assists: 0,
+        plus_minus: 0,
+        shots: 0,
+        hits: 0,
+        pim: 0,
+        blocks: 0,
+      }))
+
+    const allRecords = [...skaterRows, ...goalieRows]
+    if (allRecords.length === 0) {
+      toast.error("Please add at least one player stat")
+      setSaving(false)
+      return
+    }
+
+    // Split by presence of player_id (TEXT). IMPORTANT: '' becomes null.
+    const withId = allRecords
+      .filter((r) => r.player_id && String(r.player_id).trim() !== "")
+      .map((r) => ({ ...r, player_id: String(r.player_id).trim(), player_name: r.player_name.trim() }))
+
+    const withoutId = allRecords
+      .filter((r) => !r.player_id || String(r.player_id).trim() === "")
+      .map((r) => ({ ...r, player_id: null, player_name: r.player_name.trim() }))
+
+    // 1) Upsert those WITH player_id using the unique constraint (match_id, player_id)
+    if (withId.length > 0) {
+      const { error: e1 } = await supabase
+        .from(playerStatsTable)
+        .upsert(withId, {
+          onConflict: "match_id,player_id",
+          ignoreDuplicates: true, // don't overwrite; just skip existing
         })
+        .select()
 
-      // GOALIES
-      const goalieRows = goalieStats
-        .filter((g) => (g.player_name || "").trim().length > 0)
-        .map((g) => ({
-          match_id: match.id,
-          ea_match_id: eaMatchId,
-          season_id,
-          player_name: g.player_name.trim(),
-          player_id: g.player_id ? String(g.player_id) : null, // TEXT in schema
-          team_id: g.team_id,
-          position: "G",
-          toi: g.toi || "60:00",
-          save_pct: Number.isFinite(Number(g.save_pct)) ? Number(g.save_pct) : 0,
-          goals_against: toInt(g.goals_against) ?? 0,
-          saves: toInt(g.saves) ?? 0,
-          goals: 0,
-          assists: 0,
-          plus_minus: 0,
-          shots: 0,
-          hits: 0,
-          pim: 0,
-          blocks: 0,
-        }))
-
-      const allRecords = [...skaterRows, ...goalieRows]
-
-      if (allRecords.length === 0) {
-        toast.error("Please add at least one player stat")
+      if (e1) {
+        console.error("[manual-stats] upsert withId error", e1)
+        toast.error(e1.message || "Failed to save (with player_id)")
         setSaving(false)
         return
       }
-
-      // Split by presence of player_id (TEXT)
-      const withId = allRecords.filter((r) => r.player_id && String(r.player_id).trim() !== "")
-      const withoutId = allRecords.filter((r) => !r.player_id || String(r.player_id).trim() === "")
-
-      // 1) Upsert those WITH player_id using partial unique index (match_id, player_id)
-      if (withId.length > 0) {
-        const { error: upErr } = await supabase
-          .from(playerStatsTable)
-          .upsert(withId, { onConflict: "match_id,player_id" })
-          .select()
-
-        if (upErr) {
-          console.error("[manual-stats] upsert error", upErr)
-          toast.error(upErr.message || "Failed to save stats")
-          setSaving(false)
-          return
-        }
-      }
-
-      // 2) For rows WITHOUT player_id, delete+insert by (match_id, team_id, player_name)
-      if (withoutId.length > 0) {
-        await deleteThenInsert(playerStatsTable, withoutId)
-      }
-
-      toast.success(`Saved ${allRecords.length} record(s).`)
-      setSkaterStats([])
-      setGoalieStats([])
-      onSave?.()
-      onOpenChange(false)
-    } catch (e: any) {
-      console.error("[manual-stats] unexpected error", e)
-      toast.error(e?.message || "Unexpected error saving stats")
-    } finally {
-      setSaving(false)
     }
+
+    // 2) Upsert those WITHOUT player_id using the other unique constraint (match_id, team_id, player_name)
+    if (withoutId.length > 0) {
+      const { error: e2 } = await supabase
+        .from(playerStatsTable)
+        .upsert(withoutId, {
+          onConflict: "match_id,team_id,player_name",
+          ignoreDuplicates: true, // don't overwrite; just skip existing
+        })
+        .select()
+
+      if (e2) {
+        console.error("[manual-stats] upsert withoutId error", e2)
+        toast.error(e2.message || "Failed to save (without player_id)")
+        setSaving(false)
+        return
+      }
+    }
+
+    toast.success(`Saved ${allRecords.length} record(s).`)
+    setSkaterStats([])
+    setGoalieStats([])
+    onSave?.()
+    onOpenChange(false)
+  } catch (e: any) {
+    console.error("[manual-stats] unexpected error", e)
+    toast.error(e?.message || "Unexpected error saving stats")
+  } finally {
+    setSaving(false)
   }
+}
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
