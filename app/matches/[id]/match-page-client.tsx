@@ -16,7 +16,7 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchMatch = async () => {
@@ -24,7 +24,6 @@ export default function MatchDetailPage() {
         setLoading(true)
         setError(null)
 
-        // Fetch match with team details (without season relationship since it's causing issues)
         const { data: matchData, error: matchError } = await supabase
           .from("matches")
           .select(`
@@ -49,7 +48,6 @@ export default function MatchDetailPage() {
           throw new Error(`Failed to fetch match: ${matchError.message}`)
         }
 
-        // If we have a season_number, try to get season info separately
         if (matchData.season_number) {
           const { data: seasonData } = await supabase
             .from("seasons")
@@ -64,20 +62,42 @@ export default function MatchDetailPage() {
 
         setMatch(matchData)
 
-        // Check if user is admin
         const {
           data: { user },
         } = await supabase.auth.getUser()
 
         if (user) {
-          // Check user roles table
-          const { data: roleData } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", user.id)
-            .in("role", ["Admin", "GM", "AGM", "Owner"])
+          const { data: rolesData } = await supabase.from("user_roles").select("role").eq("user_id", user.id)
 
-          setIsAdmin(roleData && roleData.length > 0)
+          if (rolesData && rolesData.length > 0) {
+            // Define role hierarchy (highest to lowest priority)
+            const rolePriority: { [key: string]: number } = {
+              Admin: 5,
+              Owner: 4,
+              GM: 3,
+              AGM: 2,
+              Player: 1,
+            }
+
+            // Find the highest priority role
+            let highestRole = "Player"
+            let highestPriority = 0
+
+            rolesData.forEach((roleEntry) => {
+              const priority = rolePriority[roleEntry.role] || 0
+              if (priority > highestPriority) {
+                highestPriority = priority
+                highestRole = roleEntry.role
+              }
+            })
+
+            console.log(
+              "[v0] User roles:",
+              rolesData.map((r) => r.role),
+            )
+            console.log("[v0] Highest priority role:", highestRole)
+            setUserRole(highestRole)
+          }
         }
       } catch (err: any) {
         console.error("Error fetching match:", err)
@@ -94,12 +114,10 @@ export default function MatchDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
-        <div className="container py-6">
-          <Skeleton className="h-12 w-3/4 mb-6 bg-ice-blue-200/50 dark:bg-ice-blue-800/50" />
-          <div className="grid gap-6">
-            <Skeleton className="h-[400px] w-full bg-hockey-silver-200/50 dark:bg-hockey-silver-800/50" />
-          </div>
+      <div className="container py-6">
+        <Skeleton className="h-12 w-3/4 mb-6" />
+        <div className="grid gap-6">
+          <Skeleton className="h-[400px] w-full" />
         </div>
       </div>
     )
@@ -107,20 +125,18 @@ export default function MatchDetailPage() {
 
   if (error || !match) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
-        <div className="container py-6">
-          <Alert variant="destructive" className="border-goal-red-300/50 dark:border-goal-red-600/50 bg-goal-red-50/30 dark:bg-goal-red-900/20">
-            <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-            <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">{error || "Match not found"}</AlertDescription>
-          </Alert>
-        </div>
+      <div className="container py-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error || "Match not found"}</AlertDescription>
+        </Alert>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950">
-      <ComprehensiveMatchView match={match} isAdmin={isAdmin} />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+      <ComprehensiveMatchView match={match} userRole={userRole} />
     </div>
   )
 }
