@@ -1,197 +1,107 @@
-/* Midnight Studios INTl - All rights reserved */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Mantine CSS Integration with Conflict Resolution */
-@import '@mantine/core/styles.css' layer(mantine);
-@import '@mantine/notifications/styles.css' layer(mantine);
-@import '@mantine/dates/styles.css' layer(mantine);
+body {
+  font-family: "Oswald", Arial, Helvetica, sans-serif;
+  font-weight: 400;
+}
 
-@layer mantine {
-  /* Override Mantine to use your existing CSS variables */
-  .mantine-Container-root {
-    --mantine-color-scheme: light dark;
-  }
-  
-  .mantine-Card-root {
-    background: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
-    border: 1px solid hsl(var(--border)) !important;
-  }
-  
-  .mantine-Button-root {
-    font-family: inherit !important;
-  }
-  
-  .mantine-Text-root {
-    color: hsl(var(--foreground));
-  }
-  
-  .mantine-Input-root {
-    background: hsl(var(--background));
-    border: 1px solid hsl(var(--border));
-    color: hsl(var(--foreground));
-  }
-  
-  .mantine-Select-root {
-    background: hsl(var(--background));
-    border: 1px solid hsl(var(--border));
-  }
-  
-  .mantine-Table-root {
-    background: hsl(var(--card));
-    color: hsl(var(--card-foreground));
-  }
-  
-  .mantine-Badge-root {
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-  }
-  
-  .mantine-Tabs-root {
-    background: hsl(var(--card));
-  }
-  
-  .mantine-Tabs-tab {
-    color: hsl(var(--muted-foreground));
-  }
-  
-  .mantine-Tabs-tab[data-active] {
-    color: hsl(var(--primary));
-    background: hsl(var(--accent));
-  }
-  
-  /* Ensure Mantine components respect dark mode */
-  .dark .mantine-Card-root {
-    background: hsl(var(--card)) !important;
-    color: hsl(var(--card-foreground)) !important;
-  }
-  
-  .dark .mantine-Text-root {
-    color: hsl(var(--foreground));
-  }
-  
-  .dark .mantine-Input-root {
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
   }
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Lilac / Fossil Gray / Black — LIGHT MODE */
+    --background: 270 25% 97%;     /* very light lilac wash */
+    --foreground: 260 12% 12%;     /* near-black with slight violet tint */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 260 12% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
-    
-  /* Hockey-themed custom properties */
-  --ice-blue: 217.2 91.2% 59.8%;
-  --hockey-silver: 220 13% 91%;
-  --rink-blue: 217.2 91.2% 59.8%;
-  --goal-red: 0 84.2% 60.2%;
-  --assist-green: 142.1 76.2% 36.3%;
-  
-  /* Enhanced hockey theme colors */
-  --ice-blue-50: 217.2 91.2% 95%;
-  --ice-blue-100: 217.2 91.2% 90%;
-  --ice-blue-200: 217.2 91.2% 80%;
-  --ice-blue-300: 217.2 91.2% 70%;
-  --ice-blue-400: 217.2 91.2% 60%;
-  --ice-blue-500: 217.2 91.2% 59.8%;
-  --ice-blue-600: 217.2 91.2% 50%;
-  --ice-blue-700: 217.2 91.2% 40%;
-  --ice-blue-800: 217.2 91.2% 30%;
-  --ice-blue-900: 217.2 91.2% 20%;
-  
-  --hockey-silver-50: 220 13% 98%;
-  --hockey-silver-100: 220 13% 95%;
-  --hockey-silver-200: 220 13% 90%;
-  --hockey-silver-300: 220 13% 85%;
-  --hockey-silver-400: 220 13% 80%;
-  --hockey-silver-500: 220 13% 75%;
-  --hockey-silver-600: 220 13% 70%;
-  --hockey-silver-700: 220 13% 65%;
-  --hockey-silver-800: 220 13% 60%;
-  --hockey-silver-900: 220 13% 55%;
-  
-  --rink-blue-50: 217.2 91.2% 95%;
-  --rink-blue-100: 217.2 91.2% 90%;
-  --rink-blue-200: 217.2 91.2% 80%;
-  --rink-blue-300: 217.2 91.2% 70%;
-  --rink-blue-400: 217.2 91.2% 60%;
-  --rink-blue-500: 217.2 91.2% 59.8%;
-  --rink-blue-600: 217.2 91.2% 50%;
-  --rink-blue-700: 217.2 91.2% 40%;
-  --rink-blue-800: 217.2 91.2% 30%;
-  --rink-blue-900: 217.2 91.2% 20%;
-  
-  --goal-red-50: 0 84.2% 95%;
-  --goal-red-100: 0 84.2% 90%;
-  --goal-red-200: 0 84.2% 80%;
-  --goal-red-300: 0 84.2% 70%;
-  --goal-red-400: 0 84.2% 60%;
-  --goal-red-500: 0 84.2% 60.2%;
-  --goal-red-600: 0 84.2% 50%;
-  --goal-red-700: 0 84.2% 40%;
-  --goal-red-800: 0 84.2% 30%;
-  --goal-red-900: 0 84.2% 20%;
-  
-  --assist-green-50: 142.1 76.2% 95%;
-  --assist-green-100: 142.1 76.2% 90%;
-  --assist-green-200: 142.1 76.2% 80%;
-  --assist-green-300: 142.1 76.2% 70%;
-  --assist-green-400: 142.1 76.2% 60%;
-  --assist-green-500: 142.1 76.2% 36.3%;
-  --assist-green-600: 142.1 76.2% 30%;
-  --assist-green-700: 142.1 76.2% 25%;
-  --assist-green-800: 142.1 76.2% 20%;
-  --assist-green-900: 142.1 76.2% 15%;
+    --popover-foreground: 260 12% 12%;
+
+    /* Brand accents */
+    --primary: 270 45% 58%;        /* lilac (main brand) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 55 8% 58%;        /* fossil gray (warm desaturated) */
+    --secondary-foreground: 260 12% 12%;
+    --accent: 270 30% 92%;         /* pale lilac for subtle accents */
+    --accent-foreground: 260 12% 12%;
+
+    /* Feedback */
+    --muted: 260 10% 90%;
+    --muted-foreground: 260 9% 45%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* UI chrome */
+    --border: 260 12% 88%;
+    --input: 260 12% 88%;
+    --ring: 270 45% 58%;
+
+    /* Charts tuned to palette */
+    --chart-1: 270 45% 58%;  /* lilac */
+    --chart-2: 55 8% 58%;    /* fossil gray */
+    --chart-3: 265 35% 40%;  /* deeper lilac */
+    --chart-4: 260 10% 30%;  /* graphite */
+    --chart-5: 270 20% 75%;  /* soft lilac */
+
+    /* Radius */
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 260 12% 12%;
+    --sidebar-primary: 270 45% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 55 8% 58%;
+    --sidebar-accent-foreground: 260 12% 12%;
+    --sidebar-border: 260 12% 88%;
+    --sidebar-ring: 270 45% 58%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    
-    /* Hockey-themed custom properties for dark mode */
-    --ice-blue: 217.2 91.2% 59.8%;
-    --hockey-silver: 220 13% 91%;
-    --rink-blue: 217.2 91.2% 59.8%;
-    --goal-red: 0 84.2% 60.2%;
-    --assist-green: 142.1 76.2% 36.3%;
+    /* Lilac / Fossil Gray / Black — DARK MODE */
+    --background: 260 12% 7%;      /* near-black charcoal */
+    --foreground: 0 0% 98%;
+    --card: 260 12% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 260 12% 9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 270 55% 64%;        /* brighter lilac for dark BG pop */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 55 10% 62%;       /* fossil gray lifted for contrast */
+    --secondary-foreground: 260 12% 7%;
+    --accent: 270 25% 18%;         /* muted lilac panel */
+    --accent-foreground: 0 0% 98%;
+
+    --muted: 260 10% 14%;
+    --muted-foreground: 260 8% 68%;
+    --destructive: 0 65% 46%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 260 10% 18%;
+    --input: 260 10% 18%;
+    --ring: 270 55% 64%;
+
+    --chart-1: 270 55% 64%;
+    --chart-2: 55 10% 62%;
+    --chart-3: 265 40% 46%;
+    --chart-4: 260 8% 40%;
+    --chart-5: 270 25% 75%;
+
+    --sidebar-background: 260 12% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 270 55% 64%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 55 10% 62%;
+    --sidebar-accent-foreground: 260 12% 6%;
+    --sidebar-border: 260 10% 18%;
+    --sidebar-ring: 270 55% 64%;
   }
 }
 
@@ -201,1702 +111,146 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-@layer components {
-  /* Hero UI-Inspired Design System */
-  .hero-card {
-    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/50 dark:border-slate-700/50 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-2;
-  }
-  
-  .hero-button {
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 hover:from-ice-blue-600 hover:to-rink-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:shadow-ice-blue-500/30 transition-all duration-300 ease-out hover:scale-105 active:scale-95 border border-ice-blue-400/20;
-  }
-  
-  .hero-button-secondary {
-    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-ice-blue-200 dark:border-ice-blue-700 text-ice-blue-700 dark:text-ice-blue-300 hover:bg-ice-blue-50 dark:hover:bg-ice-blue-900/20 hover:border-ice-blue-300 dark:hover:border-ice-blue-600 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:scale-105 active:scale-95;
-  }
-  
-  .hero-input {
-    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-2 border-ice-blue-200 dark:border-ice-blue-700 rounded-xl px-4 py-3 text-base focus:border-ice-blue-500 dark:focus:border-ice-blue-400 focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-ice-blue-400/20 transition-all duration-200 hover:border-ice-blue-300 dark:hover:border-ice-blue-600;
-  }
-  
-  .hero-badge {
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white font-semibold px-3 py-1.5 rounded-full text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105;
-  }
-  
-  .hero-title {
-    @apply text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent leading-tight tracking-tight;
-  }
-  
-  .hero-subtitle {
-    @apply text-xl md:text-2xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl;
-  }
-  
-  .hero-section {
-    @apply py-20 px-4;
-  }
-  
-  .hero-container {
-    @apply max-w-7xl mx-auto;
-  }
-  
-  .hero-grid {
-    @apply grid gap-8 md:grid-cols-2 lg:grid-cols-3;
-  }
-  
-  .hero-feature-card {
-    @apply hero-card p-8 text-center group;
-  }
-  
-  .hero-feature-icon {
-    @apply w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300;
-  }
-  
-  .hero-feature-title {
-    @apply text-xl font-bold text-slate-800 dark:text-slate-200 mb-4;
-  }
-  
-  .hero-feature-description {
-    @apply text-slate-600 dark:text-slate-400 leading-relaxed;
-  }
-  
-  .hero-stats-grid {
-    @apply grid grid-cols-2 md:grid-cols-4 gap-6;
-  }
-  
-  .hero-stat-card {
-    @apply hero-card p-6 text-center;
-  }
-  
-  .hero-stat-value {
-    @apply text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2;
-  }
-  
-  .hero-stat-label {
-    @apply text-sm text-slate-600 dark:text-slate-400 font-medium;
-  }
-  
-  .hero-gradient-text {
-    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800 dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600 bg-clip-text text-transparent;
-  }
-  
-  .hero-divider {
-    @apply h-1 w-24 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto;
-  }
-  
-  .hero-background {
-    @apply bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20;
-  }
-  
-  .hero-glass {
-    @apply bg-white/10 dark:bg-slate-800/10 backdrop-blur-md border border-white/20 dark:border-slate-700/20;
-  }
-  
-  .hero-hover-lift {
-    @apply transition-all duration-300 ease-out hover:scale-105 hover:-translate-y-2 hover:shadow-2xl;
-  }
-  
-  .hero-focus-ring {
-    @apply focus:outline-none focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-ice-blue-400/20 focus:border-ice-blue-500 dark:focus:border-ice-blue-400;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
   }
 
-  /* Enhanced Hockey-Themed Design System */
-  .hockey-card {
-    @apply bg-gradient-to-br from-white via-ice-blue-50/30 to-rink-blue-50/20 dark:from-hockey-silver-900 dark:via-ice-blue-900/20 dark:to-rink-blue-900/10;
-    @apply border border-ice-blue-200/60 dark:border-rink-blue-800/60;
-    @apply shadow-xl shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
-    @apply backdrop-blur-sm rounded-2xl;
-    @apply transition-all duration-500 ease-out;
-    @apply hover:shadow-2xl hover:shadow-ice-blue-500/20 dark:hover:shadow-rink-blue-500/30;
-    @apply hover:scale-[1.02] hover:-translate-y-1;
-    @apply hover:border-ice-blue-300/80 dark:hover:border-rink-blue-700/80;
-  }
-  
-  .clean-card {
-    @apply bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300;
-  }
-  
-  .hockey-button {
-    @apply bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-ice-blue-600;
-    @apply hover:from-ice-blue-600 hover:via-rink-blue-600 hover:to-ice-blue-700;
-    @apply text-white font-bold py-3 px-6 rounded-xl;
-    @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105 hover:shadow-xl hover:shadow-ice-blue-500/30;
-    @apply focus:outline-none focus:ring-4 focus:ring-ice-blue-500/30;
-    @apply relative overflow-hidden;
-    @apply border border-ice-blue-400/20;
-  }
-  
-  .hockey-button::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20;
-    @apply transform -skew-x-12 -translate-x-full;
-    @apply transition-transform duration-700;
-  }
-  
-  .hockey-button:hover::before {
-    @apply translate-x-full;
-  }
-  
-  .clean-button {
-    @apply bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg;
-  }
-  
-  .clean-button-secondary {
-    @apply border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 font-semibold py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105 hover:bg-slate-50 dark:hover:bg-slate-700;
-  }
-  
-  .hockey-gradient-text {
-    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
-    @apply bg-clip-text text-transparent;
-    @apply animate-gradient-x;
-    @apply font-black;
-  }
-  
-  .clean-gradient-text {
-    @apply bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600 bg-clip-text text-transparent;
-  }
-  
-  .clean-gradient-text-red {
-    @apply bg-gradient-to-r from-red-600 to-red-800 dark:from-red-400 dark:to-red-600 bg-clip-text text-transparent;
-  }
-  
-  .clean-gradient-text-emerald {
-    @apply bg-gradient-to-r from-emerald-600 to-emerald-800 dark:from-emerald-400 dark:to-emerald-600 bg-clip-text text-transparent;
-  }
-  
-  .clean-section-header {
-    @apply text-center mb-16;
-  }
-  
-  .clean-section-title {
-    @apply text-4xl md:text-5xl font-bold mb-6;
-  }
-  
-  .clean-section-subtitle {
-    @apply text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed;
-  }
-  
-  .clean-divider {
-    @apply h-1 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mx-auto mb-8;
-  }
-  
-  .clean-divider-red {
-    @apply h-1 w-32 bg-gradient-to-r from-red-500 to-red-600 rounded-full mx-auto mb-8;
-  }
-  
-  .clean-divider-emerald {
-    @apply h-1 w-32 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full mx-auto mb-8;
-  }
-  
-  .clean-icon-container {
-    @apply p-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg;
-  }
-  
-  .clean-icon-container-red {
-    @apply p-4 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg;
-  }
-  
-  .clean-icon-container-emerald {
-    @apply p-4 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg;
-  }
-  
-  .clean-icon-container-indigo {
-    @apply p-4 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl shadow-lg;
-  }
-  
-  .clean-stats-grid {
-    @apply grid grid-cols-2 md:grid-cols-4 gap-8;
-  }
-  
-  .clean-stat-item {
-    @apply text-center;
-  }
-  
-  .clean-stat-icon {
-    @apply p-4 rounded-xl shadow-lg mx-auto w-fit group-hover:shadow-xl transition-shadow duration-300;
-  }
-  
-  .clean-stat-value {
-    @apply text-3xl font-bold mb-2 text-slate-800 dark:text-slate-200;
-  }
-  
-  .clean-stat-label {
-    @apply text-lg font-semibold mb-2 text-slate-700 dark:text-slate-300;
-  }
-  
-  .clean-stat-desc {
-    @apply text-sm text-slate-600 dark:text-slate-400;
-  }
-  
-  .clean-feature-card {
-    @apply h-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300;
-  }
-  
-  .clean-feature-header {
-    @apply flex items-center gap-4 mb-6;
-  }
-  
-  .clean-feature-icon {
-    @apply p-3 rounded-lg shadow-lg;
-  }
-  
-  .clean-feature-title {
-    @apply text-2xl font-bold text-slate-800 dark:text-slate-200;
-  }
-  
-  .clean-feature-content {
-    @apply space-y-4;
-  }
-  
-  .clean-feature-text {
-    @apply text-slate-600 dark:text-slate-400 leading-relaxed;
-  }
-  
-  .clean-user-panel {
-    @apply space-y-4;
-  }
-  
-  .clean-user-info-card {
-    @apply bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20;
-  }
-  
-  .clean-user-avatar {
-    @apply w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center;
-  }
-  
-  .clean-user-name {
-    @apply text-white font-medium text-sm;
-  }
-  
-  .clean-user-status {
-    @apply text-blue-200 text-xs;
-  }
-  
-  .clean-user-detail {
-    @apply flex items-center justify-between text-xs;
-  }
-  
-  .clean-user-detail-label {
-    @apply text-slate-300;
-  }
-  
-  .clean-user-detail-value {
-    @apply text-slate-300;
-  }
-  
-  .clean-user-detail-value-online {
-    @apply text-green-400 font-medium;
-  }
-  
-  .clean-quick-actions {
-    @apply space-y-2;
-  }
-  
-  .clean-quick-actions-title {
-    @apply text-sm font-semibold text-slate-300 mb-3;
-  }
-  
-  .clean-quick-actions-list {
-    @apply space-y-2;
-  }
-  
-  .clean-quick-action-link {
-    @apply inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1;
-  }
-  
-  .clean-quick-action-icon {
-    @apply h-4 w-4 text-blue-400 group-hover:text-white transition-colors duration-200;
-  }
-  
-  .clean-quick-action-dot {
-    @apply w-1 h-1 rounded-full group-hover:bg-white transition-colors duration-200;
-  }
-  
-  .clean-quick-action-dot-blue {
-    @apply bg-blue-400;
-  }
-  
-  .clean-quick-action-dot-emerald {
-    @apply bg-emerald-400;
-  }
-  
-  .clean-quick-action-dot-red {
-    @apply bg-red-400;
-  }
-  
-  .clean-auth-card {
-    @apply bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 text-center;
-  }
-  
-  .clean-auth-icon {
-    @apply h-8 w-8 text-slate-400 mx-auto mb-3;
-  }
-  
-  .clean-auth-text {
-    @apply text-slate-300 text-sm mb-4;
-  }
-  
-  .clean-auth-buttons {
-    @apply space-y-2;
-  }
-  
-  .clean-auth-button-primary {
-    @apply block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-center py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105;
-  }
-  
-  .clean-auth-button-secondary {
-    @apply block w-full border border-white/30 hover:border-white/50 text-white text-center py-2 px-4 rounded-lg transition-all duration-200 hover:bg-white/10;
+  /* Override all bold text styling to use regular font weight */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 400 !important;
   }
 
-  /* Hockey-themed component styles */
-  .hockey-card {
-    @apply bg-gradient-to-br from-white to-ice-blue-50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20;
-    @apply border border-ice-blue-200/50 dark:border-rink-blue-800/50;
-    @apply shadow-lg shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
-    @apply backdrop-blur-sm;
-    @apply min-h-[280px];
-  }
-  
-  .hockey-card-hover {
-    @apply hover:shadow-xl hover:shadow-ice-blue-500/20 dark:hover:shadow-rink-blue-500/30;
-    @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-700;
-    @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105;
-  }
-  
-  .hockey-gradient-text {
-    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
-    @apply bg-clip-text text-transparent;
-    @apply animate-gradient-x;
-  }
-  
-  .hockey-button {
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
-    @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
-    @apply text-white font-semibold py-2 px-4 rounded-lg;
-    @apply transition-all duration-200 ease-out;
-    @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/25;
-    @apply focus:outline-none focus:ring-2 focus:ring-ice-blue-500 focus:ring-offset-2;
-  }
-  
-  .hockey-badge {
-    @apply bg-gradient-to-r from-ice-blue-100 to-rink-blue-100;
-    @apply dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
-    @apply text-ice-blue-800 dark:text-ice-blue-200;
-    @apply border border-ice-blue-200 dark:border-ice-blue-700;
-    @apply px-3 py-1 rounded-full text-sm font-medium;
-    @apply transition-all duration-200 ease-out;
-    @apply hover:scale-105 hover:shadow-md;
-  }
-  
-  .hockey-stats-grid {
-    @apply grid grid-cols-3 gap-4 w-full;
-    @apply bg-gradient-to-br from-hockey-silver-50 to-ice-blue-50/30;
-    @apply dark:from-hockey-silver-900/50 dark:to-rink-blue-900/20;
-    @apply rounded-xl p-4 border border-hockey-silver-200/50;
-    @apply dark:border-hockey-silver-700/50;
-  }
-  
-  .hockey-stat-item {
-    @apply text-center p-3 rounded-lg;
-    @apply bg-white/70 dark:bg-hockey-silver-800/70;
-    @apply backdrop-blur-sm border border-hockey-silver-200/50;
-    @apply dark:border-hockey-silver-600/50;
-    @apply transition-all duration-200 ease-out;
-    @apply hover:scale-105 hover:bg-white dark:hover:bg-hockey-silver-800;
-    @apply hover:shadow-md hover:shadow-ice-blue-500/20;
-    @apply min-h-[70px] flex flex-col justify-center;
-  }
-  
-  .hockey-search {
-    @apply bg-white/80 dark:bg-hockey-silver-800/80;
-    @apply border-2 border-ice-blue-200 dark:border-rink-blue-700;
-    @apply focus:border-ice-blue-500 dark:focus:border-rink-blue-500;
-    @apply focus:ring-2 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20;
-    @apply rounded-lg px-3 py-2 text-sm;
-    @apply transition-all duration-200 ease-out;
-    @apply placeholder:text-hockey-silver-500 dark:placeholder:text-hockey-silver-400;
-    @apply backdrop-blur-sm;
-  }
-  
-  .hockey-header {
-    @apply relative overflow-hidden;
-    @apply bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50;
-    @apply dark:from-hockey-silver-900/50 dark:via-hockey-silver-800 dark:to-rink-blue-900/30;
-    @apply before:absolute before:inset-0 before:bg-hockey-pattern before:opacity-5;
-  }
-  
-  .hockey-title {
-    @apply relative z-10;
-    @apply bg-gradient-to-r from-ice-blue-700 via-rink-blue-700 to-ice-blue-800;
-    @apply dark:from-ice-blue-300 dark:via-rink-blue-300 dark:to-ice-blue-400;
-    @apply bg-clip-text text-transparent;
-    @apply text-2xl md:text-3xl font-bold;
-    @apply animate-gradient-x;
-  }
-  
-  .hockey-subtitle {
-    @apply relative z-10 text-hockey-silver-600 dark:text-hockey-silver-400;
-    @apply text-base md:text-lg font-medium;
-    @apply max-w-2xl;
-  }
-  
-  .hockey-match-card {
-    @apply bg-gradient-to-br from-white to-ice-blue-50/50 dark:from-hockey-silver-900 dark:to-rink-blue-900/20;
-    @apply border border-ice-blue-200/50 dark:border-rink-blue-800/50;
-    @apply shadow-lg shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
-    @apply backdrop-blur-sm;
-    @apply transition-all duration-300 ease-out;
-    @apply min-h-[280px];
-  }
-  
-  .hockey-match-card-hover {
-    @apply hover:shadow-xl hover:shadow-ice-blue-500/20 dark:hover:shadow-rink-blue-500/30;
-    @apply hover:border-ice-blue-300 dark:hover:border-rink-blue-700;
-    @apply hover:scale-105;
-  }
-  
-  .hockey-week-nav {
-    @apply bg-gradient-to-br from-white to-ice-blue-50/30 dark:from-hockey-silver-900/50 dark:to-rink-blue-900/20;
-    @apply border border-ice-blue-200/50 dark:border-rink-blue-800/50;
-    @apply rounded-xl p-6 shadow-lg shadow-ice-blue-500/10 dark:shadow-rink-blue-500/20;
-  }
-  
-  .hockey-date-header {
-    @apply flex items-center gap-3 mb-6;
-  }
-  
-  .hockey-date-indicator {
-    @apply w-2 h-8 bg-gradient-to-b from-ice-blue-500 to-rink-blue-600 rounded-full;
-  }
-  
-  .hockey-score-display {
-    @apply text-center;
+  strong,
+  b {
+    font-weight: 400 !important;
   }
 
-  /* Custom Hockey-Themed Scrollbar */
-  .hockey-scrollbar {
+  .font-bold {
+    font-weight: 400 !important;
+  }
+
+  .font-semibold {
+    font-weight: 400 !important;
+  }
+
+  .font-medium {
+    font-weight: 400 !important;
+  }
+
+  /* Mobile-first responsive design */
+  html {
+    /* Prevent zoom on iOS */
+    -webkit-text-size-adjust: 100%;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+  }
+
+  /* Ensure mobile viewport is properly handled */
+  @media (max-width: 768px) {
+    body {
+      /* Prevent horizontal overflow */
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    /* Make sure all containers fit mobile */
+    .container {
+      width: 100%;
+      max-width: 100%;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+  }
+
+  /* Custom scrollbar for sidebar */
+  .sidebar-scroll {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--ice-blue)) hsl(var(--hockey-silver));
+    scrollbar-color: hsl(var(--muted)) transparent;
   }
 
-  .hockey-scrollbar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  .hockey-scrollbar::-webkit-scrollbar-track {
-    background: hsl(var(--hockey-silver) / 0.3);
-    border-radius: 4px;
-  }
-
-  .hockey-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, hsl(var(--ice-blue)), hsl(var(--rink-blue)));
-    border-radius: 4px;
-    border: 1px solid hsl(var(--hockey-silver) / 0.5);
-  }
-
-  .hockey-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, hsl(var(--ice-blue) / 0.8), hsl(var(--rink-blue) / 0.8));
-    box-shadow: 0 0 8px hsl(var(--ice-blue) / 0.5);
-  }
-
-  .hockey-scrollbar::-webkit-scrollbar-corner {
-    background: hsl(var(--hockey-silver) / 0.3);
-  }
-
-  /* Sidebar-specific scrollbar */
-  .sidebar-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--ice-blue) / 0.6) hsl(var(--hockey-silver) / 0.2);
-  }
-
-  .sidebar-scrollbar::-webkit-scrollbar {
+  .sidebar-scroll::-webkit-scrollbar {
     width: 6px;
   }
 
-  .sidebar-scrollbar::-webkit-scrollbar-track {
-    background: hsl(var(--hockey-silver) / 0.1);
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
     border-radius: 3px;
   }
 
-  .sidebar-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, hsl(var(--ice-blue) / 0.6), hsl(var(--rink-blue) / 0.6));
-    border-radius: 3px;
-    border: 1px solid hsl(var(--hockey-silver) / 0.3);
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground));
   }
-
-  .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, hsl(var(--ice-blue) / 0.8), hsl(var(--rink-blue) / 0.8));
-    box-shadow: 0 0 6px hsl(var(--ice-blue) / 0.4);
-  }
-  
-  .hockey-score-number {
-    @apply text-3xl font-bold tabular-nums text-hockey-silver-800 dark:text-hockey-silver-200;
-  }
-  
-  .hockey-score-separator {
-    @apply text-lg text-hockey-silver-500 dark:text-hockey-silver-500 font-medium;
-  }
-  
-  .hockey-vs-text {
-    @apply text-2xl font-bold text-hockey-silver-500 dark:text-hockey-silver-500;
-  }
-  
-  .hockey-match-grid {
-    @apply grid gap-6 md:grid-cols-2;
-  }
-  
-  .hockey-match-content {
-    @apply p-6;
-  }
-  
-  .hockey-match-header {
-    @apply flex justify-between items-center mb-6;
-  }
-  
-  .hockey-match-teams {
-    @apply flex items-center justify-between mb-6;
-  }
-  
-  .hockey-team-section {
-    @apply flex flex-col items-center gap-4 w-2/5;
-  }
-  
-  .hockey-team-logo {
-    @apply relative w-20 h-20 overflow-hidden;
-  }
-  
-  .hockey-team-name {
-    @apply font-bold text-center text-hockey-silver-800 dark:text-hockey-silver-200 group-hover:text-ice-blue-600 dark:group-hover:text-rink-blue-400 transition-colors duration-200 text-base;
-  }
-  
-  .hockey-team-badge {
-    @apply mt-3 text-sm flex items-center gap-1 px-3 py-1 rounded-full font-medium;
-  }
-  
-  .hockey-home-badge {
-    @apply bg-gradient-to-r from-ice-blue-100 to-ice-blue-200 text-ice-blue-800 border border-ice-blue-300 dark:from-ice-blue-900/30 dark:to-ice-blue-800/30 dark:text-ice-blue-200 dark:border-ice-blue-600;
-  }
-  
-  .hockey-away-badge {
-    @apply bg-gradient-to-r from-rink-blue-100 to-rink-blue-200 text-rink-blue-800 border border-rink-blue-300 dark:from-rink-blue-900/30 dark:to-rink-blue-800/30 dark:text-rink-blue-200 dark:border-rink-blue-600;
-  }
-  
-  .hockey-score-section {
-    @apply flex items-center justify-center w-1/5;
-  }
-  
-  .hockey-match-action {
-    @apply bg-gradient-to-r from-hockey-silver-50 to-ice-blue-50/30 dark:from-hockey-silver-800/30 dark:to-rink-blue-900/20 p-4 flex justify-center;
-  }
-  
-  .hockey-standings-table {
-    @apply w-full;
-  }
-  
-  .hockey-standings-table th {
-    @apply bg-gradient-to-r from-hockey-silver-50 to-ice-blue-50/30 dark:from-hockey-silver-900/30 dark:to-ice-blue-900/20;
-    @apply border-hockey-silver-200 dark:border-hockey-silver-700;
-    @apply text-hockey-silver-700 dark:text-hockey-silver-300;
-    @apply font-bold;
-    @apply px-4 py-3;
-  }
-  
-  .hockey-standings-table td {
-    @apply border-hockey-silver-200 dark:border-hockey-silver-700;
-    @apply px-4 py-3;
-    @apply transition-all duration-200;
-  }
-  
-  .hockey-standings-table tbody tr:hover {
-    @apply bg-gradient-to-r from-ice-blue-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20;
-    @apply shadow-md shadow-ice-blue-500/10;
-  }
-  
-  .hockey-tabs-list {
-    @apply bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
-    @apply p-1 rounded-xl border border-ice-blue-200/50 dark:border-rink-blue-700/50;
-  }
-  
-  .hockey-tab-trigger {
-    @apply data-[state=active]:bg-gradient-to-r data-[state=active]:from-ice-blue-500 data-[state=active]:to-rink-blue-600;
-    @apply data-[state=active]:text-white data-[state=active]:shadow-lg;
-    @apply transition-all duration-200;
-  }
-  
-  /* Enhanced Hockey-Themed Components */
-  .hockey-glow-effect {
-    @apply relative;
-  }
-  
-  .hockey-glow-effect::before {
-    content: '';
-    @apply absolute inset-0 rounded-lg blur-xl opacity-30 scale-150;
-    @apply bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30;
-    @apply transition-opacity duration-300;
-  }
-  
-  .hockey-glow-effect:hover::before {
-    @apply opacity-50;
-  }
-  
-  .hockey-enhanced-card {
-    @apply hockey-card;
-    @apply hover:shadow-2xl hover:shadow-ice-blue-500/25 dark:hover:shadow-rink-blue-500/30;
-    @apply hover:scale-105 hover:border-ice-blue-300/70 dark:hover:border-rink-blue-600/70;
-    @apply transition-all duration-300 ease-out;
-  }
-  
-  .hockey-enhanced-card::before {
-    content: '';
-    @apply absolute inset-0 rounded-lg opacity-0;
-    @apply bg-gradient-to-br from-ice-blue-500/5 to-transparent;
-    @apply transition-opacity duration-300;
-  }
-  
-  .hockey-enhanced-card:hover::before {
-    @apply opacity-100;
-  }
-  
-  .hockey-feature-icon {
-    @apply relative p-3 rounded-lg shadow-lg;
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
-    @apply transition-all duration-300;
-  }
-  
-  .hockey-feature-icon::before {
-    content: '';
-    @apply absolute inset-0 rounded-lg blur-md scale-150 opacity-30;
-    @apply bg-gradient-to-r from-ice-blue-500/30 to-rink-blue-500/30;
-    @apply transition-opacity duration-300;
-  }
-  
-  .hockey-feature-icon:hover::before {
-    @apply opacity-50;
-  }
-  
-  .hockey-stats-enhanced {
-    @apply text-center p-4 rounded-xl;
-    @apply bg-gradient-to-br from-white/80 to-ice-blue-50/50;
-    @apply dark:from-hockey-silver-800/80 dark:to-rink-blue-900/30;
-    @apply backdrop-blur-sm border border-ice-blue-200/50;
-    @apply dark:border-rink-blue-700/50;
-    @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/20;
-    @apply cursor-pointer;
-  }
-  
-  .hockey-stats-enhanced:hover {
-    @apply bg-white dark:bg-hockey-silver-800;
-    @apply border-ice-blue-300 dark:border-rink-blue-600;
-  }
-  
-  .hockey-button-enhanced {
-    @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
-    @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
-    @apply text-white font-semibold py-2 px-4 rounded-lg;
-    @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/30;
-    @apply focus:outline-none focus:ring-2 focus:ring-ice-blue-500 focus:ring-offset-2;
-    @apply relative overflow-hidden;
-  }
-  
-  .hockey-button-enhanced::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-white/20 to-transparent;
-    @apply transform -skew-x-12 -translate-x-full;
-    @apply transition-transform duration-500;
-  }
-  
-  .hockey-button-enhanced:hover::before {
-    @apply translate-x-full;
-  }
-  
-  .hockey-title-enhanced {
-    @apply hockey-title;
-    @apply text-3xl md:text-4xl;
-    @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-    @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
-    @apply bg-clip-text text-transparent;
-    @apply animate-gradient-x;
-    @apply relative;
-  }
-  
-  .hockey-subtitle-enhanced {
-    @apply hockey-subtitle;
-    @apply text-lg md:text-xl;
-    @apply leading-relaxed;
-    @apply max-w-3xl mx-auto;
-  }
-  
-  .hockey-section-divider {
-    @apply h-1 w-40 bg-gradient-to-r from-ice-blue-500 via-rink-blue-500 to-transparent;
-    @apply rounded-full mx-auto;
-    @apply transition-all duration-1000;
-  }
-  
-  .hockey-floating-element {
-    @apply absolute pointer-events-none;
-    @apply animate-float;
-  }
-  
-  .hockey-background-pattern {
-    @apply absolute inset-0 opacity-5;
-    @apply bg-hockey-pattern;
-  }
-
-  /* Premium Hockey Gradient Text Animation */
-  .hockey-gradient-text-animated {
-    @apply bg-gradient-to-r from-ice-blue-400 via-rink-blue-500 to-assist-green-400;
-    @apply dark:from-ice-blue-300 dark:via-rink-blue-400 dark:to-assist-green-300;
-    @apply bg-clip-text text-transparent;
-    @apply bg-[length:200%_200%];
-    @apply animate-gradient-text;
-    @apply font-black;
-  }
-
-  /* Premium Hockey Card Hover Effects */
-  .hockey-stat-hover-enhanced {
-    @apply transition-all duration-500 ease-out;
-    @apply hover:scale-105 hover:shadow-2xl;
-    @apply hover:shadow-ice-blue-500/20;
-    @apply rounded-2xl;
-    @apply backdrop-blur-sm;
-  }
-
-  /* Premium Hockey Button Enhancements */
-  .hockey-button-hover-enhanced {
-    @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105 hover:shadow-xl;
-    @apply hover:shadow-ice-blue-500/30;
-    @apply transform-gpu;
-  }
-
-  /* Premium Hockey Hover Lift Effect */
-  .hockey-hover-lift {
-    @apply transition-all duration-300 ease-out;
-    @apply hover:scale-105 hover:-translate-y-1;
-    @apply hover:shadow-xl;
-    @apply transform-gpu;
-  }
-
-
-  /* Premium Hockey Table Row Hover */
-  .hockey-table-row-hover {
-    @apply transition-all duration-300 ease-out;
-    @apply hover:bg-gradient-to-r hover:from-ice-blue-50 hover:to-rink-blue-50;
-    @apply dark:hover:from-ice-blue-900/20 dark:hover:to-rink-blue-900/20;
-    @apply hover:shadow-lg;
-    @apply hover:scale-[1.01];
-  }
-
-  /* Premium Hockey Alert Styling */
-  .hockey-alert {
-    @apply bg-gradient-to-r from-ice-blue-50 to-rink-blue-50;
-    @apply dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
-    @apply border border-ice-blue-200 dark:border-ice-blue-700;
-    @apply rounded-2xl;
-    @apply shadow-lg;
-    @apply transition-all duration-300 ease-out;
-  }
-}
-
-/* Custom container class to ensure proper centering */
-.container {
-  @apply mx-auto max-w-7xl;
-  width: 100%;
-}
-
-/* Hide v0 attribution popup */
-[data-v0-attribution],
-[data-v0-built-with],
-.v0-attribution,
-.built-with-v0,
-iframe[src*="v0.dev"],
-div[onclick*="v0.dev"],
-a[href*="v0.dev/chat/api/open/built-with-v0"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Hide fixed position elements that might be v0 attribution */
-div[style*="position: fixed"][style*="bottom"][style*="right"] {
-  display: none !important;
-}
-
-/* Additional selectors to catch any v0 attribution */
-[class*="v0-"],
-[id*="v0-"],
-[data-testid*="v0"],
-[aria-label*="Built with v0"],
-[title*="Built with v0"] {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* Hide any popup with v0 branding at common positions */
-div[style*="position: fixed"][style*="bottom: 16px"][style*="right: 16px"],
-div[style*="position: fixed"][style*="bottom: 1rem"][style*="right: 1rem"] {
-  display: none !important;
-}
-
-/* Enhanced Hockey Button Styles */
-.hockey-button {
-  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
-  @apply hover:from-ice-blue-600 hover:to-rink-blue-700;
-  @apply text-white font-semibold py-2 px-4 rounded-lg;
-  @apply hover:scale-105 hover:shadow-lg hover:shadow-ice-blue-500/25;
-  @apply transition-all duration-200 ease-out;
-}
-
-.hockey-button-secondary {
-  @apply bg-gradient-to-r from-rink-blue-500 to-ice-blue-600;
-  @apply hover:from-rink-blue-600 hover:to-ice-blue-700;
-  @apply text-white font-semibold py-2 px-4 rounded-lg;
-  @apply hover:scale-105 hover:shadow-lg hover:shadow-rink-blue-500/25;
-  @apply transition-all duration-200 ease-out;
-}
-
-.hockey-button-success {
-  @apply bg-gradient-to-r from-assist-green-500 to-goal-red-600;
-  @apply hover:from-assist-green-600 hover:to-goal-red-700;
-  @apply text-white font-semibold py-2 px-4 rounded-lg;
-  @apply hover:scale-105 hover:shadow-lg hover:shadow-assist-green-500/25;
-  @apply transition-all duration-200 ease-out;
-}
-
-.hockey-button-danger {
-  @apply bg-gradient-to-r from-goal-red-500 to-assist-green-600;
-  @apply hover:from-goal-red-600 hover:to-assist-green-700;
-  @apply text-white font-semibold py-2 px-4 rounded-lg;
-  @apply hover:scale-105 hover:shadow-lg hover:shadow-goal-red-500/25;
-  @apply transition-all duration-200 ease-out;
-}
-
-/* Enhanced Hockey Card Styles */
-.hockey-card {
-  @apply bg-white dark:bg-hockey-silver-800;
-  @apply border border-ice-blue-200 dark:border-ice-blue-700;
-  @apply rounded-xl shadow-lg;
-  @apply transition-all duration-300 ease-out;
-}
-
-.hockey-card-hover {
-  @apply hover:shadow-2xl hover:shadow-ice-blue-500/10;
-  @apply hover:-translate-y-1;
-}
-
-.hockey-stat-item {
-  @apply bg-white dark:bg-hockey-silver-800;
-  @apply border border-ice-blue-200 dark:border-ice-blue-700;
-  @apply rounded-xl p-6 shadow-lg;
-  @apply transition-all duration-300 ease-out;
-}
-
-/* Enhanced Hockey Title Styles */
-.hockey-title {
-  @apply text-4xl md:text-5xl font-bold;
-  @apply bg-gradient-to-r from-ice-blue-600 via-rink-blue-600 to-ice-blue-800;
-  @apply dark:from-ice-blue-400 dark:via-rink-blue-400 dark:to-ice-blue-600;
-  @apply bg-clip-text text-transparent;
-  @apply mb-6;
-}
-
-.hockey-subtitle {
-  @apply text-lg md:text-xl text-hockey-silver-600 dark:text-hockey-silver-400;
-  @apply max-w-2xl;
-}
-
-/* Enhanced Hockey Search Styles */
-.hockey-search {
-  @apply bg-white dark:bg-hockey-silver-800;
-  @apply border-2 border-ice-blue-200 dark:border-ice-blue-700;
-  @apply rounded-xl shadow-lg;
-  @apply focus:ring-4 focus:ring-ice-blue-500/20 dark:focus:ring-rink-blue-500/20;
-  @apply transition-all duration-300 ease-out;
-}
-
-/* Enhanced Hockey Alert Styles */
-.hockey-alert {
-  @apply bg-gradient-to-r from-ice-blue-50 to-rink-blue-50;
-  @apply dark:from-ice-blue-900/30 dark:to-rink-blue-900/30;
-  @apply border border-ice-blue-200 dark:border-ice-blue-700;
-  @apply rounded-xl shadow-lg;
-}
-
-.hockey-alert-success {
-  @apply bg-gradient-to-r from-assist-green-50 to-goal-red-50;
-  @apply dark:from-assist-green-900/30 dark:to-goal-red-900/30;
-  @apply border border-assist-green-200 dark:border-assist-green-700;
-  @apply rounded-xl shadow-lg;
-}
-
-.hockey-alert-warning {
-  @apply bg-gradient-to-r from-goal-red-50 to-assist-green-50;
-  @apply dark:from-goal-red-900/30 dark:to-assist-green-900/30;
-  @apply border border-goal-red-200 dark:border-goal-red-700;
-  @apply rounded-xl shadow-lg;
-}
-
-/* Enhanced Hockey Badge Styles */
-.hockey-badge {
-  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600;
-  @apply text-white font-semibold px-3 py-1 rounded-full;
-  @apply text-sm;
-}
-
-.hockey-badge-secondary {
-  @apply bg-gradient-to-r from-rink-blue-500 to-ice-blue-600;
-  @apply text-white font-semibold px-3 py-1 rounded-full;
-  @apply text-sm;
-}
-
-.hockey-badge-success {
-  @apply bg-gradient-to-r from-assist-green-500 to-goal-red-600;
-  @apply text-white font-semibold px-3 py-1 rounded-full;
-  @apply text-sm;
-}
-
-.hockey-badge-danger {
-  @apply bg-gradient-to-r from-goal-red-500 to-assist-green-600;
-  @apply text-white font-semibold px-3 py-1 rounded-full;
-  @apply text-sm;
-}
-
-/* Enhanced Animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes gradient-x {
-  0%, 100% {
-    background-size: 200% 200%;
-    background-position: left center;
-  }
-  50% {
-    background-size: 200% 200%;
-    background-position: right center;
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-  }
-}
-
-@keyframes slide-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
+/* Added custom utility classes for the modern esports-inspired design */
+@layer utilities {
+  .bg-texture {
+    background-image: url("https://cewrogcukeebjkpzsthw.supabase.co/storage/v1/object/public/media/photos/general/bg-texture-01.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes gradient-text {
-  0%, 100% { 
-    background-position: 0% 50%; 
-  }
-  50% { 
-    background-position: 100% 50%; 
-  }
-}
-
-@keyframes bounce-gentle {
-  0%, 100% { 
-    transform: translateY(0); 
-  }
-  50% { 
-    transform: translateY(-5px); 
-  }
-}
-
-@keyframes rotate-slow {
-  from { 
-    transform: rotate(0deg); 
-  }
-  to { 
-    transform: rotate(360deg); 
-  }
-}
 
-@keyframes glow-pulse {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.1);
+  /* Lilac gradient wash that adapts to theme */
+  .bg-lilac-wash {
+    background:
+      radial-gradient(1200px 800px at 10% 0%, hsl(var(--primary) / 0.10), transparent 60%),
+      radial-gradient(800px 600px at 90% 20%, hsl(var(--secondary) / 0.10), transparent 60%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
-  50% { 
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.2);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-gradient-x {
-  animation: gradient-x 3s ease infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-slide-in-up {
-  animation: slide-in-up 0.6s ease-out;
-}
-
-.animate-gradient-text {
-  animation: gradient-text 3s ease infinite;
-}
-
-.animate-bounce-gentle {
-  animation: bounce-gentle 2s ease-in-out infinite;
-}
-
-.animate-rotate-slow {
-  animation: rotate-slow 8s linear infinite;
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-.animate-slide-in-left {
-  animation: slide-in-left 0.6s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.6s ease-out;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.4s ease-out;
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Enhanced Hover Effects */
-.hockey-hover-lift {
-  @apply transition-all duration-300 ease-out;
-  @apply hover:scale-105 hover:-translate-y-1;
-  @apply hover:shadow-xl hover:shadow-ice-blue-500/25;
-}
-
-.hockey-hover-glow {
-  @apply transition-all duration-300 ease-out;
-  @apply hover:shadow-lg hover:shadow-ice-blue-500/30;
-  @apply hover:ring-2 hover:ring-ice-blue-500/20;
-}
-
-.hockey-hover-underline {
-  @apply relative;
-  @apply after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0;
-  @apply after:bg-gradient-to-r after:from-ice-blue-500 after:to-rink-blue-600;
-  @apply after:transition-all after:duration-300 after:ease-out;
-  @apply hover:after:w-full;
-}
-
-/* Enhanced tab utilities */
-.hockey-tab-active {
-  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 text-white shadow-lg shadow-ice-blue-500/25;
-}
-
-.hockey-tab-hover {
-  @apply hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:scale-105 hover:shadow-md;
-}
-
-.hockey-gradient-text {
-  @apply bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 bg-clip-text text-transparent;
-}
-
-.hockey-border-gradient {
-  @apply border-2 border-transparent bg-gradient-to-r from-ice-blue-200 to-rink-blue-200 bg-clip-border;
-}
-
-.hockey-shadow {
-  @apply shadow-lg shadow-ice-blue-500/10 hover:shadow-xl hover:shadow-ice-blue-500/20;
-}
-
-
-/* Enhanced Card Hover Effects */
-.hockey-card-hover-enhanced {
-  @apply hockey-enhanced-card;
-  @apply hover:shadow-2xl hover:shadow-ice-blue-500/30;
-  @apply hover:scale-[1.02] hover:-translate-y-2;
-  @apply hover:border-ice-blue-400 dark:hover:border-rink-blue-500;
-  @apply transition-all duration-500 ease-out;
-}
-
-
-
-
-/* Enhanced Loading States */
-.hockey-loading-skeleton {
-  @apply bg-gradient-to-r from-hockey-silver-200 via-hockey-silver-100 to-hockey-silver-200;
-  @apply dark:from-hockey-silver-700 dark:via-hockey-silver-600 dark:to-hockey-silver-700;
-  @apply animate-shimmer;
-  @apply rounded-lg;
-}
-
-/* Enhanced Focus States */
-.hockey-focus-enhanced {
-  @apply focus:outline-none focus:ring-4 focus:ring-ice-blue-500/30;
-  @apply focus:border-ice-blue-500 dark:focus:border-rink-blue-500;
-  @apply focus:scale-105;
-  @apply transition-all duration-200 ease-out;
-}
-
-/* Enhanced Scrollbar for Hockey Theme */
-.hockey-scrollbar-enhanced {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--ice-blue) / 0.8) hsl(var(--hockey-silver) / 0.3);
-}
-
-.hockey-scrollbar-enhanced::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.hockey-scrollbar-enhanced::-webkit-scrollbar-track {
-  background: hsl(var(--hockey-silver) / 0.2);
-  border-radius: 5px;
-}
-
-.hockey-scrollbar-enhanced::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, hsl(var(--ice-blue) / 0.8), hsl(var(--rink-blue) / 0.8));
-  border-radius: 5px;
-  border: 2px solid hsl(var(--hockey-silver) / 0.3);
-}
-
-.hockey-scrollbar-enhanced::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, hsl(var(--ice-blue)), hsl(var(--rink-blue)));
-  box-shadow: 0 0 10px hsl(var(--ice-blue) / 0.5);
-}
-
-.hockey-scrollbar-enhanced::-webkit-scrollbar-corner {
-  background: hsl(var(--hockey-silver) / 0.2);
-}
 
-/* Responsive Mobile Scaling - Only scale the main content area */
-@media (max-width: 767px) {
-  /* Remove scaling and make content fill entire screen */
-  .mobile-content {
-    transform: none;
-    transform-origin: unset;
-    width: 100vw !important;
-    min-height: 100vh;
+  /* Use your texture with a subtle lilac overlay for readability */
+  .bg-texture-lilac {
     position: relative;
-    overflow-x: hidden;
-    overflow-y: auto;
+    background-image:
+      linear-gradient(0deg, hsl(var(--background) / 0.85), hsl(var(--background) / 0.85)),
+      url("https://cewrogcukeebjkpzsthw.supabase.co/storage/v1/object/public/media/photos/general/bg-texture-01.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
-  
-  /* Ensure the main container takes full width */
-  .container {
-    width: 100%;
-  }
-  
-  /* Fix content positioning to fill entire viewport */
-  body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-  }
-  
-  /* Ensure main content fills the viewport */
-  .flex.min-h-screen {
-    min-height: 100vh;
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Force mobile content to fill entire screen */
-  .mobile-content {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    position: relative !important;
-  }
-  
-  /* Override the md:ml-72 class on mobile */
-  .mobile-content.md\:ml-72 {
-    margin-left: 0 !important;
-  }
-  
-  /* Remove any margins from main content */
-  main {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100vw;
-    max-width: 100vw;
-  }
-  
-  /* Ensure content area fills the screen */
-  .flex-1.flex.flex-col {
-    width: 100vw;
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Ensure all content containers fill full width */
-  .mobile-content > * {
-    width: 100vw;
-    max-width: 100vw;
-  }
-  
-  /* Ensure main content area fills full width */
-  .mobile-content .flex-1 {
-    width: 100vw;
-    max-width: 100vw;
-  }
-  
-  /* Remove any default margins and padding from html and body */
-  html {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow-x: hidden !important;
-  }
-  
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100vw !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-  }
-  
-  /* Ensure the root div fills the entire viewport */
-  #__next {
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Fix any potential gaps */
-  * {
-    box-sizing: border-box;
-  }
-  
-  /* Fix any fixed positioned elements */
-  .fixed {
-    transform: scale(1) !important;
-  }
-  
-  /* Ensure navigation elements work properly */
-  .md\\:hidden {
-    transform: scale(1) !important;
-  }
-  
-  /* Mobile navigation button should not be scaled */
-  .mobile-nav-button {
-    transform: scale(1) !important;
-  }
-  
-  /* Mobile sidebar should not be scaled and should be hidden by default */
-  .mobile-sidebar {
-    transform: scale(1) !important;
-  }
-  
-  /* Force sidebar to be hidden on mobile by default */
-  aside.mobile-sidebar {
-    transform: translateX(-100%) !important;
-  }
-  
-  /* Show sidebar only when mobile menu is open */
-  aside.mobile-sidebar.translate-x-0 {
-    transform: translateX(0) !important;
-  }
-  
-  /* Additional override to ensure sidebar is hidden on mobile */
-  .mobile-sidebar:not(.translate-x-0) {
-    transform: translateX(-100%) !important;
-  }
-  
-  /* Mobile overlay should not be scaled */
-  .mobile-overlay {
-    transform: scale(1) !important;
-  }
-  
-  /* Toast notifications should not be scaled */
-  [data-radix-toast-viewport] {
-    transform: scale(1) !important;
-  }
-  
-  /* Any other fixed positioned elements with high z-index should not be scaled */
-  [style*="position: fixed"][style*="z-index: 100"],
-  [style*="position: fixed"][style*="z-index: 999"],
-  [style*="position: fixed"][style*="z-index: 1000"] {
-    transform: scale(1) !important;
-  }
-}
 
-/* Remove all scaling for mobile content - use full viewport */
-@media (min-width: 320px) and (max-width: 374px) {
-  .mobile-content {
-    transform: none;
-    width: 100vw !important;
-    min-height: 100vh;
+  /* Card border glow on hover using lilac */
+  .hover-glow {
+    transition: box-shadow 200ms ease, border-color 200ms ease;
   }
-}
+  .hover-glow:hover {
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.15);
+    border-color: hsl(var(--primary));
+  }
 
-@media (min-width: 375px) and (max-width: 414px) {
-  .mobile-content {
-    transform: none;
-    width: 100vw !important;
-    min-height: 100vh;
+  .geometric-accent::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -50px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 100px 50px;
+    border-color: transparent transparent currentColor transparent;
+    opacity: 0.1;
   }
-}
 
-@media (min-width: 415px) and (max-width: 480px) {
-  .mobile-content {
-    transform: none;
-    width: 100vw !important;
-    min-height: 100vh;
-  }
-}
-
-@media (min-width: 481px) and (max-width: 767px) {
-  .mobile-content {
-    transform: none;
-    width: 100vw !important;
-    min-height: 100vh;
-  }
-}
-
-/* Additional mobile scaling optimizations */
-@media (max-width: 767px) {
-  /* Ensure smooth scaling transitions */
-  html {
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  /* Prevent horizontal scroll on very small screens */
-  body {
-    min-width: 320px;
-  }
-  
-  /* Optimize touch targets for scaled content */
-  button, a, input, select, textarea {
-    min-height: 44px; /* iOS recommended touch target size */
-    min-width: 44px;
-  }
-  
-  /* Ensure text remains readable */
-  p, span, div {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  
-  /* Prevent zoom on input focus */
-  input, select, textarea {
-    font-size: 16px;
-  }
-  
-  /* Make text and elements larger on mobile */
-  body {
-    font-size: 1.1rem;
-  }
-  
-  /* Increase button and interactive element sizes */
-  button, a, input, select, textarea {
-    min-height: 48px;
-    min-width: 48px;
-    font-size: 1rem;
-  }
-  
-  /* Make headings larger */
-  h1 { font-size: 2.5rem; }
-  h2 { font-size: 2rem; }
-  h3 { font-size: 1.75rem; }
-  h4 { font-size: 1.5rem; }
-  h5 { font-size: 1.25rem; }
-  h6 { font-size: 1.1rem; }
-  
-  /* Remove any padding from main content on mobile */
-  .mobile-content main {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100vw !important;
-    min-height: 100vh;
-    position: relative !important;
-  }
-  
-  /* Ensure all direct children of mobile content fill width */
-  .mobile-content > div {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-  }
-  
-  /* Force all nested elements to fill width */
-  .mobile-content * {
-    max-width: 100vw !important;
-    box-sizing: border-box !important;
-  }
-  
-  /* Mobile Navigation Accessibility Improvements */
-  .mobile-nav-button {
-    min-width: 48px !important;
-    min-height: 48px !important;
-  }
-  
-  /* Ensure navigation items meet accessibility standards */
-  .mobile-sidebar nav a {
-    min-height: 48px !important;
-    font-size: 16px !important;
-  }
-  
-  .mobile-sidebar nav button {
-    min-width: 48px !important;
-    min-height: 48px !important;
-  }
-  
-  /* Proper spacing between navigation elements */
-  .mobile-sidebar nav > div {
-    margin-bottom: 32px !important;
-  }
-  
-  /* Mobile Tab Selector Fixes */
-  .mobile-content [role="tablist"] {
-    flex-wrap: wrap !important;
-    gap: 2px !important;
-    padding: 2px !important;
-    min-height: 16px !important;
-  }
-  
-  .mobile-content [role="tab"] {
-    min-width: 0 !important;
-    flex: 1 1 auto !important;
-    font-size: 10px !important;
-    padding: 2px 4px !important;
-    min-height: 12px !important;
-    max-height: 12px !important;
-    line-height: 1 !important;
-  }
-  
-  .mobile-content [role="tab"] span {
-    font-size: 9px !important;
-    line-height: 1 !important;
-  }
-  
-  /* Specific fixes for different tab layouts */
-  .mobile-content .grid-cols-3 {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4px !important;
-  }
-  
-  .mobile-content .grid-cols-4 {
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 4px !important;
-  }
-  
-  .mobile-content .grid-cols-7 {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4px !important;
-  }
-  
-  /* Hide icons on very small screens to save space */
-  .mobile-content [role="tab"] svg {
-    width: 14px !important;
-    height: 14px !important;
-  }
-  
-  /* Ensure tab text is readable */
-  .mobile-content [role="tab"] {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  
-  /* Fix TabsList component on mobile */
-  .mobile-content .tabs-list {
-    height: auto !important;
-    min-height: 16px !important;
-    flex-wrap: wrap !important;
-    gap: 1px !important;
-    padding: 1px !important;
-  }
-  
-  /* Fix TabsTrigger component on mobile */
-  .mobile-content .tabs-trigger {
-    font-size: 9px !important;
-    padding: 1px 3px !important;
-    min-height: 12px !important;
-    max-height: 12px !important;
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-    line-height: 1 !important;
-  }
-  
-  /* Responsive tab text sizing */
-  .mobile-content .tabs-trigger span {
-    font-size: 8px !important;
-    line-height: 1 !important;
-  }
-  
-  /* Hide long text on very small screens */
-  @media (max-width: 375px) {
-    .mobile-content .tabs-trigger span {
-      display: none !important;
-    }
-    
-    .mobile-content .tabs-trigger {
-      min-width: 12px !important;
-      max-width: 12px !important;
-      padding: 1px !important;
-    }
-  }
-  
-  /* Ensure all nested containers fill width */
-  .mobile-content * {
-    max-width: 100vw !important;
-  }
-  
-  /* Global Tab Selector Height Reduction */
-  [role="tablist"] {
-    min-height: 24px !important;
-    height: auto !important;
-  }
-  
-  [role="tab"] {
-    min-height: 20px !important;
-    max-height: 20px !important;
-    padding: 2px 8px !important;
-  }
-  
-  .tabs-list {
-    min-height: 24px !important;
-    height: auto !important;
-  }
-  
-  .tabs-trigger {
-    min-height: 20px !important;
-    max-height: 20px !important;
-    padding: 2px 8px !important;
-  }
-  
-  /* Extra Mobile Tab Compactness */
-  @media (max-width: 767px) {
-    [role="tablist"] {
-      min-height: 16px !important;
-      padding: 1px !important;
-    }
-    
-    [role="tab"] {
-      min-height: 12px !important;
-      max-height: 12px !important;
-      padding: 1px 3px !important;
-      font-size: 9px !important;
-    }
-    
-    .tabs-list {
-      min-height: 16px !important;
-      padding: 1px !important;
-    }
-    
-    .tabs-trigger {
-      min-height: 12px !important;
-      max-height: 12px !important;
-      padding: 1px 3px !important;
-      font-size: 9px !important;
-    }
-  }
-  
-  /* Remove any potential margins from all elements */
-  .mobile-content * {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-  
-  /* Remove all padding and margins from the main content area */
-  .mobile-content .flex-1 {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  /* Force the main element to have no padding */
-  .mobile-content main.flex-1 {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  /* Remove any padding from the Suspense wrapper */
-  .mobile-content .flex-1 > div {
-    padding: 0 !important;
-    margin: 0 !important;
+  .geometric-accent::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -50px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 100px 50px 0 0;
+    border-color: currentColor transparent transparent transparent;
+    opacity: 0.1;
   }
 }
