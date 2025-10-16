@@ -1,3 +1,4 @@
+// /api/matches/update-from-ea/route.ts
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { mapEaPositionToStandard } from "@/lib/ea-position-mapper"
@@ -13,12 +14,16 @@ function formatTimeOnIce(seconds: number): string {
 
 // Helper function to safely prepare player stats for database insertion
 function preparePlayerStatsForDB(stat: any, matchId: string, eaMatchId: string | null, seasonId = 1) {
+  // ✅ normalize: never store "" for ids; use null instead
+  const normalizedPid =
+    stat.player_id == null ? null : String(stat.player_id).trim() === "" ? null : String(stat.player_id).trim()
+
   // Create a base object with required fields
   const safeData: Record<string, any> = {
     match_id: matchId,
-    ea_match_id: eaMatchId,
-    player_name: stat.player_name || "Unknown Player",
-    player_id: stat.player_id || "",
+    ea_match_id: eaMatchId ?? null,
+    player_name: (stat.player_name || "Unknown Player").toString().trim(),
+    player_id: normalizedPid,
     team_id: stat.team_id || "",
     position: stat.position || "",
     season_id: seasonId, // Always set season_id
@@ -81,10 +86,28 @@ function preparePlayerStatsForDB(stat: any, matchId: string, eaMatchId: string |
   return safeData
 }
 
+// ------ NEW: league-aware table picker ------
+function pickTables(league: "NHL" | "AHL") {
+  const isAHL = league === "AHL"
+  return {
+    seasons: isAHL ? "seasons_ahl" : "seasons",
+    matches: isAHL ? "matches_ahl" : "matches",
+    teams: isAHL ? "teams_ahl" : "teams",
+    eaMatchData: isAHL ? "ea_match_data_ahl" : "ea_match_data",
+    eaPlayerStats: isAHL ? "ea_player_stats_ahl" : "ea_player_stats",
+    eaTeamStats: isAHL ? "ea_team_stats_ahl" : "ea_team_stats", // if you don't have this, the code checks existence
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = cookies()
-    const supabase = createClient()
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
 
     // TEMPORARILY DISABLE AUTHORIZATION FOR DEPLOYED WEBSITE
     // TODO: Re-enable authorization once the deployment auth issues are resolved
@@ -95,30 +118,60 @@ export async function POST(request: Request) {
 
     // Get the request body
     const body = await request.json()
-    const { matchId, eaMatchId, eaMatchData, isManualImport = false, adminOverride = false } = body
+
+    console.log("[v0] ===== REQUEST BODY =====")
+    console.log("[v0] Full body:", JSON.stringify(body, null, 2))
+
+    const {
+      matchId,
+      eaMatchId,
+      eaMatchData,
+      isManualImport = false,
+      adminOverride = false,
+      league = "NHL", // <-- NEW: pass "AHL" to target *_ahl tables
+    } = body as {
+      matchId: string
+      eaMatchId?: string
+      eaMatchData: any
+      isManualImport?: boolean
+      adminOverride?: boolean
+      league?: "NHL" | "AHL"
+    }
+
+    console.log("[v0] ===== EXTRACTED PARAMETERS =====")
+    console.log("[v0] matchId:", matchId)
+    console.log("[v0] matchId type:", typeof matchId)
+    console.log("[v0] eaMatchId:", eaMatchId)
+    console.log("[v0] league:", league)
+    console.log("[v0] league type:", typeof league)
 
     if (!matchId || !eaMatchData) {
       return NextResponse.json({ error: "Match ID and EA Match Data are required" }, { status: 400 })
     }
 
-    // Get the current active season ID
-    let currentSeasonId = 1 // Default to 1
-    try {
-      const { data: activeSeason, error: seasonError } = await supabase
-        .from("seasons")
-        .select("id, number")
-        .eq("is_active", true)
-        .single()
+    const T = pickTables(league)
 
-      if (!seasonError && activeSeason) {
-        currentSeasonId = activeSeason.number || activeSeason.id || 1
-        console.log(`Found active season: ${currentSeasonId}`)
-      } else {
-        console.log("No active season found, defaulting to season 1")
-      }
-    } catch (error) {
-      console.log("Error fetching active season, defaulting to season 1:", error)
+    console.log(`[v0] ===== TABLE SELECTION =====`)
+    console.log(`[v0] League: ${league}`)
+    console.log(`[v0] Using tables:`, JSON.stringify(T, null, 2))
+    console.log(`[v0] Looking for match ID: ${matchId}`)
+
+    const { data: activeSeason, error: seasonError } = await supabase
+      .from(T.seasons)
+      .select("season_number")
+      .eq("is_active", true)
+      .single()
+
+    if (seasonError || !activeSeason) {
+      console.error("Error fetching active season:", seasonError)
+      return NextResponse.json(
+        { error: `Could not determine current active ${league} season. Please ensure a season is marked as active.` },
+        { status: 500 },
+      )
     }
+
+    const currentSeasonId = activeSeason.season_number
+    console.log(`Using current active season number: ${currentSeasonId} [${league}]`)
 
     // Check if this is a combined match
     const isCombinedMatch = eaMatchId?.startsWith("combined-") || eaMatchData.isCombined
@@ -134,34 +187,96 @@ export async function POST(request: Request) {
     }
 
     // Get the match details to check team IDs
+    console.log(`[v0] ===== QUERYING DATABASE =====`)
+    console.log(`[v0] Querying ${T.matches} table for match ID: ${matchId}`)
+    console.log(
+      `[v0] Query: supabase.from("${T.matches}").select("home_team_id, away_team_id, status").eq("id", "${matchId}").maybeSingle()`,
+    )
+
     const { data: match, error: matchError } = await supabase
-      .from("matches")
+      .from(T.matches)
       .select("home_team_id, away_team_id, status")
       .eq("id", matchId)
-      .single()
+      .maybeSingle()
+
+    console.log(`[v0] ===== QUERY RESULT =====`)
+    console.log(`[v0] Match data:`, match ? JSON.stringify(match, null, 2) : "null")
+    console.log(`[v0] Match error:`, matchError ? JSON.stringify(matchError, null, 2) : "null")
 
     if (matchError) {
-      console.error("Match error:", matchError)
+      console.error("[v0] Match query error:", matchError)
       return NextResponse.json({ error: `Match not found: ${matchError.message}` }, { status: 404 })
     }
 
-    console.log("Match found:", match)
+    if (!match) {
+      console.error("[v0] ===== MATCH NOT FOUND =====")
+      console.error("[v0] Match ID:", matchId)
+      console.error("[v0] Table queried:", T.matches)
+      console.error("[v0] League:", league)
 
+      console.log("[v0] ===== DEBUGGING: Checking both tables =====")
+
+      const { data: nhlMatch, error: nhlError } = await supabase
+        .from("matches")
+        .select("id, home_team_id, away_team_id")
+        .eq("id", matchId)
+        .maybeSingle()
+
+      const { data: ahlMatch, error: ahlError } = await supabase
+        .from("matches_ahl")
+        .select("id, home_team_id, away_team_id")
+        .eq("id", matchId)
+        .maybeSingle()
+
+      console.log(
+        "[v0] NHL matches table result:",
+        nhlMatch ? "FOUND" : "NOT FOUND",
+        nhlError ? `Error: ${nhlError.message}` : "",
+      )
+      console.log(
+        "[v0] AHL matches_ahl table result:",
+        ahlMatch ? "FOUND" : "NOT FOUND",
+        ahlError ? `Error: ${ahlError.message}` : "",
+      )
+
+      if (nhlMatch) {
+        console.log("[v0] ⚠️ Match found in NHL table but league parameter is:", league)
+      }
+      if (ahlMatch) {
+        console.log("[v0] ⚠️ Match found in AHL table but league parameter is:", league)
+      }
+
+      return NextResponse.json(
+        {
+          error: `Match not found with ID: ${matchId} in table: ${T.matches}`,
+          league,
+          table: T.matches,
+          debug: {
+            foundInNHL: !!nhlMatch,
+            foundInAHL: !!ahlMatch,
+            requestedLeague: league,
+          },
+        },
+        { status: 404 },
+      )
+    }
+
+    console.log("Match found:", match)
     console.log("Proceeding with match update (authorization bypassed)")
 
     // Get team EA club IDs
     const { data: teams, error: teamsError } = await supabase
-      .from("teams")
+      .from(T.teams)
       .select("id, ea_club_id")
       .in("id", [match.home_team_id, match.away_team_id])
 
     if (teamsError) {
-      return NextResponse.json({ error: "Failed to get team EA club IDs" }, { status: 500 })
+      return NextResponse.json({ error: `Failed to get team EA club IDs (${league})` }, { status: 500 })
     }
 
     // Map team IDs to EA club IDs
     const teamEaClubIds: Record<string, string> = {}
-    teams.forEach((team) => {
+    ;(teams || []).forEach((team) => {
       if (team.ea_club_id) {
         teamEaClubIds[team.id] = team.ea_club_id
       }
@@ -196,12 +311,12 @@ export async function POST(request: Request) {
         periodScores = eaMatchData.periodScores || periodScores
       } else {
         // For automatic imports, extract from the clubs data
-        const homeClub = homeTeamEaClubId ? eaMatchData.clubs[homeTeamEaClubId] : null
-        const awayClub = awayTeamEaClubId ? eaMatchData.clubs[awayTeamEaClubId] : null
+        const homeClub = homeTeamEaClubId ? eaMatchData.clubs?.[homeTeamEaClubId] : null
+        const awayClub = awayTeamEaClubId ? eaMatchData.clubs?.[awayTeamEaClubId] : null
 
         if (homeClub && awayClub) {
-          homeScore = homeClub.details?.goals || 0
-          awayScore = awayClub.details?.goals || 0
+          homeScore = homeClub.details?.goals ?? homeClub.goals ?? 0
+          awayScore = awayClub.details?.goals ?? awayClub.goals ?? 0
 
           // Create period scores (this is a simplification - EA API doesn't provide period scores)
           periodScores = [
@@ -221,23 +336,31 @@ export async function POST(request: Request) {
     console.log(`Scores: ${homeScore} - ${awayScore}`)
 
     // Update the match - don't automatically set status to "Completed"
-    const { error: updateError } = await supabase
-      .from("matches")
-      .update({
+    {
+      const updatePayload: any = {
         home_score: homeScore,
         away_score: awayScore,
         period_scores: periodScores,
         // Removed: status: "Completed",
-        ea_match_id: eaMatchId,
-        ea_match_data: eaMatchData,
         is_manual_import: isManualImport,
         updated_at: new Date().toISOString(),
-      })
-      .eq("id", matchId)
+      }
 
-    if (updateError) {
-      console.error("Error updating match:", updateError)
-      return NextResponse.json({ error: `Failed to update match: ${updateError.message}` }, { status: 500 })
+      // NHL matches table stores raw JSON; for AHL you likely store raw JSON in ea_match_data_ahl instead.
+      if (league === "NHL") {
+        updatePayload.ea_match_id = eaMatchId
+        updatePayload.ea_match_data = eaMatchData
+      } else {
+        // If your matches_ahl has ea_match_id, keep this; remove if not in schema.
+        updatePayload.ea_match_id = eaMatchId
+      }
+
+      const { error: updateError } = await supabase.from(T.matches).update(updatePayload).eq("id", matchId)
+
+      if (updateError) {
+        console.error("Error updating match:", updateError)
+        return NextResponse.json({ error: `Failed to update match: ${updateError.message}` }, { status: 500 })
+      }
     }
 
     // Log the power play stats that are being saved
@@ -249,8 +372,8 @@ export async function POST(request: Request) {
       })
     }
 
-    // Update team standings
-    await updateTeamStandings(supabase, match.home_team_id, match.away_team_id, homeScore, awayScore, false)
+    // Update team standings (league-aware)
+    await updateTeamStandings(supabase, T.teams, match.home_team_id, match.away_team_id, homeScore, awayScore, false)
 
     // Add this debugging code to log power play stats before saving
     if (eaMatchData && eaMatchData.clubs) {
@@ -291,23 +414,23 @@ export async function POST(request: Request) {
       }
     }
 
-    // Save raw EA data if available
+    // Save raw EA data if available (league-aware)
     if (eaMatchData && eaMatchId) {
       try {
         // First check if the record already exists
         const { data: existingData, error: checkError } = await supabase
-          .from("ea_match_data")
+          .from(T.eaMatchData)
           .select("id")
           .eq("match_id", eaMatchId)
           .maybeSingle()
 
         if (checkError) {
-          console.error("Error checking existing EA match data:", checkError)
+          console.error(`Error checking existing ${T.eaMatchData}:`, checkError)
         } else {
           if (existingData) {
             // Record exists, update it
             const { error: updateRawDataError } = await supabase
-              .from("ea_match_data")
+              .from(T.eaMatchData)
               .update({
                 data: eaMatchData,
                 updated_at: new Date().toISOString(),
@@ -315,13 +438,13 @@ export async function POST(request: Request) {
               .eq("match_id", eaMatchId)
 
             if (updateRawDataError) {
-              console.error("Error updating raw EA data:", updateRawDataError)
+              console.error(`Error updating raw EA data in ${T.eaMatchData}:`, updateRawDataError)
             } else {
-              console.log("Successfully updated raw EA match data")
+              console.log(`Successfully updated raw EA match data in ${T.eaMatchData}`)
             }
           } else {
             // Record doesn't exist, insert it
-            const { error: insertRawDataError } = await supabase.from("ea_match_data").insert({
+            const { error: insertRawDataError } = await supabase.from(T.eaMatchData).insert({
               match_id: eaMatchId,
               data: eaMatchData,
               created_at: new Date().toISOString(),
@@ -329,9 +452,9 @@ export async function POST(request: Request) {
             })
 
             if (insertRawDataError) {
-              console.error("Error inserting raw EA data:", insertRawDataError)
+              console.error(`Error inserting raw EA data into ${T.eaMatchData}:`, insertRawDataError)
             } else {
-              console.log("Successfully inserted raw EA match data")
+              console.log(`Successfully inserted raw EA match data into ${T.eaMatchData}`)
             }
           }
         }
@@ -341,11 +464,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check if the ea_player_stats table exists
+    const homePlayerStats: any[] = []
+    const awayPlayerStats: any[] = []
+
+    // Check if the ea_player_stats table exists (league-aware)
     let tableExists = false
     try {
       // Try to query the table
-      const { error: checkTableError } = await supabase.from("ea_player_stats").select("id").limit(1)
+      const { error: checkTableError } = await supabase.from(T.eaPlayerStats).select("id").limit(1)
       tableExists = !checkTableError
     } catch (error) {
       console.log("Table does not exist or other error:", error)
@@ -354,7 +480,7 @@ export async function POST(request: Request) {
 
     if (tableExists) {
       // Delete any existing stats for this match before adding new ones
-      const { error: deleteError } = await supabase.from("ea_player_stats").delete().eq("match_id", matchId)
+      const { error: deleteError } = await supabase.from(T.eaPlayerStats).delete().eq("match_id", matchId)
 
       if (deleteError) {
         console.error("Error deleting existing player stats:", deleteError)
@@ -409,7 +535,7 @@ export async function POST(request: Request) {
             match_id: matchId,
             ea_match_id: eaMatchId,
             player_name: player.persona || player.playername || "Unknown Player",
-            player_id: player.playerId,
+            player_id: player.playerId ? String(player.playerId).trim() : null, // ✅ normalize
             team_id: match.home_team_id,
             position: position,
             season_id: currentSeasonId, // Set the current active season ID
@@ -532,7 +658,7 @@ export async function POST(request: Request) {
             match_id: matchId,
             ea_match_id: eaMatchId,
             player_name: player.persona || player.playername || "Unknown Player",
-            player_id: player.playerId,
+            player_id: player.playerId ? String(player.playerId).trim() : null, // ✅ normalize
             team_id: match.away_team_id,
             position: position,
             season_id: currentSeasonId, // Set the current active season ID
@@ -617,56 +743,77 @@ export async function POST(request: Request) {
           preparePlayerStatsForDB(stat, matchId, eaMatchId, currentSeasonId),
         )
 
-        // Insert in batches to avoid exceeding limits
-        const BATCH_SIZE = 25
-        const insertErrors = []
+        // ✅ De-dupe inside this payload first (avoid double rows in same request)
+        const deduped: any[] = []
+        const seenWith = new Set<string>()
+        const seenWithout = new Set<string>()
 
-        for (let i = 0; i < preparedStats.length; i += BATCH_SIZE) {
-          const batch = preparedStats.slice(i, i + BATCH_SIZE)
-          const { error } = await supabase.from("ea_player_stats").insert(batch)
+        for (const r of preparedStats) {
+          if (r.player_id) {
+            const k = `${r.match_id}:${r.player_id}`
+            if (seenWith.has(k)) continue
+            seenWith.add(k)
+            deduped.push(r)
+          } else {
+            const k = `${r.match_id}:${r.team_id}:${(r.player_name || "").toLowerCase()}`
+            if (seenWithout.has(k)) continue
+            seenWithout.add(k)
+            deduped.push(r)
+          }
+        }
+
+        // Split by presence of player_id to match DB unique constraints
+        const withId = deduped.filter((r) => r.player_id)
+        const withoutId = deduped.filter((r) => !r.player_id)
+
+        // ✅ Upsert WITH player_id against (match_id,player_id)
+        if (withId.length) {
+          const { error } = await supabase
+            .from(T.eaPlayerStats)
+            .upsert(withId, { onConflict: "match_id,player_id", ignoreDuplicates: false })
+            .select()
 
           if (error) {
-            console.error(`Error inserting batch ${Math.floor(i / BATCH_SIZE) + 1}:`, error)
-            insertErrors.push(error)
+            console.error("[ea import] upsert with player_id failed", error)
+            return NextResponse.json(
+              { success: false, error: `Failed to insert player stats (with player_id): ${error.message}` },
+              { status: 500 },
+            )
           }
         }
 
-        console.log(`Processed ${preparedStats.length} player statistics records`)
-        if (preparedStats.length > 0) {
-          console.log("Sample player stat:", preparedStats[0])
+        // ✅ Upsert WITHOUT player_id against (match_id,team_id,player_name)
+        if (withoutId.length) {
+          const { error } = await supabase
+            .from(T.eaPlayerStats)
+            .upsert(withoutId, { onConflict: "match_id,team_id,player_name", ignoreDuplicates: false })
+            .select()
+
+          if (error) {
+            console.error("[ea import] upsert without player_id failed", error)
+            return NextResponse.json(
+              { success: false, error: `Failed to insert player stats (no player_id): ${error.message}` },
+              { status: 500 },
+            )
+          }
         }
 
-        if (insertErrors.length > 0) {
-          const errorMessage = insertErrors[0].message
-          let migrationPath = "/admin/ea-stats-fields-migration"
-
-          // Check if the error is about the category column
-          if (errorMessage.includes("category")) {
-            migrationPath = "/admin/category-column-migration"
-          }
-
-          return NextResponse.json(
-            {
-              success: false,
-              error: `Failed to insert player stats: ${errorMessage}`,
-              message: `Match scores updated but player statistics could not be saved. Please run the missing columns migration at ${migrationPath}.`,
-              migrationPath: migrationPath,
-            },
-            { status: 500 },
-          )
+        console.log(`Processed ${deduped.length} player statistics records`)
+        if (deduped.length > 0) {
+          console.log("Sample player stat:", deduped[0])
         }
       }
     }
 
-    // Save team stats to ea_team_stats table if it exists
+    // Save team stats to ea_team_stats table if it exists (league-aware)
     try {
       // Check if ea_team_stats table exists
       let teamStatsTableExists = false
       try {
-        const { data, error } = await supabase.from("ea_team_stats").select("id").limit(1)
+        const { data, error } = await supabase.from(T.eaTeamStats).select("id").limit(1)
         teamStatsTableExists = !error
       } catch (checkError) {
-        console.log("ea_team_stats table does not exist")
+        console.log(`${T.eaTeamStats} table does not exist`)
         teamStatsTableExists = false
       }
 
@@ -674,14 +821,14 @@ export async function POST(request: Request) {
         console.log("Processing team stats for database insertion...")
 
         // Delete any existing team stats for this match
-        const { error: deleteTeamStatsError } = await supabase.from("ea_team_stats").delete().eq("match_id", matchId)
+        const { error: deleteTeamStatsError } = await supabase.from(T.eaTeamStats).delete().eq("match_id", matchId)
 
         if (deleteTeamStatsError) {
           console.error("Error deleting existing team stats:", deleteTeamStatsError)
         }
 
         // Process team stats from EA data
-        const teamStatsToInsert = []
+        const teamStatsToInsert: any[] = []
 
         // Process home team stats
         if (homeTeamEaClubId && eaMatchData.clubs[homeTeamEaClubId]) {
@@ -835,12 +982,12 @@ export async function POST(request: Request) {
         if (teamStatsToInsert.length > 0) {
           console.log(`Inserting ${teamStatsToInsert.length} team stats records`)
 
-          const { error: insertTeamStatsError } = await supabase.from("ea_team_stats").insert(teamStatsToInsert)
+          const { error: insertTeamStatsError } = await supabase.from(T.eaTeamStats).insert(teamStatsToInsert)
 
           if (insertTeamStatsError) {
             console.error("Error inserting team stats:", insertTeamStatsError)
           } else {
-            console.log("Successfully inserted team stats into database")
+            console.log(`Successfully inserted team stats into ${T.eaTeamStats}`)
           }
         }
       }
@@ -849,7 +996,7 @@ export async function POST(request: Request) {
       // Don't fail the entire operation if team stats fail
     }
 
-    console.log("=== MATCH UPDATE SUCCESSFUL (AUTHORIZATION BYPASSED) ===")
+    console.log(`=== MATCH UPDATE SUCCESSFUL (AUTHORIZATION BYPASSED) [${league}] ===`)
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error("Error updating match from EA data:", error)
@@ -857,10 +1004,12 @@ export async function POST(request: Request) {
   }
 }
 
+// ------ UPDATED: standings updater accepts teams table name ------
 async function updateTeamStandings(
   supabase: any,
+  teamsTable: string,
   homeTeamId: string,
-  awayTeamId: string,
+  awayTeamId: number | string,
   homeScore: number,
   awayScore: number,
   hasOvertime: boolean,
@@ -868,13 +1017,13 @@ async function updateTeamStandings(
   try {
     // Get current team records
     const { data: homeTeam } = await supabase
-      .from("teams")
+      .from(teamsTable)
       .select("wins, losses, otl, goals_for, goals_against")
       .eq("id", homeTeamId)
       .single()
 
     const { data: awayTeam } = await supabase
-      .from("teams")
+      .from(teamsTable)
       .select("wins, losses, otl, goals_for, goals_against")
       .eq("id", awayTeamId)
       .single()
@@ -909,7 +1058,7 @@ async function updateTeamStandings(
 
     // Update home team
     await supabase
-      .from("teams")
+      .from(teamsTable)
       .update({
         wins: homeWins,
         losses: homeLosses,
@@ -922,7 +1071,7 @@ async function updateTeamStandings(
 
     // Update away team
     await supabase
-      .from("teams")
+      .from(teamsTable)
       .update({
         wins: awayWins,
         losses: awayLosses,
