@@ -92,7 +92,7 @@ interface FreeAgent {
 interface Bid {
   id: string
   amount: number
-  bid_expires_at: string
+  expires_at: string
   status: string
   players: {
     id: string
@@ -220,7 +220,6 @@ const ManagementPage = () => {
   const [playerBids, setPlayerBids] = useState<Record<string, any>>({})
   const [myBids, setMyBids] = useState<any[]>([])
   const [isAuthorized, setIsAuthorized] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState<any>(false)
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<any>(false)
@@ -243,7 +242,7 @@ const ManagementPage = () => {
   const [tradeError, setTradeError] = useState<string | null>(null)
   const [tradeSuccess, setTradeSuccess] = useState<string | null>(null)
   const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(60000000) // $60M salary cap
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(30000000) // $30M salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
@@ -277,11 +276,11 @@ const ManagementPage = () => {
   // Add state for cap space withholding
   const [capSpaceWithholding, setCapSpaceWithholding] = useState<{ [playerId: string]: number }>({})
 
-  // Update current time every 15 minutes for countdown
+  // Update current time every second for countdown
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date())
-    }, 900000)
+    }, 1000)
 
     return () => clearInterval(interval)
   }, [])
@@ -299,9 +298,8 @@ const ManagementPage = () => {
     // Apply position filter if not "all"
     if (positionFilter !== "all") {
       filtered = filtered.filter((player) => {
-        // Normalize positions to abbreviations for comparison
-        const primaryPos = getPositionAbbreviation(player.users?.primary_position || "")
-        const secondaryPos = getPositionAbbreviation(player.users?.secondary_position || "")
+        const primaryPos = getPositionAbbreviation(player.season_registrations?.[0]?.primary_position || "UNKNOWN")
+        const secondaryPos = getPositionAbbreviation(player.season_registrations?.[0]?.secondary_position || "")
         const filterPos = getPositionAbbreviation(positionFilter)
 
         return primaryPos === filterPos || secondaryPos === filterPos
@@ -404,16 +402,16 @@ const ManagementPage = () => {
         let enhancedOtherPlayers = otherPlayers || []
 
         if (userIds.length > 0) {
-          // Get user data
+          // Get user data first
           const { data: users, error: usersError } = await supabase
             .from("users")
             .select(`
-            id,
-            email,
-            gamer_tag_id,
-            console,
-            avatar_url
-          `)
+              id,
+              email,
+              gamer_tag_id,
+              console,
+              avatar_url
+            `)
             .in("id", userIds)
 
           if (usersError) {
@@ -567,8 +565,8 @@ const ManagementPage = () => {
   async function fetchData() {
     if (!session?.user) {
       setIsAuthorized(false)
-        return
-      }
+      return
+    }
 
     setLoading(true)
     try {
@@ -587,28 +585,16 @@ const ManagementPage = () => {
       const isManager = ["GM", "AGM", "Owner"].includes(playerData.role)
       setIsAuthorized(isManager)
 
-      // Check if user is admin by fetching from users table
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", session.user.id)
-        .single()
-
-      if (!userError && userData) {
-        setIsAdmin(userData.role === "admin")
-      }
-
       if (!isManager || !playerData.team_id) {
         throw new Error("You must be a team manager to access this page")
       }
 
       // Get current season ID for team stats calculation
-      const currentSeasonId = 'fc808734-ff25-4f4b-9644-855ea0ea4b93' // Hardcoded SCSHL Season 1 UUID
-      const currentSeasonNumber = 2 // Hardcoded SCSHL Season 1 number
+      const currentSeasonId = await getCurrentSeasonId()
       console.log("Current season ID:", currentSeasonId)
 
       // Get calculated team stats (this will give us the actual record)
-      const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonNumber)
+      const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonId)
       console.log("Calculated team stats:", calculatedTeamStats)
 
       if (!calculatedTeamStats) {
@@ -654,8 +640,6 @@ const ManagementPage = () => {
             id,
             email,
             gamer_tag_id,
-            primary_position,
-            secondary_position,
             console,
             avatar_url
           )
@@ -691,8 +675,6 @@ const ManagementPage = () => {
               id,
               email,
               gamer_tag_id,
-              primary_position,
-              secondary_position,
               console,
               avatar_url
             `)
@@ -772,8 +754,8 @@ const ManagementPage = () => {
                 id: user?.id || player.user_id,
                 email: user?.email,
                 gamer_tag_id: registration?.gamer_tag || user?.gamer_tag_id || "Unknown Player",
-                primary_position: registration?.primary_position || user?.primary_position || "Unknown",
-                secondary_position: registration?.secondary_position || user?.secondary_position || null,
+                primary_position: registration?.primary_position || "Unknown",
+                secondary_position: registration?.secondary_position || null,
                 console: registration?.console || user?.console || "Unknown",
                 avatar_url: user?.avatar_url,
               },
@@ -822,14 +804,21 @@ const ManagementPage = () => {
                 users: {
                   ...player.users,
                   gamer_tag_id: registration.gamer_tag || player.users.gamer_tag_id,
-                  primary_position: registration.primary_position || player.users.primary_position,
-                  secondary_position: registration.secondary_position || player.users.secondary_position,
+                  primary_position: registration.primary_position,
+                  secondary_position: registration.secondary_position,
                   console: registration.console || player.users.console,
                 },
               }
             }
 
-            return player
+            return {
+              ...player,
+              users: {
+                ...player.users,
+                primary_position: "Unknown",
+                secondary_position: null,
+              },
+            }
           })
 
           setTeamPlayers(enhancedPlayers)
@@ -856,7 +845,7 @@ const ManagementPage = () => {
         setAllTeams(allTeamsData || [])
       }
 
-      // Fetch team matches with lineups - Fixed the query structure and added season filtering
+      // Fetch team matches with lineups - Fixed the query structure
       const { data: matches, error: matchesError } = await supabase
         .from("matches")
         .select(`
@@ -865,7 +854,6 @@ const ManagementPage = () => {
           away_team:away_team_id(id, name, logo_url)
         `)
         .or(`home_team_id.eq.${playerData.team_id},away_team_id.eq.${playerData.team_id}`)
-        .eq("season_id", currentSeasonId) // Filter by active season
         .order("match_date", { ascending: true })
 
       if (matchesError) throw matchesError
@@ -887,6 +875,10 @@ const ManagementPage = () => {
               primary_position,
               secondary_position,
               console
+            ),
+            season_registrations (
+              primary_position,
+              secondary_position
             )
           )
         `)
@@ -991,8 +983,8 @@ const ManagementPage = () => {
 
   // Enhanced loadFreeAgents function with better error handling for team managers
   const loadFreeAgents = async () => {
-      setFreeAgentsLoading(true)
-      setFreeAgentsError(null)
+    setFreeAgentsLoading(true)
+    setFreeAgentsError(null)
 
     try {
       console.log("Loading free agents via API...")
@@ -1045,47 +1037,8 @@ const ManagementPage = () => {
 
   // Fetch current bids for all players
   const fetchPlayerBids = async () => {
-    if (!teamData?.id) return
-
     try {
-      // Fetch my team's bids
-      const { data: myBids, error: myBidsError } = await supabase
-        .from("player_bidding")
-        .select(`
-          *,
-          players:player_id (
-            id,
-            salary,
-            users:user_id (
-              id,
-              gamer_tag_id,
-              primary_position,
-              secondary_position,
-              console,
-              avatar_url
-            )
-          )
-        `)
-        .eq("team_id", teamData.id)
-        .in("status", ["Active", null])
-        .order("bid_expires_at", { ascending: true })
-
-      if (myBidsError) {
-        console.error("Error fetching my team's bids:", myBidsError)
-        return
-      }
-
-      // Create a map of player_id to bid for easy lookup
-      const bidsMap: Record<string, any> = {}
-      const myBidsList: any[] = []
-
-      myBids?.forEach((bid) => {
-        bidsMap[bid.players.id] = bid
-        myBidsList.push(bid)
-      })
-
-      // Also fetch all bids to show highest bids for each player
-      const { data: allBids, error: allBidsError } = await supabase
+      const { data: bids, error } = await supabase
         .from("player_bidding")
         .select(`
           *,
@@ -1095,43 +1048,20 @@ const ManagementPage = () => {
             logo_url
           )
         `)
-        .in("status", ["Active", null])
         .order("bid_amount", { ascending: false })
 
-      if (!allBidsError && allBids) {
-        // Group all bids by player_id to find highest bid for each player
-        const highestBidsByPlayer: Record<string, any> = {}
-        allBids.forEach((bid) => {
-          if (!highestBidsByPlayer[bid.player_id] || bid.bid_amount > highestBidsByPlayer[bid.player_id].bid_amount) {
-            highestBidsByPlayer[bid.player_id] = bid
-          }
-        })
-        setPlayerBids(highestBidsByPlayer)
+      if (error) throw error
 
-        // Enhance my bids with status information
-        const enhancedBids = myBidsList.map((bid) => {
-          const highestBid = highestBidsByPlayer[bid.player_id]
-          const isHighestBidder = highestBid && highestBid.id === bid.id
-          const isExpired = new Date(bid.bid_expires_at) <= new Date()
+      // Group bids by player_id and keep only the highest bid for each player
+      const highestBids: Record<string, any> = {}
 
-          return {
-            ...bid,
-            isHighestBidder,
-            highestBid: !isHighestBidder ? highestBid : null,
-            isExpired,
-            status: isExpired ? "expired" : isHighestBidder ? "winning" : "outbid",
-          }
-        })
+      bids?.forEach((bid) => {
+        if (!highestBids[bid.player_id] || bid.bid_amount > highestBids[bid.player_id].bid_amount) {
+          highestBids[bid.player_id] = bid
+        }
+      })
 
-        setMyBids(enhancedBids)
-
-        // Count active and outbid bids
-        const activeBids = enhancedBids.filter((bid) => !bid.isExpired && bid.isHighestBidder)
-        const outbidBids = enhancedBids.filter((bid) => !bid.isExpired && !bid.isHighestBidder)
-
-        setActiveBidsCount(activeBids.length)
-        setOutbidCount(outbidBids.length)
-      }
+      setPlayerBids(highestBids)
     } catch (error) {
       console.log("Error fetching player bids:", error)
     }
@@ -1403,15 +1333,8 @@ const ManagementPage = () => {
   }
 
   useEffect(() => {
-      fetchData()
+    fetchData()
   }, [supabase, session, toast])
-
-  // Fetch player bids when teamData is available
-  useEffect(() => {
-    if (teamData?.id) {
-      fetchPlayerBids()
-    }
-  }, [teamData?.id])
 
   // Add this effect to load waivers when the tab changes to "waivers"
   useEffect(() => {
@@ -1426,14 +1349,6 @@ const ManagementPage = () => {
     if (activeTab === "free-agents" && teamData?.id) {
       console.log("Switching to free-agents tab, reloading free agents") // Debug log
       loadFreeAgents()
-    }
-  }, [activeTab, teamData?.id])
-
-  // Effect to reload bids when switching to my-bids tab
-  useEffect(() => {
-    if (activeTab === "my-bids" && teamData?.id) {
-      console.log("Switching to my-bids tab, reloading bids") // Debug log
-      fetchPlayerBids()
     }
   }, [activeTab, teamData?.id])
 
@@ -1455,15 +1370,15 @@ const ManagementPage = () => {
   const calculatePostTradePlayerSalary = (player: any, withholding = 0): number => {
     const originalSalary = player.salary || 0
     const postTradeSalary = originalSalary - withholding
-    return Math.max(postTradeSalary, 2000000) // Minimum $2M
+    return Math.max(postTradeSalary, 750000) // Minimum $750k
   }
 
   // Add function to get validwithholding amounts
   const getValidWithholdingAmounts = (playerSalary: number): number[] => {
-    const maxWithholding = Math.floor((playerSalary * 0.25) / 2000000) * 2000000 // 25% in $2M increments
+    const maxWithholding = Math.floor((playerSalary * 0.25) / 250000) * 250000 // 25% in $250k increments
     const amounts = []
-    for (let i = 0; i <= maxWithholding; i += 2000000) {
-      if (playerSalary - i >= 2000000) {
+    for (let i = 0; i <= maxWithholding; i += 250000) {
+      if (playerSalary - i >= 750000) {
         // Ensure minimum salary
         amounts.push(i)
       }
@@ -1552,11 +1467,11 @@ const ManagementPage = () => {
   }
 
   return (
-      <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         {/* Update the main title section to be more mobile-friendly: */}
         <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
-      <div>
+          <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
             {teamData && (
               <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
@@ -1572,7 +1487,7 @@ const ManagementPage = () => {
                 {teamData.name}
               </p>
             )}
-                </div>
+          </div>
         </div>
 
         {loading ? (
@@ -1584,54 +1499,54 @@ const ManagementPage = () => {
           <>
             {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
-          <Card>
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Users className="h-6 w-6 text-primary" />
                   </div>
-                <div>
+                  <div>
                     <div className="text-sm text-muted-foreground">Team Size</div>
                     <div className="text-2xl font-bold">
                       {teamPlayers.length}
                       {projectedRosterSize !== teamPlayers.length && (
                         <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
                       )}
-          </div>
+                    </div>
                   </div>
-            </CardContent>
-          </Card>
-          <Card>
+                </CardContent>
+              </Card>
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Calendar className="h-6 w-6 text-primary" />
                   </div>
-                <div>
+                  <div>
                     <div className="text-sm text-muted-foreground">Upcoming Matches</div>
                     <div className="text-2xl font-bold">
                       {teamMatches.filter((m) => m.status === "Scheduled").length}
                     </div>
                   </div>
-            </CardContent>
-          </Card>
-          <Card>
+                </CardContent>
+              </Card>
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <Trophy className="h-6 w-6 text-primary" />
                   </div>
-                <div>
+                  <div>
                     <div className="text-sm text-muted-foreground">Record</div>
                     <div className="text-2xl font-bold">
                       {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
-                  </div>
                     </div>
-            </CardContent>
-          </Card>
-          <Card>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
                 <CardContent className="p-6 flex items-center gap-4">
                   <div className="bg-primary/10 p-3 rounded-full">
                     <DollarSign className="h-6 w-6 text-primary" />
                   </div>
-                <div>
+                  <div>
                     <div className="text-sm text-muted-foreground">Salary Cap</div>
                     <div className="text-2xl font-bold">
                       ${(currentTeamSalary / 1000000).toFixed(1)}M
@@ -1640,71 +1555,19 @@ const ManagementPage = () => {
                           → ${(projectedSalary / 1000000).toFixed(1)}M
                         </span>
                       )}
+                    </div>
                   </div>
-                    </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
             </div>
-
-            {/* Future Team Projections */}
-            {projectedSalary !== currentTeamSalary || projectedRosterSize !== teamPlayers.length ? (
-              <div className="mb-6 md:mb-8">
-                <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <span className="text-blue-400">🔮</span>
-                      Future Team Projection
-                    </CardTitle>
-                    <CardDescription>
-                      Impact of your winning bids on team composition
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-white/5 rounded-lg">
-                        <div className="text-3xl font-bold text-white mb-1">
-                          ${(projectedSalary / 1000000).toFixed(1)}M
-                        </div>
-                        <div className="text-sm text-gray-300 mb-1">Future Salary</div>
-                        <div className="text-xs text-green-400">
-                          +${((projectedSalary - currentTeamSalary) / 1000000).toFixed(1)}M from bids
-                        </div>
-                      </div>
-                      <div className="text-center p-4 bg-white/5 rounded-lg">
-                        <div className="text-3xl font-bold text-white mb-1">
-                          {projectedRosterSize}
-                        </div>
-                        <div className="text-sm text-gray-300 mb-1">Future Roster</div>
-                        <div className="text-xs text-green-400">
-                          +{projectedRosterSize - teamPlayers.length} new players
-                        </div>
-                      </div>
-                      <div className="text-center p-4 bg-white/5 rounded-lg">
-                        <div className={`text-3xl font-bold mb-1 ${
-                          currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          ${((currentSalaryCap - projectedSalary) / 1000000).toFixed(1)}M
-                        </div>
-                        <div className="text-sm text-gray-300 mb-1">Remaining Cap</div>
-                        <div className={`text-xs ${
-                          currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          {currentSalaryCap - projectedSalary > 0 ? 'Under cap' : 'Over cap'}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : null}
 
             {/* Update the tabs to be more mobile-friendly: */}
             <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3 md:grid-cols-8 mb-6 md:mb-8 h-auto">
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
                 <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
-            </TabsTrigger>
+                </TabsTrigger>
                 <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Avail</span>
                   <span className="md:hidden">Avail</span>
@@ -1714,13 +1577,13 @@ const ManagementPage = () => {
                   <span className="md:hidden">Schedule</span>
                 </TabsTrigger>
                 <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
-              <span className="hidden md:inline">Free Agents</span>
+                  <span className="hidden md:inline">Free Agents</span>
                   <span className="md:hidden">Free Agents</span>
-            </TabsTrigger>
+                </TabsTrigger>
                 <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
-              <span className="hidden md:inline">My Bids</span>
+                  <span className="hidden md:inline">My Bids</span>
                   <span className="md:hidden">Bids</span>
-            </TabsTrigger>
+                </TabsTrigger>
                 <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Waivers</span>
                   <span className="md:hidden">Waivers</span>
@@ -1734,18 +1597,12 @@ const ManagementPage = () => {
                     </span>
                   )}
                 </TabsTrigger>
-                {isAuthorized && (
-                  <TabsTrigger value="match-stats" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                    <span className="hidden md:inline">Match Stats</span>
-                    <span className="md:hidden">Stats</span>
-                  </TabsTrigger>
-                )}
-            </TabsList>
+              </TabsList>
 
               {/* Roster Tab Content */}
               <TabsContent value="roster">
-            <Card>
-              <CardHeader>
+                <Card>
+                  <CardHeader>
                     <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
                     <CardDescription className="text-sm md:text-base">
                       Manage your team's players and roles
@@ -1774,14 +1631,24 @@ const ManagementPage = () => {
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-1">
-                                      <span className={getPositionColor(player.users?.primary_position)}>
-                                        {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                      <span
+                                        className={getPositionColor(player.season_registrations?.[0]?.primary_position)}
+                                      >
+                                        {getPositionAbbreviation(
+                                          player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                        )}
                                       </span>
-                                      {player.users?.secondary_position && (
+                                      {player.season_registrations?.[0]?.secondary_position && (
                                         <>
                                           {" / "}
-                                          <span className={getPositionColor(player.users?.secondary_position)}>
-                                            {getPositionAbbreviation(player.users?.secondary_position)}
+                                          <span
+                                            className={getPositionColor(
+                                              player.season_registrations?.[0]?.secondary_position,
+                                            )}
+                                          >
+                                            {getPositionAbbreviation(
+                                              player.season_registrations?.[0]?.secondary_position,
+                                            )}
                                           </span>
                                         </>
                                       )}
@@ -1813,17 +1680,21 @@ const ManagementPage = () => {
                                   </h3>
                                   <div className="flex items-center gap-2 mt-1">
                                     <span
-                                      className={`${getPositionColor(player.users?.primary_position)} text-sm font-medium`}
+                                      className={`${getPositionColor(player.season_registrations?.[0]?.primary_position)} text-sm font-medium`}
                                     >
-                                      {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                      {getPositionAbbreviation(
+                                        player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                      )}
                                     </span>
-                                    {player.users?.secondary_position && (
+                                    {player.season_registrations?.[0]?.secondary_position && (
                                       <>
                                         <span className="text-muted-foreground text-sm">/</span>
                                         <span
-                                          className={`${getPositionColor(player.users?.secondary_position)} text-sm font-medium`}
+                                          className={`${getPositionColor(player.season_registrations?.[0]?.secondary_position)} text-sm font-medium`}
                                         >
-                                          {getPositionAbbreviation(player.users?.secondary_position)}
+                                          {getPositionAbbreviation(
+                                            player.season_registrations?.[0]?.secondary_position,
+                                          )}
                                         </span>
                                       </>
                                     )}
@@ -1890,7 +1761,7 @@ const ManagementPage = () => {
                                   <div className="text-sm text-muted-foreground">{matchDate.toLocaleDateString()}</div>
                                   <div className="text-xs text-muted-foreground">
                                     {matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </div>
+                                  </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Badge variant="outline" className="text-xs">
@@ -1946,8 +1817,8 @@ const ManagementPage = () => {
 
               {/* Free Agents Tab Content */}
               <TabsContent value="free-agents">
-            <Card>
-              <CardHeader>
+                <Card>
+                  <CardHeader>
                     <CardTitle className="text-lg md:text-xl">Free Agents</CardTitle>
                     <CardDescription className="text-sm md:text-base">
                       Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
@@ -1972,53 +1843,8 @@ const ManagementPage = () => {
                         <CardContent className="p-3 md:p-4">
                           <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
                           <RosterProgress current={teamPlayers.length} max={15} projected={projectedRosterSize} />
-                          {projectedRosterSize !== teamPlayers.length && (
-                            <div className="mt-2 text-xs text-blue-400">
-                              +{projectedRosterSize - teamPlayers.length} from winning bids
-                            </div>
-                          )}
                         </CardContent>
                       </Card>
-
-                      {/* Future Team Projections */}
-                      {projectedSalary !== currentTeamSalary || projectedRosterSize !== teamPlayers.length ? (
-                        <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30">
-                          <CardContent className="p-3 md:p-4">
-                            <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base flex items-center gap-2">
-                              <span className="text-blue-400">🔮</span>
-                              Future Team Projection
-                            </h3>
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-300 text-xs">Future Salary:</span>
-                                <span className="text-white font-medium text-sm">
-                                  ${(projectedSalary / 1000000).toFixed(1)}M
-                                  <span className="text-green-400 ml-1">
-                                    (+${((projectedSalary - currentTeamSalary) / 1000000).toFixed(1)}M)
-                                  </span>
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-300 text-xs">Future Roster:</span>
-                                <span className="text-white font-medium text-sm">
-                                  {projectedRosterSize} players
-                                  <span className="text-green-400 ml-1">
-                                    (+{projectedRosterSize - teamPlayers.length})
-                                  </span>
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-300 text-xs">Cap Space:</span>
-                                <span className={`font-medium text-sm ${
-                                  currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
-                                }`}>
-                                  ${((currentSalaryCap - projectedSalary) / 1000000).toFixed(1)}M remaining
-                                </span>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ) : null}
 
                       {/* Position Breakdown */}
                       <Card className="bg-slate-800 border-slate-700">
@@ -2039,7 +1865,9 @@ const ManagementPage = () => {
                               }
 
                               teamPlayers.forEach((player) => {
-                                const pos = getPositionAbbreviation(player.users?.primary_position || "")
+                                const pos = getPositionAbbreviation(
+                                  player.season_registrations?.[0]?.primary_position || "",
+                                )
                                 if (positions.hasOwnProperty(pos)) {
                                   positions[pos as keyof typeof positions]++
                                 }
@@ -2083,7 +1911,7 @@ const ManagementPage = () => {
                       <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4" />
                         <Select value={positionFilter} onValueChange={setPositionFilter}>
-                      <SelectTrigger className="w-full sm:w-48">
+                          <SelectTrigger className="w-full sm:w-48">
                             <SelectValue placeholder="Filter by position" />
                           </SelectTrigger>
                           <SelectContent>
@@ -2154,17 +1982,21 @@ const ManagementPage = () => {
                                     </h3>
                                     <div className="flex items-center gap-1 mt-1">
                                       <span
-                                        className={`${getPositionColor(player.users?.primary_position)} text-xs md:text-sm`}
+                                        className={`${getPositionColor(player.season_registrations?.[0]?.primary_position)} text-xs md:text-sm`}
                                       >
-                                        {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                        {getPositionAbbreviation(
+                                          player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                        )}
                                       </span>
-                                      {player.users?.secondary_position && (
+                                      {player.season_registrations?.[0]?.secondary_position && (
                                         <>
                                           {" / "}
                                           <span
-                                            className={`${getPositionColor(player.users?.secondary_position)} text-xs md:text-sm`}
+                                            className={`${getPositionColor(player.season_registrations?.[0]?.secondary_position)} text-xs md:text-sm`}
                                           >
-                                            {getPositionAbbreviation(player.users?.secondary_position)}
+                                            {getPositionAbbreviation(
+                                              player.season_registrations?.[0]?.secondary_position,
+                                            )}
                                           </span>
                                         </>
                                       )}
@@ -2231,45 +2063,14 @@ const ManagementPage = () => {
 
               {/* My Bids Tab Content */}
               <TabsContent value="my-bids">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Bids</CardTitle>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>My Bids</CardTitle>
                     <CardDescription>
                       Bids placed by {teamData?.name}. Active: {activeBidsCount} | Outbid: {outbidCount}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {/* Future Team Impact Summary */}
-                    {projectedSalary !== currentTeamSalary || projectedRosterSize !== teamPlayers.length ? (
-                      <div className="mb-6 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg">
-                        <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                          <span className="text-blue-400">🔮</span>
-                          Future Team Impact from Winning Bids
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-white">
-                              ${((projectedSalary - currentTeamSalary) / 1000000).toFixed(1)}M
-                            </div>
-                            <div className="text-xs text-gray-300">Additional Salary</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-white">
-                              +{projectedRosterSize - teamPlayers.length}
-                            </div>
-                            <div className="text-xs text-gray-300">New Players</div>
-                          </div>
-                          <div className="text-center">
-                            <div className={`text-2xl font-bold ${
-                              currentSalaryCap - projectedSalary > 0 ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              ${((currentSalaryCap - projectedSalary) / 1000000).toFixed(1)}M
-                            </div>
-                            <div className="text-xs text-gray-300">Remaining Cap</div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
                     {myBids.length > 0 ? (
                       <div className="space-y-4">
                         {myBids.map((bid) => {
@@ -2303,14 +2104,26 @@ const ManagementPage = () => {
                                     {bid.players?.users?.gamer_tag_id || "Unknown Player"}
                                   </h3>
                                   <div className="flex items-center gap-1 mt-1">
-                                    <span className={getPositionColor(bid.players?.users?.primary_position)}>
-                                      {getPositionAbbreviation(bid.players?.users?.primary_position || "Unknown")}
+                                    <span
+                                      className={getPositionColor(
+                                        bid.players?.season_registrations?.[0]?.primary_position,
+                                      )}
+                                    >
+                                      {getPositionAbbreviation(
+                                        bid.players?.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                      )}
                                     </span>
-                                    {bid.players?.users?.secondary_position && (
+                                    {bid.players?.season_registrations?.[0]?.secondary_position && (
                                       <>
                                         {" / "}
-                                        <span className={getPositionColor(bid.players?.users?.secondary_position)}>
-                                          {getPositionAbbreviation(bid.players?.users?.secondary_position)}
+                                        <span
+                                          className={getPositionColor(
+                                            bid.players?.season_registrations?.[0]?.secondary_position,
+                                          )}
+                                        >
+                                          {getPositionAbbreviation(
+                                            bid.players?.season_registrations?.[0]?.secondary_position,
+                                          )}
                                         </span>
                                       </>
                                     )}
@@ -2318,16 +2131,6 @@ const ManagementPage = () => {
                                   <p className="text-sm text-muted-foreground mt-1">
                                     Your bid: ${bid.bid_amount.toLocaleString()}
                                   </p>
-                                  {isWinning && (
-                                    <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">🔮</span>
-                                        <span className="text-blue-600 dark:text-blue-400 text-xs">
-                                          Will add ${(bid.bid_amount / 1000000).toFixed(1)}M to future salary
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )}
                                   {!bid.isHighestBidder && bid.highestBid && (
                                     <p className="text-sm text-red-600 dark:text-red-400 font-bold">
                                       Outbid by {bid.highestBid.teams?.name}: $
@@ -2428,18 +2231,27 @@ const ManagementPage = () => {
                                             {waiver.players?.users?.gamer_tag_id || "Unknown Player"}
                                           </h3>
                                           <div className="flex items-center gap-1 mt-1">
-                                            <span className={getPositionColor(waiver.players?.users?.primary_position)}>
-                                              {getPositionAbbreviation(waiver.players?.users?.primary_position)}
+                                            <span
+                                              className={getPositionColor(
+                                                waiver.players?.season_registrations?.[0]?.primary_position,
+                                              )}
+                                            >
+                                              {getPositionAbbreviation(
+                                                waiver.players?.season_registrations?.[0]?.primary_position ||
+                                                  "UNKNOWN",
+                                              )}
                                             </span>
-                                            {waiver.players?.users?.secondary_position && (
+                                            {waiver.players?.season_registrations?.[0]?.secondary_position && (
                                               <>
                                                 {" / "}
                                                 <span
                                                   className={getPositionColor(
-                                                    waiver.players?.users?.secondary_position,
+                                                    waiver.players?.season_registrations?.[0]?.secondary_position,
                                                   )}
                                                 >
-                                                  {getPositionAbbreviation(waiver.players?.users?.secondary_position)}
+                                                  {getPositionAbbreviation(
+                                                    waiver.players?.season_registrations?.[0]?.secondary_position,
+                                                  )}
                                                 </span>
                                               </>
                                             )}
@@ -2548,14 +2360,26 @@ const ManagementPage = () => {
                                           {player.users?.gamer_tag_id || "Unknown Player"}
                                         </h3>
                                         <div className="flex items-center gap-1 mt-1">
-                                          <span className={getPositionColor(player.users?.primary_position)}>
-                                            {getPositionAbbreviation(player.users?.primary_position)}
+                                          <span
+                                            className={getPositionColor(
+                                              player.season_registrations?.[0]?.primary_position,
+                                            )}
+                                          >
+                                            {getPositionAbbreviation(
+                                              player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                            )}
                                           </span>
-                                          {player.users?.secondary_position && (
+                                          {player.season_registrations?.[0]?.secondary_position && (
                                             <>
                                               {" / "}
-                                              <span className={getPositionColor(player.users?.secondary_position)}>
-                                                {getPositionAbbreviation(player.users?.secondary_position)}
+                                              <span
+                                                className={getPositionColor(
+                                                  player.season_registrations?.[0]?.secondary_position,
+                                                )}
+                                              >
+                                                {getPositionAbbreviation(
+                                                  player.season_registrations?.[0]?.secondary_position,
+                                                )}
                                               </span>
                                             </>
                                           )}
@@ -2596,8 +2420,8 @@ const ManagementPage = () => {
 
               {/* Trades Tab Content */}
               <TabsContent value="trades">
-            <Card>
-              <CardHeader>
+                <Card>
+                  <CardHeader>
                     <CardTitle>Trade Center</CardTitle>
                     <CardDescription>Propose trades with other teams and manage trade proposals</CardDescription>
                   </CardHeader>
@@ -2687,14 +2511,26 @@ const ManagementPage = () => {
                                             {player.users?.gamer_tag_id || "Unknown Player"}
                                           </div>
                                           <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                            <span className={getPositionColor(player.users?.primary_position)}>
-                                              {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                            <span
+                                              className={getPositionColor(
+                                                player.season_registrations?.[0]?.primary_position,
+                                              )}
+                                            >
+                                              {getPositionAbbreviation(
+                                                player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                              )}
                                             </span>
-                                            {player.users?.secondary_position && (
+                                            {player.season_registrations?.[0]?.secondary_position && (
                                               <>
                                                 {" / "}
-                                                <span className={getPositionColor(player.users?.secondary_position)}>
-                                                  {getPositionAbbreviation(player.users?.secondary_position)}
+                                                <span
+                                                  className={getPositionColor(
+                                                    player.season_registrations?.[0]?.secondary_position,
+                                                  )}
+                                                >
+                                                  {getPositionAbbreviation(
+                                                    player.season_registrations?.[0]?.secondary_position,
+                                                  )}
                                                 </span>
                                               </>
                                             )}
@@ -2764,14 +2600,26 @@ const ManagementPage = () => {
                                             {player.users?.gamer_tag_id || "Unknown Player"}
                                           </div>
                                           <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                            <span className={getPositionColor(player.users?.primary_position)}>
-                                              {getPositionAbbreviation(player.users?.primary_position || "Unknown")}
+                                            <span
+                                              className={getPositionColor(
+                                                player.season_registrations?.[0]?.primary_position,
+                                              )}
+                                            >
+                                              {getPositionAbbreviation(
+                                                player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                              )}
                                             </span>
-                                            {player.users?.secondary_position && (
+                                            {player.season_registrations?.[0]?.secondary_position && (
                                               <>
                                                 {" / "}
-                                                <span className={getPositionColor(player.users?.secondary_position)}>
-                                                  {getPositionAbbreviation(player.users?.secondary_position)}
+                                                <span
+                                                  className={getPositionColor(
+                                                    player.season_registrations?.[0]?.secondary_position,
+                                                  )}
+                                                >
+                                                  {getPositionAbbreviation(
+                                                    player.season_registrations?.[0]?.secondary_position,
+                                                  )}
                                                 </span>
                                               </>
                                             )}
@@ -2836,11 +2684,10 @@ const ManagementPage = () => {
                                       selectedOtherPlayers.includes(p.id),
                                     )
 
-                                    // Format player data for notification
                                     const fromPlayers = myPlayersToTrade.map((p) => ({
                                       id: p.id,
                                       name: p.users?.gamer_tag_id || "Unknown Player",
-                                      position: p.users?.primary_position,
+                                      position: p.season_registrations?.[0]?.primary_position || "UNKNOWN",
                                       salary: p.salary,
                                       withholding: capSpaceWithholding[p.id] || 0,
                                     }))
@@ -2848,7 +2695,7 @@ const ManagementPage = () => {
                                     const toPlayers = otherPlayersToReceive.map((p) => ({
                                       id: p.id,
                                       name: p.users?.gamer_tag_id || "Unknown Player",
-                                      position: p.users?.primary_position,
+                                      position: p.season_registrations?.[0]?.primary_position || "UNKNOWN",
                                       salary: p.salary,
                                     }))
 
@@ -3253,134 +3100,6 @@ const ManagementPage = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              {/* Match Stats Tab Content - Team Managers Only */}
-              {isAuthorized && (
-                <TabsContent value="match-stats">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5" />
-                        Match Statistics Management
-                      </CardTitle>
-                      <CardDescription>
-                        Upload and manage match statistics using EA API or manual entry for your team's matches
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-6">
-                        {/* Recent Matches Section */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4">Recent Matches</h3>
-                          <div className="space-y-4">
-                            {teamMatches
-                              .filter((match) => match.status === "Completed")
-                              .slice(0, 5)
-                              .map((match) => (
-                                <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                  <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-medium">{match.home_team.name}</span>
-                                      <span className="text-muted-foreground">vs</span>
-                                      <span className="font-medium">{match.away_team.name}</span>
-                                    </div>
-                                    <Badge variant="outline">
-                                      {match.home_score} - {match.away_score}
-                                    </Badge>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      asChild
-                                    >
-                                      <Link href={`/matches/${match.id}`}>
-                                        View Details
-                                      </Link>
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        // Open EA import modal for this match
-                                        window.open(`/matches/${match.id}`, '_blank');
-                                      }}
-                                    >
-                                      Import EA Stats
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-
-                        {/* Team Match Management */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4">Team Match Management</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Card>
-                              <CardHeader>
-                                <CardTitle className="text-base">All Team Matches</CardTitle>
-                                <CardDescription>
-                                  View and manage all matches for your team
-                                </CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <Button 
-                                  variant="outline" 
-                                  className="w-full"
-                                  asChild
-                                >
-                                  <Link href="/matches">
-                                    <Trophy className="h-4 w-4 mr-2" />
-                                    View All Matches
-                                  </Link>
-                                </Button>
-                              </CardContent>
-                            </Card>
-
-                            <Card>
-                              <CardHeader>
-                                <CardTitle className="text-base">Team Schedule</CardTitle>
-                                <CardDescription>
-                                  View your team's upcoming and past games
-                                </CardDescription>
-                              </CardHeader>
-                              <CardContent>
-                                <Button 
-                                  variant="outline" 
-                                  className="w-full"
-                                  onClick={() => {
-                                    // Switch to schedule tab
-                                    setActiveTab('schedule');
-                                  }}
-                                >
-                                  <Calendar className="h-4 w-4 mr-2" />
-                                  Team Schedule
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        </div>
-
-                        {/* Instructions */}
-                        <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
-                          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                            How to Manage Match Stats for Your Team:
-                          </h4>
-                          <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                            <li>• <strong>Individual Matches:</strong> Click "View Details" on any match to access stats upload options</li>
-                            <li>• <strong>All Matches:</strong> Use "View All Matches" to see all league matches and find your team's games</li>
-                            <li>• <strong>Team Schedule:</strong> Use "Team Schedule" to see only your team's upcoming and past games</li>
-                            <li>• <strong>Stats Upload:</strong> On individual match pages, you can upload EA API stats or manually enter statistics</li>
-                            <li>• <strong>Admin Access:</strong> For bulk operations and EA API management, contact an admin</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              )}
             </Tabs>
           </>
         )}
