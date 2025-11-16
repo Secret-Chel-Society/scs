@@ -80,117 +80,122 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* === Core theme (light) – taken from logo === */
+    --background: 42.9 16.3% 91.6%;      /* warm parchment / shield background */
+    --foreground: 0 2.1% 9.2%;           /* almost black (wings / lion) */
+
+    --card: 60 20% 99%;                  /* soft off-white cards */
+    --card-foreground: 0 2.1% 9.2%;
+
+    --popover: 60 20% 99%;
+    --popover-foreground: 0 2.1% 9.2%;
+
+    /* primary = royal gold, secondary = deep bronze/charcoal */
+    --primary: 35 60% 55%;               /* crown / trim gold */
+    --primary-foreground: 60 20% 99%;
+
+    --secondary: 30.9 15.8% 41%;         /* medium brown from shield */
+    --secondary-foreground: 60 20% 99%;
+
+    --muted: 43 12% 88%;                 /* soft warm neutral */
+    --muted-foreground: 30.9 15.8% 41%;
+
+    --accent: 30 45% 62%;                /* richer bronze accent */
+    --accent-foreground: 60 20% 99%;
+
+    --destructive: 6 63% 47%;            /* warm red (can echo eye glow) */
+    --destructive-foreground: 60 20% 99%;
+
+    --border: 43 12% 82%;
+    --input: 43 12% 82%;
+    --ring: 35 60% 55%;                  /* gold focus ring */
     --radius: 0.75rem;
-    
-  /* Hockey-themed custom properties */
-  --ice-blue: 217.2 91.2% 59.8%;
-  --hockey-silver: 220 13% 91%;
-  --rink-blue: 217.2 91.2% 59.8%;
-  --goal-red: 0 84.2% 60.2%;
-  --assist-green: 142.1 76.2% 36.3%;
-  
-  /* Enhanced hockey theme colors */
-  --ice-blue-50: 217.2 91.2% 95%;
-  --ice-blue-100: 217.2 91.2% 90%;
-  --ice-blue-200: 217.2 91.2% 80%;
-  --ice-blue-300: 217.2 91.2% 70%;
-  --ice-blue-400: 217.2 91.2% 60%;
-  --ice-blue-500: 217.2 91.2% 59.8%;
-  --ice-blue-600: 217.2 91.2% 50%;
-  --ice-blue-700: 217.2 91.2% 40%;
-  --ice-blue-800: 217.2 91.2% 30%;
-  --ice-blue-900: 217.2 91.2% 20%;
-  
-  --hockey-silver-50: 220 13% 98%;
-  --hockey-silver-100: 220 13% 95%;
-  --hockey-silver-200: 220 13% 90%;
-  --hockey-silver-300: 220 13% 85%;
-  --hockey-silver-400: 220 13% 80%;
-  --hockey-silver-500: 220 13% 75%;
-  --hockey-silver-600: 220 13% 70%;
-  --hockey-silver-700: 220 13% 65%;
-  --hockey-silver-800: 220 13% 60%;
-  --hockey-silver-900: 220 13% 55%;
-  
-  --rink-blue-50: 217.2 91.2% 95%;
-  --rink-blue-100: 217.2 91.2% 90%;
-  --rink-blue-200: 217.2 91.2% 80%;
-  --rink-blue-300: 217.2 91.2% 70%;
-  --rink-blue-400: 217.2 91.2% 60%;
-  --rink-blue-500: 217.2 91.2% 59.8%;
-  --rink-blue-600: 217.2 91.2% 50%;
-  --rink-blue-700: 217.2 91.2% 40%;
-  --rink-blue-800: 217.2 91.2% 30%;
-  --rink-blue-900: 217.2 91.2% 20%;
-  
-  --goal-red-50: 0 84.2% 95%;
-  --goal-red-100: 0 84.2% 90%;
-  --goal-red-200: 0 84.2% 80%;
-  --goal-red-300: 0 84.2% 70%;
-  --goal-red-400: 0 84.2% 60%;
-  --goal-red-500: 0 84.2% 60.2%;
-  --goal-red-600: 0 84.2% 50%;
-  --goal-red-700: 0 84.2% 40%;
-  --goal-red-800: 0 84.2% 30%;
-  --goal-red-900: 0 84.2% 20%;
-  
-  --assist-green-50: 142.1 76.2% 95%;
-  --assist-green-100: 142.1 76.2% 90%;
-  --assist-green-200: 142.1 76.2% 80%;
-  --assist-green-300: 142.1 76.2% 70%;
-  --assist-green-400: 142.1 76.2% 60%;
-  --assist-green-500: 142.1 76.2% 36.3%;
-  --assist-green-600: 142.1 76.2% 30%;
-  --assist-green-700: 142.1 76.2% 25%;
-  --assist-green-800: 142.1 76.2% 20%;
-  --assist-green-900: 142.1 76.2% 15%;
+
+    /* === “Hockey” tokens remapped to logo colors for compatibility === */
+    /* Treat ice-blue as GOLD, rink-blue as deeper BRONZE, hockey-silver as warm neutral */
+
+    --ice-blue: 35 60% 55%;              /* base gold */
+    --hockey-silver: 43 12% 70%;         /* mid warm silver */
+    --rink-blue: 30 45% 52%;             /* darker bronze */
+
+    --goal-red: 6 63% 47%;               /* keep red for alerts/goals */
+    --assist-green: 142.1 76.2% 36.3%;   /* keep green for success states */
+
+    /* Gold scale (was ice-blue) */
+    --ice-blue-50: 35 60% 96%;
+    --ice-blue-100: 35 60% 92%;
+    --ice-blue-200: 35 60% 85%;
+    --ice-blue-300: 35 60% 75%;
+    --ice-blue-400: 35 60% 65%;
+    --ice-blue-500: 35 60% 55%;
+    --ice-blue-600: 35 60% 45%;
+    --ice-blue-700: 35 60% 38%;
+    --ice-blue-800: 35 60% 30%;
+    --ice-blue-900: 35 60% 24%;
+
+    /* Bronze scale (was rink-blue) */
+    --rink-blue-50: 30 45% 96%;
+    --rink-blue-100: 30 45% 90%;
+    --rink-blue-200: 30 45% 82%;
+    --rink-blue-300: 30 45% 72%;
+    --rink-blue-400: 30 45% 62%;
+    --rink-blue-500: 30 45% 52%;
+    --rink-blue-600: 30 45% 42%;
+    --rink-blue-700: 30 45% 34%;
+    --rink-blue-800: 30 45% 26%;
+    --rink-blue-900: 30 45% 20%;
+
+    /* Warm silver / stone scale (was hockey-silver) */
+    --hockey-silver-50: 43 12% 98%;
+    --hockey-silver-100: 43 12% 94%;
+    --hockey-silver-200: 43 12% 88%;
+    --hockey-silver-300: 43 12% 82%;
+    --hockey-silver-400: 43 12% 76%;
+    --hockey-silver-500: 43 12% 70%;
+    --hockey-silver-600: 43 12% 64%;
+    --hockey-silver-700: 43 12% 58%;
+    --hockey-silver-800: 43 12% 52%;
+    --hockey-silver-900: 43 12% 46%;
+
+    /* (Goal red + assist green scales can stay as-is if you like them) */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    
-    /* Hockey-themed custom properties for dark mode */
-    --ice-blue: 217.2 91.2% 59.8%;
-    --hockey-silver: 220 13% 91%;
-    --rink-blue: 217.2 91.2% 59.8%;
-    --goal-red: 0 84.2% 60.2%;
+    /* === Core theme (dark) – heavy wings, gold trims === */
+    --background: 0 2% 9.2%;             /* near black */
+    --foreground: 43 12% 94%;            /* light warm text */
+
+    --card: 24 8.8% 22.4%;               /* deep charcoal (from feathers) */
+    --card-foreground: 43 12% 94%;
+
+    --popover: 24 8.8% 22.4%;
+    --popover-foreground: 43 12% 94%;
+
+    --primary: 35 60% 55%;               /* same gold */
+    --primary-foreground: 0 0% 4%;       /* very dark text on gold buttons */
+
+    --secondary: 30.9 15.8% 32%;         /* darker bronze/stone */
+    --secondary-foreground: 43 12% 94%;
+
+    --muted: 24 8.8% 26%;
+    --muted-foreground: 43 12% 76%;
+
+    --accent: 30 45% 52%;
+    --accent-foreground: 43 12% 94%;
+
+    --destructive: 6 63% 47%;
+    --destructive-foreground: 60 20% 99%;
+
+    --border: 24 8.8% 30%;
+    --input: 24 8.8% 30%;
+    --ring: 35 60% 55%;
+
+    /* Dark-mode logo mapping */
+    --ice-blue: 35 60% 55%;
+    --hockey-silver: 43 12% 70%;
+    --rink-blue: 30 45% 52%;
+
+    --goal-red: 6 63% 47%;
     --assist-green: 142.1 76.2% 36.3%;
   }
 }
