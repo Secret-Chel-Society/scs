@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useRouter } from "next/navigation"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,16 +13,19 @@ import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2, AlertCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
+
+// ✅ use your existing Supabase client context instead of createClientComponentClient
+import { useSupabase } from "@/lib/supabase/client"
 
 // Prevent static generation for this page
 export const dynamic = "force-dynamic"
 
 export default function AccountPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const { supabase, session, isLoading: authLoading } = useSupabase()
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(true)
+
+  const [isProfileLoading, setIsProfileLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [user, setUser] = useState<any>(null)
@@ -39,30 +42,23 @@ export default function AccountPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
+    // Wait until Supabase auth has finished loading
+    if (authLoading) return
+
     async function fetchUserData() {
       try {
-        setIsLoading(true)
+        setIsProfileLoading(true)
         setError(null)
 
-        // Check if user is authenticated
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
-
-        if (sessionError) {
-          throw new Error(`Authentication error: ${sessionError.message}`)
-        }
-
         if (!session) {
-          // Use Next.js router instead of window.location
+          // Not logged in – kick to login
           router.push("/login")
           return
         }
 
         setUser(session.user)
 
-        // Fetch user profile
+        // Fetch user profile from your "users" table
         const { data, error: profileError } = await supabase
           .from("users")
           .select("*")
@@ -86,12 +82,12 @@ export default function AccountPage() {
         console.error("Account page error:", err)
         setError(err.message || "An error occurred while loading your account")
       } finally {
-        setIsLoading(false)
+        setIsProfileLoading(false)
       }
     }
 
     fetchUserData()
-  }, [supabase, router])
+  }, [authLoading, session, supabase, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -150,12 +146,10 @@ export default function AccountPage() {
     setError(null)
 
     try {
-      // Create a unique file name
       const fileExt = file.name.split(".").pop()
       const fileName = `${user.id}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
       const filePath = `avatars/${fileName}`
 
-      // Upload the file to Supabase Storage
       const { error: uploadError } = await supabase.storage.from("profiles").upload(filePath, file, {
         cacheControl: "3600",
         upsert: true,
@@ -165,19 +159,18 @@ export default function AccountPage() {
         throw new Error(`Error uploading file: ${uploadError.message}`)
       }
 
-      // Get the public URL
       const { data: publicUrlData } = supabase.storage.from("profiles").getPublicUrl(filePath)
-
       const newAvatarUrl = publicUrlData.publicUrl
 
-      // Update the user profile with the new avatar URL
-      const { error: updateError } = await supabase.from("users").update({ avatar_url: newAvatarUrl }).eq("id", user.id)
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ avatar_url: newAvatarUrl })
+        .eq("id", user.id)
 
       if (updateError) {
         throw new Error(`Error updating profile: ${updateError.message}`)
       }
 
-      // Update state
       setAvatarUrl(newAvatarUrl)
 
       toast({
@@ -194,7 +187,6 @@ export default function AccountPage() {
       })
     } finally {
       setIsUploading(false)
-      // Reset the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
@@ -208,7 +200,7 @@ export default function AccountPage() {
     return user?.email?.substring(0, 2).toUpperCase() || "U"
   }
 
-  if (isLoading) {
+  if (authLoading || isProfileLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
@@ -373,3 +365,4 @@ export default function AccountPage() {
     </div>
   )
 }
+
