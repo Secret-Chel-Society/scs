@@ -3,7 +3,7 @@
 import { CardDescription } from "@/components/ui/card"
 
 import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,18 +19,19 @@ import Image from "next/image"
 
 interface PlayerProfileProps {
   params: {
-    id: string
+    slug: string // Changed from id to slug
   }
 }
 
-export default function PlayerDetailPage() {
-  const params = useParams()
+export default function PlayerProfile({ params }: { params: { slug: string } }) {
+  // Renamed from PlayerDetailPage to PlayerProfile and accepted params
   const router = useRouter()
-  const playerId = params.id as string
+  const playerSlug = params.slug as string // Changed from playerId to playerSlug
   const { supabase } = useSupabase()
   const { toast } = useToast()
   const [player, setPlayer] = useState<any>(null)
   const [matches, setMatches] = useState<any[]>([])
+  const [matchesAHL, setMatchesAHL] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,6 +39,13 @@ export default function PlayerDetailPage() {
   const [currentSeason, setCurrentSeason] = useState<any>(null)
   const [careerStats, setCareerStats] = useState<any>(null)
   const [seasonStats, setSeasonStats] = useState<any[]>([])
+  const [seasonRegistration, setSeasonRegistration] = useState<any>(null)
+  const [aggregatedStatsAHL, setAggregatedStatsAHL] = useState<any>(null)
+  const [seasonStatsAHL, setSeasonStatsAHL] = useState<any[]>([])
+  const [careerStatsAHL, setCareerStatsAHL] = useState<any>(null)
+  const [currentSeasonAHL, setCurrentSeasonAHL] = useState<any>(null)
+  const [statsLeague, setStatsLeague] = useState<"nhl" | "ahl">("nhl")
+  const [gameLogLeague, setGameLogLeague] = useState<"nhl" | "ahl">("nhl")
 
   useEffect(() => {
     async function checkAdminStatus() {
@@ -134,149 +142,287 @@ export default function PlayerDetailPage() {
     fetchCurrentSeason()
   }, [supabase])
 
+  useEffect(() => {
+    async function fetchCurrentSeasonAHL() {
+      try {
+        console.log("[v0] Fetching current AHL season...")
+
+        // First try to get current season from system_settings_ahl
+        const { data: settingsData, error: settingsError } = await supabase
+          .from("system_settings_ahl")
+          .select("value")
+          .eq("key", "current_season")
+          .single()
+
+        if (!settingsError && settingsData && settingsData.value) {
+          const seasonNumber = Number.parseInt(settingsData.value.toString(), 10)
+          console.log("[v0] Found current AHL season number from system_settings_ahl:", seasonNumber)
+
+          if (!isNaN(seasonNumber)) {
+            // Get the full season record from seasons_ahl
+            const { data: seasonRecord, error: seasonError } = await supabase
+              .from("seasons_ahl")
+              .select("*")
+              .eq("number", seasonNumber)
+              .single()
+
+            if (!seasonError && seasonRecord) {
+              console.log("[v0] Found AHL season record:", seasonRecord)
+              setCurrentSeasonAHL(seasonRecord)
+              return
+            }
+          }
+        }
+
+        // Fallback: try to get active season from seasons_ahl
+        const { data: seasonsData, error: seasonsError } = await supabase
+          .from("seasons_ahl")
+          .select("*")
+          .order("number", { ascending: false })
+
+        if (!seasonsError && seasonsData && seasonsData.length > 0) {
+          const activeSeason = seasonsData.find((s) => s.is_active === true)
+          if (activeSeason) {
+            console.log("[v0] Found active AHL season:", activeSeason)
+            setCurrentSeasonAHL(activeSeason)
+          } else {
+            console.log("[v0] No active AHL season, using most recent:", seasonsData[0])
+            setCurrentSeasonAHL(seasonsData[0])
+          }
+        } else {
+          // Default to season 1
+          const defaultSeason = {
+            id: "1",
+            number: 1,
+            name: "Season 1",
+            is_active: true,
+          }
+          console.log("[v0] Using default AHL season:", defaultSeason)
+          setCurrentSeasonAHL(defaultSeason)
+        }
+      } catch (error) {
+        console.error("[v0] Error fetching current AHL season:", error)
+        const defaultSeason = {
+          id: "1",
+          number: 1,
+          name: "Season 1",
+          is_active: true,
+        }
+        setCurrentSeasonAHL(defaultSeason)
+      }
+    }
+
+    fetchCurrentSeasonAHL()
+  }, [])
+
   // Main data fetching effect
   useEffect(() => {
     async function fetchPlayerData() {
       try {
-        console.log("Starting fetchPlayerData for playerId:", playerId)
+        console.log("Starting fetchPlayerData for playerSlug:", playerSlug) // Updated log message
         setLoading(true)
         setError(null)
 
-        // Check if this is an EA player ID (numeric) rather than a UUID
-        const isEaPlayerId = !playerId.includes("-") && !isNaN(Number(playerId))
+        const isLegacyId = playerSlug.includes("-") || (!isNaN(Number(playerSlug)) && playerSlug.length > 10)
 
-        if (isEaPlayerId) {
-          console.log("Detected EA player ID, checking for mapping...")
-          // Check if there's a mapping for this EA player ID
-          const { data: mappingData, error: mappingError } = await supabase
-            .from("ea_player_mappings")
-            .select("player_id")
-            .eq("ea_player_id", playerId)
+        if (isLegacyId) {
+          console.log("Detected legacy ID format, handling as ID...")
+
+          // Check if this is an EA player ID (numeric) rather than a UUID
+          const isEaPlayerId = !playerSlug.includes("-") && !isNaN(Number(playerSlug))
+
+          if (isEaPlayerId) {
+            console.log("Detected EA player ID, checking for mapping...")
+            // Check if there's a mapping for this EA player ID
+            const { data: mappingData, error: mappingError } = await supabase
+              .from("ea_player_mappings")
+              .select("player_id")
+              .eq("ea_player_id", playerSlug)
+              .single()
+
+            if (!mappingError && mappingData && mappingData.player_id) {
+              // If we have a mapping, redirect to the player page with the correct slug
+              console.log("Found mapping, need to get player slug...")
+              const { data: playerData } = await supabase
+                .from("players")
+                .select("users:user_id (gamer_tag_id)")
+                .eq("id", mappingData.player_id)
+                .single()
+
+              if (playerData?.users?.gamer_tag_id) {
+                const slug = playerData.users.gamer_tag_id.toLowerCase().replace(/[^a-z0-9]/g, "-")
+                router.push(`/players/${slug}`)
+                return
+              }
+            } else {
+              // If no mapping exists, redirect to the EA player page
+              console.log("No mapping found, redirecting to EA player page")
+              router.push(`/ea-player/${playerSlug}`)
+              return
+            }
+          }
+
+          // Handle legacy UUID-based URLs by converting to slug
+          const { data: legacyPlayerData, error: legacyError } = await supabase
+            .from("players")
+            .select(`
+              users:user_id (gamer_tag_id)
+            `)
+            .or(`id.eq.${playerSlug},user_id.eq.${playerSlug}`)
             .single()
 
-          if (!mappingError && mappingData && mappingData.player_id) {
-            // If we have a mapping, redirect to the player page with the correct UUID
-            console.log("Found mapping, redirecting to:", mappingData.player_id)
-            router.push(`/players/${mappingData.player_id}`)
-            return
-          } else {
-            // If no mapping exists, redirect to the EA player page
-            console.log("No mapping found, redirecting to EA player page")
-            router.push(`/ea-player/${playerId}`)
+          if (!legacyError && legacyPlayerData?.users?.gamer_tag_id) {
+            const slug = legacyPlayerData.users.gamer_tag_id.toLowerCase().replace(/[^a-z0-9]/g, "-")
+            console.log("Redirecting legacy ID to slug:", slug)
+            router.push(`/players/${slug}`)
             return
           }
         }
 
-        console.log("Fetching player data from database...")
+        console.log("Fetching player data by slug from database...")
 
-        // First, try to fetch by player ID
         let userData = null
         let userError = null
 
-        const { data: playerData, error: playerError } = await supabase
-          .from("players")
-          .select(`
-            id,
-            role,
-            salary,
-            team_id,
-            user_id,
-            teams:team_id (
-              id, 
-              name, 
-              logo_url
-            ),
-            users:user_id (
-              id,
-              gamer_tag_id, 
-              discord_name, 
-              primary_position, 
-              secondary_position, 
-              console, 
-              avatar_url,
-              created_at
-            )
-          `)
-          .eq("id", playerId)
-          .single()
+        // Convert slug back to potential gamer_tag_id variations
+        const possibleGamerTags = [
+          playerSlug,
+          playerSlug.replace(/-/g, ""),
+          playerSlug.replace(/-/g, "_"),
+          playerSlug.replace(/-/g, " "),
+        ]
 
-        if (!playerError && playerData) {
-          userData = playerData
-          console.log("Found player by player ID:", userData)
-        } else {
-          console.log("Player not found by player ID, trying user ID...")
-          // If not found by player ID, try to find by user ID
-          const { data: userPlayerData, error: userPlayerError } = await supabase
-            .from("players")
-            .select(`
-              id,
-              role,
-              salary,
-              team_id,
-              user_id,
-              teams:team_id (
-                id, 
-                name, 
-                logo_url
-              ),
-              users:user_id (
-                id,
-                gamer_tag_id, 
-                discord_name, 
-                primary_position, 
-                secondary_position, 
-                console, 
-                avatar_url,
-                created_at
-              )
-            `)
-            .eq("user_id", playerId)
+        // Try to find user first, then get player data
+        for (const gamerTag of possibleGamerTags) {
+          console.log("Trying gamer tag variation:", gamerTag)
+
+          // First, find the user by gamer_tag_id
+          const { data: userResult, error: userError } = await supabase
+            .from("users")
+            .select("id, gamer_tag_id, discord_name, console, avatar_url, created_at")
+            .eq("gamer_tag_id", gamerTag)
             .single()
 
-          if (!userPlayerError && userPlayerData) {
-            userData = userPlayerData
-            console.log("Found player by user ID:", userData)
-          } else {
-            console.log("Player not found by user ID either, checking if user exists without player record...")
+          if (!userError && userResult) {
+            console.log("Found user:", userResult)
 
-            // Check if this is a user who doesn't have a player record yet
-            const { data: userOnly, error: userOnlyError } = await supabase
-              .from("users")
+            // Now get player data for this user
+            const { data: playerResult, error: playerError } = await supabase
+              .from("players")
               .select(`
                 id,
-                gamer_tag_id, 
-                discord_name, 
-                primary_position, 
-                secondary_position, 
-                console, 
-                avatar_url,
-                created_at
+                role,
+                salary,
+                team_id,
+                user_id,
+                teams:team_id (
+                  id, 
+                  name, 
+                  logo_url
+                )
               `)
-              .eq("id", playerId)
+              .eq("user_id", userResult.id)
               .single()
 
-            if (!userOnlyError && userOnly) {
-              // Create a mock player object for users without player records
+            if (!playerError && playerResult) {
+              // User has a player record
+              userData = {
+                ...playerResult,
+                users: userResult,
+              }
+              console.log("Found player with user data:", userData)
+            } else {
+              // User exists but no player record - create mock player object
               userData = {
                 id: null,
                 role: "Free Agent",
                 salary: 0,
                 team_id: null,
-                user_id: userOnly.id,
+                user_id: userResult.id,
                 teams: null,
-                users: userOnly,
+                users: userResult,
               }
-              console.log("Found user without player record:", userData)
-            } else {
-              userError = playerError || userPlayerError || userOnlyError
+              console.log("Found user without player record, created mock player:", userData)
             }
+            break
+          }
+        }
+
+        // If not found by exact match, try case-insensitive search
+        if (!userData) {
+          console.log("Trying case-insensitive search...")
+          const searchPattern = playerSlug.replace(/-/g, "%")
+
+          const { data: userResults, error: userSearchError } = await supabase
+            .from("users")
+            .select("id, gamer_tag_id, discord_name, console, avatar_url, created_at")
+            .ilike("gamer_tag_id", `%${searchPattern}%`)
+            .limit(1)
+            .single()
+
+          if (!userSearchError && userResults) {
+            console.log("Found user by case-insensitive search:", userResults)
+
+            // Get player data for this user
+            const { data: playerResult, error: playerError } = await supabase
+              .from("players")
+              .select(`
+                id,
+                role,
+                salary,
+                team_id,
+                user_id,
+                teams:team_id (
+                  id, 
+                  name, 
+                  logo_url
+                )
+              `)
+              .eq("user_id", userResults.id)
+              .single()
+
+            if (!playerError && playerResult) {
+              userData = {
+                ...playerResult,
+                users: userResults,
+              }
+            } else {
+              userData = {
+                id: null,
+                role: "Free Agent",
+                salary: 0,
+                team_id: null,
+                user_id: userResults.id,
+                teams: null,
+                users: userResults,
+              }
+            }
+          } else {
+            userError = { message: "Player not found" }
+          }
+        }
+
+        let seasonRegistrationData = null
+        if (userData?.user_id) {
+          const { data: currentSeasonData } = await supabase.from("seasons").select("id").eq("is_active", true).single()
+
+          if (currentSeasonData) {
+            const { data: regData } = await supabase
+              .from("season_registrations")
+              .select("primary_position, secondary_position")
+              .eq("user_id", userData.user_id)
+              .eq("season_id", currentSeasonData.id)
+              .single()
+
+            seasonRegistrationData = regData
+            setSeasonRegistration(regData)
           }
         }
 
         if (userError || !userData) {
           console.error("User error:", userError)
           if (userError?.code === "PGRST116") {
-            setError("Player not found. The ID may be invalid.")
+            setError("Player not found. The slug may be invalid.")
           } else {
             setError(`Error loading player: ${userError?.message || "Player not found"}`)
           }
@@ -296,14 +442,12 @@ export default function PlayerDetailPage() {
 
         setPlayer(userData)
 
-        // Fetch player match history by looking directly for player stats
-        console.log("Fetching match history...")
         let matchesData = []
 
         const playerGamerTag = userData.users?.gamer_tag_id?.toLowerCase()
 
         if (playerGamerTag) {
-          console.log(`Searching for matches where ${playerGamerTag} played...`)
+          console.log(`Searching for NHL matches where ${playerGamerTag} played...`)
 
           // First, get all ea_player_stats records for this player
           const { data: playerStatsRecords, error: playerStatsError } = await supabase
@@ -315,11 +459,11 @@ export default function PlayerDetailPage() {
           if (playerStatsError) {
             console.error("Error fetching player stats:", playerStatsError)
           } else if (playerStatsRecords && playerStatsRecords.length > 0) {
-            console.log(`Found ${playerStatsRecords.length} stat records for player`)
+            console.log(`Found ${playerStatsRecords.length} NHL stat records for player`)
 
             // Get unique match IDs
             const matchIds = [...new Set(playerStatsRecords.map((stat) => stat.match_id))]
-            console.log(`Player participated in ${matchIds.length} unique matches`)
+            console.log(`Player participated in ${matchIds.length} unique NHL matches`)
 
             // Fetch the actual match details
             const { data: matchDetails, error: matchDetailsError } = await supabase
@@ -345,7 +489,7 @@ export default function PlayerDetailPage() {
             if (matchDetailsError) {
               console.error("Error fetching match details:", matchDetailsError)
             } else if (matchDetails && matchDetails.length > 0) {
-              console.log(`Found ${matchDetails.length} match details`)
+              console.log(`Found ${matchDetails.length} NHL match details`)
 
               // Create a map of match_id to aggregated player stats
               const statsMap = new Map()
@@ -409,25 +553,192 @@ export default function PlayerDetailPage() {
                 }
               })
 
-              console.log(`Successfully processed ${matchesData.length} matches with player stats`)
+              console.log(`Successfully processed ${matchesData.length} NHL matches with player stats`)
             }
           } else {
-            console.log("No player stats found for this player")
+            console.log("No NHL player stats found for this player")
           }
         } else {
           console.log("No gamer tag found for player")
         }
 
-        console.log("Final matches data:", matchesData.length)
+        console.log("Final NHL matches data:", matchesData.length)
         setMatches(matchesData || [])
 
-        // Now fetch aggregated stats if we have current season
-        if (currentSeason) {
-          console.log("Fetching aggregated stats with season:", currentSeason)
-          await fetchAggregatedStats(userData, currentSeason)
+        let matchesDataAHL = []
+
+        if (playerGamerTag) {
+          console.log(`Searching for AHL matches where ${playerGamerTag} played...`)
+
+          // Get all ea_player_stats_ahl records for this player
+          const { data: playerStatsRecordsAHL, error: playerStatsErrorAHL } = await supabase
+            .from("ea_player_stats_ahl")
+            .select("match_id, goals, assists, plus_minus, shots, hits, pim, saves, goals_against, position, team_id")
+            .ilike("player_name", playerGamerTag)
+            .order("created_at", { ascending: false })
+
+          if (playerStatsErrorAHL) {
+            console.error("Error fetching AHL player stats:", playerStatsErrorAHL)
+          } else if (playerStatsRecordsAHL && playerStatsRecordsAHL.length > 0) {
+            console.log(`Found ${playerStatsRecordsAHL.length} AHL stat records for player`)
+
+            // Get unique match IDs
+            const matchIdsAHL = [...new Set(playerStatsRecordsAHL.map((stat) => stat.match_id))]
+            console.log(`Player participated in ${matchIdsAHL.length} unique AHL matches`)
+
+            // Fetch the actual match details
+            const { data: matchDetailsAHL, error: matchDetailsErrorAHL } = await supabase
+              .from("matches_ahl")
+              .select(`
+                id,
+                match_date,
+                status,
+                home_team_id,
+                away_team_id,
+                home_score,
+                away_score,
+                season_name,
+                overtime,
+                has_overtime,
+                home_team:home_team_id (id, name, logo_url),
+                away_team:away_team_id (id, name, logo_url)
+              `)
+              .in("id", matchIdsAHL)
+              .order("match_date", { ascending: false })
+              .limit(20)
+
+            if (matchDetailsErrorAHL) {
+              console.error("Error fetching AHL match details:", matchDetailsErrorAHL)
+            } else if (matchDetailsAHL && matchDetailsAHL.length > 0) {
+              console.log(`Found ${matchDetailsAHL.length} AHL match details`)
+
+              // Create a map of match_id to aggregated player stats
+              const statsMapAHL = new Map()
+
+              playerStatsRecordsAHL.forEach((stat) => {
+                if (!statsMapAHL.has(stat.match_id)) {
+                  statsMapAHL.set(stat.match_id, {
+                    goals: 0,
+                    assists: 0,
+                    plus_minus: 0,
+                    shots: 0,
+                    hits: 0,
+                    pim: 0,
+                    saves: 0,
+                    goals_against: 0,
+                    position: stat.position,
+                    team_id: stat.team_id,
+                  })
+                }
+
+                const existing = statsMapAHL.get(stat.match_id)
+                existing.goals += stat.goals || 0
+                existing.assists += stat.assists || 0
+                existing.plus_minus += stat.plus_minus || 0
+                existing.shots += stat.shots || 0
+                existing.hits += stat.hits || 0
+                existing.pim += stat.pim || 0
+                existing.saves += stat.saves || 0
+                existing.goals_against += stat.goals_against || 0
+                if (!existing.position && stat.position) {
+                  existing.position = stat.position
+                }
+                if (!existing.team_id && stat.team_id) {
+                  existing.team_id = stat.team_id
+                }
+              })
+
+              // Combine match details with player stats
+              matchesDataAHL = matchDetailsAHL.map((match) => {
+                const playerStats = statsMapAHL.get(match.id) || {
+                  goals: 0,
+                  assists: 0,
+                  plus_minus: 0,
+                  shots: 0,
+                  hits: 0,
+                  pim: 0,
+                  saves: 0,
+                  goals_against: 0,
+                  position: null,
+                  team_id: null,
+                }
+
+                return {
+                  ...match,
+                  player_stats: {
+                    ...playerStats,
+                    points: (playerStats.goals || 0) + (playerStats.assists || 0),
+                  },
+                }
+              })
+
+              console.log(`Successfully processed ${matchesDataAHL.length} AHL matches with player stats`)
+            }
+          } else {
+            console.log("No AHL player stats found for this player")
+          }
+        }
+
+        console.log("Final AHL matches data:", matchesDataAHL.length)
+        setMatchesAHL(matchesDataAHL || [])
+
+        if (currentSeason && currentSeasonAHL) {
+          console.log(
+            "[v0] Fetching aggregated stats with NHL season:",
+            currentSeason,
+            "and AHL season:",
+            currentSeasonAHL,
+          )
+          await Promise.all([
+            fetchAggregatedStats(userData, currentSeason),
+            fetchCareerStats(userData),
+            fetchAHLStats(userData, currentSeasonAHL), // Pass AHL season instead of NHL season
+            fetchCareerStatsAHL(userData),
+          ])
+        } else if (currentSeason) {
+          // If only NHL season is available
+          console.log("[v0] Fetching NHL stats only with season:", currentSeason)
+          await Promise.all([fetchAggregatedStats(userData, currentSeason), fetchCareerStats(userData)])
+        } else if (currentSeasonAHL) {
+          // If only AHL season is available
+          console.log("[v0] Fetching AHL stats only with season:", currentSeasonAHL)
+          await Promise.all([fetchAHLStats(userData, currentSeasonAHL), fetchCareerStatsAHL(userData)])
         } else {
           console.log("No current season available, setting empty stats")
           setAggregatedStats({
+            games_played: 0,
+            goals: 0,
+            assists: 0,
+            points: 0,
+            plus_minus: 0,
+            pim: 0,
+            shots: 0,
+            hits: 0,
+            blocks: 0,
+            takeaways: 0,
+            giveaways: 0,
+            faceoffs_won: 0,
+            faceoffs_taken: 0,
+            faceoffs_lost: 0,
+            pass_attempted: 0,
+            pass_completed: 0,
+            interceptions: 0,
+            saves: 0,
+            goals_against: 0,
+            glshots: 0,
+            save_pct: 0,
+            total_shots_faced: 0,
+            wins: 0,
+            losses: 0,
+            otl: 0,
+            shooting_pct: 0,
+            ppg: 0,
+            shg: 0,
+            gwg: 0,
+            pass_pct: 0,
+            faceoff_pct: 0,
+          })
+          setAggregatedStatsAHL({
             games_played: 0,
             goals: 0,
             assists: 0,
@@ -464,6 +775,7 @@ export default function PlayerDetailPage() {
 
         // Fetch career stats
         await fetchCareerStats(userData)
+        await fetchCareerStatsAHL(userData)
 
         console.log("Player data fetch completed successfully")
       } catch (error: any) {
@@ -474,11 +786,11 @@ export default function PlayerDetailPage() {
       }
     }
 
-    // Only fetch if we have playerId and currentSeason is loaded (or we've tried to load it)
-    if (playerId && currentSeason !== null) {
+    // Only fetch if we have playerSlug and currentSeason is loaded (or we've tried to load it)
+    if (playerSlug && currentSeason !== null && currentSeasonAHL !== null) {
       fetchPlayerData()
     }
-  }, [supabase, playerId, router, currentSeason])
+  }, [supabase, playerSlug, router, currentSeason, currentSeasonAHL]) // Updated dependency
 
   async function fetchAggregatedStats(playerData: any, season: any) {
     try {
@@ -1011,7 +1323,10 @@ export default function PlayerDetailPage() {
         const match = matchMap.get(stat.match_id)
         if (!match) return
 
-        // Determine season number
+        const seasonKey = match.season_name || "Season 1"
+        const seasonName = seasonKey
+
+        // Extract season number for sorting purposes
         let seasonNumber = 1
         if (match.season_name) {
           const seasonMatch = /Season\s+(\d+)/i.exec(match.season_name)
@@ -1021,10 +1336,11 @@ export default function PlayerDetailPage() {
         }
 
         // Initialize season stats if not exists
-        if (!seasonStatsMap.has(seasonNumber)) {
-          seasonStatsMap.set(seasonNumber, {
+        if (!seasonStatsMap.has(seasonKey)) {
+          seasonStatsMap.set(seasonKey, {
             season_number: seasonNumber,
-            season_name: `Season ${seasonNumber}`,
+            season_name: seasonName,
+            season_key: seasonKey, // Add season key for unique identification
             games_played: new Set(),
             positions_played: new Set(),
             goals: 0,
@@ -1054,7 +1370,7 @@ export default function PlayerDetailPage() {
           })
         }
 
-        const seasonStats = seasonStatsMap.get(seasonNumber)
+        const seasonStats = seasonStatsMap.get(seasonKey)
 
         // Track unique games and positions
         seasonStats.games_played.add(stat.match_id)
@@ -1239,12 +1555,765 @@ export default function PlayerDetailPage() {
         gaa: stats.games_played > 0 ? stats.goals_against / stats.games_played : 0,
       }))
 
+      setSeasonStats(
+        seasonStatsArray.sort((a, b) => {
+          if (a.season_number !== b.season_number) {
+            return a.season_number - b.season_number
+          }
+          // If same season number, sort regular season before playoffs
+          if (a.season_name.includes("(Playoffs)") && !b.season_name.includes("(Playoffs)")) {
+            return 1
+          }
+          if (!a.season_name.includes("(Playoffs)") && b.season_name.includes("(Playoffs)")) {
+            return -1
+          }
+          return a.season_name.localeCompare(b.season_name)
+        }),
+      )
+
       setSeasonStats(seasonStatsArray.sort((a, b) => a.season_number - b.season_number))
       setCareerStats(positionStatsArray)
 
       console.log("Career stats processed:", { seasonStatsArray, positionStatsArray })
     } catch (error) {
       console.error("Error fetching career stats:", error)
+    }
+  }
+
+  async function fetchAHLStats(playerData: any, season: any) {
+    try {
+      console.log("[v0] fetchAHLStats called with:", { playerData: playerData.id, season: season.name })
+
+      let seasonNumber = 1
+      const seasonId = season.id
+
+      if (season.number && !isNaN(Number(season.number))) {
+        seasonNumber = Number(season.number)
+      } else if (season.name && /Season\s+(\d+)/i.test(season.name)) {
+        const match = /Season\s+(\d+)/i.exec(season.name)
+        seasonNumber = Number(match![1])
+      }
+
+      const playerGamerTag = playerData.users?.gamer_tag_id?.toLowerCase()
+
+      if (!playerGamerTag) {
+        console.log("[v0] No gamer tag found for AHL stats")
+        setAggregatedStatsAHL({
+          games_played: 0,
+          goals: 0,
+          assists: 0,
+          points: 0,
+          plus_minus: 0,
+          pim: 0,
+          shots: 0,
+          hits: 0,
+          blocks: 0,
+          takeaways: 0,
+          giveaways: 0,
+          faceoffs_won: 0,
+          faceoffs_taken: 0,
+          faceoffs_lost: 0,
+          pass_attempted: 0,
+          pass_completed: 0,
+          interceptions: 0,
+          saves: 0,
+          goals_against: 0,
+          glshots: 0,
+          save_pct: 0,
+          total_shots_faced: 0,
+          wins: 0,
+          losses: 0,
+          otl: 0,
+          shooting_pct: 0,
+          ppg: 0,
+          shg: 0,
+          gwg: 0,
+          pass_pct: 0,
+          faceoff_pct: 0,
+        })
+        return
+      }
+
+      console.log(`[v0] Fetching AHL stats for player ${playerGamerTag} in season ${seasonNumber}`)
+
+      // Get season from seasons_ahl table
+      const { data: seasonRecord, error: seasonError } = await supabase
+        .from("seasons_ahl")
+        .select("id, number, name")
+        .eq("number", seasonNumber)
+        .single()
+
+      let actualSeasonId = seasonId
+      if (!seasonError && seasonRecord) {
+        actualSeasonId = seasonRecord.id
+        console.log(`[v0] Found AHL season record with UUID: ${actualSeasonId}`)
+      }
+
+      // Build the query for AHL matches
+      let matchQuery = supabase
+        .from("matches_ahl")
+        .select(
+          "id, home_team_id, away_team_id, home_score, away_score, status, season_id, season_name, overtime, has_overtime",
+        )
+        .or("status.ilike.%completed%,status.ilike.%Completed%")
+
+      if (actualSeasonId && actualSeasonId !== seasonNumber.toString()) {
+        matchQuery = matchQuery.eq("season_id", actualSeasonId)
+      } else {
+        matchQuery = matchQuery.eq("season_name", `Season ${seasonNumber}`)
+      }
+
+      const { data: completedMatches, error: matchesError } = await matchQuery
+
+      if (matchesError) {
+        console.error("[v0] Error fetching AHL completed matches:", matchesError)
+        return
+      }
+
+      console.log(`[v0] Found ${completedMatches?.length || 0} completed AHL matches for season ${seasonNumber}`)
+      await processPlayerStatsAHL(completedMatches || [], playerData)
+    } catch (error) {
+      console.error("[v0] Error fetching AHL aggregated stats:", error)
+    }
+  }
+
+  async function processPlayerStatsAHL(completedMatches: any[], playerData: any) {
+    try {
+      console.log("[v0] processPlayerStatsAHL called with", completedMatches.length, "matches")
+
+      // Build a map of match results
+      const matchResultsMap = new Map<string, { home_result: "W" | "L" | "OTL"; away_result: "W" | "L" | "OTL" }>()
+
+      completedMatches.forEach((match) => {
+        if (match.home_score !== null && match.away_score !== null) {
+          const isOvertime =
+            match.overtime === true ||
+            match.has_overtime === true ||
+            (match.status && match.status.toLowerCase().includes("overtime")) ||
+            (match.status && match.status.includes("(OT)"))
+
+          let homeResult: "W" | "L" | "OTL"
+          let awayResult: "W" | "L" | "OTL"
+
+          if (match.home_score > match.away_score) {
+            homeResult = "W"
+            awayResult = isOvertime ? "OTL" : "L"
+          } else if (match.away_score > match.home_score) {
+            awayResult = "W"
+            homeResult = isOvertime ? "OTL" : "L"
+          } else {
+            homeResult = "OTL"
+            awayResult = "OTL"
+          }
+
+          matchResultsMap.set(match.id, { home_result: homeResult, away_result: awayResult })
+        }
+      })
+
+      const matchIds = completedMatches.map((m) => m.id)
+
+      if (matchIds.length === 0) {
+        console.log("[v0] No completed AHL matches found for player stats")
+        setAggregatedStatsAHL({
+          games_played: 0,
+          goals: 0,
+          assists: 0,
+          points: 0,
+          plus_minus: 0,
+          pim: 0,
+          shots: 0,
+          hits: 0,
+          blocks: 0,
+          takeaways: 0,
+          giveaways: 0,
+          faceoffs_won: 0,
+          faceoffs_taken: 0,
+          faceoffs_lost: 0,
+          pass_attempted: 0,
+          pass_completed: 0,
+          interceptions: 0,
+          saves: 0,
+          goals_against: 0,
+          glshots: 0,
+          save_pct: 0,
+          total_shots_faced: 0,
+          wins: 0,
+          losses: 0,
+          otl: 0,
+          shooting_pct: 0,
+          ppg: 0,
+          shg: 0,
+          gwg: 0,
+          pass_pct: 0,
+          faceoff_pct: 0,
+        })
+        return
+      }
+
+      const playerGamerTag = playerData.users?.gamer_tag_id?.toLowerCase()
+
+      if (!playerGamerTag) {
+        console.log("[v0] No gamer tag found for player in processPlayerStatsAHL")
+        return
+      }
+
+      console.log(`[v0] Querying ea_player_stats_ahl for ${playerGamerTag} in ${matchIds.length} matches`)
+
+      const { data: playerStatsData, error: playerStatsError } = await supabase
+        .from("ea_player_stats_ahl")
+        .select("*")
+        .in("match_id", matchIds)
+        .ilike("player_name", playerGamerTag)
+
+      if (playerStatsError) {
+        console.error("[v0] Error fetching AHL player stats:", playerStatsError)
+        setAggregatedStatsAHL({
+          games_played: 0,
+          goals: 0,
+          assists: 0,
+          points: 0,
+          plus_minus: 0,
+          pim: 0,
+          shots: 0,
+          hits: 0,
+          blocks: 0,
+          takeaways: 0,
+          giveaways: 0,
+          faceoffs_won: 0,
+          faceoffs_taken: 0,
+          faceoffs_lost: 0,
+          pass_attempted: 0,
+          pass_completed: 0,
+          interceptions: 0,
+          saves: 0,
+          goals_against: 0,
+          glshots: 0,
+          save_pct: 0,
+          total_shots_faced: 0,
+          wins: 0,
+          losses: 0,
+          otl: 0,
+          shooting_pct: 0,
+          ppg: 0,
+          shg: 0,
+          gwg: 0,
+          pass_pct: 0,
+          faceoff_pct: 0,
+        })
+        return
+      }
+
+      console.log(`[v0] Found ${playerStatsData?.length || 0} AHL stat records for player ${playerGamerTag}`)
+
+      if (!playerStatsData || playerStatsData.length === 0) {
+        setAggregatedStatsAHL({
+          games_played: 0,
+          goals: 0,
+          assists: 0,
+          points: 0,
+          plus_minus: 0,
+          pim: 0,
+          shots: 0,
+          hits: 0,
+          blocks: 0,
+          takeaways: 0,
+          giveaways: 0,
+          faceoffs_won: 0,
+          faceoffs_taken: 0,
+          faceoffs_lost: 0,
+          pass_attempted: 0,
+          pass_completed: 0,
+          interceptions: 0,
+          saves: 0,
+          goals_against: 0,
+          glshots: 0,
+          save_pct: 0,
+          total_shots_faced: 0,
+          wins: 0,
+          losses: 0,
+          otl: 0,
+          shooting_pct: 0,
+          ppg: 0,
+          shg: 0,
+          gwg: 0,
+          pass_pct: 0,
+          faceoff_pct: 0,
+        })
+        return
+      }
+
+      const matchDataMap = new Map()
+      completedMatches.forEach((match) => {
+        matchDataMap.set(match.id, match)
+      })
+
+      // Aggregate all stats for this player
+      const aggregated = {
+        games_played: 0,
+        goals: 0,
+        assists: 0,
+        points: 0,
+        plus_minus: 0,
+        pim: 0,
+        shots: 0,
+        hits: 0,
+        blocks: 0,
+        takeaways: 0,
+        giveaways: 0,
+        faceoffs_won: 0,
+        faceoffs_taken: 0,
+        faceoffs_lost: 0,
+        pass_attempted: 0,
+        pass_completed: 0,
+        interceptions: 0,
+        saves: 0,
+        goals_against: 0,
+        glshots: 0,
+        save_pct: 0,
+        total_shots_faced: 0,
+        wins: 0,
+        losses: 0,
+        otl: 0,
+        shooting_pct: 0,
+        ppg: 0,
+        shg: 0,
+        gwg: 0,
+        pass_pct: 0,
+        faceoff_pct: 0,
+        positions_played: new Set<string>(),
+      }
+
+      const uniqueMatches = new Set<string>()
+
+      playerStatsData.forEach((stat) => {
+        if (stat.position) {
+          aggregated.positions_played.add(stat.position)
+        }
+
+        if (!uniqueMatches.has(stat.match_id)) {
+          aggregated.games_played += 1
+          uniqueMatches.add(stat.match_id)
+
+          const matchResult = matchResultsMap.get(stat.match_id)
+          const matchData = matchDataMap.get(stat.match_id)
+
+          if (matchResult && matchData && stat.team_id) {
+            let playerResult: "W" | "L" | "OTL" | null = null
+
+            if (stat.team_id === matchData.home_team_id) {
+              playerResult = matchResult.home_result
+            } else if (stat.team_id === matchData.away_team_id) {
+              playerResult = matchResult.away_result
+            }
+
+            if (playerResult === "W") {
+              aggregated.wins += 1
+            } else if (playerResult === "OTL") {
+              aggregated.otl += 1
+            } else if (playerResult === "L") {
+              aggregated.losses += 1
+            }
+          }
+        }
+
+        aggregated.goals += stat.goals || 0
+        aggregated.assists += stat.assists || 0
+        aggregated.plus_minus += stat.plus_minus || 0
+        aggregated.pim += stat.pim || 0
+        aggregated.shots += stat.shots || 0
+        aggregated.hits += stat.hits || 0
+        aggregated.blocks += stat.blocks || 0
+        aggregated.takeaways += stat.takeaways || 0
+        aggregated.giveaways += stat.giveaways || 0
+        aggregated.faceoffs_won += stat.faceoffs_won || 0
+        aggregated.faceoffs_taken += stat.faceoffs_taken || 0
+        aggregated.pass_attempted += stat.pass_attempts || stat.pass_attempted || 0
+        aggregated.pass_completed += stat.pass_complete || stat.pass_completed || 0
+        aggregated.interceptions += stat.interceptions || 0
+        aggregated.ppg += stat.ppg || 0
+        aggregated.shg += stat.shg || 0
+        aggregated.gwg += stat.gwg || 0
+
+        if (stat.position === "G" || stat.position === "0") {
+          aggregated.saves += stat.saves || 0
+          aggregated.goals_against += stat.goals_against || 0
+          aggregated.glshots += stat.glshots || 0
+          aggregated.total_shots_faced += (stat.saves || 0) + (stat.goals_against || 0)
+        }
+      })
+
+      aggregated.points = aggregated.goals + aggregated.assists
+      aggregated.faceoffs_lost = aggregated.faceoffs_taken - aggregated.faceoffs_won
+      aggregated.shooting_pct = aggregated.shots > 0 ? (aggregated.goals / aggregated.shots) * 100 : 0
+      aggregated.pass_pct =
+        aggregated.pass_attempted > 0 ? (aggregated.pass_completed / aggregated.pass_attempted) * 100 : 0
+      aggregated.faceoff_pct =
+        aggregated.faceoffs_taken > 0 ? (aggregated.faceoffs_won / aggregated.faceoffs_taken) * 100 : 0
+
+      if (aggregated.total_shots_faced > 0) {
+        aggregated.save_pct = (aggregated.saves / aggregated.total_shots_faced) * 100
+      }
+
+      const positionsArray = Array.from(aggregated.positions_played)
+
+      console.log(`[v0] Player ${playerGamerTag} AHL aggregated stats:`, {
+        games: aggregated.games_played,
+        goals: aggregated.goals,
+        assists: aggregated.assists,
+        points: aggregated.points,
+        positions: positionsArray,
+      })
+
+      setAggregatedStatsAHL({
+        ...aggregated,
+        positions_played: positionsArray,
+      })
+    } catch (error) {
+      console.error("[v0] Error processing AHL player stats:", error)
+      setAggregatedStatsAHL({
+        games_played: 0,
+        goals: 0,
+        assists: 0,
+        points: 0,
+        plus_minus: 0,
+        pim: 0,
+        shots: 0,
+        hits: 0,
+        blocks: 0,
+        takeaways: 0,
+        giveaways: 0,
+        faceoffs_won: 0,
+        faceoffs_taken: 0,
+        faceoffs_lost: 0,
+        pass_attempted: 0,
+        pass_completed: 0,
+        interceptions: 0,
+        saves: 0,
+        goals_against: 0,
+        glshots: 0,
+        save_pct: 0,
+        total_shots_faced: 0,
+        wins: 0,
+        losses: 0,
+        otl: 0,
+        shooting_pct: 0,
+        ppg: 0,
+        shg: 0,
+        gwg: 0,
+        pass_pct: 0,
+        faceoff_pct: 0,
+      })
+    }
+  }
+
+  async function fetchCareerStatsAHL(playerData: any) {
+    try {
+      console.log("[v0] Fetching AHL career stats for player:", playerData.users?.gamer_tag_id)
+
+      const playerGamerTag = playerData.users?.gamer_tag_id?.toLowerCase()
+
+      if (!playerGamerTag) {
+        console.log("[v0] No gamer tag found for AHL career stats")
+        return
+      }
+
+      // Get all AHL seasons
+      const { data: allSeasons, error: seasonsError } = await supabase
+        .from("seasons_ahl")
+        .select("*")
+        .order("number", { ascending: true })
+
+      if (seasonsError) {
+        console.error("[v0] Error fetching AHL seasons:", seasonsError)
+        return
+      }
+
+      // Get all AHL player stats for this player
+      const { data: allPlayerStats, error: playerStatsError } = await supabase
+        .from("ea_player_stats_ahl")
+        .select("*")
+        .ilike("player_name", playerGamerTag)
+
+      if (playerStatsError) {
+        console.error("[v0] Error fetching all AHL player stats:", playerStatsError)
+        return
+      }
+
+      if (!allPlayerStats || allPlayerStats.length === 0) {
+        console.log("[v0] No AHL career stats found for player")
+        return
+      }
+
+      // Get all AHL matches to determine season and results
+      const matchIds = [...new Set(allPlayerStats.map((stat) => stat.match_id))]
+      const { data: allMatches, error: matchesError } = await supabase
+        .from("matches_ahl")
+        .select(
+          "id, season_name, season_id, home_team_id, away_team_id, home_score, away_score, overtime, has_overtime, status",
+        )
+        .in("id", matchIds)
+
+      if (matchesError) {
+        console.error("[v0] Error fetching AHL matches for career stats:", matchesError)
+        return
+      }
+
+      const matchMap = new Map()
+      allMatches?.forEach((match) => {
+        matchMap.set(match.id, match)
+      })
+
+      const seasonStatsMap = new Map()
+      const positionStatsMap = new Map()
+
+      allPlayerStats.forEach((stat) => {
+        const match = matchMap.get(stat.match_id)
+        if (!match) return
+
+        const seasonKey = match.season_name || "Season 1"
+        const seasonName = seasonKey
+
+        let seasonNumber = 1
+        if (match.season_name) {
+          const seasonMatch = /Season\s+(\d+)/i.exec(match.season_name)
+          if (seasonMatch) {
+            seasonNumber = Number(seasonMatch[1])
+          }
+        }
+
+        if (!seasonStatsMap.has(seasonKey)) {
+          seasonStatsMap.set(seasonKey, {
+            season_number: seasonNumber,
+            season_name: seasonName,
+            season_key: seasonKey,
+            games_played: new Set(),
+            positions_played: new Set(),
+            goals: 0,
+            assists: 0,
+            points: 0,
+            plus_minus: 0,
+            pim: 0,
+            shots: 0,
+            hits: 0,
+            blocks: 0,
+            takeaways: 0,
+            giveaways: 0,
+            faceoffs_won: 0,
+            faceoffs_taken: 0,
+            pass_attempted: 0,
+            pass_completed: 0,
+            interceptions: 0,
+            saves: 0,
+            goals_against: 0,
+            total_shots_faced: 0,
+            wins: 0,
+            losses: 0,
+            otl: 0,
+            ppg: 0,
+            shg: 0,
+            gwg: 0,
+          })
+        }
+
+        const seasonStats = seasonStatsMap.get(seasonKey)
+
+        seasonStats.games_played.add(stat.match_id)
+        if (stat.position) {
+          seasonStats.positions_played.add(stat.position)
+        }
+
+        seasonStats.goals += stat.goals || 0
+        seasonStats.assists += stat.assists || 0
+        seasonStats.plus_minus += stat.plus_minus || 0
+        seasonStats.pim += stat.pim || 0
+        seasonStats.shots += stat.shots || 0
+        seasonStats.hits += stat.hits || 0
+        seasonStats.blocks += stat.blocks || 0
+        seasonStats.takeaways += stat.takeaways || 0
+        seasonStats.giveaways += stat.giveaways || 0
+        seasonStats.faceoffs_won += stat.faceoffs_won || 0
+        seasonStats.faceoffs_taken += stat.faceoffs_taken || 0
+        seasonStats.pass_attempted += stat.pass_attempts || 0
+        seasonStats.pass_completed += stat.pass_complete || 0
+        seasonStats.interceptions += stat.interceptions || 0
+        seasonStats.ppg += stat.ppg || 0
+        seasonStats.shg += stat.shg || 0
+        seasonStats.gwg += stat.gwg || 0
+
+        if (stat.position === "G" || stat.position === "0") {
+          seasonStats.saves += stat.saves || 0
+          seasonStats.goals_against += stat.goals_against || 0
+          seasonStats.total_shots_faced += (stat.saves || 0) + (stat.goals_against || 0)
+        }
+
+        if (match.home_score !== null && match.away_score !== null && stat.team_id) {
+          const isOvertime =
+            match.overtime ||
+            match.has_overtime ||
+            (match.status && (match.status.toLowerCase().includes("overtime") || match.status.includes("(OT)")))
+
+          let playerResult = null
+          if (stat.team_id === match.home_team_id) {
+            if (match.home_score > match.away_score) {
+              playerResult = "W"
+            } else if (match.home_score < match.away_score) {
+              playerResult = isOvertime ? "OTL" : "L"
+            } else {
+              playerResult = "OTL"
+            }
+          } else if (stat.team_id === match.away_team_id) {
+            if (match.away_score > match.home_score) {
+              playerResult = "W"
+            } else if (match.away_score < match.home_score) {
+              playerResult = isOvertime ? "OTL" : "L"
+            } else {
+              playerResult = "OTL"
+            }
+          }
+
+          if (playerResult === "W") seasonStats.wins += 1
+          else if (playerResult === "L") seasonStats.losses += 1
+          else if (playerResult === "OTL") seasonStats.otl += 1
+        }
+
+        const position = stat.position || "Unknown"
+        if (!positionStatsMap.has(position)) {
+          positionStatsMap.set(position, {
+            position,
+            games_played: new Set(),
+            goals: 0,
+            assists: 0,
+            points: 0,
+            plus_minus: 0,
+            pim: 0,
+            shots: 0,
+            hits: 0,
+            blocks: 0,
+            takeaways: 0,
+            giveaways: 0,
+            faceoffs_won: 0,
+            faceoffs_taken: 0,
+            pass_attempted: 0,
+            pass_completed: 0,
+            interceptions: 0,
+            saves: 0,
+            goals_against: 0,
+            total_shots_faced: 0,
+            wins: 0,
+            losses: 0,
+            otl: 0,
+            ppg: 0,
+            shg: 0,
+            gwg: 0,
+            shutouts: 0,
+          })
+        }
+
+        const posStats = positionStatsMap.get(position)
+        posStats.games_played.add(stat.match_id)
+        posStats.goals += stat.goals || 0
+        posStats.assists += stat.assists || 0
+        posStats.plus_minus += stat.plus_minus || 0
+        posStats.pim += stat.pim || 0
+        posStats.shots += stat.shots || 0
+        posStats.hits += stat.hits || 0
+        posStats.blocks += stat.blocks || 0
+        posStats.takeaways += stat.takeaways || 0
+        posStats.giveaways += stat.giveaways || 0
+        posStats.faceoffs_won += stat.faceoffs_won || 0
+        posStats.faceoffs_taken += stat.faceoffs_taken || 0
+        posStats.pass_attempted += stat.pass_attempts || 0
+        posStats.pass_completed += stat.pass_complete || 0
+        posStats.interceptions += stat.interceptions || 0
+        posStats.ppg += stat.ppg || 0
+        posStats.shg += stat.shg || 0
+        posStats.gwg += stat.gwg || 0
+
+        if (position === "G" || position === "0") {
+          posStats.saves += stat.saves || 0
+          posStats.goals_against += stat.goals_against || 0
+          posStats.total_shots_faced += (stat.saves || 0) + (stat.goals_against || 0)
+          if ((stat.goals_against || 0) === 0) {
+            posStats.shutouts += 1
+          }
+        }
+
+        if (match.home_score !== null && match.away_score !== null && stat.team_id) {
+          const isOvertime =
+            match.overtime ||
+            match.has_overtime ||
+            (match.status && (match.status.toLowerCase().includes("overtime") || match.status.includes("(OT)")))
+
+          let playerResult = null
+          if (stat.team_id === match.home_team_id) {
+            if (match.home_score > match.away_score) {
+              playerResult = "W"
+            } else if (match.home_score < match.away_score) {
+              playerResult = isOvertime ? "OTL" : "L"
+            } else {
+              playerResult = "OTL"
+            }
+          } else if (stat.team_id === match.away_team_id) {
+            if (match.away_score > match.home_score) {
+              playerResult = "W"
+            } else if (match.away_score < match.home_score) {
+              playerResult = isOvertime ? "OTL" : "L"
+            } else {
+              playerResult = "OTL"
+            }
+          }
+
+          if (playerResult === "W") posStats.wins += 1
+          else if (playerResult === "L") posStats.losses += 1
+          else if (playerResult === "OTL") posStats.otl += 1
+        }
+      })
+
+      const seasonStatsArray = Array.from(seasonStatsMap.values())
+        .filter((stats) => stats.games_played.size > 0)
+        .map((stats) => ({
+          ...stats,
+          games_played: stats.games_played.size,
+          points: stats.goals + stats.assists,
+          shooting_pct: stats.shots > 0 ? (stats.goals / stats.shots) * 100 : 0,
+          pass_pct: stats.pass_attempted > 0 ? (stats.pass_completed / stats.pass_attempted) * 100 : 0,
+          faceoff_pct: stats.faceoffs_taken > 0 ? (stats.faceoffs_won / stats.faceoffs_taken) * 100 : 0,
+          save_pct: stats.total_shots_faced > 0 ? (stats.saves / stats.total_shots_faced) * 100 : 0,
+          gaa: stats.games_played > 0 ? stats.goals_against / stats.games_played : 0,
+          positions_played: Array.from(stats.positions_played),
+        }))
+        .sort((a, b) => {
+          if (a.season_number !== b.season_number) {
+            return a.season_number - b.season_number
+          }
+          if (a.season_name.includes("(Playoffs)") && !b.season_name.includes("(Playoffs)")) {
+            return 1
+          }
+          if (!a.season_name.includes("(Playoffs)") && b.season_name.includes("(Playoffs)")) {
+            return -1
+          }
+          return a.season_name.localeCompare(b.season_name)
+        })
+
+      const positionStatsArray = Array.from(positionStatsMap.values())
+        .filter((stats) => stats.games_played.size > 0)
+        .map((stats) => ({
+          ...stats,
+          games_played: stats.games_played.size,
+          points: stats.goals + stats.assists,
+          shooting_pct: stats.shots > 0 ? (stats.goals / stats.shots) * 100 : 0,
+          pass_pct: stats.pass_attempted > 0 ? (stats.pass_completed / stats.pass_attempted) * 100 : 0,
+          faceoff_pct: stats.faceoffs_taken > 0 ? (stats.faceoffs_won / stats.faceoffs_taken) * 100 : 0,
+          save_pct: stats.total_shots_faced > 0 ? (stats.saves / stats.total_shots_faced) * 100 : 0,
+          gaa: stats.games_played > 0 ? stats.goals_against / stats.games_played : 0,
+        }))
+
+      setSeasonStatsAHL(seasonStatsArray)
+      setCareerStatsAHL(positionStatsArray)
+
+      console.log("[v0] AHL career stats processed:", { seasonStatsArray, positionStatsArray })
+    } catch (error) {
+      console.error("[v0] Error fetching AHL career stats:", error)
     }
   }
 
@@ -1327,6 +2396,9 @@ export default function PlayerDetailPage() {
 
   // Sort matches by date (newest first)
   const sortedMatches = [...matches].sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime())
+  const sortedMatchesAHL = [...matchesAHL].sort(
+    (a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime(),
+  )
 
   // Calculate last 5 games trend
   const last5Games = sortedMatches.slice(0, 5)
@@ -1348,7 +2420,9 @@ export default function PlayerDetailPage() {
             return pos
           })
           .join(" / ")
-      : player.users?.primary_position || "Unknown"
+      : seasonRegistration?.primary_position
+        ? `${seasonRegistration.primary_position}${seasonRegistration.secondary_position ? ` / ${seasonRegistration.secondary_position}` : ""}`
+        : "Unknown"
 
   // Helper function to format position names
   const formatPositionName = (position: string) => {
@@ -1368,6 +2442,8 @@ export default function PlayerDetailPage() {
     }
     return positionMap[position] || position
   }
+
+  const playerId = player?.id
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -1469,229 +2545,475 @@ export default function PlayerDetailPage() {
           </TabsList>
 
           <TabsContent value="stats">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Season Statistics</CardTitle>
-                  <CardDescription>
-                    Overall performance metrics for {currentSeason?.name || "Current Season"}
-                    {positionsPlayed.length > 1 && (
-                      <span className="block text-xs mt-1 text-blue-600">
-                        Combined stats from positions: {positionDisplay}
-                      </span>
-                    )}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.games_played || 0}</div>
-                        <div className="text-sm text-muted-foreground">Games Played</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{(stats.goals || 0) + (stats.assists || 0)}</div>
-                        <div className="text-sm text-muted-foreground">Total Points</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.goals || 0}</div>
-                        <div className="text-sm text-muted-foreground">Goals</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.assists || 0}</div>
-                        <div className="text-sm text-muted-foreground">Assists</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{pointsPerGame.toFixed(2)}</div>
-                        <div className="text-sm text-muted-foreground">Points Per Game</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">
-                          {stats.plus_minus > 0 ? `+${stats.plus_minus}` : stats.plus_minus || 0}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Plus/Minus</div>
-                      </div>
-                    </div>
+            <Tabs
+              value={statsLeague}
+              onValueChange={(value) => setStatsLeague(value as "nhl" | "ahl")}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="nhl">NHL Statistics</TabsTrigger>
+                <TabsTrigger value="ahl">AHL Statistics</TabsTrigger>
+              </TabsList>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.shots || 0}</div>
-                        <div className="text-sm text-muted-foreground">Shots</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{(stats.shooting_pct || 0).toFixed(1)}%</div>
-                        <div className="text-sm text-muted-foreground">Shooting %</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.ppg || 0}</div>
-                        <div className="text-sm text-muted-foreground">Power Play Goals</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.shg || 0}</div>
-                        <div className="text-sm text-muted-foreground">Shorthanded Goals</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.gwg || 0}</div>
-                        <div className="text-sm text-muted-foreground">Game-Winning Goals</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.pim || 0}</div>
-                        <div className="text-sm text-muted-foreground">Penalty Minutes</div>
-                      </div>
-                    </div>
-
-                    {/* Record */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-green-600">{stats.wins || 0}</div>
-                        <div className="text-sm text-muted-foreground">Wins</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-red-600">{stats.losses || 0}</div>
-                        <div className="text-sm text-muted-foreground">Losses</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-yellow-600">{stats.otl || 0}</div>
-                        <div className="text-sm text-muted-foreground">OT Losses</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Advanced Statistics</CardTitle>
-                  <CardDescription>Detailed performance metrics</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.hits || 0}</div>
-                        <div className="text-sm text-muted-foreground">Hits</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.takeaways || 0}</div>
-                        <div className="text-sm text-muted-foreground">Takeaways</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.giveaways || 0}</div>
-                        <div className="text-sm text-muted-foreground">Giveaways</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{(stats.faceoff_pct || 0).toFixed(1)}%</div>
-                        <div className="text-sm text-muted-foreground">Faceoff Win %</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{(stats.pass_pct || 0).toFixed(1)}%</div>
-                        <div className="text-sm text-muted-foreground">Pass Completion %</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">
-                          {((stats.takeaways || 0) - (stats.giveaways || 0)).toFixed(0)}
-                        </div>
-                        <div className="text-sm text-muted-foreground">Takeaway Diff</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.blocks || 0}</div>
-                        <div className="text-sm text-muted-foreground">Blocks</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.interceptions || 0}</div>
-                        <div className="text-sm text-muted-foreground">Interceptions</div>
-                      </div>
-                    </div>
-
-                    {/* Faceoff Details */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.faceoffs_won || 0}</div>
-                        <div className="text-sm text-muted-foreground">Faceoffs Won</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.faceoffs_taken || 0}</div>
-                        <div className="text-sm text-muted-foreground">Faceoffs Taken</div>
-                      </div>
-                    </div>
-
-                    {/* Pass Details */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.pass_completed || 0}</div>
-                        <div className="text-sm text-muted-foreground">Passes Completed</div>
-                      </div>
-                      <div className="bg-muted/30 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold">{stats.pass_attempted || 0}</div>
-                        <div className="text-sm text-muted-foreground">Passes Attempted</div>
-                      </div>
-                    </div>
-
-                    {/* Goalie Stats (if applicable) */}
-                    {stats.saves > 0 && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-muted/30 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold">{stats.saves || 0}</div>
-                          <div className="text-sm text-muted-foreground">Saves</div>
-                        </div>
-                        <div className="bg-muted/30 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold">{(stats.save_pct || 0).toFixed(1)}%</div>
-                          <div className="text-sm text-muted-foreground">Save %</div>
-                        </div>
-                        <div className="bg-muted/30 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold">{stats.goals_against || 0}</div>
-                          <div className="text-sm text-muted-foreground">Goals Against</div>
-                        </div>
-                        <div className="bg-muted/30 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold">
-                            {stats.games_played > 0 ? (stats.goals_against / stats.games_played).toFixed(2) : "0.00"}
-                          </div>
-                          <div className="text-sm text-muted-foreground">GAA</div>
-                        </div>
-                        <div className="bg-muted/30 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold">{stats.total_shots_faced || 0}</div>
-                          <div className="text-sm text-muted-foreground">Shots Faced</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {last5Games.length > 0 && (
+              <TabsContent value="nhl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {aggregatedStats && aggregatedStats.games_played > 0 ? (
+                    <>
                       <Card>
-                        <CardHeader className="py-3">
-                          <CardTitle className="text-base">Recent Performance</CardTitle>
+                        <CardHeader>
+                          <CardTitle>NHL Season Statistics</CardTitle>
+                          <CardDescription>
+                            Overall performance metrics for {currentSeason?.name || "Current Season"}
+                            {positionsPlayed.length > 1 && (
+                              <span className="block text-xs mt-1 text-blue-600">
+                                Combined stats from positions: {positionDisplay}
+                              </span>
+                            )}
+                          </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="text-sm text-muted-foreground">Last {last5Games.length} Games</div>
-                              <div className="text-xl font-bold">{pointsLast5} Points</div>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.games_played || 0}</div>
+                                <div className="text-sm text-muted-foreground">Games Played</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{(stats.goals || 0) + (stats.assists || 0)}</div>
+                                <div className="text-sm text-muted-foreground">Total Points</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.goals || 0}</div>
+                                <div className="text-sm text-muted-foreground">Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.assists || 0}</div>
+                                <div className="text-sm text-muted-foreground">Assists</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{pointsPerGame.toFixed(2)}</div>
+                                <div className="text-sm text-muted-foreground">Points Per Game</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {stats.plus_minus > 0 ? `+${stats.plus_minus}` : stats.plus_minus || 0}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Plus/Minus</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="text-sm text-muted-foreground">Points Per Game</div>
-                              <div className="flex items-center">
-                                <span className="text-xl font-bold">{pointsPerGameLast5}</span>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.shots || 0}</div>
+                                <div className="text-sm text-muted-foreground">Shots</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{(stats.shooting_pct || 0).toFixed(1)}%</div>
+                                <div className="text-sm text-muted-foreground">Shooting %</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.ppg || 0}</div>
+                                <div className="text-sm text-muted-foreground">Power Play Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.shg || 0}</div>
+                                <div className="text-sm text-muted-foreground">Shorthanded Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.gwg || 0}</div>
+                                <div className="text-sm text-muted-foreground">Game-Winning Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.pim || 0}</div>
+                                <div className="text-sm text-muted-foreground">Penalty Minutes</div>
+                              </div>
+                            </div>
+
+                            {/* Record */}
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-green-600">{stats.wins || 0}</div>
+                                <div className="text-sm text-muted-foreground">Wins</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-red-600">{stats.losses || 0}</div>
+                                <div className="text-sm text-muted-foreground">Losses</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-yellow-600">{stats.otl || 0}</div>
+                                <div className="text-sm text-muted-foreground">OT Losses</div>
                               </div>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>NHL Advanced Statistics</CardTitle>
+                          <CardDescription>Detailed performance metrics</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.hits || 0}</div>
+                                <div className="text-sm text-muted-foreground">Hits</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.takeaways || 0}</div>
+                                <div className="text-sm text-muted-foreground">Takeaways</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.giveaways || 0}</div>
+                                <div className="text-sm text-muted-foreground">Giveaways</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{(stats.faceoff_pct || 0).toFixed(1)}%</div>
+                                <div className="text-sm text-muted-foreground">Faceoff Win %</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{(stats.pass_pct || 0).toFixed(1)}%</div>
+                                <div className="text-sm text-muted-foreground">Pass Completion %</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {(stats.takeaways || 0) - (stats.giveaways || 0)}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Takeaway Diff</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.blocks || 0}</div>
+                                <div className="text-sm text-muted-foreground">Blocks</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.interceptions || 0}</div>
+                                <div className="text-sm text-muted-foreground">Interceptions</div>
+                              </div>
+                            </div>
+
+                            {/* Faceoff Details */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.faceoffs_won || 0}</div>
+                                <div className="text-sm text-muted-foreground">Faceoffs Won</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.faceoffs_taken || 0}</div>
+                                <div className="text-sm text-muted-foreground">Faceoffs Taken</div>
+                              </div>
+                            </div>
+
+                            {/* Pass Details */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.pass_completed || 0}</div>
+                                <div className="text-sm text-muted-foreground">Passes Completed</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{stats.pass_attempted || 0}</div>
+                                <div className="text-sm text-muted-foreground">Passes Attempted</div>
+                              </div>
+                            </div>
+
+                            {/* Goalie Stats (if applicable) */}
+                            {stats.saves > 0 && (
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{stats.saves || 0}</div>
+                                  <div className="text-sm text-muted-foreground">Saves</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{(stats.save_pct || 0).toFixed(1)}%</div>
+                                  <div className="text-sm text-muted-foreground">Save %</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{stats.goals_against || 0}</div>
+                                  <div className="text-sm text-muted-foreground">Goals Against</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">
+                                    {stats.games_played > 0
+                                      ? (stats.goals_against / stats.games_played).toFixed(2)
+                                      : "0.00"}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">GAA</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{stats.total_shots_faced || 0}</div>
+                                  <div className="text-sm text-muted-foreground">Shots Faced</div>
+                                </div>
+                              </div>
+                            )}
+
+                            {last5Games.length > 0 && (
+                              <Card>
+                                <CardHeader className="py-3">
+                                  <CardTitle className="text-base">Recent Performance</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <div className="text-sm text-muted-foreground">
+                                        Last {last5Games.length} Games
+                                      </div>
+                                      <div className="text-xl font-bold">{pointsLast5} Points</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm text-muted-foreground">Points Per Game</div>
+                                      <div className="flex items-center">
+                                        <span className="text-xl font-bold">{pointsPerGameLast5}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-muted-foreground">
+                      No NHL statistics available for the current season.
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="ahl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {aggregatedStatsAHL && aggregatedStatsAHL.games_played > 0 ? (
+                    <>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>AHL Season Statistics</CardTitle>
+                          <CardDescription>
+                            AHL performance metrics for {currentSeasonAHL?.name || "Current Season"}
+                            {aggregatedStatsAHL.positions_played && aggregatedStatsAHL.positions_played.length > 1 && (
+                              <span className="block text-xs mt-1 text-blue-600">
+                                Combined stats from positions:{" "}
+                                {aggregatedStatsAHL.positions_played
+                                  .map((p: string) => formatPositionName(p))
+                                  .join(", ")}
+                              </span>
+                            )}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.games_played || 0}</div>
+                                <div className="text-sm text-muted-foreground">Games Played</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {(aggregatedStatsAHL.goals || 0) + (aggregatedStatsAHL.assists || 0)}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Total Points</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.goals || 0}</div>
+                                <div className="text-sm text-muted-foreground">Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.assists || 0}</div>
+                                <div className="text-sm text-muted-foreground">Assists</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {aggregatedStatsAHL.games_played > 0
+                                    ? (
+                                        ((aggregatedStatsAHL.goals || 0) + (aggregatedStatsAHL.assists || 0)) /
+                                        aggregatedStatsAHL.games_played
+                                      ).toFixed(2)
+                                    : "0.00"}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Points Per Game</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {aggregatedStatsAHL.plus_minus > 0
+                                    ? `+${aggregatedStatsAHL.plus_minus}`
+                                    : aggregatedStatsAHL.plus_minus || 0}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Plus/Minus</div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.shots || 0}</div>
+                                <div className="text-sm text-muted-foreground">Shots</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {(aggregatedStatsAHL.shooting_pct || 0).toFixed(1)}%
+                                </div>
+                                <div className="text-sm text-muted-foreground">Shooting %</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.ppg || 0}</div>
+                                <div className="text-sm text-muted-foreground">Power Play Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.shg || 0}</div>
+                                <div className="text-sm text-muted-foreground">Shorthanded Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.gwg || 0}</div>
+                                <div className="text-sm text-muted-foreground">Game-Winning Goals</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.pim || 0}</div>
+                                <div className="text-sm text-muted-foreground">Penalty Minutes</div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-green-600">{aggregatedStatsAHL.wins || 0}</div>
+                                <div className="text-sm text-muted-foreground">Wins</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-red-600">{aggregatedStatsAHL.losses || 0}</div>
+                                <div className="text-sm text-muted-foreground">Losses</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold text-yellow-600">{aggregatedStatsAHL.otl || 0}</div>
+                                <div className="text-sm text-muted-foreground">OT Losses</div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>AHL Advanced Statistics</CardTitle>
+                          <CardDescription>Detailed AHL performance metrics</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.hits || 0}</div>
+                                <div className="text-sm text-muted-foreground">Hits</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.takeaways || 0}</div>
+                                <div className="text-sm text-muted-foreground">Takeaways</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.giveaways || 0}</div>
+                                <div className="text-sm text-muted-foreground">Giveaways</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {(aggregatedStatsAHL.faceoff_pct || 0).toFixed(1)}%
+                                </div>
+                                <div className="text-sm text-muted-foreground">Faceoff Win %</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {(aggregatedStatsAHL.pass_pct || 0).toFixed(1)}%
+                                </div>
+                                <div className="text-sm text-muted-foreground">Pass Completion %</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">
+                                  {((aggregatedStatsAHL.takeaways || 0) - (aggregatedStatsAHL.giveaways || 0)).toFixed(
+                                    0,
+                                  )}
+                                </div>
+                                <div className="text-sm text-muted-foreground">Takeaway Diff</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.blocks || 0}</div>
+                                <div className="text-sm text-muted-foreground">Blocks</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.interceptions || 0}</div>
+                                <div className="text-sm text-muted-foreground">Interceptions</div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.faceoffs_won || 0}</div>
+                                <div className="text-sm text-muted-foreground">Faceoffs Won</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.faceoffs_taken || 0}</div>
+                                <div className="text-sm text-muted-foreground">Faceoffs Taken</div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.pass_completed || 0}</div>
+                                <div className="text-sm text-muted-foreground">Passes Completed</div>
+                              </div>
+                              <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                <div className="text-2xl font-bold">{aggregatedStatsAHL.pass_attempted || 0}</div>
+                                <div className="text-sm text-muted-foreground">Passes Attempted</div>
+                              </div>
+                            </div>
+
+                            {aggregatedStatsAHL.saves > 0 && (
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{aggregatedStatsAHL.saves || 0}</div>
+                                  <div className="text-sm text-muted-foreground">Saves</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">
+                                    {(aggregatedStatsAHL.save_pct || 0).toFixed(1)}%
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">Save %</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{aggregatedStatsAHL.goals_against || 0}</div>
+                                  <div className="text-sm text-muted-foreground">Goals Against</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">
+                                    {aggregatedStatsAHL.games_played > 0
+                                      ? (aggregatedStatsAHL.goals_against / aggregatedStatsAHL.games_played).toFixed(2)
+                                      : "0.00"}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">GAA</div>
+                                </div>
+                                <div className="bg-muted/30 p-4 rounded-lg text-center">
+                                  <div className="text-2xl font-bold">{aggregatedStatsAHL.total_shots_faced || 0}</div>
+                                  <div className="text-sm text-muted-foreground">Shots Faced</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  ) : (
+                    <div className="col-span-2 text-center py-12 text-muted-foreground">
+                      No AHL statistics available for the current season.
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="career">
             <div className="space-y-8">
-              {/* Season by Season Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Season by Season Statistics</CardTitle>
-                  <CardDescription>Performance breakdown by season</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {seasonStats.length > 0 ? (
+              {seasonStats.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>NHL Season by Season Statistics</CardTitle>
+                    <CardDescription>NHL performance breakdown by season</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
@@ -1721,7 +3043,7 @@ export default function PlayerDetailPage() {
                         </TableHeader>
                         <TableBody>
                           {seasonStats.map((season) => (
-                            <TableRow key={season.season_number}>
+                            <TableRow key={season.season_key || season.season_name}>
                               <TableCell className="font-medium">{season.season_name}</TableCell>
                               <TableCell className="text-center">{season.games_played}</TableCell>
                               <TableCell className="text-center">
@@ -1768,22 +3090,17 @@ export default function PlayerDetailPage() {
                         </TableBody>
                       </Table>
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No season statistics available for this player.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
 
-              {/* All-Time Stats by Position */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>All-Time Statistics by Position</CardTitle>
-                  <CardDescription>Career totals grouped by position played</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {careerStats && careerStats.length > 0 ? (
+              {careerStats && careerStats.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>NHL All-Time Statistics by Position</CardTitle>
+                    <CardDescription>NHL career totals grouped by position played</CardDescription>
+                  </CardHeader>
+                  <CardContent>
                     <div className="space-y-6">
                       {careerStats
                         .filter((pos) => pos.games_played > 0)
@@ -1849,146 +3166,456 @@ export default function PlayerDetailPage() {
                           )
                         })}
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No career statistics available for this player.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                  </CardContent>
+                </Card>
+              )}
 
-          <TabsContent value="games">
-            <Card>
-              <CardHeader>
-                <CardTitle>Game Log</CardTitle>
-                <CardDescription>Performance in recent games</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {sortedMatches.length > 0 ? (
-                  <div className="rounded-md border overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Matchup</TableHead>
-                          <TableHead className="text-center">Result</TableHead>
-                          <TableHead className="text-center">Pos</TableHead>
-                          <TableHead className="text-center">G</TableHead>
-                          <TableHead className="text-center">A</TableHead>
-                          <TableHead className="text-center">PTS</TableHead>
-                          <TableHead className="text-center">+/-</TableHead>
-                          <TableHead className="text-center">SOG</TableHead>
-                          <TableHead className="text-center">HIT</TableHead>
-                          <TableHead className="text-center">PIM</TableHead>
-                          <TableHead className="text-center">SV</TableHead>
-                          <TableHead className="text-center">GA</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {sortedMatches.map((match) => {
-                          const matchDate = new Date(match.match_date)
-                          const formattedDate = matchDate.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })
-
-                          // Determine if player won this game
-                          let isWin = false
-                          let playerTeamId = null
-
-                          // Check if player was on home or away team based on stats
-                          if (match.player_stats.position) {
-                            // We have stats, so player participated
-                            // Try to determine team from the match and player's current team
-                            if (player.team_id === match.home_team_id) {
-                              playerTeamId = match.home_team_id
-                              isWin = match.home_score > match.away_score
-                            } else if (player.team_id === match.away_team_id) {
-                              playerTeamId = match.away_team_id
-                              isWin = match.away_score > match.home_score
-                            } else {
-                              // Player might have been on a different team at the time
-                              // Default to showing the result without win/loss indication
-                              isWin = false
-                            }
-                          }
-
-                          // Format position
-                          const position = match.player_stats.position
-                          let positionDisplay = position
-                          if (position === "0") positionDisplay = "G"
-                          else if (position === "1") positionDisplay = "RD"
-                          else if (position === "2") positionDisplay = "LD"
-                          else if (position === "3") positionDisplay = "RW"
-                          else if (position === "4") positionDisplay = "LW"
-                          else if (position === "5") positionDisplay = "C"
-
-                          const isGoalie = position === "0" || position === "G"
-
-                          return (
-                            <TableRow key={match.id} className="hover:bg-muted/50 transition-colors">
-                              <TableCell>{formattedDate}</TableCell>
-                              <TableCell>
-                                <Link href={`/matches/${match.id}`} className="hover:text-primary transition-colors">
-                                  {match.home_team.name} vs {match.away_team.name}
-                                </Link>
-                              </TableCell>
+              {seasonStatsAHL.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>AHL Season by Season Statistics</CardTitle>
+                    <CardDescription>AHL performance breakdown by season</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Season</TableHead>
+                            <TableHead className="text-center">GP</TableHead>
+                            <TableHead className="text-center">W-L-OTL</TableHead>
+                            <TableHead className="text-center">G</TableHead>
+                            <TableHead className="text-center">A</TableHead>
+                            <TableHead className="text-center">PTS</TableHead>
+                            <TableHead className="text-center">+/-</TableHead>
+                            <TableHead className="text-center">PIM</TableHead>
+                            <TableHead className="text-center">S</TableHead>
+                            <TableHead className="text-center">S%</TableHead>
+                            <TableHead className="text-center">HIT</TableHead>
+                            <TableHead className="text-center">BLK</TableHead>
+                            <TableHead className="text-center">TKA</TableHead>
+                            <TableHead className="text-center">GVA</TableHead>
+                            <TableHead className="text-center">FO%</TableHead>
+                            <TableHead className="text-center">PPG</TableHead>
+                            <TableHead className="text-center">SHG</TableHead>
+                            <TableHead className="text-center">SV</TableHead>
+                            <TableHead className="text-center">GA</TableHead>
+                            <TableHead className="text-center">SV%</TableHead>
+                            <TableHead className="text-center">GAA</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {seasonStatsAHL.map((season) => (
+                            <TableRow key={season.season_key || season.season_name}>
+                              <TableCell className="font-medium">{season.season_name}</TableCell>
+                              <TableCell className="text-center">{season.games_played}</TableCell>
                               <TableCell className="text-center">
-                                <span className="text-sm font-medium">
-                                  {match.home_score}-{match.away_score}
-                                  {(match.overtime || match.has_overtime) && " (OT)"}
-                                </span>
-                                {playerTeamId && (
-                                  <div className={`text-xs ${isWin ? "text-green-600" : "text-red-600"}`}>
-                                    {isWin ? "W" : "L"}
-                                  </div>
-                                )}
+                                <span className="text-green-600">{season.wins}</span>-
+                                <span className="text-red-600">{season.losses}</span>-
+                                <span className="text-yellow-600">{season.otl}</span>
                               </TableCell>
-                              <TableCell className="text-center text-sm">{positionDisplay || "-"}</TableCell>
-                              <TableCell className="text-center font-medium">{match.player_stats.goals || 0}</TableCell>
-                              <TableCell className="text-center font-medium">
-                                {match.player_stats.assists || 0}
-                              </TableCell>
-                              <TableCell className="text-center font-bold">{match.player_stats.points || 0}</TableCell>
+                              <TableCell className="text-center">{season.goals}</TableCell>
+                              <TableCell className="text-center">{season.assists}</TableCell>
+                              <TableCell className="text-center font-bold">{season.points}</TableCell>
                               <TableCell className="text-center">
                                 <span
                                   className={
-                                    match.player_stats.plus_minus > 0
+                                    season.plus_minus > 0
                                       ? "text-green-500"
-                                      : match.player_stats.plus_minus < 0
+                                      : season.plus_minus < 0
                                         ? "text-red-500"
                                         : ""
                                   }
                                 >
-                                  {match.player_stats.plus_minus > 0
-                                    ? `+${match.player_stats.plus_minus}`
-                                    : match.player_stats.plus_minus || 0}
+                                  {season.plus_minus > 0 ? `+${season.plus_minus}` : season.plus_minus}
                                 </span>
                               </TableCell>
-                              <TableCell className="text-center">{match.player_stats.shots || 0}</TableCell>
-                              <TableCell className="text-center">{match.player_stats.hits || 0}</TableCell>
-                              <TableCell className="text-center">{match.player_stats.pim || 0}</TableCell>
+                              <TableCell className="text-center">{season.pim}</TableCell>
+                              <TableCell className="text-center">{season.shots}</TableCell>
+                              <TableCell className="text-center">{season.shooting_pct.toFixed(1)}%</TableCell>
+                              <TableCell className="text-center">{season.hits}</TableCell>
+                              <TableCell className="text-center">{season.blocks}</TableCell>
+                              <TableCell className="text-center">{season.takeaways}</TableCell>
+                              <TableCell className="text-center">{season.giveaways}</TableCell>
+                              <TableCell className="text-center">{season.faceoff_pct.toFixed(1)}%</TableCell>
+                              <TableCell className="text-center">{season.ppg}</TableCell>
+                              <TableCell className="text-center">{season.shg}</TableCell>
+                              <TableCell className="text-center">{season.saves || "-"}</TableCell>
+                              <TableCell className="text-center">{season.goals_against || "-"}</TableCell>
                               <TableCell className="text-center">
-                                {isGoalie ? match.player_stats.saves || 0 : "-"}
+                                {season.saves > 0 ? `${season.save_pct.toFixed(1)}%` : "-"}
                               </TableCell>
                               <TableCell className="text-center">
-                                {isGoalie ? match.player_stats.goals_against || 0 : "-"}
+                                {season.saves > 0 ? season.gaa.toFixed(2) : "-"}
                               </TableCell>
                             </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {careerStatsAHL && careerStatsAHL.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>AHL All-Time Statistics by Position</CardTitle>
+                    <CardDescription>AHL career totals grouped by position played</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {careerStatsAHL
+                        .filter((pos) => pos.games_played > 0)
+                        .sort((a, b) => {
+                          if (a.position === "G" || a.position === "0") return 1
+                          if (b.position === "G" || b.position === "0") return -1
+                          return b.games_played - a.games_played
+                        })
+                        .map((positionStats) => {
+                          const isGoalie = positionStats.position === "G" || positionStats.position === "0"
+
+                          return (
+                            <div key={positionStats.position} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold">{formatPositionName(positionStats.position)}</h3>
+                                <div className="text-sm text-muted-foreground">
+                                  <span className="text-green-600">{positionStats.wins}</span>-
+                                  <span className="text-red-600">{positionStats.losses}</span>-
+                                  <span className="text-yellow-600">{positionStats.otl}</span>
+                                </div>
+                              </div>
+
+                              {isGoalie ? (
+                                <div className="text-sm">
+                                  <span className="font-medium">{positionStats.games_played} GP</span> •
+                                  <span className="ml-2">{positionStats.total_shots_faced} Shots</span> •
+                                  <span className="ml-2">{positionStats.saves} Saves</span> •
+                                  <span className="ml-2">{positionStats.goals_against} Goals Against</span> •
+                                  <span className="ml-2">{positionStats.gaa.toFixed(2)} GAA</span> •
+                                  <span className="ml-2">{positionStats.save_pct.toFixed(1)}% SV%</span>
+                                  {positionStats.shutouts > 0 && (
+                                    <span className="ml-2">{positionStats.shutouts} Shutouts</span>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-sm">
+                                  <span className="font-medium">{positionStats.games_played} GP</span> •
+                                  <span className="ml-2">{positionStats.goals}G</span> •
+                                  <span className="ml-2">{positionStats.assists}A</span> •
+                                  <span className="ml-2 font-medium">{positionStats.points}PT</span> •
+                                  <span
+                                    className={`ml-2 ${positionStats.plus_minus > 0 ? "text-green-500" : positionStats.plus_minus < 0 ? "text-red-500" : ""}`}
+                                  >
+                                    {positionStats.plus_minus > 0
+                                      ? `+${positionStats.plus_minus}`
+                                      : positionStats.plus_minus}
+                                  </span>{" "}
+                                  •<span className="ml-2">{positionStats.hits} Hits</span> •
+                                  <span className="ml-2">{positionStats.giveaways} GVA</span> •
+                                  <span className="ml-2">{positionStats.takeaways} TKA</span> •
+                                  <span className="ml-2">{positionStats.interceptions} INT</span> •
+                                  <span className="ml-2">{positionStats.pass_completed} Pass Completed</span> •
+                                  <span className="ml-2">{positionStats.pass_attempted} Pass Attempted</span> •
+                                  <span className="ml-2">{positionStats.pass_pct.toFixed(1)}% Pass%</span>
+                                  {positionStats.ppg > 0 && <span className="ml-2">{positionStats.ppg} PPG</span>}
+                                  {positionStats.faceoffs_taken > 0 && (
+                                    <span className="ml-2">{positionStats.faceoff_pct.toFixed(1)}% FO%</span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           )
                         })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No game history available for this player.
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="games">
+            <Tabs
+              value={gameLogLeague}
+              onValueChange={(value) => setGameLogLeague(value as "nhl" | "ahl")}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="nhl">NHL Game Log</TabsTrigger>
+                <TabsTrigger value="ahl">AHL Game Log</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="nhl">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>NHL Game Log</CardTitle>
+                    <CardDescription>Performance in recent NHL games</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {sortedMatches.length > 0 ? (
+                      <div className="rounded-md border overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Matchup</TableHead>
+                              <TableHead className="text-center">Result</TableHead>
+                              <TableHead className="text-center">Pos</TableHead>
+                              <TableHead className="text-center">G</TableHead>
+                              <TableHead className="text-center">A</TableHead>
+                              <TableHead className="text-center">PTS</TableHead>
+                              <TableHead className="text-center">+/-</TableHead>
+                              <TableHead className="text-center">SOG</TableHead>
+                              <TableHead className="text-center">HIT</TableHead>
+                              <TableHead className="text-center">PIM</TableHead>
+                              <TableHead className="text-center">SV</TableHead>
+                              <TableHead className="text-center">GA</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {sortedMatches.map((match) => {
+                              const matchDate = new Date(match.match_date)
+                              const formattedDate = matchDate.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })
+
+                              // Determine if player won this game
+                              let isWin = false
+                              let playerTeamId = null
+
+                              // Check if player was on home or away team based on stats
+                              if (match.player_stats.position) {
+                                // We have stats, so player participated
+                                // Try to determine team from the match and player's current team
+                                if (player.team_id === match.home_team_id) {
+                                  playerTeamId = match.home_team_id
+                                  isWin = match.home_score > match.away_score
+                                } else if (player.team_id === match.away_team_id) {
+                                  playerTeamId = match.away_team_id
+                                  isWin = match.away_score > match.home_score
+                                } else {
+                                  // Player might have been on a different team at the time
+                                  // Default to showing the result without win/loss indication
+                                  isWin = false
+                                }
+                              }
+
+                              // Format position
+                              const position = match.player_stats.position
+                              let positionDisplay = position
+                              if (position === "0") positionDisplay = "G"
+                              else if (position === "1") positionDisplay = "RD"
+                              else if (position === "2") positionDisplay = "LD"
+                              else if (position === "3") positionDisplay = "RW"
+                              else if (position === "4") positionDisplay = "LW"
+                              else if (position === "5") positionDisplay = "C"
+
+                              const isGoalie = position === "0" || position === "G"
+
+                              return (
+                                <TableRow key={match.id} className="hover:bg-muted/50 transition-colors">
+                                  <TableCell>{formattedDate}</TableCell>
+                                  <TableCell>
+                                    <Link
+                                      href={`/matches/${match.id}`}
+                                      className="hover:text-primary transition-colors"
+                                    >
+                                      {match.home_team.name} vs {match.away_team.name}
+                                    </Link>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <span className="text-sm font-medium">
+                                      {match.home_score}-{match.away_score}
+                                      {(match.overtime || match.has_overtime) && " (OT)"}
+                                    </span>
+                                    {playerTeamId && (
+                                      <div className={`text-xs ${isWin ? "text-green-600" : "text-red-600"}`}>
+                                        {isWin ? "W" : "L"}
+                                      </div>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-center text-sm">{positionDisplay || "-"}</TableCell>
+                                  <TableCell className="text-center font-medium">
+                                    {match.player_stats.goals || 0}
+                                  </TableCell>
+                                  <TableCell className="text-center font-medium">
+                                    {match.player_stats.assists || 0}
+                                  </TableCell>
+                                  <TableCell className="text-center font-bold">
+                                    {match.player_stats.points || 0}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <span
+                                      className={
+                                        match.player_stats.plus_minus > 0
+                                          ? "text-green-500"
+                                          : match.player_stats.plus_minus < 0
+                                            ? "text-red-500"
+                                            : ""
+                                      }
+                                    >
+                                      {match.player_stats.plus_minus > 0
+                                        ? `+${match.player_stats.plus_minus}`
+                                        : match.player_stats.plus_minus || 0}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-center">{match.player_stats.shots || 0}</TableCell>
+                                  <TableCell className="text-center">{match.player_stats.hits || 0}</TableCell>
+                                  <TableCell className="text-center">{match.player_stats.pim || 0}</TableCell>
+                                  <TableCell className="text-center">
+                                    {isGoalie ? match.player_stats.saves || 0 : "-"}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    {isGoalie ? match.player_stats.goals_against || 0 : "-"}
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No NHL game history available for this player.
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="ahl">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>AHL Game Log</CardTitle>
+                    <CardDescription>Performance in recent AHL games</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {sortedMatchesAHL.length > 0 ? (
+                      <div className="rounded-md border overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Matchup</TableHead>
+                              <TableHead className="text-center">Result</TableHead>
+                              <TableHead className="text-center">Pos</TableHead>
+                              <TableHead className="text-center">G</TableHead>
+                              <TableHead className="text-center">A</TableHead>
+                              <TableHead className="text-center">PTS</TableHead>
+                              <TableHead className="text-center">+/-</TableHead>
+                              <TableHead className="text-center">SOG</TableHead>
+                              <TableHead className="text-center">HIT</TableHead>
+                              <TableHead className="text-center">PIM</TableHead>
+                              <TableHead className="text-center">SV</TableHead>
+                              <TableHead className="text-center">GA</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {sortedMatchesAHL.map((match) => {
+                              const matchDate = new Date(match.match_date)
+                              const formattedDate = matchDate.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })
+
+                              let isWin = false
+                              let playerTeamId = null
+
+                              if (match.player_stats.position) {
+                                if (player.team_id === match.home_team_id) {
+                                  playerTeamId = match.home_team_id
+                                  isWin = match.home_score > match.away_score
+                                } else if (player.team_id === match.away_team_id) {
+                                  playerTeamId = match.away_team_id
+                                  isWin = match.away_score > match.home_score
+                                } else {
+                                  isWin = false
+                                }
+                              }
+
+                              const position = match.player_stats.position
+                              let positionDisplay = position
+                              if (position === "0") positionDisplay = "G"
+                              else if (position === "1") positionDisplay = "RD"
+                              else if (position === "2") positionDisplay = "LD"
+                              else if (position === "3") positionDisplay = "RW"
+                              else if (position === "4") positionDisplay = "LW"
+                              else if (position === "5") positionDisplay = "C"
+
+                              const isGoalie = position === "0" || position === "G"
+
+                              return (
+                                <TableRow key={match.id} className="hover:bg-muted/50 transition-colors">
+                                  <TableCell>{formattedDate}</TableCell>
+                                  <TableCell>
+                                    <Link
+                                      href={`/ahl/matches/${match.id}`}
+                                      className="hover:text-primary transition-colors"
+                                    >
+                                      {match.home_team.name} vs {match.away_team.name}
+                                    </Link>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <span className="text-sm font-medium">
+                                      {match.home_score}-{match.away_score}
+                                      {(match.overtime || match.has_overtime) && " (OT)"}
+                                    </span>
+                                    {playerTeamId && (
+                                      <div className={`text-xs ${isWin ? "text-green-600" : "text-red-600"}`}>
+                                        {isWin ? "W" : "L"}
+                                      </div>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-center text-sm">{positionDisplay || "-"}</TableCell>
+                                  <TableCell className="text-center font-medium">
+                                    {match.player_stats.goals || 0}
+                                  </TableCell>
+                                  <TableCell className="text-center font-medium">
+                                    {match.player_stats.assists || 0}
+                                  </TableCell>
+                                  <TableCell className="text-center font-bold">
+                                    {match.player_stats.points || 0}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <span
+                                      className={
+                                        match.player_stats.plus_minus > 0
+                                          ? "text-green-500"
+                                          : match.player_stats.plus_minus < 0
+                                            ? "text-red-500"
+                                            : ""
+                                      }
+                                    >
+                                      {match.player_stats.plus_minus > 0
+                                        ? `+${match.player_stats.plus_minus}`
+                                        : match.player_stats.plus_minus || 0}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-center">{match.player_stats.shots || 0}</TableCell>
+                                  <TableCell className="text-center">{match.player_stats.hits || 0}</TableCell>
+                                  <TableCell className="text-center">{match.player_stats.pim || 0}</TableCell>
+                                  <TableCell className="text-center">
+                                    {isGoalie ? match.player_stats.saves || 0 : "-"}
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    {isGoalie ? match.player_stats.goals_against || 0 : "-"}
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No AHL game history available for this player.
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="awards">
@@ -2028,12 +3655,12 @@ export default function PlayerDetailPage() {
                         </div>
                         <div className="space-y-1">
                           <div className="text-sm text-muted-foreground">Primary Position</div>
-                          <div className="font-medium">{player.users?.primary_position}</div>
+                          <div className="font-medium">{seasonRegistration?.primary_position || "Not Set"}</div>
                         </div>
-                        {player.users?.secondary_position && (
+                        {seasonRegistration?.secondary_position && (
                           <div className="space-y-1">
                             <div className="text-sm text-muted-foreground">Secondary Position</div>
-                            <div className="font-medium">{player.users?.secondary_position}</div>
+                            <div className="font-medium">{seasonRegistration.secondary_position}</div>
                           </div>
                         )}
                         {positionsPlayed.length > 0 && (
@@ -2105,7 +3732,7 @@ export default function PlayerDetailPage() {
                         </div>
                         <div className="space-y-1">
                           <div className="text-sm text-muted-foreground">Season</div>
-                          <div className="font-medium">{currentSeason?.name || "Current Season"}</div>
+                          <div className="font-medium">{currentSeasonAHL?.name || "Current Season"}</div>
                         </div>
                       </div>
                     </div>
