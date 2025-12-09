@@ -166,11 +166,7 @@ const TeamManagePage = () => {
 
       const result = await makeAuthenticatedRequest("/api/waivers", {
         method: "POST",
-        body: JSON.stringify({ 
-          action: 'waive',
-          playerId,
-          teamId: teamData.id
-        }),
+        body: JSON.stringify({ playerId }),
       })
 
       if (result.success) {
