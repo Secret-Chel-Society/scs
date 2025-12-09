@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server"
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { createRouteHandlerClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 
 export async function GET() {
   try {
-    console.log("Admin check request received")
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
@@ -13,10 +12,7 @@ export async function GET() {
       data: { session },
     } = await supabase.auth.getSession()
 
-    console.log("Admin check session:", { hasSession: !!session, userId: session?.user?.id })
-
     if (!session) {
-      console.log("No session found in admin check, returning 401")
       return NextResponse.json(
         {
           authenticated: false,
@@ -26,27 +22,25 @@ export async function GET() {
       )
     }
 
-    // Check for all user roles
-    const { data: userRolesData, error: userRolesError } = await supabase
+    // Check for Admin and Site Owner roles
+    const { data: adminRoleData, error: adminRoleError } = await supabase
       .from("user_roles")
-      .select("role")
+      .select("*")
       .eq("user_id", session.user.id)
+      .in("role", ["Admin", "Site Owner"])
 
-    if (userRolesError) {
+    if (adminRoleError) {
       return NextResponse.json(
         {
           authenticated: true,
           isAdmin: false,
-          role: null,
-          error: userRolesError.message,
+          error: adminRoleError.message,
         },
         { status: 500 },
       )
     }
 
-    const roles = userRolesData?.map(r => r.role) || []
-    const isAdmin = roles.includes("Admin")
-    const primaryRole = roles.length > 0 ? roles[0] : null
+    const isAdmin = adminRoleData && adminRoleData.length > 0
 
     // Get user details
     const { data: userData, error: userError } = await supabase
@@ -69,10 +63,9 @@ export async function GET() {
     return NextResponse.json({
       authenticated: true,
       isAdmin,
-      role: primaryRole,
-      roles: roles,
       userId: session.user.id,
       email: userData?.email,
+      adminRoles: adminRoleData,
     })
   } catch (error: any) {
     console.error("Error checking admin status:", error)
