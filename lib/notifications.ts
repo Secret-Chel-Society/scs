@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerComponentClient } from "@/lib/supabase/server"
 
 export async function sendNotification({
   userId,
@@ -12,7 +11,7 @@ export async function sendNotification({
   message: string
   link?: string
 }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerComponentClient()
 
   const { error } = await supabase.from("notifications").insert({
     user_id: userId,
@@ -37,7 +36,7 @@ export async function sendNotificationToTeam({
   link?: string
   excludeUserId?: string
 }) {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerComponentClient()
 
   // Get all players on the team
   const { data: players, error: playersError } = await supabase
