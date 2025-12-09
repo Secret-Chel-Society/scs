@@ -2,24 +2,20 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ProfilePage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const { supabase, session, isLoading: sessionLoading } = useSupabase()
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function checkUserAndRedirect() {
-      try {
-        // Get the current session
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
+      if (sessionLoading) return
 
+      try {
         if (!session) {
-          // If no session, redirect to login
           router.push("/login")
           return
         }
@@ -35,10 +31,10 @@ export default function ProfilePage() {
     }
 
     checkUserAndRedirect()
-  }, [router, supabase])
+  }, [router, session, sessionLoading])
 
   // Show loading state while checking session and redirecting
-  if (isLoading) {
+  if (isLoading || sessionLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
