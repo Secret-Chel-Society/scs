@@ -2,12 +2,14 @@
 "use client"
 
 import type React from "react"
-
-import { createClient as createBrowserClient } from "@supabase/supabase-js"
+import {
+  createClient as createBrowserClient,
+  type SupabaseClient,
+  type Session,
+  type User,
+} from "@supabase/supabase-js"
 import { createContext, useContext, useEffect, useState } from "react"
-import type { SupabaseClient } from "@supabase/supabase-js"
 import type { Database } from "../types/database"
-import type { Session } from "@supabase/supabase-js"
 import { createCustomClient } from "./custom-client"
 
 type SupabaseContext = {
@@ -83,7 +85,11 @@ export default function SupabaseProvider({
     }
   }, [supabase])
 
-  return <Context.Provider value={{ supabase, session, isLoading, refreshSession }}>{children}</Context.Provider>
+  return (
+    <Context.Provider value={{ supabase, session, isLoading, refreshSession }}>
+      {children}
+    </Context.Provider>
+  )
 }
 
 export const useSupabase = () => {
@@ -94,22 +100,15 @@ export const useSupabase = () => {
   return context
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 // Hook: useUser – returns an object with { user } for easy destructuring
-// ─────────────────────────────────────────────────────────────────────────────
-import type { User } from "@supabase/supabase-js"
-
-/**
- * useUser
- *
- * Returns the authenticated Supabase user (or null) wrapped in an object
- * so callers can safely destructure:  const { user } = useUser()
- */
+// ─────────────────────────────────────────────────────────────
 export function useUser(): { user: User | null } {
   const { session } = useSupabase()
   return { user: session?.user ?? null }
 }
 
+// Server-side / generic client factory using cookies (if provided)
 export function createClient(cookieStore: any = null) {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -122,4 +121,12 @@ export function createClient(cookieStore: any = null) {
       },
     },
   )
+}
+
+// ─────────────────────────────────────────────────────────────
+// Shim: createClientComponentClient – for old code that expects it
+// ─────────────────────────────────────────────────────────────
+export function createClientComponentClient(): SupabaseClient<Database> {
+  // Uses the same custom browser client you already use in the provider
+  return createCustomClient()
 }
