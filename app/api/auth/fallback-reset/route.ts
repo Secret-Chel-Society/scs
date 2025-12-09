@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createRouteHandlerClient } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   try {
@@ -11,12 +11,11 @@ export async function POST(request: Request) {
 
     console.log("Processing fallback password reset for:", email)
 
-    // Create a Supabase client
-    const supabase = createClientComponentClient()
+    const supabase = await createRouteHandlerClient()
 
     // Use Supabase's built-in password reset functionality
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://www.secretchelsociety.com/reset-password",
+      redirectTo: "https://majorgaminghockeyleague.com/reset-password",
     })
 
     if (error) {
