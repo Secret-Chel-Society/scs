@@ -1,9 +1,9 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { createRouteHandlerClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 import type { NextRequest } from "next/server"
-import type { Database } from "@/lib/database.types"
+import type { Database } from "@/lib/types/database"
 
 export const dynamic = "force-dynamic"
 
