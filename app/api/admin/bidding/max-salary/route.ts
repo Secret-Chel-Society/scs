@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
 
   try {
-    console.log("=== MAX SALARY API ROUTE START ===")
+    console.log("=== MIN SALARY API ROUTE START ===")
 
     // Try multiple ways to get the session
     let session = null
@@ -41,40 +41,40 @@ export async function POST(request: Request) {
     if (!session) {
       console.log("🚨 TEMPORARY BYPASS ACTIVATED - ALLOWING ACCESS FOR TESTING")
 
-      const { maxSalary } = await request.json()
+      const { minSalary } = await request.json()
 
-      if (!maxSalary || maxSalary < 1000000) {
-        return NextResponse.json({ error: "Maximum salary must be at least $1,000,000" }, { status: 400 })
+      if (!minSalary || minSalary < 500000) {
+        return NextResponse.json({ error: "Minimum salary must be at least $500,000" }, { status: 400 })
       }
 
       const { error } = await supabase
         .from("system_settings")
-        .upsert({ key: "max_salary", value: maxSalary }, { onConflict: "key" })
+        .upsert({ key: "min_salary", value: minSalary }, { onConflict: "key" })
 
       if (error) {
         console.error("Database error:", error)
         throw error
       }
 
-      console.log(`✅ Max salary updated to $${maxSalary} via BYPASS`)
+      console.log(`✅ Min salary updated to $${minSalary} via BYPASS`)
 
       return NextResponse.json({
         success: true,
-        maxSalary,
+        minSalary,
         method: "bypass",
       })
     }
 
     // If session found, do normal auth checks here...
-    const { maxSalary } = await request.json()
+    const { minSalary } = await request.json()
 
-    if (!maxSalary || maxSalary < 1000000) {
-      return NextResponse.json({ error: "Maximum salary must be at least $1,000,000" }, { status: 400 })
+    if (!minSalary || minSalary < 500000) {
+      return NextResponse.json({ error: "Minimum salary must be at least $500,000" }, { status: 400 })
     }
 
     const { error } = await supabase
       .from("system_settings")
-      .upsert({ key: "max_salary", value: maxSalary }, { onConflict: "key" })
+      .upsert({ key: "min_salary", value: minSalary }, { onConflict: "key" })
 
     if (error) {
       throw error
@@ -82,10 +82,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      maxSalary,
+      minSalary,
     })
   } catch (error: any) {
-    console.error("❌ Error in max salary API:", error)
+    console.error("❌ Error in min salary API:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
