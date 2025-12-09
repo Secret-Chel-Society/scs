@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 
 interface PlayerAvatarUploaderProps {
   currentAvatarUrl: string | null
@@ -26,7 +27,7 @@ export function PlayerAvatarUploader({
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
-  const supabase = createClientComponentClient()
+  const { supabase } = useSupabase()
 
   const handleAvatarClick = () => {
     if (fileInputRef.current) {
@@ -159,7 +160,7 @@ export function PlayerAvatarUploader({
         size="sm"
         onClick={handleAvatarClick}
         disabled={isUploading}
-        className="w-full max-w-xs"
+        className="w-full max-w-xs bg-transparent"
       >
         {isUploading ? (
           <>
