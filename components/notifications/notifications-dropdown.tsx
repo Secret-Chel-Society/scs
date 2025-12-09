@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Bell } from "lucide-react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,7 +22,7 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null)
-  const supabase = createClientComponentClient<Database>()
+  const { supabase } = useSupabase()
   const { toast } = useToast()
 
   // Function to fetch notifications
@@ -63,7 +63,7 @@ export function NotificationsDropdown({ userId }: { userId?: string }) {
     fetchNotifications()
 
     // Set up polling instead of WebSocket
-    const interval = setInterval(fetchNotifications, 900000) // Poll every 15 minutes
+    const interval = setInterval(fetchNotifications, 30000) // Poll every 30 seconds
     setPollingInterval(interval)
 
     return () => {
