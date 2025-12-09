@@ -50,7 +50,7 @@ interface Team {
   logo_url: string | null
 
   // season-specific
-  team_season_id: string // team_seasons.id
+  team_seasons.id: string // team_seasons.id
   season_id: string // UUID from team_seasons.season_id
   is_active: boolean
 
@@ -509,7 +509,7 @@ export default function AdminTeamsPage() {
             name: row.teams.name,
             logo_url: row.teams.logo_url,
 
-            team_season_id: row.id,
+            team_seasons.id: row.id,
             season_id: row.season_id,
             is_active: row.is_active ?? true,
 
@@ -712,7 +712,7 @@ export default function AdminTeamsPage() {
             is_active: teamForm.is_active,
             season_id: effectiveSeasonId,
           })
-          .eq("id", editingTeam.team_season_id)
+          .eq("id", editingTeam.team_seasons.id)
 
         if (tsError) throw tsError
 
