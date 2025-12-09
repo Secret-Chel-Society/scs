@@ -1,9 +1,8 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerComponentClient } from "@/lib/supabase/server"
 
 export async function PositionCounts() {
   try {
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = await createServerComponentClient()
 
     // Define the positions we want to display
     const positions = ["Center", "Right Wing", "Left Wing", "Left Defense", "Right Defense", "Goalie"]
