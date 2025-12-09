@@ -1,58 +1,41 @@
 "use client"
 
 import Link from "next/link"
-import { useSupabase } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
-import { 
-  MessageSquare, 
-  Users, 
-  Trophy, 
-  BarChart3, 
-  Shield, 
-  HelpCircle, 
-  FileText, 
-  Mail, 
-  Settings, 
-  User, 
-  LogIn, 
+import { useSupabase } from "@/lib/supabase/client"
+import {
+  Trophy,
+  Shield,
+  User,
   ExternalLink,
   Heart,
   Star,
   Zap,
-  Target
+  Target,
 } from "lucide-react"
 
 export default function Footer() {
+  const { supabase, session, isLoading } = useSupabase()
   const [user, setUser] = useState<any>(null)
-  const supabase = createClientComponentClient()
   const currentYear = new Date().getFullYear()
 
+  // Keep a simple sync between context session and local `user` state
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
-    }
-
-    getUser()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    if (!isLoading) {
       setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    }
+  }, [session, isLoading])
 
   return (
     <footer className="relative bg-gradient-to-br from-hockey-silver-900 via-rink-blue-900 to-ice-blue-900 text-white overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       {/* Main Footer Content */}
@@ -60,7 +43,6 @@ export default function Footer() {
         {/* Top Section */}
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            
             {/* Secret Chel Society Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
@@ -69,14 +51,15 @@ export default function Footer() {
                 </div>
                 <div>
                   <h3 className="font-bold text-2xl text-white">Secret Chel Society</h3>
-                  <div className="h-1 w-16 bg-gradient-to-r from-ice-blue-400 to-rink-blue-500 rounded-full"></div>
+                  <div className="h-1 w-16 bg-gradient-to-r from-ice-blue-400 to-rink-blue-500 rounded-full" />
                 </div>
               </div>
-              
+
               <p className="text-hockey-silver-300 leading-relaxed mb-6">
-                The premier competitive NHL 26 league for elite console players across North America, powered by Midnight Studios.
+                The premier competitive NHL 26 league for elite console players across
+                North America, powered by Midnight Studios.
               </p>
-              
+
               <Link
                 href="https://discord.gg/secretchelsociety"
                 target="_blank"
@@ -101,50 +84,50 @@ export default function Footer() {
                 </div>
                 <h3 className="font-bold text-xl text-white">Quick Links</h3>
               </div>
-              
+
               <ul className="space-y-3">
                 <li>
-                  <Link 
-                    href="/" 
+                  <Link
+                    href="/"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Home
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/standings" 
+                  <Link
+                    href="/standings"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Standings
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/statistics" 
+                  <Link
+                    href="/statistics"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Statistics
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/teams" 
+                  <Link
+                    href="/teams"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Teams
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/matches" 
+                  <Link
+                    href="/matches"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-ice-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Matches
                   </Link>
                 </li>
@@ -159,51 +142,51 @@ export default function Footer() {
                 </div>
                 <h3 className="font-bold text-xl text-white">Resources</h3>
               </div>
-              
+
               <ul className="space-y-3">
                 <li>
-                  <Link 
-                    href="/rules" 
+                  <Link
+                    href="/rules"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Rules
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/faq" 
+                  <Link
+                    href="/faq"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/privacy" 
+                  <Link
+                    href="/privacy"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/disclaimer" 
+                  <Link
+                    href="/disclaimer"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                     Disclaimer
                   </Link>
                 </li>
                 <li>
-                  <Link 
-                    href="/contact" 
+                  <Link
+                    href="/about"
                     className="inline-flex items-center gap-2 text-hockey-silver-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                   >
-                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
-                    Contact Us
+                    <div className="w-1 h-1 bg-rink-blue-400 rounded-full group-hover:bg-white transition-colors duration-200" />
+                    About
                   </Link>
                 </li>
               </ul>
@@ -217,7 +200,7 @@ export default function Footer() {
                 </div>
                 <h3 className="font-bold text-xl text-white">User Panel</h3>
               </div>
-              
+
               {user ? (
                 <div className="space-y-4">
                   {/* User Info Card */}
@@ -225,12 +208,12 @@ export default function Footer() {
                     <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                         <span className="text-white font-bold text-sm">
-                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                          {user.email?.charAt(0).toUpperCase() || "U"}
                         </span>
                       </div>
                       <div>
                         <p className="text-white font-medium text-sm">
-                          {user.email?.split('@')[0] || 'User'}
+                          {user.email?.split("@")[0] || "User"}
                         </p>
                         <p className="text-blue-200 text-xs">Active Member</p>
                       </div>
@@ -243,7 +226,9 @@ export default function Footer() {
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-300">Member Since</span>
                         <span className="text-slate-300">
-                          {new Date(user.created_at).toLocaleDateString()}
+                          {user.created_at
+                            ? new Date(user.created_at).toLocaleDateString()
+                            : "—"}
                         </span>
                       </div>
                     </div>
@@ -251,23 +236,25 @@ export default function Footer() {
 
                   {/* Quick Actions */}
                   <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-slate-300 mb-3">Quick Actions</h4>
+                    <h4 className="text-sm font-semibold text-slate-300 mb-3">
+                      Quick Actions
+                    </h4>
                     <ul className="space-y-2">
                       <li>
-                        <Link 
-                          href="/management" 
+                        <Link
+                          href="/management"
                           className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                         >
-                          <div className="w-1 h-1 bg-emerald-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                          <div className="w-1 h-1 bg-emerald-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                           Management
                         </Link>
                       </li>
                       <li>
-                        <Link 
-                          href="/admin" 
+                        <Link
+                          href="/admin"
                           className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200 hover:translate-x-1 group"
                         >
-                          <div className="w-1 h-1 bg-red-400 rounded-full group-hover:bg-white transition-colors duration-200"></div>
+                          <div className="w-1 h-1 bg-red-400 rounded-full group-hover:bg-white transition-colors duration-200" />
                           Admin Panel
                         </Link>
                       </li>
@@ -278,16 +265,18 @@ export default function Footer() {
                 <div className="space-y-4">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 text-center">
                     <User className="h-8 w-8 text-slate-400 mx-auto mb-3" />
-                    <p className="text-slate-300 text-sm mb-4">Join the community to access all features</p>
+                    <p className="text-slate-300 text-sm mb-4">
+                      Join the community to access all features
+                    </p>
                     <div className="space-y-2">
-                      <Link 
-                        href="/login" 
+                      <Link
+                        href="/login"
                         className="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-center py-2 px-4 rounded-lg transition-all duration-200 hover:scale-105"
                       >
                         Sign In
                       </Link>
-                      <Link 
-                        href="/register" 
+                      <Link
+                        href="/register"
                         className="block w-full border border-white/30 hover:border-white/50 text-white text-center py-2 px-4 rounded-lg transition-all duration-200 hover:bg-white/10"
                       >
                         Register
@@ -310,11 +299,12 @@ export default function Footer() {
                 <br className="hidden sm:inline" />
                 In official partnership with Midnight Studios.
                 <br className="hidden sm:inline" />
-                This site is an independent entity and is not affiliated with or endorsed by EA Sports.
+                This site is an independent entity and is not affiliated with or
+                endorsed by EA Sports.
               </p>
-              
+
               {/* Additional Info */}
-              <div className="flex items-center justify-center gap-6 text-sm text-hockey-silver-500">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-hockey-silver-500">
                 <div className="flex items-center gap-2">
                   <Heart className="h-4 w-4 text-goal-red-400" />
                   <span>Made with passion for hockey</span>
