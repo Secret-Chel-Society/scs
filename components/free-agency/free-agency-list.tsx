@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { BidPlayerModal as BidModal } from "@/components/management/bid-player-modal"
 import { BidHistoryModal } from "@/components/free-agency/bid-history-modal"
 import { Button } from "@/components/ui/button"
@@ -58,7 +58,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
   const [historyPlayer, setHistoryPlayer] = useState<any>(null)
   const [userTeam, setUserTeam] = useState<any>(null)
   const [now, setNow] = useState(new Date())
-  const supabase = createClientComponentClient()
+  const { supabase } = useSupabase()
   const { toast } = useToast()
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
@@ -95,12 +95,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     setMounted(true)
   }, [])
 
-  // Update current time every 15 minutes
+  // Update current time every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(new Date())
       checkExpiredBids()
-    }, 900000)
+    }, 30000)
 
     return () => clearInterval(interval)
   }, [playerBids])
@@ -322,7 +322,16 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     try {
       const { data: players, error: playersError } = await supabase
         .from("players")
-        .select("salary, users(primary_position)")
+        .select(`
+          salary,
+          users!inner(
+            id,
+            season_registrations!inner(
+              primary_position,
+              secondary_position
+            )
+          )
+        `)
         .eq("team_id", userTeam.id)
 
       if (playersError) {
@@ -336,7 +345,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       // Calculate position breakdown
       const positions: { [key: string]: number } = {}
       players.forEach((player) => {
-        const pos = player.users?.primary_position || "Unknown"
+        const pos = player.users?.season_registrations?.[0]?.primary_position || "Unknown"
         positions[pos] = (positions[pos] || 0) + 1
       })
 
@@ -378,8 +387,8 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     const potentialPositions = { ...teamStats.positions }
     winningBids.forEach((bid) => {
       const player = freeAgents.find((p) => p.id === bid.player_id)
-      if (player?.users?.primary_position) {
-        const pos = player.users.primary_position
+      if (player?.users?.season_registrations?.[0]?.primary_position) {
+        const pos = player.users.season_registrations[0].primary_position
         potentialPositions[pos] = (potentialPositions[pos] || 0) + 1
       }
     })
@@ -408,8 +417,8 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     // Apply position filter
     if (filters.position && filters.position !== "all") {
       filtered = filtered.filter((player) => {
-        const primaryPos = getPositionAbbreviation(player.users?.primary_position || "")
-        const secondaryPos = getPositionAbbreviation(player.users?.secondary_position || "")
+        const primaryPos = getPositionAbbreviation(player.users?.season_registrations?.[0]?.primary_position || "")
+        const secondaryPos = getPositionAbbreviation(player.users?.season_registrations?.[0]?.secondary_position || "")
         return primaryPos === filters.position || secondaryPos === filters.position
       })
     }
@@ -488,7 +497,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       if (teamError) throw new Error(teamError.message)
 
       const currentSalaryTotal = teamPlayers.reduce((sum, player) => sum + (player.salary || 0), 0)
-      const salaryCap = 60000000 // $60M salary cap
+      const salaryCap = 75000000 // $75M salary cap
 
       if (currentSalaryTotal + amount > salaryCap) {
         toast({
@@ -507,10 +516,10 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       }
 
       // Check if the bid meets the minimum increment requirement
-      if (currentBid && amount < currentBid.bid_amount + 2000000) {
+      if (currentBid && amount < currentBid.bid_amount + 250000) {
         toast({
           title: "Bid too low",
-          description: "New bids must be at least $2,000,000 higher than the current highest bid.",
+          description: "New bids must be at least $250,000 higher than the current highest bid.",
           variant: "destructive",
         })
         return
@@ -537,17 +546,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       if (bidError) throw new Error(bidError.message)
 
       // Send notification to the player
-      const { error: notificationError } = await supabase.from("notifications").insert({
+      await supabase.from("notifications").insert({
         user_id: selectedPlayer.user_id,
         title: "New Bid Received",
         message: `${userTeam.name} has placed a bid of $${amount.toLocaleString()} for you.`,
         link: "/free-agency",
       })
-
-      if (notificationError) {
-        console.error("Error sending notification to player:", notificationError)
-        // Don't fail the bid if notification fails
-      }
 
       // If there was a previous highest bidder and it's not the current team, notify them
       if (currentBid && currentBid.team_id !== userTeam.id) {
@@ -567,12 +571,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             link: "/management",
           }))
 
-          const { error: outbidNotificationError } = await supabase.from("notifications").insert(notifications)
-
-          if (outbidNotificationError) {
-            console.error("Error sending outbid notifications:", outbidNotificationError)
-            // Don't fail the bid if notification fails
-          }
+          await supabase.from("notifications").insert(notifications)
         }
       }
 
@@ -665,12 +664,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             <div className="space-y-2">
               <div>
                 <p className="text-white text-lg font-bold">
-                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $60M
+                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $75M
                 </p>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
                     className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.current_salary / 60000000) * 100}%` }}
+                    style={{ width: `${(teamStats.current_salary / 75000000) * 100}%` }}
                   />
                 </div>
               </div>
@@ -680,7 +679,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
                   <div className="w-full bg-gray-700 rounded-full h-1">
                     <div
                       className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialSalary / 60000000) * 100}%` }}
+                      style={{ width: `${(potentialStats.potentialSalary / 75000000) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -787,13 +786,13 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
                     <h3 className="font-semibold text-lg truncate">{player.users.gamer_tag_id || "Unknown Player"}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-orange-400 font-medium">
-                        ({getPositionAbbreviation(player.users.primary_position || "N/A")})
+                        ({getPositionAbbreviation(player.users.season_registrations?.[0]?.primary_position || "N/A")})
                       </span>
-                      {player.users.secondary_position && (
+                      {player.users.season_registrations?.[0]?.secondary_position && (
                         <>
                           <span className="text-muted-foreground">/</span>
                           <span className="text-blue-400 font-medium">
-                            ({getPositionAbbreviation(player.users.secondary_position)})
+                            ({getPositionAbbreviation(player.users.season_registrations[0].secondary_position)})
                           </span>
                         </>
                       )}
