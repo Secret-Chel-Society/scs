@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 
@@ -16,7 +16,7 @@ interface BidHistoryModalProps {
 export function BidHistoryModal({ isOpen, onClose, playerId, playerName }: BidHistoryModalProps) {
   const [bids, setBids] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const { supabase } = useSupabase()
   const { toast } = useToast()
 
   useEffect(() => {
