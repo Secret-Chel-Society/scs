@@ -1,355 +1,524 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/components/ui/use-toast"
+import { useMemo, useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { 
-  Trophy, 
-  Award, 
-  Users, 
-  Search, 
-  TrendingUp, 
-  DollarSign, 
-  Target, 
-  Medal, 
-  Star, 
-  Zap, 
-  Crown, 
-  Flame, 
-  Shield, 
-  Rocket,
-  BarChart3,
-  Activity,
-  Calendar,
-  RefreshCw
-} from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/components/ui/use-toast"
 import { TeamLogo } from "@/components/team-logo"
 import { getAllTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
+import { Trophy, Award, Users, Search, ArrowUpDown, Grid2X2, Rows, ChevronRight, Sparkles, Shield } from "lucide-react"
 
-// Maximum roster size constant
-const MAX_ROSTER_SIZE = 15
+// --- Constants --------------------------------------------------------------
+const MAX_ROSTER_SIZE = 16
+const CARDS_PER_SKELETON = 12
 
+// --- Helpers ----------------------------------------------------------------
+function safePct(numerator = 0, denominator = 1) {
+  if (!denominator) return 0
+  const pct = (numerator / denominator) * 100
+  return Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0
+}
+
+function formatMoneyM(value = 0) {
+  return `$${(value / 1_000_000).toFixed(1)}M`
+}
+
+function cupAndTrophyCounts(awards = []) {
+  let cups = 0
+  let other = 0
+  for (const a of awards) {
+    if ((a?.award_type || "").toLowerCase().includes("cup")) cups++
+    else other++
+  }
+  return { cups, other }
+}
+
+function classNames(...xs) {
+  return xs.filter(Boolean).join(" ")
+}
+
+// Simple sparkbar from an array of numbers (0..max)
+function SparkBar({ series }) {
+  if (!series || !series.length) return null
+  const max = Math.max(...series)
+  return (
+    <div className="flex items-end gap-0.5 h-6 w-full">
+      {series.map((v, i) => (
+        <div
+          key={i}
+          className="w-1.5 bg-primary/70 rounded-t"
+          style={{ height: `${max ? (v / max) * 100 : 0}%` }}
+          title={`Game ${i + 1}: ${v} pts`}
+        />
+      ))}
+    </div>
+  )
+}
+
+// Dot form (W/L/OTL) — expects array like ["W","W","L","OTL","W"]
+function FormDots({ form = [] }) {
+  const map = { W: "bg-emerald-500", L: "bg-rose-500", OTL: "bg-amber-500" }
+  if (!form?.length) return null
+  return (
+    <div className="flex items-center gap-1" aria-label="recent form">
+      {form.slice(-5).map((r, i) => (
+        <div key={i} className={classNames("h-2.5 w-2.5 rounded-full", map[r] || "bg-muted-foreground/40")} />
+      ))}
+    </div>
+  )
+}
+
+// --- Main Page --------------------------------------------------------------
 export default function TeamsPage() {
   const { toast } = useToast()
-  const [teams, setTeams] = useState<any[]>([])
+  const [teams, setTeams] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [currentSeason, setCurrentSeason] = useState<number | null>(null)
+  const [query, setQuery] = useState("")
+  const [view, setView] = useState("grid") // grid | table
+  const [sortBy, setSortBy] = useState("points_desc")
+  const [division, setDivision] = useState("all")
+  // nhl | ahl | all (if you have league on team)
 
   useEffect(() => {
-    async function fetchTeams() {
+    let mounted = true
+    async function run() {
       try {
         setLoading(true)
-
-        // Get current season ID
         const seasonId = await getCurrentSeasonId()
-        setCurrentSeason(seasonId)
-
-        // Get team stats
         const teamStats = await getAllTeamStats(seasonId)
+        const res = await fetch("/api/teams/awards")
+        const { awards } = await res.json()
 
-        // Get team awards
-        const response = await fetch("/api/teams/awards")
-        const { awards } = await response.json()
+        // group awards by team
+        const awardsByTeam = {}
+        for (const a of awards || []) {
+          if (!awardsByTeam[a.team_id]) awardsByTeam[a.team_id] = []
+          awardsByTeam[a.team_id].push(a)
+        }
 
-        // Group awards by team
-        const awardsByTeam: Record<string, any[]> = {}
-        awards?.forEach((award: any) => {
-          if (!awardsByTeam[award.team_id]) {
-            awardsByTeam[award.team_id] = []
-          }
-          awardsByTeam[award.team_id].push(award)
-        })
-
-        // Combine team stats with awards
-        const teamsWithAwards = teamStats.map((team) => ({
-          ...team,
-          awards: awardsByTeam[team.id] || [],
-        }))
-
-        setTeams(teamsWithAwards)
-      } catch (error: any) {
-        toast({
-          title: "Error loading teams",
-          description: error.message || "Failed to load teams data.",
-          variant: "destructive",
-        })
+        const merged = (teamStats || []).map((t) => ({ ...t, awards: awardsByTeam[t.id] || [] }))
+        if (mounted) setTeams(merged)
+      } catch (e) {
+        toast({ title: "Error loading teams", description: (e && e.message) || "Failed to load teams.", variant: "destructive" })
       } finally {
         setLoading(false)
       }
     }
-
-    fetchTeams()
+    run()
+    return () => { mounted = false }
   }, [toast])
 
-  // Filter teams based on search query
-  const filteredTeams = teams.filter((team) => team.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  // --- Derived metrics for header hero -------------------------------------
+  const summary = useMemo(() => {
+    if (!teams?.length) return { count: 0, avgPts: 0, totalCap: 0, avgCapUsed: 0 }
+    const count = teams.length
+    const avgPts = teams.reduce((s, t) => s + (t.points || 0), 0) / count
+    const totalCap = teams.reduce((s, t) => s + (t.total_salary || 0), 0)
+    const capUsedPct = teams.map((t) => safePct((t.total_salary || 0), ((t.salary_cap || t.cap_limit || 100_000_000))))
+    const avgCapUsed = capUsedPct.reduce((s, x) => s + x, 0) / capUsedPct.length
+    return { count, avgPts: Math.round(avgPts), totalCap, avgCapUsed: Math.round(avgCapUsed) }
+  }, [teams])
 
-  // Calculate league statistics for the header
-  const totalTeams = teams.length
-  const totalPlayers = teams.reduce((sum, team) => sum + (team.player_count || 0), 0)
-  const totalSalary = teams.reduce((sum, team) => sum + (team.total_salary || 0), 0)
+  // --- Filtering & sorting --------------------------------------------------
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    let rows = teams
 
+        if (division !== "all") rows = rows.filter((t) => (t.division || "").toLowerCase() === division)
+    if (q) rows = rows.filter((t) => (t.name || "").toLowerCase().includes(q))
+
+    const sorters = {
+      name_asc: (a, b) => (a.name || "").localeCompare(b.name || ""),
+      points_desc: (a, b) => (b.points || 0) - (a.points || 0),
+      capspace_desc: (a, b) => (b.cap_space || 0) - (a.cap_space || 0),
+      salary_asc: (a, b) => (a.total_salary || 0) - (b.total_salary || 0),
+      roster_desc: (a, b) => (b.player_count || 0) - (a.player_count || 0),
+    }
+    const sorter = sorters[sortBy] || sorters.points_desc
+    return [...rows].sort(sorter)
+  }, [teams, query, division, sortBy])
+
+  // --- UI -------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
-      {/* Header Section */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-4 mb-6">
-              <div className="p-4 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-xl shadow-lg">
-                <Trophy className="h-10 w-10 text-white" />
-              </div>
-              <div className="text-center">
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
-                  Elite Team Directory
-                </h1>
-                {currentSeason && (
-                  <div className="mt-2">
-                     <Badge className="bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-4 py-2 text-lg font-semibold">
-                       SCSHL Season 1
-                     </Badge>
-                  </div>
-                )}
+    <div className="container mx-auto px-4 py-8">
+      {/* Hero */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-6">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight flex items-center gap-2">
+                <Sparkles className="h-7 w-7 text-primary" /> Teams
+              </h1>
+              <p className="text-muted-foreground mt-1">All NHL franchises competing this season.</p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <StatPill label="Total Teams" value={summary.count} />
+                <StatPill label="Avg Points" value={summary.avgPts} />
+                <StatPill label="Avg Cap Used" value={`${summary.avgCapUsed}%`} />
+                <StatPill label="Total Payroll" value={formatMoneyM(summary.totalCap)} />
               </div>
             </div>
-            <div className="h-1 w-32 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full mx-auto mb-8" />
-            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              Discover the powerhouse teams competing in the most competitive hockey league. Each team brings unique talent, strategy, and determination to the ice.
-            </p>
+            {/* Controls */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Search teams..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+              <Select value={division} onValueChange={setDivision}>
+                <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Division" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Divisions</SelectItem>
+                  <SelectItem value="atlantic">Atlantic</SelectItem>
+                  <SelectItem value="metropolitan">Metropolitan</SelectItem>
+                  <SelectItem value="central">Central</SelectItem>
+                  <SelectItem value="pacific">Pacific</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-48"><SelectValue placeholder="Sort" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="points_desc"><div className="flex items-center gap-1"><ArrowUpDown className="h-4 w-4" /> Points</div></SelectItem>
+                  <SelectItem value="name_asc">Name (A–Z)</SelectItem>
+                  <SelectItem value="capspace_desc">Cap Space</SelectItem>
+                  <SelectItem value="salary_asc">Lowest Payroll</SelectItem>
+                  <SelectItem value="roster_desc">Roster Size</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="inline-flex rounded-lg border p-1 self-stretch">
+                <Button variant={view === "grid" ? "default" : "ghost"} size="sm" className="gap-1" onClick={() => setView("grid")}>
+                  <Grid2X2 className="h-4 w-4" /> Grid
+                </Button>
+                <Button variant={view === "table" ? "default" : "ghost"} size="sm" className="gap-1" onClick={() => setView("table")}>
+                  <Rows className="h-4 w-4" /> Table
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
+      </motion.div>
+
+      {/* Content */}
+      <div className="mt-8">
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: CARDS_PER_SKELETON }).map((_, i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState />
+        ) : view === "table" ? (
+          <TeamTable rows={filtered} />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filtered.map((team) => (
+              <TeamCard key={team.id} team={team} />
+            ))}
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
 
-      {/* League Statistics */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-ice-blue-500 to-ice-blue-600 rounded-lg w-fit mx-auto mb-4">
-                <Trophy className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {totalTeams}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                Total Teams
-              </div>
-            </CardContent>
-          </Card>
+// --- Subcomponents ----------------------------------------------------------
+function StatPill({ label, value }) {
+  return (
+    <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold">{value}</span>
+    </div>
+  )
+}
 
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-assist-green-500 to-assist-green-600 rounded-lg w-fit mx-auto mb-4">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-                {totalPlayers}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                Total Players
-              </div>
-            </CardContent>
-          </Card>
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-16 border rounded-2xl">
+      <Shield className="h-10 w-10 text-muted-foreground" />
+      <h3 className="mt-3 text-lg font-semibold">No teams match your filters</h3>
+      <p className="text-muted-foreground text-sm">Try adjusting league, division, sort, or your search query.</p>
+    </div>
+  )
+}
 
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-            <CardContent className="p-6 text-center">
-              <div className="p-3 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg w-fit mx-auto mb-4">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">
-                ${totalSalary.toLocaleString()}
-              </div>
-              <div className="text-sm text-slate-600 dark:text-slate-400">
-                Total Salary
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+function CapBar({ used = 0, limit = 100_000_000, compact = false }) {
+  const pct = safePct(used, limit)
+  return (
+    <div>
+      <div className={compact ? "flex items-center justify-between text-[10px] text-muted-foreground" : "flex items-center justify-between text-xs text-muted-foreground"}>
+        <span>Cap Usage</span>
+        <span>{pct.toFixed(0)}%</span>
       </div>
+      <div className={compact ? "mt-0.5 h-1.5 w-full rounded-full bg-muted overflow-hidden" : "mt-1 h-2 w-full rounded-full bg-muted overflow-hidden"}>
+        <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Search Section */}
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 border-b border-slate-200 dark:border-slate-700">
-              <CardTitle className="text-lg sm:text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-lg">
-                  <Search className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                Team Directory
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="max-w-2xl mx-auto">
-                <div className="relative">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
-                  <Input
-                    placeholder="Search teams by name..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 sm:pl-12 pr-4 sm:pr-6 py-2 sm:py-3 text-base sm:text-lg border-slate-300 dark:border-slate-600 focus:border-ice-blue-500 dark:focus:border-ice-blue-500 focus:ring-2 focus:ring-ice-blue-500/20 transition-all duration-300"
+function RosterBar({ count = 0, max = MAX_ROSTER_SIZE, compact = false }) {
+  const pct = safePct(count, max)
+  return (
+    <div>
+      <div className={compact ? "flex items-center justify-between text-[10px] text-muted-foreground" : "flex items-center justify-between text-xs text-muted-foreground"}>
+        <span>Roster</span>
+        <span>
+          {count}/{max}
+        </span>
+      </div>
+      <div className={compact ? "mt-0.5 h-1.5 w-full rounded-full bg-muted overflow-hidden" : "mt-1 h-2 w-full rounded-full bg-muted overflow-hidden"}>
+        <div className="h-full bg-primary/70" style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
+
+function TeamCard({ team }) {
+  const { cups, other } = cupAndTrophyCounts(team.awards)
+  const limit = team.salary_cap || team.cap_limit || 100_000_000
+  const capUsed = team.total_salary || 0
+
+  const form = team.form_last5 || [] // e.g., ["W","W","L","OTL","W"]
+  const pointsSeries = team.points_history || [] // e.g., [2,0,1,2,2,1]
+
+  return (
+    <Link href={`/teams/${team.id}`}>
+      <motion.div
+        whileHover={{ y: -6 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      >
+        <Card className="group overflow-hidden h-full border-muted-foreground/20 hover:border-primary/40 transition-colors rounded-2xl">
+          {/* Header gradient / logo slot */}
+          <div className="relative h-28 w-full bg-gradient-to-r from-primary/15 via-background to-background">
+            <div
+              className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 20%, var(--primary) 2px, transparent 2px)",
+                backgroundSize: "24px 24px",
+              }}
+            />
+
+            {/* Centered logo tile */}
+            <div className="absolute -bottom-0 left-5 h-24 w-24 flex items-center justify-center">
+              {team.logo_url ? (
+                <div className="relative h-20 w-20">
+                  <Image
+                    src={team.logo_url}
+                    alt={team.name}
+                    fill
+                    className="object-contain drop-shadow-md"
+                    sizes="80px"
                   />
                 </div>
-                {searchQuery && (
-                  <div className="text-center mt-4">
-                    <span className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
-                      Found <span className="font-semibold text-ice-blue-600 dark:text-ice-blue-400">{filteredTeams.length}</span> team{filteredTeams.length !== 1 ? 's' : ''}
-                    </span>
+              ) : (
+                <TeamLogo teamName={team.name} size="xl" />
+              )}
+            </div>
+          </div>
+
+          <CardContent className="pt-16 p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold leading-tight">{team.name}</h2>
+                <div className="mt-1 text-sm text-muted-foreground">Record: {team.wins}-{team.losses}-{team.otl}</div>
+              </div>
+              <div className="flex items-center gap-1">
+                {cups > 0 && (
+                  <Badge variant="outline" className="gap-1 border-yellow-500 text-yellow-600">
+                    <Trophy className="h-3.5 w-3.5" /> {cups}
+                  </Badge>
+                )}
+                {other > 0 && (
+                  <Badge variant="outline" className="gap-1">
+                    <Award className="h-3.5 w-3.5" /> {other}
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-extrabold">{team.points ?? 0}</div>
+                <div className="text-xs text-muted-foreground">PTS</div>
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold">{formatMoneyM(capUsed)}</div>
+                <div className="text-xs text-muted-foreground">PAYROLL</div>
+              </div>
+              <div>
+                <div className="text-2xl font-extrabold">{formatMoneyM(team.cap_space || 0)}</div>
+                <div className="text-xs text-muted-foreground">CAP SPACE</div>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <CapBar used={capUsed} limit={limit} />
+              <RosterBar count={team.player_count || 0} />
+            </div>
+
+            {(form?.length > 0 || pointsSeries?.length > 0) && (
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                {form?.length > 0 && (
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Recent Form</div>
+                    <FormDots form={form} />
+                  </div>
+                )}
+                {pointsSeries?.length > 0 && (
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Points (last {pointsSeries.length})</div>
+                    <SparkBar series={pointsSeries} />
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            )}
 
-          {/* Teams Grid */}
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="h-80 sm:h-96 w-full rounded-xl bg-gradient-to-br from-slate-100 to-ice-blue-100 dark:from-slate-800 dark:to-ice-blue-900/20"></div>
-                </div>
-              ))}
+            <div className="mt-6 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Users className="h-3.5 w-3.5" />
+                <span>
+                  {(team.player_count || 0)}/{MAX_ROSTER_SIZE} players
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <QuickLink href={`/teams/${team.id}`}>Overview</QuickLink>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {filteredTeams.map((team, index) => (
-                <Link key={team.id} href={`/teams/${team.id}`}>
-                  <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 h-full overflow-hidden">
-                    <CardContent className="p-0">
-                      {/* Team Logo Section */}
-                      <div className="relative h-40 sm:h-48 bg-gradient-to-br from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 flex items-center justify-center p-4 sm:p-6">
-                        {/* Logo Container */}
-                        <div className="relative h-20 w-20 sm:h-24 sm:w-24 group-hover:scale-110 transition-transform duration-300">
-                          {team.logo_url ? (
-                            <Image
-                              src={team.logo_url || "/placeholder.svg"}
-                              alt={team.name}
-                              fill
-                              className="object-contain"
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                            />
-                          ) : (
-                            <TeamLogo teamName={team.name} size="xl" />
-                          )}
-                        </div>
-                        
-                        {/* Achievement Badge */}
-                        {team.awards && team.awards.length > 0 && (
-                          <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
-                            <div className="bg-gradient-to-r from-goal-red-500 to-assist-green-500 text-white p-2 rounded-full shadow-lg">
-                              <Medal className="h-3 w-3 sm:h-4 sm:w-4" />
-                            </div>
-                          </div>
-                        )}
-                      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </Link>
+  )
+}
 
-                      {/* Team Info Section */}
-                      <div className="p-4 sm:p-6">
-                        {/* Team Name */}
-                        <h3 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200 text-center mb-3 sm:mb-4">
-                          {team.name}
-                        </h3>
-                        
-                        {/* Record */}
-                        <div className="flex justify-center mb-3 sm:mb-4">
-                          <Badge className="bg-gradient-to-r from-ice-blue-100 to-rink-blue-100 text-ice-blue-800 border-ice-blue-300 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 dark:text-ice-blue-200 dark:border-ice-blue-600 text-sm sm:text-base">
-                            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                            {team.wins}-{team.losses}-{team.otl}
-                          </Badge>
-                        </div>
+function QuickLink({ href, children }) {
+  return (
+    <Link href={href} className="text-xs inline-flex items-center gap-1 rounded-full border px-2.5 py-1 hover:border-primary">
+      {children} <ChevronRight className="h-3 w-3" />
+    </Link>
+  )
+}
 
-                        {/* Team Awards */}
-                        {team.awards && team.awards.length > 0 && (
-                          <div className="flex flex-wrap justify-center gap-1 sm:gap-2 mb-3 sm:mb-4">
-                            {team.awards.slice(0, 2).map((award: any) => (
-                              <Badge
-                                key={award.id}
-                                className={`flex items-center gap-1 px-2 py-1 text-xs ${
-                                  award.award_type === "SCS Cup"
-                                    ? "bg-gradient-to-r from-goal-red-100 to-goal-red-200 text-goal-red-800 border-goal-red-300 dark:from-goal-red-900/30 dark:to-goal-red-800/30 dark:text-goal-red-200 dark:border-goal-red-600"
-                                    : "bg-gradient-to-r from-assist-green-100 to-assist-green-200 text-assist-green-800 border-assist-green-300 dark:from-assist-green-900/30 dark:to-assist-green-800/30 dark:text-assist-green-200 dark:border-assist-green-600"
-                                }`}
-                              >
-                                {award.award_type === "SCS Cup" ? (
-                                  <Crown className="h-3 w-3" />
-                                ) : (
-                                  <Award className="h-3 w-3" />
-                                )}
-                                {award.award_type === "SCS Cup" ? "Cup" : "Trophy"} {award.year}
-                              </Badge>
-                            ))}
-                            {team.awards.length > 2 && (
-                              <Badge variant="outline" className="text-slate-600 dark:text-slate-400 text-xs">
-                                +{team.awards.length - 2} more
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Team Statistics */}
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                          <div className="text-center">
-                            <div className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">
-                              {team.points}
-                            </div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400">
-                              Points
-                            </div>
-                          </div>
-                          
-                          <div className="text-center">
-                            <div className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200">
-                              ${(team.total_salary / 1000000).toFixed(1)}M
-                            </div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400">
-                              Salary
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-center text-xs text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 rounded-lg px-3 py-2 mt-3 sm:mt-4">
-                          <Users className="h-3 w-3 mr-2" />
-                          <span className="font-medium">{team.player_count || 0}/{MAX_ROSTER_SIZE}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-              
-              {filteredTeams.length === 0 && (
-                <div className="col-span-full text-center py-12 sm:py-20">
-                  <div className="max-w-md mx-auto px-4">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-slate-200 to-ice-blue-200 dark:from-slate-700 dark:to-ice-blue-800 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                      <Search className="h-8 w-8 sm:h-10 sm:w-10 text-slate-500 dark:text-slate-400" />
+function TeamTable({ rows }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border">
+      {/* Desktop / tablet (md+) */}
+      <div className="hidden md:block">
+        <div className="grid grid-cols-12 items-center bg-muted/40 px-4 py-2 text-xs font-semibold text-muted-foreground">
+          <div className="col-span-4">Team</div>
+          <div className="col-span-1 text-center">PTS</div>
+          <div className="col-span-2 text-center">Record</div>
+          <div className="col-span-2 text-center">Cap</div>
+          <div className="col-span-1 text-center">Space</div>
+          <div className="col-span-2 text-center">Roster</div>
+        </div>
+        <div className="divide-y">
+          {rows.map((t) => {
+            const { cups } = cupAndTrophyCounts(t.awards)
+            const limit = t.salary_cap || t.cap_limit || 100_000_000
+            return (
+              <Link key={t.id} href={`/teams/${t.id}`} className="block hover:bg-muted/30">
+                <div className="grid grid-cols-12 items-center px-4 py-3 gap-2">
+                  <div className="col-span-4 flex items-center gap-3 min-w-0">
+                    <div className="relative h-10 w-10 shrink-0">
+                      {t.logo_url ? (
+                        <Image src={t.logo_url} alt={t.name} fill className="object-contain" />
+                      ) : (
+                        <TeamLogo teamName={t.name} size="md" />
+                      )}
                     </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2 sm:mb-3">
-                      No teams found
-                    </h3>
-                    <p className="text-slate-500 dark:text-slate-500 text-base sm:text-lg mb-4 sm:mb-6">
-                      Try adjusting your search terms or browse all available teams.
-                    </p>
-                    <button 
-                      onClick={() => setSearchQuery("")}
-                      className="inline-flex items-center gap-2 text-ice-blue-600 dark:text-ice-blue-400 hover:text-ice-blue-700 dark:hover:text-ice-blue-300 font-medium transition-colors duration-200 text-sm sm:text-base"
-                    >
-                      <Shield className="h-4 w-4" />
-                      Clear Search
-                    </button>
+                    <div className="min-w-0">
+                      <div className="font-semibold leading-tight flex items-center gap-2 truncate">
+                        <span className="truncate">{t.name}</span>
+                        {cups > 0 && (
+                          <Badge variant="outline" className="h-5 px-1.5 gap-1 border-yellow-500 text-yellow-600"><Trophy className="h-3 w-3" />{cups}</Badge>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground capitalize truncate">
+                        {t.division ? t.division : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-span-1 text-center font-semibold">{t.points ?? 0}</div>
+                  <div className="col-span-2 text-center text-sm text-muted-foreground">{t.wins}-{t.losses}-{t.otl}</div>
+                  <div className="col-span-2"><CapBar used={t.total_salary || 0} limit={limit} /></div>
+                  <div className="col-span-1 text-center">{formatMoneyM(t.cap_space || 0)}</div>
+                  <div className="col-span-2"><RosterBar count={t.player_count || 0} /></div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Mobile (<md) — compact list */}
+      <div className="md:hidden divide-y">
+        {rows.map((t) => {
+          const limit = t.salary_cap || t.cap_limit || 100_000_000
+          const { cups } = cupAndTrophyCounts(t.awards)
+          return (
+            <Link key={t.id} href={`/teams/${t.id}`} className="block">
+              <div className="px-3 py-3 flex items-start gap-3">
+                {/* Logo */}
+                <div className="relative h-9 w-9 shrink-0">
+                  {t.logo_url ? (
+                    <Image src={t.logo_url} alt={t.name} fill className="object-contain" />
+                  ) : (
+                    <TeamLogo teamName={t.name} size="sm" />
+                  )}
+                </div>
+
+                {/* Main */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-semibold leading-tight truncate flex items-center gap-2">
+                        <span className="truncate">{t.name}</span>
+                        {cups > 0 && (
+                          <Badge variant="outline" className="h-4 text-[10px] px-1 border-yellow-500 text-yellow-600">
+                            {cups}<Trophy className="ml-1 h-3 w-3"/>
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground capitalize">{t.division || ""}</div>
+                    </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <div className="text-base font-extrabold leading-none">{t.points ?? 0}</div>
+                      <div className="text-[11px] text-muted-foreground">PTS</div>
+                    </div>
+                  </div>
+
+                  {/* Second row: record and money */}
+                  <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <div>{t.wins}-{t.losses}-{t.otl}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="whitespace-nowrap">{formatMoneyM(t.total_salary || 0)}</div>
+                      <div className="whitespace-nowrap">{formatMoneyM(t.cap_space || 0)}</div>
+                    </div>
+                  </div>
+
+                  {/* Bars */}
+                  <div className="mt-2 grid grid-cols-2 gap-3">
+                    <CapBar used={t.total_salary || 0} limit={limit} compact />
+                    <RosterBar count={t.player_count || 0} compact />
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
