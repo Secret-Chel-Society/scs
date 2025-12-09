@@ -1,88 +1,40 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerComponentClient } from "@/lib/supabase/server"
 import { cache } from "react"
 
 // Cache the fetch operation to prevent multiple identical requests
 const getPositionCounts = cache(async () => {
   try {
-    const supabase = createServerComponentClient({ cookies })
+    const supabase = await createServerComponentClient()
 
-    // First, get the active season
-    const { data: activeSeason, error: seasonError } = await supabase
-      .from("seasons")
-      .select("id")
-      .eq("is_active", true)
-      .single()
+    // Use a more efficient count query with a single request
+    const { data, error } = await supabase.rpc("get_position_counts")
 
-    if (seasonError || !activeSeason) {
-      console.error("Error fetching active season:", seasonError)
+    if (error) {
+      console.error("Supabase RPC error:", error)
       return null
     }
 
-    // Get approved season registrations for the active season
-    const { data: registrations, error: regError } = await supabase
-      .from("season_registrations")
-      .select("id, user_id, primary_position")
-      .eq("status", "Approved")
-      .eq("season_id", activeSeason.id)
-
-    if (regError) {
-      console.error("Error fetching season registrations:", regError)
-      return null
-    }
-
-    if (!registrations || registrations.length === 0) {
-      return []
-    }
-
-    // Get user IDs from registrations
-    const userIds = registrations.map((reg) => reg.user_id)
-
-    // Get active users
-    const { data: activeUsers, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("is_active", true)
-      .in("id", userIds)
-
-    if (userError) {
-      console.error("Error fetching active users:", userError)
-      return null
-    }
-
-    // Get users with teams (not free agents)
-    const { data: playersWithTeams, error: playerError } = await supabase
-      .from("players")
-      .select("user_id")
-      .not("team_id", "is", null)
-      .in("user_id", userIds)
-
-    if (playerError) {
-      console.error("Error fetching players with teams:", playerError)
-      return null
-    }
-
-    // Create sets for faster lookups
-    const activeUserIds = new Set(activeUsers?.map((user) => user.id) || [])
-    const userIdsWithTeams = new Set(playersWithTeams?.map((player) => player.user_id) || [])
-
-    // Filter to only include active users who don't have a team (free agents)
-    const freeAgents = registrations.filter(
-      (reg) => activeUserIds.has(reg.user_id) && !userIdsWithTeams.has(reg.user_id),
-    )
-
-    return freeAgents
+    return data
   } catch (error) {
     console.error("Error in getPositionCounts:", error)
     return null
   }
 })
 
-// Fallback function - now also uses season registrations
+// Fallback function that doesn't use RPC in case the stored procedure doesn't exist
 const getPositionCountsFallback = cache(async () => {
   try {
-    // Use the same logic as the main function
-    return await getPositionCounts()
+    const supabase = await createServerComponentClient()
+
+    // Use a more efficient query with fewer columns
+    const { data, error } = await supabase.from("users").select("primary_position").eq("is_active", true)
+
+    if (error) {
+      console.error("Supabase query error:", error)
+      return null
+    }
+
+    return data
   } catch (error) {
     console.error("Error in getPositionCountsFallback:", error)
     return null
@@ -114,12 +66,19 @@ export async function PositionCounts() {
     Other: 0,
   }
 
-  // Process the data - now it's always season registration data
-  if (Array.isArray(data)) {
-    // Data from season registrations, count by primary_position
-    data.forEach((registration: any) => {
-      if (registration.primary_position) {
-        const normalizedPosition = normalizePosition(registration.primary_position)
+  // Process the data based on its format
+  if (Array.isArray(data) && data.length > 0 && "count" in data[0]) {
+    // Data from RPC with count already calculated
+    data.forEach((item: any) => {
+      const position = item.position || "Other"
+      const normalizedPosition = normalizePosition(position)
+      positionCounts[normalizedPosition] = item.count
+    })
+  } else if (Array.isArray(data)) {
+    // Data from fallback method, need to count manually
+    data.forEach((user: any) => {
+      if (user.primary_position) {
+        const normalizedPosition = normalizePosition(user.primary_position)
         positionCounts[normalizedPosition]++
       } else {
         positionCounts["Other"]++
