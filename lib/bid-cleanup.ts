@@ -21,7 +21,7 @@ export async function cancelPlayerBids(playerId: string): Promise<boolean> {
         updated_at: new Date().toISOString(),
       })
       .eq("player_id", playerId)
-      .in("status", ["Active", "Pending"])
+      .in("status", ["active", "pending"])
 
     if (error) {
       console.error("Error cancelling player bids:", error)
@@ -50,11 +50,11 @@ export async function cleanupExpiredBids(): Promise<number> {
     const { data, error } = await supabase
       .from("player_bidding")
       .update({
-        status: "Expired",
+        status: "expired",
         updated_at: now,
       })
-      .eq("status", "Active")
-      .lt("bid_expires_at", now)
+      .eq("status", "active")
+      .lt("bid_expires", now)
       .select("id")
 
     if (error) {
@@ -87,14 +87,15 @@ export async function getActiveBidsForPlayer(playerId: string): Promise<any[]> {
           name,
           logo_url
         ),
-        players!player_bidding_player_id_fkey(
-          user_id,
-          users!players_user_id_fkey(id, username, email)
+        users:user_id (
+          id,
+          username,
+          email
         )
       `)
       .eq("player_id", playerId)
-      .eq("status", "Active")
-      .order("bid_amount", { ascending: false })
+      .eq("status", "active")
+      .order("current_bid", { ascending: false })
 
     if (error) {
       console.error("Error fetching active bids:", error)
@@ -159,9 +160,9 @@ export async function processExpiredBids(): Promise<number> {
           name
         )
       `)
-      .eq("status", "Active")
-      .lt("bid_expires_at", now)
-      .order("bid_amount", { ascending: false })
+      .eq("status", "active")
+      .lt("bid_expires", now)
+      .order("current_bid", { ascending: false })
 
     if (fetchError) {
       console.error("Error fetching expired bids:", fetchError)
@@ -188,21 +189,20 @@ export async function processExpiredBids(): Promise<number> {
     for (const [playerId, playerBids] of bidsByPlayer) {
       // Find the highest bid
       const winningBid = playerBids.reduce((highest, current) =>
-        current.bid_amount > highest.bid_amount ? current : highest,
+        current.current_bid > highest.current_bid ? current : highest,
       )
 
-      console.log(`Player ${playerId}: Winning bid of $${winningBid.bid_amount} by team ${winningBid.teams?.name}`)
+      console.log(`Player ${playerId}: Winning bid of $${winningBid.current_bid} by team ${winningBid.teams?.name}`)
 
       // Assign player to winning team
       const { error: assignError } = await supabase
-        .from("players")
+        .from("season_registrations")
         .update({
           team_id: winningBid.team_id,
-          salary: winningBid.bid_amount,
-          status: 'active',
+          salary: winningBid.current_bid,
           updated_at: now,
         })
-        .eq("id", playerId)
+        .eq("user_id", playerId)
 
       if (assignError) {
         console.error(`Error assigning player ${playerId} to team:`, assignError)
@@ -213,7 +213,7 @@ export async function processExpiredBids(): Promise<number> {
       const { error: winError } = await supabase
         .from("player_bidding")
         .update({
-          status: "Won",
+          status: "won",
           updated_at: now,
         })
         .eq("id", winningBid.id)
@@ -222,14 +222,14 @@ export async function processExpiredBids(): Promise<number> {
         console.error(`Error marking winning bid:`, winError)
       }
 
-      // Mark all other bids for this player as outbid
+      // Mark all other bids for this player as lost
       const losingBidIds = playerBids.filter((bid) => bid.id !== winningBid.id).map((bid) => bid.id)
 
       if (losingBidIds.length > 0) {
         const { error: loseError } = await supabase
           .from("player_bidding")
           .update({
-            status: "Outbid",
+            status: "lost",
             updated_at: now,
           })
           .in("id", losingBidIds)
