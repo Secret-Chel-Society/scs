@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { avatarSync } from "@/lib/avatar-sync"
 
 interface PlayerCardProps {
@@ -19,7 +19,7 @@ interface PlayerCardProps {
 export function PlayerCard({ player }: PlayerCardProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const { supabase } = useSupabase()
 
   // Fetch user avatar
   useEffect(() => {
