@@ -12,12 +12,13 @@ import { useToast } from "@/components/ui/use-toast"
 import { Loader2, AlertCircle, CheckCircle2, KeyRound } from "lucide-react"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 
 export default function StandardResetPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
+  const { supabase } = useSupabase()
 
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -34,8 +35,6 @@ export default function StandardResetPage() {
       setError(null)
 
       try {
-        const supabase = createClientComponentClient()
-
         // First, check if we already have a session
         const { data: sessionData } = await supabase.auth.getSession()
 
@@ -90,7 +89,7 @@ export default function StandardResetPage() {
     }
 
     checkSession()
-  }, [searchParams])
+  }, [searchParams, supabase])
 
   // Handle form submission
   async function handleSubmit(e: React.FormEvent) {
@@ -112,8 +111,6 @@ export default function StandardResetPage() {
 
     try {
       console.log("Attempting to update password...")
-      const supabase = createClientComponentClient()
-
       // Get current session to verify we're authenticated
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
 
