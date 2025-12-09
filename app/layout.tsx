@@ -1,19 +1,15 @@
-// Midnight Studios INTl - All rights reserved
 import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Oswald } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { MantineProviderWrapper } from "@/components/providers/mantine-provider"
 import Navigation from "@/components/navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import SupabaseProvider from "@/lib/supabase/client"
-// import { Analytics } from "@vercel/analytics/next" // Temporarily disabled
-import { Suspense } from "react"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
-import { MobileScalingProvider } from "@/components/mobile-scaling-provider"
-import "@/lib/download-tracker" // Initialize download tracking
+import { Analytics } from "@vercel/analytics/next"
+import { Suspense } from "react"
 
 // Optimize font loading
 const inter = Inter({
