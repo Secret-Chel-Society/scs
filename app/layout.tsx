@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"   // ← FIXED: was Oswald before
+import { Inter } from "next/font/google"
 import "./globals.css"
 
 import { ThemeProvider } from "@/components/theme-provider"
@@ -11,9 +11,6 @@ import SupabaseProvider from "@/lib/supabase/client"
 import { BannedUserModal } from "@/components/auth/banned-user-modal"
 import { Suspense } from "react"
 
-// Optional: if you use this anywhere else
-import { MobileScalingProvider } from "@/components/providers/mobile-scaling-provider"
-
 // Optimize font loading
 const inter = Inter({
   subsets: ["latin"],
@@ -23,13 +20,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Secret Chel Society",
   description: "Official website for the NHL 26 Secret Chel Society",
-  viewport: "width=device-width, initial-scale=1",
   generator: "v0.dev",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/favicon.ico",
   },
+}
+
+// Move viewport out of metadata to avoid Next.js warning
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -43,38 +45,28 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
-
-        {/* This script doesn’t look necessary, but leaving as is */}
         <script
           async
           src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/scslogo25.png"
           crossOrigin="anonymous"
         />
       </head>
-
       <body className={`${inter.className} hockey-scrollbar`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <SupabaseProvider>
-            <MobileScalingProvider>
-              <div className="flex min-h-screen w-full">
-                <Navigation />
-
-                {/* MAIN CONTENT */}
-                <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
-                  <Suspense>
-                    <main className="flex-1 p-6 hockey-scrollbar w-full">
-                      {children}
-                    </main>
-                  </Suspense>
-
-                  <Footer />
-                </div>
+            <div className="flex min-h-screen w-full">
+              <Navigation />
+              {/* Main content area */}
+              <div className="flex-1 flex flex-col md:ml-72 mobile-content w-full">
+                <Suspense>
+                  <main className="flex-1 p-6 hockey-scrollbar w-full">{children}</main>
+                </Suspense>
+                <Footer />
               </div>
-
-              <Toaster />
-              <BannedUserModal />
-              {/* <Analytics /> */}
-            </MobileScalingProvider>
+            </div>
+            <Toaster />
+            <BannedUserModal />
+            {/* <Analytics /> */}
           </SupabaseProvider>
         </ThemeProvider>
       </body>
