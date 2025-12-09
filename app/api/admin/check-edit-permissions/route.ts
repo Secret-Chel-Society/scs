@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { createRouteHandlerClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
@@ -26,7 +26,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ isAdmin: false, canEdit: false, error: userError.message }, { status: 200 })
     }
 
-    const isAdmin = userData?.some((role) => role.role === "admin" || role.role === "Admin") || false
+    const isAdmin =
+      userData?.some((role) => role.role === "admin" || role.role === "Admin" || role.role === "Site Owner") || false
 
     return NextResponse.json({ isAdmin, canEdit: isAdmin }, { status: 200 })
   } catch (error: any) {
