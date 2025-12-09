@@ -953,8 +953,8 @@ export default function Home() {
       <section className="relative">
         <div className="w-full bg-gradient-to-r from-black via-neutral-950 to-black">
           <img
-            src="https://cewrogcukeebjkpzsthw.supabase.co/storage/v1/object/public/media/photos/general/OFF-SEASON_BANNER.png"
-            alt="Off-Season Banner"
+            src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/F7BEEA43-47A5-49C4-894D-3087DBE59E5D.jpg"
+            alt="Fanatics Giveaway Banner"
             className="w-full h-auto object-cover opacity-95"
           />
         </div>
