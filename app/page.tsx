@@ -142,7 +142,7 @@ export default function Home() {
     },
     {
       url: "https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/logoheader/scslogo.png?height=600&width=1200",
-      title: "Season 1 Registration Open",
+      title: "Season 2 Registration Open",
       subtitle: "Join the most competitive NHL 26 league and earn rewards through our token system",
     },
     {
@@ -1158,7 +1158,7 @@ export default function Home() {
               >
                 <Link href="/register" className="flex items-center gap-3">
                   <Zap className="h-6 w-6" />
-                  Register for Season 1
+                  Create your Account!
                 </Link>
               </Button>
 
