@@ -11,24 +11,7 @@ import { useSupabase } from "@/lib/supabase/client"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Trophy, 
-  Award, 
-  RefreshCw, 
-  ChevronLeft, 
-  ChevronRight,
-  Users,
-  BarChart3,
-  Target,
-  Shield,
-  Star,
-  Activity,
-  TrendingUp,
-  DollarSign,
-  Crown
-} from "lucide-react"
+import { ArrowLeft, Calendar, Trophy, Award, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
 import { TeamLogo } from "@/components/team-logo"
 import { Button } from "@/components/ui/button"
 import { getTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
@@ -59,9 +42,9 @@ interface Player {
     id: string
     email: string
     gamer_tag_id: string
-    primary_position: string
-    secondary_position: string | null
     console: string
+    primary_position?: string
+    secondary_position?: string | null
   }
   stats?: PlayerStats
 }
@@ -119,8 +102,22 @@ function getPositionAbbreviation(position: string): string {
     "Left Defense": "LD",
     "Right Defense": "RD",
     Center: "C",
+    Forward: "F",
+    Defense: "D",
+    Defenseman: "D",
+    G: "G",
+    RW: "RW",
+    LW: "LW",
+    LD: "LD",
+    RD: "RD",
+    C: "C",
+    F: "F",
+    D: "D",
+    "Right Defenseman": "RD",
+    "Left Defenseman": "LD",
+    "Right Defense": "RD",
+    "Left Defense": "LD",
   }
-
   return positionMap[position] || position
 }
 
@@ -136,7 +133,7 @@ export default function TeamDetailPage() {
   const [canManageTeam, setCanManageTeam] = useState(false)
   const [awards, setAwards] = useState<TeamAward[]>([])
   const [refreshing, setRefreshing] = useState(false)
-  const [currentSeasonId, setCurrentSeasonId] = useState<string | null>(null)
+  const [seasonUUID, setSeasonUUID] = useState<string | null>(null)
   const [currentUserPlayer, setCurrentUserPlayer] = useState<Player | null>(null)
 
   // Week navigation state
@@ -149,22 +146,17 @@ export default function TeamDetailPage() {
 
   async function refreshTeamStats() {
     if (refreshing) return
-
     try {
       setRefreshing(true)
       const response = await fetch(`/api/teams/${teamId}/refresh-stats`, { method: "POST" })
-
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.error || "Failed to refresh team stats")
       }
-
       toast({
         title: "Team stats refreshed",
         description: "Team statistics have been recalculated based on match results.",
       })
-
-      // Reload the page to show updated stats
       window.location.reload()
     } catch (error: any) {
       toast({
@@ -180,55 +172,39 @@ export default function TeamDetailPage() {
   // Calculate weeks from matches
   const calculateWeeks = (matchesData: Match[]) => {
     if (!matchesData.length) return 1
-
-    // Sort matches by date
     const sortedMatches = [...matchesData].sort(
       (a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime(),
     )
-
     const firstMatchDate = new Date(sortedMatches[0].match_date)
     const lastMatchDate = new Date(sortedMatches[sortedMatches.length - 1].match_date)
-
-    // Calculate the difference in weeks
     const timeDiff = lastMatchDate.getTime() - firstMatchDate.getTime()
     const weeksDiff = Math.ceil(timeDiff / (7 * 24 * 60 * 60 * 1000))
-
     return Math.max(1, weeksDiff + 1)
   }
 
-  // Calculate current week based on today's date
   const getCurrentWeek = (matchesData: Match[]) => {
     if (!matchesData.length) return 1
-
     const today = new Date()
     const sortedMatches = [...matchesData].sort(
       (a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime(),
     )
     const firstMatchDate = new Date(sortedMatches[0].match_date)
-
-    // Calculate which week we're in
     const timeDiff = today.getTime() - firstMatchDate.getTime()
     const weeksDiff = Math.floor(timeDiff / (7 * 24 * 60 * 60 * 1000))
-
-    // Return week number (1-based), but don't go beyond total weeks
     const totalWeeks = calculateWeeks(matchesData)
     return Math.max(1, Math.min(weeksDiff + 1, totalWeeks))
   }
 
-  // Get week date range for display
   const getWeekDateRange = (week: number) => {
     if (matches.length === 0) return ""
-
     const sortedMatches = [...matches].sort(
       (a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime(),
     )
     const firstMatchDate = new Date(sortedMatches[0].match_date)
     const weekStartDate = new Date(firstMatchDate)
     weekStartDate.setDate(firstMatchDate.getDate() + (week - 1) * 7)
-
     const weekEndDate = new Date(weekStartDate)
     weekEndDate.setDate(weekStartDate.getDate() + 6)
-
     return `${weekStartDate.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -239,41 +215,33 @@ export default function TeamDetailPage() {
     })}`
   }
 
-  // Calculate weeks and set current week when matches load
   useEffect(() => {
     if (matches.length > 0) {
       const weeks = calculateWeeks(matches)
       setTotalWeeks(weeks)
-
-      // Set current week based on today's date
       const currentWeekNum = getCurrentWeek(matches)
       setCurrentWeek(currentWeekNum)
     }
   }, [matches])
 
-  // Filter matches for current week
   useEffect(() => {
     if (matches.length === 0) {
       setWeekMatches([])
       return
     }
-
     const sortedMatches = [...matches].sort(
       (a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime(),
     )
     const firstMatchDate = new Date(sortedMatches[0].match_date)
     const weekStartDate = new Date(firstMatchDate)
     weekStartDate.setDate(firstMatchDate.getDate() + (currentWeek - 1) * 7)
-
     const weekEndDate = new Date(weekStartDate)
     weekEndDate.setDate(weekStartDate.getDate() + 6)
     weekEndDate.setHours(23, 59, 59, 999)
-
     const filteredMatches = matches.filter((match) => {
       const matchDate = new Date(match.match_date)
       return matchDate >= weekStartDate && matchDate <= weekEndDate
     })
-
     setWeekMatches(filteredMatches)
   }, [matches, currentWeek])
 
@@ -282,26 +250,38 @@ export default function TeamDetailPage() {
       try {
         setLoading(true)
 
-        // Get current season ID as a number for team stats
-        const seasonIdNumber = await getCurrentSeasonId()
+        const seasonIdFromFunction = await getCurrentSeasonId()
+        let seasonUUIDLocal: string | null = null
+        let currentSeason: any = null
 
-        // Get the actual UUID for the current season from the seasons table
-        const { data: seasonData, error: seasonError } = await supabase
-          .from("seasons")
-          .select("id")
-          .eq("season_number", seasonIdNumber)
-          .single()
-
-        if (seasonError) {
-          console.error("Error fetching season ID:", seasonError)
-          // Continue without season-specific data
-        } else if (seasonData) {
-          setCurrentSeasonId(seasonData.id)
+        if (seasonIdFromFunction) {
+          if (typeof seasonIdFromFunction === "string" && seasonIdFromFunction.includes("-")) {
+            const { data: seasonData } = await supabase
+              .from("seasons")
+              .select("id, season_number, name, parent_season_id")
+              .eq("id", seasonIdFromFunction)
+              .single()
+            if (seasonData) {
+              currentSeason = seasonData
+              seasonUUIDLocal = seasonData.id
+              setSeasonUUID(seasonData.id)
+            }
+          } else {
+            const { data: seasonData } = await supabase
+              .from("seasons")
+              .select("id, season_number, name, parent_season_id")
+              .eq("season_number", seasonIdFromFunction)
+              .single()
+            if (seasonData) {
+              currentSeason = seasonData
+              seasonUUIDLocal = seasonData.id
+              setSeasonUUID(seasonData.id)
+            }
+          }
         }
 
-        // Get team stats
-        const teamStats = await getTeamStats(teamId, seasonIdNumber)
-
+        // Get team stats (standings-based)
+        const teamStats = await getTeamStats(teamId, seasonUUIDLocal as any)
         if (!teamStats) {
           toast({
             title: "Team not found",
@@ -313,10 +293,8 @@ export default function TeamDetailPage() {
 
         // Fetch team details
         const { data: teamData, error: teamError } = await supabase.from("teams").select("*").eq("id", teamId).single()
-
         if (teamError) throw teamError
 
-        // Combine team data with calculated stats
         setTeam({
           ...teamData,
           wins: teamStats.wins,
@@ -329,21 +307,15 @@ export default function TeamDetailPage() {
           goal_differential: teamStats.goal_differential,
         })
 
-        // Fetch team awards
-        const { data: awardsData, error: awardsError } = await supabase
+        // Team awards
+        const { data: awardsData } = await supabase
           .from("team_awards")
           .select("*")
           .eq("team_id", teamId)
           .order("year", { ascending: false })
+        setAwards(awardsData || [])
 
-        if (awardsError) {
-          console.error("Error fetching team awards:", awardsError)
-          // Continue without awards rather than failing completely
-        } else {
-          setAwards(awardsData || [])
-        }
-
-        // First, fetch the basic player data without trying to join with season_registrations
+        // Basic roster
         const { data: rosterData, error: rosterError } = await supabase
           .from("players")
           .select(`
@@ -356,148 +328,222 @@ export default function TeamDetailPage() {
               id, 
               email,
               gamer_tag_id,
-              primary_position,
-              secondary_position,
               console
             )
           `)
           .eq("team_id", teamId)
           .order("role", { ascending: true })
 
-        if (rosterError) {
-          console.error("Error fetching roster:", rosterError)
-          throw rosterError
+        if (rosterError) throw rosterError
+
+        // Decorate with season registration (positions)
+        let rosterWithSeasonData = [...(rosterData as Player[])]
+        let seasonForPositions = currentSeason
+        let seasonIdForPositions = seasonUUIDLocal
+        if (currentSeason?.name?.includes("(Playoffs)") && currentSeason?.parent_season_id) {
+          const { data: parentSeasonData } = await supabase
+            .from("seasons")
+            .select("id, season_number, name")
+            .eq("id", currentSeason.parent_season_id)
+            .single()
+          if (parentSeasonData) {
+            seasonForPositions = parentSeasonData
+            seasonIdForPositions = parentSeasonData.id
+          }
         }
 
-        console.log("Roster data:", rosterData)
-
-        // Now, for each player, try to get their season registration data if we have a valid season ID
-        let rosterWithSeasonData = [...rosterData]
-
-        if (currentSeasonId) {
-          // Get all season registrations for the current season in one query
-          const { data: allSeasonRegs, error: allSeasonRegsError } = await supabase
+        if (seasonForPositions) {
+          const { data: allSeasonRegs } = await supabase
             .from("season_registrations")
             .select("user_id, gamer_tag, primary_position, secondary_position, console")
-            .eq("season_id", currentSeasonId)
+            .eq("season_number", seasonForPositions.season_number)
 
-          if (allSeasonRegsError) {
-            console.error("Error fetching season registrations:", allSeasonRegsError)
-          } else if (allSeasonRegs) {
-            // Create a map for quick lookup
-            const seasonRegMap = new Map(allSeasonRegs.map((reg) => [reg.user_id, reg]))
-
-            // Update player data with season registration data
-            rosterWithSeasonData = rosterData.map((player) => {
+          if (allSeasonRegs && allSeasonRegs.length > 0) {
+            const seasonRegMap = new Map(allSeasonRegs.map((reg: any) => [reg.user_id, reg]))
+            rosterWithSeasonData = (rosterData as Player[]).map((player) => {
               const seasonReg = seasonRegMap.get(player.user_id)
-
               if (seasonReg) {
                 return {
                   ...player,
                   user: {
                     ...player.user,
                     gamer_tag_id: seasonReg.gamer_tag || player.user.gamer_tag_id,
-                    primary_position: seasonReg.primary_position || player.user.primary_position,
-                    secondary_position: seasonReg.secondary_position || player.user.secondary_position,
+                    primary_position: seasonReg.primary_position,
+                    secondary_position: seasonReg.secondary_position,
                     console: seasonReg.console || player.user.console,
                   },
                 }
               }
-
-              return player
+              return {
+                ...player,
+                user: {
+                  ...player.user,
+                  primary_position: "Forward",
+                  secondary_position: null,
+                },
+              }
             })
+          } else {
+            rosterWithSeasonData = (rosterData as Player[]).map((player) => ({
+              ...player,
+              user: {
+                ...player.user,
+                primary_position: "Forward",
+                secondary_position: null,
+              },
+            }))
+          }
+        } else {
+          rosterWithSeasonData = (rosterData as Player[]).map((player) => ({
+            ...player,
+            user: {
+              ...player.user,
+              primary_position: "Forward",
+              secondary_position: null,
+            },
+          }))
+        }
+
+        // ========= NEW: Season-wide EA aggregation by player across ALL teams =========
+        // We use the *season number* (integer) for ea_player_stats.season_id.
+        const seasonNumber: number | undefined = seasonForPositions?.season_number
+        let seasonEaStats: any[] = []
+
+        if (seasonNumber !== undefined) {
+          const names = Array.from(
+            new Set(
+              rosterWithSeasonData
+                .map((p) => p.user?.gamer_tag_id)
+                .filter((n): n is string => Boolean(n)),
+            ),
+          )
+
+          // Prefer filtering by names + season_id to reduce payload.
+          let eaQuery = supabase
+            .from("ea_player_stats")
+            .select(
+              "player_name, match_id, goals, assists, position, saves, goals_against, glsaves, glga, glshots, save_pct, glsavepct",
+            )
+            .eq("season_id", seasonNumber)
+
+          if (names.length > 0) {
+            eaQuery = eaQuery.in("player_name", names)
+          }
+
+          const { data, error } = await eaQuery
+          if (error) {
+            console.error("EA NHL stats season-wide error:", error)
+            seasonEaStats = []
+          } else {
+            seasonEaStats = data || []
           }
         }
 
-        // Fetch player stats from EA player stats for current season
-        const { data: eaStatsData, error: eaStatsError } = await supabase
-          .from("ea_player_stats")
-          .select(
-            "player_name, goals, assists, position, team_id, saves, goals_against, glsaves, glga, glshots, save_pct, glsavepct",
-          )
-          .in("team_id", [teamId])
+        // Build a case-insensitive aggregation keyed by gamer tag
+        type Agg = {
+          games: Set<string> // distinct match_id
+          g: number
+          a: number
+          sv: number
+          ga: number
+          sh: number
+        }
+        const seasonAggByName = new Map<string, Agg>()
 
-        if (eaStatsError) {
-          console.error("Error fetching EA player stats:", eaStatsError)
+        for (const row of seasonEaStats) {
+          const name = (row.player_name || "").toLowerCase()
+          if (!name) continue
+          const rec: Agg =
+            seasonAggByName.get(name) ||
+            ({ games: new Set<string>(), g: 0, a: 0, sv: 0, ga: 0, sh: 0 } as Agg)
+          if (row.match_id) rec.games.add(row.match_id)
+
+          // skater tallies
+          rec.g += row.goals ?? 0
+          rec.a += row.assists ?? 0
+
+          // goalie tallies
+          const saves = row.saves ?? row.glsaves ?? 0
+          const ga = row.goals_against ?? row.glga ?? 0
+          const shots = row.glshots ?? (saves + ga) // fallback when glshots missing
+          rec.sv += saves
+          rec.ga += ga
+          rec.sh += shots
+
+          seasonAggByName.set(name, rec)
         }
 
-        // Combine player data with EA stats by matching gamer tag to player name
-        const rosterWithStats = rosterWithSeasonData.map((player) => {
-          // Find EA stats for this player by matching gamer tag to player name
-          const playerEaStats =
-            eaStatsData?.filter(
-              (stat) => stat.player_name?.toLowerCase() === player.user.gamer_tag_id?.toLowerCase(),
-            ) || []
+        // Merge season totals into roster
+        const rosterWithStats: Player[] = rosterWithSeasonData.map((player) => {
+          const key = (player.user.gamer_tag_id || "").toLowerCase()
+          const agg = seasonAggByName.get(key)
 
-          const isGoalie = player.user.primary_position === "G" || player.user.primary_position === "Goalie"
+          const isGoalie =
+            player.user.primary_position === "G" || player.user.primary_position === "Goalie"
 
-          if (isGoalie) {
-            // Calculate goalie stats - use save_pct directly from EA stats
-            const totalSaves = playerEaStats.reduce((sum, stat) => sum + (stat.saves || stat.glsaves || 0), 0)
-            const totalGoalsAgainst = playerEaStats.reduce(
-              (sum, stat) => sum + (stat.goals_against || stat.glga || 0),
-              0,
-            )
-            const totalShotsAgainst = playerEaStats.reduce((sum, stat) => sum + (stat.glshots || 0), 0)
-
-            // Use save_pct directly from EA stats if available, otherwise calculate
-            let savePercentage = 0
-            const eaSavePercentages = playerEaStats
-              .map((stat) => stat.save_pct || stat.glsavepct || 0)
-              .filter((pct) => pct > 0)
-
-            if (eaSavePercentages.length > 0) {
-              // Use average of available save percentages
-              savePercentage = eaSavePercentages.reduce((sum, pct) => sum + pct, 0) / eaSavePercentages.length
-              // Convert to percentage if it's in decimal form (0.0-1.0)
-              if (savePercentage <= 1) {
-                savePercentage = savePercentage * 100
-              }
-            }
-
+          if (!agg) {
+            // No stats found this season; keep zeros
             return {
               ...player,
               stats: {
                 id: player.id,
                 player_id: player.id,
-                saves: totalSaves,
-                goals_against: totalGoalsAgainst,
-                shots_against: totalShotsAgainst,
-                save_percentage: savePercentage,
-                games_played: playerEaStats.length,
-                goals: 0, // Goalies don't score
-                assists: 0, // Goalies don't get assists
-                points: 0, // Goalies don't get points
+                goals: 0,
+                assists: 0,
+                points: 0,
+                games_played: 0,
+                ...(isGoalie
+                  ? { saves: 0, goals_against: 0, shots_against: 0, save_percentage: 0 }
+                  : {}),
+              },
+            }
+          }
+
+          const gp = agg.games.size
+          if (isGoalie) {
+            const shotsAgainst = agg.sh
+            const savePct = shotsAgainst > 0 ? ((shotsAgainst - agg.ga) / shotsAgainst) * 100 : 0
+            return {
+              ...player,
+              stats: {
+                id: player.id,
+                player_id: player.id,
+                saves: agg.sv,
+                goals_against: agg.ga,
+                shots_against: shotsAgainst,
+                save_percentage: savePct,
+                games_played: gp,
+                goals: 0,
+                assists: 0,
+                points: 0,
               },
             }
           } else {
-            // Calculate skater stats (existing logic)
-            const totalGoals = playerEaStats.reduce((sum, stat) => sum + (stat.goals || 0), 0)
-            const totalAssists = playerEaStats.reduce((sum, stat) => sum + (stat.assists || 0), 0)
-
+            const goals = agg.g
+            const assists = agg.a
             return {
               ...player,
               stats: {
                 id: player.id,
                 player_id: player.id,
-                goals: totalGoals,
-                assists: totalAssists,
-                points: totalGoals + totalAssists,
+                goals,
+                assists,
+                points: goals + assists,
+                games_played: gp,
               },
             }
           }
         })
 
-        console.log("Final roster data:", rosterWithStats)
         setRoster(rosterWithStats)
 
-        // Find current user's player record
+        // Current user's player record
         if (session?.user) {
           const userPlayer = rosterWithStats.find((player) => player.user_id === session.user.id)
           setCurrentUserPlayer(userPlayer || null)
         }
 
-        // Fetch team matches
+        // Team matches
         const { data: matchesData, error: matchesError } = await supabase
           .from("matches")
           .select(`
@@ -517,16 +563,16 @@ export default function TeamDetailPage() {
         if (matchesError) throw matchesError
         setMatches(matchesData || [])
 
-        // Check if the current user can manage this team
+        // Manage permissions (avoid 406)
         if (session?.user) {
-          const { data: playerData, error: playerError } = await supabase
+          const { data: playerData } = await supabase
             .from("players")
             .select("role")
             .eq("user_id", session.user.id)
             .eq("team_id", teamId)
-            .single()
+            .maybeSingle()
 
-          if (!playerError && playerData) {
+          if (playerData) {
             const managerRoles = ["Owner", "GM", "AGM"]
             setCanManageTeam(managerRoles.includes(playerData.role))
           }
@@ -585,7 +631,7 @@ export default function TeamDetailPage() {
   // Sort roster by points
   const sortedRoster = [...roster].sort((a, b) => (b.stats?.points || 0) - (a.stats?.points || 0))
 
-  // Split matches into upcoming and completed for the old view
+  // Split matches (kept for old view)
   const upcomingMatches = matches
     .filter((match) => match.status === "Scheduled")
     .sort((a, b) => new Date(a.match_date).getTime() - new Date(b.match_date).getTime())
@@ -595,158 +641,134 @@ export default function TeamDetailPage() {
     .sort((a, b) => new Date(b.match_date).getTime() - new Date(a.match_date).getTime())
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900/20">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-            <Link href="/teams" className="flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors duration-200 text-sm sm:text-base">
-              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+    <div className="container mx-auto px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            <ArrowLeft className="h-5 w-5" />
+            <Link href="/teams" className="text-muted-foreground hover:text-foreground">
               Back to Teams
             </Link>
-
-            {session?.user && (
-              <Button variant="outline" size="sm" onClick={refreshTeamStats} disabled={refreshing} className="border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm">
-                <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${refreshing ? "animate-spin" : ""}`} />
-                Refresh Stats
-              </Button>
-            )}
           </div>
 
-          {/* Team Header */}
-          <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-xl mb-6 sm:mb-8 overflow-hidden">
-            <div className="bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/30 dark:to-rink-blue-900/30 p-4 sm:p-6 lg:p-8">
-              <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
-                <div className="relative h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32">
-                  {team.logo_url ? (
-                    <Image src={team.logo_url || "/placeholder.svg"} alt={team.name} fill className="object-contain" />
-                  ) : (
-                    <TeamLogo teamName={team.name} size="xl" />
-                  )}
+          {session?.user && (
+            <Button variant="outline" size="sm" onClick={refreshTeamStats} disabled={refreshing}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh Stats
+            </Button>
+          )}
+        </div>
+
+        {/* Team Header */}
+        <Card className="mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/20 to-primary/5 p-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="relative h-32 w-32">
+                {team.logo_url ? (
+                  <Image src={team.logo_url || "/placeholder.svg"} alt={team.name} fill className="object-contain" />
+                ) : (
+                  <TeamLogo teamName={team.name} size="xl" />
+                )}
+              </div>
+
+              <div className="text-center md:text-left">
+                <h1 className="text-3xl font-bold mb-2">{team.name}</h1>
+                <div className="text-lg text-muted-foreground mb-4">
+                  Record: {team.wins}-{team.losses}-{team.otl}
                 </div>
 
-                <div className="text-center md:text-left flex-1">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-ice-blue-600 to-rink-blue-700 dark:from-ice-blue-400 dark:to-rink-blue-500 bg-clip-text text-transparent">
-                    {team.name}
-                  </h1>
-                  <div className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-4 sm:mb-6">
-                    Record: {team.wins}-{team.losses}-{team.otl}
+                <div className="flex flex-wrap justify-center md:justify-start gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.points}</div>
+                    <div className="text-sm text-muted-foreground">Points</div>
                   </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.points}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Points</div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.games_played}</div>
+                    <div className="text-sm text-muted-foreground">Games Played</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.goals_for}</div>
+                    <div className="text-sm text-muted-foreground">Goals For</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">{team.goals_against}</div>
+                    <div className="text-sm text-muted-foreground">Goals Against</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold">
+                      {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.games_played}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Games Played</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.goals_for}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Goals For</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">{team.goals_against}</div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Goals Against</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 dark:text-slate-200">
-                        {team.goal_differential > 0 ? `+${team.goal_differential}` : team.goal_differential}
-                      </div>
-                      <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Goal Diff</div>
-                    </div>
+                    <div className="text-sm text-muted-foreground">Goal Differential</div>
                   </div>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
+        </Card>
 
-          {/* Team Awards */}
-          {awards && awards.length > 0 && (
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 shadow-lg mb-8">
-              <CardHeader className="bg-gradient-to-r from-goal-red-50 to-goal-red-100 dark:from-goal-red-900/30 dark:to-goal-red-800/30 border-b border-slate-200 dark:border-slate-700">
-                <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-goal-red-500 to-goal-red-600 rounded-lg">
-                    <Trophy className="h-5 w-5 text-white" />
-                  </div>
-                  Team Awards
-                </CardTitle>
-                <CardDescription className="text-slate-600 dark:text-slate-400">
-                  Achievements and honors earned by {team.name}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {awards.map((award) => {
-                    const isPresident = award.award_type === "President Trophy"
-                    const isCup = award.award_type === "SCS Cup"
-
-                    return (
+        {/* Team Awards */}
+        {awards && awards.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Team Awards
+              </CardTitle>
+              <CardDescription>Achievements and honors earned by {team.name}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                {awards.map((award) => {
+                  const isPresident = award.award_type === "President Trophy"
+                  const isCup = award.award_type === "MGHL Cup"
+                  return (
+                    <div
+                      key={award.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg ${
+                        isPresident
+                          ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                          : isCup
+                          ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
+                          : "bg-muted/50"
+                      }`}
+                    >
                       <div
-                        key={award.id}
-                        className={`flex items-center gap-4 p-4 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                        className={`p-2 rounded-full ${
                           isPresident
-                            ? "bg-gradient-to-r from-ice-blue-50 to-rink-blue-50 dark:from-ice-blue-900/20 dark:to-rink-blue-900/20 border-ice-blue-200 dark:border-ice-blue-700"
+                            ? "bg-blue-100 dark:bg-blue-800"
                             : isCup
-                              ? "bg-gradient-to-r from-goal-red-50 to-assist-green-50 dark:from-goal-red-900/20 dark:to-assist-green-900/20 border-goal-red-200 dark:border-goal-red-700"
-                              : "bg-slate-50 dark:bg-slate-700 border-slate-200 dark:border-slate-600"
+                            ? "bg-yellow-100 dark:bg-yellow-800"
+                            : "bg-muted"
                         }`}
                       >
-                        <div
-                          className={`p-3 rounded-lg ${
-                            isPresident
-                              ? "bg-gradient-to-r from-ice-blue-500 to-rink-blue-600"
-                              : isCup
-                                ? "bg-gradient-to-r from-goal-red-500 to-assist-green-600"
-                                : "bg-slate-500"
-                          }`}
-                        >
-                          {isPresident ? (
-                            <Award className="h-6 w-6 text-white" />
-                          ) : isCup ? (
-                            <Trophy className="h-6 w-6 text-white" />
-                          ) : (
-                            <Award className="h-6 w-6 text-white" />
-                          )}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-800 dark:text-slate-200">{award.award_type}</div>
-                          <div className="text-sm text-slate-600 dark:text-slate-400">
-                            Season {award.season_number} ({award.year})
-                          </div>
-                          {award.description && (
-                            <div className="text-sm text-slate-500 dark:text-slate-500 mt-1">{award.description}</div>
-                          )}
-                        </div>
+                        {isPresident ? (
+                          <Award className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        ) : isCup ? (
+                          <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+                        ) : (
+                          <Award className="h-6 w-6" />
+                        )}
                       </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                      <div>
+                        <div className="font-medium">{award.award_type}</div>
+                        <div className="text-sm text-muted-foreground">
+                          Season {award.season_number} ({award.year})
+                        </div>
+                        {award.description && <div className="text-sm mt-1">{award.description}</div>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          <Tabs defaultValue="roster" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 h-12 bg-hockey-silver-800 dark:bg-hockey-silver-900 rounded-lg p-1">
-            <TabsTrigger 
-              value="roster"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-            >
-              Roster
-            </TabsTrigger>
-            <TabsTrigger 
-              value="schedule"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-            >
-              Schedule
-            </TabsTrigger>
-            <TabsTrigger 
-              value="stats"
-              className="text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white text-hockey-silver-300 hover:text-white"
-            >
-              Team Stats
-            </TabsTrigger>
+        <Tabs defaultValue="roster" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="roster">Roster</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            <TabsTrigger value="stats">Team Stats</TabsTrigger>
           </TabsList>
 
           <TabsContent value="roster">
@@ -767,6 +789,7 @@ export default function TeamDetailPage() {
                           <TableHead className="text-center">Gamer Tag</TableHead>
                           <TableHead className="text-center">Console</TableHead>
                           <TableHead className="text-center">Salary</TableHead>
+                          <TableHead className="text-center">GP</TableHead>
                           <TableHead className="text-center">Points</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -795,9 +818,12 @@ export default function TeamDetailPage() {
                             <TableCell className="text-center">{player.user.gamer_tag_id}</TableCell>
                             <TableCell className="text-center">{player.user.console || "Unknown"}</TableCell>
                             <TableCell className="text-center">${(player.salary / 1000000).toFixed(2)}M</TableCell>
+                            <TableCell className="text-center font-semibold">
+                              {player.stats?.games_played ?? 0}
+                            </TableCell>
                             <TableCell className="text-center font-bold">
                               {player.user.primary_position === "G" || player.user.primary_position === "Goalie"
-                                ? "N/A" // For goalies, we'd show different stats
+                                ? "N/A"
                                 : player.stats?.points || 0}
                             </TableCell>
                           </TableRow>
@@ -819,7 +845,6 @@ export default function TeamDetailPage() {
                 <CardDescription>Games for {team.name} organized by week</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Week Navigation */}
                 {totalWeeks > 1 && (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -851,11 +876,7 @@ export default function TeamDetailPage() {
                       </Button>
                     </div>
 
-                    {/* Week selector for quick navigation */}
-                    <Select
-                      value={currentWeek.toString()}
-                      onValueChange={(value) => setCurrentWeek(Number.parseInt(value))}
-                    >
+                    <Select value={currentWeek.toString()} onValueChange={(v) => setCurrentWeek(Number(v))}>
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -870,7 +891,6 @@ export default function TeamDetailPage() {
                   </div>
                 )}
 
-                {/* IR Request Button - Show once per week */}
                 {isUserOnTeam && weekMatches.length > 0 && (
                   <div className="flex justify-between items-center p-4 bg-muted/30 rounded-lg">
                     <div>
@@ -883,12 +903,11 @@ export default function TeamDetailPage() {
                       teamId={team.id}
                       isUserOnTeam={isUserOnTeam}
                       matches={weekMatches}
-                      currentSeasonId={currentSeasonId || 1}
+                      currentSeasonId={seasonUUID}
                     />
                   </div>
                 )}
 
-                {/* Matches for current week */}
                 {weekMatches.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">No games scheduled for Week {currentWeek}</p>
@@ -944,8 +963,8 @@ export default function TeamDetailPage() {
                                     match.status === "Completed" || match.status === "completed"
                                       ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
                                       : match.status === "In Progress"
-                                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
-                                        : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
+                                      ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
+                                      : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300"
                                   }`}
                                 >
                                   {match.status}
@@ -1119,7 +1138,8 @@ export default function TeamDetailPage() {
                                       <div>{player.stats.save_percentage.toFixed(1)}% SV%</div>
                                       <div className="text-xs text-muted-foreground">
                                         {player.stats.saves}/
-                                        {player.stats.shots_against || player.stats.saves + player.stats.goals_against}{" "}
+                                        {player.stats.shots_against ||
+                                          (player.stats.saves || 0) + (player.stats.goals_against || 0)}{" "}
                                         ({player.stats.goals_against} GA)
                                       </div>
                                     </div>
@@ -1130,8 +1150,7 @@ export default function TeamDetailPage() {
                               </div>
                             ))}
                           {sortedRoster.filter(
-                            (player) =>
-                              player.user.primary_position === "G" || player.user.primary_position === "Goalie",
+                            (player) => player.user.primary_position === "G" || player.user.primary_position === "Goalie",
                           ).length === 0 && (
                             <div className="text-center py-2 text-muted-foreground">No goalies on roster</div>
                           )}
@@ -1145,9 +1164,8 @@ export default function TeamDetailPage() {
               </Card>
             </div>
           </TabsContent>
-          </Tabs>
-        </motion.div>
-      </div>
+        </Tabs>
+      </motion.div>
     </div>
   )
 }
