@@ -3,25 +3,27 @@ import { calculateStandings, getCurrentSeasonId } from "@/lib/standings-calculat
 
 export async function GET(request: Request) {
   try {
-    console.log("=== STANDINGS API CALLED ===")
-    
-    // Get season ID from query params or use current season
+    // Get season parameter from query params
     const url = new URL(request.url)
-    const seasonId = url.searchParams.get("seasonId")
+    const seasonParam = url.searchParams.get("season")
 
     let seasonIdNumber: number
 
-    if (seasonId) {
-      seasonIdNumber = Number.parseInt(seasonId, 10)
-      if (isNaN(seasonIdNumber)) {
-        console.log("Invalid season ID provided:", seasonId)
-        return NextResponse.json({ error: "Invalid season ID" }, { status: 400 })
+    if (seasonParam) {
+      // If season name is provided, try to extract season number
+      const seasonMatch = seasonParam.match(/Season\s+(\d+)/i) || seasonParam.match(/(\d+)/)
+      if (seasonMatch) {
+        seasonIdNumber = Number.parseInt(seasonMatch[1], 10)
+        if (isNaN(seasonIdNumber)) {
+          return NextResponse.json({ error: "Invalid season number" }, { status: 400 })
+        }
+      } else {
+        // Fallback to current season if we can't parse the season
+        seasonIdNumber = await getCurrentSeasonId()
       }
     } else {
-      // Get current season ID
-      console.log("Getting current season ID...")
+      // Get current season ID if no season specified
       seasonIdNumber = await getCurrentSeasonId()
-      console.log("Current season ID:", seasonIdNumber)
     }
 
     console.log(`Fetching standings for season ${seasonIdNumber}`)
@@ -30,13 +32,10 @@ export async function GET(request: Request) {
     const standings = await calculateStandings(seasonIdNumber)
 
     console.log(`Returning ${standings.length} team standings`)
-    console.log("Standings data:", standings)
-    console.log("=== END STANDINGS API ===")
 
     return NextResponse.json({ standings, seasonId: seasonIdNumber })
   } catch (error: any) {
     console.error("Error in standings API:", error)
-    console.error("Error stack:", error.stack)
     return NextResponse.json({ error: `Error fetching standings: ${error.message}` }, { status: 500 })
   }
 }
