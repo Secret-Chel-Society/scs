@@ -315,7 +315,7 @@ export default function Footer() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-ice-blue-400" />
-                  <span>Powered by Midnight Studios</span>
+                  <span>Powered by MajorGamingLeagues</span>
                 </div>
               </div>
             </div>
