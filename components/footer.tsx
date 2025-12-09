@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { 
   MessageSquare, 
