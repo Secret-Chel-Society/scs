@@ -18,7 +18,6 @@ import { TableHeader } from "@tiptap/extension-table-header"
 import { TableCell } from "@tiptap/extension-table-cell"
 
 import Youtube from "@tiptap/extension-youtube"
-import Video from "@/lib/tiptap-video"                 // custom HTML5 video node
 
 import Papa from "papaparse"
 
