@@ -40,13 +40,20 @@ interface Season {
   name: string
   is_active: boolean
   is_current: boolean
-  number?: number // Added for the update
+  number?: number // Season display number
 }
 
+// UPDATED: Team now reflects data coming from team_seasons + teams
 interface Team {
-  id: string
+  id: string // teams.id
   name: string
   logo_url: string | null
+
+  // season-specific
+  team_season_id: string // team_seasons.id
+  season_id: string // UUID from team_seasons.season_id
+  is_active: boolean
+
   wins: number
   losses: number
   otl: number
@@ -54,9 +61,8 @@ interface Team {
   goals_against: number
   points?: number
   games_played?: number
-  season_id: number // Changed to number
+
   ea_club_id?: string
-  is_active: boolean
   manual_override?: boolean
   powerplay_goals?: number
   powerplay_opportunities?: number
@@ -92,13 +98,16 @@ export default function AdminTeamsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAddingTeam, setIsAddingTeam] = useState(false)
+
+  // UPDATED: season_id is now a UUID (string), not a number
   const [teamForm, setTeamForm] = useState({
     name: "",
     logo_url: "",
-    season_id: 1,
+    season_id: "", // season UUID
     ea_club_id: "",
     is_active: true,
   })
+
   const [isSearchingEA, setIsSearchingEA] = useState(false)
   const [eaSearchQuery, setEaSearchQuery] = useState("")
   const [eaSearchResults, setEaSearchResults] = useState<EATeam[]>([])
@@ -226,19 +235,15 @@ export default function AdminTeamsPage() {
   // Check if ea_club_id column exists
   const checkEaColumnExists = async () => {
     try {
-      // Try to query a team with ea_club_id to see if the column exists
-      const { data, error } = await supabase.from("teams").select("ea_club_id").limit(1).maybeSingle()
+      const { error } = await supabase.from("teams").select("ea_club_id").limit(1).maybeSingle()
 
       if (error) {
-        // If there's an error about the column not existing, set hasEaColumn to false
         if (error.message.includes("column") && error.message.includes("ea_club_id")) {
           setHasEaColumn(false)
         } else {
-          // For other errors, log but don't assume the column doesn't exist
           console.error("Error checking ea_club_id column:", error)
         }
       } else {
-        // If no error, the column exists
         setHasEaColumn(true)
       }
     } catch (error) {
@@ -250,19 +255,15 @@ export default function AdminTeamsPage() {
   // Check if is_active column exists
   const checkActiveColumnExists = async () => {
     try {
-      // Try to query a team with is_active to see if the column exists
-      const { data, error } = await supabase.from("teams").select("is_active").limit(1).maybeSingle()
+      const { error } = await supabase.from("teams").select("is_active").limit(1).maybeSingle()
 
       if (error) {
-        // If there's an error about the column not existing, set hasActiveColumn to false
         if (error.message.includes("column") && error.message.includes("is_active")) {
           setHasActiveColumn(false)
         } else {
-          // For other errors, log but don't assume the column doesn't exist
           console.error("Error checking is_active column:", error)
         }
       } else {
-        // If no error, the column exists
         setHasActiveColumn(true)
       }
     } catch (error) {
@@ -274,19 +275,15 @@ export default function AdminTeamsPage() {
   // Check if manual_override column exists
   const checkManualOverrideColumnExists = async () => {
     try {
-      // Try to query a team with manual_override to see if the column exists
-      const { data, error } = await supabase.from("teams").select("manual_override").limit(1).maybeSingle()
+      const { error } = await supabase.from("teams").select("manual_override").limit(1).maybeSingle()
 
       if (error) {
-        // If there's an error about the column not existing, set hasManualOverrideColumn to false
         if (error.message.includes("column") && error.message.includes("manual_override")) {
           setHasManualOverrideColumn(false)
         } else {
-          // For other errors, log but don't assume the column doesn't exist
           console.error("Error checking manual_override column:", error)
         }
       } else {
-        // If no error, the column exists
         setHasManualOverrideColumn(true)
       }
     } catch (error) {
@@ -298,19 +295,15 @@ export default function AdminTeamsPage() {
   // Check if games_played column exists
   const checkGamesPlayedColumn = async () => {
     try {
-      // Try to query a team with games_played to see if the column exists
-      const { data, error } = await supabase.from("teams").select("games_played").limit(1).maybeSingle()
+      const { error } = await supabase.from("teams").select("games_played").limit(1).maybeSingle()
 
       if (error) {
-        // If there's an error about the column not existing, set hasGamesPlayedColumn to false
         if (error.message.includes("column") && error.message.includes("games_played")) {
           setHasGamesPlayedColumn(false)
         } else {
-          // For other errors, log but don't assume the column doesn't exist
           console.error("Error checking games_played column:", error)
         }
       } else {
-        // If no error, the column exists
         setHasGamesPlayedColumn(true)
       }
     } catch (error) {
@@ -322,19 +315,15 @@ export default function AdminTeamsPage() {
   // Check if points column exists
   const checkPointsColumn = async () => {
     try {
-      // Try to query a team with points to see if the column exists
-      const { data, error } = await supabase.from("teams").select("points").limit(1).maybeSingle()
+      const { error } = await supabase.from("teams").select("points").limit(1).maybeSingle()
 
       if (error) {
-        // If there's an error about the column not existing, set hasPointsColumn to false
         if (error.message.includes("column") && error.message.includes("points")) {
           setHasPointsColumn(false)
         } else {
-          // For other errors, log but don't assume the column doesn't exist
           console.error("Error checking points column:", error)
         }
       } else {
-        // If no error, the column exists
         setHasPointsColumn(true)
       }
     } catch (error) {
@@ -350,7 +339,7 @@ export default function AdminTeamsPage() {
     await checkManualOverrideColumnExists()
     await checkGamesPlayedColumn()
     await checkPointsColumn()
-    setLastRefresh(Date.now()) // This will trigger a reload of teams data
+    setLastRefresh(Date.now())
   }
 
   // Add missing columns directly using exec_sql
@@ -358,7 +347,6 @@ export default function AdminTeamsPage() {
     try {
       setIsAddingColumns(true)
 
-      // Use the exec_sql function to add the columns
       const { error: execError } = await supabase.rpc("exec_sql", {
         sql: `
           ALTER TABLE teams ADD COLUMN IF NOT EXISTS games_played INTEGER DEFAULT 0;
@@ -369,7 +357,6 @@ export default function AdminTeamsPage() {
       if (execError) {
         console.error("Error adding columns with exec_sql:", execError)
 
-        // Try with run_sql as a fallback
         try {
           const { error: runError } = await supabase.rpc("run_sql", {
             sql: `
@@ -384,9 +371,7 @@ export default function AdminTeamsPage() {
         } catch (runError: any) {
           console.error("Error adding columns with run_sql:", runError)
 
-          // Final fallback: try direct SQL execution
           try {
-            // Try to execute the SQL directly through a custom endpoint
             const response = await fetch("/api/admin/execute-sql", {
               method: "POST",
               headers: {
@@ -416,7 +401,6 @@ export default function AdminTeamsPage() {
         description: "The required columns have been added to the teams table.",
       })
 
-      // Refresh column status
       await checkGamesPlayedColumn()
       await checkPointsColumn()
       setLastRefresh(Date.now())
@@ -432,11 +416,10 @@ export default function AdminTeamsPage() {
     }
   }
 
+  // NOTE: left here in case you still use it elsewhere, but it's no longer used in loadTeams
   const getSeasonIdForTeams = async (seasonUuid: string): Promise<number | null> => {
     if (!supabase) return null
 
-    // For now, create a simple mapping based on season names
-    // This should ideally be stored in the database
     const { data: seasonData, error } = await supabase
       .from("seasons")
       .select("name, number")
@@ -448,10 +431,10 @@ export default function AdminTeamsPage() {
       return null
     }
 
-    // Use the season number directly if available, otherwise map from name
     return seasonData.number || null
   }
 
+  // UPDATED: load teams from team_seasons + teams instead of teams.season_id
   const loadTeams = async (seasonId?: string) => {
     if (!supabase) {
       console.error("Supabase client not available")
@@ -462,32 +445,49 @@ export default function AdminTeamsPage() {
     try {
       setIsLoadingStats(true)
       setLoadError(null)
-      const season = seasonId || selectedSeason || "default-season-1"
 
-      let seasonNumber: number
+      const season = seasonId || selectedSeason
 
-      if (season === "default-season-1") {
-        seasonNumber = 1
-      } else {
-        // Try to parse season number from UUID or use direct number
-        const { data: seasonData, error: seasonError } = await supabase
-          .from("seasons")
-          .select("number")
-          .eq("id", season)
-          .single()
-
-        if (seasonError || !seasonData) {
-          // Fallback to season 1 if we can't find the season
-          seasonNumber = 1
-        } else {
-          seasonNumber = seasonData.number
-        }
+      if (!season || season === "default-season-1") {
+        setTeams([])
+        setFilteredTeams([])
+        setLoadError("No valid season selected")
+        return
       }
 
-      const { data, error } = await supabase.from("teams").select("*").eq("season_id", seasonNumber).order("name")
+      const { data, error } = await supabase
+        .from("team_seasons")
+        .select(
+          `
+          id,
+          team_id,
+          season_id,
+          is_active,
+          wins,
+          losses,
+          otl,
+          goals_for,
+          goals_against,
+          points,
+          games_played,
+          powerplay_goals,
+          powerplay_opportunities,
+          penalty_kill_goals_against,
+          penalty_kill_opportunities,
+          manual_override,
+          teams:team_id (
+            id,
+            name,
+            logo_url,
+            ea_club_id
+          )
+        `
+        )
+        .eq("season_id", season)
+        .order("created_at", { ascending: true })
 
       if (error) {
-        console.error("Error loading teams:", error)
+        console.error("Error loading team_seasons:", error)
         setLoadError(`Database error: ${error.message}`)
         toast({
           title: "Error loading teams",
@@ -497,11 +497,40 @@ export default function AdminTeamsPage() {
         return
       }
 
-      const teamsData = data || []
-      console.log("[v0] Loaded teams from database:", teamsData.length, "teams")
-      console.log("[v0] Teams data:", teamsData)
+      const teamsData: Team[] =
+        (data || []).map((row: any) => {
+          const wins = row.wins ?? 0
+          const losses = row.losses ?? 0
+          const otl = row.otl ?? 0
+          const points = row.points ?? wins * 2 + otl
 
-      // Set teams and apply filters
+          return {
+            id: row.teams.id,
+            name: row.teams.name,
+            logo_url: row.teams.logo_url,
+
+            team_season_id: row.id,
+            season_id: row.season_id,
+            is_active: row.is_active ?? true,
+
+            wins,
+            losses,
+            otl,
+            goals_for: row.goals_for ?? 0,
+            goals_against: row.goals_against ?? 0,
+            points,
+            games_played: row.games_played ?? wins + losses + otl,
+
+            ea_club_id: row.teams.ea_club_id || undefined,
+            manual_override: row.manual_override ?? false,
+            powerplay_goals: row.powerplay_goals ?? 0,
+            powerplay_opportunities: row.powerplay_opportunities ?? 0,
+            penalty_kill_goals_against: row.penalty_kill_goals_against ?? 0,
+            penalty_kill_opportunities: row.penalty_kill_opportunities ?? 0,
+          }
+        }) ?? []
+
+      console.log("[admin/teams] Loaded team_seasons:", teamsData.length, "rows")
       setTeams(teamsData)
       applyFilters(teamsData, searchQuery, showShowInactive)
     } catch (error: any) {
@@ -521,12 +550,10 @@ export default function AdminTeamsPage() {
   const applyFilters = (teamsData: Team[], query: string, includeInactive: boolean) => {
     let filtered = teamsData
 
-    // Filter by search query
     if (query.trim() !== "") {
       filtered = filtered.filter((team) => team.name.toLowerCase().includes(query.toLowerCase()))
     }
 
-    // Filter by active status if the column exists
     if (hasActiveColumn && !includeInactive) {
       filtered = filtered.filter((team) => team.is_active !== false)
     }
@@ -536,7 +563,7 @@ export default function AdminTeamsPage() {
 
   // Filter teams when search query or showInactive changes
   useEffect(() => {
-    applyFilters(teams, searchQuery, showShowInactive) // Use renamed state variable
+    applyFilters(teams, searchQuery, showShowInactive)
   }, [searchQuery, showShowInactive, teams, hasActiveColumn])
 
   // Update filtered teams when selected season changes
@@ -553,18 +580,20 @@ export default function AdminTeamsPage() {
     }
   }, [lastRefresh])
 
+  // UPDATED: use current season UUID for form
   const handleAddTeam = () => {
     setIsAddingTeam(true)
     setEditingTeam(null)
     setTeamForm({
       name: "",
       logo_url: "",
-      season_id: seasons.find((s) => s.is_current)?.number || 1, // Default to current season number or 1
+      season_id: selectedSeason || seasons.find((s) => s.is_current)?.id || seasons[0]?.id || "",
       ea_club_id: "",
       is_active: true,
     })
   }
 
+  // UPDATED: editing uses team.season_id (UUID from team_seasons)
   const handleEditTeam = (team: Team) => {
     setIsAddingTeam(false)
     setEditingTeam(team)
@@ -573,10 +602,11 @@ export default function AdminTeamsPage() {
       logo_url: team.logo_url || "",
       season_id: team.season_id,
       ea_club_id: team.ea_club_id || "",
-      is_active: team.is_active !== false, // Default to true if undefined
+      is_active: team.is_active !== false,
     })
   }
 
+  // UPDATED: save both teams and team_seasons, seasons via UUID
   const handleSaveTeam = async () => {
     if (!teamForm.name.trim()) {
       toast({
@@ -587,49 +617,51 @@ export default function AdminTeamsPage() {
       return
     }
 
+    const effectiveSeasonId = teamForm.season_id || selectedSeason
+
+    if (!effectiveSeasonId || effectiveSeasonId === "default-season-1") {
+      toast({
+        title: "Validation Error",
+        description: "Please select a valid season",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       setIsSaving(true)
 
-      const teamData: any = {
-        name: teamForm.name,
-        logo_url: teamForm.logo_url || null,
-        season_id: Number.parseInt(teamForm.season_id.toString()),
-      }
-
-      // Only include ea_club_id if the column exists
-      if (hasEaColumn) {
-        teamData.ea_club_id = teamForm.ea_club_id || null
-      }
-
-      // Only include is_active if the column exists
-      if (hasActiveColumn) {
-        teamData.is_active = teamForm.is_active
-      }
+      // determine season number if we still need to keep teams.season_id in sync
+      const seasonObj = seasons.find((s) => s.id === effectiveSeasonId)
+      const seasonNumber = seasonObj?.number
 
       if (isAddingTeam) {
-        // Add default values for new teams
-        teamData.wins = 0
-        teamData.losses = 0
-        teamData.otl = 0
-        teamData.goals_for = 0
-        teamData.goals_against = 0
+        // 1) insert into teams
+        const teamInsert: any = {
+          name: teamForm.name,
+          logo_url: teamForm.logo_url || null,
+        }
 
-        const { data: newTeam, error: teamError } = await supabase.from("teams").insert(teamData).select().single()
+        if (typeof seasonNumber === "number") {
+          teamInsert.season_id = seasonNumber
+        }
 
+        if (hasEaColumn) {
+          teamInsert.ea_club_id = teamForm.ea_club_id || null
+        }
+
+        if (hasActiveColumn) {
+          teamInsert.is_active = teamForm.is_active
+        }
+
+        const { data: newTeam, error: teamError } = await supabase.from("teams").insert(teamInsert).select().single()
         if (teamError) throw teamError
 
-        const { data: seasonData, error: seasonFetchError } = await supabase
-          .from("seasons")
-          .select("id")
-          .eq("number", Number.parseInt(teamForm.season_id.toString()))
-          .single()
-
-        if (seasonFetchError) throw seasonFetchError
-
-        // Create corresponding team_seasons entry with UUID season_id
+        // 2) insert into team_seasons for that team + season
         const { error: seasonError } = await supabase.from("team_seasons").insert({
           team_id: newTeam.id,
-          season_id: seasonData.id, // Use UUID from seasons table
+          season_id: effectiveSeasonId,
+          is_active: teamForm.is_active,
           wins: 0,
           losses: 0,
           otl: 0,
@@ -652,10 +684,37 @@ export default function AdminTeamsPage() {
           description: "The team has been added successfully.",
         })
       } else if (editingTeam) {
-        // Update existing team using standard Supabase update
-        const { error } = await supabase.from("teams").update(teamData).eq("id", editingTeam.id)
+        // Update teams base data
+        const teamUpdate: any = {
+          name: teamForm.name,
+          logo_url: teamForm.logo_url || null,
+        }
 
-        if (error) throw error
+        if (typeof seasonNumber === "number") {
+          teamUpdate.season_id = seasonNumber
+        }
+
+        if (hasEaColumn) {
+          teamUpdate.ea_club_id = teamForm.ea_club_id || null
+        }
+
+        if (hasActiveColumn) {
+          teamUpdate.is_active = teamForm.is_active
+        }
+
+        const { error: teamError } = await supabase.from("teams").update(teamUpdate).eq("id", editingTeam.id)
+        if (teamError) throw teamError
+
+        // Update team_seasons link (season + active)
+        const { error: tsError } = await supabase
+          .from("team_seasons")
+          .update({
+            is_active: teamForm.is_active,
+            season_id: effectiveSeasonId,
+          })
+          .eq("id", editingTeam.team_season_id)
+
+        if (tsError) throw tsError
 
         toast({
           title: "Team updated",
@@ -663,7 +722,6 @@ export default function AdminTeamsPage() {
         })
       }
 
-      // Reload teams
       setLastRefresh(Date.now())
       setIsAddingTeam(false)
       setEditingTeam(null)
@@ -687,9 +745,7 @@ export default function AdminTeamsPage() {
     try {
       setIsSaving(true)
 
-      // Delete team
       const { error } = await supabase.from("teams").delete().eq("id", teamId)
-
       if (error) throw error
 
       toast({
@@ -697,7 +753,6 @@ export default function AdminTeamsPage() {
         description: "The team has been deleted successfully.",
       })
 
-      // Reload teams
       setLastRefresh(Date.now())
     } catch (error: any) {
       console.error("Error deleting team:", error)
@@ -715,7 +770,6 @@ export default function AdminTeamsPage() {
     try {
       const newActiveState = !team.is_active
 
-      // Update the team_seasons junction table instead of the teams table
       const { error } = await supabase
         .from("team_seasons")
         .update({ is_active: newActiveState })
@@ -729,7 +783,6 @@ export default function AdminTeamsPage() {
         description: `${team.name} is now ${newActiveState ? "active" : "inactive"} for this season.`,
       })
 
-      // Reload teams
       setLastRefresh(Date.now())
     } catch (error: any) {
       console.error("Error toggling team active status:", error)
@@ -755,10 +808,8 @@ export default function AdminTeamsPage() {
       setIsSearchingEA(true)
       setEaSearchResults([])
 
-      // Format the search query for EA API (replace spaces with underscores)
       const formattedQuery = eaSearchQuery.replace(/\s+/g, "_")
 
-      // Call EA API to search for teams
       const response = await fetch(`/api/ea/search-teams?clubName=${formattedQuery}`)
 
       if (!response.ok) {
@@ -817,7 +868,6 @@ export default function AdminTeamsPage() {
 
   const viewEATeamStats = async (clubId: string) => {
     try {
-      // Navigate to a page that will display EA team stats
       router.push(`/admin/ea-stats/${clubId}`)
     } catch (error: any) {
       console.error("Error viewing EA team stats:", error)
@@ -834,10 +884,10 @@ export default function AdminTeamsPage() {
   }
 
   const handleStatsUpdated = async () => {
-    // Force a refresh of the data
     setLastRefresh(Date.now())
   }
 
+  // NOTE: Bulk assign is left as-is; it currently works on teams table.
   const handleBulkAssignSeason = async () => {
     if (!bulkAssignSeason || selectedTeamsForBulk.length === 0) {
       toast({
@@ -851,12 +901,11 @@ export default function AdminTeamsPage() {
     try {
       setIsSaving(true)
 
-      // Create new team entries for the selected season
-      const teamsToAssign = teams.filter((team) => selectedTeamsForBulk.includes(team.id))
+      const teamsToAssign = teams.filter((team) => selectedTeamsForBulk.includes(team.id as unknown as number))
       const newTeamData = teamsToAssign.map((team) => ({
         name: team.name,
         logo_url: team.logo_url,
-        season_id: Number.parseInt(bulkAssignSeason), // Ensure season_id is an integer
+        season_id: Number.parseInt(bulkAssignSeason),
         ea_club_id: team.ea_club_id,
         is_active: true,
         wins: 0,
@@ -867,7 +916,6 @@ export default function AdminTeamsPage() {
       }))
 
       const { error } = await supabase.from("teams").insert(newTeamData)
-
       if (error) throw error
 
       toast({
@@ -894,7 +942,6 @@ export default function AdminTeamsPage() {
     try {
       setIsSaving(true)
 
-      // Get teams from the source season using the junction table
       const { data: sourceTeamSeasons, error: fetchError } = await supabase
         .from("team_seasons")
         .select(`
@@ -919,7 +966,6 @@ export default function AdminTeamsPage() {
         return
       }
 
-      // Check if any teams are already assigned to the target season
       const { data: existingAssignments } = await supabase
         .from("team_seasons")
         .select("team_id")
@@ -927,7 +973,6 @@ export default function AdminTeamsPage() {
 
       const existingTeamIds = new Set(existingAssignments?.map((a) => a.team_id) || [])
 
-      // Create new team-season assignments for teams not already in the target season
       const newAssignments = sourceTeamSeasons
         .filter((ts) => !existingTeamIds.has(ts.team_id))
         .map((teamSeason) => ({
@@ -946,7 +991,6 @@ export default function AdminTeamsPage() {
       }
 
       const { error } = await supabase.from("team_seasons").insert(newAssignments)
-
       if (error) throw error
 
       toast({
@@ -1222,10 +1266,10 @@ export default function AdminTeamsPage() {
                   </TableRow>
                 ) : (
                   filteredTeams.map((team) => {
+                    // UPDATED: season name by UUID
                     const seasonName =
-                      seasons.find((s: Season) => s.number === team.season_id)?.name || `Season ${team.season_id}`
+                      seasons.find((s: Season) => s.id === team.season_id)?.name || "Unknown season"
 
-                    // Use database values directly for more accurate display
                     const wins = team.wins || 0
                     const losses = team.losses || 0
                     const otl = team.otl || 0
@@ -1233,7 +1277,7 @@ export default function AdminTeamsPage() {
                     const goalDiff = (team.goals_for || 0) - (team.goals_against || 0)
 
                     return (
-                      <TableRow key={team.id} className={!team.is_active ? "opacity-60" : ""}>
+                      <TableRow key={team.team_season_id} className={!team.is_active ? "opacity-60" : ""}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             {team.name}
@@ -1310,13 +1354,13 @@ export default function AdminTeamsPage() {
                                   powerplay_goals: team.powerplay_goals,
                                   powerplay_opportunities: team.powerplay_opportunities,
                                   powerplay_percentage: team.powerplay_opportunities
-                                    ? (team.powerplay_goals / team.powerplay_opportunities) * 100
+                                    ? (team.powerplay_goals! / team.powerplay_opportunities!) * 100
                                     : 0,
                                   penalty_kill_goals_against: team.penalty_kill_goals_against,
                                   penalty_kill_opportunities: team.penalty_kill_opportunities,
                                   penalty_kill_percentage: team.penalty_kill_opportunities
-                                    ? ((team.penalty_kill_opportunities - team.penalty_kill_goals_against) /
-                                        team.penalty_kill_opportunities) *
+                                    ? ((team.penalty_kill_opportunities! - team.penalty_kill_goals_against!) /
+                                        team.penalty_kill_opportunities!) *
                                       100
                                     : 0,
                                   manual_override: team.manual_override,
@@ -1380,18 +1424,19 @@ export default function AdminTeamsPage() {
               />
             </div>
 
+            {/* UPDATED: Season select uses season UUIDs */}
             <div className="space-y-2">
               <Label htmlFor="season">Season</Label>
               <Select
-                value={teamForm.season_id.toString()}
-                onValueChange={(value) => setTeamForm({ ...teamForm, season_id: Number.parseInt(value) })}
+                value={teamForm.season_id}
+                onValueChange={(value) => setTeamForm({ ...teamForm, season_id: value })}
               >
                 <SelectTrigger id="season">
                   <SelectValue placeholder="Select Season" />
                 </SelectTrigger>
                 <SelectContent>
                   {seasons.map((season) => (
-                    <SelectItem key={season.id} value={season.number?.toString() || "1"}>
+                    <SelectItem key={season.id} value={season.id}>
                       {season.name}
                     </SelectItem>
                   ))}
