@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 
@@ -28,9 +28,9 @@ export function TeamSummaryStats({ userTeam, playerBids = {} }: TeamSummaryStats
     bidCount: 0,
   })
   const [loading, setLoading] = useState(true)
-  const supabase = createClientComponentClient()
+  const { supabase } = useSupabase()
 
-  const SALARY_CAP = 65000000 // $65M
+  const SALARY_CAP = 75000000 // $75M
 
   useEffect(() => {
     if (userTeam) {
