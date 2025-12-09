@@ -1,6 +1,5 @@
 import { Suspense } from "react"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createServerComponentClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { PageHeader } from "@/components/ui/page-header"
 import { NotificationsList } from "@/components/notifications/notifications-list"
@@ -9,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 export const dynamic = "force-dynamic"
 
 export default async function NotificationsPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createServerComponentClient()
 
   const {
     data: { session },
