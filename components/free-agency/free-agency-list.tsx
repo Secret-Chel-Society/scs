@@ -655,66 +655,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
   return (
     <>
-      {/* Team Summary Stats with Potential Stats */}
-      {userTeam && teamStats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
-          {/* Team Salary */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-            <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Team Salary</h3>
-            <div className="space-y-2">
-              <div>
-                <p className="text-white text-lg font-bold">
-                  ${(teamStats.current_salary / 1000000).toFixed(1)}M / $75M
-                </p>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.current_salary / 75000000) * 100}%` }}
-                  />
-                </div>
-              </div>
-              {potentialStats && potentialStats.potentialSalary !== teamStats.current_salary && (
-                <div className="text-gray-400 text-sm">
-                  <p>Potential: ${(potentialStats.potentialSalary / 1000000).toFixed(1)}M</p>
-                  <div className="w-full bg-gray-700 rounded-full h-1">
-                    <div
-                      className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialSalary / 75000000) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Roster Size */}
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-            <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Roster Size</h3>
-            <div className="space-y-2">
-              <div>
-                <p className="text-white text-lg font-bold">{teamStats.roster_size} / 15 players</p>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div
-                    className="bg-green-500 h-2 rounded-full"
-                    style={{ width: `${(teamStats.roster_size / 15) * 100}%` }}
-                  />
-                </div>
-              </div>
-              {potentialStats && potentialStats.potentialRosterSize !== teamStats.roster_size && (
-                <div className="text-gray-400 text-sm">
-                  <p>Potential: {potentialStats.potentialRosterSize} players</p>
-                  <div className="w-full bg-gray-700 rounded-full h-1">
-                    <div
-                      className="bg-yellow-500 h-1 rounded-full"
-                      style={{ width: `${(potentialStats.potentialRosterSize / 15) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Position Breakdown */}
+       {/* Position Breakdown */}
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Position Breakdown</h3>
             <div className="space-y-2">
