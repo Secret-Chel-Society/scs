@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { TeamLogo } from "@/components/team-logo"
 import { getAllAHLTeamStats } from "@/lib/ahl-team-utils"
 import { getAHLSeasons } from "@/lib/ahl-standings-calculator"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase/client"
 
 // Maximum roster size constant
 const MAX_ROSTER_SIZE = 15
