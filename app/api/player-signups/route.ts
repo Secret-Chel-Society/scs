@@ -25,11 +25,11 @@ export async function GET() {
       .maybeSingle()
 
     if (!currentSeason) {
-      console.log("[/api/players-signups] No active season found, falling back to season 9")
+      console.log("[/api/players-signups] No active season found, falling back to season 3")
       const { data: fallbackSeason, error: fallbackError } = await supabaseAdmin
         .from("seasons")
         .select("id, name, season_number")
-        .eq("season_number", 9)
+        .eq("season_number", 3)
         .maybeSingle()
 
       currentSeason = fallbackSeason
