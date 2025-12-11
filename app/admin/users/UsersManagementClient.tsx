@@ -40,11 +40,10 @@ import {
 } from "lucide-react"
 
 // Valid player roles for players table
-const VALID_PLAYER_ROLES = ["TC", "Player", "GM", "AGM", "Owner"]
+const VALID_PLAYER_ROLES = ["Player", "GM", "AGM", "Owner"]
 
 // Selectable roles (user_roles)
 const roles = [
-  { label: "TC", value: "TC" },
   { label: "Player", value: "Player" },
   { label: "GM", value: "GM" },
   { label: "AGM", value: "AGM" },
