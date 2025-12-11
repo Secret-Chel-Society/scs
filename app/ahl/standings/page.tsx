@@ -10,7 +10,7 @@ import TeamStandings from "@/components/team-standings"
 import PlayoffBracket from "@/components/playoff-bracket"
 import { calculateAHLStandings, getAHLSeasons } from "@/lib/ahl-standings-calculator"
 import type { AHLTeamStanding } from "@/lib/ahl-standings-calculator"
-import { supabase } from "@/lib/supabase"
+import { useSupabase } from "@/lib/supabase/client"
 
 function AHLPlayoffPicture({ standings }: { standings: AHLTeamStanding[] }) {
   const sortedTeams = [...standings].sort((a, b) => {
