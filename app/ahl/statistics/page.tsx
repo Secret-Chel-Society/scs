@@ -417,7 +417,7 @@ export default function AHLStatisticsPage() {
   }
 
   const getSelectedWeekInfo = () => {
-    return SEASON_6_WEEKS.find((week) => week.id === selectedWeek) || SEASON_6_WEEKS[0]
+    return SEASON_1_WEEKS.find((week) => week.id === selectedWeek) || SEASON_1_WEEKS[0]
   }
 
   // TZ-aware date normalizer (Toronto) — robust version
@@ -1901,7 +1901,7 @@ export default function AHLStatisticsPage() {
                 <SelectValue placeholder="Select week" />
               </SelectTrigger>
               <SelectContent>
-                {SEASON_6_WEEKS.map((week) => (
+                {SEASON_1_WEEKS.map((week) => (
                   <SelectItem key={week.id} value={week.id}>
                     {week.displayName || week.name}
                   </SelectItem>
