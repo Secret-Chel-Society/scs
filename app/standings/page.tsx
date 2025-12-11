@@ -10,7 +10,7 @@ import TeamStandings from "@/components/team-standings"
 import PlayoffBracket from "@/components/playoff-bracket"
 import { calculateStandings, getSeasons } from "@/lib/standings-calculator"
 import type { TeamStanding } from "@/lib/standings-calculator"
-import { supabase } from "@/lib/supabase"
+import { useSupabase } from "@/lib/supabase/client"
 
 function PlayoffPicture({ standings }: { standings: TeamStanding[] }) {
   // Sort teams by points for playoff seeding
