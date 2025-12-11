@@ -409,35 +409,37 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     let filtered = [...freeAgents]
 
     // Apply name filter
-    if (filters.name) {
-      const searchTerm = filters.name.toLowerCase().trim()
+    if ((filters as any).name) {
+      const searchTerm = (filters as any).name.toLowerCase().trim()
       filtered = filtered.filter((player) => player.users?.gamer_tag_id?.toLowerCase().includes(searchTerm))
     }
 
     // Apply position filter
-    if (filters.position && filters.position !== "all") {
+    if ((filters as any).position && (filters as any).position !== "all") {
+      const posFilter = (filters as any).position
       filtered = filtered.filter((player) => {
         const primaryPos = getPositionAbbreviation(player.users?.season_registrations?.[0]?.primary_position || "")
         const secondaryPos = getPositionAbbreviation(player.users?.season_registrations?.[0]?.secondary_position || "")
-        return primaryPos === filters.position || secondaryPos === filters.position
+        return primaryPos === posFilter || secondaryPos === posFilter
       })
     }
 
     // Apply console filter
-    if (filters.console && filters.console !== "all") {
-      filtered = filtered.filter((player) => player.users?.console === filters.console)
+    if ((filters as any).console && (filters as any).console !== "all") {
+      const consoleFilter = (filters as any).console
+      filtered = filtered.filter((player) => player.users?.console === consoleFilter)
     }
 
     // Apply salary filters
-    if (filters.minSalary) {
-      const minSal = Number.parseInt(filters.minSalary)
+    if ((filters as any).minSalary) {
+      const minSal = Number.parseInt((filters as any).minSalary)
       if (!isNaN(minSal)) {
         filtered = filtered.filter((player) => (player.salary || 0) >= minSal)
       }
     }
 
-    if (filters.maxSalary) {
-      const maxSal = Number.parseInt(filters.maxSalary)
+    if ((filters as any).maxSalary) {
+      const maxSal = Number.parseInt((filters as any).maxSalary)
       if (!isNaN(maxSal)) {
         filtered = filtered.filter((player) => (player.salary || 0) <= maxSal)
       }
@@ -554,12 +556,13 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
       })
 
       // If there was a previous highest bidder and it's not the current team, notify them
-      if (currentBid && currentBid.team_id !== userTeam.id) {
+      const currentBidAfterInsert = currentBid
+      if (currentBidAfterInsert && currentBidAfterInsert.team_id !== userTeam.id) {
         // Get the GM/AGM/Owner of the outbid team
         const { data: teamManagers } = await supabase
           .from("players")
           .select("user_id")
-          .eq("team_id", currentBid.team_id)
+          .eq("team_id", currentBidAfterInsert.team_id)
           .in("role", ["GM", "AGM", "Owner"])
 
         if (teamManagers && teamManagers.length > 0) {
@@ -655,7 +658,9 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
   return (
     <>
-       {/* Position Breakdown */}
+      {/* Position Breakdown (only render if we have teamStats) */}
+      {teamStats && (
+        <div className="mb-6">
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
             <h3 className="text-white font-semibold mb-3 text-sm md:text-base">Position Breakdown</h3>
             <div className="space-y-2">
@@ -685,6 +690,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
         </div>
       )}
 
+      {/* Free Agents List */}
       {filteredPlayers.length === 0 ? (
         <div className="text-center py-12">
           <h3 className="text-xl font-semibold">No free agents available</h3>
@@ -706,7 +712,8 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             const currentBid = playerBids[player.id]
             const hasTeam = !!userTeam
             const canBid = hasTeam && (!currentBid || currentBid.team_id !== userTeam.id)
-            const bidExpiring = currentBid && new Date(currentBid.bid_expires_at).getTime() - now.getTime() < 3600000 // 1 hour
+            const bidExpiring =
+              currentBid && new Date(currentBid.bid_expires_at).getTime() - now.getTime() < 3600000 // 1 hour
 
             return (
               <div key={player.id} className="bg-card border border-border rounded-lg p-6 shadow-sm">
@@ -724,16 +731,26 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
                   {/* Player Info */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg truncate">{player.users.gamer_tag_id || "Unknown Player"}</h3>
+                    <h3 className="font-semibold text-lg truncate">
+                      {player.users.gamer_tag_id || "Unknown Player"}
+                    </h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-orange-400 font-medium">
-                        ({getPositionAbbreviation(player.users.season_registrations?.[0]?.primary_position || "N/A")})
+                        (
+                        {getPositionAbbreviation(
+                          player.users.season_registrations?.[0]?.primary_position || "N/A",
+                        )}
+                        )
                       </span>
                       {player.users.season_registrations?.[0]?.secondary_position && (
                         <>
                           <span className="text-muted-foreground">/</span>
                           <span className="text-blue-400 font-medium">
-                            ({getPositionAbbreviation(player.users.season_registrations[0].secondary_position)})
+                            (
+                            {getPositionAbbreviation(
+                              player.users.season_registrations[0].secondary_position,
+                            )}
+                            )
                           </span>
                         </>
                       )}
@@ -772,12 +789,20 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
                             className="mr-1 object-contain"
                           />
                         ) : null}
-                        <span className="text-sm font-medium">{currentBid.teams?.name || "Unknown Team"}</span>
+                        <span className="text-sm font-medium">
+                          {currentBid.teams?.name || "Unknown Team"}
+                        </span>
                       </div>
                       <div className="flex items-center">
-                        <Clock className={`h-3 w-3 mr-1 ${bidExpiring ? "text-red-400" : "text-muted-foreground"}`} />
+                        <Clock
+                          className={`h-3 w-3 mr-1 ${
+                            bidExpiring ? "text-red-400" : "text-muted-foreground"
+                          }`}
+                        />
                         <span
-                          className={`text-xs font-medium ${bidExpiring ? "text-red-400" : "text-muted-foreground"}`}
+                          className={`text-xs font-medium ${
+                            bidExpiring ? "text-red-400" : "text-muted-foreground"
+                          }`}
                         >
                           {formatTimeRemaining(currentBid.bid_expires_at)}
                         </span>
@@ -788,7 +813,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
                 <div className="flex gap-2">
                   {userTeam && (
-                    <Button onClick={() => handleBidClick(player)} className="flex-1">
+                    <Button onClick={() => handleBidClick(player)} className="flex-1" disabled={!canBid}>
                       {currentBid && currentBid.team_id === userTeam.id ? "Extend Bid" : "Place Bid"}
                     </Button>
                   )}
