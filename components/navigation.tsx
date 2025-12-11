@@ -355,14 +355,6 @@ export default function Navigation() {
           { name: "Matches", href: "/ahl/matches" },
           { name: "Awards", href: "/ahl/awards" },
           {
-            name: "Free Agency",
-            href: "/ahl/free-agency",
-            submenu: [
-              { name: "Free Agency", href: "/ahl/free-agency" },
-              { name: "Bidding Recap", href: "/ahl/free-agency/bidding-recap" },
-            ],
-          },
-          {
             name: "News",
             href: "/ahl/news",
             submenu: [
