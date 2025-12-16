@@ -299,8 +299,10 @@ const ManagementPage = () => {
     // Apply position filter if not "all"
     if (positionFilter !== "all") {
       filtered = filtered.filter((player) => {
-        const primaryPos = getPositionAbbreviation(player.season_registrations?.[0]?.primary_position || "UNKNOWN")
-        const secondaryPos = getPositionAbbreviation(player.season_registrations?.[0]?.secondary_position || "")
+        const { primary, secondary } = getPrimarySecondary(player)
+
+        const primaryPos = getPositionAbbreviation(primary)
+        const secondaryPos = getPositionAbbreviation(secondary || "")
         const filterPos = getPositionAbbreviation(positionFilter)
 
         return primaryPos === filterPos || secondaryPos === filterPos
