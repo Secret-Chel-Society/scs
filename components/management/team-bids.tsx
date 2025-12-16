@@ -11,19 +11,22 @@ interface TeamBidsProps {
 }
 
 export function TeamBids({ teamId }: TeamBidsProps) {
-  const [bids, setBids] = useState([])
+  const [bids, setBids] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
   const { supabase, session } = useSupabase()
 
   useEffect(() => {
     fetchBids()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchBids = async () => {
     try {
       setLoading(true)
+      setError(null)
+
       const { data, error } = await supabase
         .from("player_bidding")
         .select(
@@ -32,17 +35,18 @@ export function TeamBids({ teamId }: TeamBidsProps) {
           player_id,
           team_id,
           bid_amount,
-          expires_at,
+          bid_expires_at,
           created_at,
-          status,
           players:player_id (
             id,
             user_id,
             users:user_id (
               id,
               gamer_tag_id,
-              primary_position,
-              secondary_position
+              season_registrations (
+                primary_position,
+                secondary_position
+              )
             )
           ),
           teams:team_id (
@@ -53,24 +57,20 @@ export function TeamBids({ teamId }: TeamBidsProps) {
         `,
         )
         .eq("team_id", teamId)
-        .order("expires_at", { ascending: true })
+        .order("bid_expires_at", { ascending: true })
 
-      if (error) {
-        throw error
-      }
-
+      if (error) throw error
       setBids(data || [])
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching bids:", err)
-      setError(err.message)
+      setError(err.message || "Failed to load bids")
     } finally {
       setLoading(false)
     }
   }
 
-  const extendBid = async (bidId) => {
+  const extendBid = async (bidId: string) => {
     try {
-      // Ensure we have a valid session before making the request
       if (!session?.access_token) {
         toast({
           title: "Authentication Error",
@@ -90,19 +90,11 @@ export function TeamBids({ teamId }: TeamBidsProps) {
       })
 
       const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Failed to extend bid")
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to extend bid")
-      }
-
-      toast({
-        title: "Bid Extended",
-        description: "The bid has been extended by 2 hours.",
-      })
-
-      // Refresh bids
+      toast({ title: "Bid Extended", description: "The bid has been extended." })
       fetchBids()
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error extending bid:", err)
       toast({
         title: "Error",
@@ -112,47 +104,49 @@ export function TeamBids({ teamId }: TeamBidsProps) {
     }
   }
 
-  if (loading) {
-    return <div className="text-center p-4">Loading bids...</div>
-  }
-
-  if (error) {
-    return <div className="text-center text-red-500 p-4">Error: {error}</div>
-  }
-
-  if (bids.length === 0) {
-    return <div className="text-center p-4">No active bids found.</div>
-  }
+  if (loading) return <div className="text-center p-4">Loading bids...</div>
+  if (error) return <div className="text-center text-red-500 p-4">Error: {error}</div>
+  if (bids.length === 0) return <div className="text-center p-4">No active bids found.</div>
 
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Team Bids</h2>
-      {bids.map((bid) => (
-        <Card key={bid.id}>
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <span>{bid.players?.users?.gamer_tag_id}</span>
-                <span className="text-sm text-muted-foreground">
-                  ({bid.players?.users?.primary_position}/{bid.players?.users?.secondary_position})
-                </span>
+
+      {bids.map((bid) => {
+        const sr = bid.players?.users?.season_registrations?.[0]
+        const primary = sr?.primary_position || "N/A"
+        const secondary = sr?.secondary_position || "N/A"
+
+        return (
+          <Card key={bid.id}>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span>{bid.players?.users?.gamer_tag_id || "Unknown"}</span>
+                  <span className="text-sm text-muted-foreground">
+                    ({primary}/{secondary})
+                  </span>
+                </div>
+                <span className="text-lg font-bold">${(bid.bid_amount / 1000).toFixed(1)}k</span>
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Expires: {bid.bid_expires_at ? new Date(bid.bid_expires_at).toLocaleString() : "N/A"}
+                  </p>
+                </div>
+
+                <Button onClick={() => extendBid(bid.id)} variant="outline" size="sm">
+                  Extend Bid
+                </Button>
               </div>
-              <span className="text-lg font-bold">${(bid.bid_amount / 1000).toFixed(1)}k</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Expires: {new Date(bid.expires_at).toLocaleString()}</p>
-                <p className="text-sm text-muted-foreground">Status: {bid.status}</p>
-              </div>
-              <Button onClick={() => extendBid(bid.id)} variant="outline" size="sm">
-                Extend Bid
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }
