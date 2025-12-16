@@ -9,8 +9,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 })
     }
 
-    // Get the site URL from environment variables or use production URL as fallback
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL || "https://www.secretchelsociety.com"
+    // Get the site URL from environment variables or use a default
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL || "http://localhost:3000"
 
     // Create the reset password URL
     const resetUrl = `${siteUrl}/reset-password`
