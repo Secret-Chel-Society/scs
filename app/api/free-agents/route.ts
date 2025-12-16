@@ -23,27 +23,22 @@ export async function GET(request: NextRequest) {
       try {
         const supabase = createRouteHandlerClient()
         const token = authHeader.replace("Bearer ", "")
-        const {
-          data: { user },
-          error: authError,
-        } = await supabase.auth.getUser(token)
+        const { data, error } = await supabase.auth.getUser(token)
 
-        if (!authError && user) {
-          authenticatedUser = user
-          console.log("User authenticated:", user.id)
+        if (!error && data?.user) {
+          authenticatedUser = data.user
+          console.log("User authenticated:", data.user.id)
         } else {
-          console.log("Auth validation failed, but continuing as public:", authError?.message)
+          console.log("Auth validation failed, continuing as public:", error?.message)
         }
       } catch (authError) {
-        console.log("Auth error, but continuing as public:", authError)
+        console.log("Auth error, continuing as public:", authError)
       }
     } else {
       console.log("No auth header provided, serving public data")
     }
 
-    console.log("Fetching free agents using admin client...")
-
-    // First try to get the current active season
+    // --- 1) Determine current season (fallback season 9) ---
     let { data: currentSeason, error: seasonError } = await adminClient
       .from("seasons")
       .select("id, name, season_number, parent_season_id")
@@ -51,7 +46,6 @@ export async function GET(request: NextRequest) {
       .order("season_number", { ascending: false })
       .maybeSingle()
 
-    // If no active season found, fall back to season 9 (current season)
     if (!currentSeason) {
       console.log("No active season found, falling back to season 9")
       const { data: fallbackSeason, error: fallbackError } = await adminClient
@@ -64,7 +58,7 @@ export async function GET(request: NextRequest) {
       seasonError = fallbackError
     }
 
-    if (seasonError || !currentSeason) {
+    if (seasonError || !currentSeason?.season_number) {
       console.error("Error fetching current season:", seasonError)
       return NextResponse.json({
         freeAgents: [],
@@ -76,114 +70,122 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    console.log(
-      `Current Season: ${currentSeason.name} (ID: ${currentSeason.id}, Number: ${currentSeason.season_number})`,
-    )
-
     const seasonNumbersToCheck = [currentSeason.season_number]
 
-    // If this season has a parent, also include the parent season's number
     if (currentSeason.parent_season_id) {
-      console.log(`Season has parent_season_id: ${currentSeason.parent_season_id}`)
-
-      const { data: parentSeason, error: parentSeasonError } = await adminClient
+      const { data: parentSeason } = await adminClient
         .from("seasons")
         .select("season_number")
         .eq("id", currentSeason.parent_season_id)
-        .single()
+        .maybeSingle()
 
-      if (!parentSeasonError && parentSeason) {
+      if (parentSeason?.season_number) {
         seasonNumbersToCheck.push(parentSeason.season_number)
-        console.log(`Including parent season number: ${parentSeason.season_number}`)
-      } else {
-        console.log("Could not fetch parent season:", parentSeasonError?.message)
       }
     }
 
-    console.log(`Checking for registrations in season numbers: ${seasonNumbersToCheck.join(", ")}`)
+    console.log(
+      `Season check: ${currentSeason.name} numbers = ${seasonNumbersToCheck.join(", ")}`,
+    )
 
-    const { data: approvedRegistrations, error: registrationError } = await adminClient
-      .from("season_registrations")
-      .select("user_id")
-      .in("season_number", seasonNumbersToCheck)
-      .eq("status", "Approved")
+    // --- 2) Detect Free Agent “team” if you use one (optional) ---
+    // If you *don’t* have a Free Agents team row, this stays null and we fall back to team_id IS NULL only.
+    const { data: freeAgentTeam } = await adminClient
+      .from("teams")
+      .select("id, name")
+      .ilike("name", "%free%agent%")
+      .maybeSingle()
 
-    if (registrationError) {
-      console.error("Error fetching approved registrations:", registrationError)
-      throw registrationError
-    }
+    const freeAgentTeamId = freeAgentTeam?.id || null
+    console.log("Free agent team detected:", freeAgentTeam?.name || "none", freeAgentTeamId || "")
 
-    console.log(`Found ${approvedRegistrations?.length || 0} approved registrations`)
-
-    if (!approvedRegistrations || approvedRegistrations.length === 0) {
-      return NextResponse.json({
-        freeAgents: [],
-        authenticated: !!authenticatedUser,
-        debug: {
-          message: `No approved registrations found for ${currentSeason.name} or parent season`,
-          season: currentSeason.name,
-          seasonNumbersChecked: seasonNumbersToCheck,
-        },
-      })
-    }
-
-    const approvedUserIds = approvedRegistrations.map((reg) => reg.user_id)
-
-    const { data: playersWithoutTeams, error: playersError } = await adminClient
+    // --- 3) Fetch free agents + ONLY the approved registration for relevant season(s) ---
+    // IMPORTANT:
+    // - We include players with team_id NULL OR team_id == freeAgentTeamId (if it exists)
+    // - We embed season_registrations but then we *normalize* to only the approved/current one.
+    let playersQuery = adminClient
       .from("players")
-      .select(`
+      .select(
+        `
         id,
         salary,
         user_id,
+        team_id,
         users!inner (
           id,
           gamer_tag_id,
           console,
           avatar_url,
-          season_registrations!left (
+          season_registrations (
             primary_position,
             secondary_position,
-            season_number
+            season_number,
+            status
           )
         )
-      `)
-      .is("team_id", null)
-      .in("user_id", approvedUserIds)
+      `,
+      )
+
+    if (freeAgentTeamId) {
+      playersQuery = playersQuery.or(`team_id.is.null,team_id.eq.${freeAgentTeamId}`)
+    } else {
+      playersQuery = playersQuery.is("team_id", null)
+    }
+
+    const { data: rawPlayers, error: playersError } = await playersQuery
 
     if (playersError) {
-      console.error("Error fetching players without teams:", playersError)
+      console.error("Error fetching free agents:", playersError)
       throw playersError
     }
 
-    console.log(`Found ${playersWithoutTeams?.length || 0} free agent players with approved registrations`)
+    const rawCount = rawPlayers?.length || 0
+    console.log("Raw free agent players returned:", rawCount)
 
-    if (!playersWithoutTeams || playersWithoutTeams.length === 0) {
-      return NextResponse.json({
-        freeAgents: [],
-        authenticated: !!authenticatedUser,
-        debug: {
-          message: "No free agent players found with approved registrations",
-          season: currentSeason.name,
-          approvedRegistrationsCount: approvedRegistrations.length,
-        },
+    // --- 4) Normalize: keep ONLY Approved registrations for seasonNumbersToCheck,
+    // and prefer the current season’s registration first.
+    const normalized = (rawPlayers || [])
+      .filter((p) => p?.users)
+      .map((p: any) => {
+        const regs = Array.isArray(p.users?.season_registrations) ? p.users.season_registrations : []
+
+        const approvedRegs = regs.filter(
+          (r: any) =>
+            r?.status === "Approved" && seasonNumbersToCheck.includes(Number(r?.season_number)),
+        )
+
+        // Prefer current season_number first
+        approvedRegs.sort((a: any, b: any) => {
+          const aScore = a?.season_number === currentSeason.season_number ? 0 : 1
+          const bScore = b?.season_number === currentSeason.season_number ? 0 : 1
+          return aScore - bScore
+        })
+
+        return {
+          ...p,
+          users: {
+            ...p.users,
+            // ✅ this makes your frontend safe: users.season_registrations[0]
+            season_registrations: approvedRegs,
+          },
+        }
       })
-    }
+      // only keep players that actually have an approved reg for the season(s)
+      .filter((p: any) => (p.users?.season_registrations?.length || 0) > 0)
+      .sort((a: any, b: any) => (b?.salary || 0) - (a?.salary || 0))
 
-    // Sort by salary descending
-    const sortedFreeAgents = playersWithoutTeams
-      .filter((player) => player.users) // Only include players with valid user data
-      .sort((a, b) => (b?.salary || 0) - (a?.salary || 0))
-
-    console.log(`Final free agents count: ${sortedFreeAgents.length}`)
+    console.log("Final free agents count after normalization:", normalized.length)
 
     return NextResponse.json({
-      freeAgents: sortedFreeAgents,
+      freeAgents: normalized,
       authenticated: !!authenticatedUser,
       debug: {
         message: "Successfully fetched free agents",
         season: currentSeason.name,
-        approvedRegistrationsCount: approvedRegistrations.length,
-        finalCount: sortedFreeAgents.length,
+        seasonNumbersChecked: seasonNumbersToCheck,
+        freeAgentTeamDetected: freeAgentTeam?.name || null,
+        rawPlayersCount: rawCount,
+        finalCount: normalized.length,
       },
     })
   } catch (error: any) {
