@@ -80,12 +80,13 @@ interface FreeAgent {
   id: string
   salary: number
   users: {
-    id: string
     gamer_tag_id: string
-    primary_position: string
-    secondary_position?: string
     console: string
-    avatar_url?: string
+    avatar_url?: string | null
+    season_registrations?: {
+      primary_position: string
+      secondary_position?: string | null
+    }[]
   }
 }
 
@@ -869,16 +870,15 @@ const ManagementPage = () => {
           *,
           players (
             id,
+            users_id
             users (
               id,
               gamer_tag_id,
-              primary_position,
-              secondary_position,
-              console
-            ),
-            season_registrations (
-              primary_position,
-              secondary_position
+              console,
+              season_registrations (
+                primary_position,
+                secondary_position
+              ) 
             )
           )
         `)
