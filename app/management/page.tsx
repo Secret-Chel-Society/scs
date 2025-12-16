@@ -144,6 +144,29 @@ interface Waiver {
   hasTeamClaimed?: boolean
 }
 
+type SeasonReg = {
+  primary_position?: string | null
+  secondary_position?: string | null
+}
+
+const getSeasonReg0 = (row: any): SeasonReg | null => {
+  // Handles the different shapes you currently have in this file
+  return (
+    row?.season_registrations?.[0] ??
+    row?.users?.season_registrations?.[0] ??
+    row?.players?.season_registrations?.[0] ??
+    row?.players?.users?.season_registrations?.[0] ??
+    null
+  )
+}
+
+const getPrimarySecondary = (row: any) => {
+  const reg = getSeasonReg0(row)
+  const primary = reg?.primary_position || "UNKNOWN"
+  const secondary = reg?.secondary_position || null
+  return { primary, secondary }
+}
+
 // Update the getPositionAbbreviation function to handle both full names and abbreviations
 const getPositionAbbreviation = (position: string): string => {
   if (!position) return "?"
