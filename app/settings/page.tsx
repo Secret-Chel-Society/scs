@@ -101,8 +101,7 @@ export default function SettingsPage() {
         const { data: profile, error: profileError } = await supabase
           .from("users")
           .select("*")
-          // FIX: match your row using auth_id (not id)
-          .eq("auth_id", session.user.id)
+          .eq("id", session.user.id)
           .single()
 
         if (profileError) {
@@ -110,12 +109,9 @@ export default function SettingsPage() {
             setDebugInfo(`User profile not found, creating new profile for: ${session.user.id}`)
             // User doesn't exist in users table - create one
             const defaultProfile = {
-              // FIX: store auth user id here
-              auth_id: session.user.id,
+              id: session.user.id,
               email: session.user.email,
               gamer_tag_id: session.user.email?.split("@")[0] || "User",
-              // FIX: console is NOT NULL, so pick a default if you don't have one yet
-              console: "Xbox",
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
               is_active: true,
@@ -256,8 +252,7 @@ export default function SettingsPage() {
           console: console,
           updated_at: new Date().toISOString(),
         })
-        // FIX: update by auth_id (not id)
-        .eq("auth_id", session.user.id)
+        .eq("id", session.user.id)
 
       if (updateError) {
         throw new Error(`Error updating settings: ${updateError.message}`)
@@ -297,8 +292,7 @@ export default function SettingsPage() {
           news_notifications: newsNotifications,
           updated_at: new Date().toISOString(),
         })
-        // FIX: update by auth_id (not id)
-        .eq("auth_id", session.user.id)
+        .eq("id", session.user.id)
 
       if (updateError) {
         throw new Error(`Error updating notification preferences: ${updateError.message}`)
@@ -367,8 +361,7 @@ export default function SettingsPage() {
       const { error: updateError } = await supabase
         .from("users")
         .update({ avatar_url: newAvatarUrl })
-        // FIX: update by auth_id (not id)
-        .eq("auth_id", session.user.id)
+        .eq("id", session.user.id)
 
       if (updateError) {
         console.error("Error updating profile:", updateError)
@@ -825,7 +818,11 @@ export default function SettingsPage() {
                     <Label htmlFor="emailNotifications">Email Notifications</Label>
                     <p className="text-sm text-muted-foreground">Receive email notifications from MGHL</p>
                   </div>
-                  <Switch id="emailNotifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                  <Switch
+                    id="emailNotifications"
+                    checked={emailNotifications}
+                    onCheckedChange={setEmailNotifications}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
