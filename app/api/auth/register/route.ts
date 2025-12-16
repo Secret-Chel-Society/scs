@@ -1,6 +1,28 @@
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/server"
-import { logIpFromRequest } from "@/lib/ip-tracking"
+
+async function waitForAuthUserInUsersTable(supabase: any, userId: string, maxAttempts = 10): Promise<boolean> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    console.log(`Checking for auth user in users table, attempt ${attempt}/${maxAttempts}`)
+
+    const { data, error } = await supabase.from("users").select("id").eq("id", userId).single()
+
+    if (data && !error) {
+      console.log("Auth user found in users table")
+      return true
+    }
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Error checking users table:", error)
+    }
+
+    // Wait before next attempt (increasing delay)
+    await new Promise((resolve) => setTimeout(resolve, attempt * 500))
+  }
+
+  console.error("Auth user not found in users table after maximum attempts")
+  return false
+}
 
 export async function POST(request: Request) {
   try {
@@ -41,19 +63,16 @@ export async function POST(request: Request) {
 
     const {
       gamer_tag_id: gamerTag,
-      primary_position: primaryPosition,
-      secondary_position: secondaryPosition,
       console: playerConsole,
       discord_id: discordId,
       discord_username: discordUsername,
     } = metadata
 
-    // Validate metadata fields
-    if (!gamerTag || !playerConsole || !primaryPosition) {
+    // Validate metadata fields (removed position validation)
+    if (!gamerTag || !playerConsole) {
       console.error("Missing required metadata fields:", {
         gamerTag: !!gamerTag,
         playerConsole: !!playerConsole,
-        primaryPosition: !!primaryPosition,
       })
       return NextResponse.json(
         {
@@ -61,7 +80,6 @@ export async function POST(request: Request) {
           details: {
             gamerTag: !!gamerTag,
             playerConsole: !!playerConsole,
-            primaryPosition: !!primaryPosition,
           },
         },
         { status: 400 },
@@ -70,7 +88,7 @@ export async function POST(request: Request) {
 
     console.log("Registration attempt for:", { email, gamerTag, discordId })
 
-    // Check if email already exists
+    // Check if email already exists in users table
     const { data: existingUser, error: emailCheckError } = await supabase
       .from("users")
       .select("id")
@@ -86,7 +104,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email already registered" }, { status: 400 })
     }
 
-    // Check if gamertag already exists
+    // Check if gamertag already exists in users table
     const { data: existingGamertag, error: gamertagCheckError } = await supabase
       .from("users")
       .select("id")
@@ -104,35 +122,84 @@ export async function POST(request: Request) {
 
     // If Discord info is provided, check if Discord ID is already in use
     if (discordId) {
-      const { data: existingDiscordUser, error: discordCheckError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("discord_id", discordId)
-        .single()
+      console.log("Checking Discord ID:", discordId)
 
-      if (discordCheckError && discordCheckError.code !== "PGRST116") {
-        console.error("Error checking existing Discord ID:", discordCheckError)
-        return NextResponse.json({ error: "Database error while checking Discord ID" }, { status: 500 })
-      }
+      try {
+        const { data: existingDiscordUser, error: discordCheckError } = await supabase
+          .from("users")
+          .select("id")
+          .eq("discord_id", discordId)
+          .single()
 
-      if (existingDiscordUser) {
-        return NextResponse.json({ error: "Discord account already connected to another user" }, { status: 400 })
-      }
+        if (discordCheckError) {
+          console.log("Discord check error details:", {
+            code: discordCheckError.code,
+            message: discordCheckError.message,
+            details: discordCheckError.details,
+            hint: discordCheckError.hint,
+          })
 
-      // Also check discord_users table
-      const { data: existingDiscordConnection, error: discordConnectionError } = await supabase
-        .from("discord_users")
-        .select("user_id")
-        .eq("discord_id", discordId)
-        .single()
+          // Only return error for non-"no rows found" errors
+          if (discordCheckError.code !== "PGRST116") {
+            console.error("Database error checking Discord ID in users table:", discordCheckError)
+            return NextResponse.json(
+              {
+                error: "Database error while checking Discord ID",
+                details: discordCheckError.message,
+              },
+              { status: 500 },
+            )
+          }
+        }
 
-      if (discordConnectionError && discordConnectionError.code !== "PGRST116") {
-        console.error("Error checking existing Discord connection:", discordConnectionError)
-        return NextResponse.json({ error: "Database error while checking Discord connection" }, { status: 500 })
-      }
+        if (existingDiscordUser) {
+          return NextResponse.json({ error: "Discord account already connected to another user" }, { status: 400 })
+        }
 
-      if (existingDiscordConnection) {
-        return NextResponse.json({ error: "Discord account already connected to another user" }, { status: 400 })
+        // Also check discord_users table
+        console.log("Checking discord_users table for Discord ID:", discordId)
+
+        const { data: existingDiscordConnection, error: discordConnectionError } = await supabase
+          .from("discord_users")
+          .select("user_id")
+          .eq("discord_id", discordId)
+          .single()
+
+        if (discordConnectionError) {
+          console.log("Discord connection check error details:", {
+            code: discordConnectionError.code,
+            message: discordConnectionError.message,
+            details: discordConnectionError.details,
+            hint: discordConnectionError.hint,
+          })
+
+          // Only return error for non-"no rows found" errors
+          if (discordConnectionError.code !== "PGRST116") {
+            console.error("Database error checking Discord connection:", discordConnectionError)
+            return NextResponse.json(
+              {
+                error: "Database error while checking Discord connection",
+                details: discordConnectionError.message,
+              },
+              { status: 500 },
+            )
+          }
+        }
+
+        if (existingDiscordConnection) {
+          return NextResponse.json({ error: "Discord account already connected to another user" }, { status: 400 })
+        }
+
+        console.log("Discord ID checks passed successfully")
+      } catch (discordError: any) {
+        console.error("Unexpected error during Discord ID checks:", discordError)
+        return NextResponse.json(
+          {
+            error: "Unexpected database error while checking Discord ID",
+            details: discordError.message,
+          },
+          { status: 500 },
+        )
       }
     }
 
@@ -156,26 +223,21 @@ export async function POST(request: Request) {
 
     console.log("Auth user created:", authData.user.id)
 
-    // Create user record with Discord ID if provided
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .insert({
-        id: authData.user.id,
-        email,
-        gamer_tag_id: gamerTag,
-        primary_position: primaryPosition,
-        secondary_position: secondaryPosition || null,
-        console: playerConsole,
-        discord_id: discordId || null, // Save Discord ID to users table
-        discord_name: discordUsername || null,
-        is_active: true,
-      })
-      .select()
-      .single()
+    const { error: publicUserError } = await supabase.from("users").insert({
+      id: authData.user.id,
+      email: email,
+      gamer_tag_id: gamerTag,
+      console: playerConsole,
+      discord_id: discordId || null,
+      discord_name: discordUsername || null,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
 
-    if (userError) {
-      console.error("User creation error:", userError)
-      // Clean up auth user if user creation fails
+    if (publicUserError) {
+      console.error("Public users table creation error:", publicUserError)
+      // Clean up auth user if public users creation fails
       try {
         await supabase.auth.admin.deleteUser(authData.user.id)
       } catch (cleanupError) {
@@ -183,26 +245,66 @@ export async function POST(request: Request) {
       }
       return NextResponse.json(
         {
-          error: "Failed to create user profile",
-          details: userError,
+          error: "Failed to create user record in public users table",
+          details: publicUserError,
         },
         { status: 500 },
       )
     }
 
-    console.log("User record created:", userData.id)
+    console.log("Public users record created:", authData.user.id)
 
-    // Log IP address for registration
-    try {
-      const ipLogResult = await logIpFromRequest(request, userData.id, 'register')
-      if (ipLogResult.success) {
-        console.log("✅ IP address logged for registration")
-      } else {
-        console.warn("⚠️ Failed to log IP address for registration:", ipLogResult.error)
+    // Add a brief delay to ensure record creation is fully processed
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    // Wait for auth user to appear in users table
+    const userExists = await waitForAuthUserInUsersTable(supabase, authData.user.id)
+    if (!userExists) {
+      // Clean up auth user if verification fails
+      try {
+        await supabase.auth.admin.deleteUser(authData.user.id)
+      } catch (cleanupError) {
+        console.error("Failed to cleanup auth user:", cleanupError)
       }
-    } catch (ipError) {
-      console.warn("⚠️ Exception logging IP address for registration:", ipError)
+      return NextResponse.json(
+        {
+          error: "Failed to create user account - timing issue with user creation",
+          details: "User record was not found in users table",
+        },
+        { status: 500 },
+      )
     }
+
+    const { error: updateUserError } = await supabase
+      .from("users")
+      .update({
+        gamer_tag_id: gamerTag,
+        console: playerConsole,
+        discord_id: discordId || null,
+        discord_name: discordUsername || null,
+        is_active: true,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", authData.user.id)
+
+    if (updateUserError) {
+      console.error("User update error:", updateUserError)
+      // Clean up auth user if update fails
+      try {
+        await supabase.auth.admin.deleteUser(authData.user.id)
+      } catch (cleanupError) {
+        console.error("Failed to cleanup auth user:", cleanupError)
+      }
+      return NextResponse.json(
+        {
+          error: "Failed to update user profile",
+          details: updateUserError,
+        },
+        { status: 500 },
+      )
+    }
+
+    console.log("User record updated:", authData.user.id)
 
     // If Discord info is provided, also create discord_users record
     if (discordInfo && discordId) {
@@ -254,9 +356,11 @@ export async function POST(request: Request) {
 
     if (playerError) {
       console.error("Player creation error:", playerError)
-      // Clean up user and auth records
+      if (playerError.code === "23503" && playerError.message?.includes("players_user_id_fkey")) {
+        console.error("Foreign key constraint violation - user_id not found in users table")
+      }
+
       try {
-        await supabase.from("users").delete().eq("id", authData.user.id)
         await supabase.auth.admin.deleteUser(authData.user.id)
         // Also clean up discord_users record if it was created
         if (discordId) {
@@ -276,12 +380,10 @@ export async function POST(request: Request) {
 
     console.log("Player record created:", playerData.id)
 
-    // Create season registration
+    // Create season registration (removed position fields)
     const { error: registrationError } = await supabase.from("season_registrations").insert({
       user_id: authData.user.id,
       season_id: seasonId,
-      primary_position: primaryPosition,
-      secondary_position: secondaryPosition || null,
       gamer_tag: gamerTag,
       console: playerConsole,
       status: "registered",
