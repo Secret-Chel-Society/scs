@@ -37,12 +37,12 @@ export function BidPlayerModal({
   fetchPlayerBids,
   currentTeamSalary = 0,
   projectedSalary = 0,
-  currentSalaryCap = 30000000,
+  currentSalaryCap = 60000000,
   teamPlayers = [],
   projectedRosterSize = 0,
   onBidPlaced,
   currentBid,
-  salaryCap = 30000000,
+  salaryCap = 60000000,
 }: BidPlayerModalProps) {
   const [bidAmount, setBidAmount] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -58,8 +58,8 @@ export function BidPlayerModal({
     if (isOpen && player) {
       // Set minimum bid amount
       const currentBidAmount = currentBid?.bid_amount || 0
-      const playerSalary = player.salary || 2000000
-      const minimumBid = Math.max(currentBidAmount + 2000000, playerSalary)
+      const playerSalary = player.salary || 750000
+      const minimumBid = Math.max(currentBidAmount + 250000, playerSalary)
       setBidAmount(minimumBid.toString())
       setError(null)
     } else {
@@ -89,8 +89,8 @@ export function BidPlayerModal({
 
     // Validate minimum bid
     const currentBidAmount = currentBid?.bid_amount || 0
-    const playerSalary = player.salary || 2000000
-    const minimumBid = Math.max(currentBidAmount + 2000000, playerSalary)
+    const playerSalary = player.salary || 750000
+    const minimumBid = Math.max(currentBidAmount + 250000, playerSalary)
 
     if (amount < minimumBid) {
       setError(`Minimum bid is $${minimumBid.toLocaleString()}`)
@@ -237,8 +237,8 @@ export function BidPlayerModal({
   }
 
   const currentBidAmount = currentBid?.bid_amount || 0
-  const playerSalary = player.salary || 2000000
-  const minimumBid = Math.max(currentBidAmount + 2000000, playerSalary)
+  const playerSalary = player.salary || 750000
+  const minimumBid = Math.max(currentBidAmount + 250000, playerSalary)
   const isExtendingBid = currentBid && currentBid.team_id === team?.id
 
   return (
@@ -294,12 +294,12 @@ export function BidPlayerModal({
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
                 min={minimumBid}
-                step="2000000"
+                step="250000"
                 placeholder={`Minimum: $${minimumBid.toLocaleString()}`}
                 disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Minimum bid: ${minimumBid.toLocaleString()} (increments of $2,000,000)
+                Minimum bid: ${minimumBid.toLocaleString()} (increments of $250,000)
               </p>
             </div>
 
