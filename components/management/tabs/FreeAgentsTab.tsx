@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Filter, Search, Clock, History } from "lucide-react"
@@ -35,7 +34,6 @@ type Props = {
 }
 
 export default function FreeAgentsTab(props: Props) {
-  // Provide safe fallbacks in case the parent passes undefined/null
   const {
     currentTeamSalary = 0,
     currentSalaryCap = 0,
@@ -64,6 +62,31 @@ export default function FreeAgentsTab(props: Props) {
   const hasFiltered = (filteredFreeAgents?.length ?? 0) > 0
   const noFreeAgents = (freeAgents?.length ?? 0) === 0
 
+  // ✅ Helper: safely grab the "best" registration record regardless of shape
+  const getReg0 = (player: any) => {
+    // preferred (correct for your schema): users -> season_registrations (by user_id)
+    const nested = player?.users?.season_registrations?.[0]
+    // fallback: if your API returns it top-level for convenience
+    const topLevel = player?.season_registrations?.[0]
+    return nested ?? topLevel ?? null
+  }
+
+  // ✅ Position breakdown should count from the current list we’re showing
+  const positionCounts = (() => {
+    const positions = { C: 0, LW: 0, RW: 0, LD: 0, RD: 0, G: 0 }
+    const list = filteredFreeAgents ?? []
+
+    list.forEach((p) => {
+      const reg0 = getReg0(p)
+      const primary = getPositionAbbreviation(reg0?.primary_position || "")
+      if (positions.hasOwnProperty(primary)) {
+        positions[primary as keyof typeof positions]++
+      }
+    })
+
+    return positions
+  })()
+
   return (
     <Card>
       <CardHeader>
@@ -72,6 +95,7 @@ export default function FreeAgentsTab(props: Props) {
           Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
           <Card className="bg-slate-800 border-slate-700">
@@ -92,37 +116,30 @@ export default function FreeAgentsTab(props: Props) {
             <CardContent className="p-3 md:p-4">
               <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Position Breakdown</h3>
               <div className="grid grid-cols-3 gap-1 md:gap-2 text-xs md:text-sm">
-                {(() => {
-                  const positions = { C: 0, LW: 0, RW: 0, LD: 0, RD: 0, G: 0 }
-                  return (
-                    <>
-                      <div className="flex justify-between">
-                        <span className="text-red-400 font-medium">C:</span>
-                        <span className="text-white">{positions.C}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-green-400 font-medium">LW:</span>
-                        <span className="text-white">{positions.LW}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-blue-400 font-medium">RW:</span>
-                        <span className="text-white">{positions.RW}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-cyan-400 font-medium">LD:</span>
-                        <span className="text-white">{positions.LD}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-yellow-400 font-medium">RD:</span>
-                        <span className="text-white">{positions.RD}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-purple-400 font-medium">G:</span>
-                        <span className="text-white">{positions.G}</span>
-                      </div>
-                    </>
-                  )
-                })()}
+                <div className="flex justify-between">
+                  <span className="text-red-400 font-medium">C:</span>
+                  <span className="text-white">{positionCounts.C}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-green-400 font-medium">LW:</span>
+                  <span className="text-white">{positionCounts.LW}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-blue-400 font-medium">RW:</span>
+                  <span className="text-white">{positionCounts.RW}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-cyan-400 font-medium">LD:</span>
+                  <span className="text-white">{positionCounts.LD}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-yellow-400 font-medium">RD:</span>
+                  <span className="text-white">{positionCounts.RD}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-purple-400 font-medium">G:</span>
+                  <span className="text-white">{positionCounts.G}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -146,6 +163,7 @@ export default function FreeAgentsTab(props: Props) {
               </SelectContent>
             </Select>
           </div>
+
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4" />
             <Input
@@ -174,22 +192,30 @@ export default function FreeAgentsTab(props: Props) {
               .sort((a, b) => (a?.users?.gamer_tag_id || "").localeCompare(b?.users?.gamer_tag_id || ""))
               .map((player) => {
                 if (!player?.users) return null
+
                 const currentBid = playerBids?.[player.id]
                 const canBid =
-                  !!isBiddingEnabled && (!currentBid || currentBid.team_id !== teamId) && (projectedRosterSize ?? 0) < 15
+                  !!isBiddingEnabled &&
+                  (!currentBid || currentBid.team_id !== teamId) &&
+                  (projectedRosterSize ?? 0) < 15
 
-                const primaryPos = player?.season_registrations?.[0]?.primary_position
-                const secondaryPos = player?.season_registrations?.[0]?.secondary_position
+                const reg0 = getReg0(player)
+                const primaryPos = reg0?.primary_position || "UNKNOWN"
+                const secondaryPos = reg0?.secondary_position || null
 
                 return (
                   <div key={player.id} className="border rounded-lg p-3 md:p-4 shadow-sm dark:border-gray-800">
                     <div className="flex justify-between items-start mb-2 md:mb-3">
                       <div>
-                        <h3 className="font-medium text-sm md:text-base">{player.users?.gamer_tag_id}</h3>
+                        <h3 className="font-medium text-sm md:text-base">
+                          {player.users?.gamer_tag_id || "Unknown Player"}
+                        </h3>
+
                         <div className="flex items-center gap-1 mt-1">
                           <span className={`${getPositionColor(primaryPos)} text-xs md:text-sm`}>
-                            {getPositionAbbreviation(primaryPos || "UNKNOWN")}
+                            {getPositionAbbreviation(primaryPos)}
                           </span>
+
                           {secondaryPos && (
                             <>
                               {" / "}
@@ -199,8 +225,9 @@ export default function FreeAgentsTab(props: Props) {
                             </>
                           )}
                         </div>
+
                         <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                          {player.users?.console} • ${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M
+                          {player.users?.console || "Unknown"} • ${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M
                         </p>
                       </div>
                     </div>
@@ -209,7 +236,9 @@ export default function FreeAgentsTab(props: Props) {
                       <div className="mb-2 md:mb-3 p-2 bg-muted rounded-md">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-xs md:text-sm font-medium">Current Bid:</span>
-                          <span className="font-bold text-xs md:text-sm">${(currentBid.bid_amount ?? 0).toLocaleString()}</span>
+                          <span className="font-bold text-xs md:text-sm">
+                            ${(currentBid.bid_amount ?? 0).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center text-xs">
                           <span>By: {currentBid?.teams?.name}</span>
@@ -231,6 +260,7 @@ export default function FreeAgentsTab(props: Props) {
                       >
                         {currentBid && currentBid.team_id === teamId ? "Extend Bid" : "Place Bid"}
                       </Button>
+
                       <Button
                         variant="outline"
                         size="sm"
