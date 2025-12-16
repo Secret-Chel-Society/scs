@@ -3,43 +3,15 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
-import { useSupabase } from "@/lib/supabase/client"
 
 export default function AuthCallbackPage() {
   const router = useRouter()
-  const { supabase } = useSupabase()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const trackLogin = async () => {
-      try {
-        // Wait a bit for the session to be fully established
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Track IP address for login
-        const response = await fetch("/api/auth/track-login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (response.ok) {
-          console.log("✅ Login IP tracked successfully")
-        } else {
-          const errorData = await response.json()
-          console.warn("⚠️ Failed to track login IP:", errorData)
-        }
-      } catch (error) {
-        console.warn("⚠️ Error tracking login IP:", error)
-      }
-    }
-
-    // Track login and then redirect
-    trackLogin().finally(() => {
-      router.push("/auth-success")
-    })
-  }, [router, supabase])
+    // Redirect to auth-success page
+    router.push("/auth-success")
+  }, [router])
 
   if (error) {
     return (
