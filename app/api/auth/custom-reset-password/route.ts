@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     // Use Supabase's built-in password reset functionality
     // This avoids the rate limiting issue with generateLink
     const { error } = await supabase.auth.admin.resetUserPasswordByEmail(email, {
-      redirectTo: "https://www.secretchelsociety.com/reset-password",
+      redirectTo: "https://majorgaminghockeyleague.com/reset-password",
     })
 
     if (error) {
