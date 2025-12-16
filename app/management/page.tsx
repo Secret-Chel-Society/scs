@@ -302,7 +302,6 @@ export default function ManagementPage() {
   // ----------------------
   const fetchTradeProposals = async (teamId: string, teamName: string) => {
     try {
-      // original notification queries
       const { data: incomingRaw } = await supabase
         .from("notifications")
         .select("*")
@@ -319,14 +318,13 @@ export default function ManagementPage() {
         .not("message", "like", "%STATUS:%")
         .order("created_at", { ascending: false })
 
-      // --- NEW: parse TRADE_DATA for tradeIds we can verify against the trades table
       const TRADE_DATA_REGEX = /TRADE_DATA:(.+)$/s
       const allNotifs = [...(incomingRaw || []), ...(outgoingRaw || [])]
 
       const tradeIds = Array.from(
         new Set(
           allNotifs
-            .map(n => {
+            .map((n) => {
               try {
                 const m = n.message?.match(TRADE_DATA_REGEX)
                 if (!m) return null
@@ -336,44 +334,35 @@ export default function ManagementPage() {
                 return null
               }
             })
-            .filter(Boolean)
-        )
+            .filter(Boolean),
+        ),
       ) as string[]
 
-      // lookup statuses for those tradeIds
       let statusById: Record<string, string> = {}
       if (tradeIds.length > 0) {
-        const { data: trades, error: tradesErr } = await supabase
-          .from("trades")
-          .select("id, status")
-          .in("id", tradeIds)
-
+        const { data: trades, error: tradesErr } = await supabase.from("trades").select("id, status").in("id", tradeIds)
         if (!tradesErr && trades) {
           for (const t of trades) statusById[t.id] = t.status
         }
       }
 
-      // keep only notifications whose trade is still 'pending'
       const filterByTradeStatus = (arr: any[] | null | undefined) =>
-        (arr || []).filter(n => {
+        (arr || []).filter((n) => {
           try {
             const m = n.message?.match(TRADE_DATA_REGEX)
-            if (!m) return true // not a trade payload => keep (legacy/other)
+            if (!m) return true
             const payload = JSON.parse(m[1])
             const tid = payload?.tradeId as string | undefined
-            if (!tid) return true // legacy trade without id => keep
+            if (!tid) return true
             const st = statusById[tid]
-            return !st || st === "pending" // hide cancelled/accepted/rejected/etc.
+            return !st || st === "pending"
           } catch {
             return true
           }
         })
 
-      const incoming = filterByTradeStatus(incomingRaw)
-      const outgoing = filterByTradeStatus(outgoingRaw)
-
-      setIncomingTradeProposals(incoming || [])
-      setOutgoingTradeProposals(outgoing || [])
+      setIncomingTradeProposals(filterByTradeStatus(incomingRaw))
+      setOutgoingTradeProposals(filterByTradeStatus(outgoingRaw))
     } catch (e) {
       console.error("Error fetching trade proposals:", e)
     }
@@ -391,10 +380,11 @@ export default function ManagementPage() {
             name,
             logo_url
           )
-        `
+        `,
         )
         .order("bid_amount", { ascending: false })
       if (error) throw error
+
       const highest: Record<string, any> = {}
       bids?.forEach((b) => {
         if (!highest[b.player_id] || b.bid_amount > highest[b.player_id].bid_amount) highest[b.player_id] = b
@@ -437,9 +427,11 @@ export default function ManagementPage() {
     setLoadingWaivers(true)
     setWaiverError(null)
     try {
-      // process expired first
       try {
-        const processResponse = await fetch("/api/waivers/check-expired", { method: "POST", headers: { "Content-Type": "application/json" } })
+        const processResponse = await fetch("/api/waivers/check-expired", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        })
         if (processResponse.ok) {
           const processResult = await processResponse.json()
           if (processResult.expiredCount > 0) {
@@ -463,7 +455,6 @@ export default function ManagementPage() {
       const nowTs = new Date()
       const filtered = (data.waivers || []).filter((w: any) => new Date(w.claim_deadline) > nowTs)
 
-      // add hasTeamClaimed flags
       const withClaims: Waiver[] = await Promise.all(
         filtered.map(async (waiver: Waiver) => {
           const { data: teamClaim } = await supabase
@@ -474,7 +465,7 @@ export default function ManagementPage() {
             .eq("status", "pending")
             .maybeSingle()
           return { ...waiver, hasTeamClaimed: !!teamClaim }
-        })
+        }),
       )
 
       setWaivers(withClaims)
@@ -541,7 +532,10 @@ export default function ManagementPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to claim waiver")
-      toast({ title: "Claim submitted", description: "Your waiver claim has been submitted. You'll be notified when the waiver period ends." })
+      toast({
+        title: "Claim submitted",
+        description: "Your waiver claim has been submitted. You'll be notified when the waiver period ends.",
+      })
       await loadWaiversData()
     } catch (e: any) {
       toast({ title: "Error claiming player", description: e.message, variant: "destructive" })
@@ -576,7 +570,11 @@ export default function ManagementPage() {
       await fetchData()
       if (teamData?.id && teamData.name) await fetchTradeProposals(teamData.id, teamData.name)
     } catch (e: any) {
-      toast({ title: "Error", description: e.message || `Failed to ${accept ? "accept" : "reject"} trade`, variant: "destructive" })
+      toast({
+        title: "Error",
+        description: e.message || `Failed to ${accept ? "accept" : "reject"} trade`,
+        variant: "destructive",
+      })
     } finally {
       setIsProcessingTradeResponse(false)
     }
@@ -588,6 +586,7 @@ export default function ManagementPage() {
   async function fetchData() {
     if (!session?.user) {
       setIsAuthorized(false)
+      setLoading(false) // ✅ FIX: don't stay stuck loading if no session
       return
     }
     setLoading(true)
@@ -617,8 +616,6 @@ export default function ManagementPage() {
         .eq("id", currentSeasonId)
         .maybeSingle()
 
-      const activeSeasonNumber = activeSeasonRow?.season_number ?? null
-
       const { data: basicTeamData, error: teamError } = await supabase.from("teams").select("*").eq("id", playerData.team_id).single()
       if (teamError) throw teamError
 
@@ -629,7 +626,7 @@ export default function ManagementPage() {
         otl: calculatedTeamStats.otl,
         points: calculatedTeamStats.points,
         games_played: calculatedTeamStats.games_played,
-        goals_for: calculatedTeamStats.goals_for,          // FIX
+        goals_for: calculatedTeamStats.goals_for, // ✅ FIX
         goals_against: calculatedTeamStats.goals_against,
         goal_differential: calculatedTeamStats.goal_differential,
       }
@@ -642,7 +639,7 @@ export default function ManagementPage() {
           `
           id, season_number, round, original_team_id, current_team_id, is_traded,
           original_team:teams!tradeable_draft_picks_original_team_id_fkey ( name, logo_url )
-        `
+        `,
         )
         .eq("current_team_id", playerData.team_id)
         .order("season_number", { ascending: true })
@@ -658,13 +655,14 @@ export default function ManagementPage() {
           `
           id, role, salary, user_id,
           users!inner ( id, email, gamer_tag_id, console, avatar_url )
-        `
+        `,
         )
         .eq("team_id", playerData.team_id)
         .order("role", { ascending: false })
 
+      let localPlayersForSalary: any[] = []
+
       if (playersError) {
-        // fallback path omitted here for brevity — original logic enhanced users/registrations; keep behavior:
         const { data: playersOnly } = await supabase
           .from("players")
           .select(`id, role, salary, user_id`)
@@ -673,20 +671,17 @@ export default function ManagementPage() {
 
         const userIds = playersOnly?.map((p) => p.user_id) || []
         let enhancedPlayers = playersOnly || []
+
         if (userIds.length > 0) {
-          const { data: users } = await supabase
-            .from("users")
-            .select(`id, email, gamer_tag_id, console, avatar_url`)
-            .in("id", userIds)
+          const { data: users } = await supabase.from("users").select(`id, email, gamer_tag_id, console, avatar_url`).in("id", userIds)
 
           let registrations: any[] = []
-          const { data: activeSeason } = await supabase.from("seasons").select("id, season_number").eq("is_active", true).single()
-          if (activeSeason) {
+          if (activeSeasonRow?.id) {
             const { data: activeRegs } = await supabase
               .from("season_registrations")
               .select(`user_id, primary_position, secondary_position, gamer_tag, console`)
               .in("user_id", userIds)
-              .eq("season_id", activeSeason.id)
+              .eq("season_id", activeSeasonRow.id)
               .eq("status", "Approved")
             registrations = activeRegs || []
           }
@@ -704,12 +699,11 @@ export default function ManagementPage() {
                   console: reg?.console || user?.console,
                   avatar_url: user?.avatar_url,
                 },
-                // IMPORTANT: attach season_registrations array so tabs can read it
                 season_registrations: reg
                   ? [
                       {
-                        season_id: activeSeason?.id,
-                        season_number: activeSeason?.season_number,
+                        season_id: activeSeasonRow?.id,
+                        season_number: activeSeasonRow?.season_number,
                         primary_position: reg.primary_position,
                         secondary_position: reg.secondary_position,
                       },
@@ -718,18 +712,19 @@ export default function ManagementPage() {
               }
             }) || []
         }
+
         setTeamPlayers(enhancedPlayers)
+        localPlayersForSalary = enhancedPlayers // ✅ FIX: use local list for salary
       } else {
-        // enhance with active season registration if available
-        const userIds = players?.map((p) => p.user_id) || []
+        const userIds = players?.map((p: any) => p.user_id) || []
         let registrations: any[] = []
-        const { data: activeSeason } = await supabase.from("seasons").select("id, season_number").eq("is_active", true).single()
-        if (activeSeason) {
+
+        if (activeSeasonRow?.id) {
           const { data: activeRegs } = await supabase
             .from("season_registrations")
             .select(`user_id, primary_position, secondary_position, gamer_tag, console`)
             .in("user_id", userIds)
-            .eq("season_id", activeSeason.id)
+            .eq("season_id", activeSeasonRow.id)
             .eq("status", "Approved")
           registrations = activeRegs || []
         }
@@ -744,34 +739,34 @@ export default function ManagementPage() {
                 gamer_tag_id: reg.gamer_tag || p.users.gamer_tag_id,
                 console: reg.console || p.users.console,
               },
-              // IMPORTANT: attach season_registrations array so tabs can read it
               season_registrations: [
                 {
-                  season_id: activeSeason?.id,
-                  season_number: activeSeason?.season_number,
+                  season_id: activeSeasonRow?.id,
+                  season_number: activeSeasonRow?.season_number,
                   primary_position: reg.primary_position,
                   secondary_position: reg.secondary_position,
                 },
               ],
             }
           }
-          // No registration: still provide an empty array
           return { ...p, season_registrations: [] }
         })
+
         setTeamPlayers(enhanced)
+        localPlayersForSalary = enhanced // ✅ FIX: use local list for salary
       }
 
-      // salary
-      const totalSalary =
-        (Array.isArray(teamPlayers) && teamPlayers.length > 0 ? teamPlayers : (players as any[]) || []).reduce(
-          (sum: number, p: any) => sum + (p.salary || 0),
-          0
-        ) || 0
+      // ✅ FIX: salary calc must use localPlayersForSalary (state is stale here)
+      const totalSalary = (localPlayersForSalary || []).reduce((sum: number, p: any) => sum + (p.salary || 0), 0) || 0
       setCurrentTeamSalary(totalSalary)
       setProjectedTeamSalary(totalSalary)
 
       // other teams (for trades)
-      const { data: allTeamsData } = await supabase.from("teams").select("*").neq("id", playerData.team_id).order("name", { ascending: true })
+      const { data: allTeamsData } = await supabase
+        .from("teams")
+        .select("*")
+        .neq("id", playerData.team_id)
+        .order("name", { ascending: true })
       setAllTeams(allTeamsData || [])
 
       // schedule
@@ -783,6 +778,7 @@ export default function ManagementPage() {
       setTeamMatches(matches || [])
 
       // bids (mine)
+      // ✅ FIX: season_registrations must be nested under users (not directly under players)
       const { data: myTeamBids } = await supabase
         .from("player_bidding")
         .select(
@@ -793,15 +789,17 @@ export default function ManagementPage() {
             users (
               id,
               gamer_tag_id,
-              console
-            ),
-            season_registrations (
-              primary_position,
-              secondary_position
+              console,
+              season_registrations (
+                primary_position,
+                secondary_position,
+                season_id,
+                status
+              )
             )
           ),
           teams:team_id (id, name, logo_url)
-        `
+        `,
         )
         .eq("team_id", playerData.team_id)
         .order("bid_expires_at", { ascending: true })
@@ -815,7 +813,7 @@ export default function ManagementPage() {
           }
         })
         const nowTs = new Date()
-        const enhanced = myTeamBids.map((bid: any) => {
+        const enhancedBids = myTeamBids.map((bid: any) => {
           const highest = highestByPlayer[bid.player_id]
           const isHighestBidder = highest && highest.id === bid.id
           const isExpired = new Date(bid.bid_expires_at) <= nowTs
@@ -827,9 +825,9 @@ export default function ManagementPage() {
             status: isExpired ? "expired" : isHighestBidder ? "winning" : "outbid",
           }
         })
-        setMyBids(enhanced)
-        setActiveBidsCount(enhanced.filter((b: any) => !b.isExpired && b.isHighestBidder).length)
-        setOutbidCount(enhanced.filter((b: any) => !b.isExpired && !b.isHighestBidder).length)
+        setMyBids(enhancedBids)
+        setActiveBidsCount(enhancedBids.filter((b: any) => !b.isExpired && b.isHighestBidder).length)
+        setOutbidCount(enhancedBids.filter((b: any) => !b.isExpired && !b.isHighestBidder).length)
       }
     } catch (error: any) {
       console.error("Error fetching management data:", error)
@@ -904,20 +902,13 @@ export default function ManagementPage() {
         return
       }
       try {
-        const { data: otherPlayers } = await supabase
-          .from("players")
-          .select(`id, role, salary, user_id`)
-          .eq("team_id", selectedTeamForTrade)
-          .order("role", { ascending: false })
+        const { data: otherPlayers } = await supabase.from("players").select(`id, role, salary, user_id`).eq("team_id", selectedTeamForTrade).order("role", { ascending: false })
 
         const { data: activeSeason } = await supabase.from("seasons").select("id, season_number").eq("is_active", true).single()
         const userIds = otherPlayers?.map((p) => p.user_id) || []
         let enhanced = otherPlayers || []
         if (userIds.length > 0) {
-          const { data: users } = await supabase
-            .from("users")
-            .select(`id, email, gamer_tag_id, console, avatar_url`)
-            .in("id", userIds)
+          const { data: users } = await supabase.from("users").select(`id, email, gamer_tag_id, console, avatar_url`).in("id", userIds)
 
           let registrations: any[] = []
           if (activeSeason) {
@@ -963,7 +954,7 @@ export default function ManagementPage() {
             `
             id, season_number, round, original_team_id, current_team_id, is_traded,
             original_team:teams!tradeable_draft_picks_original_team_id_fkey ( name, logo_url )
-          `
+          `,
           )
           .eq("current_team_id", selectedTeamForTrade)
           .order("season_number", { ascending: true })
@@ -1050,9 +1041,7 @@ export default function ManagementPage() {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-        <p className="text-muted-foreground mb-8">
-          You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
-        </p>
+        <p className="text-muted-foreground mb-8">You must be a Team Manager (GM, AGM, or Owner) to access the management panel.</p>
         <Button asChild>
           <Link href="/">Return to Home</Link>
         </Button>
@@ -1066,14 +1055,19 @@ export default function ManagementPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        {/* HEADER / SUMMARY (split out) */}
         <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
             {teamData && (
               <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
                 {teamData.logo_url && (
-                  <Image src={teamData.logo_url || "/placeholder.svg"} alt={teamData.name} width={20} height={20} className="rounded-full md:w-6 md:h-6" />
+                  <Image
+                    src={teamData.logo_url || "/placeholder.svg"}
+                    alt={teamData.name}
+                    width={20}
+                    height={20}
+                    className="rounded-full md:w-6 md:h-6"
+                  />
                 )}
                 {teamData.name}
               </p>
@@ -1097,33 +1091,38 @@ export default function ManagementPage() {
               projectedSalary={projectedSalary}
             />
 
-            {/* TABS */}
             <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
               <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
                 <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
                 </TabsTrigger>
+
                 <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Avail</span>
                   <span className="md:hidden">Avail</span>
                 </TabsTrigger>
+
                 <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Schedule</span>
-                  <span className="md-hidden">Schedule</span>
+                  <span className="md:hidden">Schedule</span> {/* ✅ FIX */}
                 </TabsTrigger>
+
                 <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Free Agents</span>
                   <span className="md:hidden">Free Agents</span>
                 </TabsTrigger>
+
                 <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">My Bids</span>
                   <span className="md:hidden">Bids</span>
                 </TabsTrigger>
+
                 <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Waivers</span>
                   <span className="md:hidden">Waivers</span>
                 </TabsTrigger>
+
                 <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
                   <span className="hidden md:inline">Trades</span>
                   <span className="md:hidden">Trades</span>
@@ -1135,41 +1134,30 @@ export default function ManagementPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* ROSTER */}
               <TabsContent value="roster">
-                <TeamRosterTab
-                  teamPlayers={teamPlayers}
-                  getPositionAbbreviation={getPositionAbbreviation}
-                  getPositionColor={getPositionColor}
-                />
+                <TeamRosterTab teamPlayers={teamPlayers} getPositionAbbreviation={getPositionAbbreviation} getPositionColor={getPositionColor} />
               </TabsContent>
 
-              {/* AVAILABILITY */}
               <TabsContent value="availability">
                 <TeamAvailTab teamId={teamData?.id} teamName={teamData?.name} />
               </TabsContent>
 
-              {/* SCHEDULE */}
               <TabsContent value="schedule">
                 <TeamScheduleTab teamData={teamData} teamMatches={teamMatches} />
               </TabsContent>
 
-              {/* FREE AGENTS */}
               <TabsContent value="free-agents">
                 <FreeAgentsTab
-                  // summary widgets
                   currentTeamSalary={currentTeamSalary}
                   currentSalaryCap={currentSalaryCap}
                   projectedSalary={projectedSalary}
                   rosterCount={teamPlayers.length}
                   projectedRosterSize={projectedRosterSize}
                   teamPlayers={teamPlayers}
-                  // filters
                   positionFilter={positionFilter}
                   nameFilter={nameFilter}
                   setPositionFilter={setPositionFilter}
                   setNameFilter={setNameFilter}
-                  // data
                   teamData={teamData}
                   freeAgents={filteredFreeAgents}
                   freeAgentsRaw={freeAgents}
@@ -1178,7 +1166,6 @@ export default function ManagementPage() {
                   playerBids={playerBids}
                   isBiddingEnabled={isBiddingEnabled}
                   now={now}
-                  // actions
                   reloadFreeAgents={loadFreeAgents}
                   handleBidClick={handleBidClick}
                   handleHistoryClick={handleHistoryClick}
@@ -1188,7 +1175,6 @@ export default function ManagementPage() {
                 />
               </TabsContent>
 
-              {/* MY BIDS */}
               <TabsContent value="my-bids">
                 <MyBidsTab
                   myBids={myBids}
@@ -1200,7 +1186,6 @@ export default function ManagementPage() {
                 />
               </TabsContent>
 
-              {/* WAIVERS */}
               <TabsContent value="waivers">
                 <WaiversTab
                   waivers={waivers}
@@ -1219,23 +1204,19 @@ export default function ManagementPage() {
                 />
               </TabsContent>
 
-              {/* TRADES */}
               <TabsContent value="trades">
                 <TradesTab
-                  /* data */
                   allTeams={allTeams}
                   teamData={teamData}
                   teamPlayers={teamPlayers}
                   selectedTeamPlayers={selectedTeamPlayers}
                   myPicks={myPicks}
                   otherTeamPicks={otherTeamPicks}
-                  /* salary/cap */
                   currentSalaryCap={currentSalaryCap}
                   currentTeamSalary={currentTeamSalary}
                   projectedTeamSalary={projectedTeamSalary}
                   otherTeamSalary={otherTeamSalary}
                   projectedOtherTeamSalary={projectedOtherTeamSalary}
-                  /* selections */
                   selectedTeamForTrade={selectedTeamForTrade}
                   setSelectedTeamForTrade={setSelectedTeamForTrade}
                   selectedMyPlayers={selectedMyPlayers}
@@ -1246,18 +1227,15 @@ export default function ManagementPage() {
                   setSelectedMyPicks={setSelectedMyPicks}
                   selectedOtherPicks={selectedOtherPicks}
                   setSelectedOtherPicks={setSelectedOtherPicks}
-                  /* withholding */
                   capSpaceWithholding={capSpaceWithholding}
                   setCapSpaceWithholding={setCapSpaceWithholding}
                   getValidWithholdingAmounts={getValidWithholdingAmounts}
-                  /* text + helpers */
                   tradeMessage={tradeMessage}
                   setTradeMessage={setTradeMessage}
                   formatPick={formatPick}
                   toggleFromArray={toggleFromArray}
                   getPositionAbbreviation={getPositionAbbreviation}
                   getPositionColor={getPositionColor}
-                  /* actions/state */
                   isSubmittingTrade={isSubmittingTrade}
                   setIsSubmittingTrade={setIsSubmittingTrade}
                   tradeError={tradeError}
@@ -1265,13 +1243,11 @@ export default function ManagementPage() {
                   tradeSuccess={tradeSuccess}
                   setTradeSuccess={setTradeSuccess}
                   handleTradeResponse={handleTradeResponse}
-                  /* proposals */
                   incomingTradeProposals={incomingTradeProposals}
                   outgoingTradeProposals={outgoingTradeProposals}
                   isProcessingTradeResponse={isProcessingTradeResponse}
                   cancellingTrades={cancellingTrades}
                   setCancellingTrades={setCancellingTrades}
-                  /* env/tools */
                   supabase={supabase}
                   session={session}
                   fetchTradeProposals={fetchTradeProposals}
@@ -1283,7 +1259,6 @@ export default function ManagementPage() {
         )}
       </motion.div>
 
-      {/* Bid Modal (unchanged) */}
       {selectedPlayer && (
         <BidPlayerModal
           player={selectedPlayer}
