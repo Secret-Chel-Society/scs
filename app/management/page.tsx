@@ -1044,19 +1044,10 @@ const ManagementPage = () => {
   }
 
   // Fetch current bids for all players
-  const fetchPlayerBids = async () => {
-    try {
-      const { data: bids, error } = await supabase
-        .from("player_bidding")
-        .select(`
-          *,
-          teams:team_id (
-            id,
-            name,
-            logo_url
-          )
-        `)
-        .order("bid_amount", { ascending: false })
+   const { data: bids, error } = await supabase
+     .from("player_bidding")
+     .select("*, teams:team_id ( id, name, logo_url )")
+     .order("bid_amount", { ascending: false })
 
       if (error) throw error
 
