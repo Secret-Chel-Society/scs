@@ -1299,7 +1299,7 @@ const ManagementPage = () => {
         headers: {
           "Content-Type": "application/json",
           // Use the fresh session access token
-          Authorization: `Bearer ${freshSession.access_token}`,
+          Authorization: "Bearer " + freshSession.access_token,
         },
         body: JSON.stringify({
           waiverId,
