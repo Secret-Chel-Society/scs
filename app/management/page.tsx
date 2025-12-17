@@ -996,13 +996,17 @@ const ManagementPage = () => {
       console.log("User role:", session?.user?.role)
       console.log("Team data:", teamData?.name)
 
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      if (session?.access_token) {
+        headers.Authorization = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch("/api/free-agents", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // Include authorization header if we have a session
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
+        headers,
       })
 
       console.log("Free agents API response status:", response.status)
