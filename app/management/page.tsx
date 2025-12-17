@@ -242,7 +242,7 @@ const ManagementPage = () => {
   const [tradeError, setTradeError] = useState<string | null>(null)
   const [tradeSuccess, setTradeSuccess] = useState<string | null>(null)
   const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(30000000) // $30M salary cap
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $65Mil salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
@@ -1032,7 +1032,7 @@ const ManagementPage = () => {
       console.log("Successfully loaded free agents:", freeAgentsList.length)
     } catch (error: any) {
       console.error("Error loading free agents:", error)
-      setFreeAgentsError(`Failed to load free agents: ${error.message}`)
+      setFreeAgentsError("Failed to load free agents: " + (error?.message || "Unknown error"))
       toast({
         title: "Error",
         description: "Failed to load free agents: " + error.message,
