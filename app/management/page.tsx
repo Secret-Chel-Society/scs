@@ -1001,7 +1001,7 @@ const ManagementPage = () => {
       }
 
       if (session?.access_token) {
-        headers.Authorization = `Bearer ${session.access_token}`
+        headers.Authorization = "Bearer " + session.access_token
       }
 
       const response = await fetch("/api/free-agents", {
