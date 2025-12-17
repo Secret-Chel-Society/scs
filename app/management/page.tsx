@@ -1807,11 +1807,11 @@ const ManagementPage = () => {
                                   <Badge variant="outline">{match.status}</Badge>
                                 )}
                                 <Button variant="outline" size="sm" asChild>
-                                  <Link href={`/matches/${match.id}`}>View</Link>
+                                  <Link href={"/matches/" + match.id}>View</Link>
                                 </Button>
                                 {match.status === "Scheduled" && (
                                   <Button variant="outline" size="sm" asChild>
-                                    <Link href={`/management/lineups/${match.id}`}>Set Lineup</Link>
+                                    <Link href={"/management/lineups/" + match.id}>Set Lineup</Link>
                                   </Button>
                                 )}
                               </div>
