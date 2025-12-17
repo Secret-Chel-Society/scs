@@ -23,12 +23,14 @@ export default function MyBidsTab({
   getPositionAbbreviation,
   getPositionColor,
 }: Props) {
+  console.log("[v0] MyBidsTab received myBids:", myBids)
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>My Bids</CardTitle>
         <CardDescription>
-          Bids placed by {teamName}. Active: {activeBidsCount} | Outbid: {outbidCount}
+          Bids placed by {teamName}. Active: {activeBidsCount} | Outbid: {outbidCount} | Total: {myBids.length}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -56,42 +58,50 @@ export default function MyBidsTab({
                 statusBadge = { variant: "destructive" as const, text: "LOST" }
               }
 
+              const primaryPos = bid.registration?.primary_position
+              const secondaryPos = bid.registration?.secondary_position
+
               return (
                 <div key={bid.id} className={cardClass}>
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">{bid.players?.users?.gamer_tag_id || "Unknown Player"}</h3>
                       <div className="flex items-center gap-1 mt-1">
-                        <span className={getPositionColor(bid.players?.season_registrations?.[0]?.primary_position)}>
-                          {getPositionAbbreviation(bid.players?.season_registrations?.[0]?.primary_position || "UNKNOWN")}
-                        </span>
-                        {bid.players?.season_registrations?.[0]?.secondary_position && (
+                        {primaryPos ? (
                           <>
-                            {" / "}
-                            <span
-                              className={getPositionColor(bid.players?.season_registrations?.[0]?.secondary_position)}
-                            >
-                              {getPositionAbbreviation(bid.players?.season_registrations?.[0]?.secondary_position)}
-                            </span>
+                            <span className={getPositionColor(primaryPos)}>{getPositionAbbreviation(primaryPos)}</span>
+                            {secondaryPos && (
+                              <>
+                                {" / "}
+                                <span className={getPositionColor(secondaryPos)}>
+                                  {getPositionAbbreviation(secondaryPos)}
+                                </span>
+                              </>
+                            )}
                           </>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">Position unknown</span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">Your bid: ${bid.bid_amount.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Your bid: ${bid.bid_amount?.toLocaleString()}
+                      </p>
                       {!bid.isHighestBidder && bid.highestBid && (
                         <p className="text-sm text-red-600 dark:text-red-400 font-bold">
-                          Outbid by {bid.highestBid.teams?.name}: ${bid.highestBid.bid_amount.toLocaleString()}
+                          Highest bid: ${bid.highestBid.bid_amount?.toLocaleString()}
                         </p>
-                      )}
-                      {isExpired && !bid.isHighestBidder && (
-                        <p className="text-sm text-red-600 dark:text-red-400 font-bold">BID LOST</p>
-                      )}
-                      {isExpired && bid.isHighestBidder && (
-                        <p className="text-sm text-green-600 dark:text-green-400 font-bold">BID WON</p>
                       )}
                     </div>
                     <div className="text-right">
-                      <Badge variant={statusBadge.variant}>{statusBadge.text}</Badge>
-                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Badge
+                        variant={statusBadge.variant}
+                        className={
+                          isWinning ? "bg-green-500 hover:bg-green-600" : isOutbid ? "bg-red-500 hover:bg-red-600" : ""
+                        }
+                      >
+                        {statusBadge.text}
+                      </Badge>
+                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1 justify-end">
                         <Clock className="h-3 w-3" />
                         {formatTimeRemaining(bid.bid_expires_at)}
                       </div>
