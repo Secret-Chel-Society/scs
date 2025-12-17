@@ -1633,7 +1633,7 @@ const ManagementPage = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-
+  
               {/* Trades Tab Content */}
               <TabsContent value="trades">
                 <Card>
