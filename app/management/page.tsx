@@ -1543,7 +1543,9 @@ const ManagementPage = () => {
                   <div>
                     <div className="text-sm text-muted-foreground">Record</div>
                     <div className="text-2xl font-bold">
-                      {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
+                      {teamData
+                        ? teamData.wins + "-" + teamData.losses + "-" + teamData.otl
+                        : "0-0-0"}
                     </div>
                   </div>
                 </CardContent>
