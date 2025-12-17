@@ -15,86 +15,101 @@ type Props = {
 export default function TeamRosterTab({ teamPlayers, getPositionAbbreviation, getPositionColor }: Props) {
   const { supabase } = useSupabase()
 
-  // We capture BOTH season id and number to handle schemas that use either in season_registrations.
+  const [registrationsByUser, setRegistrationsByUser] = useState<Record<string, any>>({})
   const [activeSeasonId, setActiveSeasonId] = useState<string | null>(null)
   const [activeSeasonNumber, setActiveSeasonNumber] = useState<number | null>(null)
 
+  const safePlayers = useMemo(() => (Array.isArray(teamPlayers) ? teamPlayers : []), [teamPlayers])
+
   useEffect(() => {
     let cancelled = false
-    const loadActiveSeason = async () => {
+    const loadRegistrations = async () => {
       try {
-        // Prefer system_settings.current_season_number if present
-        const { data: settings } = await supabase
-          .from("system_settings")
-          .select("current_season_number")
-          .maybeSingle()
-
-        if (settings?.current_season_number != null) {
-          setActiveSeasonNumber(settings.current_season_number)
-        }
-
-        // Also fetch the active season row so we have the season *id* as well
-        const { data: season, error: seasonErr } = await supabase
+        // Get active season
+        const { data: activeSeason } = await supabase
           .from("seasons")
-          .select("id, season_number, is_active")
+          .select("id, season_number")
           .eq("is_active", true)
           .maybeSingle()
 
-        if (!cancelled) {
-          if (!seasonErr && season) {
-            setActiveSeasonId(season.id ?? null)
-            // Keep number from seasons too (even if system_settings missing)
-            if (activeSeasonNumber == null && season.season_number != null) {
-              setActiveSeasonNumber(season.season_number)
-            }
+        if (!cancelled && activeSeason) {
+          setActiveSeasonId(activeSeason.id)
+          setActiveSeasonNumber(activeSeason.season_number)
+        }
+
+        // Get user IDs from team players
+        const userIds = safePlayers.map((p) => p.user_id).filter(Boolean)
+
+        if (userIds.length === 0) return
+
+        // Fetch registrations for these users
+        let query = supabase
+          .from("season_registrations")
+          .select("user_id, primary_position, secondary_position, season_id, season_number, status")
+          .in("user_id", userIds)
+          .eq("status", "Approved")
+
+        // Filter by active season if we have one
+        if (activeSeason?.id) {
+          query = query.eq("season_id", activeSeason.id)
+        }
+
+        const { data: registrations, error } = await query
+
+        console.log("[v0] TeamRosterTab fetched registrations:", {
+          userIds,
+          activeSeasonId: activeSeason?.id,
+          registrations,
+          error,
+        })
+
+        if (!cancelled && registrations) {
+          const regMap: Record<string, any> = {}
+          for (const reg of registrations) {
+            regMap[reg.user_id] = reg
           }
+          setRegistrationsByUser(regMap)
         }
       } catch (e) {
-        // Silent fail; component will just fall back to first registration if present
-        if (!cancelled) {
-          setActiveSeasonId(null)
-          // don't force number to null; if we had one from settings, keep it
-        }
+        console.error("[v0] TeamRosterTab error loading registrations:", e)
       }
     }
-    loadActiveSeason()
+    loadRegistrations()
     return () => {
       cancelled = true
     }
-  }, [supabase])
+  }, [supabase, safePlayers])
 
-  const safePlayers = useMemo(() => (Array.isArray(teamPlayers) ? teamPlayers : []), [teamPlayers])
+  const getPlayerPosition = (player: any) => {
+    // First check our directly fetched registrations
+    const fetchedReg = registrationsByUser[player.user_id]
+    if (fetchedReg) {
+      return {
+        primary: fetchedReg.primary_position,
+        secondary: fetchedReg.secondary_position,
+      }
+    }
 
-  // Choose the season registration for the active season by id OR number.
-  const getDisplayRegistration = (player: any) => {
+    // Then check if registration was passed with player data
     const regs = Array.isArray(player?.season_registrations) ? player.season_registrations : []
-    if (!regs.length) return null
-
-    // 1) Exact match by season_id (most reliable if your regs store season_id)
-    if (activeSeasonId) {
-      const byId = regs.find((r: any) => r?.season_id === activeSeasonId)
-      if (byId) return byId
+    if (regs.length > 0) {
+      const reg = regs[0]
+      return {
+        primary: reg?.primary_position,
+        secondary: reg?.secondary_position,
+      }
     }
 
-    // 2) Exact match by season_number (if your regs store season_number)
-    if (activeSeasonNumber != null) {
-      const byNumber = regs.find((r: any) => r?.season_number === activeSeasonNumber)
-      if (byNumber) return byNumber
-    }
-
-    // 3) Fallback: if neither id nor number matched, use the first available registration
-    //    so we don't render UNKNOWN when data exists.
-    return regs[0] ?? null
+    return { primary: null, secondary: null }
   }
 
   const renderPosition = (player: any) => {
-    const reg = getDisplayRegistration(player)
-    const primary = reg?.primary_position ?? "UNKNOWN"
-    const secondary = reg?.secondary_position ?? null
+    const { primary, secondary } = getPlayerPosition(player)
+    const primaryPos = primary ?? "UNKNOWN"
 
     return (
       <div className="flex items-center justify-center gap-1">
-        <span className={getPositionColor(primary)}>{getPositionAbbreviation(primary)}</span>
+        <span className={getPositionColor(primaryPos)}>{getPositionAbbreviation(primaryPos)}</span>
         {secondary && (
           <>
             {" / "}
@@ -155,10 +170,7 @@ export default function TeamRosterTab({ teamPlayers, getPositionAbbreviation, ge
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <h3 className="font-medium text-base">{player?.users?.gamer_tag_id || "Unknown Player"}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        {/* reuse the same rendering for consistency */}
-                        {renderPosition(player)}
-                      </div>
+                      <div className="flex items-center gap-2 mt-1">{renderPosition(player)}</div>
                     </div>
                     <Badge variant={player?.role === "Owner" ? "default" : "outline"} className="text-xs">
                       {player?.role ?? "Player"}
@@ -166,9 +178,7 @@ export default function TeamRosterTab({ teamPlayers, getPositionAbbreviation, ge
                   </div>
                   <div className="flex justify-between items-center text-sm text-muted-foreground">
                     <span>{player?.users?.console || "Unknown"}</span>
-                    <span className="font-mono font-medium">
-                      ${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M
-                    </span>
+                    <span className="font-mono font-medium">${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M</span>
                   </div>
                 </div>
               ))}
