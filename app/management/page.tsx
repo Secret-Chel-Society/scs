@@ -3069,23 +3069,17 @@ const ManagementPage = () => {
                                               const { error: incomingUpdateError } = await supabase
                                                 .from("notifications")
                                                 .update({
-                                                  message: supabase.raw("message || '\n\nSTATUS: CANCELLED'"),
+                                                  message: proposal.message + "\n\nSTATUS: CANCELLED",
                                                 })
                                                 .in(
                                                   "user_id",
                                                   otherTeamManagers.map((m) => m.user_id),
                                                 )
-                                                .like("title", "Trade Proposal from " + teamData.name)
-                                                .gte(
-                                                  "created_at",
-                                                  new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-                                                ) // Only recent proposals
+                                                .like("title", `Trade Proposal from ${teamData.name}%`)
+                                                .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Only recent proposals
 
                                               if (incomingUpdateError) {
-                                                console.error(
-                                                  "Error updating incoming notifications:",
-                                                  incomingUpdateError,
-                                                )
+                                                console.error("Error updating incoming notifications:", incomingUpdateError)
                                                 // Don't throw here - the outgoing cancellation still worked
                                               }
                                             }
