@@ -954,7 +954,7 @@ const ManagementPage = () => {
         .from("notifications")
         .select("*")
         .eq("user_id", session?.user.id)
-        .like("title", `Trade Proposal from %`)
+        .like("title", "Trade Proposal from %")
         .not("message", "like", "%STATUS:%")
         .order("created_at", { ascending: false })
 
