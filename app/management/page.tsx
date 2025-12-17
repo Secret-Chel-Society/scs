@@ -1013,7 +1013,7 @@ const ManagementPage = () => {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || `Failed to fetch free agents: ${response.status}`)
+        throw new Error(errorData.error || ("Failed to fetch free agents: " + response.status))
       }
 
       const data = await response.json()
