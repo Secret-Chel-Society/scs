@@ -863,7 +863,7 @@ const ManagementPage = () => {
       // await loadFreeAgents()
 
       // Fetch my team's bids with enhanced status tracking
-      const { data: myTeamBids, error } = await supabase
+      const { data: myTeamBids, bidsError } = await supabase
         .from("player_bidding")
         .select(`
           id,
@@ -885,8 +885,8 @@ const ManagementPage = () => {
               secondary_position
             )
           )
-        ')
-        .eq("team_id", teamData.id)
+        `)
+        .eq("team_id", playerData.team_id)
         .order("bid_expires_at", { ascending: true })
 
       if (bidsError) {
