@@ -2804,7 +2804,7 @@ const ManagementPage = () => {
                                     }
                                   } catch (error: any) {
                                     console.error("Error submitting trade:", error)
-                                    setTradeError(`Failed to submit trade: ${error.message}`)
+                                    setTradeError("Failed to submit trade: " + (error?.message || "Unknown error"))
                                   } finally {
                                     setIsSubmittingTrade(false)
                                   }
