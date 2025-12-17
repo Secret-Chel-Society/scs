@@ -211,7 +211,7 @@ export default function ManagementPage() {
   const [selectedTeamPlayers, setSelectedTeamPlayers] = useState<any[]>([])
   const [selectedMyPlayers, setSelectedMyPlayers] = useState<string[]>([])
   const [selectedOtherPlayers, setSelectedOtherPlayers] = useState<string[]>([])
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(100000000) // $100M salary cap
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $100M salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
