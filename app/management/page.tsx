@@ -1044,17 +1044,19 @@ const ManagementPage = () => {
   }
 
   // Fetch current bids for all players
-   const { data: bids, error } = await supabase
-     .from("player_bidding")
-     .select("*, teams:team_id ( id, name, logo_url )")
-     .order("bid_amount", { ascending: false })
+   const fetchPlayerBids = async () => {
+     try {
+       const { data: bids, error } = await supabase
+          .from("player_bidding")
+          .select("*, teams:team_id ( id, name, logo_url )")
+          .order("bid_amount", { ascending: false })
 
       if (error) throw error
 
       // Group bids by player_id and keep only the highest bid for each player
       const highestBids: Record<string, any> = {}
 
-      bids?.forEach((bid) => {
+      bids?.forEach((bid: any) => {
         if (!highestBids[bid.player_id] || bid.bid_amount > highestBids[bid.player_id].bid_amount) {
           highestBids[bid.player_id] = bid
         }
