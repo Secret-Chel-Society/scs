@@ -2504,9 +2504,10 @@ const ManagementPage = () => {
                                     {teamPlayers.map((player) => (
                                       <div
                                         key={player.id}
-                                        className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer ${
-                                          selectedMyPlayers.includes(player.id) ? "bg-primary/10" : ""
-                                        }`}
+                                        className={
+                                          "p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer " +
+                                          (selectedMyPlayers.includes(player.id) ? "bg-primary/10" : "")
+                                        }                                  
                                         onClick={() => {
                                           if (selectedMyPlayers.includes(player.id)) {
                                             setSelectedMyPlayers(selectedMyPlayers.filter((id) => id !== player.id))
