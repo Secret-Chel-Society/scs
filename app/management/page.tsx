@@ -2654,11 +2654,12 @@ const ManagementPage = () => {
                               {/* Trade Validation */}
                               {(tradeError || tradeSuccess) && (
                                 <div
-                                  className={`p-3 rounded-md ${
-                                    tradeError
-                                      ? "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300"
-                                      : "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300"
-                                  }`}
+                                  className={
+                                    "p-3 rounded-md " +
+                                    (tradeError
+                                       ? "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                                       : "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300")
+                                   }
                                 >
                                   {tradeError || tradeSuccess}
                                 </div>
