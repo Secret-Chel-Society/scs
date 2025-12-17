@@ -12,23 +12,30 @@ type Props = {
   currentTeamSalary: number
   currentSalaryCap: number
   projectedSalary: number
-  teamPlayersCount: number
+  rosterCount?: number
+  teamPlayersCount?: number
   projectedRosterSize: number
+  teamPlayers?: any[]
   positionFilter: string
   setPositionFilter: (v: string) => void
   nameFilter: string
   setNameFilter: (v: string) => void
   freeAgentsLoading: boolean
   freeAgentsError: string | null
-  filteredFreeAgents: any[]
-  freeAgents: any[]
+  // Accept both naming conventions
+  filteredFreeAgents?: any[]
+  freeAgents?: any[]
+  freeAgentsRaw?: any[]
+  teamData?: any
   playerBids: Record<string, any>
   isBiddingEnabled: boolean
   handleBidClick: (player: any) => void
   handleHistoryClick: (player: any) => void
   formatTimeRemaining: (expiresAt: string) => string
   teamId?: string
-  loadFreeAgents: () => void
+  now?: Date
+  loadFreeAgents?: () => void
+  reloadFreeAgents?: () => void
   getPositionAbbreviation: (pos: string) => string
   getPositionColor: (pos: string) => string
 }
@@ -38,64 +45,61 @@ export default function FreeAgentsTab(props: Props) {
     currentTeamSalary = 0,
     currentSalaryCap = 0,
     projectedSalary = 0,
+    rosterCount = 0,
     teamPlayersCount = 0,
     projectedRosterSize = 0,
+    teamPlayers = [],
     positionFilter = "all",
     setPositionFilter,
     nameFilter = "",
     setNameFilter,
     freeAgentsLoading = false,
     freeAgentsError = null,
-    filteredFreeAgents = [],
-    freeAgents = [],
+    filteredFreeAgents: filteredFreeAgentsProp,
+    freeAgents: freeAgentsProp,
+    freeAgentsRaw,
+    teamData,
     playerBids = {},
     isBiddingEnabled = false,
     handleBidClick,
     handleHistoryClick,
     formatTimeRemaining,
-    teamId,
+    now,
     loadFreeAgents,
+    reloadFreeAgents,
     getPositionAbbreviation,
     getPositionColor,
   } = props
 
-  const hasFiltered = (filteredFreeAgents?.length ?? 0) > 0
-  const noFreeAgents = (freeAgents?.length ?? 0) === 0
+  // Management page passes: freeAgents={filteredFreeAgents}, freeAgentsRaw={freeAgents}
+  // So freeAgentsProp is actually the filtered list, and freeAgentsRaw is the raw list
+  const displayList = filteredFreeAgentsProp || freeAgentsProp || []
+  const rawList = freeAgentsRaw || freeAgentsProp || []
 
-  // ✅ Helper: safely grab the "best" registration record regardless of shape
-  const getReg0 = (player: any) => {
-    // preferred (correct for your schema): users -> season_registrations (by user_id)
-    const nested = player?.users?.season_registrations?.[0]
-    // fallback: if your API returns it top-level for convenience
-    const topLevel = player?.season_registrations?.[0]
-    return nested ?? topLevel ?? null
-  }
+  const teamId = teamData?.id || props.teamId
+  const actualRosterCount = rosterCount || teamPlayersCount || teamPlayers?.length || 0
+  const reload = reloadFreeAgents || loadFreeAgents
 
-  // ✅ Position breakdown should count from the current list we’re showing
-  const positionCounts = (() => {
-    const positions = { C: 0, LW: 0, RW: 0, LD: 0, RD: 0, G: 0 }
-    const list = filteredFreeAgents ?? []
+  const hasFiltered = (displayList?.length ?? 0) > 0
+  const noFreeAgents = (rawList?.length ?? 0) === 0
 
-    list.forEach((p) => {
-      const reg0 = getReg0(p)
-      const primary = getPositionAbbreviation(reg0?.primary_position || "")
-      if (positions.hasOwnProperty(primary)) {
-        positions[primary as keyof typeof positions]++
-      }
-    })
-
-    return positions
-  })()
+  const positionCounts = { C: 0, LW: 0, RW: 0, LD: 0, RD: 0, G: 0 }
+  rawList?.forEach((player: any) => {
+    const primaryPos = player?.users?.season_registrations?.[0]?.primary_position
+    if (primaryPos && positionCounts.hasOwnProperty(primaryPos)) {
+      positionCounts[primaryPos as keyof typeof positionCounts]++
+    }
+  })
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Free Agents</CardTitle>
         <CardDescription>
-          Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
+          Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."} ({rawList?.length || 0}{" "}
+          total, {displayList?.length || 0} shown)
         </CardDescription>
       </CardHeader>
-
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
           <Card className="bg-slate-800 border-slate-700">
@@ -108,7 +112,7 @@ export default function FreeAgentsTab(props: Props) {
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="p-3 md:p-4">
               <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
-              <RosterProgress current={teamPlayersCount} max={15} projected={projectedRosterSize} />
+              <RosterProgress current={actualRosterCount} max={15} projected={projectedRosterSize} />
             </CardContent>
           </Card>
 
@@ -163,7 +167,6 @@ export default function FreeAgentsTab(props: Props) {
               </SelectContent>
             </Select>
           </div>
-
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4" />
             <Input
@@ -182,40 +185,34 @@ export default function FreeAgentsTab(props: Props) {
         ) : freeAgentsError ? (
           <div className="text-center py-8">
             <div className="text-red-500 mb-4">{freeAgentsError}</div>
-            <Button onClick={loadFreeAgents} variant="outline">
+            <Button onClick={reload} variant="outline">
               Try Again
             </Button>
           </div>
         ) : hasFiltered ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            {[...(filteredFreeAgents ?? [])]
+            {[...(displayList ?? [])]
               .sort((a, b) => (a?.users?.gamer_tag_id || "").localeCompare(b?.users?.gamer_tag_id || ""))
               .map((player) => {
                 if (!player?.users) return null
-
                 const currentBid = playerBids?.[player.id]
                 const canBid =
                   !!isBiddingEnabled &&
                   (!currentBid || currentBid.team_id !== teamId) &&
                   (projectedRosterSize ?? 0) < 15
 
-                const reg0 = getReg0(player)
-                const primaryPos = reg0?.primary_position || "UNKNOWN"
-                const secondaryPos = reg0?.secondary_position || null
+                const primaryPos = player?.users?.season_registrations?.[0]?.primary_position
+                const secondaryPos = player?.users?.season_registrations?.[0]?.secondary_position
 
                 return (
                   <div key={player.id} className="border rounded-lg p-3 md:p-4 shadow-sm dark:border-gray-800">
                     <div className="flex justify-between items-start mb-2 md:mb-3">
                       <div>
-                        <h3 className="font-medium text-sm md:text-base">
-                          {player.users?.gamer_tag_id || "Unknown Player"}
-                        </h3>
-
+                        <h3 className="font-medium text-sm md:text-base">{player.users?.gamer_tag_id}</h3>
                         <div className="flex items-center gap-1 mt-1">
                           <span className={`${getPositionColor(primaryPos)} text-xs md:text-sm`}>
-                            {getPositionAbbreviation(primaryPos)}
+                            {getPositionAbbreviation(primaryPos || "UNKNOWN")}
                           </span>
-
                           {secondaryPos && (
                             <>
                               {" / "}
@@ -225,9 +222,8 @@ export default function FreeAgentsTab(props: Props) {
                             </>
                           )}
                         </div>
-
                         <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                          {player.users?.console || "Unknown"} • ${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M
+                          {player.users?.console} • ${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M
                         </p>
                       </div>
                     </div>
@@ -260,7 +256,6 @@ export default function FreeAgentsTab(props: Props) {
                       >
                         {currentBid && currentBid.team_id === teamId ? "Extend Bid" : "Place Bid"}
                       </Button>
-
                       <Button
                         variant="outline"
                         size="sm"
