@@ -863,26 +863,30 @@ const ManagementPage = () => {
       // await loadFreeAgents()
 
       // Fetch my team's bids with enhanced status tracking
-      const { data: myTeamBids, error: bidsError } = await supabase
+      const { data: myTeamBids, error } = await supabase
         .from("player_bidding")
         .select(`
-          *,
-          players (
+          id,
+          player_id,
+          team_id,
+          bid_amount,
+          bid_expires_at,
+          players:player_id (
             id,
+            salary,
             users (
               id,
               gamer_tag_id,
-              primary_position,
-              secondary_position,
-              console
+              console,
+              avatar_url
             ),
             season_registrations (
               primary_position,
               secondary_position
             )
           )
-        `)
-        .eq("team_id", playerData.team_id)
+        ')
+        .eq("team_id", teamData.id)
         .order("bid_expires_at", { ascending: true })
 
       if (bidsError) {
