@@ -2748,21 +2748,35 @@ const ManagementPage = () => {
                                     // Send notifications to other team's managers
                                     const notifications = otherTeamManagers.map((manager) => ({
                                       user_id: manager.user_id,
-                                      title: `Trade Proposal from ${teamData.name}`,
-                                      message: `${teamData.name} wants to trade ${fromPlayers.map((p) => p.name).join(", ") || "players"} for ${toPlayers.map((p) => p.name).join(", ") || "players"}. ${tradeMessage ? `Message: ${tradeMessage}` : ""}\n\nTRADE_DATA:${JSON.stringify(tradeData)}`,
-                                      link: "/management?tab=trades",
-                                      read: false,
-                                    }))
+                                      title: "Trade Proposal from " + teamData.name,
+                                      message:
+                                       teamData.name +
+                                       " wants to trade " +
+                                       (fromPlayers.map((p) => p.name).join(", ") || "players") +
+                                       " for " +
+                                       (toPlayers.map((p) => p.name).join(", ") || "players") +
+                                       ". " +
+                                       (tradeMessage ? "Message: " + tradeMessage : "") +
+                                       "\n\nTRADE_DATA:" +
+                                       JSON.stringify(tradeData),
+                                     link: "/management?tab=trades",
+                                     read: false,
+                                   }))
 
-                                    // Send notification to self for tracking
-                                    const selfNotification = {
-                                      user_id: session.user.id,
-                                      title: `Trade Proposal to ${otherTeam.name}`,
-                                      message: `You proposed to trade ${fromPlayers.map((p) => p.name).join(", ") || "players"} for ${toPlayers.map((p) => p.name).join(", ") || "players"}. Waiting for response.\n\nTRADE_DATA:${JSON.stringify(tradeData)}`,
-                                      link: "/management?tab=trades",
-                                      read: false,
-                                    }
-
+                                   // Send notification to self for tracking
+                                   const selfNotification = {
+                                     user_id: session.user.id,
+                                     title: "Trade Proposal to " + otherTeam.name,
+                                     message:
+                                      "You proposed to trade " +
+                                      (fromPlayers.map((p) => p.name).join(", ") || "players") +
+                                      " for " +
+                                      (toPlayers.map((p) => p.name).join(", ") || "players") +
+                                      ". Waiting for response.\n\nTRADE_DATA:" +
+                                      JSON.stringify(tradeData),
+                                    link: "/management?tab=trades",
+                                    read: false,
+                                  }
                                     // Insert all notifications
                                     const { error: notificationError } = await supabase
                                       .from("notifications")
