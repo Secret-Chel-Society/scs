@@ -863,7 +863,7 @@ const ManagementPage = () => {
       // await loadFreeAgents()
 
       // Fetch my team's bids with enhanced status tracking
-      const { data: myTeamBids, bidsError } = await supabase
+      const { data: myTeamBids, error: bidsError } = await supabase
         .from("player_bidding")
         .select(`
           id,
@@ -1053,7 +1053,6 @@ const ManagementPage = () => {
 
       if (error) throw error
 
-      // Group bids by player_id and keep only the highest bid for each player
       const highestBids: Record<string, any> = {}
 
       bids?.forEach((bid: any) => {
