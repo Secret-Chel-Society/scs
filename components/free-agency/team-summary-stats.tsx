@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSupabase } from "@/lib/supabase/client"
 import { Card, CardContent } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -8,6 +8,29 @@ import { Progress } from "@/components/ui/progress"
 interface TeamSummaryStatsProps {
   userTeam?: any
   playerBids?: Record<string, any>
+}
+
+// Match your main page logic (handles full names + abbreviations)
+const getPositionAbbreviation = (position: string): "C" | "LW" | "RW" | "LD" | "RD" | "G" | "?" => {
+  if (!position) return "?"
+  const p = position.trim().toLowerCase()
+
+  const map: Record<string, any> = {
+    goalie: "G",
+    g: "G",
+    center: "C",
+    c: "C",
+    "left wing": "LW",
+    lw: "LW",
+    "right wing": "RW",
+    rw: "RW",
+    "left defense": "LD",
+    ld: "LD",
+    "right defense": "RD",
+    rd: "RD",
+  }
+
+  return map[p] || "?"
 }
 
 export function TeamSummaryStats({ userTeam, playerBids = {} }: TeamSummaryStatsProps) {
@@ -23,95 +46,119 @@ export function TeamSummaryStats({ userTeam, playerBids = {} }: TeamSummaryStats
       G: 0,
     },
   })
+
   const [pendingBids, setPendingBids] = useState({
     totalBidAmount: 0,
     bidCount: 0,
   })
+
   const [loading, setLoading] = useState(true)
   const { supabase } = useSupabase()
 
   const SALARY_CAP = 75000000 // $75M
 
-  useEffect(() => {
-    if (userTeam) {
-      fetchTeamStats()
-      calculatePendingBids()
-    }
-  }, [userTeam, playerBids])
-
-  const fetchTeamStats = async () => {
-    if (!userTeam) return
-
-    try {
-      // Get current team players
-      const { data: players, error } = await supabase
-        .from("players")
-        .select(`
-          salary,
-          users:user_id (
-            id,
-            gamer_tag_id
-          ),
-          season_registrations!inner (
-            primary_position,
-            secondary_position
-          )
-        `)
-        .eq("team_id", userTeam.id)
-
-      if (error) throw error
-
-      let currentSalary = 0
-      let rosterSize = 0
-      const positionBreakdown = {
-        C: 0,
-        LW: 0,
-        RW: 0,
-        LD: 0,
-        RD: 0,
-        G: 0,
-      }
-
-      players?.forEach((player) => {
-        if (player.users) {
-          currentSalary += player.salary || 0
-          rosterSize += 1
-
-          // Count primary position
-          const primaryPos = player.season_registrations?.[0]?.primary_position
-          if (primaryPos && positionBreakdown.hasOwnProperty(primaryPos)) {
-            positionBreakdown[primaryPos as keyof typeof positionBreakdown] += 1
-          }
-        }
-      })
-
-      setTeamStats({
-        currentSalary,
-        rosterSize,
-        positionBreakdown,
-      })
-    } catch (error) {
-      console.error("Error fetching team stats:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const calculatePendingBids = () => {
+  const calculatePendingBids = useCallback(() => {
     if (!userTeam) return
 
     let totalBidAmount = 0
     let bidCount = 0
 
+    // NOTE: playerBids is "highest bid per player" in your management page
     Object.values(playerBids).forEach((bid: any) => {
-      if (bid.team_id === userTeam.id) {
-        totalBidAmount += bid.bid_amount
+      if (bid?.team_id === userTeam.id) {
+        totalBidAmount += Number(bid.bid_amount || 0)
         bidCount += 1
       }
     })
 
     setPendingBids({ totalBidAmount, bidCount })
-  }
+  }, [playerBids, userTeam])
+
+  const fetchTeamStats = useCallback(async () => {
+    if (!userTeam?.id) return
+
+    setLoading(true)
+
+    try {
+      // 1) Pull roster from players (this is the source of truth for salary/size)
+      const { data: players, error } = await supabase
+        .from("players")
+        .select(
+          `
+          salary,
+          user_id
+        `,
+        )
+        .eq("team_id", userTeam.id)
+
+      if (error) throw error
+
+      const roster = players || []
+      const userIds = roster.map((p: any) => p.user_id).filter(Boolean)
+
+      // 2) Pull positions from season_registrations (by user_id)
+      // Prefer active season if you have seasons table, otherwise fall back to latest approved
+      let registrations: any[] = []
+
+      const { data: activeSeason } = await supabase.from("seasons").select("id").eq("is_active", true).maybeSingle()
+
+      if (activeSeason?.id && userIds.length > 0) {
+        const { data: regs, error: regErr } = await supabase
+          .from("season_registrations")
+          .select("user_id, primary_position, secondary_position")
+          .in("user_id", userIds)
+          .eq("season_id", activeSeason.id)
+          .eq("status", "Approved")
+
+        if (!regErr && regs) registrations = regs
+      }
+
+      // Fallback: most recent approved per user if active season didn’t return anything
+      if (registrations.length === 0 && userIds.length > 0) {
+        const { data: regs, error: regErr } = await supabase
+          .from("season_registrations")
+          .select("user_id, primary_position, secondary_position, season_id")
+          .in("user_id", userIds)
+          .eq("status", "Approved")
+          .order("season_id", { ascending: false })
+
+        if (!regErr && regs) {
+          const latest: Record<string, any> = {}
+          regs.forEach((r: any) => {
+            if (!latest[r.user_id]) latest[r.user_id] = r
+          })
+          registrations = Object.values(latest)
+        }
+      }
+
+      // 3) Compute stats
+      const positionBreakdown = { C: 0, LW: 0, RW: 0, LD: 0, RD: 0, G: 0 }
+
+      const currentSalary = roster.reduce((sum: number, p: any) => sum + Number(p.salary || 0), 0)
+      const rosterSize = roster.length
+
+      roster.forEach((p: any) => {
+        const reg = registrations.find((r: any) => r.user_id === p.user_id)
+        const primary = getPositionAbbreviation(reg?.primary_position || "")
+        if (primary !== "?" && positionBreakdown.hasOwnProperty(primary)) {
+          positionBreakdown[primary as keyof typeof positionBreakdown] += 1
+        }
+      })
+
+      setTeamStats({ currentSalary, rosterSize, positionBreakdown })
+    } catch (err) {
+      console.error("Error fetching team stats:", err)
+      // Don’t leave stale loading state; keep last known values
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, userTeam?.id])
+
+  useEffect(() => {
+    if (!userTeam) return
+    fetchTeamStats()
+    calculatePendingBids()
+  }, [userTeam, fetchTeamStats, calculatePendingBids])
 
   const projectedSalary = teamStats.currentSalary + pendingBids.totalBidAmount
   const projectedRosterSize = teamStats.rosterSize + pendingBids.bidCount
