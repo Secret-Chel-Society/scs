@@ -2275,16 +2275,20 @@ const ManagementPage = () => {
                                         <div className="text-right">
                                           <div className="flex items-center">
                                             <Clock
-                                              className={`h-4 w-4 mr-1 ${isExpired ? "text-red-500" : "text-muted-foreground"}`}
+                                              className={
+                                                "h-4 w-4 mr-1 " + (isExpired ? "text-red-500" : "text-muted-foreground")
+                                              }
                                             />
+
                                             <span
-                                              className={`text-sm ${isExpired ? "text-red-500" : "text-muted-foreground"}`}
+                                              className={
+                                                "text-sm " + (isExpired ? "text-red-500" : "text-muted-foreground")
+                                              }
                                             >
-                                              {isExpired ? "Processing..." : `${hoursRemaining}h ${minutesRemaining}m`}
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </div>
+                                              {isExpired
+                                                ? "Processing..."
+                                                : String(hoursRemaining) + "h " + String(minutesRemaining) + "m"}
+                                           </span>
 
                                       {/* Display Claiming Teams */}
                                       {waiver.waiver_claims && waiver.waiver_claims.length > 0 && (
