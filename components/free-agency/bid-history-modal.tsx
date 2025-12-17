@@ -17,25 +17,26 @@ export function BidHistoryModal({ isOpen, onClose, playerId, playerName }: BidHi
   const [bids, setBids] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [viewerRole, setViewerRole] = useState<string>("Player")
+  const [viewerTeamId, setViewerTeamId] = useState<string | null>(null)
+
   const { supabase } = useSupabase()
   const { toast } = useToast()
 
-  const canRevealBidTeams = useMemo(() => {
-    return ["Admin", "Owner", "GM", "AGM"].includes(viewerRole)
-  }, [viewerRole])
+  // Admin sees all teams. Everyone else can only see their own team's bids (or none if not on a team).
+  const isAdmin = useMemo(() => viewerRole === "Admin", [viewerRole])
 
   useEffect(() => {
     if (!isOpen) return
     if (!playerId) return
 
     ;(async () => {
-      await loadViewerRole()
+      await loadViewerRoleAndTeam()
       await loadBidHistory()
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, playerId])
 
-  const loadViewerRole = async () => {
+  const loadViewerRoleAndTeam = async () => {
     try {
       const {
         data: { session },
@@ -43,19 +44,26 @@ export function BidHistoryModal({ isOpen, onClose, playerId, playerName }: BidHi
 
       if (!session?.user?.id) {
         setViewerRole("Player")
+        setViewerTeamId(null)
         return
       }
 
       const { data, error } = await supabase
         .from("players")
-        .select("role")
+        .select("role, team_id")
         .eq("user_id", session.user.id)
-        .single()
+        .maybeSingle()
 
-      if (!error && data?.role) setViewerRole(data.role)
-      else setViewerRole("Player")
+      if (!error && data) {
+        setViewerRole(data.role || "Player")
+        setViewerTeamId(data.team_id || null)
+      } else {
+        setViewerRole("Player")
+        setViewerTeamId(null)
+      }
     } catch {
       setViewerRole("Player")
+      setViewerTeamId(null)
     }
   }
 
@@ -63,35 +71,23 @@ export function BidHistoryModal({ isOpen, onClose, playerId, playerName }: BidHi
     setLoading(true)
 
     try {
-      // Managers can see team details
-      if (canRevealBidTeams) {
-        const { data, error } = await supabase
-          .from("player_bidding")
-          .select(
-            `
-            id,
-            bid_amount,
-            created_at,
-            bid_expires_at,
-            teams (
-              id,
-              name,
-              logo_url
-            )
-          `,
-          )
-          .eq("player_id", playerId)
-          .order("created_at", { ascending: false })
-
-        if (error) throw error
-        setBids(data || [])
-        return
-      }
-
-      // Players: redacted history only (no team join)
+      // Always fetch team_id + teams join so we can selectively reveal per-row
       const { data, error } = await supabase
         .from("player_bidding")
-        .select("id,bid_amount,created_at,bid_expires_at")
+        .select(
+          `
+          id,
+          team_id,
+          bid_amount,
+          created_at,
+          bid_expires_at,
+          teams:team_id (
+            id,
+            name,
+            logo_url
+          )
+        `,
+        )
         .eq("player_id", playerId)
         .order("created_at", { ascending: false })
 
@@ -112,10 +108,7 @@ export function BidHistoryModal({ isOpen, onClose, playerId, playerName }: BidHi
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            Bid History for {playerName}
-            {!canRevealBidTeams && <span className="text-muted-foreground text-sm"> (Teams hidden)</span>}
-          </DialogTitle>
+          <DialogTitle>Bid History for {playerName}</DialogTitle>
         </DialogHeader>
 
         <div className="py-4">
@@ -127,34 +120,38 @@ export function BidHistoryModal({ isOpen, onClose, playerId, playerName }: BidHi
             <p className="text-center text-muted-foreground">No bids have been placed yet.</p>
           ) : (
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-              {bids.map((bid) => (
-                <div key={bid.id} className="border rounded-md p-3 dark:border-gray-700">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center">
-                      {canRevealBidTeams ? (
-                        <>
-                          {bid.teams?.logo_url ? (
-                            <img
-                              src={bid.teams.logo_url || "/placeholder.svg"}
-                              alt={bid.teams.name}
-                              className="h-6 w-6 mr-2 object-contain"
-                            />
-                          ) : null}
-                          <span className="font-medium">{bid.teams?.name || "Unknown Team"}</span>
-                        </>
-                      ) : (
-                        <span className="font-medium text-muted-foreground">Team hidden</span>
-                      )}
-                    </div>
-                    <span className="font-bold">${bid.bid_amount.toLocaleString()}</span>
-                  </div>
+              {bids.map((bid) => {
+                const canSeeThisTeam = isAdmin || (!!viewerTeamId && bid.team_id === viewerTeamId)
 
-                  <div className="text-xs text-muted-foreground flex justify-between">
-                    <span>Placed: {format(new Date(bid.created_at), "MMM d, yyyy h:mm a")}</span>
-                    <span>Expires: {format(new Date(bid.bid_expires_at), "MMM d, yyyy h:mm a")}</span>
+                return (
+                  <div key={bid.id} className="border rounded-md p-3 dark:border-gray-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        {canSeeThisTeam ? (
+                          <>
+                            {bid.teams?.logo_url ? (
+                              <img
+                                src={bid.teams.logo_url || "/placeholder.svg"}
+                                alt={bid.teams.name}
+                                className="h-6 w-6 mr-2 object-contain"
+                              />
+                            ) : null}
+                            <span className="font-medium">{bid.teams?.name || "Unknown Team"}</span>
+                          </>
+                        ) : (
+                          <span className="font-medium text-muted-foreground">Another team</span>
+                        )}
+                      </div>
+                      <span className="font-bold">${bid.bid_amount.toLocaleString()}</span>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground flex justify-between">
+                      <span>Placed: {format(new Date(bid.created_at), "MMM d, yyyy h:mm a")}</span>
+                      <span>Expires: {format(new Date(bid.bid_expires_at), "MMM d, yyyy h:mm a")}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
