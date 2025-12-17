@@ -3069,7 +3069,7 @@ const ManagementPage = () => {
                                               const { error: incomingUpdateError } = await supabase
                                                 .from("notifications")
                                                 .update({
-                                                  message: supabase.raw(`message || '\n\nSTATUS: CANCELLED'`),
+                                                  message: supabase.raw("message || '\n\nSTATUS: CANCELLED'"),
                                                 })
                                                 .in(
                                                   "user_id",
