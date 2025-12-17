@@ -1093,7 +1093,7 @@ const ManagementPage = () => {
           if (processResult.expiredCount > 0) {
             toast({
               title: "Waivers Processed",
-              description: `${processResult.expiredCount} expired waivers have been processed.`,
+              description: processResult.expiredCount + " expired waivers have been processed.",
             })
 
             // Refresh team data since players may have been assigned
