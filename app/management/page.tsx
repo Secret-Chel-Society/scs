@@ -143,11 +143,13 @@ interface Waiver {
   hasTeamClaimed?: boolean
 }
 
+// Update the getPositionAbbreviation function to handle both full names and abbreviations
 const getPositionAbbreviation = (position: string): string => {
   if (!position) return "?"
 
   const trimmedPosition = position.trim().toLowerCase()
 
+  // Position mapping that handles both full names and abbreviations
   const positionMap: Record<string, string> = {
     goalie: "G",
     g: "G",
@@ -166,6 +168,7 @@ const getPositionAbbreviation = (position: string): string => {
   return positionMap[trimmedPosition] || position.toUpperCase()
 }
 
+// Function to get position color
 const getPositionColor = (position: string): string => {
   switch (position) {
     case "Goalie":
@@ -203,6 +206,7 @@ const ManagementPage = () => {
   const { toast } = useToast()
   const router = useRouter()
 
+  // Safe search params handling
   const searchParams = useSearchParams()
 
   const [loading, setLoading] = useState(true)
@@ -226,7 +230,7 @@ const ManagementPage = () => {
   const [freeAgentsError, setFreeAgentsError] = useState<string | null>(null)
   const [freeAgentsLoading, setFreeAgentsLoading] = useState(false)
 
-  // ✅ FIX: default tab should be a REAL tab id used by your TabsTrigger list
+  // Get active tab from search params or default to "roster"
   const [activeTab, setActiveTab] = useState(searchParams?.get("tab") || "roster")
 
   // Trade state
@@ -238,10 +242,7 @@ const ManagementPage = () => {
   const [tradeError, setTradeError] = useState<string | null>(null)
   const [tradeSuccess, setTradeSuccess] = useState<string | null>(null)
   const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
-
-  // ✅ FIX: default cap should be 65M (and later replaced by teamData.salary_cap)
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000)
-
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(30000000) // $30M salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
@@ -288,11 +289,13 @@ const ManagementPage = () => {
   useEffect(() => {
     let filtered = freeAgents
 
+    // Apply name filter if provided
     if (nameFilter.trim() !== "") {
       const searchTerm = nameFilter.toLowerCase().trim()
       filtered = filtered.filter((player) => player.users?.gamer_tag_id?.toLowerCase().includes(searchTerm))
     }
 
+    // Apply position filter if not "all"
     if (positionFilter !== "all") {
       filtered = filtered.filter((player) => {
         const primaryPos = getPositionAbbreviation(player.season_registrations?.[0]?.primary_position || "UNKNOWN")
@@ -314,18 +317,26 @@ const ManagementPage = () => {
       return
     }
 
+    // Calculate projected values based on winning bids that haven't expired
     const winningBids = myBids.filter((bid) => {
       const isWinning = bid.isHighestBidder
       const isActive = new Date(bid.bid_expires_at) > now
       return isWinning && isActive
     })
 
-    const projectedSalaryIncrease = winningBids.reduce((sum, bid) => sum + (bid.bid_amount || 0), 0)
+    console.log("Calculating projections - Winning bids:", winningBids.length) // Debug log
+
+    const projectedSalaryIncrease = winningBids.reduce((sum, bid) => sum + bid.bid_amount, 0)
     const projectedRosterIncrease = winningBids.length
 
-    setProjectedSalary(currentTeamSalary + projectedSalaryIncrease)
-    setProjectedRosterSize(teamPlayers.length + projectedRosterIncrease)
-  }, [myBids, currentTeamSalary, teamPlayers.length, teamData, now])
+    const newProjectedSalary = currentTeamSalary + projectedSalaryIncrease
+    const newProjectedRosterSize = teamPlayers.length + projectedRosterIncrease
+
+    console.log("Setting projected salary:", newProjectedSalary, "roster:", newProjectedRosterSize) // Debug log
+
+    setProjectedSalary(newProjectedSalary)
+    setProjectedRosterSize(newProjectedRosterSize)
+  }, [myBids, currentTeamSalary, teamPlayers.length, teamData, now]) // Always runs when these change
 
   // Check bidding status
   useEffect(() => {
@@ -336,26 +347,197 @@ const ManagementPage = () => {
         setIsBiddingEnabled(data.enabled)
       } catch (error) {
         console.error("Error checking bidding status:", error)
-        setIsBiddingEnabled(false)
+        setIsBiddingEnabled(false) // Default to disabled on error
       }
     }
 
     checkBiddingStatus()
   }, [])
 
-  // Handle tab change (keeps URL + state in sync)
+  // Add this useEffect after the existing useEffects
+  useEffect(() => {
+    const loadOtherTeamPlayers = async () => {
+      if (!selectedTeamForTrade) {
+        setSelectedTeamPlayers([])
+        setOtherTeamSalary(0)
+        setProjectedOtherTeamSalary(0)
+        return
+      }
+
+      console.log("Loading players for team:", selectedTeamForTrade) // Debug log
+
+      try {
+        // Fetch other team's players
+        const { data: otherPlayers, error: otherPlayersError } = await supabase
+          .from("players")
+          .select(`
+          id,
+          role,
+          salary,
+          user_id
+        `)
+          .eq("team_id", selectedTeamForTrade)
+          .order("role", { ascending: false })
+
+        if (otherPlayersError) {
+          console.error("Error fetching other team players:", otherPlayersError)
+          throw otherPlayersError
+        }
+
+        console.log("Fetched other team players:", otherPlayers?.length) // Debug log
+
+        // Get the active season for position data
+        const { data: activeSeason, error: seasonError } = await supabase
+          .from("seasons")
+          .select("id")
+          .eq("is_active", true)
+          .single()
+
+        if (seasonError) {
+          console.error("Error fetching active season:", seasonError)
+        }
+
+        // Get position data from season_registrations and user data
+        const userIds = otherPlayers?.map((player) => player.user_id) || []
+        let enhancedOtherPlayers = otherPlayers || []
+
+        if (userIds.length > 0) {
+          // Get user data first
+          const { data: users, error: usersError } = await supabase
+            .from("users")
+            .select(`
+              id,
+              email,
+              gamer_tag_id,
+              console,
+              avatar_url
+            `)
+            .in("id", userIds)
+
+          if (usersError) {
+            console.error("Error fetching users:", usersError)
+          }
+
+          // Get registration data for positions if we have an active season
+          let registrations = []
+          if (activeSeason) {
+            const { data: regData, error: regError } = await supabase
+              .from("season_registrations")
+              .select(`
+              user_id,
+              primary_position,
+              secondary_position,
+              gamer_tag,
+              console
+            `)
+              .in("user_id", userIds)
+              .eq("season_id", activeSeason.id)
+              .eq("status", "Approved")
+
+            if (regError) {
+              console.error("Error fetching player registrations:", regError)
+            } else {
+              registrations = regData || []
+            }
+          }
+
+          // Combine all data
+          enhancedOtherPlayers =
+            otherPlayers?.map((player) => {
+              const user = users?.find((u) => u.id === player.user_id)
+              const registration = registrations?.find((reg) => reg.user_id === player.user_id)
+
+              return {
+                ...player,
+                users: {
+                  id: user?.id || player.user_id,
+                  email: user?.email,
+                  gamer_tag_id: registration?.gamer_tag || user?.gamer_tag_id || "Unknown Player",
+                  primary_position: registration?.primary_position || "Unknown",
+                  secondary_position: registration?.secondary_position || null,
+                  console: registration?.console || user?.console,
+                  avatar_url: user?.avatar_url,
+                },
+              }
+            }) || []
+        }
+
+        console.log("Enhanced other team players:", enhancedOtherPlayers?.length) // Debug log
+        setSelectedTeamPlayers(enhancedOtherPlayers)
+
+        // Calculate other team's current salary
+        const otherTeamCurrentSalary = otherPlayers?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
+        setOtherTeamSalary(otherTeamCurrentSalary)
+        setProjectedOtherTeamSalary(otherTeamCurrentSalary)
+      } catch (error) {
+        console.error("Error loading other team players:", error)
+        // Set empty state on error
+        setSelectedTeamPlayers([])
+        setOtherTeamSalary(0)
+        setProjectedOtherTeamSalary(0)
+      }
+    }
+
+    loadOtherTeamPlayers()
+  }, [selectedTeamForTrade, supabase])
+
+  // Add useEffect to calculate projected trade salaries
+  useEffect(() => {
+    if (!selectedTeamForTrade || !teamData) {
+      setProjectedTeamSalary(currentTeamSalary)
+      setProjectedOtherTeamSalary(otherTeamSalary)
+      return
+    }
+
+    // Calculate salary changes for my team
+    const myPlayersToTrade = teamPlayers.filter((p) => selectedMyPlayers.includes(p.id))
+    const otherPlayersToReceive = selectedTeamPlayers.filter((p) => selectedOtherPlayers.includes(p.id))
+
+    const myPlayersSalaryOut = myPlayersToTrade.reduce((sum, player) => {
+      const withholding = capSpaceWithholding[player.id] || 0
+      return sum + (player.salary - withholding)
+    }, 0)
+
+    const otherPlayersSalaryIn = otherPlayersToReceive.reduce((sum, player) => sum + (player.salary || 0), 0)
+
+    const newProjectedTeamSalary = currentTeamSalary - myPlayersSalaryOut + otherPlayersSalaryIn
+
+    // Calculate salary changes for other team
+    const otherPlayersSalaryOut = otherPlayersToReceive.reduce((sum, player) => sum + (player.salary || 0), 0)
+    const myPlayersSalaryIn = myPlayersToTrade.reduce((sum, player) => {
+      const withholding = capSpaceWithholding[player.id] || 0
+      return sum + (player.salary - withholding)
+    }, 0)
+
+    const newProjectedOtherTeamSalary = otherTeamSalary - otherPlayersSalaryOut + myPlayersSalaryIn
+
+    setProjectedTeamSalary(newProjectedTeamSalary)
+    setProjectedOtherTeamSalary(newProjectedOtherTeamSalary)
+  }, [
+    selectedMyPlayers,
+    selectedOtherPlayers,
+    teamPlayers,
+    selectedTeamPlayers,
+    currentTeamSalary,
+    otherTeamSalary,
+    capSpaceWithholding,
+    selectedTeamForTrade,
+    teamData,
+  ])
+
+  // Handle tab change
   const handleTabChange = (value: string) => {
     try {
       router.push(`/management?tab=${value}`, { scroll: false })
     } catch (error) {
       console.warn("Error navigating:", error)
+      // Fallback: just update the URL without router
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href)
         url.searchParams.set("tab", value)
         window.history.replaceState({}, "", url.toString())
       }
     }
-    setActiveTab(value)
   }
 
   function formatTimeRemaining(expiresAt: string): string {
@@ -369,10 +551,15 @@ const ManagementPage = () => {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
     const seconds = Math.floor((diff % (1000 * 60)) / 1000)
 
-    if (days > 0) return `${days}d ${hours}h`
-    if (hours > 0) return `${hours}h ${minutes}m`
-    if (minutes > 0) return `${minutes}m ${seconds}s`
-    return `${seconds}s`
+    if (days > 0) {
+      return `${days}d ${hours}h`
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m`
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`
+    } else {
+      return `${seconds}s`
+    }
   }
 
   async function fetchData() {
@@ -383,6 +570,7 @@ const ManagementPage = () => {
 
     setLoading(true)
     try {
+      // Check if user is a team manager (GM, AGM, Owner)
       const { data: playerData, error: playerError } = await supabase
         .from("players")
         .select("role, team_id")
@@ -403,9 +591,11 @@ const ManagementPage = () => {
 
       // Get current season ID for team stats calculation
       const currentSeasonId = await getCurrentSeasonId()
+      console.log("Current season ID:", currentSeasonId)
 
       // Get calculated team stats (this will give us the actual record)
       const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonId)
+      console.log("Calculated team stats:", calculatedTeamStats)
 
       if (!calculatedTeamStats) {
         throw new Error("Could not calculate team statistics")
@@ -420,7 +610,7 @@ const ManagementPage = () => {
 
       if (teamError) throw teamError
 
-      // ✅ FIX: correct stat mapping (your old code swapped goals_for/goals_against)
+      // Combine basic team data with calculated stats
       const teamWithStats: Team = {
         ...basicTeamData,
         wins: calculatedTeamStats.wins,
@@ -428,24 +618,20 @@ const ManagementPage = () => {
         otl: calculatedTeamStats.otl,
         points: calculatedTeamStats.points,
         games_played: calculatedTeamStats.games_played,
-        goals_for: calculatedTeamStats.goals_for,
-        goals_against: calculatedTeamStats.goals_against,
+        goals_for: calculatedTeamStats.goals_against,
         goal_differential: calculatedTeamStats.goal_differential,
       }
 
+      console.log("Final team data with calculated stats:", teamWithStats)
       setTeamData(teamWithStats)
-
-      // ✅ FIX: set salary cap from DB (fallback to 65M)
-      setCurrentSalaryCap(Number(teamWithStats.salary_cap || 65000000))
 
       // Fetch trade proposals
       await fetchTradeProposals(playerData.team_id, basicTeamData.name)
 
-      // Fetch team players
+      // Fetch team players with comprehensive position data fetching
       const { data: players, error: playersError } = await supabase
         .from("players")
-        .select(
-          `
+        .select(`
           id,
           role,
           salary,
@@ -457,51 +643,108 @@ const ManagementPage = () => {
             console,
             avatar_url
           )
-        `,
-        )
+        `)
         .eq("team_id", playerData.team_id)
         .order("role", { ascending: false })
 
-      let finalPlayers: any[] = []
-
       if (playersError) {
         console.error("Error fetching players with users:", playersError)
-
+        // Fallback to separate queries
         const { data: playersOnly, error: playersOnlyError } = await supabase
           .from("players")
-          .select(`id, role, salary, user_id`)
+          .select(`
+            id,
+            role,
+            salary,
+            user_id
+          `)
           .eq("team_id", playerData.team_id)
           .order("role", { ascending: false })
 
         if (playersOnlyError) throw playersOnlyError
 
+        // Get user IDs for fetching additional data
         const userIds = playersOnly?.map((player) => player.user_id) || []
         let enhancedPlayers = playersOnly || []
 
         if (userIds.length > 0) {
+          // Get user data first
           const { data: users, error: usersError } = await supabase
             .from("users")
-            .select(`id, email, gamer_tag_id, console, avatar_url`)
+            .select(`
+              id,
+              email,
+              gamer_tag_id,
+              console,
+              avatar_url
+            `)
             .in("id", userIds)
 
-          if (usersError) console.error("Error fetching users:", usersError)
+          if (usersError) {
+            console.error("Error fetching users:", usersError)
+          }
 
+          // Get season registrations for position data (try multiple approaches)
           let registrations: any[] = []
+
+          // First try: Get active season registrations
           const { data: activeSeason } = await supabase.from("seasons").select("id").eq("is_active", true).single()
 
           if (activeSeason) {
-            const { data: regData, error: regError } = await supabase
+            const { data: activeSeasonRegs } = await supabase
               .from("season_registrations")
-              .select(`user_id, primary_position, secondary_position, gamer_tag, console`)
+              .select(`
+                user_id,
+                primary_position,
+                secondary_position,
+                gamer_tag,
+                console
+              `)
               .in("user_id", userIds)
               .eq("season_id", activeSeason.id)
               .eq("status", "Approved")
 
-            if (regError) console.error("Error fetching registrations:", regError)
-            registrations = regData || []
+            if (activeSeasonRegs && activeSeasonRegs.length > 0) {
+              registrations = activeSeasonRegs
+            }
           }
 
-          enhancedPlayers = (playersOnly || []).map((player) => {
+          // Second try: Get any approved registrations if active season didn't work
+          if (registrations.length === 0) {
+            const { data: anyApprovedRegs } = await supabase
+              .from("season_registrations")
+              .select(`
+                user_id,
+                primary_position,
+                secondary_position,
+                gamer_tag,
+                console,
+                season_id
+              `)
+              .in("user_id", userIds)
+              .eq("status", "Approved")
+              .order("season_id", { ascending: false })
+
+            if (anyApprovedRegs && anyApprovedRegs.length > 0) {
+              // Group by user_id and take the most recent registration for each user
+              const latestRegs = anyApprovedRegs.reduce(
+                (acc, reg) => {
+                  if (!acc[reg.user_id] || reg.season_id > acc[reg.user_id].season_id) {
+                    acc[reg.user_id] = reg
+                  }
+                  return acc
+                },
+                {} as Record<string, any>,
+              )
+
+              registrations = Object.values(latestRegs)
+            }
+          }
+
+          console.log("Found registrations for team players:", registrations.length)
+
+          // Combine all data with fallback logic
+          enhancedPlayers = playersOnly.map((player) => {
             const user = users?.find((u) => u.id === player.user_id)
             const registration = registrations?.find((reg) => reg.user_id === player.user_id)
 
@@ -516,27 +759,76 @@ const ManagementPage = () => {
                 console: registration?.console || user?.console || "Unknown",
                 avatar_url: user?.avatar_url,
               },
-              season_registrations: registration
-                ? [
-                    {
-                      primary_position: registration.primary_position,
-                      secondary_position: registration.secondary_position,
-                    },
-                  ]
-                : [],
             }
           })
         }
 
-        finalPlayers = enhancedPlayers
         setTeamPlayers(enhancedPlayers)
       } else {
-        finalPlayers = players || []
-        setTeamPlayers(players || [])
+        // Direct query worked, but still try to enhance with season registration data
+        const userIds = players?.map((player) => player.user_id) || []
+
+        if (userIds.length > 0) {
+          // Get season registrations for enhanced position data
+          let registrations: any[] = []
+
+          // Try to get active season registrations
+          const { data: activeSeason } = await supabase.from("seasons").select("id").eq("is_active", true).single()
+
+          if (activeSeason) {
+            const { data: activeSeasonRegs } = await supabase
+              .from("season_registrations")
+              .select(`
+                user_id,
+                primary_position,
+                secondary_position,
+                gamer_tag,
+                console
+              `)
+              .in("user_id", userIds)
+              .eq("season_id", activeSeason.id)
+              .eq("status", "Approved")
+
+            if (activeSeasonRegs && activeSeasonRegs.length > 0) {
+              registrations = activeSeasonRegs
+            }
+          }
+
+          // Enhance players with registration data if available
+          const enhancedPlayers = players.map((player) => {
+            const registration = registrations?.find((reg) => reg.user_id === player.user_id)
+
+            if (registration) {
+              return {
+                ...player,
+                users: {
+                  ...player.users,
+                  gamer_tag_id: registration.gamer_tag || player.users.gamer_tag_id,
+                  primary_position: registration.primary_position,
+                  secondary_position: registration.secondary_position,
+                  console: registration.console || player.users.console,
+                },
+              }
+            }
+
+            return {
+              ...player,
+              users: {
+                ...player.users,
+                primary_position: "Unknown",
+                secondary_position: null,
+              },
+            }
+          })
+
+          setTeamPlayers(enhancedPlayers)
+        } else {
+          setTeamPlayers(players || [])
+        }
       }
 
-      // ✅ FIX: compute salary from the finalized player list (avoids async state timing -> 0 salary)
-      const totalSalary = finalPlayers.reduce((sum, p) => sum + (Number(p.salary) || 0), 0)
+      // Calculate current team salary
+      const totalSalary = (players || teamPlayers)?.reduce((sum, player) => sum + (player.salary || 0), 0) || 0
       setCurrentTeamSalary(totalSalary)
       setProjectedTeamSalary(totalSalary)
 
@@ -553,27 +845,27 @@ const ManagementPage = () => {
         setAllTeams(allTeamsData || [])
       }
 
-      // Fetch team matches
+      // Fetch team matches with lineups - Fixed the query structure
       const { data: matches, error: matchesError } = await supabase
         .from("matches")
-        .select(
-          `
+        .select(`
           *,
           home_team:home_team_id(id, name, logo_url),
           away_team:away_team_id(id, name, logo_url)
-        `,
-        )
+        `)
         .or(`home_team_id.eq.${playerData.team_id},away_team_id.eq.${playerData.team_id}`)
         .order("match_date", { ascending: true })
 
       if (matchesError) throw matchesError
       setTeamMatches(matches || [])
 
-      // Fetch my team's bids
+      // Load free agents - this will be called separately when needed
+      // await loadFreeAgents()
+
+      // Fetch my team's bids with enhanced status tracking
       const { data: myTeamBids, error: bidsError } = await supabase
         .from("player_bidding")
-        .select(
-          `
+        .select(`
           *,
           players (
             id,
@@ -589,25 +881,21 @@ const ManagementPage = () => {
               secondary_position
             )
           )
-        `,
-        )
+        `)
         .eq("team_id", playerData.team_id)
         .order("bid_expires_at", { ascending: true })
 
       if (bidsError) {
         console.error("Error fetching team bids:", bidsError)
       } else {
+        // Get all current highest bids to determine if our bids are winning
         const { data: allBids, error: allBidsError } = await supabase
           .from("player_bidding")
-          .select(
-            `
-            *,
-            teams:team_id ( id, name, logo_url )
-          `,
-          )
+          .select("*")
           .order("bid_amount", { ascending: false })
 
         if (!allBidsError && allBids) {
+          // Group all bids by player_id to find highest bid for each player
           const highestBidsByPlayer: Record<string, any> = {}
           allBids.forEach((bid) => {
             if (!highestBidsByPlayer[bid.player_id] || bid.bid_amount > highestBidsByPlayer[bid.player_id].bid_amount) {
@@ -615,10 +903,12 @@ const ManagementPage = () => {
             }
           })
 
+          // Enhance our bids with winning status and categorize them
           const enhancedBids =
             myTeamBids?.map((bid) => {
               const highestBid = highestBidsByPlayer[bid.player_id]
               const isHighestBidder = highestBid && highestBid.id === bid.id
+
               const isExpired = new Date(bid.bid_expires_at) <= now
 
               return {
@@ -632,15 +922,12 @@ const ManagementPage = () => {
 
           setMyBids(enhancedBids)
 
+          // Count active and outbid bids
           const activeBids = enhancedBids.filter((bid) => !bid.isExpired && bid.isHighestBidder)
           const outbidBids = enhancedBids.filter((bid) => !bid.isExpired && !bid.isHighestBidder)
 
           setActiveBidsCount(activeBids.length)
           setOutbidCount(outbidBids.length)
-        } else {
-          setMyBids([])
-          setActiveBidsCount(0)
-          setOutbidCount(0)
         }
       }
     } catch (error: any) {
@@ -658,6 +945,7 @@ const ManagementPage = () => {
   // Fetch trade proposals
   const fetchTradeProposals = async (teamId: string, teamName: string) => {
     try {
+      // Fetch incoming trade proposals (exclude processed ones)
       const { data: incoming, error: incomingError } = await supabase
         .from("notifications")
         .select("*")
@@ -669,9 +957,11 @@ const ManagementPage = () => {
       if (incomingError) {
         console.error("Error fetching incoming trade proposals:", incomingError)
       } else {
+        console.log("Fetched incoming trade proposals:", incoming?.length || 0)
         setIncomingTradeProposals(incoming || [])
       }
 
+      // Fetch outgoing trade proposals (exclude processed ones)
       const { data: outgoing, error: outgoingError } = await supabase
         .from("notifications")
         .select("*")
@@ -683,13 +973,14 @@ const ManagementPage = () => {
       if (outgoingError) {
         console.error("Error fetching outgoing trade proposals:", outgoingError)
       } else {
+        console.log("Fetched outgoing trade proposals:", outgoing?.length || 0)
         setOutgoingTradeProposals(outgoing || [])
       }
     } catch (error) {
       console.error("Error fetching trade proposals:", error)
     }
   }
-  
+
   // Enhanced loadFreeAgents function with better error handling for team managers
   const loadFreeAgents = async () => {
     setFreeAgentsLoading(true)
@@ -729,9 +1020,6 @@ const ManagementPage = () => {
 
       // Fetch bids for all players
       await fetchPlayerBids()
-
-      // Keep My Bids in sync with Free Agents bidding
-      await refreshMyBids()
 
       console.log("Successfully loaded free agents:", freeAgentsList.length)
     } catch (error: any) {
@@ -779,114 +1067,8 @@ const ManagementPage = () => {
     }
   }
 
-  const refreshMyBids = async () => {
-    if (!teamData?.id) return
-
-    try {
-      const { data: myTeamBids, error: bidsError } = await supabase
-        .from("player_bidding")
-        .select(`
-          *,
-          teams:team_id (
-            id,
-            name,
-            logo_url
-          ),
-          players (
-            id,
-            salary,
-            users (
-              id,
-              gamer_tag_id,
-              primary_position,
-              secondary_position,
-              console
-            ),
-            season_registrations (
-              primary_position,
-              secondary_position
-            )
-          )
-        `)
-        .eq("team_id", teamData.id)
-        .order("bid_expires_at", { ascending: true })
-
-      if (bidsError) {
-        console.error("Error fetching team bids:", bidsError)
-        return
-      }
-
-      // Pull all bids so we can determine highest bidder per player
-      const { data: allBids, error: allBidsError } = await supabase
-        .from("player_bidding")
-        .select(`
-          *,
-          teams:team_id (
-            id,
-            name,
-            logo_url
-          )
-        `)
-        .order("bid_amount", { ascending: false })
-
-      if (allBidsError) {
-        console.error("Error fetching all bids:", allBidsError)
-        return
-      }
-
-      const highestBidsByPlayer: Record<string, any> = {}
-      allBids?.forEach((bid) => {
-        if (!highestBidsByPlayer[bid.player_id] || bid.bid_amount > highestBidsByPlayer[bid.player_id].bid_amount) {
-          highestBidsByPlayer[bid.player_id] = bid
-        }
-      })
-
-      const enhancedBids =
-        myTeamBids?.map((bid) => {
-          const highestBid = highestBidsByPlayer[bid.player_id]
-          const isHighestBidder = highestBid && highestBid.id === bid.id
-          const isExpired = new Date(bid.bid_expires_at) <= now
-
-          return {
-            ...bid,
-            isHighestBidder,
-            highestBid: !isHighestBidder ? highestBid : null,
-            isExpired,
-            status: isExpired ? "expired" : isHighestBidder ? "winning" : "outbid",
-          }
-        }) || []
-
-      setMyBids(enhancedBids)
-
-      // Count active and outbid bids
-      const activeWinningBids = enhancedBids.filter((bid) => !bid.isExpired && bid.isHighestBidder)
-      const activeOutbidBids = enhancedBids.filter((bid) => !bid.isExpired && !bid.isHighestBidder)
-
-      setActiveBidsCount(activeWinningBids.length)
-      setOutbidCount(activeOutbidBids.length)
-
-      // IMPORTANT FIX:
-      // Reserve cap space based on ALL active bids (non-expired),
-      // not only winning bids, so "potential salary I'm at" matches reality.
-      const activeAllBids = enhancedBids.filter((bid) => !bid.isExpired)
-
-      const projectedSalaryIncrease = activeAllBids.reduce((sum, bid) => sum + (bid.bid_amount || 0), 0)
-      const projectedRosterIncrease = activeAllBids.length
-
-      setProjectedSalary(currentTeamSalary + projectedSalaryIncrease)
-      setProjectedRosterSize(teamPlayers.length + projectedRosterIncrease)
-    } catch (e) {
-      console.error("Error refreshing my bids:", e)
-    }
-  }
-
-  // FIX: Ensure salary cap comes from the team record (fallback 65M)
-  useEffect(() => {
-    const capFromTeam = Number(teamData?.salary_cap || 0)
-    setCurrentSalaryCap(capFromTeam > 0 ? capFromTeam : 65000000)
-  }, [teamData?.salary_cap])
-
   // Find the loadWaiversData function and update it to handle expired waivers better
+
   // Replace the loadWaiversData function with this improved version:
   const loadWaiversData = async () => {
     setLoadingWaivers(true)
@@ -976,7 +1158,7 @@ const ManagementPage = () => {
 
       console.log("Final waivers to display:", waiversWithClaims.length)
       setWaivers(waiversWithClaims)
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error loading waivers:", error)
       setWaiverError(error.message || "Failed to load waivers")
     } finally {
@@ -1170,13 +1352,6 @@ const ManagementPage = () => {
     }
   }, [activeTab, teamData?.id])
 
-  // NEW: keep My Bids refreshed when opening that tab
-  useEffect(() => {
-    if (activeTab === "my-bids" && teamData?.id) {
-      refreshMyBids()
-    }
-  }, [activeTab, teamData?.id, now])
-
   const handleBidClick = (player: any) => {
     console.log("handleBidClick called for player:", player)
     console.log("Current userTeam:", teamData)
@@ -1277,107 +1452,719 @@ const ManagementPage = () => {
     }
   }
 
-                {/* My Bids Tab Content */}
-              <TabsContent value="my-bids">
+  if (!isAuthorized && !loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+        <p className="text-muted-foreground mb-8">
+          You must be a Team Manager (GM, AGM, or Owner) to access the management panel.
+        </p>
+        <Button asChild>
+          <Link href="/">Return to Home</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        {/* Update the main title section to be more mobile-friendly: */}
+        <div className="flex flex-col gap-2 md:gap-4 mb-6 md:mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">Team Management</h1>
+            {teamData && (
+              <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
+                {teamData.logo_url && (
+                  <Image
+                    src={teamData.logo_url || "/placeholder.svg"}
+                    alt={teamData.name}
+                    width={20}
+                    height={20}
+                    className="rounded-full md:w-6 md:h-6"
+                  />
+                )}
+                {teamData.name}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="grid gap-6">
+            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[500px] w-full" />
+          </div>
+        ) : (
+          <>
+            {/* Update the stats cards grid to be more mobile-friendly by changing the grid classes: */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Team Size</div>
+                    <div className="text-2xl font-bold">
+                      {teamPlayers.length}
+                      {projectedRosterSize !== teamPlayers.length && (
+                        <span className="text-sm text-muted-foreground ml-1">→ {projectedRosterSize}</span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Calendar className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Upcoming Matches</div>
+                    <div className="text-2xl font-bold">
+                      {teamMatches.filter((m) => m.status === "Scheduled").length}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <Trophy className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Record</div>
+                    <div className="text-2xl font-bold">
+                      {teamData ? `${teamData.wins}-${teamData.losses}-${teamData.otl}` : "0-0-0"}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex items-center gap-4">
+                  <div className="bg-primary/10 p-3 rounded-full">
+                    <DollarSign className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Salary Cap</div>
+                    <div className="text-2xl font-bold">
+                      ${(currentTeamSalary / 1000000).toFixed(1)}M
+                      {projectedSalary !== currentTeamSalary && (
+                        <span className="text-sm text-muted-foreground ml-1">
+                          → ${(projectedSalary / 1000000).toFixed(1)}M
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Update the tabs to be more mobile-friendly: */}
+            <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
+                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Team Roster</span>
+                  <span className="md:hidden">Roster</span>
+                </TabsTrigger>
+                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Team Avail</span>
+                  <span className="md:hidden">Avail</span>
+                </TabsTrigger>
+                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Team Schedule</span>
+                  <span className="md:hidden">Schedule</span>
+                </TabsTrigger>
+                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Free Agents</span>
+                  <span className="md:hidden">Free Agents</span>
+                </TabsTrigger>
+                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">My Bids</span>
+                  <span className="md:hidden">Bids</span>
+                </TabsTrigger>
+                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  <span className="hidden md:inline">Waivers</span>
+                  <span className="md:hidden">Waivers</span>
+                </TabsTrigger>
+                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
+                  <span className="hidden md:inline">Trades</span>
+                  <span className="md:hidden">Trades</span>
+                  {incomingTradeProposals.length > 0 && (
+                    <span className="ml-1 md:ml-2 bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
+                      {incomingTradeProposals.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Roster Tab Content */}
+              <TabsContent value="roster">
                 <Card>
                   <CardHeader>
-                    <CardTitle>My Bids</CardTitle>
-                    <CardDescription>
-                      Bids placed by {teamData?.name}. Active: {activeBidsCount} | Outbid: {outbidCount}
+                    <CardTitle className="text-lg md:text-xl">Team Roster</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
+                      Manage your team's players and roles
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {myBids.length > 0 ? (
-                      <div className="space-y-4">
-                        {myBids.map((bid) => {
-                          const isExpired = bid.isExpired
-                          const isWinning = bid.isHighestBidder && !isExpired
-                          const isOutbid = !bid.isHighestBidder && !isExpired
-
-                          let cardClass = "border rounded-lg p-4"
-                          let statusBadge = { variant: "secondary" as const, text: "EXPIRED" }
-
-                          if (isWinning) {
-                            cardClass = "border-2 border-green-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-4"
-                            statusBadge = { variant: "default" as const, text: "WINNING" }
-                          } else if (isOutbid) {
-                            cardClass = "border-2 border-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-4"
-                            statusBadge = { variant: "destructive" as const, text: "OUTBID" }
-                          } else if (isExpired && bid.isHighestBidder) {
-                            cardClass =
-                              "border-2 border-green-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-4 opacity-75"
-                            statusBadge = { variant: "default" as const, text: "WON" }
-                          } else if (isExpired) {
-                            cardClass = "border-2 border-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-4 opacity-75"
-                            statusBadge = { variant: "destructive" as const, text: "LOST" }
-                          }
-
-                          return (
-                            <div key={bid.id} className={cardClass}>
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <h3 className="font-medium">
-                                    {bid.players?.users?.gamer_tag_id || "Unknown Player"}
-                                  </h3>
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <span
-                                      className={getPositionColor(
-                                        bid.players?.season_registrations?.[0]?.primary_position,
+                    {teamPlayers.length > 0 ? (
+                      <>
+                        {/* Desktop Table */}
+                        <div className="hidden md:block rounded-md border overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Player</TableHead>
+                                <TableHead className="text-center">Position</TableHead>
+                                <TableHead className="text-center">Role</TableHead>
+                                <TableHead className="text-center">Console</TableHead>
+                                <TableHead className="text-center">Salary</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {teamPlayers.map((player) => (
+                                <TableRow key={player.id} className="hover:bg-muted/50 transition-colors">
+                                  <TableCell>
+                                    <div className="font-medium">{player.users?.gamer_tag_id || "Unknown Player"}</div>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <div className="flex items-center justify-center gap-1">
+                                      <span
+                                        className={getPositionColor(player.season_registrations?.[0]?.primary_position)}
+                                      >
+                                        {getPositionAbbreviation(
+                                          player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                        )}
+                                      </span>
+                                      {player.season_registrations?.[0]?.secondary_position && (
+                                        <>
+                                          {" / "}
+                                          <span
+                                            className={getPositionColor(
+                                              player.season_registrations?.[0]?.secondary_position,
+                                            )}
+                                          >
+                                            {getPositionAbbreviation(
+                                              player.season_registrations?.[0]?.secondary_position,
+                                            )}
+                                          </span>
+                                        </>
                                       )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    <Badge variant={player.role === "Owner" ? "default" : "outline"}>
+                                      {player.role}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-center">{player.users?.console || "Unknown"}</TableCell>
+                                  <TableCell className="text-center font-mono">
+                                    ${(player.salary / 1000000).toFixed(2)}M
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+
+                        {/* Mobile Cards */}
+                        <div className="md:hidden space-y-3">
+                          {teamPlayers.map((player) => (
+                            <div key={player.id} className="border rounded-lg p-4 bg-card">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-base">
+                                    {player.users?.gamer_tag_id || "Unknown Player"}
+                                  </h3>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span
+                                      className={`${getPositionColor(player.season_registrations?.[0]?.primary_position)} text-sm font-medium`}
                                     >
                                       {getPositionAbbreviation(
-                                        bid.players?.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                        player.season_registrations?.[0]?.primary_position || "UNKNOWN",
                                       )}
                                     </span>
-                                    {bid.players?.season_registrations?.[0]?.secondary_position && (
+                                    {player.season_registrations?.[0]?.secondary_position && (
                                       <>
-                                        {" / "}
+                                        <span className="text-muted-foreground text-sm">/</span>
                                         <span
-                                          className={getPositionColor(
-                                            bid.players?.season_registrations?.[0]?.secondary_position,
-                                          )}
+                                          className={`${getPositionColor(player.season_registrations?.[0]?.secondary_position)} text-sm font-medium`}
                                         >
                                           {getPositionAbbreviation(
-                                            bid.players?.season_registrations?.[0]?.secondary_position,
+                                            player.season_registrations?.[0]?.secondary_position,
                                           )}
                                         </span>
                                       </>
                                     )}
                                   </div>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    Your bid: ${bid.bid_amount.toLocaleString()}
-                                  </p>
-                                  {!bid.isHighestBidder && bid.highestBid && (
-                                    <p className="text-sm text-red-600 dark:text-red-400 font-bold">
-                                      Outbid by {bid.highestBid.teams?.name}: $
-                                      {bid.highestBid.bid_amount.toLocaleString()}
-                                    </p>
-                                  )}
-                                  {isExpired && !bid.isHighestBidder && (
-                                    <p className="text-sm text-red-600 dark:text-red-400 font-bold">BID LOST</p>
-                                  )}
-                                  {isExpired && bid.isHighestBidder && (
-                                    <p className="text-sm text-green-600 dark:text-green-400 font-bold">BID WON</p>
-                                  )}
                                 </div>
-                                <div className="text-right">
-                                  <Badge variant={statusBadge.variant}>{statusBadge.text}</Badge>
-                                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {formatTimeRemaining(bid.bid_expires_at)}
+                                <Badge variant={player.role === "Owner" ? "default" : "outline"} className="text-xs">
+                                  {player.role}
+                                </Badge>
+                              </div>
+                              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                                <span>{player.users?.console || "Unknown"}</span>
+                                <span className="font-mono font-medium">${(player.salary / 1000000).toFixed(2)}M</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">No players on this team.</div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Team Availability Tab Content */}
+              <TabsContent value="availability">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Team Availability</CardTitle>
+                    <CardDescription>View your team's availability for upcoming games</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {teamData ? (
+                      <TeamAvailabilityTab teamId={teamData.id} teamName={teamData.name} />
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">Loading team data...</div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Schedule Tab Content */}
+              <TabsContent value="schedule">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Team Schedule</CardTitle>
+                    <CardDescription>Upcoming and recent matches for {teamData?.name}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {teamMatches.length > 0 ? (
+                      <div className="space-y-4">
+                        {teamMatches.map((match) => {
+                          const isHomeTeam = match.home_team_id === teamData?.id
+                          const opponent = isHomeTeam ? match.away_team : match.home_team
+                          const matchDate = new Date(match.match_date)
+
+                          return (
+                            <div
+                              key={match.id}
+                              className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="text-center">
+                                  <div className="text-sm text-muted-foreground">{matchDate.toLocaleDateString()}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                   </div>
                                 </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {isHomeTeam ? "HOME" : "AWAY"}
+                                  </Badge>
+                                  <span>vs {opponent?.name}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                {match.status === "Completed" ? (
+                                  <div className="text-right">
+                                    <div className="font-bold">
+                                      {isHomeTeam
+                                        ? `${match.home_score} - ${match.away_score}`
+                                        : `${match.away_score} - ${match.home_score}`}
+                                    </div>
+                                    <Badge
+                                      variant={
+                                        (isHomeTeam && match.home_score > match.away_score) ||
+                                        (!isHomeTeam && match.away_score > match.home_score)
+                                          ? "default"
+                                          : "destructive"
+                                      }
+                                    >
+                                      {(isHomeTeam && match.home_score > match.away_score) ||
+                                      (!isHomeTeam && match.away_score > match.home_score)
+                                        ? "WIN"
+                                        : "LOSS"}
+                                    </Badge>
+                                  </div>
+                                ) : (
+                                  <Badge variant="outline">{match.status}</Badge>
+                                )}
+                                <Button variant="outline" size="sm" asChild>
+                                  <Link href={`/matches/${match.id}`}>View</Link>
+                                </Button>
+                                {match.status === "Scheduled" && (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/management/lineups/${match.id}`}>Set Lineup</Link>
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           )
                         })}
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-muted-foreground">No bids placed yet.</div>
+                      <div className="text-center py-8 text-muted-foreground">No matches scheduled.</div>
                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              {/* Free Agents Tab Content */}
+              <TabsContent value="free-agents">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg md:text-xl">Free Agents</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
+                      Available players for bidding. {!isBiddingEnabled && "Bidding is currently disabled."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+                      {/* Team Salary */}
+                      <Card className="bg-slate-800 border-slate-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Team Salary</h3>
+                          <SalaryProgress
+                            current={currentTeamSalary}
+                            max={currentSalaryCap}
+                            projected={projectedSalary}
+                          />
+                        </CardContent>
+                      </Card>
+
+                      {/* Roster Size */}
+                      <Card className="bg-slate-800 border-slate-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
+                          <RosterProgress current={teamPlayers.length} max={15} projected={projectedRosterSize} />
+                        </CardContent>
+                      </Card>
+
+                      {/* Position Breakdown */}
+                      <Card className="bg-slate-800 border-slate-700">
+                        <CardContent className="p-3 md:p-4">
+                          <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">
+                            Position Breakdown
+                          </h3>
+                          <div className="grid grid-cols-3 gap-1 md:gap-2 text-xs md:text-sm">
+                            {/* Calculate position counts */}
+                            {(() => {
+                              const positions = {
+                                C: 0,
+                                LW: 0,
+                                RW: 0,
+                                LD: 0,
+                                RD: 0,
+                                G: 0,
+                              }
+
+                              teamPlayers.forEach((player) => {
+                                const pos = getPositionAbbreviation(
+                                  player.season_registrations?.[0]?.primary_position || "",
+                                )
+                                if (positions.hasOwnProperty(pos)) {
+                                  positions[pos as keyof typeof positions]++
+                                }
+                              })
+
+                              return (
+                                <>
+                                  <div className="flex justify-between">
+                                    <span className="text-red-400 font-medium">C:</span>
+                                    <span className="text-white">{positions.C}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-green-400 font-medium">LW:</span>
+                                    <span className="text-white">{positions.LW}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-blue-400 font-medium">RW:</span>
+                                    <span className="text-white">{positions.RW}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-cyan-400 font-medium">LD:</span>
+                                    <span className="text-white">{positions.LD}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-yellow-400 font-medium">RD:</span>
+                                    <span className="text-white">{positions.RD}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-purple-400 font-medium">G:</span>
+                                    <span className="text-white">{positions.G}</span>
+                                  </div>
+                                </>
+                              )
+                            })()}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-2 md:gap-4 mb-4 md:mb-6">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4" />
+                        <Select value={positionFilter} onValueChange={setPositionFilter}>
+                          <SelectTrigger className="w-full sm:w-48">
+                            <SelectValue placeholder="Filter by position" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Positions</SelectItem>
+                            <SelectItem value="G">Goalie</SelectItem>
+                            <SelectItem value="C">Center</SelectItem>
+                            <SelectItem value="LW">Left Wing</SelectItem>
+                            <SelectItem value="RW">Right Wing</SelectItem>
+                            <SelectItem value="LD">Left Defense</SelectItem>
+                            <SelectItem value="RD">Right Defense</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Search className="h-4 w-4" />
+                        <Input
+                          placeholder="Search by name..."
+                          value={nameFilter}
+                          onChange={(e) => setNameFilter(e.target.value)}
+                          className="w-full sm:w-48"
+                        />
+                      </div>
+                    </div>
+
+                    {freeAgentsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="text-muted-foreground">Loading free agents...</div>
+                      </div>
+                    ) : freeAgentsError ? (
+                      <div className="text-center py-8">
+                        <div className="text-red-500 mb-4">{freeAgentsError}</div>
+                        <Button onClick={loadFreeAgents} variant="outline">
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : filteredFreeAgents.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                        {(() => {
+                          // Sort players by gamer_tag_id
+                          const sortedPlayers = [...filteredFreeAgents].sort((a, b) => {
+                            const nameA = a.users?.gamer_tag_id || ""
+                            const nameB = b.users?.gamer_tag_id || ""
+                            return nameA.localeCompare(nameB)
+                          })
+
+                          const userTeam = teamData
+
+                          return sortedPlayers.map((player) => {
+                            // Skip players with null users
+                            if (!player.users) return null
+
+                            const currentBid = playerBids[player.id]
+                            const hasTeam = !!userTeam
+                            const canBid =
+                              isBiddingEnabled &&
+                              (!currentBid || currentBid.team_id !== teamData?.id) &&
+                              projectedRosterSize < 15
+
+                            return (
+                              <div
+                                key={player.id}
+                                className="border rounded-lg p-3 md:p-4 shadow-sm dark:border-gray-800"
+                              >
+                                <div className="flex justify-between items-start mb-2 md:mb-3">
+                                  <div>
+                                    <h3 className="font-medium text-sm md:text-base">
+                                      {player.users?.gamer_tag_id || "Unknown Player"}
+                                    </h3>
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <span
+                                        className={`${getPositionColor(player.season_registrations?.[0]?.primary_position)} text-xs md:text-sm`}
+                                      >
+                                        {getPositionAbbreviation(
+                                          player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                        )}
+                                      </span>
+                                      {player.season_registrations?.[0]?.secondary_position && (
+                                        <>
+                                          {" / "}
+                                          <span
+                                            className={`${getPositionColor(player.season_registrations?.[0]?.secondary_position)} text-xs md:text-sm`}
+                                          >
+                                            {getPositionAbbreviation(
+                                              player.season_registrations?.[0]?.secondary_position,
+                                            )}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                    <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                                      {player.users?.console} • ${(player.salary / 1000000).toFixed(2)}M
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {currentBid && (
+                                  <div className="mb-2 md:mb-3 p-2 bg-muted rounded-md">
+                                    <div className="flex justify-between items-center mb-1">
+                                      <span className="text-xs md:text-sm font-medium">Current Bid:</span>
+                                      <span className="font-bold text-xs md:text-sm">
+                                        ${currentBid.bid_amount.toLocaleString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs">
+                                      <span>By: {currentBid.teams?.name}</span>
+                                      <span className="flex items-center gap-1">
+                                        <Clock className="h-3 w-3" />
+                                        {formatTimeRemaining(currentBid.bid_expires_at)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={() => handleBidClick(player)}
+                                    className="flex-1 text-xs md:text-sm h-8 md:h-9"
+                                    size="sm"
+                                    disabled={!canBid}
+                                    title={projectedRosterSize >= 15 ? "Roster limit reached with current bids" : ""}
+                                  >
+                                    {currentBid && currentBid.team_id === teamData?.id ? "Extend Bid" : "Place Bid"}
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleHistoryClick(player)}
+                                    title="View Bid History"
+                                    className="h-8 md:h-9 w-8 md:w-9 p-0"
+                                  >
+                                    <History className="h-3 w-3 md:h-4 md:w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )
+                          })
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground text-sm md:text-base">
+                        {freeAgents.length === 0
+                          ? "No free agents available."
+                          : "No players match your filter criteria."}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+{/* My Bids Tab Content */}
+<TabsContent value="my-bids">
+  <Card>
+    <CardHeader>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <CardTitle>My Bids</CardTitle>
+          <CardDescription>
+            Bids placed by {teamData?.name}. Active: {activeBidsCount} | Outbid: {outbidCount}
+          </CardDescription>
+        </div>
+
+        <Button variant="outline" size="sm" onClick={loadMyBids} disabled={myBidsLoading || !teamData?.id}>
+          {myBidsLoading ? "Loading..." : "Refresh"}
+        </Button>
+      </div>
+    </CardHeader>
+
+    <CardContent>
+      {myBidsError && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-900/20 dark:text-red-300">
+          {myBidsError}
+        </div>
+      )}
+
+      {myBidsLoading ? (
+        <div className="text-center py-8 text-muted-foreground">Loading bids...</div>
+      ) : myBids.length > 0 ? (
+        <div className="space-y-4">
+          {myBids.map((bid: any) => {
+            const isExpired = !!bid.isExpired
+            const isWinning = !!bid.isHighestBidder && !isExpired
+            const isOutbid = !bid.isHighestBidder && !isExpired
+
+            let cardClass = "border rounded-lg p-4"
+            let statusBadge = { variant: "secondary" as const, text: "EXPIRED" }
+
+            if (isWinning) {
+              cardClass = "border-2 border-green-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-4"
+              statusBadge = { variant: "default" as const, text: "WINNING" }
+            } else if (isOutbid) {
+              cardClass = "border-2 border-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-4"
+              statusBadge = { variant: "destructive" as const, text: "OUTBID" }
+            } else if (isExpired && bid.isHighestBidder) {
+              cardClass =
+                "border-2 border-green-500 bg-green-50 dark:bg-green-900/20 rounded-lg p-4 opacity-75"
+              statusBadge = { variant: "default" as const, text: "WON" }
+            } else if (isExpired) {
+              cardClass =
+                "border-2 border-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg p-4 opacity-75"
+              statusBadge = { variant: "destructive" as const, text: "LOST" }
+            }
+
+            return (
+              <div key={bid.id} className={cardClass}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium">{bid.players?.users?.gamer_tag_id || "Unknown Player"}</h3>
+
+                    <div className="flex items-center gap-1 mt-1">
+                      <span className={getPositionColor(bid.players?.season_registrations?.[0]?.primary_position)}>
+                        {getPositionAbbreviation(bid.players?.season_registrations?.[0]?.primary_position || "UNKNOWN")}
+                      </span>
+
+                      {bid.players?.season_registrations?.[0]?.secondary_position && (
+                        <>
+                          {" / "}
+                          <span className={getPositionColor(bid.players?.season_registrations?.[0]?.secondary_position)}>
+                            {getPositionAbbreviation(bid.players?.season_registrations?.[0]?.secondary_position)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Your bid: ${Number(bid.bid_amount || 0).toLocaleString()}
+                    </p>
+
+                    {!bid.isHighestBidder && bid.highestBid && (
+                      <p className="text-sm text-red-600 dark:text-red-400 font-bold">
+                        Outbid by {bid.highestBid.teams?.name}: ${Number(bid.highestBid.bid_amount || 0).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="text-right">
+                    <Badge variant={statusBadge.variant}>{statusBadge.text}</Badge>
+                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatTimeRemaining(bid.bid_expires_at)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-muted-foreground">No bids placed yet.</div>
+      )}
+    </CardContent>
+  </Card>
+</TabsContent>
+
 
               {/* Waivers Tab Content */}
               <TabsContent value="waivers">
@@ -1633,7 +2420,7 @@ const ManagementPage = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-  
+
               {/* Trades Tab Content */}
               <TabsContent value="trades">
                 <Card>
