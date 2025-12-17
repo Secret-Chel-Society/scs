@@ -1699,7 +1699,9 @@ const ManagementPage = () => {
                                       <>
                                         <span className="text-muted-foreground text-sm">/</span>
                                         <span
-                                          className={`${getPositionColor(player.season_registrations?.[0]?.secondary_position)} text-sm font-medium`}
+                                          className={
+                                            getPositionColor(player.season_registrations?.[0]?.secondary_position) + " text-sm font-medium"
+                                          }
                                         >
                                           {getPositionAbbreviation(
                                             player.season_registrations?.[0]?.secondary_position,
