@@ -1993,7 +1993,7 @@ const ManagementPage = () => {
                                     </h3>
                                     <div className="flex items-center gap-1 mt-1">
                                       <span
-                                        className={`${getPositionColor(player.season_registrations?.[0]?.primary_position)} text-xs md:text-sm`}
+                                        className={getPositionColor(player.season_registrations?.[0]?.primary_position) + " text-xs md:text-sm"}
                                       >
                                         {getPositionAbbreviation(
                                           player.season_registrations?.[0]?.primary_position || "UNKNOWN",
@@ -2003,7 +2003,7 @@ const ManagementPage = () => {
                                         <>
                                           {" / "}
                                           <span
-                                            className={`${getPositionColor(player.season_registrations?.[0]?.secondary_position)} text-xs md:text-sm`}
+                                            className={getPositionColor(player.season_registrations?.[0]?.secondary_position) + " text-xs md:text-sm"}
                                           >
                                             {getPositionAbbreviation(
                                               player.season_registrations?.[0]?.secondary_position,
