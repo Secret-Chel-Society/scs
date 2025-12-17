@@ -1786,8 +1786,8 @@ const ManagementPage = () => {
                                   <div className="text-right">
                                     <div className="font-bold">
                                       {isHomeTeam
-                                        ? `${match.home_score} - ${match.away_score}`
-                                        : `${match.away_score} - ${match.home_score}`}
+                                        ? String(match.home_score) + " - " + String(match.away_score)
+                                        : String(match.away_score) + " - " + String(match.home_score)}
                                     </div>
                                     <Badge
                                       variant={
