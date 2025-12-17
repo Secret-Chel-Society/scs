@@ -1111,15 +1111,21 @@ const ManagementPage = () => {
 
       // Then fetch current active waivers (should exclude processed ones)
       console.log("Fetching active waivers...")
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      if (session && session.access_token) {
+        headers["Authorization"] = "Bearer " + session.access_token
+      }
+
       const response = await fetch("/api/waivers?status=active", {
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
+        method: "GET",
+        headers,
       })
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch waivers: ${response.status}`)
+        throw new Error("Failed to fetch waivers: " + response.status)
       }
 
       const data = await response.json()
@@ -1132,7 +1138,9 @@ const ManagementPage = () => {
         return deadline > now
       })
 
-      console.log(`Filtered out ${(data.waivers || []).length - filteredWaivers.length} expired waivers`)
+      console.log(
+        "Filtered out " + ((data.waivers || []).length - filteredWaivers.length) + " expired waivers"
+      )
 
       // Process the waivers to add the hasTeamClaimed property
       const waiversWithClaims = await Promise.all(
@@ -1203,7 +1211,7 @@ const ManagementPage = () => {
         headers: {
           "Content-Type": "application/json",
           // Use the fresh session access token
-          Authorization: `Bearer ${freshSession.access_token}`,
+          Authorization: "Bearer " + freshSession.access_token,
         },
         body: JSON.stringify({ playerId }),
       })
@@ -1286,7 +1294,7 @@ const ManagementPage = () => {
 
       console.log("Making claim request with fresh session")
 
-      const response = await fetch(`/api/waivers/claim`, {
+      const response = await fetch("/api/waivers/claim", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1418,7 +1426,7 @@ const ManagementPage = () => {
       if (!response.ok) {
         const errorData = await response.json()
         console.error("Trade response error:", errorData)
-        throw new Error(errorData.error || `Failed to ${accept ? "accept" : "reject"} trade`)
+        throw new Error(errorData.error || ("Failed to " + (accept ? "accept" : "reject") + " trade"))
       }
 
       const data = await response.json()
@@ -1440,10 +1448,10 @@ const ManagementPage = () => {
       setIsTradeDetailsOpen(false)
       setSelectedTradeProposal(null)
     } catch (error: any) {
-      console.error(`Error ${accept ? "accepting" : "rejecting"} trade:`, error)
+      console.error("Error " + (accept ? "accepting" : "rejecting") + " trade:", error)
       toast({
         title: "Error",
-        description: error.message || `Failed to ${accept ? "accept" : "reject"} trade`,
+        description: error.message || ("Failed to " + (accept ? "accept" : "reject") + " trade"),
         variant: "destructive",
       })
     } finally {
