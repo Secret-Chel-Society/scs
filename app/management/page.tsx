@@ -3075,7 +3075,7 @@ const ManagementPage = () => {
                                                   "user_id",
                                                   otherTeamManagers.map((m) => m.user_id),
                                                 )
-                                                .like("title", `Trade Proposal from ${teamData.name}%`)
+                                                .like("title", "Trade Proposal from " + teamData.name + "%")
                                                 .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Only recent proposals
 
                                               if (incomingUpdateError) {
