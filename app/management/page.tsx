@@ -1213,11 +1213,21 @@ export default function ManagementPage() {
             />
 
             {/* TABS */}
-            <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
+            <TabsList
               <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 mb-6 md:mb-8 h-auto">
-                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
-                  <span className="hidden md:inline">Team Roster</span>
-                  <span className="md:hidden">Roster</span>
+                className="
+                  w-full mb-6 md:mb-8 h-auto
+                  flex md:grid
+                  md:grid-cols-7
+                  gap-2
+                  overflow-x-auto md:overflow-visible
+                  whitespace-nowrap
+                  justify-start md:justify-stretch
+                  p-1
+                  [-ms-overflow-style:none] [scrollbar-width:none]
+                  [&::-webkit-scrollbar]:hidden
+                "
+              >
                 </TabsTrigger>
                 <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Avail</span>
