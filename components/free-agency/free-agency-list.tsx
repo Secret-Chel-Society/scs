@@ -60,9 +60,27 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
   // viewer role gate (players shouldn't see teams)
   const [viewerRole, setViewerRole] = useState<string>("Player")
+
+  /**
+   * ✅ NEW: permission model
+   * - Admin: can see all bid teams
+   * - Owner/GM/AGM: can ONLY see their own team's bid team identity (not other teams)
+   * - Player: cannot see bid teams
+   */
+  const isAdmin = useMemo(() => viewerRole === "Admin", [viewerRole])
+  const isManager = useMemo(() => ["Owner", "GM", "AGM"].includes(viewerRole), [viewerRole])
+
+  // Kept (but updated meaning): this now means "can reveal team names at all"
+  // (Admin always, managers only when it's their own bid, handled in UI via myTeamBids)
   const canRevealBidTeams = useMemo(() => {
-    return ["Admin", "Owner", "GM", "AGM"].includes(viewerRole)
-  }, [viewerRole])
+    return isAdmin || isManager
+  }, [isAdmin, isManager])
+
+  /**
+   * ✅ NEW: store "my team bids" so managers can reveal ONLY their own team identity.
+   * Keyed by player_id.
+   */
+  const [myTeamBids, setMyTeamBids] = useState<Record<string, any>>({})
 
   const urlSearchParams = useSearchParams()
 
@@ -127,13 +145,37 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
   // Fetch current bids for all players (READ-ONLY)
   const fetchPlayerBids = useCallback(async () => {
     try {
-      // Managers can see team details
-      if (canRevealBidTeams) {
-        const { data: bids, error } = await supabase
+      /**
+       * ✅ Always load public highest bid info for everyone (no team join)
+       * This powers "Current Bid" amount + expiry without leaking teams.
+       */
+      const { data: bidsPublic, error: bidsPublicError } = await supabase
+        .from("player_bidding")
+        .select("player_id,bid_amount,bid_expires_at")
+        .order("bid_amount", { ascending: false })
+
+      if (bidsPublicError) throw bidsPublicError
+
+      const highestBidsPublic: Record<string, any> = {}
+      bidsPublic?.forEach((bid) => {
+        if (!highestBidsPublic[bid.player_id] || bid.bid_amount > highestBidsPublic[bid.player_id].bid_amount) {
+          highestBidsPublic[bid.player_id] = bid
+        }
+      })
+      setPlayerBids(highestBidsPublic)
+
+      /**
+       * ✅ Admin: can see ALL teams (highest bid w/ teams)
+       */
+      if (isAdmin) {
+        const { data: bidsAll, error: bidsAllError } = await supabase
           .from("player_bidding")
           .select(
             `
-            *,
+            player_id,
+            bid_amount,
+            bid_expires_at,
+            team_id,
             teams:team_id (
               id,
               name,
@@ -143,38 +185,58 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
           )
           .order("bid_amount", { ascending: false })
 
-        if (error) throw error
+        if (bidsAllError) throw bidsAllError
 
-        const highestBids: Record<string, any> = {}
-        bids?.forEach((bid) => {
-          if (!highestBids[bid.player_id] || bid.bid_amount > highestBids[bid.player_id].bid_amount) {
-            highestBids[bid.player_id] = bid
+        const highestBidsAdmin: Record<string, any> = {}
+        bidsAll?.forEach((bid) => {
+          if (!highestBidsAdmin[bid.player_id] || bid.bid_amount > highestBidsAdmin[bid.player_id].bid_amount) {
+            highestBidsAdmin[bid.player_id] = bid
           }
         })
 
-        setPlayerBids(highestBids)
+        setPlayerBids(highestBidsAdmin)
+        setMyTeamBids({})
         return
       }
 
-      // Players: public-only bid info (NO team_id / NO team join)
-      const { data: bidsPublic, error: bidsPublicError } = await supabase
-        .from("player_bidding")
-        .select("player_id,bid_amount,bid_expires_at")
-        .order("bid_amount", { ascending: false })
+      /**
+       * ✅ Managers: load ONLY *their team's* bids with teams join
+       * so they can reveal identity ONLY when it's their own bid.
+       */
+      if (isManager && userTeam?.id) {
+        const { data: myBids, error: myBidsError } = await supabase
+          .from("player_bidding")
+          .select(
+            `
+            player_id,
+            bid_amount,
+            bid_expires_at,
+            team_id,
+            teams:team_id (
+              id,
+              name,
+              logo_url
+            )
+          `,
+          )
+          .eq("team_id", userTeam.id)
 
-      if (bidsPublicError) throw bidsPublicError
+        if (myBidsError) throw myBidsError
 
-      const highestBids: Record<string, any> = {}
-      bidsPublic?.forEach((bid) => {
-        if (!highestBids[bid.player_id] || bid.bid_amount > highestBids[bid.player_id].bid_amount) {
-          highestBids[bid.player_id] = bid
-        }
-      })
-      setPlayerBids(highestBids)
+        const myBidsByPlayer: Record<string, any> = {}
+        myBids?.forEach((bid) => {
+          if (!myBidsByPlayer[bid.player_id] || bid.bid_amount > myBidsByPlayer[bid.player_id].bid_amount) {
+            myBidsByPlayer[bid.player_id] = bid
+          }
+        })
+        setMyTeamBids(myBidsByPlayer)
+      } else {
+        setMyTeamBids({})
+      }
     } catch (error) {
       safeLog("Error fetching player bids:", error)
     }
-  }, [supabase, canRevealBidTeams])
+  }, [supabase, isAdmin, isManager, userTeam?.id])
 
   // Load free agents using API endpoint to bypass RLS
   const loadFreeAgents = useCallback(async () => {
@@ -295,6 +357,12 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     }
   }, [mounted, loadFreeAgents, fetchUserTeam])
 
+  // ✅ NEW: when role/team changes, refresh bids so permissions apply immediately
+  useEffect(() => {
+    if (!mounted) return
+    fetchPlayerBids()
+  }, [mounted, viewerRole, userTeam?.id, fetchPlayerBids])
+
   // Load team stats when user team changes
   useEffect(() => {
     fetchTeamStats()
@@ -397,6 +465,13 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
             const currentBid = playerBids[player.id]
             const bidExpiring = currentBid && new Date(currentBid.bid_expires_at).getTime() - now.getTime() < 3600000
 
+            // ✅ NEW: determine if this viewer is allowed to see the bidder identity here
+            const myBidForPlayer = myTeamBids?.[player.id]
+            const canShowBidderIdentityHere = isAdmin || (!!myBidForPlayer && myBidForPlayer.team_id === userTeam?.id)
+
+            // If admin, team info comes from currentBid. If manager, comes from myBidForPlayer.
+            const bidderTeam = isAdmin ? currentBid?.teams : myBidForPlayer?.teams
+
             return (
               <div key={player.id} className="bg-card border border-border rounded-lg p-6 shadow-sm">
                 <div className="flex items-start gap-4 mb-4">
@@ -448,19 +523,19 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        {canRevealBidTeams ? (
+                        {canShowBidderIdentityHere ? (
                           <>
                             <span className="text-muted-foreground text-sm mr-2">By:</span>
-                            {currentBid.teams?.logo_url ? (
+                            {bidderTeam?.logo_url ? (
                               <Image
-                                src={currentBid.teams.logo_url || "/placeholder.svg"}
-                                alt={currentBid.teams.name || "Team"}
+                                src={bidderTeam.logo_url || "/placeholder.svg"}
+                                alt={bidderTeam.name || "Team"}
                                 width={16}
                                 height={16}
                                 className="mr-1 object-contain"
                               />
                             ) : null}
-                            <span className="text-sm font-medium">{currentBid.teams?.name || "Unknown Team"}</span>
+                            <span className="text-sm font-medium">{bidderTeam?.name || "Your Team"}</span>
                           </>
                         ) : (
                           <span className="text-muted-foreground text-sm">Bid in progress</span>
@@ -481,7 +556,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
 
                 {/* NO BIDDING ACTIONS ON THIS PAGE */}
                 <div className="flex gap-2">
-                  {canRevealBidTeams && (
+                  {(isAdmin || (isManager && !!myTeamBids?.[player.id])) && (
                     <Button
                       variant="outline"
                       size="icon"
@@ -498,7 +573,7 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
         </div>
       )}
 
-      {historyPlayer && canRevealBidTeams && (
+      {historyPlayer && (isAdmin || (isManager && !!myTeamBids?.[historyPlayer.id])) && (
         <BidHistoryModal
           isOpen={isHistoryModalOpen}
           onClose={() => setIsHistoryModalOpen(false)}
@@ -509,3 +584,4 @@ export function FreeAgencyList({ userId, searchParams = {} }: FreeAgencyListProp
     </>
   )
 }
+
