@@ -1212,52 +1212,52 @@ export default function ManagementPage() {
               projectedSalary={projectedSalary}
             />
 
-{/* TABS */}
-<Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
-  <TabsList className="w-full mb-6 md:mb-8 h-auto flex md:grid md:grid-cols-7 gap-2 overflow-x-auto md:overflow-visible whitespace-nowrap justify-start md:justify-stretch p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-    <TabsTrigger value="roster" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
-      <span className="hidden md:inline">Team Roster</span>
-      <span className="md:hidden">Roster</span>
-    </TabsTrigger>
+      {/* TABS */}
+      <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
+        <TabsList className="w-full mb-6 md:mb-8 h-auto flex md:grid md:grid-cols-7 gap-2 overflow-x-auto md:overflow-visible whitespace-nowrap justify-start md:justify-stretch p-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <TabsTrigger value="roster" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
+            <span className="hidden md:inline">Team Roster</span>
+            <span className="md:hidden">Roster</span>
+          </TabsTrigger>
 
-    <TabsTrigger value="availability" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
-      <span className="hidden md:inline">Team Avail</span>
-      <span className="md:hidden">Avail</span>
-    </TabsTrigger>
+          <TabsTrigger value="availability" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
+            <span className="hidden md:inline">Team Avail</span>
+            <span className="md:hidden">Avail</span>
+          </TabsTrigger>
 
-    <TabsTrigger value="schedule" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
-      <span className="hidden md:inline">Team Schedule</span>
-      <span className="md:hidden">Schedule</span>
-    </TabsTrigger>
+          <TabsTrigger value="schedule" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
+            <span className="hidden md:inline">Team Schedule</span>
+            <span className="md:hidden">Schedule</span>
+          </TabsTrigger>
 
-    <TabsTrigger value="free-agents" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
-      <span className="hidden md:inline">Free Agents</span>
-      <span className="md:hidden">Free Agents</span>
-    </TabsTrigger>
+          <TabsTrigger value="free-agents" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
+            <span className="hidden md:inline">Free Agents</span>
+            <span className="md:hidden">Free Agents</span>
+          </TabsTrigger>
 
-    <TabsTrigger value="my-bids" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
-      <span className="hidden md:inline">My Bids</span>
-      <span className="md:hidden">Bids</span>
-    </TabsTrigger>
+          <TabsTrigger value="my-bids" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
+            <span className="hidden md:inline">My Bids</span>
+            <span className="md:hidden">Bids</span>
+          </TabsTrigger>
 
-    <TabsTrigger value="waivers" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
-      <span className="hidden md:inline">Waivers</span>
-      <span className="md:hidden">Waivers</span>
-    </TabsTrigger>
+          <TabsTrigger value="waivers" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max">
+            <span className="hidden md:inline">Waivers</span>
+            <span className="md:hidden">Waivers</span>
+          </TabsTrigger>
 
-    <TabsTrigger value="trades" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max relative">
-      <span className="hidden md:inline">Trades</span>
-      <span className="md:hidden">Trades</span>
-      {incomingTradeProposals.length > 0 && (
-        <span className="ml-1 md:ml-2 bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
-          {incomingTradeProposals.length}
-        </span>
-      )}
-    </TabsTrigger>
-  </TabsList>
+          <TabsTrigger value="trades" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max relative">
+            <span className="hidden md:inline">Trades</span>
+            <span className="md:hidden">Trades</span>
+            {incomingTradeProposals.length > 0 && (
+              <span className="ml-1 md:ml-2 bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
+                {incomingTradeProposals.length}
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-  {/* ...your TabsContent blocks stay exactly the same... */}
-</Tabs>
+        {/* ...your TabsContent blocks stay exactly the same... */}
+      </Tabs>
 
               {/* ROSTER */}
               <TabsContent value="roster">
