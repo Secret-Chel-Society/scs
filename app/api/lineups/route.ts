@@ -7,14 +7,26 @@ export async function GET(request: Request) {
   const matchId = searchParams.get("matchId")
   const teamId = searchParams.get("teamId")
 
+  // NEW (optional but recommended): allow filtering the correct season registration
+  // Pass either ?seasonNumber=9 or ?seasonId=<uuid>
+  const seasonNumberRaw = searchParams.get("seasonNumber")
+  const seasonId = searchParams.get("seasonId")
+  const seasonNumber = seasonNumberRaw ? Number(seasonNumberRaw) : null
+
   if (!matchId || !teamId) {
     return NextResponse.json({ error: "Match ID and Team ID are required" }, { status: 400 })
+  }
+
+  // NEW: validate seasonNumber if provided
+  if (seasonNumberRaw && Number.isNaN(seasonNumber)) {
+    return NextResponse.json({ error: "seasonNumber must be a number" }, { status: 400 })
   }
 
   const supabase = createRouteHandlerClient({ cookies })
 
   // Get the lineup for this match and team
-  const { data: lineupData, error: lineupError } = await supabase
+  // FIX: primary_position / secondary_position come from season_registrations, NOT users
+  let query = supabase
     .from("lineups")
     .select(`
       id,
@@ -27,15 +39,27 @@ export async function GET(request: Request) {
         users (
           id,
           gamer_tag_id,
-          primary_position,
-          secondary_position,
-          avatar_url
+          avatar_url,
+          season_registrations (
+            season_number,
+            season_id,
+            primary_position,
+            secondary_position,
+            console,
+            status
+          )
         )
       )
     `)
     .eq("match_id", matchId)
     .eq("team_id", teamId)
     .order("position")
+
+  // NEW: filter the nested season_registrations to the correct season (so you get 1 row back)
+  if (seasonId) query = query.eq("players.users.season_registrations.season_id", seasonId)
+  if (seasonNumber !== null) query = query.eq("players.users.season_registrations.season_number", seasonNumber)
+
+  const { data: lineupData, error: lineupError } = await query
 
   if (lineupError) {
     return NextResponse.json({ error: lineupError.message }, { status: 500 })
@@ -51,6 +75,7 @@ export async function POST(request: Request) {
   const {
     data: { session },
   } = await supabase.auth.getSession()
+
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -64,12 +89,13 @@ export async function POST(request: Request) {
     }
 
     // Check if user is authorized to manage this team
+    // FIX: support either NHL or AHL team assignment (team_id OR team_id_ahl)
     const { data: playerData, error: playerError } = await supabase
       .from("players")
       .select("id, role")
-      .eq("team_id", teamId)
       .eq("user_id", session.user.id)
-      .single()
+      .or(`team_id.eq.${teamId},team_id_ahl.eq.${teamId}`)
+      .maybeSingle()
 
     if (playerError || !playerData) {
       return NextResponse.json({ error: "You are not authorized to manage this team" }, { status: 403 })
@@ -90,6 +116,11 @@ export async function POST(request: Request) {
       .eq("position", position)
       .eq("line_number", lineNumber)
       .maybeSingle()
+
+    // NEW: handle query error (was missing)
+    if (positionError) {
+      return NextResponse.json({ error: positionError.message }, { status: 500 })
+    }
 
     if (existingPosition) {
       return NextResponse.json({ error: `Position ${position} is already filled` }, { status: 400 })
