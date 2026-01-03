@@ -54,6 +54,17 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
   const teamName = isHomeTeam ? match.home_team.name : match.away_team.name
   const opposingTeamName = isHomeTeam ? match.away_team.name : match.home_team.name
 
+  // Helpers to read positions from season_registrations
+  const getRegForUser = (user: any) => {
+    const regs = user?.season_registrations
+    if (!regs) return null
+    if (Array.isArray(regs)) return regs[0] ?? null // if multiple, we take first (you can filter by season later)
+    return regs
+  }
+
+  const getUserPrimaryPos = (user: any) => getRegForUser(user)?.primary_position ?? "?"
+  const getUserSecondaryPos = (user: any) => getRegForUser(user)?.secondary_position ?? ""
+
   // Check if the lineups table exists
   useEffect(() => {
     async function checkTable() {
@@ -61,15 +72,21 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
         setCheckingTable(true)
         setTableError(null)
 
-        // Try to query the lineups table
-        const { data, error } = await supabase.from("lineups").select("id").limit(1)
+        const { error } = await supabase.from("lineups").select("id").limit(1)
 
         if (error) {
           console.error("Error checking lineups table:", error)
-          if (error.message.includes("does not exist")) {
+
+          // FIX: PostgREST uses specific codes; do NOT treat every error as "table missing"
+          // - 42P01 = undefined_table (table truly missing)
+          // Other errors are usually RLS/permissions/auth and should NOT show "does not exist"
+          const code = (error as any).code
+          if (code === "42P01" || (error.message || "").toLowerCase().includes("does not exist")) {
             setTableExists(false)
             setTableError("The lineups table does not exist in the database.")
           } else {
+            // RLS/auth errors should be shown as-is (so you don't get false “missing table”)
+            setTableExists(true)
             setTableError(error.message)
           }
         } else {
@@ -78,7 +95,7 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
       } catch (error: any) {
         console.error("Exception checking lineups table:", error)
         setTableError(error.message)
-        if (error.message && error.message.includes("does not exist")) {
+        if ((error.message || "").toLowerCase().includes("does not exist")) {
           setTableExists(false)
         }
       } finally {
@@ -100,17 +117,29 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
         setLoading(true)
 
         // Fetch the team players
+        // FIX: primary/secondary positions come from season_registrations, not users
+        // NOTE: If you want a specific season, later you can filter by season_number in code.
         const { data: playersData, error: playersError } = await supabase
           .from("players")
           .select(`
             *,
-            user:users(id, email, gamer_tag_id, primary_position, secondary_position)
+            user:users(
+              id,
+              email,
+              gamer_tag_id,
+              avatar_url,
+              season_registrations(
+                season_number,
+                season_id,
+                primary_position,
+                secondary_position
+              )
+            )
           `)
-          .eq("team_id", teamId)
+          // FIX: support either team_id OR team_id_ahl
+          .or(`team_id.eq.${teamId},team_id_ahl.eq.${teamId}`)
 
-        if (playersError) {
-          throw playersError
-        }
+        if (playersError) throw playersError
 
         setTeamPlayers(playersData || [])
 
@@ -134,6 +163,7 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
         setIrPlayerIds(irPlayerIdsSet)
 
         // Fetch game availability for this match
+        // FIX: position fields must come from season_registrations
         const { data: availabilityData, error: availabilityError } = await supabase
           .from("game_availability")
           .select(`
@@ -141,7 +171,18 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
             status,
             player:players(
               id,
-              user:users(id, email, gamer_tag_id, primary_position, secondary_position)
+              user:users(
+                id,
+                email,
+                gamer_tag_id,
+                avatar_url,
+                season_registrations(
+                  season_number,
+                  season_id,
+                  primary_position,
+                  secondary_position
+                )
+              )
             )
           `)
           .eq("match_id", matchId)
@@ -163,7 +204,9 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
 
         if (lineupError) {
           console.error("Error fetching lineups:", lineupError)
-          if (lineupError.message.includes("does not exist")) {
+
+          const code = (lineupError as any).code
+          if (code === "42P01" || (lineupError.message || "").toLowerCase().includes("does not exist")) {
             setTableExists(false)
             setTableError("The lineups table does not exist in the database.")
           } else {
@@ -178,13 +221,15 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
         }
       } catch (error: any) {
         console.error("Error loading data:", error)
-        if (error.message && error.message.includes("does not exist")) {
+        const msg = error?.message || String(error)
+
+        if (msg.toLowerCase().includes("does not exist")) {
           setTableExists(false)
           setTableError("The lineups table does not exist in the database.")
         } else {
           toast({
             title: "Error",
-            description: "Failed to load data: " + error.message,
+            description: "Failed to load data: " + msg,
             variant: "destructive",
           })
         }
@@ -255,11 +300,8 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
 
       const { data, error } = await supabase.from("lineups").insert(newLineupItem).select()
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
 
-      // Update the lineup state
       setTeamLineup([...teamLineup, data[0]])
 
       toast({
@@ -267,7 +309,6 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
         description: "Player has been added to the lineup.",
       })
 
-      // Reset the form
       setSelectedPlayer("")
       setSelectedPosition("")
       setAddPlayerDialogOpen(false)
@@ -286,12 +327,8 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
   const handleRemovePlayer = async (lineupId: string) => {
     try {
       const { error } = await supabase.from("lineups").delete().eq("id", lineupId)
+      if (error) throw error
 
-      if (error) {
-        throw error
-      }
-
-      // Update the lineup state
       setTeamLineup(teamLineup.filter((item) => item.id !== lineupId))
 
       toast({
@@ -357,16 +394,14 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
     )
   }
 
-  // Get player name from lookup
   const getPlayerName = (playerId: string) => {
     const player = teamPlayers.find((p) => p.id === playerId)
     return player ? player.user?.gamer_tag_id || "Unknown Player" : "Unknown Player"
   }
 
-  // Get player position from lookup
   const getPlayerPosition = (playerId: string) => {
     const player = teamPlayers.find((p) => p.id === playerId)
-    return player ? player.user?.primary_position || "Unknown" : "Unknown"
+    return player ? getUserPrimaryPos(player.user) || "Unknown" : "Unknown"
   }
 
   const matchDate = new Date(match.match_date)
@@ -381,7 +416,6 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
     minute: "2-digit",
   })
 
-  // Check if we have a complete line (6 players)
   const hasCompleteLine = teamLineup.length === 6
   const hasGoalie = teamLineup.some((player) => player.position === "G")
   const lineupPositions = teamLineup.map((player) => player.position)
@@ -425,8 +459,8 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
                         {availablePlayers.map((player) => {
                           const isSignedUp = availableSignedUpPlayers.some((avail) => avail.player_id === player.id)
                           const isOnIR = irPlayerIds.has(player.id)
-                          const primaryPos = player.user?.primary_position || "?"
-                          const secondaryPos = player.user?.secondary_position || ""
+                          const primaryPos = getUserPrimaryPos(player.user)
+                          const secondaryPos = getUserSecondaryPos(player.user)
                           const positionText = secondaryPos ? `${primaryPos}/${secondaryPos}` : primaryPos
 
                           return (
@@ -488,8 +522,8 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
                   const player = teamPlayers.find((p) => p.id === availability.player_id)
                   if (!player) return null
 
-                  const primaryPos = player.user?.primary_position || "?"
-                  const secondaryPos = player.user?.secondary_position || ""
+                  const primaryPos = getUserPrimaryPos(player.user)
+                  const secondaryPos = getUserSecondaryPos(player.user)
                   const positionText = secondaryPos ? `${primaryPos}/${secondaryPos}` : primaryPos
                   const isInLineup = teamLineup.some((lineup) => lineup.player_id === player.id)
 
