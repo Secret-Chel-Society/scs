@@ -20,22 +20,37 @@ export function RunLineupsMigration({ onComplete }: RunLineupsMigrationProps) {
     setError(null)
 
     try {
-      // Use the team manager-specific endpoint
       const response = await fetch("/api/management/create-lineups-table", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        // ✅ CRITICAL: send auth cookies to the route handler
+        credentials: "include",
       })
 
+      // ✅ Better error parsing (works if server returns non-JSON too)
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to run migration")
+        const contentType = response.headers.get("content-type") || ""
+        let message = `Failed to run migration (${response.status})`
+
+        if (contentType.includes("application/json")) {
+          const errorData = await response.json().catch(() => null)
+          message =
+            errorData?.error ||
+            errorData?.message ||
+            errorData?.details ||
+            message
+        } else {
+          const text = await response.text().catch(() => "")
+          if (text) message = text
+        }
+
+        throw new Error(message)
       }
 
       setIsComplete(true)
 
-      // Call the onComplete callback if provided
       if (onComplete) {
         setTimeout(() => {
           onComplete()
@@ -43,7 +58,7 @@ export function RunLineupsMigration({ onComplete }: RunLineupsMigrationProps) {
       }
     } catch (err: any) {
       console.error("Error running migration:", err)
-      setError(err.message || "An error occurred while setting up the lineups table")
+      setError(err?.message || "An error occurred while setting up the lineups table")
     } finally {
       setIsRunning(false)
     }
