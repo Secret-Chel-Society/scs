@@ -54,11 +54,16 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
   const teamName = isHomeTeam ? match.home_team.name : match.away_team.name
   const opposingTeamName = isHomeTeam ? match.away_team.name : match.home_team.name
 
-  // Helpers to read positions from season_registrations
+  /**
+   * Helpers to read positions from season_registrations.
+   * IMPORTANT: We DO NOT rely on PostgREST nested joins for season_registrations
+   * (those fail if the FK relationship isn't defined). We attach the registration
+   * object onto user.season_registrations ourselves after fetching.
+   */
   const getRegForUser = (user: any) => {
     const regs = user?.season_registrations
     if (!regs) return null
-    if (Array.isArray(regs)) return regs[0] ?? null // if multiple, we take first (you can filter by season later)
+    if (Array.isArray(regs)) return regs[0] ?? null
     return regs
   }
 
@@ -77,15 +82,13 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
         if (error) {
           console.error("Error checking lineups table:", error)
 
-          // FIX: PostgREST uses specific codes; do NOT treat every error as "table missing"
-          // - 42P01 = undefined_table (table truly missing)
-          // Other errors are usually RLS/permissions/auth and should NOT show "does not exist"
+          // 42P01 = undefined_table (table truly missing)
           const code = (error as any).code
           if (code === "42P01" || (error.message || "").toLowerCase().includes("does not exist")) {
             setTableExists(false)
             setTableError("The lineups table does not exist in the database.")
           } else {
-            // RLS/auth errors should be shown as-is (so you don't get false “missing table”)
+            // RLS/auth errors should not be treated as missing table
             setTableExists(true)
             setTableError(error.message)
           }
@@ -116,32 +119,64 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
       try {
         setLoading(true)
 
-        // Fetch the team players
-        // FIX: primary/secondary positions come from season_registrations, not users
-        // NOTE: If you want a specific season, later you can filter by season_number in code.
+        /**
+         * STEP 1: Fetch team players (NO nested season_registrations join)
+         * This avoids 400 errors when PostgREST can't detect relationships.
+         */
         const { data: playersData, error: playersError } = await supabase
           .from("players")
           .select(`
-            *,
+            id,
+            user_id,
+            role,
+            team_id,
+            team_id_ahl,
             user:users(
               id,
               email,
               gamer_tag_id,
-              avatar_url,
-              season_registrations(
-                season_number,
-                season_id,
-                primary_position,
-                secondary_position
-              )
+              avatar_url
             )
           `)
-          // FIX: support either team_id OR team_id_ahl
           .or(`team_id.eq.${teamId},team_id_ahl.eq.${teamId}`)
 
         if (playersError) throw playersError
 
-        setTeamPlayers(playersData || [])
+        /**
+         * STEP 2: Fetch season_registrations separately and attach them to each user object.
+         * We keep the "latest" registration by season_number (or first seen).
+         */
+        const userIds = (playersData || []).map((p: any) => p.user_id).filter(Boolean)
+
+        let regByUser = new Map<string, any>()
+        if (userIds.length > 0) {
+          const { data: regsData, error: regsError } = await supabase
+            .from("season_registrations")
+            .select("user_id, season_number, season_id, primary_position, secondary_position")
+            .in("user_id", userIds)
+
+          if (regsError) {
+            console.error("Error fetching season registrations:", regsError)
+          } else {
+            for (const r of regsData || []) {
+              const cur = regByUser.get(r.user_id)
+              // keep the highest season_number as "latest"
+              if (!cur || (r.season_number ?? 0) > (cur.season_number ?? 0)) {
+                regByUser.set(r.user_id, r)
+              }
+            }
+          }
+        }
+
+        const mergedPlayers = (playersData || []).map((p: any) => {
+          const reg = p?.user?.id ? regByUser.get(p.user.id) ?? regByUser.get(p.user_id) : regByUser.get(p.user_id)
+          return {
+            ...p,
+            user: p.user ? { ...p.user, season_registrations: reg ?? null } : p.user,
+          }
+        })
+
+        setTeamPlayers(mergedPlayers)
 
         // Fetch injury reserves for this match's week
         const matchDate = new Date(match.match_date)
@@ -159,32 +194,17 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
           console.error("Error fetching injury reserves:", irError)
         }
 
-        const irPlayerIdsSet = new Set(injuryReserves?.map((ir) => ir.player_id) || [])
+        const irPlayerIdsSet = new Set(injuryReserves?.map((ir: any) => ir.player_id) || [])
         setIrPlayerIds(irPlayerIdsSet)
 
-        // Fetch game availability for this match
-        // FIX: position fields must come from season_registrations
+        /**
+         * Fetch game availability for this match.
+         * Keep it SIMPLE: only need player_id.
+         * (Nested joins here can also trigger 400 errors if FK relationships aren't defined.)
+         */
         const { data: availabilityData, error: availabilityError } = await supabase
           .from("game_availability")
-          .select(`
-            player_id,
-            status,
-            player:players(
-              id,
-              user:users(
-                id,
-                email,
-                gamer_tag_id,
-                avatar_url,
-                season_registrations(
-                  season_number,
-                  season_id,
-                  primary_position,
-                  secondary_position
-                )
-              )
-            )
-          `)
+          .select("player_id, status")
           .eq("match_id", matchId)
           .eq("team_id", teamId)
           .eq("status", "available")
@@ -291,8 +311,8 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
       team_id: teamId,
       player_id: selectedPlayer,
       position: selectedPosition,
-      line_number: 1, // Always line 1
-      is_starter: true, // Always a starter
+      line_number: 1,
+      is_starter: true,
     }
 
     try {
@@ -504,7 +524,7 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
                     Cancel
                   </Button>
                   <Button onClick={handleAddPlayer} disabled={saving}>
-                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {saving && <Loader2 className="mr-2 h-4 w-3 animate-spin" />}
                     {saving ? "Adding..." : "Add to Lineup"}
                   </Button>
                 </DialogFooter>
@@ -530,7 +550,9 @@ export function TeamLineupManager({ matchId, teamId, match }: { matchId: string;
                   return (
                     <div
                       key={availability.player_id}
-                      className={`text-sm p-2 rounded ${isInLineup ? "bg-blue-600 text-blue-100" : "bg-slate-700 text-white"}`}
+                      className={`text-sm p-2 rounded ${
+                        isInLineup ? "bg-blue-600 text-blue-100" : "bg-slate-700 text-white"
+                      }`}
                     >
                       <div className="font-medium">{player.user?.gamer_tag_id}</div>
                       <div className="text-xs text-muted-foreground">{positionText}</div>
