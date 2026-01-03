@@ -6,26 +6,32 @@ export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
 
   try {
-    // Check if the user is logged in
+    // FIX: getUser() is more reliable than getSession() in route handlers
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (userError) {
+      return NextResponse.json({ error: userError.message }, { status: 500 })
+    }
+
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     // Check if the user is a team manager (GM, AGM, Owner)
+    // FIX: use user.id and keep it flexible for NHL/AHL
     const { data: playerData, error: playerError } = await supabase
       .from("players")
-      .select("role, team_id")
-      .eq("user_id", session.user.id)
+      .select("role, team_id, team_id_ahl")
+      .eq("user_id", user.id)
 
     if (playerError) {
       return NextResponse.json({ error: "Failed to verify player status" }, { status: 500 })
     }
 
-    const isManager = playerData?.some((player) => ["GM", "AGM", "Owner"].includes(player.role))
+    const isManager = (playerData ?? []).some((player) => ["GM", "AGM", "Owner"].includes(player.role))
 
     if (!isManager) {
       return NextResponse.json({ error: "Only team managers can run this migration" }, { status: 403 })
@@ -74,15 +80,25 @@ export async function POST(request: Request) {
       EXECUTE FUNCTION update_lineups_modified_column();
     `
 
-    // Execute SQL statements
-    await supabase.rpc("exec_sql", { sql: createTableSQL })
-    await supabase.rpc("exec_sql", { sql: createIndexesSQL })
-    await supabase.rpc("exec_sql", { sql: createTriggerFunctionSQL })
-    await supabase.rpc("exec_sql", { sql: createTriggerSQL })
+    // Execute SQL statements (FIX: capture rpc errors)
+    const r1 = await supabase.rpc("exec_sql", { sql: createTableSQL })
+    if (r1.error) return NextResponse.json({ error: r1.error.message }, { status: 500 })
+
+    const r2 = await supabase.rpc("exec_sql", { sql: createIndexesSQL })
+    if (r2.error) return NextResponse.json({ error: r2.error.message }, { status: 500 })
+
+    const r3 = await supabase.rpc("exec_sql", { sql: createTriggerFunctionSQL })
+    if (r3.error) return NextResponse.json({ error: r3.error.message }, { status: 500 })
+
+    const r4 = await supabase.rpc("exec_sql", { sql: createTriggerSQL })
+    if (r4.error) return NextResponse.json({ error: r4.error.message }, { status: 500 })
 
     return NextResponse.json({ success: true, message: "Lineups table created successfully" })
   } catch (error: any) {
     console.error("Error creating lineups table:", error)
-    return NextResponse.json({ error: "Failed to create lineups table", details: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: "Failed to create lineups table", details: error?.message ?? String(error) },
+      { status: 500 }
+    )
   }
 }
