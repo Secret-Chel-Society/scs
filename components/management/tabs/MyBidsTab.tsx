@@ -23,8 +23,6 @@ export default function MyBidsTab({
   getPositionAbbreviation,
   getPositionColor,
 }: Props) {
-  console.log("[v0] MyBidsTab received myBids:", myBids)
-
   return (
     <Card>
       <CardHeader>
