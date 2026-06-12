@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Newspaper,
   Database,
-  GamepadIcon as GameController,
+  PaintRoller as GameController,
   Activity,
   ClipboardList,
   Bot,
@@ -26,26 +26,35 @@ import {
   Clock,
   DollarSign,
   Coins,
-  Crown,
-  Flame,
-  Shield,
-  Rocket,
-  Zap,
-  Target,
-  TrendingUp,
-  Award,
-  Medal,
+  UserPlus,
+  Search,
+  UserX,
+  UserCog,
+  ChevronDown,
+  ChevronUp,
   Star,
-  ArrowRight,
-  Lock,
-  Eye,
-  Cog,
   Wrench,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
 } from "lucide-react"
 import AdminDiagnostics from "@/components/admin/admin-diagnostics"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+
+interface AdminLink {
+  title: string
+  description: string
+  icon: React.ReactNode
+  href: string
+}
+
+interface AdminSection {
+  title: string
+  description: string
+  color: string
+  bgColor: string
+  borderColor: string
+  icon: React.ReactNode
+  links: AdminLink[]
+}
 
 export default function AdminDashboardPage() {
   const { supabase, session } = useSupabase()
@@ -53,6 +62,22 @@ export default function AdminDashboardPage() {
   const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    nhl: true,
+    ahl: true,
+    allstar: true,
+    ecl: true,
+    general: true,
+    users: true,
+    system: false,
+  })
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }))
+  }
 
   useEffect(() => {
     async function checkAuthorization() {
@@ -71,7 +96,7 @@ export default function AdminDashboardPage() {
           .from("user_roles")
           .select("*")
           .eq("user_id", session.user.id)
-          .eq("role", "Admin")
+          .in("role", ["Admin", "Site Owner"])
 
         if (adminRoleError || !adminRoleData || adminRoleData.length === 0) {
           toast({
@@ -101,16 +126,9 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-        <div className="container mx-auto px-4 py-20">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <Shield className="h-8 w-8 text-white" />
-              </div>
-              <p className="text-hockey-silver-600 dark:text-hockey-silver-400 font-medium">Loading Admin Dashboard...</p>
-            </div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -120,456 +138,525 @@ export default function AdminDashboardPage() {
     return null
   }
 
-  const adminLinks = [
+  // Organized by league sections
+  const adminSections: AdminSection[] = [
     {
-      title: "User Management",
-      description: "Manage user accounts and roles",
-      icon: <Users className="h-6 w-6" />,
-      href: "/admin/users",
-      category: "user",
-      color: "ice-blue"
+      title: "NHL Management",
+      description: "Teams, schedules, draft, and logos for the NHL league",
+      color: "text-blue-600",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/30",
+      icon: <Trophy className="h-5 w-5" />,
+      links: [
+        {
+          title: "Team Management",
+          description: "Manage NHL teams and rosters",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/teams",
+        },
+        {
+          title: "Schedule Management",
+          description: "Manage NHL game schedule and results",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/admin/schedule",
+        },
+        {
+          title: "NHL Draft Management",
+          description: "Manage NHL draft settings, order, and status",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/nhl-draft-management",
+        },
+        {
+          title: "Team Logos",
+          description: "Manage NHL team logos and branding",
+          icon: <ImageIcon className="h-5 w-5" />,
+          href: "/admin/team-logos",
+        },
+        {
+          title: "Daily Recap",
+          description: "Generate nightly recap for NHL teams",
+          icon: <Newspaper className="h-5 w-5" />,
+          href: "/admin/daily-recap",
+        },
+        {
+          title: "Featured Games",
+          description: "Manage featured NHL games on homepage",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/featured-games",
+        },
+      ],
     },
     {
-      title: "Complete User Deletion",
-      description: "Completely remove users from all systems",
-      icon: <Trash2 className="h-6 w-6" />,
-      href: "/admin/complete-user-deletion",
-      category: "user",
-      color: "goal-red"
+      title: "AHL Management",
+      description: "Teams, schedules, draft, and logos for the AHL league",
+      color: "text-orange-600",
+      bgColor: "bg-orange-500/10",
+      borderColor: "border-orange-500/30",
+      icon: <Trophy className="h-5 w-5" />,
+      links: [
+        {
+          title: "AHL Teams Management",
+          description: "Manage AHL teams and rosters",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/ahl-teams-management",
+        },
+        {
+          title: "AHL Schedule Management",
+          description: "Manage AHL game schedule and results",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/admin/ahl-schedule-management",
+        },
+        {
+          title: "AHL Draft Management",
+          description: "Manage AHL draft settings, order, and status",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/ahl-draft-management",
+        },
+        {
+          title: "AHL Team Logos",
+          description: "Manage AHL team logos and branding",
+          icon: <ImageIcon className="h-5 w-5" />,
+          href: "/admin/ahl-team-logos",
+        },
+      ],
     },
     {
-      title: "Banned Users Management",
-      description: "View and manage banned users, ban/unban functionality",
-      icon: <Users className="h-6 w-6" />,
-      href: "/admin/banned-users",
-      category: "user",
-      color: "goal-red"
+      title: "All-Star Management",
+      description: "Teams and schedules for All-Star events",
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/30",
+      icon: <Star className="h-5 w-5" />,
+      links: [
+        {
+          title: "Allstar Team Management",
+          description: "Manage MGALLSTAR teams and rosters",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/allstar-teams",
+        },
+        {
+          title: "Allstar Schedule Management",
+          description: "Manage MGALLSTAR game schedule and results",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/admin/allstar-schedule",
+        },
+      ],
     },
     {
-      title: "Team Management",
-      description: "Manage teams and rosters",
-      icon: <Trophy className="h-6 w-6" />,
-      href: "/admin/teams",
-      category: "team",
-      color: "assist-green"
+      title: "ECL Management",
+      description: "Teams, schedules, logos, and recaps for the ECL league",
+      color: "text-teal-600",
+      bgColor: "bg-teal-500/10",
+      borderColor: "border-teal-500/30",
+      icon: <Trophy className="h-5 w-5" />,
+      links: [
+        {
+          title: "ECL Team Management",
+          description: "Manage ECL teams and rosters",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/ecl-teams",
+        },
+        {
+          title: "ECL Schedule Management",
+          description: "Manage ECL game schedule and results",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/admin/ecl-schedule",
+        },
+        {
+          title: "ECL Team Logos",
+          description: "Manage ECL team logos and branding",
+          icon: <ImageIcon className="h-5 w-5" />,
+          href: "/admin/ecl-team-logos",
+        },
+        {
+          title: "ECL Daily Recap",
+          description: "Generate daily recaps for ECL matches",
+          icon: <Newspaper className="h-5 w-5" />,
+          href: "/admin/ecl-daily-recap",
+        },
+      ],
     },
     {
-      title: "Schedule Management",
-      description: "Manage game schedule and results",
-      icon: <Calendar className="h-6 w-6" />,
-      href: "/admin/schedule",
-      category: "game",
-      color: "rink-blue"
+      title: "League-Wide Operations",
+      description: "Shared management across all leagues",
+      color: "text-purple-600",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/30",
+      icon: <Settings className="h-5 w-5" />,
+      links: [
+        {
+          title: "Divisions & Conferences",
+          description: "Manage team divisions and conferences for NHL and AHL",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/divisions-conferences",
+        },
+        {
+          title: "Draft Picks Management",
+          description: "Manage tradeable draft picks for NHL and AHL teams",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/draft-picks-management",
+        },
+        {
+          title: "Weeks Management",
+          description: "Manage week definitions for statistics filtering",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/admin/weeks-management",
+        },
+        {
+          title: "Update Current Season",
+          description: "Change the active season for registrations",
+          icon: <Clock className="h-5 w-5" />,
+          href: "/admin/update-current-season",
+        },
+        {
+          title: "Season Registrations",
+          description: "Manage player season registrations",
+          icon: <ClipboardList className="h-5 w-5" />,
+          href: "/admin/registrations",
+        },
+        {
+          title: "Team Availability",
+          description: "View player availability and games played by week",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/admin/team-avail",
+        },
+        {
+          title: "Bidding Recap",
+          description: "View comprehensive bidding statistics and player bid history",
+          icon: <DollarSign className="h-5 w-5" />,
+          href: "/admin/bidding-recap",
+        },
+        {
+          title: "Fine Management",
+          description: "Issue and manage team fines for rule violations",
+          icon: <DollarSign className="h-5 w-5" />,
+          href: "/admin/fines",
+        },
+        {
+          title: "Team of the Week",
+          description: "Manage TOTW player cards for the homepage",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/team-of-the-week",
+        },
+        {
+          title: "Awards Management",
+          description: "Manage season awards and achievements",
+          icon: <Trophy className="h-5 w-5" />,
+          href: "/admin/awards",
+        },
+        {
+          title: "Statistics Management",
+          description: "Manage player and team statistics",
+          icon: <BarChart3 className="h-5 w-5" />,
+          href: "/admin/statistics",
+        },
+        {
+          title: "EA Stats",
+          description: "View EA Sports NHL player statistics",
+          icon: <GameController className="h-5 w-5" />,
+          href: "/admin/ea-stats",
+        },
+        {
+          title: "EA Matches",
+          description: "View EA Sports NHL match history",
+          icon: <Activity className="h-5 w-5" />,
+          href: "/admin/ea-matches",
+        },
+        {
+          title: "Player Mappings",
+          description: "Manage EA player to user mappings",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/player-mappings",
+        },
+        {
+          title: "News Management",
+          description: "Manage news articles and announcements",
+          icon: <Newspaper className="h-5 w-5" />,
+          href: "/admin/news",
+        },
+        {
+          title: "Forum Management",
+          description: "Manage forum categories and posts",
+          icon: <MessageSquare className="h-5 w-5" />,
+          href: "/admin/forum",
+        },
+        {
+          title: "Manage Tokens",
+          description: "Manage player tokens, redeemables, and redemption requests",
+          icon: <Coins className="h-5 w-5" />,
+          href: "/admin/tokens",
+        },
+      ],
     },
     {
-      title: "Update Current Season",
-      description: "Change the active season for registrations",
-      icon: <Clock className="h-6 w-6" />,
-      href: "/admin/update-current-season",
-      category: "system",
-      color: "hockey-silver"
+      title: "User & Role Management",
+      description: "User accounts, roles, bans, and activity",
+      color: "text-green-600",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/30",
+      icon: <Users className="h-5 w-5" />,
+      links: [
+        {
+          title: "User Management",
+          description: "Manage user accounts and roles",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/users",
+        },
+        {
+          title: "Role Offers",
+          description: "Assign Owner, GM, and AGM roles with automatic salary",
+          icon: <UserCog className="h-5 w-5" />,
+          href: "/admin/role-offers",
+        },
+        {
+          title: "Player Releases",
+          description: "Review and process player release requests from teams",
+          icon: <UserX className="h-5 w-5" />,
+          href: "/admin/player-releases",
+        },
+        {
+          title: "Banned Users Management",
+          description: "View and manage banned users, ban/unban functionality",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/banned-users",
+        },
+        {
+          title: "Complete User Deletion",
+          description: "Completely remove users from all systems",
+          icon: <Trash2 className="h-5 w-5" />,
+          href: "/admin/complete-user-deletion",
+        },
+        {
+          title: "Activity Log",
+          description: "View all admin and management actions across the league",
+          icon: <Activity className="h-5 w-5" />,
+          href: "/admin/activity-log",
+        },
+        {
+          title: "User Account Manager",
+          description: "Search, manage, and fix user account issues across all systems",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/user-account-manager",
+        },
+        {
+          title: "User Diagnostics",
+          description: "Diagnose and fix issues with user accounts, verification, and registration",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/user-diagnostics",
+        },
+      ],
     },
     {
-      title: "Season Registrations",
-      description: "Manage player season registrations",
-      icon: <ClipboardList className="h-6 w-6" />,
-      href: "/admin/registrations",
-      category: "user",
-      color: "ice-blue"
-    },
-    {
-      title: "Team Availability",
-      description: "View player availability and games played by week",
-      icon: <Calendar className="h-6 w-6" />,
-      href: "/admin/team-avail",
-      category: "team",
-      color: "assist-green"
-    },
-    {
-      title: "Bidding Recap",
-      description: "View comprehensive bidding statistics and player bid history",
-      icon: <DollarSign className="h-6 w-6" />,
-      href: "/admin/bidding-recap",
-      category: "finance",
-      color: "goal-red"
-    },
-    {
-      title: "Daily Recap",
-      description: "Generate nightly recap for all teams based on recent matches",
-      icon: <Newspaper className="h-6 w-6" />,
-      href: "/admin/daily-recap",
-      category: "content",
-      color: "rink-blue"
-    },
-    {
-      title: "Manage Tokens",
-      description: "Manage player tokens, redeemables, and redemption requests",
-      icon: <Coins className="h-6 w-6" />,
-      href: "/admin/tokens",
-      category: "finance",
-      color: "goal-red"
-    },
-    {
-      title: "News Management",
-      description: "Manage news articles and announcements",
-      icon: <Newspaper className="h-6 w-6" />,
-      href: "/admin/news",
-      category: "content",
-      color: "rink-blue"
-    },
-    {
-      title: "Statistics Management",
-      description: "Manage player and team statistics",
-      icon: <BarChart3 className="h-6 w-6" />,
-      href: "/admin/statistics",
-      category: "data",
-      color: "assist-green"
-    },
-    {
-      title: "EA Stats",
-      description: "View EA Sports NHL player statistics",
-      icon: <GameController className="h-6 w-6" />,
-      href: "/admin/ea-stats",
-      category: "data",
-      color: "assist-green"
-    },
-    {
-      title: "EA Matches",
-      description: "View EA Sports NHL match history",
-      icon: <Activity className="h-6 w-6" />,
-      href: "/admin/ea-matches",
-      category: "data",
-      color: "assist-green"
-    },
-    {
-      title: "Awards Management",
-      description: "Manage season awards and achievements",
-      icon: <Trophy className="h-6 w-6" />,
-      href: "/admin/awards",
-      category: "content",
-      color: "rink-blue"
-    },
-    {
-      title: "Photo Gallery",
-      description: "Manage photos and media",
-      icon: <ImageIcon className="h-6 w-6" />,
-      href: "/admin/photos",
-      category: "content",
-      color: "rink-blue"
-    },
-    {
-      title: "Team Logos",
-      description: "Manage team logos and branding",
-      icon: <ImageIcon className="h-6 w-6" />,
-      href: "/admin/team-logos",
-      category: "team",
-      color: "assist-green"
-    },
-    {
-      title: "Email Verification",
-      description: "Manage email verification",
-      icon: <ShieldCheck className="h-6 w-6" />,
-      href: "/admin/email-verification",
-      category: "security",
-      color: "hockey-silver"
-    },
-    {
-      title: "Password Reset",
-      description: "Reset user passwords directly",
-      icon: <ShieldCheck className="h-6 w-6" />,
-      href: "/admin/password-reset",
-      category: "security",
-      color: "hockey-silver"
-    },
-    {
-      title: "System Settings",
-      description: "Configure system settings",
-      icon: <Settings className="h-6 w-6" />,
-      href: "/admin/settings",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "User Diagnostics",
-      description: "Diagnose and fix issues with user accounts, verification, and registration.",
-      icon: <Users className="h-6 w-6" />,
-      href: "/admin/user-diagnostics",
-      category: "user",
-      color: "ice-blue"
-    },
-    {
-      title: "User Account Manager",
-      description: "Search, manage, and fix user account issues across all systems",
-      icon: <Users className="h-6 w-6" />,
-      href: "/admin/user-account-manager",
-      category: "user",
-      color: "ice-blue"
-    },
-    {
-      title: "SCS Bot",
-      description: "Manage Discord bot integration, roles, and Twitch streaming",
-      icon: <Bot className="h-6 w-6" />,
-      href: "/admin/scs-bot",
-      category: "integration",
-      color: "rink-blue"
-    },
-    {
-      title: "Setup Bot Config",
-      description: "Initialize and configure Discord bot settings",
-      icon: <Settings className="h-6 w-6" />,
-      href: "/admin/setup-bot-config",
-      category: "integration",
-      color: "rink-blue"
-    },
-    {
-      title: "Reset User Password",
-      description: "Reset a user's password by email address.",
-      icon: <ShieldCheck className="h-6 w-6" />,
-      href: "/admin/reset-user-password",
-      category: "security",
-      color: "hockey-silver"
-    },
-    {
-      title: "Auth to Database Sync",
-      description: "Sync users from Supabase Auth to database tables",
-      icon: <RefreshCw className="h-6 w-6" />,
-      href: "/admin/sync-auth-database",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "Orphaned Auth Users",
-      description: "Find and fix users from old auth system that exist in Auth but not in database",
-      icon: <Users className="h-6 w-6" />,
-      href: "/admin/orphaned-auth-users",
-      category: "user",
-      color: "ice-blue"
-    },
-    {
-      title: "Sync Missing Users",
-      description: "Sync missing users between auth and database",
-      icon: <RefreshCw className="h-6 w-6" />,
-      href: "/admin/sync-missing-users",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "Fix User Constraints",
-      description: "Fix console and gamer tag constraint violations for user sync",
-      icon: <ShieldCheck className="h-6 w-6" />,
-      href: "/admin/fix-user-constraints",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "Fix Console Values",
-      description: "Fix invalid console values for users that failed to sync",
-      icon: <GameController className="h-6 w-6" />,
-      href: "/admin/fix-console-values",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "Role Sync Fix",
-      description: "Fix role synchronization between user_roles and players tables",
-      icon: <Shield className="h-6 w-6" />,
-      href: "/admin/role-sync",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "Discord Debug",
-      description: "Debug Discord bot integration and role assignments",
-      icon: <Bot className="h-6 w-6" />,
-      href: "/admin/discord-debug",
-      category: "integration",
-      color: "rink-blue"
-    },
-    {
-      title: "Forum Management",
-      description: "Manage forum categories and posts",
-      icon: <MessageSquare className="h-6 w-6" />,
-      href: "/admin/forum",
-      category: "content",
-      color: "rink-blue"
-    },
-    {
-      title: "Featured Games",
-      description: "Manage featured games on homepage",
-      icon: <Trophy className="h-6 w-6" />,
-      href: "/admin/featured-games",
-      category: "content",
-      color: "rink-blue"
-    },
-    {
-      title: "Player Mappings",
-      description: "Manage EA player to user mappings",
-      icon: <Users className="h-6 w-6" />,
-      href: "/admin/player-mappings",
-      category: "data",
-      color: "assist-green"
-    },
-    {
-      title: "Database Structure",
-      description: "Explore database tables and structure",
-      icon: <Database className="h-6 w-6" />,
-      href: "/admin/database-structure",
-      category: "system",
-      color: "hockey-silver"
-    },
-    {
-      title: "RBAC Debug",
-      description: "Debug role-based access control",
-      icon: <ShieldCheck className="h-6 w-6" />,
-      href: "/admin/rbac-debug",
-      category: "security",
-      color: "hockey-silver"
+      title: "System & Technical",
+      description: "Database, auth, bot config, and debugging tools",
+      color: "text-red-600",
+      bgColor: "bg-red-500/10",
+      borderColor: "border-red-500/30",
+      icon: <Wrench className="h-5 w-5" />,
+      links: [
+        {
+          title: "System Settings",
+          description: "Configure system settings",
+          icon: <Settings className="h-5 w-5" />,
+          href: "/admin/settings",
+        },
+        {
+          title: "MGHL Bot",
+          description: "Manage Discord bot integration, roles, and Twitch streaming",
+          icon: <Bot className="h-5 w-5" />,
+          href: "/admin/lmshl-bot",
+        },
+        {
+          title: "Setup Bot Config",
+          description: "Initialize and configure Discord bot settings",
+          icon: <Settings className="h-5 w-5" />,
+          href: "/admin/setup-bot-config",
+        },
+        {
+          title: "Discord Debug",
+          description: "Debug Discord bot integration and role assignments",
+          icon: <Bot className="h-5 w-5" />,
+          href: "/admin/discord-debug",
+        },
+        {
+          title: "Email Verification",
+          description: "Manage email verification",
+          icon: <ShieldCheck className="h-5 w-5" />,
+          href: "/admin/email-verification",
+        },
+        {
+          title: "Password Reset",
+          description: "Reset user passwords directly",
+          icon: <ShieldCheck className="h-5 w-5" />,
+          href: "/admin/password-reset",
+        },
+        {
+          title: "Reset User Password",
+          description: "Reset a user&apos;s password by email address",
+          icon: <ShieldCheck className="h-5 w-5" />,
+          href: "/admin/reset-user-password",
+        },
+        {
+          title: "Auth to Database Sync",
+          description: "Sync users from Supabase Auth to database tables",
+          icon: <RefreshCw className="h-5 w-5" />,
+          href: "/admin/sync-auth-database",
+        },
+        {
+          title: "Orphaned Auth Users",
+          description: "Find and fix users that exist in Auth but not in database",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/orphaned-auth-users",
+        },
+        {
+          title: "Sync Missing Users",
+          description: "Sync missing users between auth and database",
+          icon: <RefreshCw className="h-5 w-5" />,
+          href: "/admin/sync-missing-users",
+        },
+        {
+          title: "Fix User Constraints",
+          description: "Fix console and gamer tag constraint violations for user sync",
+          icon: <ShieldCheck className="h-5 w-5" />,
+          href: "/admin/fix-user-constraints",
+        },
+        {
+          title: "Fix Console Values",
+          description: "Fix invalid console values for users that failed to sync",
+          icon: <GameController className="h-5 w-5" />,
+          href: "/admin/fix-console-values",
+        },
+        {
+          title: "Fix Waiver Tables",
+          description: "Fix waiver priority and claims tables structure",
+          icon: <Database className="h-5 w-5" />,
+          href: "/admin/fix-waiver-tables",
+        },
+        {
+          title: "Check Auth User",
+          description: "Check if a user exists in all required database tables and Auth",
+          icon: <Search className="h-5 w-5" />,
+          href: "/admin/check-auth-user",
+        },
+        {
+          title: "Repair Auth Users",
+          description: "Fix users who have database records but are missing from Supabase Auth",
+          icon: <UserPlus className="h-5 w-5" />,
+          href: "/admin/repair-auth-users",
+        },
+        {
+          title: "Database Structure",
+          description: "Explore database tables and structure",
+          icon: <Database className="h-5 w-5" />,
+          href: "/admin/database-structure",
+        },
+        {
+          title: "RBAC Debug",
+          description: "Debug role-based access control",
+          icon: <ShieldCheck className="h-5 w-5" />,
+          href: "/admin/rbac-debug",
+        },
+      ],
     },
   ]
 
-  const categories = {
-    user: { name: "User Management", icon: <Users className="h-5 w-5" />, color: "ice-blue" },
-    team: { name: "Team Operations", icon: <Trophy className="h-5 w-5" />, color: "assist-green" },
-    game: { name: "Game Management", icon: <GameController className="h-5 w-5" />, color: "rink-blue" },
-    system: { name: "System Tools", icon: <Settings className="h-5 w-5" />, color: "hockey-silver" },
-    finance: { name: "Financial Tools", icon: <DollarSign className="h-5 w-5" />, color: "goal-red" },
-    content: { name: "Content Management", icon: <Newspaper className="h-5 w-5" />, color: "rink-blue" },
-    data: { name: "Data & Statistics", icon: <BarChart3 className="h-5 w-5" />, color: "assist-green" },
-    security: { name: "Security & Access", icon: <Shield className="h-5 w-5" />, color: "hockey-silver" },
-    integration: { name: "Integrations", icon: <Bot className="h-5 w-5" />, color: "rink-blue" },
-  }
-
-  const groupedLinks = adminLinks.reduce((acc, link) => {
-    if (!acc[link.category]) {
-      acc[link.category] = []
-    }
-    acc[link.category].push(link)
-    return acc
-  }, {} as Record<string, typeof adminLinks>)
-
-  const getColorClasses = (color: string) => {
-    const colorMap: Record<string, string> = {
-      'ice-blue': 'from-ice-blue-500 to-rink-blue-600',
-      'rink-blue': 'from-rink-blue-500 to-ice-blue-600',
-      'assist-green': 'from-assist-green-500 to-assist-green-600',
-      'goal-red': 'from-goal-red-500 to-goal-red-600',
-      'hockey-silver': 'from-hockey-silver-500 to-hockey-silver-600'
-    }
-    return colorMap[color] || 'from-ice-blue-500 to-rink-blue-600'
-  }
+  const sectionKeys = ["nhl", "ahl", "allstar", "ecl", "general", "users", "system"]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ice-blue-50 via-white to-rink-blue-50 dark:from-hockey-silver-900 dark:via-hockey-silver-800 dark:to-rink-blue-900/30">
-      {/* Enhanced Hero Header Section */}
-      <div className="relative overflow-hidden py-20 px-4">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-hockey-pattern opacity-5"></div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-ice-blue-200/30 to-rink-blue-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-br from-assist-green-200/30 to-goal-red-200/30 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
-        
-        <div className="container mx-auto text-center relative z-10">
-          <div>
-            <h1 className="hockey-title mb-6">
-              Admin Dashboard
-            </h1>
-            <p className="hockey-subtitle mx-auto mb-8">
-              Complete control center for managing SCS operations, users, teams, and system configurations
-            </p>
-            
-            {/* Admin Status Badge */}
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-assist-green-500 to-assist-green-600 text-white px-6 py-3 rounded-full shadow-lg shadow-assist-green-500/25 border-2 border-white dark:border-hockey-silver-800">
-              <Shield className="h-5 w-5" />
-              <span className="font-semibold">Administrator Access Granted</span>
-            </div>
-          </div>
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const allExpanded = Object.values(expandedSections).every((v) => v)
+              const newState: Record<string, boolean> = {}
+              sectionKeys.forEach((key) => {
+                newState[key] = !allExpanded
+              })
+              setExpandedSections(newState)
+            }}
+            className="text-xs"
+          >
+            {Object.values(expandedSections).every((v) => v) ? "Collapse All" : "Expand All"}
+          </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pb-20">
-        {/* Category-based Admin Tools */}
-        <div className="space-y-12">
-          {Object.entries(groupedLinks).map(([categoryKey, links]) => {
-            const category = categories[categoryKey as keyof typeof categories]
-            return (
-              <div key={categoryKey} className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${getColorClasses(category.color)} rounded-xl flex items-center justify-center shadow-lg`}>
-                    <div className="text-white">
-                      {category.icon}
-                    </div>
+      <div className="space-y-4">
+        {adminSections.map((section, sectionIndex) => {
+          const sectionKey = sectionKeys[sectionIndex]
+          const isExpanded = expandedSections[sectionKey]
+
+          return (
+            <div
+              key={section.title}
+              className={cn("rounded-lg border", section.borderColor, section.bgColor)}
+            >
+              <button
+                onClick={() => toggleSection(sectionKey)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-background/50 transition-colors rounded-t-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn("p-2 rounded-md", section.bgColor, section.color)}>
+                    {section.icon}
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-hockey-silver-800 dark:text-hockey-silver-200">
-                      {category.name}
-                    </h2>
-                    <p className="text-hockey-silver-600 dark:text-hockey-silver-400">
-                      {links.length} tool{links.length !== 1 ? 's' : ''} available
+                    <h2 className={cn("text-lg font-semibold", section.color)}>{section.title}</h2>
+                    <p className="text-sm text-muted-foreground hidden sm:block">
+                      {section.description}
                     </p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {links.map((link, index) => (
-                    <Link key={index} href={link.href} className="block group">
-                      <Card className="hockey-card hockey-card-hover h-full group-hover:scale-105 transition-all duration-300 cursor-pointer">
-                        <CardHeader className="flex flex-row items-center justify-between pb-4 relative">
-                          <CardTitle className="text-xl text-hockey-silver-800 dark:text-hockey-silver-200 group-hover:text-ice-blue-600 dark:group-hover:text-ice-blue-400 transition-colors duration-200">
-                            {link.title}
-                          </CardTitle>
-                          <div className={`text-white bg-gradient-to-r ${getColorClasses(link.color)} p-3 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-200`}>
-                            {link.icon}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400 text-base leading-relaxed mb-4">
-                            {link.description}
-                          </CardDescription>
-                          
-                          {/* Action Indicator */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-ice-blue-600 dark:text-ice-blue-400 font-medium group-hover:text-ice-blue-700 dark:group-hover:text-ice-blue-300 transition-colors duration-200">
-                              <span>Access Tool</span>
-                              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
-                            </div>
-                            
-                            {/* Category Badge */}
-                            <div className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${getColorClasses(link.color)} bg-opacity-10 text-${link.color}-700 dark:text-${link.color}-300 border border-${link.color}-200 dark:border-${link.color}-700`}>
-                              {category.name}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
+                    {section.links.length} items
+                  </span>
+                  {isExpanded ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  )}
                 </div>
-              </div>
-            )
-          })}
-        </div>
+              </button>
 
-        {/* System Diagnostics Section */}
-        <div className="mt-20">
-          <Card className="hockey-card hockey-card-hover group">
-            <CardHeader className="relative">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-hockey-silver-100 to-ice-blue-100 dark:from-hockey-silver-800/30 dark:to-ice-blue-900/30 rounded-full -mr-6 -mt-6 opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-              <CardTitle className="flex items-center gap-3 text-2xl relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-r from-hockey-silver-500 to-ice-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-ice-blue-500/25">
-                  <Wrench className="h-6 w-6 text-white" />
+              {isExpanded && (
+                <div className="p-4 pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {section.links.map((link) => (
+                      <Link key={link.href} href={link.href} className="block">
+                        <Card className="h-full hover:bg-background/80 transition-colors border-background/50 hover:border-foreground/20">
+                          <CardHeader className="flex flex-row items-start gap-3 p-3 pb-2">
+                            <div className={cn("p-1.5 rounded", section.bgColor, section.color)}>
+                              {link.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-sm font-medium leading-tight">
+                                {link.title}
+                              </CardTitle>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-3 pt-0">
+                            <CardDescription className="text-xs line-clamp-2">
+                              {link.description}
+                            </CardDescription>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-                System Diagnostics & Monitoring
-              </CardTitle>
-              <CardDescription className="text-lg relative z-10">
-                Real-time system health monitoring and diagnostic tools for administrators
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="relative z-10">
-              <AdminDiagnostics />
-            </CardContent>
-          </Card>
-        </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-xl md:text-2xl font-bold mb-4">System Diagnostics</h2>
+        <AdminDiagnostics />
       </div>
     </div>
   )
