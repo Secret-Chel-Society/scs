@@ -6,10 +6,19 @@ export interface RpcPlayerRow {
   user_id: string
   role: string
   salary: number
+  is_tc: boolean | null
   team_id: string | null
   team_id_ahl: string | null
+  team_id_ecl: string | null
+  tc_team_id: string | null
+  tc_team_id_ahl: string | null
+  tc_team_id_ecl: string | null
   team_name: string | null
   ahl_team_name: string | null
+  ecl_team_name: string | null
+  tc_team_name: string | null
+  tc_ahl_team_name: string | null
+  tc_ecl_team_name: string | null
 }
 
 export async function fetchPlayersByUserIds(
