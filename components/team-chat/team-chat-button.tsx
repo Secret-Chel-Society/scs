@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { MessageCircle } from "lucide-react"
 import { TeamChatModal } from "./team-chat-modal"
@@ -17,24 +17,28 @@ export function TeamChatButton() {
   const [teamInfo, setTeamInfo] = useState<TeamInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { supabase, session } = useSupabase()
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
+    isMountedRef.current = true
+
     if (session?.user) {
       fetchTeamInfo()
     } else {
       setIsLoading(false)
     }
-  }, [session, supabase])
+
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [session?.user]) // Updated to use session?.user instead of session?.user?.id
 
   const fetchTeamInfo = async () => {
     try {
       setIsLoading(true)
-      console.log("=== TEAM CHAT BUTTON DEBUG ===")
-      console.log("Session:", !!session, session?.user?.id)
 
       if (!session?.user?.id) {
-        console.log("No session or user ID")
-        setIsLoading(false)
+        if (isMountedRef.current) setIsLoading(false)
         return
       }
 
@@ -45,16 +49,16 @@ export function TeamChatButton() {
         .eq("user_id", session.user.id)
         .maybeSingle()
 
-      console.log("Player query result:", { playerData, playerError })
+      if (!isMountedRef.current) return
 
       if (playerError) {
+        if (playerError.message?.includes("abort")) return
         console.error("Error fetching player:", playerError)
         setIsLoading(false)
         return
       }
 
       if (!playerData?.team_id) {
-        console.log("No team found for user")
         setIsLoading(false)
         return
       }
@@ -66,9 +70,10 @@ export function TeamChatButton() {
         .eq("id", playerData.team_id)
         .maybeSingle()
 
-      console.log("Team query result:", { teamData, teamError })
+      if (!isMountedRef.current) return
 
       if (teamError) {
+        if (teamError.message?.includes("abort")) return
         console.error("Error fetching team:", teamError)
         setIsLoading(false)
         return
@@ -80,14 +85,16 @@ export function TeamChatButton() {
           name: teamData.name || "Unknown Team",
           logo_url: teamData.logo_url,
         })
-        console.log("Team info set:", teamData)
-      } else {
-        console.log("No team data found")
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.name === "AbortError" || error?.message?.includes("abort")) {
+        return
+      }
       console.error("Error in fetchTeamInfo:", error)
     } finally {
-      setIsLoading(false)
+      if (isMountedRef.current) {
+        setIsLoading(false)
+      }
     }
   }
 
