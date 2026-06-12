@@ -132,6 +132,8 @@ export default function DashboardPage() {
   const secondaryPosition = userData?.registration?.secondary_position
 
   // Get team data from players -> teams relationship
+  // TC players now have team_id set, so we always use teams
+  const isTC = userData?.player?.is_tc === true
   const hasTeam = userData?.player?.team_id && userData?.team
   const teamName = hasTeam ? userData.team.name : "Free Agent"
   const teamLogo = hasTeam ? userData.team.logo_url : null
@@ -149,7 +151,7 @@ export default function DashboardPage() {
         {/* Welcome Header */}
         <div>
           <h1 className="text-3xl font-bold">Welcome back, {displayName}!</h1>
-          <p className="text-muted-foreground">Manage your LMSHL profile and tokens</p>
+          <p className="text-muted-foreground">Manage your MGHL profile and tokens</p>
         </div>
 
         {/* Debug Info (Development Only) */}
@@ -206,7 +208,9 @@ export default function DashboardPage() {
                 )}
                 <div className="text-2xl font-bold">{dataLoading ? <Skeleton className="h-6 w-16" /> : teamName}</div>
               </div>
-              <p className="text-xs text-muted-foreground">{hasTeam ? "Current Team" : "Free Agent"}</p>
+              <p className="text-xs text-muted-foreground">
+                {isTC ? "Training Camp" : hasTeam ? "Current Team" : "Free Agent"}
+              </p>
             </CardContent>
           </Card>
 
