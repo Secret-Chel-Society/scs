@@ -1,12 +1,12 @@
 "use client"
 
-// Fix the waiver priority display component to properly show the team's waiver priority
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSupabase } from "@/lib/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
+import { calculateStandings } from "@/lib/standings-calculator"
+import { getCurrentSeasonId } from "@/lib/utils"
 
 interface WaiverPriorityDisplayProps {
   teamId: string
@@ -25,41 +25,25 @@ export function WaiverPriorityDisplay({ teamId }: WaiverPriorityDisplayProps) {
         setLoading(true)
         setError(null)
 
-        // Fetch standings data to determine waiver priority
-        const { data: standings, error: standingsError } = await supabase
-          .from("teams")
-          .select("id, name, logo_url, wins, losses, otl, points, goals_for, goals_against")
-          .eq("is_active", true)
-          .order("points", { ascending: true }) // Lower points = higher priority
-          .order("wins", { ascending: true }) // Fewer wins = higher priority
-          .order("goals_for", { ascending: true }) // Fewer goals = higher priority
+        const seasonId = await getCurrentSeasonId(supabase)
 
-        if (standingsError) {
-          throw standingsError
+        if (!seasonId) {
+          throw new Error("Could not determine current season")
         }
 
-        // Calculate goal differential and sort by priority
-        const teamsWithPriority = standings
-          .map((team) => ({
-            ...team,
-            goalDiff: (team.goals_for || 0) - (team.goals_against || 0),
-            points: team.points || team.wins * 2 + team.otl,
-          }))
-          .sort((a, b) => {
-            // Sort by points (ascending)
-            if (a.points !== b.points) return a.points - b.points
+        // Calculate from standings (worst team gets first priority)
+        const standings = await calculateStandings(seasonId)
 
-            // If points are tied, sort by wins (ascending)
-            if (a.wins !== b.wins) return a.wins - b.wins
+        // Sort by points ascending, then wins ascending, then goal diff ascending (worst first)
+        const waiverPriorityOrder = [...standings].sort((a, b) => {
+          if (a.points !== b.points) return a.points - b.points
+          if (a.wins !== b.wins) return a.wins - b.wins
+          return (a.goal_differential || 0) - (b.goal_differential || 0)
+        })
 
-            // If wins are tied, sort by goal differential (ascending)
-            return a.goalDiff - b.goalDiff
-          })
+        setTeams(waiverPriorityOrder)
 
-        setTeams(teamsWithPriority)
-
-        // Find current team's rank
-        const currentTeamIndex = teamsWithPriority.findIndex((team) => team.id === teamId)
+        const currentTeamIndex = waiverPriorityOrder.findIndex((team) => team.id === teamId)
         if (currentTeamIndex !== -1) {
           setCurrentTeamRank(currentTeamIndex + 1)
         }
@@ -76,7 +60,6 @@ export function WaiverPriorityDisplay({ teamId }: WaiverPriorityDisplayProps) {
     }
   }, [supabase, teamId])
 
-  // Function to get team initials
   const getTeamInitials = (name: string) => {
     if (!name) return "??"
     return name
@@ -88,64 +71,82 @@ export function WaiverPriorityDisplay({ teamId }: WaiverPriorityDisplayProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Waiver Priority</CardTitle>
+    <Card className="sticky top-4">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center justify-between">
+          <span>Priority List</span>
+          {currentTeamRank !== null && (
+            <span className="text-sm font-normal text-muted-foreground">Your pick: #{currentTeamRank}</span>
+          )}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Based on current standings (worst record = highest priority)
+        </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {loading ? (
-          <div className="space-y-2">
-            {Array(5)
+          <div className="space-y-3">
+            {Array(8)
               .fill(0)
               .map((_, i) => (
-                <Skeleton key={i} className="h-8 w-full" />
+                <div key={i} className="flex items-center gap-3">
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-4 flex-1" />
+                </div>
               ))}
           </div>
         ) : error ? (
           <div className="text-center py-4 text-red-500">{error}</div>
         ) : (
-          <>
-            <div className="text-sm mb-4">
-              {currentTeamRank !== null ? (
-                <p>
-                  Your team has waiver priority <span className="font-bold">#{currentTeamRank}</span> of {teams.length}{" "}
-                  teams
-                </p>
-              ) : (
-                <p>Could not determine your team's waiver priority</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              {teams.map((team, index) => (
+          <div className="space-y-1">
+            {teams.map((team, index) => (
+              <div
+                key={team.id}
+                className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                  team.id === teamId
+                    ? "bg-primary/10 border border-primary/30"
+                    : "hover:bg-muted/50"
+                }`}
+              >
                 <div
-                  key={team.id}
-                  className={`flex items-center p-2 rounded-md ${
-                    team.id === teamId ? "bg-primary/10 border border-primary/20" : ""
+                  className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${
+                    index === 0
+                      ? "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400"
+                      : index === 1
+                      ? "bg-gray-400/20 text-gray-600 dark:text-gray-400"
+                      : index === 2
+                      ? "bg-orange-500/20 text-orange-600 dark:text-orange-400"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
-                  <div className="w-6 text-center font-medium text-sm mr-2">#{index + 1}</div>
-                  {team.logo_url ? (
-                    <div className="h-6 w-6 mr-2 relative">
-                      <Image
-                        src={team.logo_url || "/placeholder.svg"}
-                        alt={team.name || "Team logo"}
-                        fill
-                        className="object-contain rounded-full"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-6 w-6 mr-2 bg-muted rounded-full flex items-center justify-center text-xs font-medium">
-                      {getTeamInitials(team.name)}
-                    </div>
-                  )}
-                  <div className="flex-1 text-sm truncate">{team.name}</div>
+                  {index + 1}
+                </div>
+                {team.logo_url ? (
+                  <div className="h-10 w-10 relative flex-shrink-0">
+                    <Image
+                      src={team.logo_url || "/placeholder.svg"}
+                      alt={team.name || "Team logo"}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-10 w-10 bg-muted rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0">
+                    {getTeamInitials(team.name)}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className={`text-sm font-medium truncate ${team.id === teamId ? "text-primary" : ""}`}>
+                    {team.name}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {team.wins}-{team.losses}-{team.otl}
                   </div>
                 </div>
-              ))}
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
