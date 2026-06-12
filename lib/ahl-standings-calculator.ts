@@ -12,6 +12,9 @@ export interface AHLTeamStanding {
   wins: number
   losses: number
   otl: number
+  otw: number // Overtime wins (get 2 points instead of 3)
+  ffw: number // Forfeit wins (3 points)
+  ffl: number // Forfeit losses (-1 point)
   games_played: number
   points: number
   goals_for: number
@@ -296,7 +299,7 @@ export async function calculateAHLStandings(seasonId: string): Promise<AHLTeamSt
     // Get completed AHL matches for that season (by season_name, like NHL)
     const { data: matches, error: matchesError } = await supabase
       .from("matches_ahl")
-      .select("id, match_date, home_team_id, away_team_id, home_score, away_score, overtime, has_overtime, status")
+      .select("id, match_date, home_team_id, away_team_id, home_score, away_score, overtime, has_overtime, status, is_forfeit, forfeit_team_id")
       .eq("season_name", seasonName)
       .in("status", ["completed", "Completed", "COMPLETED"])
       .not("home_score", "is", null)
@@ -317,6 +320,9 @@ export async function calculateAHLStandings(seasonId: string): Promise<AHLTeamSt
         wins: 0,
         losses: 0,
         otl: 0,
+        otw: 0,
+        ffw: 0,
+        ffl: 0,
         goals_for: 0,
         goals_against: 0,
         games_played: 0,
@@ -396,9 +402,15 @@ export async function calculateAHLStandings(seasonId: string): Promise<AHLTeamSt
         const last10Record = await calculateLast10Record(team.id, seasonName)
         const currentStreak = await calculateCurrentStreak(team.id, seasonName)
 
-        let wins = 0
-        let losses = 0
-        let otl = 0
+        // Calculate wins, losses, otl, otw, ffw, ffl with 3-2-1-0 system
+        // Regulation win: 3 pts, OT win: 2 pts, OT loss: 1 pt, Reg loss: 0 pts
+        // Forfeit win: 3 pts, Forfeit loss: -1 pt
+        let wins = 0 // Regulation wins only (3 pts each)
+        let losses = 0 // Regulation losses (0 pts each)
+        let otl = 0 // Overtime losses (1 pt each)
+        let otw = 0 // Overtime wins (2 pts each)
+        let ffw = 0 // Forfeit wins (3 pts each)
+        let ffl = 0 // Forfeit losses (-1 pt each)
         let goalsFor = 0
         let goalsAgainst = 0
         let totalShots = 0
@@ -407,46 +419,72 @@ export async function calculateAHLStandings(seasonId: string): Promise<AHLTeamSt
           const isHomeTeam = match.home_team_id === team.id
           const homeScore = match.home_score || 0
           const awayScore = match.away_score || 0
+          const isOvertime = match.overtime === true || match.has_overtime === true
+          const isForfeit = match.is_forfeit === true
+          const forfeitTeamId = match.forfeit_team_id
 
           const shotsKey = `${match.id}-${team.id}`
           const teamShots = shotsMap.get(shotsKey) || 0
           totalShots += teamShots
+
+          // Handle forfeit games
+          if (isForfeit) {
+            if (forfeitTeamId === team.id) {
+              // This team forfeited - gets -1 point
+              ffl++
+              goalsAgainst += 3 // Forfeit is 3-0
+            } else {
+              // This team got the forfeit win - gets 3 points
+              ffw++
+              goalsFor += 3 // Forfeit is 3-0
+            }
+            return // Skip normal win/loss calculation for forfeit games
+          }
 
           if (isHomeTeam) {
             goalsFor += homeScore
             goalsAgainst += awayScore
 
             if (homeScore > awayScore) {
-              wins++
-            } else if (homeScore < awayScore) {
-              if (match.overtime === true || match.has_overtime === true) {
-                otl++
+              if (isOvertime) {
+                otw++ // Overtime win - 2 points
               } else {
-                losses++
+                wins++ // Regulation win - 3 points
+              }
+            } else if (homeScore < awayScore) {
+              if (isOvertime) {
+                otl++ // Overtime loss - 1 point
+              } else {
+                losses++ // Regulation loss - 0 points
               }
             } else {
-              losses++
+              losses++ // Tie - regulation loss
             }
           } else {
             goalsFor += awayScore
             goalsAgainst += homeScore
 
             if (awayScore > homeScore) {
-              wins++
-            } else if (awayScore < homeScore) {
-              if (match.overtime === true || match.has_overtime === true) {
-                otl++
+              if (isOvertime) {
+                otw++ // Overtime win - 2 points
               } else {
-                losses++
+                wins++ // Regulation win - 3 points
+              }
+            } else if (awayScore < homeScore) {
+              if (isOvertime) {
+                otl++ // Overtime loss - 1 point
+              } else {
+                losses++ // Regulation loss - 0 points
               }
             } else {
-              losses++
+              losses++ // Tie - regulation loss
             }
           }
         })
 
-        const points = wins * 2 + otl
-        const gamesPlayed = wins + losses + otl
+        // Calculate points with 3-2-1-0 system
+        const points = (wins * 3) + (otw * 2) + (otl * 1) + (ffw * 3) + (ffl * -1)
+        const gamesPlayed = wins + losses + otl + otw + ffw + ffl
         const goalDifferential = goalsFor - goalsAgainst
         const shotsPerGame = gamesPlayed > 0 ? totalShots / gamesPlayed : 0
 
@@ -457,6 +495,9 @@ export async function calculateAHLStandings(seasonId: string): Promise<AHLTeamSt
           wins,
           losses,
           otl,
+          otw,
+          ffw,
+          ffl,
           games_played: gamesPlayed,
           points,
           goals_for: goalsFor,
