@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
+import { logActivity } from "@/lib/activity-log"
 
 interface BidPlayerModalProps {
   isOpen: boolean
@@ -25,6 +26,7 @@ interface BidPlayerModalProps {
   onBidPlaced?: () => void
   currentBid?: any
   salaryCap?: number
+  league?: "nhl" | "ahl"
 }
 
 export function BidPlayerModal({
@@ -43,6 +45,7 @@ export function BidPlayerModal({
   onBidPlaced,
   currentBid,
   salaryCap = 65000000,
+  league = "nhl",
 }: BidPlayerModalProps) {
   const [bidAmount, setBidAmount] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -105,8 +108,8 @@ export function BidPlayerModal({
     }
 
     // Check roster limit
-    if (projectedRosterSize >= 15) {
-      setError("Your team roster is full (15 players)")
+    if (projectedRosterSize >= 17) {
+      setError("Your team roster is full (17 players)")
       return
     }
 
@@ -122,9 +125,10 @@ export function BidPlayerModal({
         teamName: team.name,
       })
 
-      // Check if bidding is enabled
+      // Check if bidding is enabled (use league-specific settings table)
+      const settingsTable = league === "ahl" ? "system_settings_ahl" : "system_settings"
       const { data: biddingSettings, error: settingsError } = await supabase
-        .from("system_settings")
+        .from(settingsTable)
         .select("value")
         .eq("key", "bidding_enabled")
         .single()
@@ -140,7 +144,7 @@ export function BidPlayerModal({
 
       // Get the current bidding duration from system settings
       const { data: durationSetting } = await supabase
-        .from("system_settings")
+        .from(settingsTable)
         .select("value")
         .eq("key", "bidding_duration")
         .single()
@@ -149,16 +153,36 @@ export function BidPlayerModal({
       const bidDurationSeconds = durationSetting?.value ? Number.parseInt(durationSetting.value) : 14400
       const expirationTime = new Date(Date.now() + bidDurationSeconds * 1000).toISOString()
 
+      // Get the current season for the appropriate league (seasons uses is_active)
+      const seasonTable = league === "ahl" ? "seasons_ahl" : "seasons"
+      const { data: currentSeason } = await supabase
+        .from(seasonTable)
+        .select("id, season_number")
+        .eq("is_active", true)
+        .single()
+
       // Insert the bid directly using Supabase client
-      const { data: bidData, error: bidError } = await supabase
-        .from("player_bidding")
-        .insert({
-          player_id: player.id,
-          team_id: team.id,
-          bid_amount: amount,
-          bid_expires_at: expirationTime,
-        })
-        .select()
+      // For AHL bids, use team_id_ahl instead of team_id
+      const bidInsertData =
+        league === "ahl"
+          ? {
+              player_id: player.id,
+              team_id_ahl: team.id,
+              bid_amount: amount,
+              bid_expires_at: expirationTime,
+              season_number: currentSeason?.season_number || null,
+              season_id_ahl: currentSeason?.id || null,
+            }
+          : {
+              player_id: player.id,
+              team_id: team.id,
+              bid_amount: amount,
+              bid_expires_at: expirationTime,
+              season_number: currentSeason?.season_number || null,
+              season_id: currentSeason?.id || null,
+            }
+
+      const { data: bidData, error: bidError } = await supabase.from("player_bidding").insert(bidInsertData).select()
 
       if (bidError) {
         console.error("Error inserting bid:", bidError)
@@ -167,11 +191,11 @@ export function BidPlayerModal({
 
       console.log("Bid inserted successfully:", bidData)
 
-      // Send notification to the player
+      // Send notification to the player (don't reveal team name for blind bidding)
       const { error: notificationError } = await supabase.from("notifications").insert({
         user_id: player.user_id,
         title: "New Bid Received",
-        message: `${team.name} has placed a bid of $${amount.toLocaleString()} for you.`,
+        message: `A team has placed a bid of $${amount.toLocaleString()} for you.`,
         link: "/free-agency",
       })
 
@@ -181,20 +205,22 @@ export function BidPlayerModal({
       }
 
       // If there was a previous highest bidder and it's not the current team, notify them
-      if (currentBid && currentBid.team_id !== team.id) {
+      const previousBidTeamId = league === "ahl" ? currentBid?.team_id_ahl : currentBid?.team_id
+      if (currentBid && previousBidTeamId !== team.id) {
         // Get the GM/AGM/Owner of the outbid team
+        const teamIdColumn = league === "ahl" ? "team_id_ahl" : "team_id"
         const { data: teamManagers } = await supabase
           .from("players")
           .select("user_id")
-          .eq("team_id", currentBid.team_id)
+          .eq(teamIdColumn, previousBidTeamId)
           .in("role", ["GM", "AGM", "Owner"])
 
         if (teamManagers && teamManagers.length > 0) {
-          // Send notification to each team manager
+          // Send notification to each team manager (don't reveal which team outbid for blind bidding)
           const notifications = teamManagers.map((manager) => ({
             user_id: manager.user_id,
             title: "Your Bid Was Outbid",
-            message: `Your bid on ${player.users?.gamer_tag_id || "a player"} has been outbid by ${team.name} with $${amount.toLocaleString()}.`,
+            message: `Your bid on ${player.users?.gamer_tag_id || "a player"} has been outbid with $${amount.toLocaleString()}.`,
             link: "/management",
           }))
 
@@ -211,6 +237,31 @@ export function BidPlayerModal({
         title: "Bid placed successfully",
         description: `Your bid of $${amount.toLocaleString()} has been placed for ${player.users?.gamer_tag_id || "the player"}.`,
       })
+
+      // Log bidding activity
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const { data: bidderUser } = await supabase
+          .from("users")
+          .select("gamer_tag_id")
+          .eq("id", session?.user?.id)
+          .single()
+        
+        await logActivity(supabase, {
+          actorId: session?.user?.id || "",
+          actorName: bidderUser?.gamer_tag_id || "Manager",
+          actorType: "Manager",
+          actionType: "bid_placed",
+          actionDescription: `${team.name} placed bid of $${amount.toLocaleString()} on ${player.users?.gamer_tag_id || "Unknown Player"}`,
+          targetId: player.id,
+          targetName: player.users?.gamer_tag_id || "Unknown Player",
+          category: "Bidding",
+          league: league.toUpperCase(),
+          metadata: { bidAmount: amount, teamId: team.id, teamName: team.name },
+        })
+      } catch (logError) {
+        console.error("Error logging bid activity:", logError)
+      }
 
       // Call the callback functions to refresh data
       if (onBidPlaced) {
@@ -239,7 +290,9 @@ export function BidPlayerModal({
   const currentBidAmount = currentBid?.bid_amount || 0
   const playerSalary = player.salary || 750000
   const minimumBid = Math.max(currentBidAmount + 250000, playerSalary)
-  const isExtendingBid = currentBid && currentBid.team_id === team?.id
+  // For AHL, check team_id_ahl; for NHL, check team_id
+  const currentBidTeamId = league === "ahl" ? currentBid?.team_id_ahl : currentBid?.team_id
+  const isExtendingBid = currentBid && currentBidTeamId === team?.id
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -257,12 +310,12 @@ export function BidPlayerModal({
             <p className="text-sm text-muted-foreground">Current Salary: ${(playerSalary / 1000000).toFixed(2)}M</p>
           </div>
 
-          {/* Current Bid Info */}
+          {/* Current Bid Info - don't show team name for blind bidding */}
           {currentBid && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <h4 className="font-medium text-blue-900 dark:text-blue-100">Current Highest Bid</h4>
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                ${currentBid.bid_amount.toLocaleString()} by {currentBid.teams?.name || "Unknown Team"}
+                ${currentBid.bid_amount.toLocaleString()}{isExtendingBid ? " (Your bid)" : ""}
               </p>
               {isExtendingBid && (
                 <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">You are extending your existing bid</p>
@@ -279,7 +332,7 @@ export function BidPlayerModal({
                 {((salaryCap || currentSalaryCap) / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-green-700 dark:text-green-300">
-                Roster: {projectedRosterSize || teamPlayers.length} / 15 players
+                Roster: {projectedRosterSize || teamPlayers.length} / 17 players
               </p>
             </div>
           )}
