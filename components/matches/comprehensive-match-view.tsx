@@ -11,17 +11,19 @@ import { TeamLogo } from "@/components/team-logo"
 import { UploadMatchButton } from "./upload-match-button"
 import { ManualStatsModal } from "./manual-stats-modal"
 import { Checkbox } from "@/components/ui/checkbox"
+import { usePathname } from "next/navigation" // ADDED: for optional league inference fallback
 
 interface ComprehensiveMatchViewProps {
   match: any
   userRole?: string | null
-  league?: "NHL" | "AHL"
+  // ADDED: include ALLSTAR support
+  league?: "NHL" | "AHL" | "ALLSTAR" | "AWHL"
 }
 
 interface PlayerStat {
   player_name: string
-  player_id: string
-  team_id: string
+  player_id: string | null
+  team_id: string | number
   goals: number
   assists: number
   shots: number
@@ -74,7 +76,7 @@ interface TeamStats {
   pp_goals?: number
   pp_opportunities?: number
   team_name: string
-  team_id: string
+  team_id: string | number
   toa?: number
   total_faceoffs_won?: number
   total_faceoffs_taken?: number
@@ -109,6 +111,7 @@ const getTeamColors = (teamName: string) => {
 
 export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" }: ComprehensiveMatchViewProps) {
   const { supabase } = useSupabase()
+  const pathname = usePathname() // ADDED
   const [openScoreModal, setOpenScoreModal] = useState(false)
   const [openManualStatsModal, setOpenManualStatsModal] = useState(false)
   const [showManualStats, setShowManualStats] = useState(false)
@@ -120,12 +123,23 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
   const [standingsLoading, setStandingsLoading] = useState(true)
   const [seasonInfo, setSeasonInfo] = useState<{ week: number; season: string } | null>(null)
 
+  // ADDED: derive activeLeague from prop, else URL fallback (keeps original default = "NHL")
+  const activeLeague: "NHL" | "AHL" | "ALLSTAR" | "AWHL" = (() => {
+    if (league) return league
+    const p = (pathname || "").toLowerCase()
+    if (p.includes("/allstar")) return "ALLSTAR"
+    if (p.includes("/awhl")) return "AWHL"
+    if (p.includes("/ahl")) return "AHL"
+    return "NHL"
+  })()
+
   useEffect(() => {
     fetchMatchStats()
     fetchTeamStandings()
     fetchSeasonInfo()
     fetchLineups()
-  }, [match.id])
+    // ADDED: re-run when league changes (keeps original dependency intent)
+  }, [match.id, activeLeague]) // UPDATED: use activeLeague internally
 
   const fetchLineups = async () => {
     try {
@@ -204,10 +218,16 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
       setStandingsLoading(true)
       console.log("Fetching standings for season:", match.season_name)
 
-      // Try to get season-specific standings, but fallback to general standings
-      const url = "/api/standings"
+      // Try to get season/league-specific standings, but fallback to general standings
+      let url = `/api/standings?league=${encodeURIComponent(activeLeague || "NHL")}`
+      let response = await fetch(url)
 
-      const response = await fetch(url)
+      if (!response.ok) {
+        // original behavior preserved
+        url = "/api/standings"
+        response = await fetch(url)
+      }
+
       if (response.ok) {
         const data = await response.json()
         console.log("Standings response:", data)
@@ -239,13 +259,33 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
     try {
       setLoading(true)
 
-      const playerStatsTable = league === "AHL" ? "ea_player_stats_ahl" : "ea_player_stats"
+      // Determine the correct player stats table based on league
+      const effectivePlayerStatsTable = (() => {
+        switch (activeLeague) {
+          case "AHL": return "ea_player_stats_ahl"
+          case "ALLSTAR": return "allstar_ea_player_stats"
+          case "AWHL": return "whl_ea_player_stats"
+          default: return "ea_player_stats"
+        }
+      })()
+
+      console.log("[match view] league=", activeLeague, "reading table=", effectivePlayerStatsTable)
 
       // Fetch EA player stats
-      const { data: statsData } = await supabase.from(playerStatsTable).select("*").eq("match_id", match.id)
+      const { data: statsData, error } = await supabase
+        .from(effectivePlayerStatsTable)
+        .select("*")
+        .eq("match_id", match.id)
+
+      if (error) {
+        console.error("Error fetching match stats:", error)
+      }
 
       if (statsData && statsData.length > 0) {
-        setPlayerStats(statsData)
+        // ADDED: normalize team_id comparisons to avoid string/uuid/number mismatches
+        const norm = (v: string | number | null | undefined) => (v == null ? "" : String(v))
+
+        setPlayerStats(statsData as PlayerStat[])
 
         // Calculate team stats from player stats
         const homeStats: TeamStats = {
@@ -282,8 +322,10 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
           total_pass_attempts: 0,
         }
 
-        statsData.forEach((stat) => {
-          const teamStat = stat.team_id === match.home_team_id ? homeStats : awayStats
+        ;(statsData as any[]).forEach((stat) => {
+          const statTeamId = norm(stat.team_id)
+          const isHome = statTeamId === norm(match.home_team_id)
+          const teamStat = isHome ? homeStats : awayStats
           teamStat.goals += stat.goals || 0
           teamStat.shots += stat.shots || 0
           teamStat.hits += stat.hits || 0
@@ -308,6 +350,9 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
           awayStats.total_pass_attempts > 0 ? (awayStats.total_pass_complete / awayStats.total_pass_attempts) * 100 : 0
 
         setTeamStats([homeStats, awayStats])
+      } else {
+        setPlayerStats([])
+        setTeamStats([])
       }
     } catch (error) {
       console.error("Error fetching match stats:", error)
@@ -334,18 +379,21 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
   }
 
   const getTopPlayers = (teamId: string, limit = 3) => {
+    const norm = (v: any) => (v == null ? "" : String(v))
     return playerStats
-      .filter((p) => p.team_id === teamId && p.position !== "G")
+      .filter((p) => norm(p.team_id) === norm(teamId) && p.position !== "G")
       .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
       .slice(0, limit)
   }
 
   const getGoalies = (teamId: string) => {
-    return playerStats.filter((p) => p.team_id === teamId && p.position === "G")
+    const norm = (v: any) => (v == null ? "" : String(v))
+    return playerStats.filter((p) => norm(p.team_id) === norm(teamId) && p.position === "G")
   }
 
   const getSkaters = (teamId: string) => {
-    return playerStats.filter((p) => p.team_id === teamId && p.position !== "G")
+    const norm = (v: any) => (v == null ? "" : String(v))
+    return playerStats.filter((p) => norm(p.team_id) === norm(teamId) && p.position !== "G")
   }
 
   // Helper function to calculate GAA
@@ -370,8 +418,8 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
     return savePct.toFixed(3)
   }
 
-  const homeTeamStats = teamStats.find((t) => t.team_id === match.home_team_id)
-  const awayTeamStats = teamStats.find((t) => t.team_id === match.away_team_id)
+  const homeTeamStats = teamStats.find((t) => String(t.team_id) === String(match.home_team_id))
+  const awayTeamStats = teamStats.find((t) => String(t.team_id) === String(match.away_team_id))
   const homeColors = getTeamColors(match.home_team.name)
   const awayColors = getTeamColors(match.away_team.name)
 
@@ -547,10 +595,10 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
           <div className="bg-slate-800 px-4 md:px-8 py-4 md:py-8 flex flex-col items-center justify-center md:min-w-[300px] relative z-20">
             <Badge
               variant={match.status === "completed" || match.status === "Completed" ? "default" : "secondary"}
-              className="mb-2 md:mb-4 text-sm md:text-lg px-3 md:px-4 py-1 md:py-2"
+              className={`mb-2 md:mb-4 text-sm md:text-lg px-3 md:px-4 py-1 md:py-2 ${match.is_forfeit ? "bg-orange-600 hover:bg-orange-700" : ""}`}
             >
               {match.status === "completed" || match.status === "Completed"
-                ? "FINAL"
+                ? (match.is_forfeit ? "FINAL via FF" : "FINAL")
                 : match.status?.toUpperCase() || "SCHEDULED"}
             </Badge>
 
@@ -582,7 +630,7 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                   awayTeamEaClubId={match.away_team?.ea_club_id}
                   onImportSuccess={() => window.location.reload()}
                   isAdmin={showEditButton}
-                  league={league}
+                  league={activeLeague} // UPDATED: pass activeLeague
                 />
               </div>
             )}
@@ -771,13 +819,13 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                     ].sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
 
                     return allPlayers.slice(0, 3).map((player, index) => {
-                      const isHomeTeam = player.team_id === match.home_team_id
+                      const isHomeTeam = String(player.team_id) === String(match.home_team_id)
                       const teamData = isHomeTeam ? match.home_team : match.away_team
                       const starNumber = index + 1
 
                       return (
                         <Card
-                          key={player.player_id}
+                          key={`${player.player_id ?? player.player_name}-${index}`}
                           className="border-none relative overflow-hidden bg-slate-800"
                           style={{
                             backgroundImage: teamData.logo_url ? `url(${teamData.logo_url})` : "none",
@@ -880,7 +928,7 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                               .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
                               .map((player, index) => (
                                 <tr
-                                  key={player.player_id}
+                                  key={`${player.player_id ?? player.player_name}-home-${index}`}
                                   className="border-b border-slate-700/50 hover:bg-slate-700/30"
                                 >
                                   <td className="py-2 px-2 text-white font-medium">
@@ -908,7 +956,7 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                                   </td>
                                   <td className="py-2 px-1 text-center text-slate-300">
                                     {player.time_with_puck
-                                      ? `${Math.floor(player.time_with_puck / 60)}:${(player.time_with_puck % 60).toString().padStart(2, "0")}`
+                                      ? `${Math.floor((player.time_with_puck || 0) / 60)}:${((player.time_with_puck || 0) % 60).toString().padStart(2, "0")}`
                                       : "0:00"}
                                   </td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.shots}</td>
@@ -983,7 +1031,7 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                               .sort((a, b) => b.goals + b.assists - (a.goals + a.assists))
                               .map((player, index) => (
                                 <tr
-                                  key={player.player_id}
+                                  key={`${player.player_id ?? player.player_name}-away-${index}`}
                                   className="border-b border-slate-700/50 hover:bg-slate-700/30"
                                 >
                                   <td className="py-2 px-2 text-white font-medium">
@@ -1011,7 +1059,7 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                                   </td>
                                   <td className="py-2 px-1 text-center text-slate-300">
                                     {player.time_with_puck
-                                      ? `${Math.floor(player.time_with_puck / 60)}:${(player.time_with_puck % 60).toString().padStart(2, "0")}`
+                                      ? `${Math.floor((player.time_with_puck || 0) / 60)}:${((player.time_with_puck || 0) % 60).toString().padStart(2, "0")}`
                                       : "0:00"}
                                   </td>
                                   <td className="py-2 px-1 text-center text-slate-300">{player.shots}</td>
@@ -1059,8 +1107,8 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                             </tr>
                           </thead>
                           <tbody>
-                            {getGoalies(match.home_team_id).map((player) => (
-                              <tr key={player.player_id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
+                            {getGoalies(match.home_team_id).map((player, i) => (
+                              <tr key={`${player.player_id ?? player.player_name}-hg-${i}`} className="border-b border-slate-700/50 hover:bg-slate-700/30">
                                 <td className="py-2 px-2 text-white font-medium">
                                   <div className="flex items-center">
                                     <TeamLogo
@@ -1083,8 +1131,8 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
                                 </td>
                               </tr>
                             ))}
-                            {getGoalies(match.away_team_id).map((player) => (
-                              <tr key={player.player_id} className="border-b border-slate-700/50 hover:bg-slate-700/30">
+                            {getGoalies(match.away_team_id).map((player, i) => (
+                              <tr key={`${player.player_id ?? player.player_name}-ag-${i}`} className="border-b border-slate-700/50 hover:bg-slate-700/30">
                                 <td className="py-2 px-2 text-white font-medium">
                                   <div className="flex items-center">
                                     <TeamLogo
@@ -1220,7 +1268,7 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
         onOpenChange={setOpenScoreModal}
         match={match}
         canEdit={showEditButton}
-        league={league}
+        league={activeLeague} // UPDATED: pass activeLeague
         onUpdate={() => {
           window.location.reload()
         }}
@@ -1235,9 +1283,9 @@ export function ComprehensiveMatchView({ match, userRole = null, league = "NHL" 
           }
         }}
         match={match}
-        league={league}
+        league={activeLeague} // UPDATED: pass activeLeague
         onSave={() => {
-          console.log("[v0] Manual stats saved, refreshing match stats...")
+          console.log("Manual stats saved, refreshing match stats...")
           fetchMatchStats()
         }}
       />
