@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
-import { TeamLogos } from "@/components/management/team-logos"
 import { WaiverPriorityDisplay } from "@/components/management/waiver-priority-display"
 import { Clock } from "lucide-react"
 
@@ -137,7 +136,28 @@ export default function WaiversTab({
                           {waiver.waiver_claims && waiver.waiver_claims.length > 0 && (
                             <div className="mb-3 p-2 bg-muted rounded-md">
                               <h4 className="text-sm font-medium mb-2">Claiming Teams ({waiver.waiver_claims.length}):</h4>
-                              <TeamLogos teams={waiver.waiver_claims.map((claim: any) => claim.teams)} />
+                              <div className="space-y-1">
+                                {[...waiver.waiver_claims]
+                                  .sort((a: any, b: any) => (a.priority_at_claim || 999) - (b.priority_at_claim || 999))
+                                  .map((claim: any, index: number) => (
+                                    <div key={claim.id} className="flex items-center gap-2 text-sm">
+                                      <span className="text-muted-foreground w-4">#{index + 1}</span>
+                                      {claim.teams?.logo_url ? (
+                                        <img
+                                          src={claim.teams.logo_url}
+                                          alt={claim.teams.name}
+                                          className="h-5 w-5 object-contain"
+                                        />
+                                      ) : (
+                                        <div className="h-5 w-5 bg-muted-foreground/20 rounded-full flex items-center justify-center text-[10px]">
+                                          {claim.teams?.name?.substring(0, 2) || "??"}
+                                        </div>
+                                      )}
+                                      <span>{claim.teams?.name || "Unknown Team"}</span>
+                                      <span className="text-muted-foreground text-xs">(Priority: {claim.priority_at_claim})</span>
+                                    </div>
+                                  ))}
+                              </div>
                             </div>
                           )}
 
