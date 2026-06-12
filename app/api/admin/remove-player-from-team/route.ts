@@ -4,11 +4,13 @@ import { createAdminClient } from "@/lib/supabase/server"
 export async function POST(request: Request) {
   try {
     const supabase = createAdminClient()
-    const { playerId, reason, adminOverride = true } = await request.json()
+    const { playerId, reason, adminOverride = true, league = "nhl" } = await request.json()
 
     if (!playerId) {
       return NextResponse.json({ error: "Missing required fields: playerId" }, { status: 400 })
     }
+
+    const isAHL = league?.toLowerCase() === "ahl"
 
     // For admin override, skip auth checks
     if (!adminOverride) {
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
     // Get the player's current team and user_id
     const { data: player, error: playerError } = await supabase
       .from("players")
-      .select("team_id, user_id")
+      .select("team_id, team_id_ahl, user_id")
       .eq("id", playerId)
       .single()
 
@@ -46,8 +48,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Player not found" }, { status: 404 })
     }
 
-    // Cancel and finalize all active bids for the player
-    const { error: bidError } = await supabase
+    // Check if player is actually on a team in the specified league
+    const currentTeamId = isAHL ? player.team_id_ahl : player.team_id
+    if (!currentTeamId) {
+      return NextResponse.json({ error: `Player is not on an ${isAHL ? "AHL" : "NHL"} team` }, { status: 400 })
+    }
+
+    // Cancel and finalize all active bids for the player in the specified league
+    let bidQuery = supabase
       .from("player_bidding")
       .update({
         status: "cancelled_manual_removal",
@@ -57,6 +65,15 @@ export async function POST(request: Request) {
       })
       .eq("player_id", playerId)
       .eq("finalized", false)
+
+    // Only cancel bids for the specific league
+    if (isAHL) {
+      bidQuery = bidQuery.not("team_id_ahl", "is", null)
+    } else {
+      bidQuery = bidQuery.not("team_id", "is", null)
+    }
+
+    const { error: bidError } = await bidQuery
 
     if (bidError) {
       console.error("Error cancelling bids:", bidError)
@@ -79,14 +96,22 @@ export async function POST(request: Request) {
     }
 
     // Update player's team assignment and manual removal status
+    // Only clear the team_id for the specific league
+    const playerUpdateData: Record<string, any> = {
+      status: "free_agent",
+      manually_removed: true,
+      manually_removed_at: new Date().toISOString(),
+    }
+
+    if (isAHL) {
+      playerUpdateData.team_id_ahl = null
+    } else {
+      playerUpdateData.team_id = null
+    }
+
     const { error: updateError } = await supabase
       .from("players")
-      .update({
-        team_id: null,
-        status: "free_agent",
-        manually_removed: true,
-        manually_removed_at: new Date().toISOString(),
-      })
+      .update(playerUpdateData)
       .eq("id", playerId)
 
     if (updateError) {
