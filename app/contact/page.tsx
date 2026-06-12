@@ -137,8 +137,8 @@ export default function ContactPage() {
                 <div className="flex items-start gap-4">
                   <div className="relative">
                     <img
-                      src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/Untitled%20design%20(42).png"
-                      alt="DarkWolf"
+                      src="https://kudmtqjzuxakngbrqxzp.supabase.co/storage/v1/object/public/media/SCS_logo-removebg-preview.png"
+                      alt="LispDoge"
                       className="w-16 h-16 rounded-full object-cover ring-4 ring-ice-blue-200 dark:ring-ice-blue-700 group-hover/team:ring-ice-blue-300 dark:group-hover/team:ring-ice-blue-600 transition-all duration-300"
                     />
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-ice-blue-500 to-rink-blue-600 rounded-full flex items-center justify-center">
@@ -147,7 +147,7 @@ export default function ContactPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-lg text-hockey-silver-800 dark:text-hockey-silver-200 group-hover/team:text-ice-blue-700 dark:group-hover/team:text-ice-blue-300 transition-colors duration-200">
-                      DARKWOLF9235
+                      LispDoge9235
                     </h3>
                     <div className="hockey-badge inline-block mb-2">Website Tech</div>
                     <p className="text-hockey-silver-600 dark:text-hockey-silver-400 text-sm leading-relaxed">
