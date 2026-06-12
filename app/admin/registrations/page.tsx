@@ -2,11 +2,24 @@
 
 import { useState, useEffect } from "react"
 import { useSupabase } from "@/lib/supabase/client"
+import { logActivity } from "@/lib/activity-log"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Download, Search, AlertCircle, RefreshCw, User, MapPin, Gamepad2, Edit } from "lucide-react"
+import {
+  Loader2,
+  Download,
+  Search,
+  AlertCircle,
+  RefreshCw,
+  User,
+  MapPin,
+  Gamepad2,
+  Edit,
+  Calendar,
+  Clock,
+} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -21,14 +34,24 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Checkbox } from "@/components/ui/checkbox"
+import { FreeAgentsTCTab } from "@/components/admin/free-agents-tc-tab"
+import { fetchPlayersByUserIds } from "@/lib/db/fetch-players-by-user-ids"
+
+const AVAILABILITY_SLOTS = {
+  tuesday: ["8:30 PM EST", "9:10 PM EST", "9:50 PM EST"],
+  wednesday: ["8:30 PM EST", "9:10 PM EST", "9:50 PM EST"],
+  thursday: ["8:30 PM EST", "9:10 PM EST", "9:50 PM EST"],
+}
 
 export default function RegistrationsPage() {
-  const { supabase } = useSupabase()
+  const { supabase, session } = useSupabase()
   const { toast } = useToast()
   const [registrations, setRegistrations] = useState<any[]>([])
   const [filteredRegistrations, setFilteredRegistrations] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeSeason, setActiveSeason] = useState<any>(null)
+  const [adminName, setAdminName] = useState<string>("Admin")
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [selectedRegistration, setSelectedRegistration] = useState<any | null>(null)
@@ -37,13 +60,17 @@ export default function RegistrationsPage() {
   const [isEditNameOpen, setIsEditNameOpen] = useState(false)
   const [isEditPositionsOpen, setIsEditPositionsOpen] = useState(false)
   const [isEditConsoleOpen, setIsEditConsoleOpen] = useState(false)
+  const [isEditAvailabilityOpen, setIsEditAvailabilityOpen] = useState(false)
   const [editingRegistration, setEditingRegistration] = useState<any | null>(null)
   const [newGamerTag, setNewGamerTag] = useState("")
   const [newPrimaryPosition, setNewPrimaryPosition] = useState("")
   const [newSecondaryPosition, setNewSecondaryPosition] = useState("")
   const [newConsole, setNewConsole] = useState("")
+  const [newAvailability, setNewAvailability] = useState<Record<string, string[]>>({})
   const [isUpdating, setIsUpdating] = useState(false)
   const [showAllRegistrations, setShowAllRegistrations] = useState(false)
+  // Maps user_id -> array of roster team names (league rosters only, excludes training camp)
+  const [playerTeams, setPlayerTeams] = useState<Record<string, string[]>>({})
 
   const positionOptions = [
     "Center",
@@ -58,6 +85,20 @@ export default function RegistrationsPage() {
   ]
 
   const consoleOptions = ["PlayStation 5", "Xbox Series X/S"]
+
+  // Fetch admin name for activity logging
+  useEffect(() => {
+    async function fetchAdminName() {
+      if (!session?.user?.id) return
+      const { data } = await supabase
+        .from("users")
+        .select("gamer_tag_id")
+        .eq("id", session.user.id)
+        .single()
+      if (data?.gamer_tag_id) setAdminName(data.gamer_tag_id)
+    }
+    fetchAdminName()
+  }, [session?.user?.id, supabase])
 
   useEffect(() => {
     async function fetchActiveSeason() {
@@ -144,6 +185,34 @@ export default function RegistrationsPage() {
       // Set registrations to current season registrations only
       setRegistrations(seasonRegistrations || [])
       setFilteredRegistrations(seasonRegistrations || [])
+
+      // Look up roster team assignments (NHL/AHL/ECL) for these users.
+      // Training-camp-only assignments are intentionally ignored so TC players
+      // do not show a team here.
+      const userIds = Array.from(
+        new Set((seasonRegistrations || []).map((r: any) => r.user_id).filter(Boolean)),
+      ) as string[]
+
+      if (userIds.length > 0) {
+        try {
+          const playerRows = await fetchPlayersByUserIds(supabase, userIds)
+          const teamMap: Record<string, string[]> = {}
+          for (const row of playerRows) {
+            const teams = [row.team_name, row.ahl_team_name, row.ecl_team_name].filter(
+              (name): name is string => Boolean(name),
+            )
+            if (teams.length > 0) {
+              teamMap[row.user_id] = teams
+            }
+          }
+          setPlayerTeams(teamMap)
+        } catch (teamErr) {
+          console.error("[v0] Error fetching player team assignments:", teamErr)
+          setPlayerTeams({})
+        }
+      } else {
+        setPlayerTeams({})
+      }
 
       if (!seasonRegistrations || seasonRegistrations.length === 0) {
         setError(`No registrations found for Season ${currentSeasonNumber}.`)
@@ -283,6 +352,109 @@ export default function RegistrationsPage() {
     setIsEditConsoleOpen(true)
   }
 
+  function openEditAvailability(registration: any) {
+    setEditingRegistration(registration)
+    setNewAvailability(registration.availability || {
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+    })
+    setIsEditAvailabilityOpen(true)
+  }
+
+  function formatAvailability(availability: any) {
+    if (!availability) return null
+
+    const days = ["tuesday", "wednesday", "thursday"]
+    const dayLabels: Record<string, string> = {
+      tuesday: "Tue",
+      wednesday: "Wed",
+      thursday: "Thu",
+    }
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {days.map((day) => {
+          const slots = availability[day] || []
+          if (slots.length === 0) return null
+          return (
+            <div key={day} className="text-xs">
+              <span className="font-medium">{dayLabels[day]}:</span>{" "}
+              <span className="text-muted-foreground">{slots.length}</span>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  async function updateLeagueApproval(
+    id: string,
+    field: "approved_nhl" | "approved_ahl" | "approved_ecl" | "bidding_eligible" | "is_late_signup",
+    value: boolean,
+  ) {
+    try {
+      const { error } = await supabase
+        .from("season_registrations")
+        .update({ [field]: value })
+        .eq("id", id)
+
+      if (error) throw error
+
+      // Find the registration to get player name
+      const registration = registrations.find((r) => r.id === id)
+      const playerName = registration?.gamer_tag || "Unknown Player"
+
+      // Update local state
+      setRegistrations(registrations.map((reg) => (reg.id === id ? { ...reg, [field]: value } : reg)))
+
+      const fieldLabels: Record<string, string> = {
+        approved_nhl: "NHL",
+        approved_ahl: "AHL",
+        bidding_eligible: "Bidding",
+        is_late_signup: "Late Signup",
+      }
+
+      // Log activity
+      const actionType = value ? "approve" : "deny"
+      const actionDescription = field === "is_late_signup"
+        ? `${value ? "Marked" : "Unmarked"} ${playerName} ${value ? "as" : "from"} Late Signup`
+        : `${value ? "Approved" : "Removed"} ${playerName} ${value ? "for" : "from"} ${fieldLabels[field]} eligibility`
+      
+      try {
+        console.log("Logging activity:", { actorId: session?.user?.id, actionType: `registration_${actionType}_${field}` })
+        await logActivity(supabase, {
+          actorId: session?.user?.id || "",
+          actorName: adminName,
+          actorType: "Admin",
+          actionType: `registration_${actionType}_${field}`,
+          actionDescription,
+          targetId: registration?.user_id || id,
+          targetName: playerName,
+          category: "Registration",
+          league: field === "approved_ahl" ? "AHL" : field === "approved_ecl" ? "ECL" : "NHL",
+        })
+        console.log("Activity logged successfully")
+      } catch (logError) {
+        console.error("Error logging activity:", logError)
+      }
+
+      toast({
+        title: "Status updated",
+        description: field === "is_late_signup" 
+          ? `Player ${value ? "marked as" : "unmarked from"} Late Signup`
+          : `Player ${value ? "approved for" : "removed from"} ${fieldLabels[field]} eligibility`,
+      })
+    } catch (error: any) {
+      console.error("Error updating league approval:", error)
+      toast({
+        title: "Error updating status",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
+
   async function updatePlayerName() {
     if (!editingRegistration || !newGamerTag.trim()) return
 
@@ -400,8 +572,68 @@ export default function RegistrationsPage() {
     }
   }
 
+  async function updateAvailability() {
+    if (!editingRegistration) return
+
+    setIsUpdating(true)
+    try {
+      const { error } = await supabase
+        .from("season_registrations")
+        .update({ availability: newAvailability })
+        .eq("id", editingRegistration.id)
+
+      if (error) throw error
+
+      // Update local state
+      const updatedRegistrations = registrations.map((reg) =>
+        reg.id === editingRegistration.id ? { ...reg, availability: newAvailability } : reg,
+      )
+      setRegistrations(updatedRegistrations)
+
+      toast({
+        title: "Availability updated",
+        description: "Player availability has been updated",
+      })
+
+      setIsEditAvailabilityOpen(false)
+    } catch (error: any) {
+      console.error("Error updating availability:", error)
+      toast({
+        title: "Error updating availability",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  function toggleAvailabilitySlot(day: string, time: string) {
+    setNewAvailability((prev) => {
+      const currentSlots = prev[day] || []
+      if (currentSlots.includes(time)) {
+        return {
+          ...prev,
+          [day]: currentSlots.filter((t) => t !== time),
+        }
+      } else {
+        return {
+          ...prev,
+          [day]: [...currentSlots, time],
+        }
+      }
+    })
+  }
+
   return (
     <div className="container mx-auto py-8">
+      <Tabs defaultValue="registrations" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="registrations">Season Registrations</TabsTrigger>
+          <TabsTrigger value="free-agents-tc">Free Agents / TC</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="registrations">
       <Card>
         <CardHeader>
           <CardTitle>Season Registrations</CardTitle>
@@ -507,7 +739,9 @@ export default function RegistrationsPage() {
                     <TableHead>Primary Position</TableHead>
                     <TableHead>Secondary Position</TableHead>
                     <TableHead>Console</TableHead>
+                    <TableHead>Availability</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>League Approval</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -534,7 +768,20 @@ export default function RegistrationsPage() {
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell>{registration.users?.email}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <span>{registration.users?.email}</span>
+                          {playerTeams[registration.user_id]?.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {playerTeams[registration.user_id].map((teamName) => (
+                                <Badge key={teamName} variant="secondary" className="text-xs">
+                                  {teamName}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {registration.primary_position}
@@ -564,7 +811,105 @@ export default function RegistrationsPage() {
                           </Button>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {registration.availability ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-auto p-1"
+                              onClick={() => viewRegistrationDetails(registration)}
+                              title="View availability details"
+                            >
+                              {formatAvailability(registration.availability) || (
+                                <span className="text-muted-foreground text-xs">None</span>
+                              )}
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">-</span>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => openEditAvailability(registration)}
+                            title="Edit Availability"
+                          >
+                            <Clock className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
                       <TableCell>{getStatusBadge(registration.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id={`bidding-${registration.id}`}
+                              checked={registration.bidding_eligible || false}
+                              onCheckedChange={(checked) =>
+                                updateLeagueApproval(registration.id, "bidding_eligible", checked as boolean)
+                              }
+                            />
+                            <Label
+                              htmlFor={`bidding-${registration.id}`}
+                              className="text-xs font-medium cursor-pointer text-green-600"
+                            >
+                              Bidding
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id={`nhl-${registration.id}`}
+                              checked={registration.approved_nhl || false}
+                              onCheckedChange={(checked) =>
+                                updateLeagueApproval(registration.id, "approved_nhl", checked as boolean)
+                              }
+                            />
+                            <Label htmlFor={`nhl-${registration.id}`} className="text-xs font-medium cursor-pointer">
+                              NHL
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id={`ahl-${registration.id}`}
+                              checked={registration.approved_ahl || false}
+                              onCheckedChange={(checked) =>
+                                updateLeagueApproval(registration.id, "approved_ahl", checked as boolean)
+                              }
+                            />
+                            <Label htmlFor={`ahl-${registration.id}`} className="text-xs font-medium cursor-pointer">
+                              AHL
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id={`ecl-${registration.id}`}
+                              checked={registration.approved_ecl || false}
+                              onCheckedChange={(checked) =>
+                                updateLeagueApproval(registration.id, "approved_ecl", checked as boolean)
+                              }
+                            />
+                            <Label htmlFor={`ecl-${registration.id}`} className="text-xs font-medium cursor-pointer">
+                              ECL
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id={`late-signup-${registration.id}`}
+                              checked={registration.is_late_signup || false}
+                              onCheckedChange={(checked) =>
+                                updateLeagueApproval(registration.id, "is_late_signup", checked as boolean)
+                              }
+                            />
+                            <Label 
+                              htmlFor={`late-signup-${registration.id}`} 
+                              className="text-xs font-medium cursor-pointer text-red-500"
+                            >
+                              Late Signup
+                            </Label>
+                          </div>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           {registration.status !== "Approved" && (
@@ -630,8 +975,9 @@ export default function RegistrationsPage() {
           {selectedRegistration && (
             <div className="space-y-4">
               <Tabs defaultValue="details">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="availability">Availability</TabsTrigger>
                   <TabsTrigger value="actions">Actions</TabsTrigger>
                 </TabsList>
 
@@ -670,6 +1016,23 @@ export default function RegistrationsPage() {
                       <p className="text-base">{new Date(selectedRegistration.updated_at).toLocaleString()}</p>
                     </div>
                     <div>
+                      <h4 className="text-sm font-medium text-muted-foreground">Eligibility Status</h4>
+                      <div className="flex gap-2 mt-1 flex-wrap">
+                        {selectedRegistration.bidding_eligible && (
+                          <Badge className="bg-green-500">Bidding Eligible</Badge>
+                        )}
+                        {selectedRegistration.approved_nhl && <Badge className="bg-blue-500">NHL</Badge>}
+                        {selectedRegistration.approved_ahl && <Badge className="bg-orange-500">AHL</Badge>}
+                        {selectedRegistration.approved_ecl && <Badge className="bg-purple-500">ECL</Badge>}
+                        {!selectedRegistration.bidding_eligible &&
+                          !selectedRegistration.approved_nhl &&
+                          !selectedRegistration.approved_ahl &&
+                          !selectedRegistration.approved_ecl && (
+                            <span className="text-muted-foreground text-sm">None</span>
+                          )}
+                      </div>
+                    </div>
+                    <div>
                       <h4 className="text-sm font-medium text-muted-foreground">Season ID</h4>
                       <p className="text-base">
                         {selectedRegistration.season_id ||
@@ -677,6 +1040,58 @@ export default function RegistrationsPage() {
                       </p>
                     </div>
                   </div>
+                </TabsContent>
+
+                <TabsContent value="availability" className="space-y-4">
+                  {selectedRegistration.availability ? (
+                    <div className="space-y-4">
+                      {Object.entries(AVAILABILITY_SLOTS).map(([day, slots]) => {
+                        const selectedSlots = selectedRegistration.availability?.[day] || []
+                        const dayLabel = day.charAt(0).toUpperCase() + day.slice(1)
+
+                        return (
+                          <div key={day} className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <h4 className="font-medium">{dayLabel}</h4>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              {slots.map((time) => {
+                                const isSelected = selectedSlots.includes(time)
+                                return (
+                                  <div
+                                    key={`${day}-${time}`}
+                                    className={`flex items-center gap-2 p-2 rounded-md border text-sm ${
+                                      isSelected
+                                        ? "bg-primary/10 border-primary text-primary"
+                                        : "bg-muted/30 border-muted text-muted-foreground"
+                                    }`}
+                                  >
+                                    <Clock className="h-3 w-3" />
+                                    <span>{time}</span>
+                                    {isSelected && <span className="ml-auto text-xs">✓</span>}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <div className="pt-2 border-t">
+                        <p className="text-sm text-muted-foreground">
+                          Total slots selected:{" "}
+                          <span className="font-medium text-foreground">
+                            {Object.values(selectedRegistration.availability || {}).flat().length}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>No availability information provided</p>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="actions" className="space-y-4">
@@ -716,6 +1131,106 @@ export default function RegistrationsPage() {
                       <Gamepad2 className="mr-2 h-4 w-4" />
                       Update Console
                     </Button>
+
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-transparent"
+                      onClick={() => {
+                        openEditAvailability(selectedRegistration)
+                        setIsDialogOpen(false)
+                      }}
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Update Availability
+                    </Button>
+
+                    <div className="border rounded-md p-4 space-y-3">
+                      <h4 className="text-sm font-medium">League Approval</h4>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="dialog-bidding"
+                            checked={selectedRegistration.bidding_eligible || false}
+                            onCheckedChange={(checked) => {
+                              updateLeagueApproval(selectedRegistration.id, "bidding_eligible", checked as boolean)
+                              setSelectedRegistration({
+                                ...selectedRegistration,
+                                bidding_eligible: checked,
+                              })
+                            }}
+                          />
+                          <Label htmlFor="dialog-bidding" className="cursor-pointer text-green-600">
+                            Approve for Bidding
+                          </Label>
+                        </div>
+                        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">
+                          Bidding
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="dialog-nhl"
+                            checked={selectedRegistration.approved_nhl || false}
+                            onCheckedChange={(checked) => {
+                              updateLeagueApproval(selectedRegistration.id, "approved_nhl", checked as boolean)
+                              setSelectedRegistration({
+                                ...selectedRegistration,
+                                approved_nhl: checked,
+                              })
+                            }}
+                          />
+                          <Label htmlFor="dialog-nhl" className="cursor-pointer">
+                            Approve for NHL Free Agency
+                          </Label>
+                        </div>
+                        <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">
+                          NHL
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="dialog-ahl"
+                            checked={selectedRegistration.approved_ahl || false}
+                            onCheckedChange={(checked) => {
+                              updateLeagueApproval(selectedRegistration.id, "approved_ahl", checked as boolean)
+                              setSelectedRegistration({
+                                ...selectedRegistration,
+                                approved_ahl: checked,
+                              })
+                            }}
+                          />
+                          <Label htmlFor="dialog-ahl" className="cursor-pointer">
+                            Approve for AHL Free Agency
+                          </Label>
+                        </div>
+                        <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/30">
+                          AHL
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="dialog-ecl"
+                            checked={selectedRegistration.approved_ecl || false}
+                            onCheckedChange={(checked) => {
+                              updateLeagueApproval(selectedRegistration.id, "approved_ecl", checked as boolean)
+                              setSelectedRegistration({
+                                ...selectedRegistration,
+                                approved_ecl: checked,
+                              })
+                            }}
+                          />
+                          <Label htmlFor="dialog-ecl" className="cursor-pointer">
+                            Approve for ECL Free Agency
+                          </Label>
+                        </div>
+                        <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/30">
+                          ECL
+                        </Badge>
+                      </div>
+                    </div>
 
                     <div className="flex justify-end space-x-2 pt-4">
                       {selectedRegistration.status !== "Approved" && (
@@ -855,7 +1370,7 @@ export default function RegistrationsPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Update Console</DialogTitle>
-            <DialogDescription>Change the player's gaming console</DialogDescription>
+            <DialogDescription>Change the player&apos;s gaming console</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
@@ -885,6 +1400,80 @@ export default function RegistrationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Availability Dialog */}
+      <Dialog open={isEditAvailabilityOpen} onOpenChange={setIsEditAvailabilityOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Update Availability</DialogTitle>
+            <DialogDescription>
+              Change the player&apos;s availability for {editingRegistration?.gamer_tag}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {Object.entries(AVAILABILITY_SLOTS).map(([day, slots]) => {
+              const dayLabel = day.charAt(0).toUpperCase() + day.slice(1)
+              const selectedSlots = newAvailability[day] || []
+
+              return (
+                <div key={day} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <h4 className="font-medium">{dayLabel}</h4>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {slots.map((time) => {
+                      const isSelected = selectedSlots.includes(time)
+                      return (
+                        <button
+                          key={`${day}-${time}`}
+                          type="button"
+                          onClick={() => toggleAvailabilitySlot(day, time)}
+                          className={`flex items-center gap-2 p-2 rounded-md border text-sm transition-colors ${
+                            isSelected
+                              ? "bg-primary/10 border-primary text-primary"
+                              : "bg-muted/30 border-muted text-muted-foreground hover:bg-muted/50"
+                          }`}
+                        >
+                          <Clock className="h-3 w-3" />
+                          <span className="text-xs">{time.replace(" EST", "")}</span>
+                          {isSelected && <span className="ml-auto text-xs">✓</span>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+            <div className="pt-2 border-t">
+              <p className="text-sm text-muted-foreground">
+                Total slots selected:{" "}
+                <span className="font-medium text-foreground">
+                  {Object.values(newAvailability).flat().length}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditAvailabilityOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={updateAvailability} disabled={isUpdating}>
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+        </TabsContent>
+
+        <TabsContent value="free-agents-tc">
+          <FreeAgentsTCTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
