@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import {
   Dialog,
@@ -18,7 +17,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
 import { useSupabase } from "@/lib/supabase/client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, AlertTriangle } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+type League = "NHL" | "AHL" | "ALLSTAR" | "AWHL"
 
 interface EditScoreModalProps {
   open: boolean
@@ -26,14 +29,73 @@ interface EditScoreModalProps {
   match: any
   canEdit?: boolean
   onUpdate?: (updatedMatch: any) => void
+  /** Which league/table to update (optional; will be inferred from URL if not provided) */
+  league?: League
 }
 
-export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onUpdate }: EditScoreModalProps) {
+const pickTables = (league: League) => {
+  if (league === "AHL") {
+    return {
+      matches: "matches_ahl",
+      teams: "teams_ahl",
+      // optional
+      teamManagersAhl: "team_managers_ahl",
+      teamManagersAllstar: "allstar_team_managers",
+    }
+  }
+  if (league === "ALLSTAR") {
+    return {
+      matches: "allstar_matches",
+      teams: "allstar_teams",
+      // optional
+      teamManagersAhl: "team_managers_ahl",
+      teamManagersAllstar: "allstar_team_managers",
+    }
+  }
+  if (league === "AWHL") {
+    return {
+      matches: "whl_matches",
+      teams: "whl_teams",
+      teamManagersAhl: "team_managers_ahl",
+      teamManagersAllstar: "allstar_team_managers",
+    }
+  }
+  // NHL default
+  return {
+    matches: "matches",
+    teams: "teams",
+    // optional
+    teamManagersAhl: "team_managers_ahl",
+    teamManagersAllstar: "allstar_team_managers",
+  }
+}
+
+export function EditScoreModal({
+  open,
+  onOpenChange,
+  match,
+  canEdit = false,
+  onUpdate,
+  league, // no default here; we infer below
+}: EditScoreModalProps) {
+  const pathname = usePathname()
+  const effectiveLeague: League =
+    league
+      ?? (pathname?.toLowerCase().includes("/allstar/") ? "ALLSTAR"
+          : pathname?.toLowerCase().includes("/awhl/") ? "AWHL"
+          : pathname?.toLowerCase().includes("/ahl/") ? "AHL"
+          : "NHL")
+
+  const T = pickTables(effectiveLeague)
   const { supabase, session } = useSupabase()
   const { toast } = useToast()
-  const [homeScore, setHomeScore] = useState<number>(match?.home_score || 0)
-  const [awayScore, setAwayScore] = useState<number>(match?.away_score || 0)
+
+  const [homeScore, setHomeScore] = useState<number>(match?.home_score ?? 0)
+  const [awayScore, setAwayScore] = useState<number>(match?.away_score ?? 0)
   const [hasOvertime, setHasOvertime] = useState<boolean>(match?.has_overtime || match?.overtime || false)
+  const [isForfeit, setIsForfeit] = useState<boolean>(match?.is_forfeit || false)
+  const [forfeitTeamId, setForfeitTeamId] = useState<string | null>(match?.forfeit_team_id || null)
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [permissionError, setPermissionError] = useState<string | null>(null)
@@ -50,46 +112,35 @@ export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onU
   const [otHome, setOtHome] = useState<number>(0)
   const [otAway, setOtAway] = useState<number>(0)
 
-  // Initialize period scores from match data
+  // Seed period scores
   useEffect(() => {
     if (match && match.period_scores) {
       try {
-        const periodScores =
-          typeof match.period_scores === "string" ? JSON.parse(match.period_scores) : match.period_scores
-
-        setPeriod1Home(periodScores.period1?.home || 0)
-        setPeriod1Away(periodScores.period1?.away || 0)
-        setPeriod2Home(periodScores.period2?.home || 0)
-        setPeriod2Away(periodScores.period2?.away || 0)
-        setPeriod3Home(periodScores.period3?.home || 0)
-        setPeriod3Away(periodScores.period3?.away || 0)
-        setOtHome(periodScores.overtime?.home || 0)
-        setOtAway(periodScores.overtime?.away || 0)
-      } catch (e) {
-        console.error("Error parsing period scores:", e)
-        // Initialize with zeros if there's an error
-        setPeriod1Home(0)
-        setPeriod1Away(0)
-        setPeriod2Home(0)
-        setPeriod2Away(0)
-        setPeriod3Home(0)
-        setPeriod3Away(0)
-        setOtHome(0)
-        setOtAway(0)
+        const ps = typeof match.period_scores === "string" ? JSON.parse(match.period_scores) : match.period_scores
+        setPeriod1Home(ps?.period1?.home ?? 0)
+        setPeriod1Away(ps?.period1?.away ?? 0)
+        setPeriod2Home(ps?.period2?.home ?? 0)
+        setPeriod2Away(ps?.period2?.away ?? 0)
+        setPeriod3Home(ps?.period3?.home ?? 0)
+        setPeriod3Away(ps?.period3?.away ?? 0)
+        setOtHome(ps?.overtime?.home ?? 0)
+        setOtAway(ps?.overtime?.away ?? 0)
+      } catch {
+        setPeriod1Home(0); setPeriod1Away(0)
+        setPeriod2Home(0); setPeriod2Away(0)
+        setPeriod3Home(0); setPeriod3Away(0)
+        setOtHome(0); setOtAway(0)
       }
     }
   }, [match])
 
-  // Update total scores when period scores change
+  // Recompute totals from period values
   useEffect(() => {
-    const newHomeScore = period1Home + period2Home + period3Home + (hasOvertime ? otHome : 0)
-    const newAwayScore = period1Away + period2Away + period3Away + (hasOvertime ? otAway : 0)
+    setHomeScore(period1Home + period2Home + period3Home + (hasOvertime ? otHome : 0))
+    setAwayScore(period1Away + period2Away + period3Away + (hasOvertime ? otAway : 0))
+  }, [period1Home, period2Home, period3Home, otHome, period1Away, period2Away, period3Away, otAway, hasOvertime])
 
-    setHomeScore(newHomeScore)
-    setAwayScore(newAwayScore)
-  }, [period1Home, period1Away, period2Home, period2Away, period3Home, period3Away, otHome, otAway, hasOvertime])
-
-  // Check if the user has permission to edit this match
+  // Permission check (admin OR manager for either team)
   const checkPermission = async () => {
     if (!session?.user || !match) {
       setPermissionError("You must be logged in to edit match scores.")
@@ -101,91 +152,86 @@ export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onU
       setError(null)
       setPermissionError(null)
 
-      // First, check if the user is an admin
-      const { data: adminData, error: adminError } = await supabase
+      // Admin?
+      const { data: adminData } = await supabase
         .from("user_roles")
-        .select("*")
+        .select("role")
         .eq("user_id", session.user.id)
-        .eq("role", "Admin")
-
-      if (!adminError && adminData && adminData.length > 0) {
-        // User is an admin, they have permission
+        .in("role", ["Admin", "admin"])
+      if (adminData?.length) {
         setPermissionChecked(true)
         return true
       }
 
-      // Check if the user is a team manager for either team in the match
-      const { data: teamManagerData, error: teamManagerError } = await supabase
+      // Team manager?
+      let isManager = false
+      const { data: tm } = await supabase
         .from("team_managers")
-        .select("*")
+        .select("team_id, role")
         .eq("user_id", session.user.id)
         .in("team_id", [match.home_team_id, match.away_team_id])
+      if (tm?.length) isManager = true
 
-      if (teamManagerError) {
-        console.error("Error checking team manager status:", teamManagerError)
-        throw new Error("Failed to check team manager status")
+      // Try AHL-specific managers table if present (optional)
+      if (!isManager && T.teamManagersAhl) {
+        try {
+          const { data: tmAhl, error: tmAhlErr } = await supabase
+            .from(T.teamManagersAhl)
+            .select("team_id, role")
+            .eq("user_id", session.user.id)
+            .in("team_id", [match.home_team_id, match.away_team_id])
+          if (!tmAhlErr && tmAhl?.length) isManager = true
+        } catch { /* ignore if table doesn't exist */ }
       }
 
-      // If the user is a team manager for either team, they have permission
-      if (teamManagerData && teamManagerData.length > 0) {
-        setPermissionChecked(true)
-        return true
+      // Optional: All-Star specific managers table if you add one later
+      if (!isManager && T.teamManagersAllstar) {
+        try {
+          const { data: tmAll, error: tmAllErr } = await supabase
+            .from(T.teamManagersAllstar)
+            .select("team_id, role")
+            .eq("user_id", session.user.id)
+            .in("team_id", [match.home_team_id, match.away_team_id])
+          if (!tmAllErr && tmAll?.length) isManager = true
+        } catch { /* ignore */ }
       }
 
-      // If we get here, also check the players table for GM, AGM, or Owner roles
-      // This is a fallback for users who might not have entries in the team_managers table yet
-      const { data: playerData, error: playerError } = await supabase
-        .from("players")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .in("team_id", [match.home_team_id, match.away_team_id])
-
-      if (playerError) {
-        console.error("Error checking player status:", playerError)
-        throw new Error("Failed to check player status")
+      // Player-manager fallback (GM/AGM/Owner) — uses ONLY the players table (no players_ahl)
+      if (!isManager) {
+        const mgrRoles = ["owner", "gm", "agm", "Owner", "GM", "AGM"]
+        const { data: players } = await supabase
+          .from("players")
+          .select("team_id, role")
+          .eq("user_id", session.user.id)
+          .in("team_id", [match.home_team_id, match.away_team_id])
+        if (players?.some(p => mgrRoles.includes((p.role || "").trim()))) isManager = true
       }
-
-      // Check if any of the player entries have a manager role
-      const managerRoles = ["owner", "gm", "agm", "Owner", "GM", "AGM"]
-      const isManager = playerData?.some((player) => {
-        const role = (player.role || "").toLowerCase().trim()
-        return managerRoles.includes(role)
-      })
 
       if (isManager) {
         setPermissionChecked(true)
         return true
       }
 
-      // Get all teams for debugging
-      const { data: allTeams, error: allTeamsError } = await supabase
-        .from("teams")
+      // Debug details to help diagnose
+      const { data: allTeams } = await supabase
+        .from(T.teams)
         .select("id, name")
         .in("id", [match.home_team_id, match.away_team_id])
+      const { data: userTeams } = await supabase.from("team_managers").select("team_id")
 
-      // Get all user teams for debugging
-      const { data: userTeams, error: userTeamsError } = await supabase
-        .from("team_managers")
-        .select("team_id, teams:team_id(name)")
-        .eq("user_id", session.user.id)
-
-      // Set debug info
       setDebugInfo({
         userId: session.user.id,
+        league: effectiveLeague,
+        targetMatchesTable: T.matches,
         matchTeams: [match.home_team_id, match.away_team_id],
-        userTeams: userTeams?.map((t) => ({ id: t.team_id, name: t.teams?.name })) || [],
-        allTeams: allTeams || [],
+        allTeams, userTeams,
       })
 
-      // User doesn't have permission
-      setPermissionError(
-        "You don't have permission to update this match. Only team managers or admins can update match data.",
-      )
+      setPermissionError("You don't have permission to update this match. Only team managers or admins can update match data.")
       setPermissionChecked(true)
       return false
-    } catch (error: any) {
-      console.error("Error checking permission:", error)
-      setPermissionError(error.message || "Failed to check permission")
+    } catch (e: any) {
+      setPermissionError(e.message || "Failed to check permission")
       setPermissionChecked(true)
       return false
     }
@@ -197,87 +243,84 @@ export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onU
     setError(null)
 
     try {
-      // Check permission first
-      const hasPermission = await checkPermission()
-      if (!hasPermission && !canEdit) {
+      const ok = await checkPermission()
+      if (!ok && !canEdit) {
         setLoading(false)
         return
       }
 
-      // Create period scores object
-      const periodScores = {
-        period1: { home: period1Home, away: period1Away },
-        period2: { home: period2Home, away: period2Away },
-        period3: { home: period3Home, away: period3Away },
+      // For forfeit games, set score to 3-0 automatically
+      const finalHomeScore = isForfeit ? (forfeitTeamId === match.home_team_id ? 0 : 3) : homeScore
+      const finalAwayScore = isForfeit ? (forfeitTeamId === match.away_team_id ? 0 : 3) : awayScore
+
+      const periodScores = isForfeit 
+        ? {
+            period1: { home: finalHomeScore, away: finalAwayScore },
+            period2: { home: 0, away: 0 },
+            period3: { home: 0, away: 0 },
+          }
+        : {
+            period1: { home: period1Home, away: period1Away },
+            period2: { home: period2Home, away: period2Away },
+            period3: { home: period3Home, away: period3Away },
+            ...(hasOvertime ? { overtime: { home: otHome, away: otAway } } : {}),
+          }
+
+      // Use the same casing you already display as "FINAL"
+      const COMPLETED_STATUS = "Completed"
+
+      const updates = {
+        home_score: finalHomeScore,
+        away_score: finalAwayScore,
+        has_overtime: isForfeit ? false : hasOvertime,
+        overtime: isForfeit ? false : hasOvertime,
+        period_scores: periodScores,
+        status: COMPLETED_STATUS,
+        is_forfeit: isForfeit,
+        forfeit_team_id: isForfeit ? forfeitTeamId : null,
+        updated_at: new Date().toISOString(),
       }
 
-      // Add overtime if applicable
-      if (hasOvertime) {
-        periodScores["overtime"] = { home: otHome, away: otAway }
-      }
-
-      // Determine match status - use proper capitalization to match the constraint
-      let status = match.status
-      if (homeScore > 0 || awayScore > 0) {
-        // Use "Completed" with capital C to match the database constraint
-        status = "Completed"
-      }
-
-      // Update the match
-      const { data, error } = await supabase
-        .from("matches")
-        .update({
-          home_score: homeScore,
-          away_score: awayScore,
-          has_overtime: hasOvertime,
-          overtime: hasOvertime, // Update both fields for compatibility
-          period_scores: periodScores,
-          status: status,
-        })
+      const { error: updateError } = await supabase
+        .from(T.matches) // matches_ahl / matches / allstar_matches
+        .update(updates)
         .eq("id", match.id)
-        .select()
 
-      if (error) {
-        throw new Error(`Error response from server: ${JSON.stringify({ error: error.message })}`)
-      }
+      if (updateError) throw updateError
 
-      toast({
-        title: "Score Updated",
-        description: "The match score has been successfully updated.",
-      })
+      // Optimistic update for UI
+      onUpdate?.({ ...match, ...updates })
 
-      // Call the onUpdate callback with the updated match
-      if (onUpdate && data && data.length > 0) {
-        onUpdate(data[0])
-      }
-
+      const leagueLabel = effectiveLeague === "ALLSTAR" ? "All-Star" : effectiveLeague
+      const forfeitMsg = isForfeit ? ` - Forfeit (${finalHomeScore}-${finalAwayScore})` : ""
+      toast({ title: "Score Updated", description: `The match was marked as ${COMPLETED_STATUS} (${leagueLabel})${forfeitMsg}.` })
       onOpenChange(false)
-    } catch (error: any) {
-      console.error("Error updating score:", error)
-      setError(error.message || "Failed to update score")
+    } catch (e: any) {
+      setError(e.message || "Failed to update score")
     } finally {
       setLoading(false)
     }
   }
 
-  // Check permission when the modal opens
+  // Reset state on open
   useEffect(() => {
     if (open) {
-      setHomeScore(match?.home_score || 0)
-      setAwayScore(match?.away_score || 0)
+      setHomeScore(match?.home_score ?? 0)
+      setAwayScore(match?.away_score ?? 0)
       setHasOvertime(match?.has_overtime || match?.overtime || false)
+      setIsForfeit(match?.is_forfeit || false)
+      setForfeitTeamId(match?.forfeit_team_id || null)
       setPermissionChecked(false)
       setPermissionError(null)
       setError(null)
-
-      // Only check permission if canEdit is not explicitly provided
-      if (canEdit === undefined) {
-        checkPermission()
-      }
+      if (canEdit === undefined) void checkPermission()
     }
-  }, [open, match, canEdit])
+    // include pathname so the inferred league reacts if route changes
+  }, [open, match, canEdit, pathname])
 
   if (!open) return null
+
+  const leagueBadge = effectiveLeague === "ALLSTAR" ? "All-Star" : effectiveLeague
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -285,7 +328,7 @@ export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onU
         <DialogHeader>
           <DialogTitle>Edit Match Score</DialogTitle>
           <DialogDescription>
-            Update the score for {match?.home_team?.name} vs {match?.away_team?.name}
+            Update the score for {match?.home_team?.name} vs {match?.away_team?.name} ({leagueBadge})
           </DialogDescription>
         </DialogHeader>
 
@@ -298,7 +341,9 @@ export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onU
               <div className="mt-2 text-xs">
                 <details>
                   <summary>Debug Details</summary>
-                  <pre className="mt-2 p-2 bg-muted rounded-md overflow-auto">{JSON.stringify(debugInfo, null, 2)}</pre>
+                  <pre className="mt-2 p-2 bg-muted rounded-md overflow-auto">
+                    {JSON.stringify(debugInfo, null, 2)}
+                  </pre>
                 </details>
               </div>
             )}
@@ -316,142 +361,145 @@ export function EditScoreModal({ open, onOpenChange, match, canEdit = false, onU
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-3 items-center gap-4 mb-2">
-              <div></div>
+              <div />
               <div className="col-span-2 flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <div className="w-20 text-center">{match?.home_team?.name || "Home"}</div>
-                <span></span>
+                <span />
                 <div className="w-20 text-center">{match?.away_team?.name || "Away"}</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="period1-home" className="text-right">
-                Period 1
-              </Label>
-              <div className="col-span-2 flex items-center gap-2">
-                <Input
-                  id="period1-home"
-                  type="number"
-                  min="0"
-                  value={period1Home}
-                  onChange={(e) => setPeriod1Home(Number.parseInt(e.target.value) || 0)}
-                  className="w-20"
-                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-                />
-                <span>-</span>
-                <Input
-                  id="period1-away"
-                  type="number"
-                  min="0"
-                  value={period1Away}
-                  onChange={(e) => setPeriod1Away(Number.parseInt(e.target.value) || 0)}
-                  className="w-20"
-                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="period2-home" className="text-right">
-                Period 2
-              </Label>
-              <div className="col-span-2 flex items-center gap-2">
-                <Input
-                  id="period2-home"
-                  type="number"
-                  min="0"
-                  value={period2Home}
-                  onChange={(e) => setPeriod2Home(Number.parseInt(e.target.value) || 0)}
-                  className="w-20"
-                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-                />
-                <span>-</span>
-                <Input
-                  id="period2-away"
-                  type="number"
-                  min="0"
-                  value={period2Away}
-                  onChange={(e) => setPeriod2Away(Number.parseInt(e.target.value) || 0)}
-                  className="w-20"
-                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="period3-home" className="text-right">
-                Period 3
-              </Label>
-              <div className="col-span-2 flex items-center gap-2">
-                <Input
-                  id="period3-home"
-                  type="number"
-                  min="0"
-                  value={period3Home}
-                  onChange={(e) => setPeriod3Home(Number.parseInt(e.target.value) || 0)}
-                  className="w-20"
-                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-                />
-                <span>-</span>
-                <Input
-                  id="period3-away"
-                  type="number"
-                  min="0"
-                  value={period3Away}
-                  onChange={(e) => setPeriod3Away(Number.parseInt(e.target.value) || 0)}
-                  className="w-20"
-                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="has-overtime"
-                checked={hasOvertime}
-                onCheckedChange={(checked) => setHasOvertime(checked === true)}
-                disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
-              />
-              <Label htmlFor="has-overtime">Game went to overtime</Label>
-            </div>
-
-            {hasOvertime && (
-              <div className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor="ot-home" className="text-right">
-                  Overtime
-                </Label>
+            {[
+              { label: "Period 1", h: period1Home, a: period1Away, setH: setPeriod1Home, setA: setPeriod1Away },
+              { label: "Period 2", h: period2Home, a: period2Away, setH: setPeriod2Home, setA: setPeriod2Away },
+              { label: "Period 3", h: period3Home, a: period3Away, setH: setPeriod3Home, setA: setPeriod3Away },
+            ].map((row) => (
+              <div className="grid grid-cols-3 items-center gap-4" key={row.label}>
+                <Label className="text-right">{row.label}</Label>
                 <div className="col-span-2 flex items-center gap-2">
                   <Input
-                    id="ot-home"
                     type="number"
                     min="0"
-                    value={otHome}
-                    onChange={(e) => setOtHome(Number.parseInt(e.target.value) || 0)}
+                    value={row.h}
+                    onChange={(e) => row.setH(Number.parseInt(e.target.value) || 0)}
                     className="w-20"
-                    disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                    disabled={isForfeit || loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
                   />
                   <span>-</span>
                   <Input
-                    id="ot-away"
                     type="number"
                     min="0"
-                    value={otAway}
-                    onChange={(e) => setOtAway(Number.parseInt(e.target.value) || 0)}
+                    value={row.a}
+                    onChange={(e) => row.setA(Number.parseInt(e.target.value) || 0)}
                     className="w-20"
-                    disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                    disabled={isForfeit || loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
                   />
                 </div>
               </div>
+            ))}
+
+            {/* Forfeit Section */}
+            <div className="border border-orange-500/30 rounded-lg p-3 bg-orange-500/5">
+              <div className="flex items-center space-x-2 mb-3">
+                <Checkbox
+                  id="is-forfeit"
+                  checked={isForfeit}
+                  onCheckedChange={(checked) => {
+                    setIsForfeit(checked === true)
+                    if (!checked) {
+                      setForfeitTeamId(null)
+                    }
+                  }}
+                  disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                />
+                <Label htmlFor="is-forfeit" className="flex items-center gap-2 text-orange-600 font-medium">
+                  <AlertTriangle className="h-4 w-4" />
+                  This game was a forfeit
+                </Label>
+              </div>
+
+              {isForfeit && (
+                <div className="grid grid-cols-3 items-center gap-4">
+                  <Label className="text-right text-sm">Which team forfeited?</Label>
+                  <div className="col-span-2">
+                    <Select
+                      value={forfeitTeamId || ""}
+                      onValueChange={(value) => setForfeitTeamId(value)}
+                      disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select team that forfeited" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={match.home_team_id}>
+                          {match.home_team?.name || "Home Team"} (Forfeit Loss)
+                        </SelectItem>
+                        <SelectItem value={match.away_team_id}>
+                          {match.away_team?.name || "Away Team"} (Forfeit Loss)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Score will be set to 3-0 automatically. Forfeiting team gets -1 point, winner gets 3 points.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Overtime Section - only show if not a forfeit */}
+            {!isForfeit && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="has-overtime"
+                    checked={hasOvertime}
+                    onCheckedChange={(checked) => setHasOvertime(checked === true)}
+                    disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                  />
+                  <Label htmlFor="has-overtime">Game went to overtime</Label>
+                </div>
+
+                {hasOvertime && (
+                  <div className="grid grid-cols-3 items-center gap-4">
+                    <Label className="text-right">Overtime</Label>
+                    <div className="col-span-2 flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={otHome}
+                        onChange={(e) => setOtHome(Number.parseInt(e.target.value) || 0)}
+                        className="w-20"
+                        disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                      />
+                      <span>-</span>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={otAway}
+                        onChange={(e) => setOtAway(Number.parseInt(e.target.value) || 0)}
+                        className="w-20"
+                        disabled={loading || (!canEdit && !permissionChecked) || (permissionError !== null && !canEdit)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="total-score" className="text-right font-bold">
-                Final Score
-              </Label>
+              <Label className="text-right font-bold">Final Score</Label>
               <div className="col-span-2 flex items-center gap-2">
-                <div className="text-lg font-bold">
-                  {homeScore} - {awayScore}
-                </div>
+                {isForfeit ? (
+                  <div className="flex items-center gap-2">
+                    <div className="text-lg font-bold text-orange-600">
+                      {forfeitTeamId === match.home_team_id ? "0 - 3" : "3 - 0"}
+                    </div>
+                    <span className="text-sm text-orange-600 font-medium">(Forfeit)</span>
+                  </div>
+                ) : (
+                  <div className="text-lg font-bold">{homeScore} - {awayScore}</div>
+                )}
               </div>
             </div>
           </div>
