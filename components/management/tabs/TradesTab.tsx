@@ -27,7 +27,9 @@ type Props = {
   allTeams: any[]
   teamData: any | null
   teamPlayers: any[]
+  tcPlayers?: any[]
   selectedTeamPlayers: any[]
+  selectedTeamTcPlayers?: any[]
   myPicks: DraftPick[]
   otherTeamPicks: DraftPick[]
 
@@ -91,7 +93,9 @@ export default function TradesTab({
   allTeams,
   teamData,
   teamPlayers,
+  tcPlayers = [],
   selectedTeamPlayers,
+  selectedTeamTcPlayers = [],
   myPicks,
   otherTeamPicks,
 
@@ -217,6 +221,7 @@ export default function TradesTab({
                         </Badge>
                       </div>
                       <div className="border rounded-lg divide-y max-h-[400px] overflow-y-auto">
+                        {/* Main Roster */}
                         {teamPlayers.map((player) => (
                           <div
                             key={player.id}
@@ -286,6 +291,64 @@ export default function TradesTab({
                             </div>
                           </div>
                         ))}
+                        
+                        {/* TC Roster Section */}
+                        {tcPlayers.length > 0 && (
+                          <>
+                            <div className="p-2 bg-amber-500/10 text-amber-500 font-medium text-sm text-center border-y border-amber-500/30">
+                              TC Roster
+                            </div>
+                            {tcPlayers.map((player) => (
+                              <div
+                                key={player.id}
+                                className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer bg-amber-500/5 ${
+                                  selectedMyPlayers.includes(player.id) ? "bg-primary/10" : ""
+                                }`}
+                                onClick={() => {
+                                  if (selectedMyPlayers.includes(player.id)) {
+                                    setSelectedMyPlayers(selectedMyPlayers.filter((id) => id !== player.id))
+                                    setCapSpaceWithholding((prev) => {
+                                      const updated = { ...prev }
+                                      delete updated[player.id]
+                                      return updated
+                                    })
+                                  } else {
+                                    setSelectedMyPlayers([...selectedMyPlayers, player.id])
+                                  }
+                                }}
+                              >
+                                <div>
+                                  <div className="font-medium flex items-center gap-2">
+                                    {player.users?.gamer_tag_id || "Unknown Player"}
+                                    <Badge variant="outline" className="bg-amber-500/20 text-amber-500 border-amber-500/50 text-xs">TC</Badge>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <span className={getPositionColor(player.season_registrations?.[0]?.primary_position)}>
+                                      {getPositionAbbreviation(
+                                        player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                      )}
+                                    </span>
+                                    {player.season_registrations?.[0]?.secondary_position && (
+                                      <>
+                                        {" / "}
+                                        <span
+                                          className={getPositionColor(player.season_registrations?.[0]?.secondary_position)}
+                                        >
+                                          {getPositionAbbreviation(
+                                            player.season_registrations?.[0]?.secondary_position,
+                                          )}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-mono text-muted-foreground">$0</div>
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -306,6 +369,11 @@ export default function TradesTab({
                             onClick={() => {
                               if (selectedOtherPlayers.includes(player.id)) {
                                 setSelectedOtherPlayers(selectedOtherPlayers.filter((id) => id !== player.id))
+                                setCapSpaceWithholding((prev) => {
+                                  const updated = { ...prev }
+                                  delete updated[player.id]
+                                  return updated
+                                })
                               } else {
                                 setSelectedOtherPlayers([...selectedOtherPlayers, player.id])
                               }
@@ -333,11 +401,86 @@ export default function TradesTab({
                                 )}
                               </div>
                             </div>
-                            <div className="text-right font-mono">
-                              ${(player.salary / 1000000).toFixed(2)}M
+                            <div className="text-right">
+                              <div className="font-mono">${(player.salary / 1000000).toFixed(2)}M</div>
+                              {selectedOtherPlayers.includes(player.id) && (
+                                <Select
+                                  value={String(capSpaceWithholding[player.id] || 0)}
+                                  onValueChange={(value) => {
+                                    setCapSpaceWithholding({
+                                      ...capSpaceWithholding,
+                                      [player.id]: Number(value),
+                                    })
+                                  }}
+                                >
+                                  <SelectTrigger className="h-7 text-xs w-24" onClick={(e) => e.stopPropagation()}>
+                                    <SelectValue placeholder="Retain" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {getValidWithholdingAmounts(player.salary).map((amount) => (
+                                      <SelectItem key={amount} value={String(amount)}>
+                                        Retain ${(amount / 1000000).toFixed(2)}M
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
                             </div>
                           </div>
                         ))}
+
+                        {/* Other Team TC Roster Section */}
+                        {selectedTeamTcPlayers.length > 0 && (
+                          <>
+                            <div className="p-2 bg-amber-500/10 text-amber-500 font-medium text-sm text-center border-y border-amber-500/30">
+                              TC Roster
+                            </div>
+                            {selectedTeamTcPlayers.map((player) => (
+                              <div
+                                key={player.id}
+                                className={`p-3 flex justify-between items-center hover:bg-muted/50 cursor-pointer bg-amber-500/5 ${
+                                  selectedOtherPlayers.includes(player.id) ? "bg-primary/10" : ""
+                                }`}
+                                onClick={() => {
+                                  if (selectedOtherPlayers.includes(player.id)) {
+                                    setSelectedOtherPlayers(selectedOtherPlayers.filter((id) => id !== player.id))
+                                  } else {
+                                    setSelectedOtherPlayers([...selectedOtherPlayers, player.id])
+                                  }
+                                }}
+                              >
+                                <div>
+                                  <div className="font-medium flex items-center gap-2">
+                                    {player.users?.gamer_tag_id || "Unknown Player"}
+                                    <Badge variant="outline" className="bg-amber-500/20 text-amber-500 border-amber-500/50 text-xs">TC</Badge>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                    <span className={getPositionColor(player.season_registrations?.[0]?.primary_position)}>
+                                      {getPositionAbbreviation(
+                                        player.season_registrations?.[0]?.primary_position || "UNKNOWN",
+                                      )}
+                                    </span>
+                                    {player.season_registrations?.[0]?.secondary_position && (
+                                      <>
+                                        {" / "}
+                                        <span
+                                          className={getPositionColor(player.season_registrations?.[0]?.secondary_position)}
+                                        >
+                                          {getPositionAbbreviation(
+                                            player.season_registrations?.[0]?.secondary_position,
+                                          )}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-mono text-muted-foreground">$0</div>
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
                       </div>
                       <Badge variant="outline">
                         ${(otherTeamSalary / 1000000).toFixed(2)}M → $
@@ -455,9 +598,11 @@ export default function TradesTab({
                           return
                         }
 
-                        // Get player details for the trade
-                        const myPlayersToTrade = teamPlayers.filter((p) => selectedMyPlayers.includes(p.id))
-                        const otherPlayersToReceive = selectedTeamPlayers.filter((p) =>
+                        // Get player details for the trade (include TC players from both teams)
+                        const myAllPlayers = [...teamPlayers, ...tcPlayers]
+                        const otherAllPlayers = [...selectedTeamPlayers, ...selectedTeamTcPlayers]
+                        const myPlayersToTrade = myAllPlayers.filter((p) => selectedMyPlayers.includes(p.id))
+                        const otherPlayersToReceive = otherAllPlayers.filter((p) =>
                           selectedOtherPlayers.includes(p.id),
                         )
 
@@ -467,6 +612,7 @@ export default function TradesTab({
                           position: p.season_registrations?.[0]?.primary_position || "UNKNOWN",
                           salary: p.salary,
                           withholding: capSpaceWithholding[p.id] || 0,
+                          is_tc: p.is_tc || false,
                         }))
 
                         const toPlayers = otherPlayersToReceive.map((p) => ({
@@ -474,6 +620,8 @@ export default function TradesTab({
                           name: p.users?.gamer_tag_id || "Unknown Player",
                           position: p.season_registrations?.[0]?.primary_position || "UNKNOWN",
                           salary: p.salary,
+                          withholding: capSpaceWithholding[p.id] || 0,
+                          is_tc: p.is_tc || false,
                         }))
 
                         // Get other team's managers
