@@ -24,6 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/components/ui/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { useSupabase } from "@/lib/supabase/client"
+import { logActivity } from "@/lib/activity-log"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { fetchPlayersByUserIds } from "@/lib/db/fetch-players-by-user-ids"
@@ -40,17 +41,49 @@ import {
 } from "lucide-react"
 
 // Valid player roles for players table
-const VALID_PLAYER_ROLES = ["TC", "Player", "GM", "AGM", "Owner"]
+const VALID_PLAYER_ROLES = ["Player", "GM", "AGM", "Owner", "ECL Owner", "ECL GM", "ECL AGM"]
 
-// Selectable roles (user_roles)
+// Selectable roles (user_roles) - Site Owner is not shown to users
 const roles = [
-  { label: "TC", value: "TC" },
   { label: "Player", value: "Player" },
   { label: "GM", value: "GM" },
   { label: "AGM", value: "AGM" },
   { label: "Owner", value: "Owner" },
+  { label: "AHL Owner", value: "AHL Owner" },
+  { label: "AHL GM", value: "AHL GM" },
+  { label: "AHL AGM", value: "AHL AGM" },
+  { label: "ECL Owner", value: "ECL Owner" },
+  { label: "ECL GM", value: "ECL GM" },
+  { label: "ECL AGM", value: "ECL AGM" },
+  { label: "League Bog", value: "League Bog" },
   { label: "Admin", value: "Admin" },
+  { label: "UPHL Admin", value: "UPHL Admin" },
 ]
+
+// Helper function to get role badge styling
+const getRoleBadgeClass = (role: string) => {
+  switch (role) {
+    case "Site Owner":
+      return "bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700"
+    case "Admin":
+      return "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700"
+    case "League Bog":
+      return "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700"
+    case "Owner":
+    case "ECL Owner":
+      return "bg-yellow-100 text-yellow-700 border-yellow-300 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700"
+    case "GM":
+    case "ECL GM":
+      return "bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700"
+    case "AGM":
+    case "ECL AGM":
+      return "bg-cyan-100 text-cyan-700 border-cyan-300 dark:bg-cyan-900/30 dark:text-cyan-400 dark:border-cyan-700"
+    case "ECL Admin":
+      return "bg-teal-100 text-teal-700 border-teal-300 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-700"
+    default:
+      return ""
+  }
+}
 
 const consoles = [
   { label: "Xbox", value: "Xbox" },
@@ -72,7 +105,14 @@ const newUserSchema = z.object({
 
 const teamAssignmentSchema = z.object({
   playerId: z.string().uuid(),
+  // Main roster (one active team per league)
   teamId: z.string().uuid().nullable(),
+  teamIdAhl: z.string().uuid().nullable(),
+  teamIdEcl: z.string().uuid().nullable(),
+  // Training camp (a player can be a TC on a team in each league)
+  tcTeamId: z.string().uuid().nullable(),
+  tcTeamIdAhl: z.string().uuid().nullable(),
+  tcTeamIdEcl: z.string().uuid().nullable(),
 })
 
 const salarySchema = z.object({
@@ -120,6 +160,7 @@ export default function UsersManagementClient() {
   const form = useForm<z.infer<typeof userRoleSchema>>({
     resolver: zodResolver(userRoleSchema),
     defaultValues: { userId: "", roles: [] },
+    mode: "onSubmit",
   })
 
   const newUserForm = useForm<z.infer<typeof newUserSchema>>({
@@ -134,7 +175,15 @@ export default function UsersManagementClient() {
 
   const teamAssignmentForm = useForm<z.infer<typeof teamAssignmentSchema>>({
     resolver: zodResolver(teamAssignmentSchema),
-    defaultValues: { playerId: "", teamId: null },
+    defaultValues: {
+      playerId: "",
+      teamId: null,
+      teamIdAhl: null,
+      teamIdEcl: null,
+      tcTeamId: null,
+      tcTeamIdAhl: null,
+      tcTeamIdEcl: null,
+    },
   })
 
   const salaryForm = useForm<z.infer<typeof salarySchema>>({
@@ -144,7 +193,7 @@ export default function UsersManagementClient() {
 
   // Teams lookup
   const teamsById = useMemo(() => {
-    const m: Record<string, { id: string; name: string; logo_url?: string; league: "NHL" | "AHL" }> = {}
+    const m: Record<string, { id: string; name: string; logo_url?: string; league: "NHL" | "AHL" | "ECL" }> = {}
     for (const t of teams) m[t.id] = t
     return m
   }, [teams])
@@ -237,17 +286,55 @@ export default function UsersManagementClient() {
     }
   }
 
+  // Fetch only the teams that are active in the current active season of a given league.
+  async function fetchActiveSeasonTeams(
+    seasonsTable: string,
+    teamSeasonsTable: string,
+    teamsTable: string,
+  ): Promise<any[]> {
+    // 1) Find the current active season for this league
+    const { data: activeSeasons, error: seasonErr } = await supabase
+      .from(seasonsTable)
+      .select("id")
+      .eq("is_active", true)
+      .limit(1)
+    if (seasonErr) throw seasonErr
+    const activeSeasonId = activeSeasons?.[0]?.id
+    if (!activeSeasonId) return []
+
+    // 2) Find team_ids active in that season
+    const { data: teamSeasonRows, error: tsErr } = await supabase
+      .from(teamSeasonsTable)
+      .select("team_id")
+      .eq("season_id", activeSeasonId)
+      .eq("is_active", true)
+    if (tsErr) throw tsErr
+    const teamIds = (teamSeasonRows || []).map((r: any) => r.team_id).filter(Boolean)
+    if (!teamIds.length) return []
+
+    // 3) Fetch those teams
+    const { data: teamRows, error: teamErr } = await supabase
+      .from(teamsTable)
+      .select("id, name, logo_url")
+      .in("id", teamIds)
+      .order("name")
+    if (teamErr) throw teamErr
+    return teamRows || []
+  }
+
   async function fetchTeams() {
     setTeamsLoading(true)
     try {
-      const { data: nhlTeams, error: nhlError } = await supabase.from("teams").select("id, name, logo_url").order("name")
-      if (nhlError) throw nhlError
-      const { data: ahlTeams, error: ahlError } = await supabase.from("teams_ahl").select("id, name, logo_url").order("name")
-      if (ahlError) throw ahlError
+      const [nhlTeams, ahlTeams, eclTeams] = await Promise.all([
+        fetchActiveSeasonTeams("seasons", "team_seasons", "teams"),
+        fetchActiveSeasonTeams("seasons_ahl", "team_seasons_ahl", "teams_ahl"),
+        fetchActiveSeasonTeams("seasons_ecl", "team_seasons_ecl", "teams_ecl"),
+      ])
 
       const combined = [
-        ...(nhlTeams || []).map((t) => ({ ...t, league: "NHL" as const })),
-        ...(ahlTeams || []).map((t) => ({ ...t, league: "AHL" as const })),
+        ...nhlTeams.map((t) => ({ ...t, league: "NHL" as const })),
+        ...ahlTeams.map((t) => ({ ...t, league: "AHL" as const })),
+        ...eclTeams.map((t) => ({ ...t, league: "ECL" as const })),
       ]
       setTeams(combined)
     } catch (e: any) {
@@ -277,11 +364,15 @@ export default function UsersManagementClient() {
   }
 
   // ---------- FIXED: fetch users + players separately, then merge ----------
-  async function fetchUsers(retryCount = 0) {
-    setLoading(true)
-    try {
-      // 1) users + roles (no nested players)
-      const { data: usersData, error: usersError } = await supabase
+  // Fetch all users in batches to overcome Supabase's 1000 row limit
+  async function fetchAllUsersBatched() {
+    const PAGE_SIZE = 1000
+    let allUsers: any[] = []
+    let from = 0
+    let hasMore = true
+
+    while (hasMore) {
+      const { data, error } = await supabase
         .from("users")
         .select(`
           id,
@@ -294,14 +385,27 @@ export default function UsersManagementClient() {
           user_roles ( id, role )
         `)
         .order("created_at", { ascending: false })
+        .range(from, from + PAGE_SIZE - 1)
 
-      if (usersError) {
-        if (usersError.message?.includes("Too Many Requests") && retryCount < 3) {
-          setTimeout(() => fetchUsers(retryCount + 1), (retryCount + 1) * 1000)
-          return
-        }
-        throw usersError
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        allUsers = [...allUsers, ...data]
+        from += PAGE_SIZE
+        hasMore = data.length === PAGE_SIZE
+      } else {
+        hasMore = false
       }
+    }
+
+    return allUsers
+  }
+
+  async function fetchUsers(retryCount = 0) {
+    setLoading(true)
+    try {
+      // 1) users + roles (no nested players) - fetch ALL users in batches
+      const usersData = await fetchAllUsersBatched()
 
       const userIds = (usersData ?? []).map(u => u.id)
       if (!userIds.length) {
@@ -316,7 +420,6 @@ export default function UsersManagementClient() {
       const byUserId = indexPlayersByUserId(playersData ?? [])
       const processed = (usersData ?? []).map((u: any) => {
         const p = byUserId[u.id] ?? null
-        const { nhl, ahl } = normalizeTeamJoins(p)
 
         const playersArr = p
           ? [
@@ -324,10 +427,22 @@ export default function UsersManagementClient() {
                 id: p.id,
                 role: p.role,
                 salary: typeof p.salary === "number" ? p.salary : 0,
+                is_tc: p.is_tc ?? false,
+                // Main roster assignments (one active per league)
                 team_id: p.team_id ?? null,
                 team_id_ahl: p.team_id_ahl ?? null,
-                teams: nhl ?? null,
-                teams_ahl: ahl ?? null,
+                team_id_ecl: p.team_id_ecl ?? null,
+                // Training camp assignments (one per league)
+                tc_team_id: p.tc_team_id ?? null,
+                tc_team_id_ahl: p.tc_team_id_ahl ?? null,
+                tc_team_id_ecl: p.tc_team_id_ecl ?? null,
+                // Joined team names from RPC
+                team_name: p.team_name ?? null,
+                ahl_team_name: p.ahl_team_name ?? null,
+                ecl_team_name: p.ecl_team_name ?? null,
+                tc_team_name: p.tc_team_name ?? null,
+                tc_ahl_team_name: p.tc_ahl_team_name ?? null,
+                tc_ecl_team_name: p.tc_ecl_team_name ?? null,
               },
             ]
           : []
@@ -342,6 +457,10 @@ export default function UsersManagementClient() {
       setUsers(processed)
       setFilteredUsers(processed)
     } catch (e: any) {
+      if (e?.message?.includes("Too Many Requests") && retryCount < 3) {
+        setTimeout(() => fetchUsers(retryCount + 1), (retryCount + 1) * 1000)
+        return
+      }
       toast({ title: "Error loading users", description: e?.message || "Failed to load users", variant: "destructive" })
     } finally {
       setLoading(false)
@@ -433,7 +552,7 @@ export default function UsersManagementClient() {
 
       const { data: player, error } = await supabase
         .from("players")
-        .select("id, team_id, team_id_ahl")
+        .select("id, team_id, team_id_ahl, team_id_ecl, tc_team_id, tc_team_id_ahl, tc_team_id_ecl")
         .eq("user_id", user.id)
         .single()
 
@@ -445,15 +564,28 @@ export default function UsersManagementClient() {
             .select("id")
             .single()
           if (createError || !newPlayer) throw createError || new Error("Failed to create player record")
-          teamAssignmentForm.reset({ playerId: newPlayer.id, teamId: null })
+          teamAssignmentForm.reset({
+            playerId: newPlayer.id,
+            teamId: null,
+            teamIdAhl: null,
+            teamIdEcl: null,
+            tcTeamId: null,
+            tcTeamIdAhl: null,
+            tcTeamIdEcl: null,
+          })
         } else {
           throw error
         }
       } else if (player) {
-        let currentTeamId: string | null = null
-        if (player.team_id) currentTeamId = player.team_id
-        else if (player.team_id_ahl) currentTeamId = player.team_id_ahl
-        teamAssignmentForm.reset({ playerId: player.id, teamId: currentTeamId })
+        teamAssignmentForm.reset({
+          playerId: player.id,
+          teamId: player.team_id ?? null,
+          teamIdAhl: player.team_id_ahl ?? null,
+          teamIdEcl: player.team_id_ecl ?? null,
+          tcTeamId: player.tc_team_id ?? null,
+          tcTeamIdAhl: player.tc_team_id_ahl ?? null,
+          tcTeamIdEcl: player.tc_team_id_ecl ?? null,
+        })
       } else {
         throw new Error("No player data returned")
       }
@@ -482,28 +614,33 @@ export default function UsersManagementClient() {
         return
       }
 
-      let playerRole = rolesList[0]
-      if (playerRole === "Admin") playerRole = "Player"
-      if (!VALID_PLAYER_ROLES.includes(playerRole)) {
-        toast({ title: "Invalid player role", description: `Valid: ${VALID_PLAYER_ROLES.join(", ")}`, variant: "destructive" })
-        return
+      // Find the first valid player role from the selected roles
+      // These are the roles that go in the players.role field
+      // Priority order: ECL Owner > Owner > AHL Owner > ECL GM > GM > AHL GM > ECL AGM > AGM > AHL AGM > Player
+      const playerRolePriority = ["ECL Owner", "Owner", "AHL Owner", "ECL GM", "GM", "AHL GM", "ECL AGM", "AGM", "AHL AGM", "Player"]
+      let playerRole: string | null = null
+      for (const pr of playerRolePriority) {
+        if (rolesList.includes(pr)) {
+          playerRole = pr
+          break
+        }
+      }
+      // Default to "Player" if no valid player role found in selection
+      if (!playerRole) {
+        playerRole = "Player"
       }
 
+      // Update or insert the player record with the role
       const { data: playerRow, error: playerCheckError } = await supabase
         .from("players")
-        .select("id, role, team_id, team_id_ahl")
+        .select("id, role")
         .eq("user_id", userId)
 
       if (playerCheckError) throw playerCheckError
 
-      let oldRole: string | null = null
-      let teamId: string | null = null
-      let teamIdAhl: string | null = null
+      const oldRole: string | null = playerRow?.length ? playerRow[0].role : null
 
       if (playerRow?.length) {
-        oldRole = playerRow[0].role
-        teamId = playerRow[0].team_id
-        teamIdAhl = playerRow[0].team_id_ahl
         const { error } = await supabase.from("players").update({ role: playerRole }).eq("user_id", userId)
         if (error) throw error
       } else {
@@ -511,27 +648,39 @@ export default function UsersManagementClient() {
         if (error) throw error
       }
 
-      const managementRoles = ["GM", "AGM", "Owner"]
-      const wasMgmt = !!oldRole && managementRoles.includes(oldRole)
-      const isMgmt = managementRoles.includes(playerRole)
+      // Update user_roles table - delete all existing and insert new ones
+      const { error: deleteErr } = await supabase.from("user_roles").delete().eq("user_id", userId)
+      if (deleteErr) throw deleteErr
 
-      if (wasMgmt && !isMgmt) {
-        await supabase.from("team_managers").delete().eq("user_id", userId)
-      }
-      if (isMgmt && (!wasMgmt || oldRole !== playerRole)) {
-        await supabase.from("team_managers").delete().eq("user_id", userId)
-        await supabase.from("team_managers").insert({
-          user_id: userId,
-          team_id: teamId,
-          team_id_ahl: teamIdAhl,
-          role: playerRole,
-        })
-      }
-
-      await supabase.from("user_roles").delete().eq("user_id", userId)
       const toInsert = rolesList.map((r) => ({ user_id: userId, role: r }))
       const { error: insertErr } = await supabase.from("user_roles").insert(toInsert)
       if (insertErr) throw insertErr
+
+      // Log activity for role changes
+      try {
+        const { data: adminUser } = await supabase
+          .from("users")
+          .select("gamer_tag_id")
+          .eq("id", session?.user?.id)
+          .single()
+        
+        const targetUser = selectedUser
+        const targetName = targetUser?.gamer_tag_id || targetUser?.users?.gamer_tag_id || "Unknown User"
+        
+        await logActivity(supabase, {
+          actorId: session?.user?.id || "",
+          actorName: adminUser?.gamer_tag_id || "Admin",
+          actorType: "Admin",
+          actionType: "role_updated",
+          actionDescription: `Updated roles for ${targetName}: ${rolesList.join(", ")}${oldRole ? ` (was: ${oldRole})` : ""}`,
+          targetId: userId,
+          targetName: targetName,
+          category: "Role",
+          league: "NHL",
+        })
+      } catch (logError) {
+        console.error("Error logging role update activity:", logError)
+      }
 
       toast({ title: "Roles updated", description: "User roles have been updated successfully" })
       setDialogOpen(false)
@@ -564,67 +713,93 @@ export default function UsersManagementClient() {
     }
   }
 
-  // Team assignment
+  // Team assignment (main roster per league + training-camp per league)
 const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
   try {
     setSubmitting(true)
-    const { playerId, teamId } = values
+    const { playerId, teamId, teamIdAhl, teamIdEcl, tcTeamId, tcTeamIdAhl, tcTeamIdEcl } = values
 
-    if (teamId === null) {
-      // Directly clear team fields and set manual removal flags
-      const { error: updateErr } = await supabase
-        .from("players")
-        .update({
-          team_id: null,
-          team_id_ahl: null,
-          manually_removed: true,
-          manually_removed_at: new Date().toISOString(),
-        })
-        .eq("id", playerId)
+    const hasAnyMainTeam = Boolean(teamId || teamIdAhl || teamIdEcl)
+    const hasAnyTcTeam = Boolean(tcTeamId || tcTeamIdAhl || tcTeamIdEcl)
 
-      if (updateErr) throw updateErr
+    const updateData: any = {
+      team_id: teamId,
+      team_id_ahl: teamIdAhl,
+      team_id_ecl: teamIdEcl,
+      tc_team_id: tcTeamId,
+      tc_team_id_ahl: tcTeamIdAhl,
+      tc_team_id_ecl: tcTeamIdEcl,
+      is_tc: hasAnyTcTeam,
+    }
 
-      // Optionally mark any active/pending bidding rows as processed so they don't reassign
+    if (!hasAnyMainTeam && !hasAnyTcTeam) {
+      // Full free agent: clear everything and lock from auto re-assignment
+      updateData.manually_removed = true
+      updateData.manually_removed_at = new Date().toISOString()
+    } else {
+      updateData.manually_removed = false
+      updateData.manually_removed_at = null
+    }
+
+    const { error: updateErr } = await supabase.from("players").update(updateData).eq("id", playerId)
+    if (updateErr) throw updateErr
+
+    // Resolve active/pending bidding rows so they don't auto-reassign
+    if (!hasAnyMainTeam && !hasAnyTcTeam) {
       await supabase
         .from("player_bidding")
-        .update({
-          status: "manually_removed",
-          processed: true,
-          processed_at: new Date().toISOString(),
-        })
+        .update({ status: "manually_removed", processed: true, processed_at: new Date().toISOString() })
         .eq("player_id", playerId)
         .in("status", ["active", "pending"])
-
-      toast({
-        title: "Player set as free agent",
-        description: "Removed from team and locked from auto re-assignment.",
-      })
-    } else {
-      const selectedTeam = teams.find((t) => t.id === teamId)
-      const isAHL = selectedTeam?.league === "AHL"
-      const updateData: any = { manually_removed: false, manually_removed_at: null }
-      if (isAHL) {
-        updateData.team_id_ahl = teamId
-        updateData.team_id = null
-      } else {
-        updateData.team_id = teamId
-        updateData.team_id_ahl = null
-      }
-
-      const { error } = await supabase.from("players").update(updateData).eq("id", playerId)
-      if (error) throw error
-
+    } else if (hasAnyMainTeam) {
       await supabase
         .from("player_bidding")
         .update({ status: "manually_assigned", processed: true, processed_at: new Date().toISOString() })
         .eq("player_id", playerId)
         .in("status", ["active", "pending"])
-
-      toast({
-        title: "Team assigned",
-        description: `Player has been assigned to ${selectedTeam ? `${selectedTeam.name} (${selectedTeam.league})` : "selected team"}.`,
-      })
     }
+
+    // Build a human-readable summary of the assignment for the activity log
+    const nameFor = (id: string | null) => (id && teamsById[id] ? teamsById[id].name : null)
+    const parts: string[] = []
+    if (teamId) parts.push(`${nameFor(teamId) || "team"} (NHL)`)
+    if (teamIdAhl) parts.push(`${nameFor(teamIdAhl) || "team"} (AHL)`)
+    if (teamIdEcl) parts.push(`${nameFor(teamIdEcl) || "team"} (ECL)`)
+    if (tcTeamId) parts.push(`${nameFor(tcTeamId) || "team"} (NHL TC)`)
+    if (tcTeamIdAhl) parts.push(`${nameFor(tcTeamIdAhl) || "team"} (AHL TC)`)
+    if (tcTeamIdEcl) parts.push(`${nameFor(tcTeamIdEcl) || "team"} (ECL TC)`)
+
+    try {
+      const { data: adminUser } = await supabase
+        .from("users")
+        .select("gamer_tag_id")
+        .eq("id", session?.user?.id)
+        .single()
+
+      const targetUser = selectedUser
+      const targetName = targetUser?.gamer_tag_id || targetUser?.users?.gamer_tag_id || "Unknown User"
+
+      await logActivity(supabase, {
+        actorId: session?.user?.id || "",
+        actorName: adminUser?.gamer_tag_id || "Admin",
+        actorType: "Admin",
+        actionType: parts.length ? "team_assigned" : "player_removed_from_team",
+        actionDescription: parts.length
+          ? `Assigned ${targetName} to ${parts.join(", ")}`
+          : `Set ${targetName} as free agent (removed from all teams)`,
+        targetId: selectedUser?.id || playerId,
+        targetName: targetName,
+        category: "Role",
+        league: "NHL",
+      })
+    } catch (logError) {
+      console.error("Error logging team assignment activity:", logError)
+    }
+
+    toast({
+      title: parts.length ? "Teams updated" : "Player set as free agent",
+      description: parts.length ? `Assigned to ${parts.join(", ")}.` : "Removed from all teams.",
+    })
 
     setTeamAssignDialogOpen(false)
     await fetchUsers()
@@ -665,6 +840,29 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
       await supabase.from("players").insert({ user_id: userId, role: playerRole })
       await supabase.from("user_roles").insert(rolesSel.map((r) => ({ user_id: userId, role: r })))
 
+      // Log user creation activity
+      try {
+        const { data: adminUser } = await supabase
+          .from("users")
+          .select("gamer_tag_id")
+          .eq("id", session?.user?.id)
+          .single()
+        
+        await logActivity(supabase, {
+          actorId: session?.user?.id || "",
+          actorName: adminUser?.gamer_tag_id || "Admin",
+          actorType: "Admin",
+          actionType: "user_created",
+          actionDescription: `Created new user ${gamer_tag_id} with roles: ${rolesSel.join(", ")}`,
+          targetId: userId,
+          targetName: gamer_tag_id,
+          category: "Account",
+          league: "NHL",
+        })
+      } catch (logError) {
+        console.error("Error logging user creation activity:", logError)
+      }
+
       toast({ title: "User created", description: "New user has been created successfully" })
       setNewUserDialogOpen(false)
       setNewUserSelectedRoles(["Player"])
@@ -704,6 +902,32 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
           throw new Error("The is_active column doesn't exist yet. Please run the migration first.")
         }
         throw error
+      }
+
+      // Log user activation/deactivation activity
+      try {
+        const { data: adminUser } = await supabase
+          .from("users")
+          .select("gamer_tag_id")
+          .eq("id", session?.user?.id)
+          .single()
+        
+        const targetUser = users.find((u) => u.id === userId)
+        const targetName = targetUser?.gamer_tag_id || "Unknown User"
+        
+        await logActivity(supabase, {
+          actorId: session?.user?.id || "",
+          actorName: adminUser?.gamer_tag_id || "Admin",
+          actorType: "Admin",
+          actionType: isActive ? "user_activated" : "user_deactivated",
+          actionDescription: `${isActive ? "Activated" : "Deactivated"} user ${targetName}`,
+          targetId: userId,
+          targetName: targetName,
+          category: "Account",
+          league: "NHL",
+        })
+      } catch (logError) {
+        console.error("Error logging user activation activity:", logError)
       }
 
       toast({
@@ -1002,21 +1226,23 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
                       paginatedUsers.map((user) => {
                         const player = user.players?.[0] ?? null
 
-                        let teamName: string | null = null
-                        let teamLeagueSuffix = ""
-                        if (player?.team_id && teamsById[player.team_id]) {
-                          teamName = teamsById[player.team_id].name
-                        } else if (player?.team_id_ahl && teamsById[player.team_id_ahl]) {
-                          teamName = teamsById[player.team_id_ahl].name
-                          teamLeagueSuffix = " (AHL)"
-                        }
-                        if (!teamName && player) {
-                          const nhlJoin = (player as any).teams
-                          const ahlJoin = (player as any).teams_ahl
-                          const nhlName = Array.isArray(nhlJoin) ? nhlJoin[0]?.name : nhlJoin?.name
-                          const ahlName = Array.isArray(ahlJoin) ? ahlJoin[0]?.name : ahlJoin?.name
-                          if (nhlName) teamName = nhlName
-                          else if (ahlName) teamName = ahlName
+                        // Build list of team chips: main roster per league + training camp per league
+                        const teamChips: { label: string; tc: boolean }[] = []
+                        const resolveName = (id: string | null, fallback: string | null) =>
+                          (id && teamsById[id]?.name) || fallback || null
+                        if (player) {
+                          const nhl = resolveName(player.team_id, player.team_name)
+                          const ahl = resolveName(player.team_id_ahl, player.ahl_team_name)
+                          const ecl = resolveName(player.team_id_ecl, player.ecl_team_name)
+                          const tcNhl = resolveName(player.tc_team_id, player.tc_team_name)
+                          const tcAhl = resolveName(player.tc_team_id_ahl, player.tc_ahl_team_name)
+                          const tcEcl = resolveName(player.tc_team_id_ecl, player.tc_ecl_team_name)
+                          if (nhl) teamChips.push({ label: `${nhl} (NHL)`, tc: false })
+                          if (ahl) teamChips.push({ label: `${ahl} (AHL)`, tc: false })
+                          if (ecl) teamChips.push({ label: `${ecl} (ECL)`, tc: false })
+                          if (tcNhl) teamChips.push({ label: `${tcNhl} (NHL TC)`, tc: true })
+                          if (tcAhl) teamChips.push({ label: `${tcAhl} (AHL TC)`, tc: true })
+                          if (tcEcl) teamChips.push({ label: `${tcEcl} (ECL TC)`, tc: true })
                         }
 
                         const salary = typeof player?.salary === "number" ? player.salary : 0
@@ -1031,17 +1257,35 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
                             <TableCell>{user.gamer_tag_id}</TableCell>
                             <TableCell className="text-center">{user.console}</TableCell>
                             <TableCell className="text-center">
-                              <div className="flex flex-wrap justify-center gap-1">
-                                {allRoles.map((role: string) => (
-                                  <Badge key={role} variant="outline" className="w-fit">
-                                    {role}
-                                  </Badge>
-                                ))}
+<div className="flex flex-wrap justify-center gap-1">
+                  {allRoles.map((role: string) => (
+                    <Badge key={role} variant="outline" className={`w-fit ${getRoleBadgeClass(role)}`}>
+                      {role}
+                    </Badge>
+                  ))}
                                 {!allRoles.length && <span className="text-muted-foreground">-</span>}
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
-                              {teamName ? <span>{teamName}{teamLeagueSuffix}</span> : <span className="text-muted-foreground">Free Agent</span>}
+                              {teamChips.length ? (
+                                <div className="flex flex-wrap justify-center gap-1">
+                                  {teamChips.map((chip) => (
+                                    <Badge
+                                      key={chip.label}
+                                      variant="outline"
+                                      className={
+                                        chip.tc
+                                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                                          : "bg-blue-50 text-blue-700 border-blue-200"
+                                      }
+                                    >
+                                      {chip.label}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">Free Agent</span>
+                              )}
                             </TableCell>
                             <TableCell className="text-center">${salary.toLocaleString()}</TableCell>
                             {isActiveColumnExists && (
@@ -1177,7 +1421,21 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (selectedRoles.length === 0) {
+                toast({ title: "Validation Error", description: "Please select at least one role.", variant: "destructive" })
+                return
+              }
+              const userId = form.getValues("userId")
+              if (!userId) {
+                toast({ title: "Validation Error", description: "User ID is missing. Please try again.", variant: "destructive" })
+                return
+              }
+              onSubmit({ userId, roles: selectedRoles })
+            }} className="space-y-6">
+              {/* Hidden userId field */}
+              <input type="hidden" {...form.register("userId")} />
               <div>
                 <div className="text-sm font-medium mb-2">Roles</div>
                 <div className="text-sm text-muted-foreground mb-4">
@@ -1202,7 +1460,10 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
                 )}
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={submitting || selectedRoles.length === 0}>
+                <Button 
+                  type="submit" 
+                  disabled={submitting || selectedRoles.length === 0}
+                >
                   {submitting ? "Saving..." : "Save changes"}
                 </Button>
               </DialogFooter>
@@ -1258,41 +1519,89 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
 
       {/* Team Assignment Dialog */}
       <Dialog open={teamAssignDialogOpen} onOpenChange={handleTeamAssignDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[480px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Assign Team</DialogTitle>
+            <DialogTitle>Assign Teams</DialogTitle>
             <DialogDescription>
-              {selectedUser && `Assign ${selectedUser.gamer_tag_id || selectedUser.email} to a team`}
+              {selectedUser && `Manage team assignments for ${selectedUser.gamer_tag_id || selectedUser.email}`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="team-select" className="text-sm font-medium">Team</label>
-              <Select
-                value={teamAssignmentForm.getValues().teamId?.toString() || "none"}
-                onValueChange={(value) => teamAssignmentForm.setValue("teamId", value === "none" ? null : value)}
-                disabled={submitting}
-              >
-                <SelectTrigger id="team-select">
-                  <SelectValue placeholder="Select a team" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Free Agent (No Team)</SelectItem>
-                  {teams.filter((t) => t.league === "NHL").map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name} (NHL)</SelectItem>
-                  ))}
-                  {teams.filter((t) => t.league === "AHL").map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name} (AHL)</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-muted-foreground">
-                Select a team for this player or choose "Free Agent" to remove them from any team and prevent automatic re-assignment.
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold mb-1">Main Roster</h4>
+                <p className="text-xs text-muted-foreground mb-3">
+                  A player can hold one active roster spot per league.
+                </p>
+                <div className="space-y-3">
+                  <TeamSlotSelect
+                    label="NHL Team"
+                    league="NHL"
+                    teams={teams}
+                    value={teamAssignmentForm.watch("teamId")}
+                    onChange={(v) => teamAssignmentForm.setValue("teamId", v)}
+                    disabled={submitting}
+                  />
+                  <TeamSlotSelect
+                    label="AHL Team"
+                    league="AHL"
+                    teams={teams}
+                    value={teamAssignmentForm.watch("teamIdAhl")}
+                    onChange={(v) => teamAssignmentForm.setValue("teamIdAhl", v)}
+                    disabled={submitting}
+                  />
+                  <TeamSlotSelect
+                    label="ECL Team"
+                    league="ECL"
+                    teams={teams}
+                    value={teamAssignmentForm.watch("teamIdEcl")}
+                    onChange={(v) => teamAssignmentForm.setValue("teamIdEcl", v)}
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-semibold mb-1">Training Camp (TC)</h4>
+                <p className="text-xs text-muted-foreground mb-3">
+                  A player can be a training-camp invite on one team per league, independent of their main roster.
+                </p>
+                <div className="space-y-3">
+                  <TeamSlotSelect
+                    label="NHL TC Team"
+                    league="NHL"
+                    teams={teams}
+                    value={teamAssignmentForm.watch("tcTeamId")}
+                    onChange={(v) => teamAssignmentForm.setValue("tcTeamId", v)}
+                    disabled={submitting}
+                  />
+                  <TeamSlotSelect
+                    label="AHL TC Team"
+                    league="AHL"
+                    teams={teams}
+                    value={teamAssignmentForm.watch("tcTeamIdAhl")}
+                    onChange={(v) => teamAssignmentForm.setValue("tcTeamIdAhl", v)}
+                    disabled={submitting}
+                  />
+                  <TeamSlotSelect
+                    label="ECL TC Team"
+                    league="ECL"
+                    teams={teams}
+                    value={teamAssignmentForm.watch("tcTeamIdEcl")}
+                    onChange={(v) => teamAssignmentForm.setValue("tcTeamIdEcl", v)}
+                    disabled={submitting}
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground border-t pt-3">
+                Leaving every selection on &quot;No Team&quot; sets the player as a full free agent and locks them from
+                automatic re-assignment.
               </p>
             </div>
             <DialogFooter>
               <Button onClick={() => teamAssignmentForm.handleSubmit(onAssignTeam)()} disabled={submitting}>
-                {submitting ? "Saving..." : "Assign Team"}
+                {submitting ? "Saving..." : "Save Assignments"}
               </Button>
             </DialogFooter>
           </div>
@@ -1390,6 +1699,49 @@ const onAssignTeam = async (values: z.infer<typeof teamAssignmentSchema>) => {
           </Form>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+function TeamSlotSelect({
+  label,
+  league,
+  teams,
+  value,
+  onChange,
+  disabled,
+}: {
+  label: string
+  league: "NHL" | "AHL" | "ECL"
+  teams: any[]
+  value: string | null | undefined
+  onChange: (value: string | null) => void
+  disabled?: boolean
+}) {
+  const leagueTeams = teams.filter((t) => t.league === league)
+  return (
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium">{label}</label>
+      <Select
+        value={value ?? "none"}
+        onValueChange={(v) => onChange(v === "none" ? null : v)}
+        disabled={disabled}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select a team" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="none">No Team</SelectItem>
+          {leagueTeams.map((t) => (
+            <SelectItem key={t.id} value={t.id}>
+              {t.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {leagueTeams.length === 0 && (
+        <p className="text-xs text-muted-foreground">No active {league} teams for the current season.</p>
+      )}
     </div>
   )
 }
