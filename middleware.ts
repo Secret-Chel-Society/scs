@@ -51,11 +51,8 @@ export const config = {
     "/api/lineups/:path*",
     "/api/management/:path*",
     "/api/bids/:path*",
+    "/api/tc/:path*",
     "/api/admin/ban-user/:path*",
     "/api/admin/unban-user/:path*",
-    "/api/forum/replies/:path*",
-    "/api/forum/votes/:path*",
-    "/api/forum/posts/:path*",
-    "/api/admin/check-admin-status/:path*",
   ],
 }
