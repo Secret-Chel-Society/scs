@@ -51,7 +51,7 @@ export type RatingResult = {
   levels: Record<string, number> // 1..20 per metric
 }
 
-export const MIN_GAMES = 9
+export const MIN_GAMES = 3
 
 // -----------------------------
 // Utility helpers
@@ -133,14 +133,14 @@ export function normalizePos(pos?: string | number): "C"|"LW"|"RW"|"LD"|"RD"|"G"
 // Weights sum to 1.00
 // -----------------------------
 const OFFENSE_WEIGHTS = {
-  ppg: 0.30,
-  goalsPer: 0.17,
+  ppg: 0.32,
+  goalsPer: 0.15,
   assistsPer: 0.10,
-  plusMinus: 0.13,
-  takeawaysPer: 0.06,
-  passPct: 0.10,
-  giveawaysPer: 0.07,
-  recordPct: 0.10,
+  plusMinus: 0.10,
+  takeawaysPer: 0.05,
+  passPct: 0.07,
+  giveawaysPer: 0.06,
+  recordPct: 0.15,
 } as const
 
 export function computeSkaterOffenseRating(s: AggregatedSkater): RatingResult {
@@ -155,11 +155,11 @@ export function computeSkaterOffenseRating(s: AggregatedSkater): RatingResult {
   const passPct = resolvePercent(s.passing_pct, s.pass_completed, s.pass_attempted)
   const recPct = recordPointsPct(s.wins, s.losses, s.otl, gp)
 
-  const lvl_ppg        = toLevel(pointsPer,     0.0, 5.8)
+  const lvl_ppg        = toLevel(pointsPer,     0.0, 5.5)
   const lvl_plusminus  = toLevel(s.plus_minus || 0, -50, 50)
-  const lvl_assistsPer = toLevel(assistsPer,    0.0, 2.8)
-  const lvl_goalsPer   = toLevel(goalsPer,      0.0, 2.3)
-  const lvl_tkaPer     = toLevel(takeawaysPer,  0.0, 3.5)
+  const lvl_assistsPer = toLevel(assistsPer,    0.0, 2.5)
+  const lvl_goalsPer   = toLevel(goalsPer,      0.0, 2.5)
+  const lvl_tkaPer     = toLevel(takeawaysPer,  0.0, 4.0)
   const lvl_passPct    = toLevel(passPct,      55.0, 90.0)
   const lvl_gvaPer     = toLevel(giveawaysPer, 25.0, 7.0, true)
   const lvl_rec        = toLevel(recPct,        0.25, .85)
@@ -207,17 +207,17 @@ export function computeSkaterOffenseRating(s: AggregatedSkater): RatingResult {
 // Weights sum to 1.00
 // -----------------------------
 const DEFENSE_WEIGHTS = {
-  plusMinus: 0.20,
+  plusMinus: 0.25,
   takeawaysPer: 0.15,
   interceptionsPer: 0.06,
-  hitsPer: 0.05,
+  hitsPer: 0.03,
   blocksPer: 0.09,
-  giveawaysPer: 0.08,
-  passPct: 0.06,
+  giveawaysPer: 0.06,
+  passPct: 0.05,
   ppg: 0.07,
-  assistsPer: 0.08,
-  goalsPer: 0.07,
-  recordPct: 0.12,
+  assistsPer: 0.09,
+  goalsPer: 0.08,
+  recordPct: 0.10,
 } as const
 
 export function computeSkaterDefenseRating(s: AggregatedSkater): RatingResult {
@@ -288,9 +288,9 @@ export function computeSkaterDefenseRating(s: AggregatedSkater): RatingResult {
 // Weights sum to 1.00
 // -----------------------------
 const GOALIE_WEIGHTS = {
-  savePct: 0.65,
-  gaa: 0.20,
-  recordPct: 0.15,
+  savePct: 0.60,
+  gaa: 0.15,
+  recordPct: 0.25,
 } as const
 
 export function computeGoalieRating(g: AggregatedGoalie): RatingResult {
@@ -305,7 +305,7 @@ export function computeGoalieRating(g: AggregatedGoalie): RatingResult {
   const gaa = g.games_played > 0 ? (g.goals_against || 0) / g.games_played : 99
   const recPct = recordPointsPct(g.wins, g.losses, g.otl, g.games_played)
 
-  const lvl_sv   = toLevel(sv ?? 0, 0.600, 0.860)
+  const lvl_sv   = toLevel(sv ?? 0, 0.600, 0.870)
   const lvl_gaa  = toLevel(gaa, 6.00, 1.00, true)
   const lvl_rec  = toLevel(recPct, 0.00, 1.00)
 
