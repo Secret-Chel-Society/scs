@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Filter, Search, Clock, History } from "lucide-react"
+import { Filter, Search, Clock, History, AlertCircle } from "lucide-react"
 import { SalaryProgress } from "@/components/management/salary-progress"
 import { RosterProgress } from "@/components/management/roster-progress"
 
@@ -38,6 +38,10 @@ type Props = {
   reloadFreeAgents?: () => void
   getPositionAbbreviation: (pos: string) => string
   getPositionColor: (pos: string) => string
+  league?: "nhl" | "ahl"
+  // Permission props
+  viewerRole?: string
+  myTeamBids?: Record<string, any>
 }
 
 export default function FreeAgentsTab(props: Props) {
@@ -69,7 +73,13 @@ export default function FreeAgentsTab(props: Props) {
     reloadFreeAgents,
     getPositionAbbreviation,
     getPositionColor,
+    viewerRole = "Player",
+    myTeamBids = {},
   } = props
+
+  // Permission checks
+  const isSiteOwner = viewerRole === "Site Owner"
+  const isManager = ["Owner", "GM", "AGM"].includes(viewerRole)
 
   // Management page passes: freeAgents={filteredFreeAgents}, freeAgentsRaw={freeAgents}
   // So freeAgentsProp is actually the filtered list, and freeAgentsRaw is the raw list
@@ -112,7 +122,7 @@ export default function FreeAgentsTab(props: Props) {
           <Card className="bg-slate-800 border-slate-700">
             <CardContent className="p-3 md:p-4">
               <h3 className="text-white font-semibold mb-2 md:mb-3 text-sm md:text-base">Roster Size</h3>
-              <RosterProgress current={actualRosterCount} max={15} projected={projectedRosterSize} />
+              <RosterProgress current={actualRosterCount} max={17} projected={projectedRosterSize} />
             </CardContent>
           </Card>
 
@@ -196,19 +206,54 @@ export default function FreeAgentsTab(props: Props) {
               .map((player) => {
                 if (!player?.users) return null
                 const currentBid = playerBids?.[player.id]
+
+                const isBidExpired =
+                  currentBid && currentBid.bid_expires_at && new Date(currentBid.bid_expires_at) < new Date()
+
+                // For AHL, use team_id_ahl; for NHL, use team_id
+                const bidTeamId = props.league === "ahl" ? currentBid?.team_id_ahl : currentBid?.team_id
+                const isMyTeamBid = currentBid && bidTeamId === teamId
+
+                // Permission check: who can see the bidding team name
+                const myBidForPlayer = myTeamBids?.[player.id]
+                const canShowBidderIdentity = isSiteOwner || (isMyTeamBid && isManager)
+                const bidderTeamName = canShowBidderIdentity ? currentBid?.teams?.name : null
+
                 const canBid =
                   !!isBiddingEnabled &&
-                  (!currentBid || currentBid.team_id !== teamId) &&
-                  (projectedRosterSize ?? 0) < 15
+                  !isBidExpired && // Don't allow bidding on expired bids
+                  (!currentBid || !isMyTeamBid) &&
+                  (projectedRosterSize ?? 0) < 17
 
                 const primaryPos = player?.users?.season_registrations?.[0]?.primary_position
                 const secondaryPos = player?.users?.season_registrations?.[0]?.secondary_position
+                const isLateSignup = player?.users?.season_registrations?.[0]?.is_late_signup
+                const availability = player?.users?.season_registrations?.[0]?.availability as {
+                  tuesday?: string[]
+                  wednesday?: string[]
+                  thursday?: string[]
+                } | null
+
+                // Format availability for display
+                const formatAvailability = (times: string[] | undefined) => {
+                  if (!times || times.length === 0) return null
+                  // Remove "EST" suffix and simplify times
+                  return times.map(t => t.replace(" EST", "")).join(", ")
+                }
+
+                const tuesdayAvail = formatAvailability(availability?.tuesday)
+                const wednesdayAvail = formatAvailability(availability?.wednesday)
+                const thursdayAvail = formatAvailability(availability?.thursday)
+                const hasAvailability = tuesdayAvail || wednesdayAvail || thursdayAvail
 
                 return (
                   <div key={player.id} className="border rounded-lg p-3 md:p-4 shadow-sm dark:border-gray-800">
                     <div className="flex justify-between items-start mb-2 md:mb-3">
                       <div>
-                        <h3 className="font-medium text-sm md:text-base">{player.users?.gamer_tag_id}</h3>
+                        <h3 className="font-medium text-sm md:text-base">
+                          {player.users?.gamer_tag_id}
+                          {isLateSignup && <span className="text-red-500 ml-1 text-xs font-bold">(LS)</span>}
+                        </h3>
                         <div className="flex items-center gap-1 mt-1">
                           <span className={`${getPositionColor(primaryPos)} text-xs md:text-sm`}>
                             {getPositionAbbreviation(primaryPos || "UNKNOWN")}
@@ -222,6 +267,28 @@ export default function FreeAgentsTab(props: Props) {
                             </>
                           )}
                         </div>
+                        {hasAvailability && (
+                          <div className="mt-1.5 text-[10px] md:text-xs text-muted-foreground space-y-0.5">
+                            {tuesdayAvail && (
+                              <div className="flex">
+                                <span className="text-orange-400 font-medium w-10 shrink-0">Tue:</span>
+                                <span className="text-gray-300">{tuesdayAvail}</span>
+                              </div>
+                            )}
+                            {wednesdayAvail && (
+                              <div className="flex">
+                                <span className="text-green-400 font-medium w-10 shrink-0">Wed:</span>
+                                <span className="text-gray-300">{wednesdayAvail}</span>
+                              </div>
+                            )}
+                            {thursdayAvail && (
+                              <div className="flex">
+                                <span className="text-blue-400 font-medium w-10 shrink-0">Thu:</span>
+                                <span className="text-gray-300">{thursdayAvail}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <p className="text-xs md:text-sm text-muted-foreground mt-1">
                           {player.users?.console} • ${((player?.salary ?? 0) / 1_000_000).toFixed(2)}M
                         </p>
@@ -229,7 +296,9 @@ export default function FreeAgentsTab(props: Props) {
                     </div>
 
                     {currentBid && (
-                      <div className="mb-2 md:mb-3 p-2 bg-muted rounded-md">
+                      <div
+                        className={`mb-2 md:mb-3 p-2 rounded-md ${isBidExpired ? "bg-yellow-500/20 border border-yellow-500/50" : "bg-muted"}`}
+                      >
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-xs md:text-sm font-medium">Current Bid:</span>
                           <span className="font-bold text-xs md:text-sm">
@@ -237,12 +306,35 @@ export default function FreeAgentsTab(props: Props) {
                           </span>
                         </div>
                         <div className="flex justify-between items-center text-xs">
-                          <span>By: {currentBid?.teams?.name}</span>
+                          <span>
+                            {canShowBidderIdentity 
+                              ? `By: ${bidderTeamName || "Unknown"}` 
+                              : "Bid in progress"}
+                          </span>
                           <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {formatTimeRemaining(currentBid?.bid_expires_at)}
+                            {isBidExpired ? (
+                              <>
+                                <AlertCircle className="h-3 w-3 text-yellow-500" />
+                                <span className="text-yellow-500">Expired</span>
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="h-3 w-3" />
+                                {formatTimeRemaining(currentBid?.bid_expires_at)}
+                              </>
+                            )}
                           </span>
                         </div>
+                        {isBidExpired && canShowBidderIdentity && (
+                          <p className="text-xs text-yellow-500 mt-1">
+                            Awaiting processing - player will be assigned to {bidderTeamName}
+                          </p>
+                        )}
+                        {isBidExpired && !canShowBidderIdentity && (
+                          <p className="text-xs text-yellow-500 mt-1">
+                            Awaiting processing
+                          </p>
+                        )}
                       </div>
                     )}
 
@@ -252,19 +344,31 @@ export default function FreeAgentsTab(props: Props) {
                         className="flex-1 text-xs md:text-sm h-8 md:h-9"
                         size="sm"
                         disabled={!canBid}
-                        title={(projectedRosterSize ?? 0) >= 15 ? "Roster limit reached with current bids" : ""}
+                        title={
+                          isBidExpired
+                            ? "Bid has expired - awaiting processing"
+                            : (projectedRosterSize ?? 0) >= 17
+                              ? "Roster limit reached with current bids"
+                              : ""
+                        }
                       >
-                        {currentBid && currentBid.team_id === teamId ? "Extend Bid" : "Place Bid"}
+                        {isBidExpired
+                          ? "Bid Expired"
+                          : isMyTeamBid
+                            ? "Extend Bid"
+                            : "Place Bid"}
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleHistoryClick(player)}
-                        title="View Bid History"
-                        className="h-8 md:h-9 w-8 md:w-9 p-0"
-                      >
-                        <History className="h-3 w-3 md:h-4 md:w-4" />
-                      </Button>
+                      {isSiteOwner && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleHistoryClick(player)}
+                          title="View Bid History"
+                          className="h-8 md:h-9 w-8 md:w-9 p-0"
+                        >
+                          <History className="h-3 w-3 md:h-4 md:w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )
