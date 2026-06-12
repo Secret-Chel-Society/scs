@@ -9,11 +9,9 @@ export async function GET(request: Request) {
 
     const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1)
     const rawLimit = Math.max(parseInt(searchParams.get("limit") || "25", 10), 1)
-    const limit = Math.min(rawLimit, 1000) // hard cap
+    const limit = Math.min(rawLimit, 1000) // hard cap per page
     const search = (searchParams.get("search") || "").trim()
-
-    const from = (page - 1) * limit
-    const to = from + limit - 1
+    const fetchAll = searchParams.get("fetchAll") === "true" // For search, fetch all matching results
 
     const supabase = createAdminClient()
 
@@ -28,6 +26,65 @@ export async function GET(request: Request) {
       ban_expiration,
       created_at
     `
+
+    // If searching and fetchAll is true, paginate through all results
+    if (search && fetchAll) {
+      const PAGE_SIZE = 1000
+      let allUsers: any[] = []
+      let pageNum = 0
+      let hasMore = true
+
+      while (hasMore) {
+        const from = pageNum * PAGE_SIZE
+        const to = from + PAGE_SIZE - 1
+
+        const safe = search.replace(/[%_]/g, "")
+        const term = `%${safe}%`
+
+        const { data, error } = await supabase
+          .from("users")
+          .select(columns)
+          .or(
+            [
+              `gamer_tag_id.ilike.${term}`,
+              `discord_name.ilike.${term}`,
+              `gamer_tag.ilike.${term}`,
+              `email.ilike.${term}`,
+            ].join(",")
+          )
+          .order("created_at", { ascending: false })
+          .range(from, to)
+
+        if (error) {
+          console.error("users-list query error:", error)
+          return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+
+        if (data && data.length > 0) {
+          allUsers = [...allUsers, ...data]
+          hasMore = data.length === PAGE_SIZE
+          pageNum++
+        } else {
+          hasMore = false
+        }
+      }
+
+      const usersWithBanStatus = allUsers.map((u) => ({
+        ...u,
+        is_banned: !!u.ban_reason,
+      }))
+
+      return NextResponse.json({
+        users: usersWithBanStatus,
+        total: allUsers.length,
+        page: 1,
+        limit: allUsers.length,
+      })
+    }
+
+    // Standard paginated query
+    const from = (page - 1) * limit
+    const to = from + limit - 1
 
     // Build base query with exact count
     let query = supabase
