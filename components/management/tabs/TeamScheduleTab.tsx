@@ -20,61 +20,70 @@ export default function TeamScheduleTab({ teamMatches, teamId, teamName }: Props
       </CardHeader>
       <CardContent>
         {teamMatches.length > 0 ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {teamMatches.map((match) => {
               const isHomeTeam = match.home_team_id === teamId
               const opponent = isHomeTeam ? match.away_team : match.home_team
               const matchDate = new Date(match.match_date)
+              const isCompleted = match.status === "Completed"
+              const teamScore = isHomeTeam ? match.home_score : match.away_score
+              const oppScore = isHomeTeam ? match.away_score : match.home_score
+              const isWin = isCompleted && teamScore > oppScore
 
               return (
                 <div
                   key={match.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between sm:p-4"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className="text-sm text-muted-foreground">{matchDate.toLocaleDateString()}</div>
-                      <div className="text-xs text-muted-foreground">
+                  {/* Left: date + matchup */}
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    {/* Date block */}
+                    <div className="flex w-14 flex-col items-center justify-center rounded-md bg-muted px-2 py-1.5 text-center shrink-0">
+                      <span className="text-sm font-semibold leading-tight">
+                        {matchDate.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground leading-tight">
                         {matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </div>
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {isHomeTeam ? "HOME" : "AWAY"}
-                      </Badge>
-                      <span>vs {opponent?.name}</span>
+
+                    {/* Matchup */}
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant={isHomeTeam ? "default" : "secondary"}
+                          className="text-[10px] px-1.5 py-0 font-semibold"
+                        >
+                          {isHomeTeam ? "HOME" : "AWAY"}
+                        </Badge>
+                        <span className="text-sm font-medium truncate">
+                          {isHomeTeam ? "vs" : "@"} {opponent?.name ?? "TBD"}
+                        </span>
+                      </div>
+                      {isCompleted ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-bold tabular-nums">
+                            {teamScore} - {oppScore}
+                          </span>
+                          <Badge variant={isWin ? "default" : "destructive"} className="text-[10px] px-1.5 py-0">
+                            {isWin ? "WIN" : "LOSS"}
+                          </Badge>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="w-fit text-[10px] px-1.5 py-0">
+                          {match.status}
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    {match.status === "Completed" ? (
-                      <div className="text-right">
-                        <div className="font-bold">
-                          {isHomeTeam
-                            ? `${match.home_score} - ${match.away_score}`
-                            : `${match.away_score} - ${match.home_score}`}
-                        </div>
-                        <Badge
-                          variant={
-                            (isHomeTeam && match.home_score > match.away_score) ||
-                            (!isHomeTeam && match.away_score > match.home_score)
-                              ? "default"
-                              : "destructive"
-                          }
-                        >
-                          {(isHomeTeam && match.home_score > match.away_score) ||
-                          (!isHomeTeam && match.away_score > match.home_score)
-                            ? "WIN"
-                            : "LOSS"}
-                        </Badge>
-                      </div>
-                    ) : (
-                      <Badge variant="outline">{match.status}</Badge>
-                    )}
-                    <Button variant="outline" size="sm" asChild>
+
+                  {/* Right: actions */}
+                  <div className="flex items-center gap-2 sm:shrink-0">
+                    <Button variant="outline" size="sm" className="flex-1 sm:flex-none bg-transparent" asChild>
                       <Link href={`/matches/${match.id}`}>View</Link>
                     </Button>
                     {match.status === "Scheduled" && (
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" className="flex-1 sm:flex-none bg-transparent" asChild>
                         <Link href={`/management/lineups/${match.id}`}>Set Lineup</Link>
                       </Button>
                     )}
