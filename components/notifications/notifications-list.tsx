@@ -22,6 +22,69 @@ interface Notification {
   action_text?: string
 }
 
+// Helper function to format trade notification messages
+function formatNotificationMessage(title: string, message: string): string {
+  // Check if this is a trade notification by looking for JSON-like content
+  if (message.includes('"fromTeam"') || message.includes('"toTeam"') || message.includes("TRADE_DATA")) {
+    try {
+      // Try to extract JSON from the message
+      let jsonStr = message
+
+      // Handle messages that have a prefix before the JSON
+      const jsonStartIndex = message.indexOf("{")
+      if (jsonStartIndex > 0) {
+        jsonStr = message.substring(jsonStartIndex)
+      }
+
+      // Remove TRADE_DATA: prefix if present
+      if (jsonStr.includes("TRADE_DATA:")) {
+        jsonStr = jsonStr.replace("TRADE_DATA:", "").trim()
+      }
+
+      const tradeData = JSON.parse(jsonStr)
+
+      // Extract player names
+      const fromPlayerNames =
+        tradeData.fromPlayers?.map((p: any) => p.name || p.gamer_tag || "Unknown Player").join(", ") || ""
+      const toPlayerNames =
+        tradeData.toPlayers?.map((p: any) => p.name || p.gamer_tag || "Unknown Player").join(", ") || ""
+
+      // Count picks
+      const fromPicksCount = tradeData.fromPicks?.length || 0
+      const toPicksCount = tradeData.toPicks?.length || 0
+
+      // Build the offering side (what fromTeam is giving)
+      const offeringParts: string[] = []
+      if (fromPlayerNames) offeringParts.push(fromPlayerNames)
+      if (fromPicksCount > 0) offeringParts.push(`${fromPicksCount} pick(s)`)
+      const offering = offeringParts.length > 0 ? offeringParts.join(" and ") : "nothing"
+
+      // Build the receiving side (what fromTeam wants)
+      const receivingParts: string[] = []
+      if (toPlayerNames) receivingParts.push(toPlayerNames)
+      if (toPicksCount > 0) receivingParts.push(`${toPicksCount} pick(s)`)
+      const receiving = receivingParts.length > 0 ? receivingParts.join(" and ") : "nothing"
+
+      // Check for cancelled/response status
+      if (tradeData.response === "CANCELLED" || message.includes("CANCELLED")) {
+        return `Trade cancelled: ${offering} for ${receiving}`
+      }
+
+      // Determine direction based on title
+      if (title.toLowerCase().includes("from")) {
+        return `${tradeData.fromTeam || "Team"} wants to trade ${offering} for ${receiving}`
+      } else {
+        return `You proposed to trade ${offering} for ${receiving}`
+      }
+    } catch {
+      // If JSON parsing fails, return a cleaned up version
+      return message.replace(/\{.*\}/s, "Trade details available").substring(0, 100)
+    }
+  }
+
+  return message
+}
+
 export function NotificationsList() {
   const { supabase } = useSupabase()
   const { toast } = useToast()
@@ -278,7 +341,7 @@ export function NotificationsList() {
                     <p
                       className={`text-sm mt-1 ${notification.read ? "text-muted-foreground" : "text-muted-foreground"}`}
                     >
-                      {notification.message}
+                      {formatNotificationMessage(notification.title, notification.message)}
                     </p>
 
                     <div className="flex items-center gap-2 mt-2">
