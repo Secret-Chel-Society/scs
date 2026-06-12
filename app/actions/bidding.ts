@@ -149,14 +149,17 @@ export async function extendBidExpiration(bidId: string, hoursToAdd = 24) {
   }
 }
 
-export async function cancelBid(bidId: string) {
+export async function cancelBid(bidId: string, reason: string = "cancelled") {
   try {
     const supabase = createAdminClient()
 
     const { error } = await supabase
       .from("player_bidding")
       .update({
+        status: reason,
         finalized: true,
+        processed: true,
+        processed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq("id", bidId)
@@ -167,6 +170,7 @@ export async function cancelBid(bidId: string) {
 
     revalidatePath("/free-agency")
     revalidatePath("/management")
+    revalidatePath("/ahl/management")
 
     return {
       success: true,
