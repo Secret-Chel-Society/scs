@@ -31,6 +31,8 @@ export interface AHLTeamStats {
   player_count?: number
   total_salary?: number
   cap_space?: number
+  total_retained_salary?: number
+  salary_fines?: number
 }
 
 /**
@@ -72,11 +74,12 @@ export async function getAllAHLTeamStats(seasonId: string): Promise<AHLTeamStats
       }
     }
 
-    // Get player counts and salaries from players table using team_id_ahl
+    // Get player counts and salaries from players table using team_id_ahl (exclude TC players)
     const { data: playerData, error: playerError } = await supabase
       .from("players")
-      .select("team_id_ahl, salary")
+      .select("team_id_ahl, salary, is_tc")
       .not("team_id_ahl", "is", null)
+      .or("is_tc.is.null,is_tc.eq.false")
 
     if (playerError) {
       console.error("Error fetching AHL player data:", playerError)
@@ -94,6 +97,35 @@ export async function getAllAHLTeamStats(seasonId: string): Promise<AHLTeamStats
       }
     })
 
+    // Fetch retained salary from teams_ahl
+    const { data: teamsAhlData, error: teamsAhlError } = await supabase
+      .from("teams_ahl")
+      .select("id, total_retained_salary")
+
+    if (teamsAhlError) {
+      console.error("Error fetching AHL teams data:", teamsAhlError)
+    }
+
+    const retainedSalaryByTeam: Record<string, number> = {}
+    teamsAhlData?.forEach((team) => {
+      retainedSalaryByTeam[team.id] = team.total_retained_salary || 0
+    })
+
+    // Fetch salary_fines from team_seasons_ahl
+    const { data: teamSeasonsData, error: teamSeasonsError } = await supabase
+      .from("team_seasons_ahl")
+      .select("team_id, salary_fines")
+      .eq("season_id", seasonId)
+
+    if (teamSeasonsError) {
+      console.error("Error fetching AHL team_seasons data:", teamSeasonsError)
+    }
+
+    const salaryFinesByTeam: Record<string, number> = {}
+    teamSeasonsData?.forEach((ts) => {
+      salaryFinesByTeam[ts.team_id] = ts.salary_fines || 0
+    })
+
     // Combine standings with shots data and player counts
     return standings.map((team) => {
       const totalShots = shotsByTeam[team.id] || 0
@@ -101,6 +133,8 @@ export async function getAllAHLTeamStats(seasonId: string): Promise<AHLTeamStats
 
       const playerCount = playerCountByTeam[team.id] || 0
       const totalSalary = totalSalaryByTeam[team.id] || 0
+      const retainedSalary = retainedSalaryByTeam[team.id] || 0
+      const salaryFines = salaryFinesByTeam[team.id] || 0
 
       return {
         ...team,
@@ -108,7 +142,9 @@ export async function getAllAHLTeamStats(seasonId: string): Promise<AHLTeamStats
         shots_per_game: Number(shotsPerGame.toFixed(1)),
         player_count: playerCount,
         total_salary: totalSalary,
-        cap_space: 40000000 - totalSalary,
+        total_retained_salary: retainedSalary,
+        salary_fines: salaryFines,
+        cap_space: 40000000 - totalSalary - retainedSalary - salaryFines,
       }
     })
   } catch (error) {
@@ -125,26 +161,20 @@ export async function getAllAHLTeamStats(seasonId: string): Promise<AHLTeamStats
  */
 export async function getAHLTeamStats(teamId: string, seasonId: string): Promise<AHLTeamStats | null> {
   try {
-    console.log("[v0] getAHLTeamStats called with:", { teamId, seasonId })
-
     const standings = await calculateAHLStandings(seasonId)
-
-    console.log("[v0] AHL standings calculator returned:", standings.length, "teams")
 
     // Find the team in the standings
     const team = standings.find((t) => t.id === teamId)
 
-    console.log("[v0] Found team in standings:", team ? team.name : "NOT FOUND")
-
     if (!team) {
-      console.log("[v0] Team not found in AHL standings for teamId:", teamId)
       return null
     }
 
     const { data: playerData, error: playerError } = await supabase
       .from("players")
-      .select("id, salary")
+      .select("id, salary, is_tc")
       .eq("team_id_ahl", teamId)
+      .or("is_tc.is.null,is_tc.eq.false")
 
     if (playerError) {
       console.error("Error fetching AHL player data:", playerError)
