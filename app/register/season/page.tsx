@@ -15,8 +15,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, Loader2, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const GAME_DAYS = ["wednesday", "thursday", "friday"] as const
-const TIME_SLOTS = ["8:40 PM EST", "9:20 PM EST", "10:00 PM EST"] as const
+const GAME_DAYS = ["tuesday", "wednesday", "thursday"] as const
+const TIME_SLOTS = ["8:30 PM EST", "9:10 PM EST", "9:50 PM EST"] as const
 
 // ✅ Force this page to always use Season 4
 const TARGET_SEASON_NUMBER = 4
@@ -47,9 +47,9 @@ export default function SeasonRegistrationPage() {
   const [secondaryPosition, setSecondaryPosition] = useState("none")
   const [consoleType, setConsoleType] = useState("")
   const [availability, setAvailability] = useState<Availability>({
+    tuesday: [],
     wednesday: [],
     thursday: [],
-    friday: [],
   })
 
   // Form validation
@@ -611,8 +611,8 @@ export default function SeasonRegistrationPage() {
                 <div>
                   <Label className="text-base">Availability</Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Select the time slots you are available to play. Games are scheduled on Wednesday, Thursday, and
-                    Friday nights.
+                    Select the time slots you are available to play. Games are scheduled on Tuesday, Wednesday, and
+                    Thursday nights.
                   </p>
                 </div>
 
@@ -654,7 +654,7 @@ export default function SeasonRegistrationPage() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setAvailability({ wednesday: [], thursday: [], friday: [] })}
+                      onClick={() => setAvailability({ tuesday: [], wednesday: [], thursday: [] })}
                     >
                       Clear all
                     </Button>
