@@ -520,19 +520,21 @@ export default function SeasonRegistrationPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl">{activeSeason.name} Registration</CardTitle>
-            <CardDescription>Register to participate in {activeSeason.name} of the Secret Chel Society</CardDescription>
+            <CardDescription>Register to participate in {activeSeason.name} of Secret Chel Society</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="mb-6 p-4 bg-muted/30 rounded-lg">
               <h3 className="font-semibold mb-2">{activeSeason.name} Information</h3>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                <li>SCS S3 Staff Annoucement March 5th</li>
-                <li>SCS S3 Owner/Team Announcement March 6th</li>
-                <li>SCS S3 Draft Lottery March 23rd</li>
-                <li>Season 3 Deadline signup 11:59 PM est March 26th</li>
-                <li>Late Signups for S3 March 27th</li>
-                <li>Draft Night March 30th 2026</li>
-                <li>Opening Night April 8th 2026</li>
+                <li>SCS S4 Signups end June 14th</li>
+                <li>SCS S4 Draft Lottery June 15th</li>
+                <li>SCS S4 Draft Day June 17th</li>
+                <li>SCS S4 Reg Season Begins June 23rd</li>
+                <li>Trades and waivers open June 26th</li>
+                <li>No Games June 30th-July 2nd Due to Holidays</li>
+                <li>Trade Deadline Aug 4th 2026</li>
+                <li> Roster Lock August 10th 2026</li>
+                <li> Regular Season Ends Aug 13th 2026</li>
               </ul>
             </div>
 
