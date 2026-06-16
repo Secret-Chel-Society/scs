@@ -481,7 +481,7 @@ export default function AdminTeamsPage() {
             logo_url,
             ea_club_id
           )
-        `
+        `,
         )
         .eq("season_id", season)
         .order("created_at", { ascending: true })
@@ -608,6 +608,8 @@ export default function AdminTeamsPage() {
 
   // UPDATED: save both teams and team_seasons, seasons via UUID
   const handleSaveTeam = async () => {
+    window.alert("handleSaveTeam called!")
+
     if (!teamForm.name.trim()) {
       toast({
         title: "Validation Error",
@@ -617,12 +619,21 @@ export default function AdminTeamsPage() {
       return
     }
 
+    if (!supabase) {
+      toast({
+        title: "Error",
+        description: "Database client not available",
+        variant: "destructive",
+      })
+      return
+    }
+
     const effectiveSeasonId = teamForm.season_id || selectedSeason
 
-    if (!effectiveSeasonId || effectiveSeasonId === "default-season-1") {
+    if (!effectiveSeasonId) {
       toast({
         title: "Validation Error",
-        description: "Please select a valid season",
+        description: "Please select a season",
         variant: "destructive",
       })
       return
@@ -633,12 +644,12 @@ export default function AdminTeamsPage() {
 
       // determine season number if we still need to keep teams.season_id in sync
       const seasonObj = seasons.find((s) => s.id === effectiveSeasonId)
-      const seasonNumber = seasonObj?.number
+      const seasonNumber = seasonObj?.number ?? null
 
       if (isAddingTeam) {
-        // 1) insert into teams
-        const teamInsert: any = {
-          name: teamForm.name,
+        // 1) insert into teams (base team record)
+        const teamInsert: Record<string, any> = {
+          name: teamForm.name.trim(),
           logo_url: teamForm.logo_url || null,
         }
 
@@ -674,9 +685,7 @@ export default function AdminTeamsPage() {
           penalty_kill_goals_against: 0,
           penalty_kill_opportunities: 0,
           total_retained_salary: 0,
-          manual_override: false,
         })
-
         if (seasonError) throw seasonError
 
         toast({
@@ -684,14 +693,11 @@ export default function AdminTeamsPage() {
           description: "The team has been added successfully.",
         })
       } else if (editingTeam) {
-        // Update teams base data
-        const teamUpdate: any = {
-          name: teamForm.name,
-          logo_url: teamForm.logo_url || null,
-        }
+        window.alert(`Updating team ID: ${editingTeam.id}`)
 
-        if (typeof seasonNumber === "number") {
-          teamUpdate.season_id = seasonNumber
+        const teamUpdate: Record<string, any> = {
+          name: teamForm.name.trim(),
+          logo_url: teamForm.logo_url || null,
         }
 
         if (hasEaColumn) {
@@ -702,17 +708,33 @@ export default function AdminTeamsPage() {
           teamUpdate.is_active = teamForm.is_active
         }
 
-        const { error: teamError } = await supabase.from("teams").update(teamUpdate).eq("id", editingTeam.id)
+        window.alert(`Update payload: ${JSON.stringify(teamUpdate)}`)
+
+        const { data: teamData, error: teamError } = await supabase
+          .from("teams")
+          .update(teamUpdate)
+          .eq("id", editingTeam.id)
+          .select()
+
+        window.alert(
+          `Teams update result - data: ${JSON.stringify(teamData)}, error: ${teamError ? teamError.message : "none"}`,
+        )
+
         if (teamError) throw teamError
 
         // Update team_seasons link (season + active)
-        const { error: tsError } = await supabase
+        const { data: tsData, error: tsError } = await supabase
           .from("team_seasons")
           .update({
             is_active: teamForm.is_active,
             season_id: effectiveSeasonId,
           })
           .eq("id", editingTeam.team_season_id)
+          .select()
+
+        window.alert(
+          `team_seasons update result - data: ${JSON.stringify(tsData)}, error: ${tsError ? tsError.message : "none"}`,
+        )
 
         if (tsError) throw tsError
 
@@ -726,7 +748,7 @@ export default function AdminTeamsPage() {
       setIsAddingTeam(false)
       setEditingTeam(null)
     } catch (error: any) {
-      console.error("Error saving team:", error)
+      window.alert(`Error: ${error.message}`)
       toast({
         title: "Error",
         description: error.message || "Failed to save team",
@@ -1267,8 +1289,7 @@ export default function AdminTeamsPage() {
                 ) : (
                   filteredTeams.map((team) => {
                     // UPDATED: season name by UUID
-                    const seasonName =
-                      seasons.find((s: Season) => s.id === team.season_id)?.name || "Unknown season"
+                    const seasonName = seasons.find((s: Season) => s.id === team.season_id)?.name || "Unknown season"
 
                     const wins = team.wins || 0
                     const losses = team.losses || 0
