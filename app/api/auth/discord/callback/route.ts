@@ -9,7 +9,7 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET
 // Trim environment variable to prevent leading/trailing spaces
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  (isDevelopment ? "http://localhost:3000" : "https://www.secretchelsociety.com")
+  (isDevelopment ? "http://localhost:3000" : "https://www.chelgaming.com")
 const DISCORD_REDIRECT_URI = `${SITE_URL}/api/auth/discord/callback`
 
 export async function GET(request: Request) {
