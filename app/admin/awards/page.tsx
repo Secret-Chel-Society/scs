@@ -118,12 +118,17 @@ export default function AdminAwardsPage() {
 
   const teamAwardTypes = ["President Trophy", "SCS Cup"]
   const playerAwardTypes = [
-    "MVP",
-    "Rookie of the Year",
-    "Best Defenseman",
-    "Best Forward",
-    "Best Goalie",
-    "Most Improved",
+    "Rocket Richard Winner",
+    "Art Ross Winner",
+    "Hart Trophy Winner",
+    "Vezina Trophy Winner",
+    "Norris Trophy Winner",
+    "Chara Trophy Winner",
+    "Calder Trophy Winner",
+    "Jack Adams Trophy Winner",
+    "Conn Smythe Trophy Winner",
+    "Best Two-Way Defenseman",
+    "Best Defensive Defenseman",
   ]
 
   useEffect(() => {
