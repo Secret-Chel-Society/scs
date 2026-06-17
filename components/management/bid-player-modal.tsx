@@ -109,7 +109,7 @@ export function BidPlayerModal({
 
     // Check roster limit
     if (projectedRosterSize >= 15) {
-      setError("Your team roster is full (15 players)"
+      setError("Your team roster is full (15 players)")
       return
     }
 
