@@ -116,7 +116,7 @@ export default function AdminAwardsPage() {
   const [selectedTeamSeason, setSelectedTeamSeason] = useState<string>("1")
   const [selectedPlayerSeason, setSelectedPlayerSeason] = useState<string>("1")
 
-  const teamAwardTypes = ["Presidents Trophy", "SCS Cup" "SCS Conference Champions"]
+  const teamAwardTypes = ["Presidents Trophy", "SCS Cup", "SCS Conference Champions",]
   const playerAwardTypes = [
     "Rocket Richard Winner",
     "Art Ross Winner",
