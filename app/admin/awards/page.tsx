@@ -127,8 +127,6 @@ export default function AdminAwardsPage() {
     "Calder Trophy Winner",
     "Jack Adams Trophy Winner",
     "Conn Smythe Trophy Winner",
-    "Best Two-Way Defenseman",
-    "Best Defensive Defenseman",
   ]
 
   useEffect(() => {
