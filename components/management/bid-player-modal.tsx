@@ -108,8 +108,8 @@ export function BidPlayerModal({
     }
 
     // Check roster limit
-    if (projectedRosterSize >= 17) {
-      setError("Your team roster is full (17 players)")
+    if (projectedRosterSize >= 15) {
+      setError("Your team roster is full (15 players)"
       return
     }
 
@@ -332,7 +332,7 @@ export function BidPlayerModal({
                 {((salaryCap || currentSalaryCap) / 1000000).toFixed(1)}M
               </p>
               <p className="text-sm text-green-700 dark:text-green-300">
-                Roster: {projectedRosterSize || teamPlayers.length} / 17 players
+                Roster: {projectedRosterSize || teamPlayers.length} / 15 players
               </p>
             </div>
           )}
