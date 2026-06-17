@@ -107,7 +107,7 @@ export async function getAllTeamStats(seasonId: string): Promise<TeamStats[]> {
         shots_per_game: Number(shotsPerGame.toFixed(1)),
         player_count: playerCountByTeam[team.id] || 0,
         total_salary: totalSalaryByTeam[team.id] || 0,
-        cap_space: 100000000 - (totalSalaryByTeam[team.id] || 0),
+        cap_space: 38000000 - (totalSalaryByTeam[team.id] || 0),
       }
     })
   } catch (error) {
@@ -150,7 +150,7 @@ export async function getTeamStats(teamId: string, seasonId: string): Promise<Te
       ...team,
       player_count: playerData?.length || 0,
       total_salary: totalSalary,
-      cap_space: 100000000 - totalSalary,
+      cap_space: 38000000 - totalSalary,
     }
   } catch (error) {
     console.error("Error getting team stats:", error)
@@ -257,7 +257,7 @@ async function calculateTeamStats(teamId: string, seasonId: string): Promise<Tea
       goal_differential: goalsFor - goalsAgainst,
       player_count: 0, // Placeholder for player count
       total_salary: 0, // Placeholder for total salary
-      cap_space: 100000000, // Placeholder for cap space
+      cap_space: 38000000, // Placeholder for cap space
     }
   } catch (error) {
     console.error("Error calculating team stats:", error)
