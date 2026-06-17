@@ -9,17 +9,25 @@ export async function GET(request: NextRequest) {
     const teamId = searchParams.get("teamId")
     const startDate = searchParams.get("startDate")
     const endDate = searchParams.get("endDate")
+    const league = searchParams.get("league") || "nhl"
 
-    console.log("Team availability API called with:", { teamId, startDate, endDate })
+    console.log("Team availability API called with:", { teamId, startDate, endDate, league })
 
     if (!teamId || !startDate || !endDate) {
       return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
     }
 
+    // League-specific table/column selection
+    const availabilityTable =
+      league === "ahl" ? "game_availability_ahl" : league === "ecl" ? "game_availability_ecl" : "game_availability"
+    const matchesTable = league === "ahl" ? "matches_ahl" : league === "ecl" ? "matches_ecl" : "matches"
+    const teamsTable = league === "ahl" ? "teams_ahl" : league === "ecl" ? "teams_ecl" : "teams"
+    const playerTeamCol = league === "ahl" ? "team_id_ahl" : league === "ecl" ? "team_id_ecl" : "team_id"
+
     const supabase = createAdminClient()
 
-    // Check if game_availability table exists
-    const { data: tableCheck, error: tableError } = await supabase.from("game_availability").select("id").limit(1)
+    // Check if availability table exists
+    const { data: tableCheck, error: tableError } = await supabase.from(availabilityTable).select("id").limit(1)
 
     if (tableError) {
       console.error("Table check error:", tableError)
@@ -38,13 +46,13 @@ export async function GET(request: NextRequest) {
       .select(`
         id,
         user_id,
-        team_id,
+        ${playerTeamCol},
         users!inner(
           id,
           gamer_tag_id
         )
       `)
-      .eq("team_id", teamId)
+      .eq(playerTeamCol, teamId)
 
     if (playersError) {
       console.error("Players error:", playersError)
@@ -55,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     // Get matches for the team in the date range
     const { data: matches, error: matchesError } = await supabase
-      .from("matches")
+      .from(matchesTable)
       .select(`
         id,
         match_date,
@@ -90,7 +98,7 @@ export async function GET(request: NextRequest) {
     })
 
     const { data: teams, error: teamsError } = await supabase
-      .from("teams")
+      .from(teamsTable)
       .select("id, name")
       .in("id", Array.from(teamIds))
 
@@ -106,7 +114,7 @@ export async function GET(request: NextRequest) {
     // Get availability data
     const matchIds = matches.map((match) => match.id)
     const { data: availability, error: availabilityError } = await supabase
-      .from("game_availability")
+      .from(availabilityTable)
       .select(`
         id,
         match_id,
