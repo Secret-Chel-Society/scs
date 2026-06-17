@@ -19,8 +19,8 @@ interface Team {
   Conference: string | null
 }
 
-const NHL_CONFERENCES = ["MGHL EAST", "MGHL WEST"]
-const AHL_CONFERENCES = ["MGAHL EAST", "MGAHL WEST"]
+const NHL_CONFERENCES = ["SCS ICE", "SCS FIRE"]
+const AHL_CONFERENCES = ["SCS EAST", "SCS WEST"]
 const DIVISIONS = ["ATLANTIC", "PACIFIC", "METRO", "CENTRAL"]
 
 export default function DivisionsConferencesPage() {
@@ -219,7 +219,7 @@ export default function DivisionsConferencesPage() {
                     Assign divisions and conferences to NHL teams
                     <br />
                     <span className="text-xs">
-                      Conferences: MGHL EAST, MGHL WEST | Divisions: ATLANTIC, PACIFIC, METRO, CENTRAL
+                      Conferences: SCS ICE, SCS FIRE | Divisions: ATLANTIC, PACIFIC, METRO, CENTRAL
                     </span>
                   </CardDescription>
                 </div>
