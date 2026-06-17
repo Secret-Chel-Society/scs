@@ -16,7 +16,7 @@ import { getAllTeamStats, getCurrentSeasonId } from "@/lib/team-utils"
 import { Trophy, Award, Users, Search, ArrowUpDown, Grid2X2, Rows, ChevronRight, Sparkles, Shield } from "lucide-react"
 
 // --- Constants --------------------------------------------------------------
-const MAX_ROSTER_SIZE = 16
+const MAX_ROSTER_SIZE = 15
 const CARDS_PER_SKELETON = 12
 
 // --- Helpers ----------------------------------------------------------------
@@ -121,7 +121,7 @@ export default function TeamsPage() {
     const count = teams.length
     const avgPts = teams.reduce((s, t) => s + (t.points || 0), 0) / count
     const totalCap = teams.reduce((s, t) => s + (t.total_salary || 0), 0)
-    const capUsedPct = teams.map((t) => safePct((t.total_salary || 0), ((t.salary_cap || t.cap_limit || 100_000_000))))
+    const capUsedPct = teams.map((t) => safePct((t.total_salary || 0), ((t.salary_cap || t.cap_limit || 38_000_000))))
     const avgCapUsed = capUsedPct.reduce((s, x) => s + x, 0) / capUsedPct.length
     return { count, avgPts: Math.round(avgPts), totalCap, avgCapUsed: Math.round(avgCapUsed) }
   }, [teams])
@@ -252,7 +252,7 @@ function EmptyState() {
   )
 }
 
-function CapBar({ used = 0, limit = 100_000_000, compact = false }) {
+function CapBar({ used = 0, limit = 38_000_000, compact = false }) {
   const pct = safePct(used, limit)
   return (
     <div>
@@ -286,7 +286,7 @@ function RosterBar({ count = 0, max = MAX_ROSTER_SIZE, compact = false }) {
 
 function TeamCard({ team }) {
   const { cups, other } = cupAndTrophyCounts(team.awards)
-  const limit = team.salary_cap || team.cap_limit || 100_000_000
+  const limit = team.salary_cap || team.cap_limit || 38_000_000
   const capUsed = team.total_salary || 0
 
   const form = team.form_last5 || [] // e.g., ["W","W","L","OTL","W"]
@@ -427,7 +427,7 @@ function TeamTable({ rows }) {
         <div className="divide-y">
           {rows.map((t) => {
             const { cups } = cupAndTrophyCounts(t.awards)
-            const limit = t.salary_cap || t.cap_limit || 100_000_000
+            const limit = t.salary_cap || t.cap_limit || 38_000_000
             return (
               <Link key={t.id} href={`/teams/${t.id}`} className="block hover:bg-muted/30">
                 <div className="grid grid-cols-12 items-center px-4 py-3 gap-2">
@@ -466,7 +466,7 @@ function TeamTable({ rows }) {
       {/* Mobile (<md) — compact list */}
       <div className="md:hidden divide-y">
         {rows.map((t) => {
-          const limit = t.salary_cap || t.cap_limit || 100_000_000
+          const limit = t.salary_cap || t.cap_limit || 38_000_000
           const { cups } = cupAndTrophyCounts(t.awards)
           return (
             <Link key={t.id} href={`/teams/${t.id}`} className="block">
