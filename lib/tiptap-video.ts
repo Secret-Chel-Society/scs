@@ -1,3 +1,4 @@
+// lib/tiptap-video.ts (TipTap v2)
 import { Node, mergeAttributes } from "@tiptap/core"
 
 export interface VideoAttrs {
