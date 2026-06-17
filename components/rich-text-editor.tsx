@@ -1,6 +1,6 @@
 "use client"
 
-import { useEditor, EditorContent } from "@tiptap/react"
+import { useEditor, EditorContent, Node, mergeAttributes } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 
 import Link from "@tiptap/extension-link"
@@ -43,8 +43,8 @@ import {
   Minus,
   Palette,
   Shield,
-  Video as VideoIcon,
-  Table as TableIcon,
+  VideoIcon,
+  TableIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
@@ -71,6 +71,54 @@ interface TeamLogo {
   url: string
   path: string
 }
+
+const Video = Node.create({
+  name: "video",
+  group: "block",
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      controls: {
+        default: true,
+      },
+      autoplay: {
+        default: false,
+      },
+      loop: {
+        default: false,
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "video",
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ["video", mergeAttributes(HTMLAttributes, { class: "rounded-md w-full my-4" })]
+  },
+
+  addCommands() {
+    return {
+      setVideo:
+        (options: { src: string }) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: options,
+          })
+        },
+    }
+  },
+})
 
 export default function RichTextEditor({
   content,
@@ -99,18 +147,37 @@ export default function RichTextEditor({
 
   // color palette
   const colors = [
-    "#000000","#374151","#6B7280","#9CA3AF","#D1D5DB","#F3F4F6",
-    "#EF4444","#F97316","#F59E0B","#EAB308","#84CC16","#22C55E",
-    "#10B981","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1",
-    "#8B5CF6","#A855F7","#D946EF","#EC4899","#F43F5E",
+    "#000000",
+    "#374151",
+    "#6B7280",
+    "#9CA3AF",
+    "#D1D5DB",
+    "#F3F4F6",
+    "#EF4444",
+    "#F97316",
+    "#F59E0B",
+    "#EAB308",
+    "#84CC16",
+    "#22C55E",
+    "#10B981",
+    "#14B8A6",
+    "#06B6D4",
+    "#0EA5E9",
+    "#3B82F6",
+    "#6366F1",
+    "#8B5CF6",
+    "#A855F7",
+    "#D946EF",
+    "#EC4899",
+    "#F43F5E",
   ]
 
   const editor = useEditor({
     extensions: [
-      StarterKit,                    // headings, lists, quote, code, hr, etc.
+      StarterKit, // headings, lists, quote, code, hr, etc.
 
       // inline styles
-      TextStyle,                     // required for Color + font-size
+      TextStyle, // required for Color + font-size
       Color,
 
       // typography & layout
@@ -166,7 +233,7 @@ export default function RichTextEditor({
   function parseCsvToArray(text: string): string[][] {
     const res = Papa.parse<string[]>(text.trim(), {
       delimiter: "", // auto
-      newline: "",   // auto
+      newline: "", // auto
       quoteChar: '"',
       escapeChar: '"',
       skipEmptyLines: "greedy",
@@ -185,16 +252,14 @@ export default function RichTextEditor({
 
     const MAX_ROWS = 100
     const MAX_COLS = 30
-    const rows = (header ? [header, ...body] : body)
-      .slice(0, MAX_ROWS)
-      .map((r) => r.slice(0, MAX_COLS))
+    const rows = (header ? [header, ...body] : body).slice(0, MAX_ROWS).map((r) => r.slice(0, MAX_COLS))
 
     const rowNodes = rows.map((row, rIdx) => {
       const cells = row.map((cellText) => {
         const cellType = withHeaderRow && rIdx === 0 ? schema.nodes.tableHeader : schema.nodes.tableCell
         return cellType.createAndFill(
           {},
-          schema.nodes.paragraph.createAndFill({}, schema.text(String(cellText ?? "")))
+          schema.nodes.paragraph.createAndFill({}, schema.text(String(cellText ?? ""))),
         )!
       })
       return schema.nodes.tableRow.createChecked(null, cells)
@@ -373,13 +438,7 @@ export default function RichTextEditor({
             {/* Color */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  type="button"
-                  onMouseDown={keepSelection}
-                >
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" type="button" onMouseDown={keepSelection}>
                   <Palette className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
@@ -399,7 +458,14 @@ export default function RichTextEditor({
                       />
                     ))}
                   </div>
-                  <Button variant="outline" size="sm" type="button" onMouseDown={keepSelection} onClick={removeTextColor} className="w-full">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onMouseDown={keepSelection}
+                    onClick={removeTextColor}
+                    className="w-full bg-transparent"
+                  >
                     Remove Color
                   </Button>
                 </div>
@@ -469,16 +535,44 @@ export default function RichTextEditor({
 
           {/* Align */}
           <div className="flex items-center border-r pr-1 mr-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" type="button" onMouseDown={keepSelection} onClick={() => editor.chain().focus().setTextAlign("left").run()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              type="button"
+              onMouseDown={keepSelection}
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            >
               <AlignLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" type="button" onMouseDown={keepSelection} onClick={() => editor.chain().focus().setTextAlign("center").run()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              type="button"
+              onMouseDown={keepSelection}
+              onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            >
               <AlignCenter className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" type="button" onMouseDown={keepSelection} onClick={() => editor.chain().focus().setTextAlign("right").run()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              type="button"
+              onMouseDown={keepSelection}
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            >
               <AlignRight className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" type="button" onMouseDown={keepSelection} onClick={() => editor.chain().focus().setTextAlign("justify").run()}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              type="button"
+              onMouseDown={keepSelection}
+              onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+            >
               <StretchHorizontal className="h-4 w-4" />
             </Button>
           </div>
@@ -487,7 +581,13 @@ export default function RichTextEditor({
           <div className="flex items-center border-r pr-1 mr-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" pressed={editor.isActive("bulletList")} onMouseDown={keepSelection} onPressedChange={() => editor.chain().focus().toggleBulletList().run()} aria-label="Bullet List">
+                <Toggle
+                  size="sm"
+                  pressed={editor.isActive("bulletList")}
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
+                  aria-label="Bullet List"
+                >
                   <List className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -495,7 +595,13 @@ export default function RichTextEditor({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" pressed={editor.isActive("orderedList")} onMouseDown={keepSelection} onPressedChange={() => editor.chain().focus().toggleOrderedList().run()} aria-label="Ordered List">
+                <Toggle
+                  size="sm"
+                  pressed={editor.isActive("orderedList")}
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
+                  aria-label="Ordered List"
+                >
                   <ListOrdered className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -503,7 +609,13 @@ export default function RichTextEditor({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" pressed={editor.isActive("blockquote")} onMouseDown={keepSelection} onPressedChange={() => editor.chain().focus().toggleBlockquote().run()} aria-label="Quote">
+                <Toggle
+                  size="sm"
+                  pressed={editor.isActive("blockquote")}
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
+                  aria-label="Quote"
+                >
                   <Quote className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -511,7 +623,12 @@ export default function RichTextEditor({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" onMouseDown={keepSelection} onPressedChange={() => editor.chain().focus().setHorizontalRule().run()} aria-label="Horizontal Rule">
+                <Toggle
+                  size="sm"
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => editor.chain().focus().setHorizontalRule().run()}
+                  aria-label="Horizontal Rule"
+                >
                   <Minus className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -523,7 +640,14 @@ export default function RichTextEditor({
           <div className="flex items-center border-r pr-1 mr-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFont('"Oswald", Arial, Helvetica, sans-serif')}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFont('"Oswald", Arial, Helvetica, sans-serif')}
+                >
                   <Type className="h-4 w-4 mr-1" /> Oswald
                 </Button>
               </TooltipTrigger>
@@ -531,7 +655,14 @@ export default function RichTextEditor({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFont(null)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFont(null)}
+                >
                   <Type className="h-4 w-4 mr-1" /> Default
                 </Button>
               </TooltipTrigger>
@@ -541,31 +672,76 @@ export default function RichTextEditor({
             {/* Simple font size presets */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFontSize("14px")}>14</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFontSize("14px")}
+                >
+                  14
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Font size 14px</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFontSize("16px")}>16</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFontSize("16px")}
+                >
+                  16
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Font size 16px</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFontSize("20px")}>20</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFontSize("20px")}
+                >
+                  20
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Font size 20px</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFontSize("24px")}>24</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFontSize("24px")}
+                >
+                  24
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Font size 24px</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 px-2" type="button" onMouseDown={keepSelection} onClick={() => setFontSize(null)}>Reset</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  type="button"
+                  onMouseDown={keepSelection}
+                  onClick={() => setFontSize(null)}
+                >
+                  Reset
+                </Button>
               </TooltipTrigger>
               <TooltipContent>Reset font size</TooltipContent>
             </Tooltip>
@@ -593,7 +769,12 @@ export default function RichTextEditor({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" onMouseDown={keepSelection} onPressedChange={() => setImageDialogOpen(true)} aria-label="Image">
+                <Toggle
+                  size="sm"
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => setImageDialogOpen(true)}
+                  aria-label="Image"
+                >
                   <ImageIcon className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -602,7 +783,12 @@ export default function RichTextEditor({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" onMouseDown={keepSelection} onPressedChange={() => setVideoDialogOpen(true)} aria-label="Video">
+                <Toggle
+                  size="sm"
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => setVideoDialogOpen(true)}
+                  aria-label="Video"
+                >
                   <VideoIcon className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -611,7 +797,12 @@ export default function RichTextEditor({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" onMouseDown={keepSelection} onPressedChange={() => setTeamLogosDialogOpen(true)} aria-label="Team Logos">
+                <Toggle
+                  size="sm"
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => setTeamLogosDialogOpen(true)}
+                  aria-label="Team Logos"
+                >
                   <Shield className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -620,7 +811,12 @@ export default function RichTextEditor({
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle size="sm" onMouseDown={keepSelection} onPressedChange={() => setCsvDialogOpen(true)} aria-label="CSV to Table">
+                <Toggle
+                  size="sm"
+                  onMouseDown={keepSelection}
+                  onPressedChange={() => setCsvDialogOpen(true)}
+                  aria-label="CSV to Table"
+                >
                   <TableIcon className="h-4 w-4" />
                 </Toggle>
               </TooltipTrigger>
@@ -668,18 +864,29 @@ export default function RichTextEditor({
       {/* Link Dialog */}
       <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader><DialogTitle>Add Link</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Add Link</DialogTitle>
+          </DialogHeader>
           <div className="py-4">
             <Input
               placeholder="https://example.com"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addLink() } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  addLink()
+                }
+              }}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setLinkDialogOpen(false)} type="button">Cancel</Button>
-            <Button onClick={addLink} type="button">Add Link</Button>
+            <Button variant="outline" onClick={() => setLinkDialogOpen(false)} type="button">
+              Cancel
+            </Button>
+            <Button onClick={addLink} type="button">
+              Add Link
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -687,18 +894,29 @@ export default function RichTextEditor({
       {/* Image Dialog */}
       <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader><DialogTitle>Add Image</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Add Image</DialogTitle>
+          </DialogHeader>
           <div className="py-4">
             <Input
               placeholder="https://example.com/image.jpg"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addImage() } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  addImage()
+                }
+              }}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setImageDialogOpen(false)} type="button">Cancel</Button>
-            <Button onClick={addImage} type="button">Add Image</Button>
+            <Button variant="outline" onClick={() => setImageDialogOpen(false)} type="button">
+              Cancel
+            </Button>
+            <Button onClick={addImage} type="button">
+              Add Image
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -706,7 +924,9 @@ export default function RichTextEditor({
       {/* Video Dialog */}
       <Dialog open={videoDialogOpen} onOpenChange={setVideoDialogOpen}>
         <DialogContent className="sm:max-w-[525px]">
-          <DialogHeader><DialogTitle>Add Video (YouTube or MP4/WebM)</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Add Video (YouTube or MP4/WebM)</DialogTitle>
+          </DialogHeader>
           <div className="py-4 space-y-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Upload className="h-4 w-4" />
@@ -716,12 +936,21 @@ export default function RichTextEditor({
               placeholder="https://youtu.be/VIDEO  or  https://cdn.example.com/video.mp4"
               value={videoUrl}
               onChange={(e) => setVideoUrl(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addVideo() } }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  addVideo()
+                }
+              }}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setVideoDialogOpen(false)} type="button">Cancel</Button>
-            <Button onClick={addVideo} type="button">Add Video</Button>
+            <Button variant="outline" onClick={() => setVideoDialogOpen(false)} type="button">
+              Cancel
+            </Button>
+            <Button onClick={addVideo} type="button">
+              Add Video
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -729,7 +958,9 @@ export default function RichTextEditor({
       {/* Team Logos Dialog */}
       <Dialog open={teamLogosDialogOpen} onOpenChange={setTeamLogosDialogOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Insert Team Logo</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Insert Team Logo</DialogTitle>
+          </DialogHeader>
           <div className="py-4">
             {loadingLogos ? (
               <div className="flex items-center justify-center py-8">
@@ -737,7 +968,9 @@ export default function RichTextEditor({
                 <span className="ml-2">Loading team logos...</span>
               </div>
             ) : teamLogos.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No team logos found in the media/team-logos folder.</div>
+              <div className="text-center py-8 text-muted-foreground">
+                No team logos found in the media/team-logos folder.
+              </div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                 {teamLogos.map((logo) => (
@@ -750,7 +983,12 @@ export default function RichTextEditor({
                     title={logo.name}
                   >
                     <div className="relative w-12 h-12 mb-2">
-                      <NextImage src={logo.url || "/placeholder.svg"} alt={logo.name} fill className="object-contain rounded" />
+                      <NextImage
+                        src={logo.url || "/placeholder.svg"}
+                        alt={logo.name}
+                        fill
+                        className="object-contain rounded"
+                      />
                     </div>
                     <span className="text-xs text-center truncate w-full">{logo.name}</span>
                   </button>
@@ -759,7 +997,9 @@ export default function RichTextEditor({
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setTeamLogosDialogOpen(false)} type="button">Cancel</Button>
+            <Button variant="outline" onClick={() => setTeamLogosDialogOpen(false)} type="button">
+              Cancel
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -767,7 +1007,9 @@ export default function RichTextEditor({
       {/* CSV → Table Dialog */}
       <Dialog open={csvDialogOpen} onOpenChange={setCsvDialogOpen}>
         <DialogContent className="sm:max-w-[720px]">
-          <DialogHeader><DialogTitle>Insert Table from CSV</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Insert Table from CSV</DialogTitle>
+          </DialogHeader>
           <div className="py-4 space-y-3">
             <div className="flex items-center gap-2">
               <Input type="file" accept=".csv,text/csv" onChange={(e) => onCsvFile(e.target.files?.[0] ?? undefined)} />
@@ -784,8 +1026,12 @@ export default function RichTextEditor({
             </label>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCsvDialogOpen(false)} type="button">Cancel</Button>
-            <Button onClick={insertCsv} type="button">Insert Table</Button>
+            <Button variant="outline" onClick={() => setCsvDialogOpen(false)} type="button">
+              Cancel
+            </Button>
+            <Button onClick={insertCsv} type="button">
+              Insert Table
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
