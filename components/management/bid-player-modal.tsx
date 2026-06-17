@@ -39,12 +39,12 @@ export function BidPlayerModal({
   fetchPlayerBids,
   currentTeamSalary = 0,
   projectedSalary = 0,
-  currentSalaryCap = 65000000,
+  currentSalaryCap = 38000000,
   teamPlayers = [],
   projectedRosterSize = 0,
   onBidPlaced,
   currentBid,
-  salaryCap = 65000000,
+  salaryCap = 38000000,
   league = "nhl",
 }: BidPlayerModalProps) {
   const [bidAmount, setBidAmount] = useState("")
