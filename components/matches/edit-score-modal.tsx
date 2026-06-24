@@ -276,7 +276,6 @@ export function EditScoreModal({
         overtime: isForfeit ? false : hasOvertime,
         period_scores: periodScores,
         status: COMPLETED_STATUS,
-        is_forfeit: isForfeit,
         updated_at: new Date().toISOString(),
       }
 
@@ -307,7 +306,6 @@ export function EditScoreModal({
       setHomeScore(match?.home_score ?? 0)
       setAwayScore(match?.away_score ?? 0)
       setHasOvertime(match?.has_overtime || match?.overtime || false)
-      setIsForfeit(match?.is_forfeit || false)
       setPermissionChecked(false)
       setPermissionError(null)
       setError(null)
