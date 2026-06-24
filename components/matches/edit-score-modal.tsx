@@ -93,6 +93,8 @@ export function EditScoreModal({
   const [homeScore, setHomeScore] = useState<number>(match?.home_score ?? 0)
   const [awayScore, setAwayScore] = useState<number>(match?.away_score ?? 0)
   const [hasOvertime, setHasOvertime] = useState<boolean>(match?.has_overtime || match?.overtime || false)
+  const [isForfeit, setIsForfeit] = useState<boolean>(match?.is_forfeit || false)
+  const [forfeitTeamId, setForfeitTeamId] = useState<string | null>(match?.forfeit_team_id || null)
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
