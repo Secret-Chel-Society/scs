@@ -1,8 +1,7 @@
 // /api/matches/update-from-ea/route.ts
 import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createServerClient } from "@supabase/ssr"
 import { mapEaPositionToStandard } from "@/lib/ea-position-mapper"
-import { cookies } from "next/headers"
 
 // Helper function to format time on ice
 function formatTimeOnIce(seconds: number): string {
@@ -86,26 +85,56 @@ function preparePlayerStatsForDB(stat: any, matchId: string, eaMatchId: string |
   return safeData
 }
 
-// ------ NEW: league-aware table picker ------
-function pickTables(league: "NHL" | "AHL") {
-  const isAHL = league === "AHL"
+// ------ NEW/UPDATED: league-aware table picker (adds ALLSTAR + AWHL) ------
+function pickTables(league: "NHL" | "AHL" | "ALLSTAR" | "AWHL") {
+  const lg = (league || "NHL").toUpperCase()
+  if (lg === "AHL") {
+    return {
+      seasons: "seasons_ahl",
+      matches: "matches_ahl",
+      teams: "teams_ahl",
+      eaMatchData: "ea_match_data_ahl",
+      eaPlayerStats: "ea_player_stats_ahl",
+      eaTeamStats: "ea_team_stats_ahl", // optional
+    }
+  }
+  if (lg === "ALLSTAR") {
+    return {
+      seasons: "allstar_seasons",
+      matches: "allstar_matches",
+      teams: "allstar_teams",
+      eaMatchData: "allstar_ea_match_data",
+      eaPlayerStats: "allstar_ea_player_stats",
+      eaTeamStats: "allstar_ea_team_stats",
+    }
+  }
+  if (lg === "AWHL") {
+    return {
+      seasons: "whl_seasons",
+      matches: "whl_matches",
+      teams: "whl_teams",
+      eaMatchData: "whl_ea_match_data",
+      eaPlayerStats: "whl_ea_player_stats",
+      eaTeamStats: "whl_ea_team_stats",
+    }
+  }
+  // NHL default
   return {
-    seasons: isAHL ? "seasons_ahl" : "seasons",
-    matches: isAHL ? "matches_ahl" : "matches",
-    teams: isAHL ? "teams_ahl" : "teams",
-    eaMatchData: isAHL ? "ea_match_data_ahl" : "ea_match_data",
-    eaPlayerStats: isAHL ? "ea_player_stats_ahl" : "ea_player_stats",
-    eaTeamStats: isAHL ? "ea_team_stats_ahl" : "ea_team_stats", // if you don't have this, the code checks existence
+    seasons: "seasons",
+    matches: "matches",
+    teams: "teams",
+    eaMatchData: "ea_match_data",
+    eaPlayerStats: "ea_player_stats",
+    eaTeamStats: "ea_team_stats",
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = cookies()
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
+    const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+      cookies: {
+        getAll() { return [] },
+        setAll() { /* no-op for service role */ },
       },
     })
 
@@ -119,8 +148,8 @@ export async function POST(request: Request) {
     // Get the request body
     const body = await request.json()
 
-    console.log("[v0] ===== REQUEST BODY =====")
-    console.log("[v0] Full body:", JSON.stringify(body, null, 2))
+    console.log("===== REQUEST BODY =====")
+    console.log("Full body:", JSON.stringify(body, null, 2))
 
     const {
       matchId,
@@ -128,33 +157,45 @@ export async function POST(request: Request) {
       eaMatchData,
       isManualImport = false,
       adminOverride = false,
-      league = "NHL", // <-- NEW: pass "AHL" to target *_ahl tables
+      league = "NHL", // <-- incoming hint; may be overridden by inference/query
     } = body as {
       matchId: string
       eaMatchId?: string
       eaMatchData: any
       isManualImport?: boolean
       adminOverride?: boolean
-      league?: "NHL" | "AHL"
+      league?: "NHL" | "AHL" | "ALLSTAR" | "AWHL"
     }
 
-    console.log("[v0] ===== EXTRACTED PARAMETERS =====")
-    console.log("[v0] matchId:", matchId)
-    console.log("[v0] matchId type:", typeof matchId)
-    console.log("[v0] eaMatchId:", eaMatchId)
-    console.log("[v0] league:", league)
-    console.log("[v0] league type:", typeof league)
+    // ===== NEW: Resolve final league (query param > body > referer inference) =====
+    const url = new URL(request.url)
+    const leagueQuery = (url.searchParams.get("league") || "").toUpperCase() as "NHL" | "AHL" | "ALLSTAR" | "AWHL" | ""
+    const referer = (request.headers.get("referer") || "").toLowerCase()
+
+    let leagueFromBody = (league || "NHL").toUpperCase() as "NHL" | "AHL" | "ALLSTAR" | "AWHL"
+    // AWHL must be checked before AHL since "/awhl/" also contains "ahl"
+    if (!leagueQuery && /\/awhl\//.test(referer)) leagueFromBody = "AWHL"
+    else if (!leagueQuery && /\/allstar\//.test(referer)) leagueFromBody = "ALLSTAR"
+    else if (!leagueQuery && /\/ahl\//.test(referer)) leagueFromBody = "AHL"
+
+    let leagueFinal = (leagueQuery || leagueFromBody || "NHL") as "NHL" | "AHL" | "ALLSTAR" | "AWHL"
+    let T = pickTables(leagueFinal)
+
+    console.log("===== EXTRACTED PARAMETERS =====")
+    console.log("matchId:", matchId)
+    console.log("matchId type:", typeof matchId)
+    console.log("eaMatchId:", eaMatchId)
+    console.log("league param:", league)
+    console.log("leagueFinal:", leagueFinal, "via", { leagueQuery, leagueFromBody, referer })
 
     if (!matchId || !eaMatchData) {
       return NextResponse.json({ error: "Match ID and EA Match Data are required" }, { status: 400 })
     }
 
-    const T = pickTables(league)
-
-    console.log(`[v0] ===== TABLE SELECTION =====`)
-    console.log(`[v0] League: ${league}`)
-    console.log(`[v0] Using tables:`, JSON.stringify(T, null, 2))
-    console.log(`[v0] Looking for match ID: ${matchId}`)
+    console.log(`===== TABLE SELECTION =====`)
+    console.log(`LeagueFinal: ${leagueFinal}`)
+    console.log(`Using tables:`, JSON.stringify(T, null, 2))
+    console.log(`Looking for match ID: ${matchId}`)
 
     const { data: activeSeason, error: seasonError } = await supabase
       .from(T.seasons)
@@ -165,13 +206,13 @@ export async function POST(request: Request) {
     if (seasonError || !activeSeason) {
       console.error("Error fetching active season:", seasonError)
       return NextResponse.json(
-        { error: `Could not determine current active ${league} season. Please ensure a season is marked as active.` },
+        { error: `Could not determine current active ${leagueFinal} season. Please ensure a season is marked as active.` },
         { status: 500 },
       )
     }
 
     const currentSeasonId = activeSeason.season_number
-    console.log(`Using current active season number: ${currentSeasonId} [${league}]`)
+    console.log(`Using current active season number: ${currentSeasonId} [${leagueFinal}]`)
 
     // Check if this is a combined match
     const isCombinedMatch = eaMatchId?.startsWith("combined-") || eaMatchData.isCombined
@@ -187,74 +228,85 @@ export async function POST(request: Request) {
     }
 
     // Get the match details to check team IDs
-    console.log(`[v0] ===== QUERYING DATABASE =====`)
-    console.log(`[v0] Querying ${T.matches} table for match ID: ${matchId}`)
+    console.log(`===== QUERYING DATABASE =====`)
+    console.log(`Querying ${T.matches} table for match ID: ${matchId}`)
     console.log(
-      `[v0] Query: supabase.from("${T.matches}").select("home_team_id, away_team_id, status").eq("id", "${matchId}").maybeSingle()`,
+      `Query: supabase.from("${T.matches}").select("home_team_id, away_team_id, status").eq("id", "${matchId}").maybeSingle()`,
     )
 
-    const { data: match, error: matchError } = await supabase
+    let { data: match, error: matchError } = await supabase
       .from(T.matches)
       .select("home_team_id, away_team_id, status")
       .eq("id", matchId)
       .maybeSingle()
 
-    console.log(`[v0] ===== QUERY RESULT =====`)
-    console.log(`[v0] Match data:`, match ? JSON.stringify(match, null, 2) : "null")
-    console.log(`[v0] Match error:`, matchError ? JSON.stringify(matchError, null, 2) : "null")
+    console.log(`===== QUERY RESULT =====`)
+    console.log(`Match data:`, match ? JSON.stringify(match, null, 2) : "null")
+    console.log(`Match error:`, matchError ? JSON.stringify(matchError, null, 2) : "null")
 
-    if (matchError) {
-      console.error("[v0] Match query error:", matchError)
+    // ===== Fallback: try other league tables if primary miss =====
+    if (!match) {
+      const fallbackLeagues = (["AWHL", "ALLSTAR", "AHL", "NHL"] as const).filter(l => l !== leagueFinal)
+      for (const fbLeague of fallbackLeagues) {
+        console.log(`Primary table miss. Retrying against ${fbLeague} auto-fallback.`)
+        const Tfb = pickTables(fbLeague)
+        const { data: fbMatch, error: fbError } = await supabase
+          .from(Tfb.matches)
+          .select("home_team_id, away_team_id, status")
+          .eq("id", matchId)
+          .maybeSingle()
+        if (fbMatch) {
+          match = fbMatch
+          leagueFinal = fbLeague
+          T = pickTables(leagueFinal)
+          console.log(`Auto-switched league to ${fbLeague} based on fallback hit.`)
+          break
+        } else {
+          console.log(`${fbLeague} fallback miss:`, fbError)
+        }
+      }
+    }
+
+    if (matchError && !match) {
+      console.error("Match query error:", matchError)
       return NextResponse.json({ error: `Match not found: ${matchError.message}` }, { status: 404 })
     }
 
     if (!match) {
-      console.error("[v0] ===== MATCH NOT FOUND =====")
-      console.error("[v0] Match ID:", matchId)
-      console.error("[v0] Table queried:", T.matches)
-      console.error("[v0] League:", league)
+      console.error("===== MATCH NOT FOUND AFTER FALLBACKS =====")
+      console.error("Match ID:", matchId)
+      console.error("Table queried:", T.matches)
+      console.error("LeagueFinal:", leagueFinal)
 
-      console.log("[v0] ===== DEBUGGING: Checking both tables =====")
+      console.log("===== DEBUGGING: Checking NHL/AHL/ALLSTAR/AWHL tables =====")
 
-      const { data: nhlMatch, error: nhlError } = await supabase
-        .from("matches")
-        .select("id, home_team_id, away_team_id")
-        .eq("id", matchId)
-        .maybeSingle()
-
-      const { data: ahlMatch, error: ahlError } = await supabase
-        .from("matches_ahl")
-        .select("id, home_team_id, away_team_id")
-        .eq("id", matchId)
-        .maybeSingle()
-
-      console.log(
-        "[v0] NHL matches table result:",
-        nhlMatch ? "FOUND" : "NOT FOUND",
-        nhlError ? `Error: ${nhlError.message}` : "",
-      )
-      console.log(
-        "[v0] AHL matches_ahl table result:",
-        ahlMatch ? "FOUND" : "NOT FOUND",
-        ahlError ? `Error: ${ahlError.message}` : "",
-      )
-
-      if (nhlMatch) {
-        console.log("[v0] ⚠️ Match found in NHL table but league parameter is:", league)
-      }
-      if (ahlMatch) {
-        console.log("[v0] ⚠️ Match found in AHL table but league parameter is:", league)
+      const debugTables = [
+        { label: "NHL", table: "matches" },
+        { label: "AHL", table: "matches_ahl" },
+        { label: "ALLSTAR", table: "allstar_matches" },
+        { label: "AWHL", table: "whl_matches" },
+      ]
+      const debugResults: Record<string, boolean> = {}
+      for (const dt of debugTables) {
+        const { data: dtMatch } = await supabase
+          .from(dt.table)
+          .select("id")
+          .eq("id", matchId)
+          .maybeSingle()
+        debugResults[dt.label] = !!dtMatch
+        console.log(`${dt.label} (${dt.table}): ${dtMatch ? "FOUND" : "NOT FOUND"}`)
+        if (dtMatch) console.log(`Match found in ${dt.label} table but league parameter was:`, league)
       }
 
       return NextResponse.json(
         {
           error: `Match not found with ID: ${matchId} in table: ${T.matches}`,
-          league,
+          league: leagueFinal,
           table: T.matches,
           debug: {
-            foundInNHL: !!nhlMatch,
-            foundInAHL: !!ahlMatch,
+            ...Object.fromEntries(Object.entries(debugResults).map(([k, v]) => [`foundIn${k}`, v])),
             requestedLeague: league,
+            resolvedLeague: leagueFinal,
           },
         },
         { status: 404 },
@@ -271,7 +323,7 @@ export async function POST(request: Request) {
       .in("id", [match.home_team_id, match.away_team_id])
 
     if (teamsError) {
-      return NextResponse.json({ error: `Failed to get team EA club IDs (${league})` }, { status: 500 })
+      return NextResponse.json({ error: `Failed to get team EA club IDs (${leagueFinal})` }, { status: 500 })
     }
 
     // Map team IDs to EA club IDs
@@ -346,12 +398,12 @@ export async function POST(request: Request) {
         updated_at: new Date().toISOString(),
       }
 
-      // NHL matches table stores raw JSON; for AHL you likely store raw JSON in ea_match_data_ahl instead.
-      if (league === "NHL") {
+      // NHL matches table stores raw JSON; for AHL/ALLSTAR you might keep it separate
+      if (leagueFinal === "NHL") {
         updatePayload.ea_match_id = eaMatchId
         updatePayload.ea_match_data = eaMatchData
       } else {
-        // If your matches_ahl has ea_match_id, keep this; remove if not in schema.
+        // If your *_ahl or allstar_matches has ea_match_id, keep this; remove if not in schema.
         updatePayload.ea_match_id = eaMatchId
       }
 
@@ -848,8 +900,8 @@ export async function POST(request: Request) {
             homePpGoals = 0
 
           // Sum from home team players
-          if (homePlayerStats && homePlayerStats.length > 0) {
-            homePlayerStats.forEach((player) => {
+          if ((homePlayerStats as any[]) && (homePlayerStats as any[]).length > 0) {
+            ;(homePlayerStats as any[]).forEach((player: any) => {
               homeHits += player.hits || 0
               homePim += player.pim || 0
               homeBlocks += player.blocks || 0
@@ -922,8 +974,8 @@ export async function POST(request: Request) {
             awayPpGoals = 0
 
           // Sum from away team players
-          if (awayPlayerStats && awayPlayerStats.length > 0) {
-            awayPlayerStats.forEach((player) => {
+          if ((awayPlayerStats as any[]) && (awayPlayerStats as any[]).length > 0) {
+            ;(awayPlayerStats as any[]).forEach((player: any) => {
               awayHits += player.hits || 0
               awayPim += player.pim || 0
               awayBlocks += player.blocks || 0
@@ -996,7 +1048,7 @@ export async function POST(request: Request) {
       // Don't fail the entire operation if team stats fail
     }
 
-    console.log(`=== MATCH UPDATE SUCCESSFUL (AUTHORIZATION BYPASSED) [${league}] ===`)
+    console.log(`=== MATCH UPDATE SUCCESSFUL (AUTHORIZATION BYPASSED) [${leagueFinal}] ===`)
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error("Error updating match from EA data:", error)
