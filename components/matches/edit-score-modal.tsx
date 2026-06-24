@@ -277,7 +277,6 @@ export function EditScoreModal({
         period_scores: periodScores,
         status: COMPLETED_STATUS,
         is_forfeit: isForfeit,
-        forfeit_team_id: isForfeit ? forfeitTeamId : null,
         updated_at: new Date().toISOString(),
       }
 
