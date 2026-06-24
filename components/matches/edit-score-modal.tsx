@@ -308,7 +308,6 @@ export function EditScoreModal({
       setAwayScore(match?.away_score ?? 0)
       setHasOvertime(match?.has_overtime || match?.overtime || false)
       setIsForfeit(match?.is_forfeit || false)
-      setForfeitTeamId(match?.forfeit_team_id || null)
       setPermissionChecked(false)
       setPermissionError(null)
       setError(null)
