@@ -189,14 +189,14 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4 bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950 min-h-screen p-6">
-        <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
-          <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
-            <Skeleton className="h-8 w-64 bg-ice-blue-200/50 dark:bg-ice-blue-800/50" />
-            <Skeleton className="h-6 w-48 bg-hockey-silver-200/50 dark:bg-hockey-silver-800/50" />
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-6 w-48" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-48 w-full bg-rink-blue-200/50 dark:bg-rink-blue-800/50" />
+            <Skeleton className="h-48 w-full" />
           </CardContent>
         </Card>
       </div>
@@ -205,19 +205,17 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
   if (error || !match) {
     return (
-      <div className="bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950 min-h-screen p-6">
-        <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
-          <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
-            <CardTitle className="text-ice-blue-700 dark:text-ice-blue-300">Match Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive" className="border-goal-red-300/50 dark:border-goal-red-600/50 bg-goal-red-50/30 dark:bg-goal-red-900/20">
-              <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-              <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">{error || "Match not found"}</AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Match Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error || "Match not found"}</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -250,16 +248,16 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
     : null
 
   return (
-    <div className="space-y-6 bg-gradient-to-br from-ice-blue-25 via-hockey-silver-50 to-rink-blue-50 dark:from-hockey-silver-950 dark:via-rink-blue-950 dark:to-ice-blue-950 min-h-screen p-6">
-      <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
-        <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-ice-blue-700 dark:text-ice-blue-300">Match Details</CardTitle>
-              <CardDescription className="text-hockey-silver-600 dark:text-hockey-silver-400">
+              <CardTitle>Match Details</CardTitle>
+              <CardDescription>
                 {formattedDate} at {formattedTime}
                 {seasonName && (
-                  <Badge variant="outline" className="ml-2 border-ice-blue-300/50 dark:border-ice-blue-600/50 bg-ice-blue-50/80 dark:bg-ice-blue-900/30 text-ice-blue-700 dark:text-ice-blue-300">
+                  <Badge variant="outline" className="ml-2">
                     {seasonName}
                   </Badge>
                 )}
@@ -274,7 +272,6 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
                     variant="outline"
                     onClick={() => setIsImportModalOpen(true)}
                     title={eaClubIdMissingMessage || "Import EA Match"}
-                    className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white"
                   >
                     {hasEaClubIds ? "Import EA Match" : eaClubIdMissingMessage}
                   </Button>
@@ -322,9 +319,9 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
             </div>
 
             <div className="flex items-center">
-              <div className="text-4xl font-bold text-ice-blue-600 dark:text-ice-blue-400">{match.home_score !== null ? match.home_score : "-"}</div>
-              <div className="mx-4 text-2xl text-hockey-silver-500 dark:text-hockey-silver-400">-</div>
-              <div className="text-4xl font-bold text-ice-blue-600 dark:text-ice-blue-400">{match.away_score !== null ? match.away_score : "-"}</div>
+              <div className="text-4xl font-bold">{match.home_score !== null ? match.home_score : "-"}</div>
+              <div className="mx-4 text-2xl">-</div>
+              <div className="text-4xl font-bold">{match.away_score !== null ? match.away_score : "-"}</div>
             </div>
 
             <div className="flex flex-col items-center">
@@ -347,10 +344,7 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
           {match.status && (
             <div className="flex justify-center mt-2">
-              <Badge 
-                variant="outline" 
-                className={`${match.status === "Completed" ? "bg-assist-green-100 dark:bg-assist-green-900/30 text-assist-green-700 dark:text-assist-green-300 border-assist-green-300 dark:border-assist-green-600" : "bg-hockey-silver-100 dark:bg-hockey-silver-800 text-hockey-silver-700 dark:text-hockey-silver-300 border-hockey-silver-300 dark:border-hockey-silver-600"}`}
-              >
+              <Badge variant={match.status === "Completed" ? "success" : "secondary"}>
                 {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
               </Badge>
             </div>
@@ -360,41 +354,41 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
       {/* Debug information */}
       {debugInfo && canManageMatch && (
-        <details className="text-xs border border-ice-blue-200/50 dark:border-rink-blue-700/50 p-2 rounded bg-ice-blue-50/30 dark:bg-ice-blue-900/20">
-          <summary className="font-medium cursor-pointer text-ice-blue-700 dark:text-ice-blue-300">Debug Information</summary>
-          <div className="mt-2 overflow-auto max-h-[200px] text-hockey-silver-600 dark:text-hockey-silver-400">
+        <details className="text-xs border p-2 rounded">
+          <summary className="font-medium cursor-pointer">Debug Information</summary>
+          <div className="mt-2 overflow-auto max-h-[200px]">
             <p>
-              <strong className="text-ice-blue-600 dark:text-ice-blue-400">Home Team EA Club ID:</strong> {debugInfo.homeTeamEaClubId || "Not found"}
+              <strong>Home Team EA Club ID:</strong> {debugInfo.homeTeamEaClubId || "Not found"}
             </p>
             <p>
-              <strong className="text-ice-blue-600 dark:text-ice-blue-400">Away Team EA Club ID:</strong> {debugInfo.awayTeamEaClubId || "Not found"}
+              <strong>Away Team EA Club ID:</strong> {debugInfo.awayTeamEaClubId || "Not found"}
             </p>
-            <pre className="text-xs text-hockey-silver-600 dark:text-hockey-silver-400">{JSON.stringify(debugInfo.matchData, null, 2)}</pre>
+            <pre>{JSON.stringify(debugInfo.matchData, null, 2)}</pre>
           </div>
         </details>
       )}
 
       {canManageMatch && !hasEaClubIds && (
-        <Alert variant="warning" className="mt-4 border-goal-red-300/50 dark:border-goal-red-600/50 bg-goal-red-50/30 dark:bg-goal-red-900/20">
-          <AlertCircle className="h-4 w-4 text-goal-red-600 dark:text-goal-red-400" />
-          <AlertDescription className="text-goal-red-700 dark:text-goal-red-300">
+        <Alert variant="warning" className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
             {eaClubIdMissingMessage}. Please set it in the team settings to enable EA match imports.
           </AlertDescription>
         </Alert>
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4 bg-ice-blue-100/50 dark:bg-rink-blue-900/30 border border-ice-blue-200/50 dark:border-rink-blue-700/50">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white dark:data-[state=active]:bg-ice-blue-600">Box Score</TabsTrigger>
-          <TabsTrigger value="stars" className="data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white dark:data-[state=active]:bg-ice-blue-600">3 Stars of the Match</TabsTrigger>
-          <TabsTrigger value="highlights" className="data-[state=active]:bg-ice-blue-500 data-[state=active]:text-white dark:data-[state=active]:bg-ice-blue-600">Highlights</TabsTrigger>
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="overview">Box Score</TabsTrigger>
+          <TabsTrigger value="stars">3 Stars of the Match</TabsTrigger>
+          <TabsTrigger value="highlights">Highlights</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
           <div className="space-y-6">
             {canManageMatch && (
               <div className="flex justify-end">
-                <Button variant="outline" onClick={() => setIsEditScoreModalOpen(true)} className="mb-2 border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white">
+                <Button variant="outline" onClick={() => setIsEditScoreModalOpen(true)} className="mb-2">
                   Edit Box Score
                 </Button>
               </div>
@@ -421,47 +415,47 @@ export function MatchDetails({ matchId }: MatchDetailsProps) {
 
         <TabsContent value="stars">
           {/* 3 Stars of the Match content */}
-          <Card className="border-2 border-ice-blue-200/50 dark:border-rink-blue-700/50 shadow-hockey-glow">
-            <CardHeader className="bg-gradient-to-r from-ice-blue-50/50 via-hockey-silver-50/50 to-rink-blue-50/50 dark:from-ice-blue-900/20 dark:via-hockey-silver-900/20 dark:to-rink-blue-900/20">
-              <CardTitle className="text-ice-blue-700 dark:text-ice-blue-300">3 Stars of the Match</CardTitle>
+          <Card>
+            <CardHeader>
+              <CardTitle>3 Stars of the Match</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row items-center justify-center gap-8 py-4">
                   <div className="flex flex-col items-center">
-                    <div className="relative w-24 h-24 mb-2 rounded-full overflow-hidden border-4 border-goal-red-400 dark:border-goal-red-500 shadow-lg">
+                    <div className="relative w-24 h-24 mb-2 rounded-full overflow-hidden border-4 border-yellow-400">
                       <Image src="/hockey-player.png" alt="First Star" fill className="object-cover" />
                     </div>
                     <div className="text-center">
-                      <h3 className="text-lg font-semibold text-goal-red-600 dark:text-goal-red-400">⭐ First Star</h3>
-                      <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Player Name</p>
+                      <h3 className="text-lg font-semibold">⭐ First Star</h3>
+                      <p className="text-sm text-muted-foreground">Player Name</p>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <div className="relative w-20 h-20 mb-2 rounded-full overflow-hidden border-2 border-hockey-silver-400 dark:border-hockey-silver-500 shadow-lg">
+                    <div className="relative w-20 h-20 mb-2 rounded-full overflow-hidden border-2 border-gray-300">
                       <Image src="/hockey-player.png" alt="Second Star" fill className="object-cover" />
                     </div>
                     <div className="text-center">
-                      <h3 className="text-md font-medium text-hockey-silver-600 dark:text-hockey-silver-400">⭐ Second Star</h3>
-                      <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Player Name</p>
+                      <h3 className="text-md font-medium">⭐ Second Star</h3>
+                      <p className="text-sm text-muted-foreground">Player Name</p>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <div className="relative w-16 h-16 mb-2 rounded-full overflow-hidden border border-assist-green-500 dark:border-assist-green-400 shadow-lg">
+                    <div className="relative w-16 h-16 mb-2 rounded-full overflow-hidden border border-amber-700">
                       <Image src="/hockey-player.png" alt="Third Star" fill className="object-cover" />
                     </div>
                     <div className="text-center">
-                      <h3 className="text-sm font-medium text-assist-green-600 dark:text-assist-green-400">⭐ Third Star</h3>
-                      <p className="text-sm text-hockey-silver-600 dark:text-hockey-silver-400">Player Name</p>
+                      <h3 className="text-sm font-medium">⭐ Third Star</h3>
+                      <p className="text-sm text-muted-foreground">Player Name</p>
                     </div>
                   </div>
                 </div>
 
                 {canManageMatch && (
                   <div className="flex justify-center">
-                    <Button variant="outline" className="border-ice-blue-300/50 dark:border-ice-blue-600/50 hover:bg-ice-blue-600 dark:hover:bg-ice-blue-500 hover:text-white">Edit Stars of the Match</Button>
+                    <Button variant="outline">Edit Stars of the Match</Button>
                   </div>
                 )}
               </div>
