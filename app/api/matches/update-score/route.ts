@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { roleHasPermission, normalizeRole } from "@/lib/rbac"
 import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
+import { logActivity, getUserActorType } from "@/lib/activity-log"
 
 export async function POST(request: Request) {
   try {
@@ -154,6 +155,35 @@ export async function POST(request: Request) {
       }
 
       console.log("Match updated successfully:", updateResult)
+
+      // Log activity
+      try {
+        const { data: actorUser } = await supabase
+          .from("users")
+          .select("gamer_tag_id")
+          .eq("id", session.user.id)
+          .single()
+        
+        // Get team names
+        const { data: homeTeam } = await supabase.from("teams").select("name").eq("id", match.home_team_id).single()
+        const { data: awayTeam } = await supabase.from("teams").select("name").eq("id", match.away_team_id).single()
+        
+        const actorType = await getUserActorType(supabase, session.user.id)
+        
+        await logActivity(supabase, {
+          actorId: session.user.id,
+          actorName: actorUser?.gamer_tag_id || "User",
+          actorType,
+          actionType: "match_score_updated",
+          actionDescription: `Updated match score: ${homeTeam?.name || "Home"} ${homeScore} - ${awayScore} ${awayTeam?.name || "Away"}${status === "Completed" ? " (Completed)" : ""}`,
+          targetId: matchId,
+          targetName: `${homeTeam?.name} vs ${awayTeam?.name}`,
+          category: "Match",
+          league: "NHL",
+        })
+      } catch (logError) {
+        console.error("Error logging match update activity:", logError)
+      }
 
       // If match is being completed or updated while already completed, update team standings
       if (isCompletingMatch || status === "Completed") {
