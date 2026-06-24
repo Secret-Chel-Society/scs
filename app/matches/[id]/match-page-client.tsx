@@ -67,37 +67,62 @@ export default function MatchDetailPage() {
         } = await supabase.auth.getUser()
 
         if (user) {
-          const { data: rolesData } = await supabase.from("user_roles").select("role").eq("user_id", user.id)
-
-          if (rolesData && rolesData.length > 0) {
-            // Define role hierarchy (highest to lowest priority)
-            const rolePriority: { [key: string]: number } = {
-              Admin: 5,
-              Owner: 4,
-              GM: 3,
-              AGM: 2,
-              Player: 1,
-            }
-
-            // Find the highest priority role
-            let highestRole = "Player"
-            let highestPriority = 0
-
-            rolesData.forEach((roleEntry) => {
-              const priority = rolePriority[roleEntry.role] || 0
-              if (priority > highestPriority) {
-                highestPriority = priority
-                highestRole = roleEntry.role
-              }
-            })
-
-            console.log(
-              "[v0] User roles:",
-              rolesData.map((r) => r.role),
-            )
-            console.log("[v0] Highest priority role:", highestRole)
-            setUserRole(highestRole)
+          // Define role hierarchy (highest to lowest priority)
+          const rolePriority: { [key: string]: number } = {
+            Admin: 5,
+            Owner: 4,
+            GM: 3,
+            AGM: 2,
+            Player: 1,
           }
+
+          // Normalize role labels coming from either table (e.g. "ECL Owner" -> "Owner")
+          const normalizeRole = (raw: string | null | undefined): string => {
+            if (!raw) return "Player"
+            const r = raw.trim()
+            if (r === "Admin") return "Admin"
+            if (/owner/i.test(r)) return "Owner"
+            if (/\bagm\b/i.test(r)) return "AGM"
+            if (/\bgm\b/i.test(r)) return "GM"
+            return r
+          }
+
+          let highestRole = "Player"
+          let highestPriority = 0
+          const considerRole = (raw: string | null | undefined) => {
+            const role = normalizeRole(raw)
+            const priority = rolePriority[role] || 0
+            if (priority > highestPriority) {
+              highestPriority = priority
+              highestRole = role
+            }
+          }
+
+          // 1) Global roles from user_roles (covers Admin and any league-wide roles)
+          const { data: rolesData } = await supabase.from("user_roles").select("role").eq("user_id", user.id)
+          rolesData?.forEach((roleEntry) => considerRole(roleEntry.role))
+
+          // 2) Team management roles from the players table, scoped to THIS match's teams.
+          // Owner/GM/AGM are stored per-team here, so a user only manages a match if they
+          // hold a management role on the home or away team.
+          const matchTeamIds = [matchData.home_team_id, matchData.away_team_id].filter(Boolean)
+          if (matchTeamIds.length > 0) {
+            const { data: playerRows } = await supabase
+              .from("players")
+              .select("role, team_id, team_id_ahl, team_id_ecl")
+              .eq("user_id", user.id)
+
+            playerRows?.forEach((p: any) => {
+              const onThisMatchTeam =
+                matchTeamIds.includes(p.team_id) ||
+                matchTeamIds.includes(p.team_id_ahl) ||
+                matchTeamIds.includes(p.team_id_ecl)
+              if (onThisMatchTeam) considerRole(p.role)
+            })
+          }
+
+          console.log("[v0] Match permissions - resolved role:", highestRole, "for match teams:", matchTeamIds)
+          setUserRole(highestRole)
         }
       } catch (err: any) {
         console.error("Error fetching match:", err)
