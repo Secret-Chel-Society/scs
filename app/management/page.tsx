@@ -22,6 +22,7 @@ import FreeAgentsTab from "@/components/management/tabs/FreeAgentsTab"
 import MyBidsTab from "@/components/management/tabs/MyBidsTab"
 import WaiversTab from "@/components/management/tabs/WaiversTab"
 import TradesTab from "@/components/management/tabs/TradesTab"
+import TradeBlockTab from "@/components/management/tabs/TradeBlockTab"
 
 // utils you referenced
 import { getCurrentSeasonId, getTeamStats } from "@/lib/team-utils"
@@ -33,6 +34,8 @@ interface Player {
   id: string
   salary: number
   role: string
+  user_id: string
+  contract_type?: string | null
   users: {
     id: string
     gamer_tag_id: string
@@ -58,11 +61,15 @@ interface Team {
   wins: number
   losses: number
   otl: number
+  otw?: number
+  ffw?: number
+  ffl?: number
   points: number
   games_played: number
   goals_for: number
   goals_against: number
   goal_differential: number
+  total_retained_salary?: number
 }
 
 interface Match {
@@ -179,10 +186,13 @@ export default function ManagementPage() {
 
   const [loading, setLoading] = useState(true)
   const [isAuthorized, setIsAuthorized] = useState(false)
+  const [viewerRole, setViewerRole] = useState<string>("Player")
+  const [myTeamBidsForFA, setMyTeamBidsForFA] = useState<Record<string, any>>({})
 
   // core data
   const [teamData, setTeamData] = useState<Team | null>(null)
   const [teamPlayers, setTeamPlayers] = useState<any[]>([])
+  const [tcPlayers, setTcPlayers] = useState<any[]>([])
   const [teamMatches, setTeamMatches] = useState<any[]>([])
 
   // free agents
@@ -209,13 +219,16 @@ export default function ManagementPage() {
   const [allTeams, setAllTeams] = useState<any[]>([])
   const [selectedTeamForTrade, setSelectedTeamForTrade] = useState<string | null>(null)
   const [selectedTeamPlayers, setSelectedTeamPlayers] = useState<any[]>([])
+  const [selectedTeamTcPlayers, setSelectedTeamTcPlayers] = useState<any[]>([])
   const [selectedMyPlayers, setSelectedMyPlayers] = useState<string[]>([])
   const [selectedOtherPlayers, setSelectedOtherPlayers] = useState<string[]>([])
-  const [currentSalaryCap, setCurrentSalaryCap] = useState(65000000) // $100M salary cap
+  const [currentSalaryCap, setCurrentSalaryCap] = useState(40000000) // $40M salary cap
   const [currentTeamSalary, setCurrentTeamSalary] = useState(0)
   const [projectedTeamSalary, setProjectedTeamSalary] = useState(0)
   const [otherTeamSalary, setOtherTeamSalary] = useState(0)
   const [projectedOtherTeamSalary, setProjectedOtherTeamSalary] = useState(0)
+  const [teamRetainedSalary, setTeamRetainedSalary] = useState(0) // Retained salary from trades
+  const [teamSalaryFines, setTeamSalaryFines] = useState(0) // Salary fines for the season
   const [tradeMessage, setTradeMessage] = useState("")
   const [isSubmittingTrade, setIsSubmittingTrade] = useState(false)
   const [tradeError, setTradeError] = useState<string | null>(null)
@@ -384,13 +397,22 @@ export default function ManagementPage() {
           )
         `,
         )
+        .eq("finalized", false)
         .order("bid_amount", { ascending: false })
       if (error) throw error
       const highest: Record<string, any> = {}
+      const myTeamBidsMap: Record<string, any> = {}
       bids?.forEach((b) => {
         if (!highest[b.player_id] || b.bid_amount > highest[b.player_id].bid_amount) highest[b.player_id] = b
+        // Track bids from user's team
+        if (teamData?.id && b.team_id === teamData.id) {
+          if (!myTeamBidsMap[b.player_id] || b.bid_amount > myTeamBidsMap[b.player_id].bid_amount) {
+            myTeamBidsMap[b.player_id] = b
+          }
+        }
       })
       setPlayerBids(highest)
+      setMyTeamBidsForFA(myTeamBidsMap)
     } catch (e) {
       console.log("Error fetching player bids:", e)
     }
@@ -563,7 +585,7 @@ export default function ManagementPage() {
       const response = await fetch("/api/trades/respond", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // FIX: JSON.JSON.stringify -> JSON.stringify
+        // </CHANGE> Fixed typo: JSON.JSON.stringify -> JSON.stringify
         body: JSON.stringify({ notificationId: proposalId, accept, userId: session.user.id }),
       })
       if (!response.ok) {
@@ -612,6 +634,15 @@ export default function ManagementPage() {
       setIsAuthorized(isManager)
       if (!isManager || !playerData.team_id) throw new Error("You must be a team manager to access this page")
 
+      // Check if user has Site Owner role in user_roles table
+      const { data: userRolesData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+      
+      const hasSiteOwnerRole = userRolesData?.some(r => r.role === "Site Owner")
+      setViewerRole(hasSiteOwnerRole ? "Site Owner" : playerData.role)
+
       const currentSeasonId = await getCurrentSeasonId()
       const calculatedTeamStats = await getTeamStats(playerData.team_id, currentSeasonId)
       if (!calculatedTeamStats) throw new Error("Could not calculate team statistics")
@@ -636,6 +667,9 @@ export default function ManagementPage() {
         wins: calculatedTeamStats.wins,
         losses: calculatedTeamStats.losses,
         otl: calculatedTeamStats.otl,
+        otw: (calculatedTeamStats as any).otw,
+        ffw: (calculatedTeamStats as any).ffw,
+        ffl: (calculatedTeamStats as any).ffl,
         points: calculatedTeamStats.points,
         games_played: calculatedTeamStats.games_played,
         goals_for: calculatedTeamStats.goals_for, // FIX
@@ -661,24 +695,29 @@ export default function ManagementPage() {
       await fetchTradeProposals(playerData.team_id, basicTeamData.name)
 
       // players (with user + active-season registrations attached)
-      const { data: players, error: playersError } = await supabase
+      const { data: allPlayers, error: playersError } = await supabase
         .from("players")
         .select(
           `
-          id, role, salary, user_id,
+          id, role, salary, user_id, contract_type, is_tc,
           users!inner ( id, email, gamer_tag_id, console, avatar_url )
         `,
         )
         .eq("team_id", playerData.team_id)
         .order("role", { ascending: false })
 
+      // Filter out TC players on client side (Supabase boolean filters are problematic)
+      const players = allPlayers?.filter(p => p.is_tc !== true) || []
+
       if (playersError) {
         // fallback path omitted here for brevity — original logic enhanced users/registrations; keep behavior:
-        const { data: playersOnly } = await supabase
+        const { data: playersOnlyRaw } = await supabase
           .from("players")
-          .select(`id, role, salary, user_id`)
+          .select(`id, role, salary, user_id, contract_type, is_tc`)
           .eq("team_id", playerData.team_id)
           .order("role", { ascending: false })
+
+        const playersOnly = playersOnlyRaw?.filter(p => p.is_tc !== true) || []
 
         const userIds = playersOnly?.map((p) => p.user_id) || []
         let enhancedPlayers = playersOnly || []
@@ -778,22 +817,80 @@ export default function ManagementPage() {
         setTeamPlayers(enhanced)
       }
 
+      // Fetch TC players for this team
+      const { data: tcPlayersRaw } = await supabase
+        .from("players")
+        .select(`
+          id, role, salary, user_id, contract_type, is_tc, tc_team_id,
+          users!inner ( id, email, gamer_tag_id, console, avatar_url )
+        `)
+        .eq("tc_team_id", playerData.team_id)
+        .eq("is_tc", true)
+        .order("role", { ascending: false })
+
+      // Enhance TC players with season registrations
+      if (tcPlayersRaw && tcPlayersRaw.length > 0) {
+        const tcUserIds = tcPlayersRaw.map(p => p.user_id)
+        const { data: tcRegs } = await supabase
+          .from("season_registrations")
+          .select("user_id, primary_position, secondary_position")
+          .in("user_id", tcUserIds)
+          .eq("status", "Approved")
+        
+        const enhancedTcPlayers = tcPlayersRaw.map(p => {
+          const reg = tcRegs?.find(r => r.user_id === p.user_id)
+          return {
+            ...p,
+            season_registrations: reg ? [{
+              primary_position: reg.primary_position,
+              secondary_position: reg.secondary_position,
+            }] : [],
+          }
+        })
+        setTcPlayers(enhancedTcPlayers)
+      } else {
+        setTcPlayers([])
+      }
+
       // salary
       const totalSalary =
         (Array.isArray(teamPlayers) && teamPlayers.length > 0 ? teamPlayers : (players as any[]) || []).reduce(
           (sum: number, p: any) => sum + (p.salary || 0),
           0,
         ) || 0
-      setCurrentTeamSalary(totalSalary)
-      setProjectedTeamSalary(totalSalary)
+setCurrentTeamSalary(totalSalary)
+  setProjectedTeamSalary(totalSalary)
+  // Set retained salary from team data
+  setTeamRetainedSalary(basicTeamData?.total_retained_salary || 0)
+  
+  // Fetch salary_fines from team_seasons for current season
+  const { data: teamSeasonData } = await supabase
+    .from("team_seasons")
+    .select("salary_fines")
+    .eq("team_id", playerData.team_id)
+    .eq("season_id", currentSeasonId)
+    .maybeSingle()
+  setTeamSalaryFines(teamSeasonData?.salary_fines || 0)
+  
+      // other teams (for trades) - only teams active in the current season
+      const { data: currentSeasonTeamRows } = await supabase
+        .from("team_seasons")
+        .select("team_id")
+        .eq("season_id", currentSeasonId)
+      const currentSeasonTeamIds = (currentSeasonTeamRows || [])
+        .map((r: any) => r.team_id)
+        .filter((id: any) => id && id !== playerData.team_id)
 
-      // other teams (for trades)
-      const { data: allTeamsData } = await supabase
-        .from("teams")
-        .select("*")
-        .neq("id", playerData.team_id)
-        .order("name", { ascending: true })
-      setAllTeams(allTeamsData || [])
+      if (currentSeasonTeamIds.length > 0) {
+        const { data: allTeamsData } = await supabase
+          .from("teams")
+          .select("*")
+          .in("id", currentSeasonTeamIds)
+          .order("name", { ascending: true })
+        setAllTeams(allTeamsData || [])
+      } else {
+        setAllTeams([])
+      }
 
       // schedule
       const { data: matches } = await supabase
@@ -809,8 +906,6 @@ export default function ManagementPage() {
         .select("id, season_number, parent_season_id")
         .eq("is_active", true)
         .single()
-
-      console.log("[v0] Active season for myBids:", activeSeason)
 
       const seasonNumbersToCheck: number[] = []
       if (activeSeason?.season_number) {
@@ -830,9 +925,7 @@ export default function ManagementPage() {
         }
       }
 
-      console.log("[v0] Season numbers to check for registrations:", seasonNumbersToCheck)
-
-      // bids (mine)
+      // bids (mine) - only show active/non-finalized bids
       const { data: myTeamBids, error: bidsError } = await supabase
         .from("player_bidding")
         .select(
@@ -853,17 +946,15 @@ export default function ManagementPage() {
         `,
         )
         .eq("team_id", playerData.team_id)
+        .eq("finalized", false)
         .order("bid_expires_at", { ascending: true })
-
-      console.log("[v0] myTeamBids query result:", myTeamBids, "error:", bidsError)
 
       if (myTeamBids && myTeamBids.length > 0) {
         const { data: allBids } = await supabase
           .from("player_bidding")
           .select("*")
+          .eq("finalized", false)
           .order("bid_amount", { ascending: false })
-
-        console.log("[v0] allBids for comparison:", allBids?.length)
 
         const highestByPlayer: Record<string, any> = {}
         allBids?.forEach((b: any) => {
@@ -873,8 +964,6 @@ export default function ManagementPage() {
         })
 
         const userIds = myTeamBids.map((bid: any) => bid.players?.user_id).filter(Boolean)
-
-        console.log("[v0] fetching season_registrations for userIds:", userIds)
 
         const registrationsByUser: Record<string, any> = {}
         if (userIds.length > 0) {
@@ -886,16 +975,12 @@ export default function ManagementPage() {
 
           const { data: registrations, error: regError } = await query
 
-          console.log("[v0] season_registrations result:", registrations, "error:", regError)
-
           registrations?.forEach((reg: any) => {
             if (!registrationsByUser[reg.user_id]) {
               registrationsByUser[reg.user_id] = reg
             }
           })
         }
-
-        console.log("[v0] registrationsByUser map:", registrationsByUser)
 
         const nowTs = new Date()
         const enhanced = myTeamBids.map((bid: any) => {
@@ -904,15 +989,6 @@ export default function ManagementPage() {
           const isExpired = new Date(bid.bid_expires_at) <= nowTs
           const userId = bid.players?.user_id
           const userReg = userId ? registrationsByUser[userId] : null
-
-          console.log(
-            "[v0] Bid for player:",
-            bid.players?.users?.gamer_tag_id,
-            "user_id:",
-            userId,
-            "registration:",
-            userReg,
-          )
 
           return {
             ...bid,
@@ -924,13 +1000,10 @@ export default function ManagementPage() {
           }
         })
 
-        console.log("[v0] enhanced myBids:", enhanced)
-
         setMyBids(enhanced)
         setActiveBidsCount(enhanced.filter((b: any) => !b.isExpired && b.isHighestBidder).length)
         setOutbidCount(enhanced.filter((b: any) => !b.isExpired && !b.isHighestBidder).length)
       } else {
-        console.log("[v0] No bids found for team or query failed")
         setMyBids([])
         setActiveBidsCount(0)
         setOutbidCount(0)
@@ -1004,6 +1077,7 @@ export default function ManagementPage() {
     const loadOtherTeamPlayers = async () => {
       if (!selectedTeamForTrade) {
         setSelectedTeamPlayers([])
+        setSelectedTeamTcPlayers([])
         setOtherTeamSalary(0)
         setProjectedOtherTeamSalary(0)
         setOtherTeamPicks([])
@@ -1067,6 +1141,48 @@ export default function ManagementPage() {
         }
         setSelectedTeamPlayers(enhanced)
 
+        // Fetch the other team's TC players (tc_team_id = selected team)
+        const { data: otherTcRaw } = await supabase
+          .from("players")
+          .select(`id, role, salary, user_id, contract_type, is_tc, tc_team_id`)
+          .eq("tc_team_id", selectedTeamForTrade)
+          .eq("is_tc", true)
+          .order("role", { ascending: false })
+
+        if (otherTcRaw && otherTcRaw.length > 0) {
+          const otherTcUserIds = otherTcRaw.map((p: any) => p.user_id)
+          const { data: otherTcUsers } = await supabase
+            .from("users")
+            .select(`id, email, gamer_tag_id, console, avatar_url`)
+            .in("id", otherTcUserIds)
+          const { data: otherTcRegs } = await supabase
+            .from("season_registrations")
+            .select("user_id, primary_position, secondary_position")
+            .in("user_id", otherTcUserIds)
+            .eq("status", "Approved")
+
+          const enhancedOtherTc = otherTcRaw.map((p: any) => {
+            const user = otherTcUsers?.find((u: any) => u.id === p.user_id)
+            const reg = otherTcRegs?.find((r: any) => r.user_id === p.user_id)
+            return {
+              ...p,
+              users: {
+                id: user?.id || p.user_id,
+                email: user?.email,
+                gamer_tag_id: user?.gamer_tag_id || "Unknown Player",
+                console: user?.console,
+                avatar_url: user?.avatar_url,
+              },
+              season_registrations: reg
+                ? [{ primary_position: reg.primary_position, secondary_position: reg.secondary_position }]
+                : [],
+            }
+          })
+          setSelectedTeamTcPlayers(enhancedOtherTc)
+        } else {
+          setSelectedTeamTcPlayers([])
+        }
+
         const { data: theirPicks } = await supabase
           .from("tradeable_draft_picks")
           .select(
@@ -1089,6 +1205,7 @@ export default function ManagementPage() {
       } catch (e) {
         console.error("Error loading other team players:", e)
         setSelectedTeamPlayers([])
+        setSelectedTeamTcPlayers([])
         setOtherTeamSalary(0)
         setProjectedOtherTeamSalary(0)
         setOtherTeamPicks([])
@@ -1103,21 +1220,27 @@ export default function ManagementPage() {
       setProjectedOtherTeamSalary(otherTeamSalary)
       return
     }
-    const myPlayersToTrade = teamPlayers.filter((p) => selectedMyPlayers.includes(p.id))
-    const otherPlayersToReceive = selectedTeamPlayers.filter((p) => selectedOtherPlayers.includes(p.id))
+    const myAllPlayers = [...teamPlayers, ...tcPlayers]
+    const otherAllPlayers = [...selectedTeamPlayers, ...selectedTeamTcPlayers]
+    const myPlayersToTrade = myAllPlayers.filter((p) => selectedMyPlayers.includes(p.id))
+    const otherPlayersToReceive = otherAllPlayers.filter((p) => selectedOtherPlayers.includes(p.id))
 
-    const myOut = myPlayersToTrade.reduce((sum, p) => sum + (p.salary - (capSpaceWithholding[p.id] || 0)), 0)
-    const otherIn = otherPlayersToReceive.reduce((sum, p) => sum + (p.salary || 0), 0)
+    // My cap: remove outgoing players (minus my retained salary), add incoming players (minus their retained salary)
+    const myOut = myPlayersToTrade.reduce((sum, p) => sum + ((p.salary || 0) - (capSpaceWithholding[p.id] || 0)), 0)
+    const otherIn = otherPlayersToReceive.reduce((sum, p) => sum + ((p.salary || 0) - (capSpaceWithholding[p.id] || 0)), 0)
     setProjectedTeamSalary(currentTeamSalary - myOut + otherIn)
 
-    const otherOut = otherPlayersToReceive.reduce((sum, p) => sum + (p.salary || 0), 0)
-    const myIn = myPlayersToTrade.reduce((sum, p) => sum + (p.salary - (capSpaceWithholding[p.id] || 0)), 0)
+    // Other team cap: remove their outgoing players (minus their retained), add my incoming (minus my retained)
+    const otherOut = otherPlayersToReceive.reduce((sum, p) => sum + ((p.salary || 0) - (capSpaceWithholding[p.id] || 0)), 0)
+    const myIn = myPlayersToTrade.reduce((sum, p) => sum + ((p.salary || 0) - (capSpaceWithholding[p.id] || 0)), 0)
     setProjectedOtherTeamSalary(otherTeamSalary - otherOut + myIn)
   }, [
     selectedMyPlayers,
     selectedOtherPlayers,
     teamPlayers,
+    tcPlayers,
     selectedTeamPlayers,
+    selectedTeamTcPlayers,
     currentTeamSalary,
     otherTeamSalary,
     capSpaceWithholding,
@@ -1204,56 +1327,48 @@ export default function ManagementPage() {
           </div>
         ) : (
           <>
-            <TeamSummaryHeader
-              teamData={teamData}
-              teamPlayersCount={teamPlayers.length}
-              projectedRosterSize={projectedRosterSize}
-              scheduledMatchesCount={teamMatches.filter((m: any) => m.status === "Scheduled").length}
-              currentTeamSalary={currentTeamSalary}
-              projectedSalary={projectedSalary}
-            />
+                <TeamSummaryHeader
+                  teamData={teamData}
+                  teamPlayersCount={teamPlayers.length}
+                  projectedRosterSize={projectedRosterSize}
+                  scheduledMatchesCount={teamMatches.filter((m: any) => m.status === "Scheduled").length}
+                  currentTeamSalary={currentTeamSalary}
+                  projectedSalary={projectedSalary}
+                  retainedSalary={teamRetainedSalary}
+                  salaryFines={teamSalaryFines}
+                />
 
             {/* TABS */}
             <Tabs value={activeTab} className="w-full" onValueChange={handleTabChange}>
-              {/* MOBILE FIX: keep your original classes, just add snap + a hair more padding safety */}
-              <TabsList className="w-full mb-6 md:mb-8 h-auto flex md:grid md:grid-cols-7 gap-2 overflow-x-auto md:overflow-visible whitespace-nowrap justify-start md:justify-stretch p-1 pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
-                <TabsTrigger value="roster" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max snap-start">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 mb-6 md:mb-8 h-auto">
+                <TabsTrigger value="roster" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Roster</span>
                   <span className="md:hidden">Roster</span>
                 </TabsTrigger>
-
-                <TabsTrigger
-                  value="availability"
-                  className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max snap-start"
-                >
+                <TabsTrigger value="availability" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Avail</span>
                   <span className="md:hidden">Avail</span>
                 </TabsTrigger>
-
-                <TabsTrigger value="schedule" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max snap-start">
+                <TabsTrigger value="schedule" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Team Schedule</span>
                   <span className="md:hidden">Schedule</span>
                 </TabsTrigger>
-
-                <TabsTrigger
-                  value="free-agents"
-                  className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max snap-start"
-                >
+                <TabsTrigger value="free-agents" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Free Agents</span>
                   <span className="md:hidden">Free Agents</span>
                 </TabsTrigger>
-
-                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max snap-start">
+                <TabsTrigger value="my-bids" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">My Bids</span>
                   <span className="md:hidden">Bids</span>
                 </TabsTrigger>
-
-                <TabsTrigger value="waivers" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max snap-start">
+                <TabsTrigger value="waivers" className="text-xs md:text-sm px-2 md:px-4 py-2">
                   <span className="hidden md:inline">Waivers</span>
                   <span className="md:hidden">Waivers</span>
                 </TabsTrigger>
-
-                <TabsTrigger value="trades" className="text-xs md:text-sm px-3 md:px-4 py-2 min-w-max relative snap-start">
+                <TabsTrigger value="trade-block" className="text-xs md:text-sm px-2 md:px-4 py-2">
+                  Trade Block
+                </TabsTrigger>
+                <TabsTrigger value="trades" className="text-xs md:text-sm px-2 md:px-4 py-2 relative">
                   <span className="hidden md:inline">Trades</span>
                   <span className="md:hidden">Trades</span>
                   {incomingTradeProposals.length > 0 && (
@@ -1268,8 +1383,13 @@ export default function ManagementPage() {
               <TabsContent value="roster">
                 <TeamRosterTab
                   teamPlayers={teamPlayers}
+                  tcPlayers={tcPlayers}
                   getPositionAbbreviation={getPositionAbbreviation}
                   getPositionColor={getPositionColor}
+                  teamId={teamData?.id}
+                  teamName={teamData?.name}
+                  league="nhl"
+                  isManager={true}
                 />
               </TabsContent>
 
@@ -1280,22 +1400,25 @@ export default function ManagementPage() {
 
               {/* SCHEDULE */}
               <TabsContent value="schedule">
-                <TeamScheduleTab teamData={teamData} teamMatches={teamMatches} />
+                <TeamScheduleTab teamMatches={teamMatches} teamId={teamData?.id} teamName={teamData?.name} />
               </TabsContent>
 
               {/* FREE AGENTS */}
               <TabsContent value="free-agents">
                 <FreeAgentsTab
+                  // summary widgets
                   currentTeamSalary={currentTeamSalary}
                   currentSalaryCap={currentSalaryCap}
                   projectedSalary={projectedSalary}
                   rosterCount={teamPlayers.length}
                   projectedRosterSize={projectedRosterSize}
                   teamPlayers={teamPlayers}
+                  // filters
                   positionFilter={positionFilter}
                   nameFilter={nameFilter}
                   setPositionFilter={setPositionFilter}
                   setNameFilter={setNameFilter}
+                  // data
                   teamData={teamData}
                   freeAgents={filteredFreeAgents}
                   freeAgentsRaw={freeAgents}
@@ -1304,12 +1427,16 @@ export default function ManagementPage() {
                   playerBids={playerBids}
                   isBiddingEnabled={isBiddingEnabled}
                   now={now}
+                  // actions
                   reloadFreeAgents={loadFreeAgents}
                   handleBidClick={handleBidClick}
                   handleHistoryClick={handleHistoryClick}
                   formatTimeRemaining={formatTimeRemaining}
                   getPositionAbbreviation={getPositionAbbreviation}
                   getPositionColor={getPositionColor}
+                  // permission props
+                  viewerRole={viewerRole}
+                  myTeamBids={myTeamBidsForFA}
                 />
               </TabsContent>
 
@@ -1344,20 +1471,38 @@ export default function ManagementPage() {
                 />
               </TabsContent>
 
+              {/* TRADE BLOCK */}
+              <TabsContent value="trade-block">
+                <TradeBlockTab
+                  teamData={teamData}
+                  teamPlayers={teamPlayers}
+                  tcPlayers={tcPlayers}
+                  session={session}
+                  league="nhl"
+                  viewerRole={viewerRole}
+                  supabase={supabase}
+                />
+              </TabsContent>
+
               {/* TRADES */}
               <TabsContent value="trades">
                 <TradesTab
+                  /* data */
                   allTeams={allTeams}
                   teamData={teamData}
                   teamPlayers={teamPlayers}
+                  tcPlayers={tcPlayers}
                   selectedTeamPlayers={selectedTeamPlayers}
+                  selectedTeamTcPlayers={selectedTeamTcPlayers}
                   myPicks={myPicks}
                   otherTeamPicks={otherTeamPicks}
+                  /* salary/cap */
                   currentSalaryCap={currentSalaryCap}
                   currentTeamSalary={currentTeamSalary}
                   projectedTeamSalary={projectedTeamSalary}
                   otherTeamSalary={otherTeamSalary}
                   projectedOtherTeamSalary={projectedOtherTeamSalary}
+                  /* selections */
                   selectedTeamForTrade={selectedTeamForTrade}
                   setSelectedTeamForTrade={setSelectedTeamForTrade}
                   selectedMyPlayers={selectedMyPlayers}
@@ -1368,15 +1513,18 @@ export default function ManagementPage() {
                   setSelectedMyPicks={setSelectedMyPicks}
                   selectedOtherPicks={selectedOtherPicks}
                   setSelectedOtherPicks={setSelectedOtherPicks}
+                  /* withholding */
                   capSpaceWithholding={capSpaceWithholding}
                   setCapSpaceWithholding={setCapSpaceWithholding}
                   getValidWithholdingAmounts={getValidWithholdingAmounts}
+                  /* text + helpers */
                   tradeMessage={tradeMessage}
                   setTradeMessage={setTradeMessage}
                   formatPick={formatPick}
                   toggleFromArray={toggleFromArray}
                   getPositionAbbreviation={getPositionAbbreviation}
                   getPositionColor={getPositionColor}
+                  /* actions/state */
                   isSubmittingTrade={isSubmittingTrade}
                   setIsSubmittingTrade={setIsSubmittingTrade}
                   tradeError={tradeError}
@@ -1384,11 +1532,13 @@ export default function ManagementPage() {
                   tradeSuccess={tradeSuccess}
                   setTradeSuccess={setTradeSuccess}
                   handleTradeResponse={handleTradeResponse}
+                  /* proposals */
                   incomingTradeProposals={incomingTradeProposals}
                   outgoingTradeProposals={outgoingTradeProposals}
                   isProcessingTradeResponse={isProcessingTradeResponse}
                   cancellingTrades={cancellingTrades}
                   setCancellingTrades={setCancellingTrades}
+                  /* env/tools */
                   supabase={supabase}
                   session={session}
                   fetchTradeProposals={fetchTradeProposals}
@@ -1396,30 +1546,30 @@ export default function ManagementPage() {
                 />
               </TabsContent>
             </Tabs>
-
-            {/* Bid Modal (unchanged) */}
-            {selectedPlayer && (
-              <BidPlayerModal
-                player={selectedPlayer}
-                isOpen={isModalOpen}
-                onClose={() => {
-                  setIsModalOpen(false)
-                  setSelectedPlayer(null)
-                }}
-                onBidPlaced={() => {
-                  fetchPlayerBids()
-                  fetchData()
-                }}
-                teamData={teamData}
-                currentBid={playerBids[selectedPlayer.id]}
-                projectedSalary={projectedSalary}
-                salaryCap={currentSalaryCap}
-                projectedRosterSize={projectedRosterSize}
-              />
-            )}
           </>
         )}
       </motion.div>
+
+      {/* Bid Modal (unchanged) */}
+      {selectedPlayer && (
+        <BidPlayerModal
+          player={selectedPlayer}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false)
+            setSelectedPlayer(null)
+          }}
+          onBidPlaced={() => {
+            fetchPlayerBids()
+            fetchData()
+          }}
+          teamData={teamData}
+          currentBid={playerBids[selectedPlayer.id]}
+          projectedSalary={projectedSalary}
+          salaryCap={currentSalaryCap}
+          projectedRosterSize={projectedRosterSize}
+        />
+      )}
     </div>
   )
 }
